@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { useScrollAnimation } from "@/hooks/use-scroll-animation";
 import { useEffect, useState } from "react";
-import heroBackground from "@/assets/hero-background.jpg";
 
 const HeroSection = () => {
   const { ref: heroRef, isVisible: heroVisible } = useScrollAnimation({ threshold: 0.2 });
@@ -22,22 +21,8 @@ const HeroSection = () => {
   return (
     <section 
       ref={heroRef}
-      className="relative min-h-[90vh] flex items-center justify-center overflow-hidden"
+      className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-secondary"
     >
-      {/* Hero Background Image with Parallax */}
-      <div 
-        className="absolute inset-0 transition-transform duration-100 ease-out"
-        style={{ transform: `translateY(${parallaxOffset * 0.5}px) scale(1.1)` }}
-      >
-        <img 
-          src={heroBackground}
-          alt="Elegant garment accessories - silk fabric with golden buttons and chains"
-          className="w-full h-full object-cover"
-        />
-        {/* Dark overlay for text readability */}
-        <div className="absolute inset-0 bg-background/60" />
-      </div>
-
       {/* Parallax Background Layers */}
       <div 
         className="absolute inset-0 transition-transform duration-100 ease-out"
@@ -53,21 +38,34 @@ const HeroSection = () => {
         />
       </div>
 
+      <div 
+        className="absolute inset-0 transition-transform duration-100 ease-out"
+        style={{ transform: `translateY(${parallaxOffset * 0.5}px)` }}
+      >
+        {/* Mid-layer pattern */}
+        <div 
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          }}
+        />
+      </div>
+
       {/* Floating decorative elements with parallax */}
       <div 
-        className="absolute top-20 left-[10%] w-32 h-32 border border-foreground/10 rotate-45 transition-transform duration-100 ease-out"
+        className="absolute top-20 left-[10%] w-32 h-32 border border-foreground/5 rotate-45 transition-transform duration-100 ease-out"
         style={{ transform: `translateY(${parallaxOffset * 0.2}px) rotate(45deg)` }}
       />
       <div 
-        className="absolute bottom-32 right-[15%] w-24 h-24 border border-foreground/10 transition-transform duration-100 ease-out"
+        className="absolute bottom-32 right-[15%] w-24 h-24 border border-foreground/5 transition-transform duration-100 ease-out"
         style={{ transform: `translateY(${parallaxOffset * 0.6}px)` }}
       />
       <div 
-        className="absolute top-1/3 right-[8%] w-16 h-16 bg-foreground/[0.05] transition-transform duration-100 ease-out"
+        className="absolute top-1/3 right-[8%] w-16 h-16 bg-foreground/[0.02] transition-transform duration-100 ease-out"
         style={{ transform: `translateY(${parallaxOffset * 0.35}px)` }}
       />
       <div 
-        className="absolute bottom-1/4 left-[12%] w-20 h-20 border border-foreground/[0.08] rounded-full transition-transform duration-100 ease-out"
+        className="absolute bottom-1/4 left-[12%] w-20 h-20 border border-foreground/[0.03] rounded-full transition-transform duration-100 ease-out"
         style={{ transform: `translateY(${parallaxOffset * 0.45}px)` }}
       />
 
