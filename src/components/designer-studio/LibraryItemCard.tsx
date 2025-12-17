@@ -1,7 +1,6 @@
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, FileText, Lock, Globe, Star } from "lucide-react";
+import { Eye, FileText, Lock, Globe, Star, Box } from "lucide-react";
 import { LibraryItem, categoryLabels } from "@/data/mockLibraryData";
 
 interface LibraryItemCardProps {
@@ -14,17 +13,47 @@ interface LibraryItemCardProps {
 
 const LibraryItemCard = ({ item, onView, onQuickRFQ, isFavorite = false, onToggleFavorite }: LibraryItemCardProps) => {
   return (
-    <Card 
-      className="group hover:shadow-lg transition-all duration-300 overflow-hidden cursor-pointer"
+    <div 
+      className="group cursor-pointer"
       onClick={() => onView(item)}
     >
-      <div className="relative aspect-square bg-muted">
+      {/* Image Container */}
+      <div className="relative aspect-square bg-muted rounded-lg overflow-hidden mb-3">
         <img
           src={item.thumbnailUrl || '/placeholder.svg'}
           alt={item.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
-        {/* Favorite button */}
+        
+        {/* Overlay on hover */}
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300" />
+        
+        {/* Top badges */}
+        <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
+          <div className="flex gap-1.5">
+            {item.modelUrl && (
+              <Badge className="bg-primary text-primary-foreground text-xs">
+                <Box className="w-3 h-3 mr-1" />
+                3D
+              </Badge>
+            )}
+          </div>
+          
+          {/* Visibility badge */}
+          {item.isPublic ? (
+            <Badge variant="secondary" className="bg-background/90 text-xs gap-1">
+              <Globe className="w-3 h-3" />
+              公開
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="bg-background/90 text-xs gap-1 border-amber-500/50 text-amber-700 dark:text-amber-400">
+              <Lock className="w-3 h-3" />
+              專屬
+            </Badge>
+          )}
+        </div>
+        
+        {/* Favorite button - always visible */}
         {onToggleFavorite && (
           <button
             onClick={(e) => {
@@ -32,7 +61,8 @@ const LibraryItemCard = ({ item, onView, onQuickRFQ, isFavorite = false, onToggl
               e.stopPropagation();
               onToggleFavorite(item.id);
             }}
-            className="absolute top-2 left-2 p-1.5 rounded-full bg-background/80 hover:bg-background transition-colors"
+            className="absolute top-3 left-3 p-2 rounded-full bg-background/80 hover:bg-background transition-all opacity-0 group-hover:opacity-100 z-10"
+            style={{ left: item.modelUrl ? '60px' : '12px' }}
           >
             <Star 
               className={`w-4 h-4 transition-colors ${
@@ -43,64 +73,53 @@ const LibraryItemCard = ({ item, onView, onQuickRFQ, isFavorite = false, onToggl
             />
           </button>
         )}
-        {/* 3D badge */}
-        {item.modelUrl && (
-          <div className={`absolute ${onToggleFavorite ? 'top-2 left-10' : 'top-2 left-2'}`}>
-            <Badge className="bg-primary/90">3D</Badge>
+        
+        {/* Hover actions */}
+        <div className="absolute inset-x-0 bottom-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              className="flex-1 bg-background/95 hover:bg-background text-foreground gap-1.5"
+              onClick={(e) => {
+                e.stopPropagation();
+                onView(item);
+              }}
+            >
+              <Eye className="w-4 h-4" />
+              查看詳情
+            </Button>
+            <Button
+              size="sm"
+              className="flex-1 gap-1.5 btn-red-glow"
+              onClick={(e) => {
+                e.stopPropagation();
+                onQuickRFQ(item);
+              }}
+            >
+              <FileText className="w-4 h-4" />
+              快速報價
+            </Button>
           </div>
-        )}
-        {/* Visibility badge */}
-        <div className="absolute top-2 right-2">
-          {item.isPublic ? (
-            <Badge variant="secondary" className="gap-1">
-              <Globe className="w-3 h-3" />
-              公開
-            </Badge>
-          ) : (
-            <Badge variant="outline" className="gap-1 bg-background/80 border-amber-500/50 text-amber-700 dark:text-amber-400">
-              <Lock className="w-3 h-3" />
-              {item.teamName || '團隊專屬'}
-            </Badge>
-          )}
         </div>
       </div>
-      <CardContent className="p-4">
-        <div className="mb-2">
+      
+      {/* Product Info */}
+      <div className="space-y-1">
+        <p className="text-xs text-muted-foreground font-mono">{item.itemCode}</p>
+        <h3 className="font-medium text-foreground leading-tight line-clamp-1 group-hover:text-primary transition-colors">
+          {item.name}
+        </h3>
+        <div className="flex items-center justify-between">
           <Badge variant="outline" className="text-xs">
             {categoryLabels[item.category]}
           </Badge>
+          {item.teamName && !item.isPublic && (
+            <span className="text-xs text-muted-foreground">{item.teamName}</span>
+          )}
         </div>
-        <p className="text-xs text-muted-foreground font-mono mb-1">{item.itemCode}</p>
-        <h3 className="font-medium text-foreground mb-1 line-clamp-1">{item.name}</h3>
-        <p className="text-sm text-muted-foreground line-clamp-2 mb-4">{item.description}</p>
-        
-        <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1 gap-1"
-            onClick={(e) => {
-              e.stopPropagation();
-              onView(item);
-            }}
-          >
-            <Eye className="w-4 h-4" />
-            查看
-          </Button>
-          <Button
-            size="sm"
-            className="flex-1 gap-1 btn-red-glow"
-            onClick={(e) => {
-              e.stopPropagation();
-              onQuickRFQ(item);
-            }}
-          >
-            <FileText className="w-4 h-4" />
-            快速報價
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
