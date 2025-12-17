@@ -16,6 +16,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { 
+  ArrowLeft,
   Calendar, 
   Package, 
   DollarSign,
@@ -99,28 +100,39 @@ const RFQDetail = ({ rfq, onBack, onStatusChange }: RFQDetailProps) => {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       
-      {/* Sticky breadcrumb navigation */}
+      {/* Sticky navigation bar with back button + breadcrumb */}
       <div className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-6 py-3">
-          <Breadcrumb>
+        <div className="max-w-7xl mx-auto px-4 lg:px-6 py-2 flex items-center gap-4">
+          {/* Clear back button */}
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={onBack} 
+            className="gap-2 h-8 text-muted-foreground hover:text-foreground shrink-0"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="hidden sm:inline">返回</span>
+          </Button>
+          
+          <div className="h-4 w-px bg-border shrink-0" />
+          
+          {/* Breadcrumb for context */}
+          <Breadcrumb className="hidden sm:block">
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink onClick={onBack} className="cursor-pointer hover:text-foreground">
-                  設計師工作室
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink onClick={onBack} className="cursor-pointer hover:text-foreground">
+                <BreadcrumbLink onClick={onBack} className="cursor-pointer hover:text-foreground text-sm">
                   我的報價
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>{rfq.id}</BreadcrumbPage>
+                <BreadcrumbPage className="text-sm">{rfq.id}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
+          
+          {/* Mobile: Just show RFQ ID */}
+          <span className="sm:hidden text-sm text-foreground">{rfq.id}</span>
         </div>
       </div>
       
