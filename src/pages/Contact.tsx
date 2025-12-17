@@ -3,9 +3,14 @@ import Footer from "@/components/layout/Footer";
 import { Mail, Phone, MapPin, Clock } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 
 const Contact = () => {
   const { toast } = useToast();
+  const { ref: heroRef, isVisible: heroVisible } = useScrollAnimation();
+  const { ref: infoRef, isVisible: infoVisible, getDelay: getInfoDelay } = useStaggeredAnimation(5, 100);
+  const { ref: formRef, isVisible: formVisible } = useScrollAnimation();
+  
   const [formData, setFormData] = useState({
     name: "",
     company: "",
@@ -35,97 +40,93 @@ const Contact = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const contactItems = [
+    { icon: Mail, title: "Email", content: "info@wincyc.com", href: "mailto:info@wincyc.com", detail: null },
+    { icon: Phone, title: "Phone", content: "+852 1234 5678", href: "tel:+85212345678", detail: null },
+    { icon: MapPin, title: "Hong Kong Office", content: "香港九龍", detail: "觀塘區", href: null },
+    { icon: MapPin, title: "China Factory", content: "中國廣東省", detail: "東莞市", href: null },
+    { icon: Clock, title: "Business Hours", content: "週一至週五 Mon-Fri", detail: "9:00 AM - 6:00 PM (HKT)", href: null },
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
       
       <main>
         {/* Hero */}
-        <section className="py-24 px-6 lg:px-8 bg-secondary">
+        <section ref={heroRef} className="py-24 px-6 lg:px-8 bg-secondary overflow-hidden">
           <div className="max-w-4xl mx-auto text-center">
-            <p className="text-subtitle mb-4">Contact Us</p>
-            <h1 className="font-serif text-4xl md:text-5xl font-light text-foreground mb-6">
+            <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${
+              heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}>Contact Us</p>
+            <h1 className={`font-serif text-4xl md:text-5xl font-light text-foreground mb-6 transition-all duration-700 ease-out ${
+              heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`} style={{ transitionDelay: '100ms' }}>
               聯絡我們
             </h1>
-            <p className="text-lg text-muted-foreground leading-relaxed">
+            <p className={`text-lg text-muted-foreground leading-relaxed transition-all duration-700 ease-out ${
+              heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`} style={{ transitionDelay: '200ms' }}>
               我們期待與您合作
             </p>
           </div>
         </section>
 
         {/* Contact Info & Form */}
-        <section className="py-24 px-6 lg:px-8">
+        <section className="py-24 px-6 lg:px-8 overflow-hidden">
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
               {/* Contact Info */}
               <div className="lg:col-span-1">
-                <h2 className="font-serif text-2xl font-light text-foreground mb-8">
+                <h2 className={`font-serif text-2xl font-light text-foreground mb-8 transition-all duration-700 ease-out ${
+                  infoVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                }`}>
                   聯絡資訊
                 </h2>
                 
-                <div className="space-y-8">
-                  <div className="flex items-start space-x-4">
-                    <Mail className="w-5 h-5 text-muted-foreground mt-1" strokeWidth={1.5} />
-                    <div>
-                      <h3 className="text-sm font-medium text-foreground mb-1">Email</h3>
-                      <a href="mailto:info@wincyc.com" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                        info@wincyc.com
-                      </a>
+                <div ref={infoRef} className="space-y-8">
+                  {contactItems.map((item, index) => (
+                    <div 
+                      key={item.title}
+                      className={`flex items-start space-x-4 transition-all duration-500 ease-out ${
+                        infoVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'
+                      }`}
+                      style={getInfoDelay(index)}
+                    >
+                      <item.icon className="w-5 h-5 text-muted-foreground mt-1" strokeWidth={1.5} />
+                      <div>
+                        <h3 className="text-sm font-medium text-foreground mb-1">{item.title}</h3>
+                        {item.href ? (
+                          <a href={item.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                            {item.content}
+                          </a>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">
+                            {item.content}
+                            {item.detail && <><br />{item.detail}</>}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="flex items-start space-x-4">
-                    <Phone className="w-5 h-5 text-muted-foreground mt-1" strokeWidth={1.5} />
-                    <div>
-                      <h3 className="text-sm font-medium text-foreground mb-1">Phone</h3>
-                      <a href="tel:+85212345678" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                        +852 1234 5678
-                      </a>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start space-x-4">
-                    <MapPin className="w-5 h-5 text-muted-foreground mt-1" strokeWidth={1.5} />
-                    <div>
-                      <h3 className="text-sm font-medium text-foreground mb-1">Hong Kong Office</h3>
-                      <p className="text-sm text-muted-foreground">
-                        香港九龍<br />
-                        觀塘區
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start space-x-4">
-                    <MapPin className="w-5 h-5 text-muted-foreground mt-1" strokeWidth={1.5} />
-                    <div>
-                      <h3 className="text-sm font-medium text-foreground mb-1">China Factory</h3>
-                      <p className="text-sm text-muted-foreground">
-                        中國廣東省<br />
-                        東莞市
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start space-x-4">
-                    <Clock className="w-5 h-5 text-muted-foreground mt-1" strokeWidth={1.5} />
-                    <div>
-                      <h3 className="text-sm font-medium text-foreground mb-1">Business Hours</h3>
-                      <p className="text-sm text-muted-foreground">
-                        週一至週五 Mon-Fri<br />
-                        9:00 AM - 6:00 PM (HKT)
-                      </p>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
 
               {/* Contact Form */}
-              <div className="lg:col-span-2">
-                <h2 className="font-serif text-2xl font-light text-foreground mb-8">
+              <div ref={formRef} className="lg:col-span-2">
+                <h2 className={`font-serif text-2xl font-light text-foreground mb-8 transition-all duration-700 ease-out ${
+                  formVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                }`}>
                   獲取報價
                 </h2>
                 
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form 
+                  onSubmit={handleSubmit} 
+                  className={`space-y-6 transition-all duration-700 ease-out ${
+                    formVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+                  }`}
+                  style={{ transitionDelay: '150ms' }}
+                >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm text-foreground mb-2">
