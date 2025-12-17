@@ -260,7 +260,7 @@ const DesignerStudioDashboard = () => {
       <Header />
       
       {/* Sticky Navigation Bar */}
-      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
+      <div className="sticky top-20 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="max-w-7xl mx-auto px-4 lg:px-6">
           {/* Compact Header Row */}
           <div className="flex items-center justify-between py-3">
