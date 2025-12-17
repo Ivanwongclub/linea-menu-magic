@@ -30,9 +30,9 @@ const HeroSection = () => {
       >
         {/* Deep background pattern */}
         <div 
-          className="absolute inset-0 opacity-[0.03]"
+          className="absolute inset-0 opacity-[0.08]"
           style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 50m-40 0a40,40 0 1,0 80,0a40,40 0 1,0 -80,0' fill='none' stroke='%23000' stroke-width='0.5'/%3E%3C/svg%3E")`,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 50m-40 0a40,40 0 1,0 80,0a40,40 0 1,0 -80,0' fill='none' stroke='%23000' stroke-width='0.8'/%3E%3C/svg%3E")`,
             backgroundSize: '200px 200px',
           }}
         />
@@ -44,28 +44,28 @@ const HeroSection = () => {
       >
         {/* Mid-layer pattern */}
         <div 
-          className="absolute inset-0 opacity-[0.04]"
+          className="absolute inset-0 opacity-[0.1]"
           style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.5'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
           }}
         />
       </div>
 
       {/* Floating decorative elements with parallax */}
       <div 
-        className="absolute top-20 left-[10%] w-32 h-32 border border-foreground/5 rotate-45 transition-transform duration-100 ease-out"
+        className="absolute top-20 left-[10%] w-32 h-32 border-2 border-foreground/10 rotate-45 transition-transform duration-100 ease-out"
         style={{ transform: `translateY(${parallaxOffset * 0.2}px) rotate(45deg)` }}
       />
       <div 
-        className="absolute bottom-32 right-[15%] w-24 h-24 border border-foreground/5 transition-transform duration-100 ease-out"
+        className="absolute bottom-32 right-[15%] w-24 h-24 border-2 border-foreground/10 transition-transform duration-100 ease-out"
         style={{ transform: `translateY(${parallaxOffset * 0.6}px)` }}
       />
       <div 
-        className="absolute top-1/3 right-[8%] w-16 h-16 bg-foreground/[0.02] transition-transform duration-100 ease-out"
+        className="absolute top-1/3 right-[8%] w-16 h-16 bg-foreground/[0.06] transition-transform duration-100 ease-out"
         style={{ transform: `translateY(${parallaxOffset * 0.35}px)` }}
       />
       <div 
-        className="absolute bottom-1/4 left-[12%] w-20 h-20 border border-foreground/[0.03] rounded-full transition-transform duration-100 ease-out"
+        className="absolute bottom-1/4 left-[12%] w-20 h-20 border-2 border-foreground/[0.08] rounded-full transition-transform duration-100 ease-out"
         style={{ transform: `translateY(${parallaxOffset * 0.45}px)` }}
       />
 
