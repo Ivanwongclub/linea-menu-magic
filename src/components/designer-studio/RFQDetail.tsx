@@ -92,15 +92,20 @@ const RFQDetail = ({ rfq, onBack, onStatusChange }: RFQDetailProps) => {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       
+      {/* Sticky back button */}
+      <div className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-6 py-2">
+          <Button variant="ghost" onClick={onBack} className="gap-2 h-8 text-sm">
+            <ArrowLeft className="w-4 h-4" />
+            返回列表
+          </Button>
+        </div>
+      </div>
+      
       <main className="flex-1 py-8 px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          {/* Back Button & Header */}
+          {/* Header */}
           <div className="mb-6">
-            <Button variant="ghost" onClick={onBack} className="mb-4">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              返回列表
-            </Button>
-            
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
               <div>
                 <div className="flex items-center gap-3 mb-2">
