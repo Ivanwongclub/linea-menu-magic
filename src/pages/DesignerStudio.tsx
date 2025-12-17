@@ -1,7 +1,8 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import { Lock, Library, Zap, Users } from "lucide-react";
+import { Lock, Library, Zap, Users, FlaskConical } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const DesignerStudio = () => {
   const features = [
@@ -37,9 +38,17 @@ const DesignerStudio = () => {
             <h1 className="font-serif text-4xl md:text-5xl font-light text-foreground mb-6">
               設計師工作室
             </h1>
-            <p className="text-lg text-muted-foreground leading-relaxed">
+            <p className="text-lg text-muted-foreground leading-relaxed mb-8">
               Designer Studio
             </p>
+            
+            {/* Prototype Link */}
+            <Link to="/designer-studio/prototype">
+              <Button className="btn-red-glow gap-2">
+                <FlaskConical className="w-4 h-4" />
+                體驗 RFQ 管理原型
+              </Button>
+            </Link>
           </div>
         </section>
 
