@@ -56,6 +56,11 @@
     --corporate-cream: 42 40% 96%;
     --corporate-charcoal: 30 10% 18%;
     
+    /* Brand red accent - muted version of #EC1C24 */
+    --brand-red: 358 50% 45%;
+    --brand-red-muted: 358 35% 50%;
+    --brand-red-subtle: 358 25% 55%;
+    
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-elegant: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -106,6 +111,11 @@
     
     --corporate-gold: 38 45% 50%;
     --corporate-bronze: 30 35% 35%;
+    
+    /* Brand red accent - muted for dark mode */
+    --brand-red: 358 45% 50%;
+    --brand-red-muted: 358 30% 55%;
+    --brand-red-subtle: 358 20% 60%;
   }
 }
 
@@ -132,11 +142,23 @@
   
   .link-elegant::after {
     content: '';
-    @apply absolute w-full h-px bottom-0 left-0 bg-current origin-bottom-right transition-transform duration-300 scale-x-0;
+    @apply absolute w-full h-px bottom-0 left-0 origin-bottom-right transition-transform duration-300 scale-x-0;
+    background: hsl(var(--brand-red-muted));
   }
   
   .link-elegant:hover::after {
     @apply origin-bottom-left scale-x-100;
+  }
+  
+  /* Accent line */
+  .accent-line {
+    @apply h-px;
+    background: linear-gradient(90deg, transparent, hsl(var(--brand-red-subtle) / 0.6), transparent);
+  }
+  
+  .accent-line-solid {
+    @apply h-px;
+    background: hsl(var(--brand-red-muted) / 0.4);
   }
   
   /* Section divider */
