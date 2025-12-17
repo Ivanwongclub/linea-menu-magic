@@ -133,7 +133,7 @@ const HeroSection = () => {
         >
           <Link
             to="/products"
-            className="group px-10 py-4 bg-foreground text-background text-xs tracking-[0.2em] uppercase transition-all duration-300 hover:bg-primary-hover hover:scale-105"
+            className="group px-10 py-4 bg-foreground text-background text-xs tracking-[0.2em] uppercase transition-all duration-300 hover:bg-brand-red-muted hover:scale-105"
           >
             <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">
               探索產品
@@ -141,7 +141,7 @@ const HeroSection = () => {
           </Link>
           <Link
             to="/contact"
-            className="group px-10 py-4 border border-foreground text-foreground text-xs tracking-[0.2em] uppercase transition-all duration-300 hover:bg-foreground hover:text-background hover:scale-105"
+            className="group px-10 py-4 border border-foreground text-foreground text-xs tracking-[0.2em] uppercase transition-all duration-300 hover:border-brand-red-muted hover:text-brand-red-muted hover:scale-105"
           >
             <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">
               聯絡我們
@@ -157,9 +157,9 @@ const HeroSection = () => {
           style={{ transitionDelay: '1000ms' }}
         >
           <div className="inline-flex items-center space-x-4 text-muted-foreground">
-            <span className={`h-px bg-border transition-all duration-1000 ease-out ${heroVisible ? 'w-12' : 'w-0'}`} style={{ transitionDelay: '1200ms' }} />
+            <span className={`h-px bg-brand-red-subtle/40 transition-all duration-1000 ease-out ${heroVisible ? 'w-12' : 'w-0'}`} style={{ transitionDelay: '1200ms' }} />
             <span className="text-xs tracking-[0.3em] uppercase">Since 1979</span>
-            <span className={`h-px bg-border transition-all duration-1000 ease-out ${heroVisible ? 'w-12' : 'w-0'}`} style={{ transitionDelay: '1200ms' }} />
+            <span className={`h-px bg-brand-red-subtle/40 transition-all duration-1000 ease-out ${heroVisible ? 'w-12' : 'w-0'}`} style={{ transitionDelay: '1200ms' }} />
           </div>
         </div>
       </div>
