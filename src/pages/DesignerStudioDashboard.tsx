@@ -36,7 +36,6 @@ import { mockLibraryItems, LibraryItem, categoryLabels } from "@/data/mockLibrar
 import LibraryItemCard from "@/components/designer-studio/LibraryItemCard";
 import LibraryTable from "@/components/designer-studio/LibraryTable";
 import LibraryItemDetail from "@/components/designer-studio/LibraryItemDetail";
-import QuickRFQDialog from "@/components/designer-studio/QuickRFQDialog";
 import ProductQuickView from "@/components/designer-studio/ProductQuickView";
 
 // RFQ imports
@@ -59,8 +58,6 @@ const DesignerStudioDashboard = () => {
   const [visibilityFilter, setVisibilityFilter] = useState<VisibilityFilter>("all");
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
   const [selectedLibraryItem, setSelectedLibraryItem] = useState<LibraryItem | null>(null);
-  const [quickRFQItem, setQuickRFQItem] = useState<LibraryItem | null>(null);
-  const [isQuickRFQOpen, setIsQuickRFQOpen] = useState(false);
   const [quickViewItem, setQuickViewItem] = useState<LibraryItem | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [libraryViewMode, setLibraryViewMode] = useState<"grid" | "list">("grid");
@@ -191,11 +188,6 @@ const DesignerStudioDashboard = () => {
     setSelectedLibraryItem(item);
   };
 
-  const handleQuickRFQ = (item: LibraryItem) => {
-    setQuickRFQItem(item);
-    setIsQuickRFQOpen(true);
-  };
-
   const handleBackFromLibraryDetail = () => {
     setSelectedLibraryItem(null);
   };
@@ -239,7 +231,6 @@ const DesignerStudioDashboard = () => {
       <LibraryItemDetail
         item={selectedLibraryItem}
         onBack={handleBackFromLibraryDetail}
-        onQuickRFQ={handleQuickRFQ}
       />
     );
   }
@@ -446,7 +437,6 @@ const DesignerStudioDashboard = () => {
                         key={item.id}
                         item={item}
                         onView={handleQuickView}
-                        onQuickRFQ={handleQuickRFQ}
                         isFavorite={favorites.has(item.id)}
                         onToggleFavorite={toggleFavorite}
                       />
@@ -456,7 +446,6 @@ const DesignerStudioDashboard = () => {
                   <LibraryTable
                     items={filteredLibraryItems}
                     onView={handleViewLibraryItem}
-                    onQuickRFQ={handleQuickRFQ}
                     onToggleFavorite={toggleFavorite}
                     favorites={favorites}
                     sortField={sortField}
@@ -561,13 +550,6 @@ const DesignerStudioDashboard = () => {
         item={quickViewItem}
         open={isQuickViewOpen}
         onOpenChange={setIsQuickViewOpen}
-        onQuickRFQ={handleQuickRFQ}
-      />
-
-      <QuickRFQDialog
-        open={isQuickRFQOpen}
-        onOpenChange={setIsQuickRFQOpen}
-        item={quickRFQItem}
       />
 
       <CreateRFQDialog 

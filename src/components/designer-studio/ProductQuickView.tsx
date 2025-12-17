@@ -2,7 +2,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { FileText, Box, Globe, Lock, Calendar, Tag, Layers, X } from "lucide-react";
+import { Box, Globe, Lock, Calendar, Tag, Layers, X } from "lucide-react";
 import { LibraryItem, categoryLabels } from "@/data/mockLibraryData";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
@@ -11,10 +11,9 @@ interface ProductQuickViewProps {
   item: LibraryItem | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onQuickRFQ: (item: LibraryItem) => void;
 }
 
-const ProductQuickView = ({ item, open, onOpenChange, onQuickRFQ }: ProductQuickViewProps) => {
+const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) => {
   if (!item) return null;
 
   return (
@@ -133,21 +132,10 @@ const ProductQuickView = ({ item, open, onOpenChange, onQuickRFQ }: ProductQuick
             {/* Actions */}
             <div className="flex gap-3">
               <Button
-                variant="outline"
-                className="flex-1"
+                className="w-full"
                 onClick={() => onOpenChange(false)}
               >
                 關閉
-              </Button>
-              <Button
-                className="flex-1 btn-red-glow"
-                onClick={() => {
-                  onOpenChange(false);
-                  onQuickRFQ(item);
-                }}
-              >
-                <FileText className="w-4 h-4 mr-2" />
-                快速報價
               </Button>
             </div>
           </div>

@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Eye, FileText, Lock, Globe, Box, Star, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Eye, Lock, Globe, Box, Star, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { LibraryItem, categoryLabels } from "@/data/mockLibraryData";
 import { format } from "date-fns";
 
@@ -12,7 +12,6 @@ type SortOrder = "asc" | "desc";
 interface LibraryTableProps {
   items: LibraryItem[];
   onView: (item: LibraryItem) => void;
-  onQuickRFQ: (item: LibraryItem) => void;
   onToggleFavorite: (itemId: string) => void;
   favorites: Set<string>;
   sortField: SortField;
@@ -30,7 +29,6 @@ const SortIcon = ({ field, currentField, order }: { field: SortField; currentFie
 const LibraryTable = ({ 
   items, 
   onView, 
-  onQuickRFQ, 
   onToggleFavorite, 
   favorites,
   sortField,
@@ -86,7 +84,7 @@ const LibraryTable = ({
                   <SortIcon field="createdAt" currentField={sortField} order={sortOrder} />
                 </button>
               </TableHead>
-              <TableHead className="w-52 text-right sticky right-0 bg-muted/50">操作</TableHead>
+              <TableHead className="w-32 text-right sticky right-0 bg-muted/50">操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -169,25 +167,15 @@ const LibraryTable = ({
                     {format(new Date(item.createdAt), 'yyyy/MM/dd')}
                   </TableCell>
                   <TableCell className="sticky right-0 bg-card group-hover:bg-muted/30" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex gap-2 justify-end">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-1"
-                        onClick={() => onView(item)}
-                      >
-                        <Eye className="w-4 h-4" />
-                        查看
-                      </Button>
-                      <Button
-                        size="sm"
-                        className="gap-1 btn-red-glow"
-                        onClick={() => onQuickRFQ(item)}
-                      >
-                        <FileText className="w-4 h-4" />
-                        報價
-                      </Button>
-                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1"
+                      onClick={() => onView(item)}
+                    >
+                      <Eye className="w-4 h-4" />
+                      查看
+                    </Button>
                   </TableCell>
                 </TableRow>
               );
