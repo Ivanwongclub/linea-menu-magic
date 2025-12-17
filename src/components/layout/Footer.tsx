@@ -11,7 +11,7 @@ const Footer = () => {
           {/* Brand */}
           <div className="lg:col-span-1">
             <div className="mb-6">
-              <h3 className="font-serif text-2xl font-light tracking-wide mb-1">
+              <h3 className="font-serif text-2xl font-light tracking-wide mb-1 text-[#EC1C24]">
                 WIN-CYC
               </h3>
               <p className="text-xs tracking-[0.2em] text-primary-foreground/60 uppercase">
