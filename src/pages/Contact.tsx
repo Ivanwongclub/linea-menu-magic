@@ -219,7 +219,7 @@ const Contact = () => {
 
                   <button
                     type="submit"
-                    className="px-12 py-4 bg-foreground text-background text-xs tracking-[0.2em] uppercase transition-all duration-300 hover:bg-primary-hover"
+                    className="px-12 py-4 bg-brand-red-accent text-white text-xs tracking-[0.2em] uppercase transition-all duration-300 hover:bg-foreground btn-red-glow"
                   >
                     發送訊息 Send Message
                   </button>

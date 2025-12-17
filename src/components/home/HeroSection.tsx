@@ -133,7 +133,7 @@ const HeroSection = () => {
         >
           <Link
             to="/products"
-            className="group px-10 py-4 bg-brand-red-accent text-white text-xs tracking-[0.2em] uppercase transition-all duration-300 hover:bg-foreground hover:scale-105 btn-red-glow"
+            className="group px-10 py-4 bg-brand-red-accent text-white text-xs tracking-[0.2em] uppercase transition-all duration-300 hover:bg-foreground hover:scale-105 btn-red-pulse"
           >
             <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">
               探索產品

@@ -148,7 +148,7 @@ const Products = () => {
             </p>
             <Link
               to="/contact"
-              className="inline-block px-12 py-4 border border-primary-foreground text-xs tracking-[0.2em] uppercase transition-all duration-300 hover:bg-primary-foreground hover:text-foreground"
+              className="inline-block px-12 py-4 bg-brand-red-accent text-white text-xs tracking-[0.2em] uppercase transition-all duration-300 hover:bg-primary-foreground hover:text-foreground btn-red-glow"
             >
               聯絡我們
             </Link>
