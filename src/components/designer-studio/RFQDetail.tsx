@@ -7,8 +7,15 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { 
-  ArrowLeft, 
   Calendar, 
   Package, 
   DollarSign,
@@ -92,13 +99,28 @@ const RFQDetail = ({ rfq, onBack, onStatusChange }: RFQDetailProps) => {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       
-      {/* Sticky back button */}
+      {/* Sticky breadcrumb navigation */}
       <div className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-6 py-2">
-          <Button variant="ghost" onClick={onBack} className="gap-2 h-8 text-sm">
-            <ArrowLeft className="w-4 h-4" />
-            返回列表
-          </Button>
+        <div className="max-w-7xl mx-auto px-6 py-3">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink onClick={onBack} className="cursor-pointer hover:text-foreground">
+                  設計師工作室
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink onClick={onBack} className="cursor-pointer hover:text-foreground">
+                  我的報價
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{rfq.id}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
         </div>
       </div>
       
