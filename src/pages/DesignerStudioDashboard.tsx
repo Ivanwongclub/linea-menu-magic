@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs as FilterTabs, TabsList as FilterTabsList, TabsTrigger as FilterTabsTrigger } from "@/components/ui/tabs";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { 
   Search, 
   Filter, 
@@ -22,12 +23,15 @@ import {
   Upload,
   CheckCircle,
   Eye,
-  Package
+  Package,
+  Grid3X3,
+  List
 } from "lucide-react";
 
 // Library imports
 import { mockLibraryItems, LibraryItem, categoryLabels } from "@/data/mockLibraryData";
 import LibraryItemCard from "@/components/designer-studio/LibraryItemCard";
+import LibraryItemListRow from "@/components/designer-studio/LibraryItemListRow";
 import LibraryItemDetail from "@/components/designer-studio/LibraryItemDetail";
 import QuickRFQDialog from "@/components/designer-studio/QuickRFQDialog";
 
@@ -51,6 +55,7 @@ const DesignerStudioDashboard = () => {
   const [selectedLibraryItem, setSelectedLibraryItem] = useState<LibraryItem | null>(null);
   const [quickRFQItem, setQuickRFQItem] = useState<LibraryItem | null>(null);
   const [isQuickRFQOpen, setIsQuickRFQOpen] = useState(false);
+  const [libraryViewMode, setLibraryViewMode] = useState<"grid" | "list">("grid");
 
   // RFQ states
   const [rfqs, setRfqs] = useState<RFQ[]>(mockRFQs);
@@ -251,25 +256,51 @@ const DesignerStudioDashboard = () => {
                 </div>
               </div>
 
-              {/* Results Count */}
+              {/* Results Count & View Toggle */}
               <div className="flex items-center justify-between mb-6">
                 <p className="text-sm text-muted-foreground">
                   顯示 {filteredLibraryItems.length} 個項目
                 </p>
+                <ToggleGroup 
+                  type="single" 
+                  value={libraryViewMode} 
+                  onValueChange={(value) => value && setLibraryViewMode(value as "grid" | "list")}
+                  className="bg-muted rounded-md p-1"
+                >
+                  <ToggleGroupItem value="grid" aria-label="Grid view" className="px-3">
+                    <Grid3X3 className="w-4 h-4" />
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="list" aria-label="List view" className="px-3">
+                    <List className="w-4 h-4" />
+                  </ToggleGroupItem>
+                </ToggleGroup>
               </div>
 
-              {/* Items Grid */}
+              {/* Items Grid/List */}
               {filteredLibraryItems.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {filteredLibraryItems.map((item) => (
-                    <LibraryItemCard
-                      key={item.id}
-                      item={item}
-                      onView={handleViewLibraryItem}
-                      onQuickRFQ={handleQuickRFQ}
-                    />
-                  ))}
-                </div>
+                libraryViewMode === "grid" ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {filteredLibraryItems.map((item) => (
+                      <LibraryItemCard
+                        key={item.id}
+                        item={item}
+                        onView={handleViewLibraryItem}
+                        onQuickRFQ={handleQuickRFQ}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    {filteredLibraryItems.map((item) => (
+                      <LibraryItemListRow
+                        key={item.id}
+                        item={item}
+                        onView={handleViewLibraryItem}
+                        onQuickRFQ={handleQuickRFQ}
+                      />
+                    ))}
+                  </div>
+                )
               ) : (
                 <div className="text-center py-16">
                   <p className="text-muted-foreground">沒有找到符合條件的項目</p>
