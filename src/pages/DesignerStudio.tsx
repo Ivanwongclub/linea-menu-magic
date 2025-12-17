@@ -42,13 +42,21 @@ const DesignerStudio = () => {
               Designer Studio
             </p>
             
-            {/* Prototype Link */}
-            <Link to="/designer-studio/prototype">
-              <Button className="btn-red-glow gap-2">
-                <FlaskConical className="w-4 h-4" />
-                體驗 RFQ 管理原型
-              </Button>
-            </Link>
+            {/* Prototype Links */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/designer-studio/library">
+                <Button className="btn-red-glow gap-2">
+                  <Library className="w-4 h-4" />
+                  瀏覽素材庫
+                </Button>
+              </Link>
+              <Link to="/designer-studio/prototype">
+                <Button variant="outline" className="gap-2">
+                  <FlaskConical className="w-4 h-4" />
+                  RFQ 管理原型
+                </Button>
+              </Link>
+            </div>
           </div>
         </section>
 
