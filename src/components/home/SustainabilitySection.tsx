@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
+import sustainabilityImage from "@/assets/sustainability.jpg";
 
 const SustainabilitySection = () => {
   const { ref: imageRef, isVisible: imageVisible } = useScrollAnimation({ threshold: 0.2 });
@@ -20,12 +21,18 @@ const SustainabilitySection = () => {
           {/* Visual */}
           <div ref={imageRef} className="relative">
             <div 
-              className={`aspect-square bg-secondary transition-all duration-1000 ease-out ${
+              className={`aspect-square overflow-hidden transition-all duration-1000 ease-out ${
                 imageVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
               }`}
-            />
+            >
+              <img 
+                src={sustainabilityImage} 
+                alt="Sustainability - eco-friendly garment accessories with natural elements" 
+                className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+              />
+            </div>
             <div 
-              className={`absolute inset-8 border border-border transition-all duration-700 ease-out ${
+              className={`absolute inset-8 border border-border transition-all duration-700 ease-out pointer-events-none ${
                 imageVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-110'
               }`}
               style={{ transitionDelay: '300ms' }}
