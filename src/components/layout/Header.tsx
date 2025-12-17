@@ -40,7 +40,7 @@ const Header = () => {
                 className={`text-sm tracking-wide transition-colors duration-300 link-elegant ${
                   isActive(link.href)
                     ? "text-foreground font-medium"
-                    : "text-muted-foreground hover:text-foreground"
+                    : "text-muted-foreground hover:text-brand-red-muted"
                 }`}
               >
                 {link.label}
@@ -52,7 +52,7 @@ const Header = () => {
           <div className="hidden lg:flex items-center space-x-4">
             <Link
               to="/contact"
-              className="px-6 py-2.5 bg-foreground text-background text-xs tracking-widest uppercase transition-all duration-300 hover:bg-primary-hover"
+              className="px-6 py-2.5 bg-foreground text-background text-xs tracking-widest uppercase transition-all duration-300 hover:bg-brand-red-muted"
             >
               獲取報價
             </Link>
@@ -92,7 +92,7 @@ const Header = () => {
               <Link
                 to="/contact"
                 onClick={() => setIsMenuOpen(false)}
-                className="mt-4 py-3 bg-foreground text-background text-center text-xs tracking-widest uppercase"
+                className="mt-4 py-3 bg-foreground text-background text-center text-xs tracking-widest uppercase transition-all duration-300 hover:bg-brand-red-muted"
               >
                 獲取報價
               </Link>
