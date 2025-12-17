@@ -1,6 +1,6 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import { Lock, Library, Zap, Users, FlaskConical } from "lucide-react";
+import { Lock, Library, Zap, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
@@ -42,18 +42,12 @@ const DesignerStudio = () => {
               Designer Studio
             </p>
             
-            {/* Prototype Links */}
+            {/* Dashboard Link */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/designer-studio/library">
+              <Link to="/designer-studio/dashboard">
                 <Button className="btn-red-glow gap-2">
                   <Library className="w-4 h-4" />
-                  瀏覽素材庫
-                </Button>
-              </Link>
-              <Link to="/designer-studio/prototype">
-                <Button variant="outline" className="gap-2">
-                  <FlaskConical className="w-4 h-4" />
-                  RFQ 管理原型
+                  進入工作室
                 </Button>
               </Link>
             </div>
