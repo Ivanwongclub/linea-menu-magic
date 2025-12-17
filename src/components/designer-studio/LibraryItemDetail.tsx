@@ -1,10 +1,19 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, FileText, Download, Globe, Lock } from "lucide-react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { ArrowLeft, FileText, Download, Globe, Lock, ZoomIn } from "lucide-react";
 import { LibraryItem, categoryLabels } from "@/data/mockLibraryData";
 import Model3DViewer from "./Model3DViewer";
+import { cn } from "@/lib/utils";
 
 interface LibraryItemDetailProps {
   item: LibraryItem;
@@ -13,6 +22,16 @@ interface LibraryItemDetailProps {
 }
 
 const LibraryItemDetail = ({ item, onBack, onQuickRFQ }: LibraryItemDetailProps) => {
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  
+  // Generate gallery images from item thumbnail (in real app, these would come from backend)
+  const galleryImages = [
+    item.thumbnailUrl || '/placeholder.svg',
+    item.thumbnailUrl || '/placeholder.svg', // Detail angle
+    item.thumbnailUrl || '/placeholder.svg', // Close-up
+    item.thumbnailUrl || '/placeholder.svg', // Usage context
+  ];
+
   const getModelType = (category: string): 'button' | 'zipper' | 'hardware' => {
     if (category === 'buttons') return 'button';
     if (category === 'zippers') return 'zipper';
@@ -75,14 +94,54 @@ const LibraryItemDetail = ({ item, onBack, onQuickRFQ }: LibraryItemDetailProps)
                 </CardContent>
               </Card>
             ) : (
-              <Card>
+              <Card className="overflow-hidden">
                 <CardContent className="p-0">
-                  <div className="aspect-square bg-muted flex items-center justify-center">
-                    <img
-                      src={item.thumbnailUrl || '/placeholder.svg'}
-                      alt={item.name}
-                      className="w-full h-full object-cover"
-                    />
+                  {/* Main Image with Carousel */}
+                  <div className="relative">
+                    <Carousel className="w-full">
+                      <CarouselContent>
+                        {galleryImages.map((image, index) => (
+                          <CarouselItem key={index}>
+                            <div className="aspect-square bg-muted relative group">
+                              <img
+                                src={image}
+                                alt={`${item.name} - 圖片 ${index + 1}`}
+                                className="w-full h-full object-cover"
+                              />
+                              <button className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors">
+                                <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                              </button>
+                            </div>
+                          </CarouselItem>
+                        ))}
+                      </CarouselContent>
+                      <CarouselPrevious className="left-4" />
+                      <CarouselNext className="right-4" />
+                    </Carousel>
+                  </div>
+                  
+                  {/* Thumbnail Strip */}
+                  <div className="p-4 border-t border-border">
+                    <div className="flex gap-2 overflow-x-auto">
+                      {galleryImages.map((image, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setSelectedImageIndex(index)}
+                          className={cn(
+                            "flex-shrink-0 w-16 h-16 rounded-md overflow-hidden border-2 transition-all",
+                            selectedImageIndex === index
+                              ? "border-primary ring-2 ring-primary/20"
+                              : "border-transparent hover:border-muted-foreground/30"
+                          )}
+                        >
+                          <img
+                            src={image}
+                            alt={`縮圖 ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
