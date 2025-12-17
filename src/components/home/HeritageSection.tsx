@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useScrollAnimation } from "@/hooks/use-scroll-animation";
+import heritageCraftsmanship from "@/assets/heritage-craftsmanship.jpg";
 
 const HeritageSection = () => {
   const { ref: contentRef, isVisible: contentVisible } = useScrollAnimation({ threshold: 0.2 });
@@ -81,10 +82,16 @@ const HeritageSection = () => {
           <div ref={imageRef} className="order-1 lg:order-2">
             <div className="relative">
               <div 
-                className={`aspect-[4/5] bg-muted transition-all duration-1000 ease-out ${
+                className={`aspect-[4/5] overflow-hidden transition-all duration-1000 ease-out ${
                   imageVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
                 }`}
-              />
+              >
+                <img 
+                  src={heritageCraftsmanship} 
+                  alt="Artisan craftsmanship - hands working with garment accessories" 
+                  className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                />
+              </div>
               <div 
                 className={`absolute -bottom-6 -left-6 w-32 h-32 border border-border bg-background flex items-center justify-center transition-all duration-700 ease-out ${
                   imageVisible ? 'opacity-100 translate-x-0 translate-y-0' : 'opacity-0 translate-x-4 translate-y-4'
