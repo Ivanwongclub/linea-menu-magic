@@ -14,7 +14,10 @@ interface LibraryItemCardProps {
 
 const LibraryItemCard = ({ item, onView, onQuickRFQ, isFavorite = false, onToggleFavorite }: LibraryItemCardProps) => {
   return (
-    <Card className="group hover:shadow-lg transition-all duration-300 overflow-hidden">
+    <Card 
+      className="group hover:shadow-lg transition-all duration-300 overflow-hidden cursor-pointer"
+      onClick={() => onView(item)}
+    >
       <div className="relative aspect-square bg-muted">
         <img
           src={item.thumbnailUrl || '/placeholder.svg'}
@@ -25,6 +28,7 @@ const LibraryItemCard = ({ item, onView, onQuickRFQ, isFavorite = false, onToggl
         {onToggleFavorite && (
           <button
             onClick={(e) => {
+              e.preventDefault();
               e.stopPropagation();
               onToggleFavorite(item.id);
             }}
@@ -70,12 +74,15 @@ const LibraryItemCard = ({ item, onView, onQuickRFQ, isFavorite = false, onToggl
         <h3 className="font-medium text-foreground mb-1 line-clamp-1">{item.name}</h3>
         <p className="text-sm text-muted-foreground line-clamp-2 mb-4">{item.description}</p>
         
-        <div className="flex gap-2">
+        <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
           <Button
             variant="outline"
             size="sm"
             className="flex-1 gap-1"
-            onClick={() => onView(item)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onView(item);
+            }}
           >
             <Eye className="w-4 h-4" />
             查看
@@ -83,7 +90,10 @@ const LibraryItemCard = ({ item, onView, onQuickRFQ, isFavorite = false, onToggl
           <Button
             size="sm"
             className="flex-1 gap-1 btn-red-glow"
-            onClick={() => onQuickRFQ(item)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onQuickRFQ(item);
+            }}
           >
             <FileText className="w-4 h-4" />
             快速報價
