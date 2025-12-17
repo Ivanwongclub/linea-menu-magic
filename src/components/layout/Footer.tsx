@@ -47,27 +47,27 @@ const Footer = () => {
             </h4>
             <ul className="space-y-3">
               <li>
-                <Link to="/" className="text-sm text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                <Link to="/" className="text-sm text-primary-foreground/80 hover:text-brand-red-subtle transition-colors">
                   首頁 Home
                 </Link>
               </li>
               <li>
-                <Link to="/about" className="text-sm text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                <Link to="/about" className="text-sm text-primary-foreground/80 hover:text-brand-red-subtle transition-colors">
                   關於我們 About
                 </Link>
               </li>
               <li>
-                <Link to="/products" className="text-sm text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                <Link to="/products" className="text-sm text-primary-foreground/80 hover:text-brand-red-subtle transition-colors">
                   產品 Products
                 </Link>
               </li>
               <li>
-                <Link to="/sustainability" className="text-sm text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                <Link to="/sustainability" className="text-sm text-primary-foreground/80 hover:text-brand-red-subtle transition-colors">
                   可持續發展 Sustainability
                 </Link>
               </li>
               <li>
-                <Link to="/designer-studio" className="text-sm text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                <Link to="/designer-studio" className="text-sm text-primary-foreground/80 hover:text-brand-red-subtle transition-colors">
                   設計師工作室 Designer Studio
                 </Link>
               </li>
@@ -81,27 +81,27 @@ const Footer = () => {
             </h4>
             <ul className="space-y-3">
               <li>
-                <Link to="/products#buttons" className="text-sm text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                <Link to="/products#buttons" className="text-sm text-primary-foreground/80 hover:text-brand-red-subtle transition-colors">
                   鈕扣 Buttons
                 </Link>
               </li>
               <li>
-                <Link to="/products#zippers" className="text-sm text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                <Link to="/products#zippers" className="text-sm text-primary-foreground/80 hover:text-brand-red-subtle transition-colors">
                   拉鏈 Zippers
                 </Link>
               </li>
               <li>
-                <Link to="/products#lace" className="text-sm text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                <Link to="/products#lace" className="text-sm text-primary-foreground/80 hover:text-brand-red-subtle transition-colors">
                   花邊 Lace & Trimming
                 </Link>
               </li>
               <li>
-                <Link to="/products#hardware" className="text-sm text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                <Link to="/products#hardware" className="text-sm text-primary-foreground/80 hover:text-brand-red-subtle transition-colors">
                   五金配件 Metal Hardware
                 </Link>
               </li>
               <li>
-                <Link to="/products#other" className="text-sm text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                <Link to="/products#other" className="text-sm text-primary-foreground/80 hover:text-brand-red-subtle transition-colors">
                   其他產品 Other Products
                 </Link>
               </li>
@@ -116,13 +116,13 @@ const Footer = () => {
             <div className="space-y-4 text-sm text-primary-foreground/80">
               <div>
                 <p className="text-primary-foreground mb-1">Email</p>
-                <a href="mailto:info@wincyc.com" className="hover:text-primary-foreground transition-colors">
+                <a href="mailto:info@wincyc.com" className="hover:text-brand-red-subtle transition-colors">
                   info@wincyc.com
                 </a>
               </div>
               <div>
                 <p className="text-primary-foreground mb-1">Phone</p>
-                <a href="tel:+85212345678" className="hover:text-primary-foreground transition-colors">
+                <a href="tel:+85212345678" className="hover:text-brand-red-subtle transition-colors">
                   +852 1234 5678
                 </a>
               </div>
@@ -146,10 +146,10 @@ const Footer = () => {
               © 2024 WIN-CYC GROUP LIMITED. All rights reserved.
             </p>
             <div className="flex space-x-6">
-              <Link to="/privacy-policy" className="text-xs text-primary-foreground/50 hover:text-primary-foreground/80 transition-colors">
+              <Link to="/privacy-policy" className="text-xs text-primary-foreground/50 hover:text-brand-red-subtle transition-colors">
                 Privacy Policy
               </Link>
-              <Link to="/terms-of-service" className="text-xs text-primary-foreground/50 hover:text-primary-foreground/80 transition-colors">
+              <Link to="/terms-of-service" className="text-xs text-primary-foreground/50 hover:text-brand-red-subtle transition-colors">
                 Terms of Service
               </Link>
             </div>
