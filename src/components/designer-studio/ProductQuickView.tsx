@@ -222,9 +222,9 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
             </div>
 
             {/* Details Section */}
-            <div className="h-[500px] md:h-auto md:max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="h-[500px] md:h-[80vh] overflow-hidden flex flex-col">
               {/* Sticky Header */}
-              <div className="sticky top-0 z-10 bg-background p-6 pb-4 border-b">
+              <div className="bg-background p-6 pb-4 border-b flex-shrink-0">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 flex-wrap">
                     <Badge variant="outline" className="text-xs">
