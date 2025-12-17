@@ -1,12 +1,20 @@
 import { Link } from "react-router-dom";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 
+// Import product images
+import buttonsImage from "@/assets/products/buttons-category.jpg";
+import zippersImage from "@/assets/products/zippers-category.jpg";
+import laceImage from "@/assets/products/lace-category.jpg";
+import hardwareImage from "@/assets/products/hardware-category.jpg";
+import otherImage from "@/assets/products/other-category.jpg";
+
 interface Category {
   id: string;
   titleCn: string;
   titleEn: string;
   count: string;
   description: string;
+  image: string;
 }
 
 const categories: Category[] = [
@@ -16,6 +24,7 @@ const categories: Category[] = [
     titleEn: "Buttons",
     count: "48+",
     description: "Polyester Buttons, Metal Buttons",
+    image: buttonsImage,
   },
   {
     id: "zippers",
@@ -23,6 +32,7 @@ const categories: Category[] = [
     titleEn: "Zippers",
     count: "36+",
     description: "Metal Zipper, Nylon Zipper",
+    image: zippersImage,
   },
   {
     id: "lace",
@@ -30,6 +40,7 @@ const categories: Category[] = [
     titleEn: "Lace & Trimming",
     count: "52+",
     description: "Cotton Lace, Elastic Lace",
+    image: laceImage,
   },
   {
     id: "hardware",
@@ -37,6 +48,7 @@ const categories: Category[] = [
     titleEn: "Metal Hardware",
     count: "64+",
     description: "Various Metal Components",
+    image: hardwareImage,
   },
   {
     id: "other",
@@ -44,6 +56,7 @@ const categories: Category[] = [
     titleEn: "Other Products",
     count: "28+",
     description: "Additional Offerings",
+    image: otherImage,
   },
 ];
 
@@ -78,32 +91,46 @@ const ProductCategories = () => {
               }`}
               style={getDelay(index)}
             >
-              {/* Hover overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              {/* Background Image */}
+              <div className="absolute inset-0">
+                <img 
+                  src={category.image} 
+                  alt={category.titleEn}
+                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                />
+              </div>
+
+              {/* Gradient Overlay - becomes darker on hover */}
+              <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/20 to-transparent transition-opacity duration-500 group-hover:from-foreground/85 group-hover:via-foreground/50" />
+              
+              {/* Elegant shine effect on hover */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary-foreground/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
+              </div>
               
               {/* Animated border */}
-              <div className="absolute inset-0 border-2 border-transparent group-hover:border-foreground/20 transition-colors duration-500" />
+              <div className="absolute inset-0 border-2 border-transparent group-hover:border-primary-foreground/20 transition-colors duration-500" />
               
               {/* Content */}
               <div className="absolute inset-0 flex flex-col justify-end p-8">
                 <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                  <span className="text-xs text-muted-foreground tracking-wider group-hover:text-primary-foreground/80 transition-colors duration-300">
+                  <span className="text-xs text-primary-foreground/80 tracking-wider transition-colors duration-300">
                     {category.count} 款
                   </span>
-                  <h3 className="font-serif text-2xl text-foreground group-hover:text-primary-foreground mt-2 transition-colors duration-300">
+                  <h3 className="font-serif text-2xl text-primary-foreground mt-2 transition-colors duration-300">
                     {category.titleCn}
                   </h3>
-                  <p className="text-sm text-muted-foreground group-hover:text-primary-foreground/80 tracking-wide transition-colors duration-300">
+                  <p className="text-sm text-primary-foreground/80 tracking-wide transition-colors duration-300">
                     {category.titleEn}
                   </p>
-                  <p className="text-xs text-muted-foreground group-hover:text-primary-foreground/60 mt-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                  <p className="text-xs text-primary-foreground/60 mt-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
                     {category.description}
                   </p>
                 </div>
               </div>
 
               {/* Corner accent */}
-              <div className="absolute top-4 right-4 w-8 h-8 border-t border-r border-foreground/0 group-hover:border-primary-foreground/30 transition-colors duration-500" />
+              <div className="absolute top-4 right-4 w-8 h-8 border-t border-r border-primary-foreground/20 group-hover:border-primary-foreground/40 transition-colors duration-500" />
             </Link>
           ))}
         </div>
@@ -119,32 +146,46 @@ const ProductCategories = () => {
               }`}
               style={getDelay(index + 3)}
             >
-              {/* Hover overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              {/* Background Image */}
+              <div className="absolute inset-0">
+                <img 
+                  src={category.image} 
+                  alt={category.titleEn}
+                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                />
+              </div>
+
+              {/* Gradient Overlay - becomes darker on hover */}
+              <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/20 to-transparent transition-opacity duration-500 group-hover:from-foreground/85 group-hover:via-foreground/50" />
+              
+              {/* Elegant shine effect on hover */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary-foreground/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
+              </div>
               
               {/* Animated border */}
-              <div className="absolute inset-0 border-2 border-transparent group-hover:border-foreground/20 transition-colors duration-500" />
+              <div className="absolute inset-0 border-2 border-transparent group-hover:border-primary-foreground/20 transition-colors duration-500" />
               
               {/* Content */}
               <div className="absolute inset-0 flex flex-col justify-end p-8">
                 <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                  <span className="text-xs text-muted-foreground tracking-wider group-hover:text-primary-foreground/80 transition-colors duration-300">
+                  <span className="text-xs text-primary-foreground/80 tracking-wider transition-colors duration-300">
                     {category.count} 款
                   </span>
-                  <h3 className="font-serif text-2xl text-foreground group-hover:text-primary-foreground mt-2 transition-colors duration-300">
+                  <h3 className="font-serif text-2xl text-primary-foreground mt-2 transition-colors duration-300">
                     {category.titleCn}
                   </h3>
-                  <p className="text-sm text-muted-foreground group-hover:text-primary-foreground/80 tracking-wide transition-colors duration-300">
+                  <p className="text-sm text-primary-foreground/80 tracking-wide transition-colors duration-300">
                     {category.titleEn}
                   </p>
-                  <p className="text-xs text-muted-foreground group-hover:text-primary-foreground/60 mt-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                  <p className="text-xs text-primary-foreground/60 mt-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
                     {category.description}
                   </p>
                 </div>
               </div>
 
               {/* Corner accent */}
-              <div className="absolute top-4 right-4 w-8 h-8 border-t border-r border-foreground/0 group-hover:border-primary-foreground/30 transition-colors duration-500" />
+              <div className="absolute top-4 right-4 w-8 h-8 border-t border-r border-primary-foreground/20 group-hover:border-primary-foreground/40 transition-colors duration-500" />
             </Link>
           ))}
         </div>
