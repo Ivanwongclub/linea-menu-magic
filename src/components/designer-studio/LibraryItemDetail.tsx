@@ -10,7 +10,15 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { ArrowLeft, Download, Globe, Lock, ZoomIn } from "lucide-react";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { Download, Globe, Lock, ZoomIn } from "lucide-react";
 import { LibraryItem, categoryLabels } from "@/data/mockLibraryData";
 import Model3DViewer from "./Model3DViewer";
 import { cn } from "@/lib/utils";
@@ -39,13 +47,28 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Sticky back button */}
+      {/* Sticky breadcrumb navigation */}
       <div className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-6 py-2">
-          <Button variant="ghost" onClick={onBack} className="gap-2 h-8 text-sm">
-            <ArrowLeft className="w-4 h-4" />
-            返回素材庫
-          </Button>
+        <div className="max-w-7xl mx-auto px-6 py-3">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink onClick={onBack} className="cursor-pointer hover:text-foreground">
+                  設計師工作室
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink onClick={onBack} className="cursor-pointer hover:text-foreground">
+                  素材庫
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{item.name}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
         </div>
       </div>
 
