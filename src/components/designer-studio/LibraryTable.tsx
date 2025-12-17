@@ -93,8 +93,12 @@ const LibraryTable = ({
             {items.map((item) => {
               const isFavorite = favorites.has(item.id);
               return (
-                <TableRow key={item.id} className="group hover:bg-muted/30">
-                  <TableCell className="text-center">
+                <TableRow 
+                  key={item.id} 
+                  className="group hover:bg-muted/30 cursor-pointer"
+                  onClick={() => onView(item)}
+                >
+                  <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -164,7 +168,7 @@ const LibraryTable = ({
                   <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                     {format(new Date(item.createdAt), 'yyyy/MM/dd')}
                   </TableCell>
-                  <TableCell className="sticky right-0 bg-card group-hover:bg-muted/30">
+                  <TableCell className="sticky right-0 bg-card group-hover:bg-muted/30" onClick={(e) => e.stopPropagation()}>
                     <div className="flex gap-2 justify-end">
                       <Button
                         variant="outline"
