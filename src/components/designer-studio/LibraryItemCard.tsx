@@ -52,7 +52,7 @@ const LibraryItemCard = ({ item, onView, isFavorite = false, onToggleFavorite }:
           )}
         </div>
         
-        {/* Favorite button - always visible */}
+        {/* Favorite button - fixed bottom-left corner */}
         {onToggleFavorite && (
           <button
             onClick={(e) => {
@@ -60,8 +60,9 @@ const LibraryItemCard = ({ item, onView, isFavorite = false, onToggleFavorite }:
               e.stopPropagation();
               onToggleFavorite(item.id);
             }}
-            className="absolute top-3 left-3 p-2 rounded-full bg-background/80 hover:bg-background transition-all opacity-0 group-hover:opacity-100 z-10"
-            style={{ left: item.modelUrl ? '60px' : '12px' }}
+            className={`absolute bottom-14 left-3 p-2 rounded-full bg-background/90 hover:bg-background shadow-sm transition-all z-10 ${
+              isFavorite ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+            }`}
           >
             <Star 
               className={`w-4 h-4 transition-colors ${
