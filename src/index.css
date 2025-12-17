@@ -274,6 +274,25 @@
   .btn-red-glow:hover {
     box-shadow: 0 4px 20px -2px hsl(var(--brand-red-accent) / 0.4);
   }
+
+  /* Subtle pulse animation for CTAs */
+  @keyframes subtle-pulse {
+    0%, 100% {
+      box-shadow: 0 0 0 0 hsl(var(--brand-red-accent) / 0.3);
+    }
+    50% {
+      box-shadow: 0 0 0 6px hsl(var(--brand-red-accent) / 0);
+    }
+  }
+
+  .btn-red-pulse {
+    animation: subtle-pulse 2.5s ease-in-out infinite;
+  }
+
+  .btn-red-pulse:hover {
+    animation: none;
+    box-shadow: 0 4px 20px -2px hsl(var(--brand-red-accent) / 0.4);
+  }
   
   /* Text reveal animation */
   .text-reveal {
