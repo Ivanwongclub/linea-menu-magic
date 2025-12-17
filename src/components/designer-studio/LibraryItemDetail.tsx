@@ -38,9 +38,9 @@ const LibraryItemDetail = ({ item, onBack, onQuickRFQ }: LibraryItemDetailProps)
                     公開
                   </Badge>
                 ) : (
-                  <Badge variant="outline" className="gap-1">
+                  <Badge variant="outline" className="gap-1 border-amber-500/50 text-amber-700 dark:text-amber-400">
                     <Lock className="w-3 h-3" />
-                    團隊專屬
+                    {item.teamName || '團隊專屬'}
                   </Badge>
                 )}
               </div>

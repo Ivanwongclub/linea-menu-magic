@@ -13,6 +13,7 @@ export interface LibraryItem {
   };
   isPublic: boolean;
   teamId?: string;
+  teamName?: string;
   modelUrl?: string;
   thumbnailUrl?: string;
   createdAt: string;
@@ -150,11 +151,11 @@ export const mockLibraryItems: LibraryItem[] = [
   },
   {
     id: 'item-008',
-    itemCode: 'TEAM-BTN-001',
+    itemCode: 'NIKE-BTN-001',
     name: '客製雕刻鈕扣',
     nameEn: 'Custom Engraved Button',
     category: 'buttons',
-    description: '團隊專屬客製鈕扣，帶有品牌標誌雕刻。',
+    description: 'Nike 專屬客製鈕扣，帶有品牌標誌雕刻。',
     specifications: {
       material: '黃銅',
       size: '18mm',
@@ -163,6 +164,7 @@ export const mockLibraryItems: LibraryItem[] = [
     },
     isPublic: false,
     teamId: 'team-nike',
+    teamName: 'Nike',
     modelUrl: '/models/button.obj',
     thumbnailUrl: '/placeholder.svg',
     createdAt: '2024-03-10T10:00:00Z',
@@ -170,11 +172,11 @@ export const mockLibraryItems: LibraryItem[] = [
   },
   {
     id: 'item-009',
-    itemCode: 'TEAM-ZIP-001',
+    itemCode: 'NIKE-ZIP-001',
     name: '品牌訂製拉鏈頭',
     nameEn: 'Custom Branded Zipper Pull',
     category: 'zippers',
-    description: '帶有品牌標誌的訂製拉鏈頭，限團隊內部使用。',
+    description: 'Nike 專屬訂製拉鏈頭，帶有品牌標誌。',
     specifications: {
       material: '鋅合金',
       size: '標準',
@@ -183,10 +185,52 @@ export const mockLibraryItems: LibraryItem[] = [
     },
     isPublic: false,
     teamId: 'team-nike',
+    teamName: 'Nike',
     modelUrl: '/models/zipper.obj',
     thumbnailUrl: '/placeholder.svg',
     createdAt: '2024-03-15T10:00:00Z',
     updatedAt: '2024-03-15T10:00:00Z',
+  },
+  {
+    id: 'item-011',
+    itemCode: 'ADIDAS-HW-001',
+    name: 'Adidas 專屬金屬扣件',
+    nameEn: 'Adidas Custom Metal Clasp',
+    category: 'hardware',
+    description: 'Adidas 專屬設計金屬扣件，用於運動服飾。',
+    specifications: {
+      material: '不鏽鋼',
+      size: '25mm',
+      color: '銀色',
+      finish: '噴砂',
+    },
+    isPublic: false,
+    teamId: 'team-adidas',
+    teamName: 'Adidas',
+    modelUrl: '/models/hardware.obj',
+    thumbnailUrl: '/placeholder.svg',
+    createdAt: '2024-03-18T10:00:00Z',
+    updatedAt: '2024-03-18T10:00:00Z',
+  },
+  {
+    id: 'item-012',
+    itemCode: 'PUMA-BTN-001',
+    name: 'Puma 品牌鈕扣',
+    nameEn: 'Puma Brand Button',
+    category: 'buttons',
+    description: 'Puma 專屬品牌鈕扣，帶有躍豹標誌。',
+    specifications: {
+      material: '樹脂',
+      size: '15mm',
+      color: '黑色',
+      finish: '亮面',
+    },
+    isPublic: false,
+    teamId: 'team-puma',
+    teamName: 'Puma',
+    thumbnailUrl: '/placeholder.svg',
+    createdAt: '2024-03-20T10:00:00Z',
+    updatedAt: '2024-03-20T10:00:00Z',
   },
   {
     id: 'item-010',
