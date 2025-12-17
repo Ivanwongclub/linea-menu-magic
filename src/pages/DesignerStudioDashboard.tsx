@@ -307,16 +307,6 @@ const DesignerStudioDashboard = () => {
                 </TabsList>
               </Tabs>
             </div>
-            
-            <Button 
-              onClick={() => setIsCreateDialogOpen(true)}
-              className="btn-red-glow h-9 text-sm"
-              size="sm"
-            >
-              <Plus className="w-4 h-4 mr-1.5" />
-              <span className="hidden sm:inline">新增報價請求</span>
-              <span className="sm:hidden">新增</span>
-            </Button>
           </div>
           
           {/* Mobile Tabs */}
