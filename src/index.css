@@ -60,6 +60,7 @@
     --brand-red: 358 50% 45%;
     --brand-red-muted: 358 35% 50%;
     --brand-red-subtle: 358 25% 55%;
+    --brand-red-accent: 358 40% 48%;
     
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -116,6 +117,7 @@
     --brand-red: 358 45% 50%;
     --brand-red-muted: 358 30% 55%;
     --brand-red-subtle: 358 20% 60%;
+    --brand-red-accent: 358 35% 52%;
   }
 }
 
