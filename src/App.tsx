@@ -10,6 +10,7 @@ import About from "./pages/About";
 import Products from "./pages/Products";
 import Sustainability from "./pages/Sustainability";
 import DesignerStudio from "./pages/DesignerStudio";
+import DesignerStudioPrototype from "./pages/DesignerStudioPrototype";
 import Contact from "./pages/Contact";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/products" element={<Products />} />
           <Route path="/sustainability" element={<Sustainability />} />
           <Route path="/designer-studio" element={<DesignerStudio />} />
+          <Route path="/designer-studio/prototype" element={<DesignerStudioPrototype />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-of-service" element={<TermsOfService />} />
