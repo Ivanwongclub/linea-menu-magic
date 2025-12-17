@@ -10,7 +10,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { ArrowLeft, FileText, Download, Globe, Lock, ZoomIn } from "lucide-react";
+import { ArrowLeft, Download, Globe, Lock, ZoomIn } from "lucide-react";
 import { LibraryItem, categoryLabels } from "@/data/mockLibraryData";
 import Model3DViewer from "./Model3DViewer";
 import { cn } from "@/lib/utils";
@@ -18,10 +18,9 @@ import { cn } from "@/lib/utils";
 interface LibraryItemDetailProps {
   item: LibraryItem;
   onBack: () => void;
-  onQuickRFQ: (item: LibraryItem) => void;
 }
 
-const LibraryItemDetail = ({ item, onBack, onQuickRFQ }: LibraryItemDetailProps) => {
+const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   
   // Generate gallery images from item thumbnail (in real app, these would come from backend)
@@ -66,10 +65,6 @@ const LibraryItemDetail = ({ item, onBack, onQuickRFQ }: LibraryItemDetailProps)
               <h1 className="font-serif text-2xl font-light text-foreground">{item.name}</h1>
               <p className="text-muted-foreground font-mono">{item.itemCode}</p>
             </div>
-            <Button className="btn-red-glow gap-2" onClick={() => onQuickRFQ(item)}>
-              <FileText className="w-4 h-4" />
-              快速報價請求
-            </Button>
           </div>
         </div>
       </div>

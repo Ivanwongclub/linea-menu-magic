@@ -1,17 +1,16 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, FileText, Lock, Globe, Star, Box } from "lucide-react";
+import { Eye, Lock, Globe, Star, Box } from "lucide-react";
 import { LibraryItem, categoryLabels } from "@/data/mockLibraryData";
 
 interface LibraryItemCardProps {
   item: LibraryItem;
   onView: (item: LibraryItem) => void;
-  onQuickRFQ: (item: LibraryItem) => void;
   isFavorite?: boolean;
   onToggleFavorite?: (itemId: string) => void;
 }
 
-const LibraryItemCard = ({ item, onView, onQuickRFQ, isFavorite = false, onToggleFavorite }: LibraryItemCardProps) => {
+const LibraryItemCard = ({ item, onView, isFavorite = false, onToggleFavorite }: LibraryItemCardProps) => {
   return (
     <div 
       className="group cursor-pointer"
@@ -74,33 +73,20 @@ const LibraryItemCard = ({ item, onView, onQuickRFQ, isFavorite = false, onToggl
           </button>
         )}
         
-        {/* Hover actions */}
-        <div className="absolute inset-x-0 bottom-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-          <div className="flex gap-2">
-            <Button
-              variant="secondary"
-              size="sm"
-              className="flex-1 bg-background/95 hover:bg-background text-foreground gap-1.5"
-              onClick={(e) => {
-                e.stopPropagation();
-                onView(item);
-              }}
-            >
-              <Eye className="w-4 h-4" />
-              查看詳情
-            </Button>
-            <Button
-              size="sm"
-              className="flex-1 gap-1.5 btn-red-glow"
-              onClick={(e) => {
-                e.stopPropagation();
-                onQuickRFQ(item);
-              }}
-            >
-              <FileText className="w-4 h-4" />
-              快速報價
-            </Button>
-          </div>
+        {/* Hover action */}
+        <div className="absolute inset-x-0 bottom-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <Button
+            variant="secondary"
+            size="sm"
+            className="w-full bg-background/95 hover:bg-background text-foreground gap-1.5"
+            onClick={(e) => {
+              e.stopPropagation();
+              onView(item);
+            }}
+          >
+            <Eye className="w-4 h-4" />
+            查看詳情
+          </Button>
         </div>
       </div>
       
