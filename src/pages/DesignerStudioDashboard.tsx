@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -92,6 +92,32 @@ const DesignerStudioDashboard = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [activeRFQTab, setActiveRFQTab] = useState("all");
   const [rfqSearchQuery, setRfqSearchQuery] = useState("");
+
+  // Header auto-hide on scroll
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const lastScrollY = useRef(0);
+  const scrollThreshold = 50;
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY < scrollThreshold) {
+        setIsHeaderVisible(true);
+      } else if (currentScrollY > lastScrollY.current) {
+        // Scrolling down
+        setIsHeaderVisible(false);
+      } else {
+        // Scrolling up
+        setIsHeaderVisible(true);
+      }
+      
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Library filtering and sorting
   const filteredLibraryItems = useMemo(() => {
@@ -248,10 +274,21 @@ const DesignerStudioDashboard = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Header />
+      {/* Auto-hiding Header wrapper - overrides Header's sticky behavior */}
+      <div 
+        className={`sticky top-0 z-50 transition-transform duration-300 [&>header]:static ${
+          isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
+        }`}
+      >
+        <Header />
+      </div>
       
       {/* Sticky Navigation Bar */}
-      <div className="sticky top-20 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
+      <div 
+        className={`sticky z-40 bg-background/95 backdrop-blur-sm border-b border-border transition-all duration-300 ${
+          isHeaderVisible ? 'top-20' : 'top-0'
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-4 lg:px-6">
           {/* Compact Header Row */}
           <div className="flex items-center justify-between py-3">
