@@ -222,7 +222,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
             </div>
 
             {/* Details Section */}
-            <div className="h-[500px] md:h-[80vh] overflow-hidden flex flex-col">
+            <div className="h-[500px] md:h-[80vh] overflow-hidden flex flex-col min-h-0">
               {/* Sticky Header */}
               <div className="bg-background p-6 pb-4 border-b flex-shrink-0">
                 <div className="space-y-2">
@@ -248,8 +248,8 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                 </div>
               </div>
 
-              <ScrollArea className="flex-1">
-              <div className="p-6 pt-4 flex flex-col">
+              <ScrollArea className="flex-1 min-h-0">
+                <div className="p-6 pt-4 flex flex-col">
 
                 {/* Description */}
                 <div className="space-y-2">
