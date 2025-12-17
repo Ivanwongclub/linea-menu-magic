@@ -177,7 +177,7 @@ const Navigation = () => {
             >
               <Link
                 to={item.href}
-                className="text-nav-foreground hover:text-nav-hover transition-colors duration-200 text-sm font-light py-6 block"
+                className="text-nav-foreground hover:text-brand-red-muted transition-colors duration-200 text-sm font-light py-6 block"
               >
                 {item.name}
               </Link>
@@ -251,7 +251,7 @@ const Navigation = () => {
                       <li key={index}>
                         <Link 
                           to={activeDropdown === "About" ? `/about/${subItem.toLowerCase().replace(/\s+/g, '-')}` : `/category/${subItem.toLowerCase()}`}
-                          className="text-nav-foreground hover:text-nav-hover transition-colors duration-200 text-sm font-light block py-2"
+                          className="text-nav-foreground hover:text-brand-red-muted transition-colors duration-200 text-sm font-light block py-2"
                         >
                           {subItem}
                         </Link>
@@ -349,7 +349,7 @@ const Navigation = () => {
                 <div key={item.name}>
                   <Link
                     to={item.href}
-                    className="text-nav-foreground hover:text-nav-hover transition-colors duration-200 text-lg font-light block py-2"
+                    className="text-nav-foreground hover:text-brand-red-muted transition-colors duration-200 text-lg font-light block py-2"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     {item.name}
@@ -359,7 +359,7 @@ const Navigation = () => {
                        <Link
                          key={subIndex}
                          to={item.name === "About" ? `/about/${subItem.toLowerCase().replace(/\s+/g, '-')}` : `/category/${subItem.toLowerCase()}`}
-                         className="text-nav-foreground/70 hover:text-nav-hover text-sm font-light block py-1"
+                         className="text-nav-foreground/70 hover:text-brand-red-muted text-sm font-light block py-1"
                          onClick={() => setIsMobileMenuOpen(false)}
                        >
                          {subItem}
