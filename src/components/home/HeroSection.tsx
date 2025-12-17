@@ -1,26 +1,82 @@
 import { Link } from "react-router-dom";
 import { useScrollAnimation } from "@/hooks/use-scroll-animation";
+import { useEffect, useState } from "react";
 
 const HeroSection = () => {
   const { ref: heroRef, isVisible: heroVisible } = useScrollAnimation({ threshold: 0.2 });
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const parallaxOffset = scrollY * 0.4;
+  const opacityFade = Math.max(0, 1 - scrollY / 600);
 
   return (
     <section 
       ref={heroRef}
       className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-secondary"
     >
-      {/* Animated Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
+      {/* Parallax Background Layers */}
+      <div 
+        className="absolute inset-0 transition-transform duration-100 ease-out"
+        style={{ transform: `translateY(${parallaxOffset * 0.3}px)` }}
+      >
+        {/* Deep background pattern */}
         <div 
-          className="absolute inset-0 transition-transform duration-[2000ms] ease-out"
+          className="absolute inset-0 opacity-[0.03]"
           style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-            transform: heroVisible ? 'scale(1)' : 'scale(1.1)',
-          }} 
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 50m-40 0a40,40 0 1,0 80,0a40,40 0 1,0 -80,0' fill='none' stroke='%23000' stroke-width='0.5'/%3E%3C/svg%3E")`,
+            backgroundSize: '200px 200px',
+          }}
         />
       </div>
 
-      <div className="relative z-10 max-w-5xl mx-auto px-6 lg:px-8 text-center">
+      <div 
+        className="absolute inset-0 transition-transform duration-100 ease-out"
+        style={{ transform: `translateY(${parallaxOffset * 0.5}px)` }}
+      >
+        {/* Mid-layer pattern */}
+        <div 
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          }}
+        />
+      </div>
+
+      {/* Floating decorative elements with parallax */}
+      <div 
+        className="absolute top-20 left-[10%] w-32 h-32 border border-foreground/5 rotate-45 transition-transform duration-100 ease-out"
+        style={{ transform: `translateY(${parallaxOffset * 0.2}px) rotate(45deg)` }}
+      />
+      <div 
+        className="absolute bottom-32 right-[15%] w-24 h-24 border border-foreground/5 transition-transform duration-100 ease-out"
+        style={{ transform: `translateY(${parallaxOffset * 0.6}px)` }}
+      />
+      <div 
+        className="absolute top-1/3 right-[8%] w-16 h-16 bg-foreground/[0.02] transition-transform duration-100 ease-out"
+        style={{ transform: `translateY(${parallaxOffset * 0.35}px)` }}
+      />
+      <div 
+        className="absolute bottom-1/4 left-[12%] w-20 h-20 border border-foreground/[0.03] rounded-full transition-transform duration-100 ease-out"
+        style={{ transform: `translateY(${parallaxOffset * 0.45}px)` }}
+      />
+
+      {/* Content with fade on scroll */}
+      <div 
+        className="relative z-10 max-w-5xl mx-auto px-6 lg:px-8 text-center transition-all duration-100 ease-out"
+        style={{ 
+          transform: `translateY(${parallaxOffset * 0.15}px)`,
+          opacity: opacityFade 
+        }}
+      >
         {/* Tagline */}
         <p 
           className={`text-subtitle mb-6 transition-all duration-700 ease-out ${
@@ -108,17 +164,24 @@ const HeroSection = () => {
         </div>
       </div>
 
-      {/* Scroll indicator */}
+      {/* Scroll indicator with parallax */}
       <div 
         className={`absolute bottom-8 left-1/2 -translate-x-1/2 transition-all duration-700 ${
           heroVisible ? 'opacity-100' : 'opacity-0'
         }`}
-        style={{ transitionDelay: '1400ms' }}
+        style={{ 
+          transitionDelay: '1400ms',
+          opacity: opacityFade * 0.8,
+          transform: `translateX(-50%) translateY(${parallaxOffset * 0.1}px)`
+        }}
       >
         <div className="w-6 h-10 border border-muted-foreground/30 rounded-full flex justify-center">
           <div className="w-1 h-2 bg-muted-foreground/50 rounded-full mt-2 animate-bounce" />
         </div>
       </div>
+
+      {/* Bottom gradient fade */}
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent pointer-events-none" />
     </section>
   );
 };
