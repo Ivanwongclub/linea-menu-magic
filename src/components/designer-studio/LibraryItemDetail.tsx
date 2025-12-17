@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -18,7 +18,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Download, Globe, Lock, ZoomIn } from "lucide-react";
+import { Download, Globe, Lock, ZoomIn, Package, Clock, MapPin, Award, Palette, Layers } from "lucide-react";
 import { LibraryItem, categoryLabels } from "@/data/mockLibraryData";
 import Model3DViewer from "./Model3DViewer";
 import { cn } from "@/lib/utils";
@@ -173,25 +173,42 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
 
           {/* Item Details */}
           <div className="space-y-6">
+            {/* Description */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">產品描述</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">{item.description}</p>
+                <p className="text-muted-foreground leading-relaxed">{item.description}</p>
+                
+                {/* Applications */}
+                {item.applications && item.applications.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-sm text-muted-foreground mb-2">適用場景</p>
+                    <div className="flex flex-wrap gap-2">
+                      {item.applications.map((app) => (
+                        <Badge key={app} variant="secondary" className="text-xs">{app}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
+            {/* Specifications */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">規格參數</CardTitle>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Layers className="w-4 h-4" />
+                  規格參數
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <dl className="space-y-3">
                   {item.specifications.material && (
                     <div className="flex justify-between">
                       <dt className="text-muted-foreground">材質</dt>
-                      <dd className="font-medium">{item.specifications.material}</dd>
+                      <dd className="font-medium text-right">{item.specifications.material}</dd>
                     </div>
                   )}
                   {item.specifications.size && (
@@ -199,16 +216,25 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                       <Separator />
                       <div className="flex justify-between">
                         <dt className="text-muted-foreground">尺寸</dt>
-                        <dd className="font-medium">{item.specifications.size}</dd>
+                        <dd className="font-medium text-right">{item.specifications.size}</dd>
                       </div>
                     </>
                   )}
-                  {item.specifications.color && (
+                  {item.specifications.weight && (
                     <>
                       <Separator />
                       <div className="flex justify-between">
-                        <dt className="text-muted-foreground">顏色</dt>
-                        <dd className="font-medium">{item.specifications.color}</dd>
+                        <dt className="text-muted-foreground">重量</dt>
+                        <dd className="font-medium text-right">{item.specifications.weight}</dd>
+                      </div>
+                    </>
+                  )}
+                  {item.specifications.thickness && (
+                    <>
+                      <Separator />
+                      <div className="flex justify-between">
+                        <dt className="text-muted-foreground">厚度</dt>
+                        <dd className="font-medium text-right">{item.specifications.thickness}</dd>
                       </div>
                     </>
                   )}
@@ -217,7 +243,16 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                       <Separator />
                       <div className="flex justify-between">
                         <dt className="text-muted-foreground">表面處理</dt>
-                        <dd className="font-medium">{item.specifications.finish}</dd>
+                        <dd className="font-medium text-right">{item.specifications.finish}</dd>
+                      </div>
+                    </>
+                  )}
+                  {item.specifications.tensileStrength && (
+                    <>
+                      <Separator />
+                      <div className="flex justify-between">
+                        <dt className="text-muted-foreground">拉力強度</dt>
+                        <dd className="font-medium text-right">{item.specifications.tensileStrength}</dd>
                       </div>
                     </>
                   )}
@@ -225,6 +260,124 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
               </CardContent>
             </Card>
 
+            {/* Pricing & MOQ */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Package className="w-4 h-4" />
+                  價格與訂購
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <dl className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <dt className="text-muted-foreground">單價</dt>
+                    <dd className="font-semibold text-lg text-foreground">
+                      {item.pricing.currency} ${item.pricing.unitPrice.toFixed(3)}
+                    </dd>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">最低訂購量 (MOQ)</dt>
+                    <dd className="font-medium">{item.pricing.moq.toLocaleString()} 件</dd>
+                  </div>
+                  {item.pricing.priceBreaks && item.pricing.priceBreaks.length > 0 && (
+                    <>
+                      <Separator />
+                      <div>
+                        <dt className="text-muted-foreground mb-2">量價階梯</dt>
+                        <dd className="space-y-1">
+                          {item.pricing.priceBreaks.map((pb, idx) => (
+                            <div key={idx} className="flex justify-between text-sm bg-muted/50 rounded px-2 py-1">
+                              <span>≥ {pb.quantity.toLocaleString()} 件</span>
+                              <span className="font-medium">${pb.price.toFixed(3)}</span>
+                            </div>
+                          ))}
+                        </dd>
+                      </div>
+                    </>
+                  )}
+                </dl>
+              </CardContent>
+            </Card>
+
+            {/* Production Info */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  生產資訊
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <dl className="space-y-3">
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">交貨時間</dt>
+                    <dd className="font-medium">{item.production.leadTime}</dd>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">樣品時間</dt>
+                    <dd className="font-medium">{item.production.sampleTime}</dd>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between items-center">
+                    <dt className="text-muted-foreground flex items-center gap-1">
+                      <MapPin className="w-3 h-3" />
+                      產地
+                    </dt>
+                    <dd className="font-medium">{item.production.origin}</dd>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">月產能</dt>
+                    <dd className="font-medium">{item.production.capacity}</dd>
+                  </div>
+                </dl>
+              </CardContent>
+            </Card>
+
+            {/* Available Colors */}
+            {item.availableColors && item.availableColors.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Palette className="w-4 h-4" />
+                    可選顏色
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {item.availableColors.map((color) => (
+                      <Badge key={color} variant="outline" className="text-xs">{color}</Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Certifications */}
+            {item.certifications && item.certifications.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Award className="w-4 h-4" />
+                    認證與標準
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {item.certifications.map((cert) => (
+                      <Badge key={cert} variant="secondary" className="text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                        {cert}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Metadata */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">其他資訊</CardTitle>
