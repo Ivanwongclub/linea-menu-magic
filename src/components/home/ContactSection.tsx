@@ -65,7 +65,7 @@ const ContactSection = () => {
         {/* CTA */}
         <Link
           to="/contact"
-          className={`group inline-block px-12 py-4 bg-foreground text-background text-xs tracking-[0.2em] uppercase transition-all duration-500 hover:bg-primary-hover hover:scale-105 ${
+          className={`group inline-block px-12 py-4 bg-[#EC1C24] text-white text-xs tracking-[0.2em] uppercase transition-all duration-500 hover:bg-[#d11920] hover:scale-105 ${
             cardsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
           style={{ transitionDelay: '450ms' }}
