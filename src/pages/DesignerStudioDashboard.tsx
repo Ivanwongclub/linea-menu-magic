@@ -28,8 +28,7 @@ import {
   Grid3X3,
   List,
   Star,
-  X,
-  Compass
+  X
 } from "lucide-react";
 
 // Library imports
@@ -582,16 +581,6 @@ const DesignerStudioDashboard = () => {
         onSubmit={handleCreateRFQ}
       />
 
-      {/* Floating Compass RFQ Button */}
-      <Button
-        onClick={() => setIsCreateDialogOpen(true)}
-        className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full btn-red-glow shadow-lg hover:scale-110 transition-transform duration-200"
-        size="icon"
-        aria-label="新增報價請求"
-      >
-        <Compass className="w-6 h-6" />
-      </Button>
-      
       <Footer />
     </div>
   );
