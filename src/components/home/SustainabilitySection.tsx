@@ -16,11 +16,11 @@ const SustainabilitySection = () => {
 
   return (
     <section className="py-24 px-6 lg:px-8 bg-background overflow-hidden relative">
-      {/* Background Pattern - More Visible */}
+      {/* Background Pattern - Animated */}
       <div className="absolute inset-0">
-        {/* Dot grid pattern */}
+        {/* Dot grid pattern - floating */}
         <div 
-          className="absolute inset-0 opacity-[0.15]"
+          className="absolute inset-0 opacity-[0.15] animate-[float-slow_20s_ease-in-out_infinite]"
           style={{
             backgroundImage: `
               radial-gradient(circle at 25% 25%, hsl(var(--foreground)) 2px, transparent 2px),
@@ -29,9 +29,9 @@ const SustainabilitySection = () => {
             backgroundSize: '50px 50px',
           }}
         />
-        {/* Diagonal lines pattern */}
+        {/* Diagonal lines pattern - slow drift */}
         <div 
-          className="absolute inset-0 opacity-[0.12]"
+          className="absolute inset-0 opacity-[0.12] animate-[drift_25s_linear_infinite]"
           style={{
             backgroundImage: `repeating-linear-gradient(
               45deg,
@@ -42,9 +42,9 @@ const SustainabilitySection = () => {
             )`,
           }}
         />
-        {/* Cross-hatch pattern */}
+        {/* Cross-hatch pattern - reverse drift */}
         <div 
-          className="absolute inset-0 opacity-[0.08]"
+          className="absolute inset-0 opacity-[0.08] animate-[drift-reverse_30s_linear_infinite]"
           style={{
             backgroundImage: `repeating-linear-gradient(
               -45deg,
@@ -57,7 +57,7 @@ const SustainabilitySection = () => {
         />
         {/* Hexagon-like pattern overlay */}
         <div 
-          className="absolute inset-0 opacity-[0.06]"
+          className="absolute inset-0 opacity-[0.06] animate-[pulse-subtle_8s_ease-in-out_infinite]"
           style={{
             backgroundImage: `
               radial-gradient(circle at 50% 50%, hsl(var(--foreground)) 1px, transparent 1px)
@@ -66,13 +66,41 @@ const SustainabilitySection = () => {
           }}
         />
       </div>
-      {/* Decorative geometric shapes */}
-      <div className="absolute top-16 left-8 w-40 h-40 border-2 border-foreground/15 rounded-full" />
-      <div className="absolute top-24 left-16 w-24 h-24 border border-foreground/20 rounded-full" />
-      <div className="absolute bottom-16 right-8 w-56 h-56 border-2 border-foreground/12 rounded-full" />
-      <div className="absolute bottom-32 right-24 w-32 h-32 border border-foreground/18 rounded-full" />
-      <div className="absolute top-1/3 right-1/5 w-20 h-20 border border-foreground/10 rounded-full" />
-      <div className="absolute bottom-1/3 left-1/4 w-28 h-28 border border-foreground/8 rounded-full" />
+      {/* Decorative geometric shapes - floating */}
+      <div className="absolute top-16 left-8 w-40 h-40 border-2 border-foreground/15 rounded-full animate-[float-circle_12s_ease-in-out_infinite]" />
+      <div className="absolute top-24 left-16 w-24 h-24 border border-foreground/20 rounded-full animate-[float-circle_10s_ease-in-out_infinite_reverse]" />
+      <div className="absolute bottom-16 right-8 w-56 h-56 border-2 border-foreground/12 rounded-full animate-[float-circle_15s_ease-in-out_infinite]" />
+      <div className="absolute bottom-32 right-24 w-32 h-32 border border-foreground/18 rounded-full animate-[float-circle_8s_ease-in-out_infinite_reverse]" />
+      <div className="absolute top-1/3 right-[20%] w-20 h-20 border border-foreground/10 rounded-full animate-[float-circle_11s_ease-in-out_infinite]" />
+      <div className="absolute bottom-1/3 left-1/4 w-28 h-28 border border-foreground/8 rounded-full animate-[float-circle_14s_ease-in-out_infinite_reverse]" />
+      
+      {/* Inline keyframes */}
+      <style>{`
+        @keyframes float-slow {
+          0%, 100% { transform: translate(0, 0); }
+          25% { transform: translate(10px, -10px); }
+          50% { transform: translate(-5px, 15px); }
+          75% { transform: translate(-10px, -5px); }
+        }
+        @keyframes drift {
+          0% { background-position: 0 0; }
+          100% { background-position: 60px 60px; }
+        }
+        @keyframes drift-reverse {
+          0% { background-position: 60px 60px; }
+          100% { background-position: 0 0; }
+        }
+        @keyframes pulse-subtle {
+          0%, 100% { opacity: 0.06; }
+          50% { opacity: 0.1; }
+        }
+        @keyframes float-circle {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          25% { transform: translate(8px, -12px) scale(1.02); }
+          50% { transform: translate(-6px, 8px) scale(0.98); }
+          75% { transform: translate(10px, 6px) scale(1.01); }
+        }
+      `}</style>
       
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
