@@ -147,7 +147,14 @@ const RFQDetail = ({ rfq, onBack, onStatusChange }: RFQDetailProps) => {
                   <Box className="w-5 h-5" />
                   3D 模型預覽
                 </h3>
-                <Model3DViewer hasModel={!!rfq.modelUrl} />
+                <Model3DViewer 
+                  hasModel={!!rfq.modelUrl} 
+                  modelType={
+                    rfq.category === '拉鍊' ? 'zipper' : 
+                    rfq.category === '五金' ? 'hardware' : 
+                    'button'
+                  }
+                />
                 {rfq.modelUrl && (
                   <div className="mt-4 flex gap-2">
                     <Button variant="outline" size="sm">
