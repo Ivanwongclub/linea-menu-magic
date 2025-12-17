@@ -264,6 +264,16 @@
   .hover-lift:hover {
     @apply -translate-y-1 shadow-lg;
   }
+
+  /* Red accent button glow */
+  .btn-red-glow {
+    @apply transition-all duration-300;
+    box-shadow: 0 0 0 0 hsl(var(--brand-red-accent) / 0);
+  }
+  
+  .btn-red-glow:hover {
+    box-shadow: 0 4px 20px -2px hsl(var(--brand-red-accent) / 0.4);
+  }
   
   /* Text reveal animation */
   .text-reveal {

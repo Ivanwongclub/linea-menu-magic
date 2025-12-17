@@ -52,7 +52,7 @@ const Header = () => {
           <div className="hidden lg:flex items-center space-x-4">
             <Link
               to="/contact"
-              className="px-6 py-2.5 bg-brand-red-accent text-white text-xs tracking-widest uppercase transition-all duration-300 hover:bg-foreground"
+              className="px-6 py-2.5 bg-brand-red-accent text-white text-xs tracking-widest uppercase transition-all duration-300 hover:bg-foreground btn-red-glow"
             >
               獲取報價
             </Link>
@@ -92,7 +92,7 @@ const Header = () => {
               <Link
                 to="/contact"
                 onClick={() => setIsMenuOpen(false)}
-                className="mt-4 py-3 bg-brand-red-accent text-white text-center text-xs tracking-widest uppercase transition-all duration-300 hover:bg-foreground"
+                className="mt-4 py-3 bg-brand-red-accent text-white text-center text-xs tracking-widest uppercase transition-all duration-300 hover:bg-foreground btn-red-glow"
               >
                 獲取報價
               </Link>
