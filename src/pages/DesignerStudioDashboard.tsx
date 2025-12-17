@@ -274,39 +274,34 @@ const DesignerStudioDashboard = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      {/* Auto-hiding Header wrapper - overrides Header's sticky behavior */}
+      {/* Auto-hiding Header + Navigation wrapper */}
       <div 
         className={`sticky top-0 z-50 transition-transform duration-300 [&>header]:static ${
           isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
         }`}
       >
         <Header />
-      </div>
-      
-      {/* Sticky Navigation Bar */}
-      <div 
-        className={`sticky z-40 bg-background/95 backdrop-blur-sm border-b border-border transition-all duration-300 ${
-          isHeaderVisible ? 'top-20' : 'top-0'
-        }`}
-      >
-        <div className="max-w-7xl mx-auto px-4 lg:px-6">
-          {/* Compact Header Row */}
-          <div className="flex items-center justify-between py-3">
-            <div className="flex items-center gap-6">
-              <h1 className="font-serif text-xl font-light text-foreground">
-                設計師工作室
-              </h1>
-              
-              {/* Main Tabs - Inline */}
-              <Tabs value={activeMainTab} onValueChange={(v) => setActiveMainTab(v as "library" | "rfq")} className="hidden sm:block">
-                <TabsList className="h-9">
-                  <TabsTrigger value="library" className="gap-1.5 text-sm px-3 h-7">
-                    <Library className="w-3.5 h-3.5" />
-                    素材庫
-                  </TabsTrigger>
-                  <TabsTrigger value="rfq" className="gap-1.5 text-sm px-3 h-7">
-                    <FileText className="w-3.5 h-3.5" />
-                    我的報價 ({statusCounts.all})
+        
+        {/* Sticky Navigation Bar */}
+        <div className="bg-background/95 backdrop-blur-sm border-b border-border">
+          <div className="max-w-7xl mx-auto px-4 lg:px-6">
+            {/* Compact Header Row */}
+            <div className="flex items-center justify-between py-3">
+              <div className="flex items-center gap-6">
+                <h1 className="font-serif text-xl font-light text-foreground">
+                  設計師工作室
+                </h1>
+                
+                {/* Main Tabs - Inline */}
+                <Tabs value={activeMainTab} onValueChange={(v) => setActiveMainTab(v as "library" | "rfq")} className="hidden sm:block">
+                  <TabsList className="h-9">
+                    <TabsTrigger value="library" className="gap-1.5 text-sm px-3 h-7">
+                      <Library className="w-3.5 h-3.5" />
+                      素材庫
+                    </TabsTrigger>
+                    <TabsTrigger value="rfq" className="gap-1.5 text-sm px-3 h-7">
+                      <FileText className="w-3.5 h-3.5" />
+                      我的報價 ({statusCounts.all})
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
@@ -420,8 +415,9 @@ const DesignerStudioDashboard = () => {
           )}
         </div>
       </div>
+    </div>
       
-      <main className="flex-1 py-4 px-4 lg:px-6">
+    <main className="flex-1 py-4 px-4 lg:px-6">
         <div className="max-w-7xl mx-auto">
           <Tabs value={activeMainTab} onValueChange={(v) => setActiveMainTab(v as "library" | "rfq")} className="w-full">
             {/* Library Tab Content */}
