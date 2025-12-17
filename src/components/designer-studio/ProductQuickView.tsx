@@ -19,6 +19,18 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl p-0 overflow-hidden">
+        {/* Mobile Header with Back Button */}
+        <div className="sticky top-0 z-10 flex items-center gap-3 p-4 bg-background border-b md:hidden">
+          <button
+            onClick={() => onOpenChange(false)}
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <X className="w-4 h-4" />
+            <span>關閉</span>
+          </button>
+          <span className="text-sm font-medium text-foreground truncate">{item.name}</span>
+        </div>
+
         <div className="grid md:grid-cols-2 gap-0">
           {/* Image Section */}
           <div className="relative bg-muted aspect-square md:aspect-auto md:min-h-[500px]">
@@ -33,12 +45,6 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                 3D 模型可用
               </Badge>
             )}
-            <button
-              onClick={() => onOpenChange(false)}
-              className="absolute top-4 right-4 p-2 rounded-full bg-background/80 hover:bg-background transition-colors md:hidden"
-            >
-              <X className="w-4 h-4" />
-            </button>
           </div>
 
           {/* Details Section */}
