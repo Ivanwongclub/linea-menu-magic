@@ -2,12 +2,20 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Link } from "react-router-dom";
 
+// Import product images
+import buttonsImage from "@/assets/products/buttons-category.jpg";
+import zippersImage from "@/assets/products/zippers-category.jpg";
+import laceImage from "@/assets/products/lace-category.jpg";
+import hardwareImage from "@/assets/products/hardware-category.jpg";
+import otherImage from "@/assets/products/other-category.jpg";
+
 interface Product {
   id: string;
   titleCn: string;
   titleEn: string;
   count: string;
   items: string[];
+  image: string;
 }
 
 const products: Product[] = [
@@ -17,6 +25,7 @@ const products: Product[] = [
     titleEn: "Buttons",
     count: "48+",
     items: ["Polyester Buttons", "Metal Buttons", "Shell Buttons", "Wood Buttons", "Snap Buttons"],
+    image: buttonsImage,
   },
   {
     id: "zippers",
@@ -24,6 +33,7 @@ const products: Product[] = [
     titleEn: "Zippers",
     count: "36+",
     items: ["Metal Zipper", "Nylon Zipper", "Plastic Zipper", "Invisible Zipper", "Water-resistant Zipper"],
+    image: zippersImage,
   },
   {
     id: "lace",
@@ -31,6 +41,7 @@ const products: Product[] = [
     titleEn: "Lace & Trimming",
     count: "52+",
     items: ["Cotton Lace", "Elastic Lace", "Embroidery Lace", "Chemical Lace", "Ribbon"],
+    image: laceImage,
   },
   {
     id: "hardware",
@@ -38,6 +49,7 @@ const products: Product[] = [
     titleEn: "Metal Hardware",
     count: "64+",
     items: ["Buckles", "D-rings", "Hooks", "Rivets", "Eyelets"],
+    image: hardwareImage,
   },
   {
     id: "other",
@@ -45,6 +57,7 @@ const products: Product[] = [
     titleEn: "Other Products",
     count: "28+",
     items: ["Labels", "Hangtags", "Packaging", "Elastic Bands", "Drawcords"],
+    image: otherImage,
   },
 ];
 
@@ -109,7 +122,14 @@ const Products = () => {
                   </div>
                   
                   <div className={index % 2 === 0 ? "order-2" : "order-2 lg:order-1"}>
-                    <div className="aspect-[4/3] bg-muted" />
+                    <div className="group relative aspect-[4/3] bg-muted overflow-hidden">
+                      <img 
+                        src={product.image} 
+                        alt={product.titleEn}
+                        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-foreground/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    </div>
                   </div>
                 </div>
               </div>
