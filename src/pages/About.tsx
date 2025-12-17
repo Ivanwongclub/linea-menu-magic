@@ -1,6 +1,8 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
+import aboutHeritageImage from "@/assets/about-heritage.jpg";
+import aboutShowroomImage from "@/assets/about-showroom.jpg";
 
 const About = () => {
   const { ref: heroRef, isVisible: heroVisible } = useScrollAnimation();
@@ -76,9 +78,15 @@ const About = () => {
                   </p>
                 </div>
               </div>
-              <div className={`aspect-[4/5] bg-muted transition-all duration-700 ease-out ${
+              <div className={`aspect-[4/5] bg-muted overflow-hidden transition-all duration-700 ease-out ${
                 storyVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'
-              }`} style={{ transitionDelay: '300ms' }} />
+              }`} style={{ transitionDelay: '300ms' }}>
+                <img 
+                  src={aboutHeritageImage} 
+                  alt="WIN-CYC heritage craftsmanship" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
             </div>
           </div>
         </section>

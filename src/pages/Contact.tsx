@@ -4,6 +4,7 @@ import { Mail, Phone, MapPin, Clock } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
+import contactHongkongImage from "@/assets/contact-hongkong.jpg";
 
 const Contact = () => {
   const { toast } = useToast();
@@ -53,18 +54,28 @@ const Contact = () => {
       <Header />
       
       <main>
-        {/* Hero */}
-        <section ref={heroRef} className="py-24 px-6 lg:px-8 bg-secondary overflow-hidden">
-          <div className="max-w-4xl mx-auto text-center">
-            <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${
+        {/* Hero with Background Image */}
+        <section ref={heroRef} className="relative py-32 px-6 lg:px-8 overflow-hidden">
+          {/* Background Image */}
+          <div className="absolute inset-0">
+            <img 
+              src={contactHongkongImage} 
+              alt="Hong Kong skyline" 
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-foreground/60" />
+          </div>
+          
+          <div className="relative max-w-4xl mx-auto text-center">
+            <p className={`text-xs tracking-[0.2em] uppercase text-primary-foreground/70 mb-4 transition-all duration-700 ease-out ${
               heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}>Contact Us</p>
-            <h1 className={`font-serif text-4xl md:text-5xl font-light text-foreground mb-6 transition-all duration-700 ease-out ${
+            <h1 className={`font-serif text-4xl md:text-5xl font-light text-primary-foreground mb-6 transition-all duration-700 ease-out ${
               heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`} style={{ transitionDelay: '100ms' }}>
               聯絡我們
             </h1>
-            <p className={`text-lg text-muted-foreground leading-relaxed transition-all duration-700 ease-out ${
+            <p className={`text-lg text-primary-foreground/80 leading-relaxed transition-all duration-700 ease-out ${
               heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`} style={{ transitionDelay: '200ms' }}>
               我們期待與您合作
