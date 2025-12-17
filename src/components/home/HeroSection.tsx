@@ -133,7 +133,7 @@ const HeroSection = () => {
         >
           <Link
             to="/products"
-            className="group px-10 py-4 bg-brand-red-muted text-background text-xs tracking-[0.2em] uppercase transition-all duration-300 hover:bg-foreground hover:scale-105"
+            className="group px-10 py-4 bg-[#EC1C24] text-white text-xs tracking-[0.2em] uppercase transition-all duration-300 hover:bg-[#d11920] hover:scale-105"
           >
             <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">
               探索產品
@@ -141,7 +141,7 @@ const HeroSection = () => {
           </Link>
           <Link
             to="/contact"
-            className="group px-10 py-4 border border-brand-red-muted text-foreground text-xs tracking-[0.2em] uppercase transition-all duration-300 hover:bg-foreground hover:text-background hover:border-foreground hover:scale-105"
+            className="group px-10 py-4 border border-[#EC1C24] text-foreground text-xs tracking-[0.2em] uppercase transition-all duration-300 hover:bg-[#EC1C24] hover:text-white hover:scale-105"
           >
             <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">
               聯絡我們
