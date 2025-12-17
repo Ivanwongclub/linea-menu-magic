@@ -37,6 +37,7 @@ import LibraryItemCard from "@/components/designer-studio/LibraryItemCard";
 import LibraryTable from "@/components/designer-studio/LibraryTable";
 import LibraryItemDetail from "@/components/designer-studio/LibraryItemDetail";
 import QuickRFQDialog from "@/components/designer-studio/QuickRFQDialog";
+import ProductQuickView from "@/components/designer-studio/ProductQuickView";
 
 // RFQ imports
 import { mockRFQs, RFQ, statusLabels } from "@/data/mockRFQData";
@@ -60,6 +61,8 @@ const DesignerStudioDashboard = () => {
   const [selectedLibraryItem, setSelectedLibraryItem] = useState<LibraryItem | null>(null);
   const [quickRFQItem, setQuickRFQItem] = useState<LibraryItem | null>(null);
   const [isQuickRFQOpen, setIsQuickRFQOpen] = useState(false);
+  const [quickViewItem, setQuickViewItem] = useState<LibraryItem | null>(null);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [libraryViewMode, setLibraryViewMode] = useState<"grid" | "list">("grid");
   const [sortField, setSortField] = useState<SortField>("itemCode");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
@@ -179,6 +182,11 @@ const DesignerStudioDashboard = () => {
   };
 
   // Library handlers
+  const handleQuickView = (item: LibraryItem) => {
+    setQuickViewItem(item);
+    setIsQuickViewOpen(true);
+  };
+
   const handleViewLibraryItem = (item: LibraryItem) => {
     setSelectedLibraryItem(item);
   };
@@ -406,7 +414,7 @@ const DesignerStudioDashboard = () => {
                       <LibraryItemCard
                         key={item.id}
                         item={item}
-                        onView={handleViewLibraryItem}
+                        onView={handleQuickView}
                         onQuickRFQ={handleQuickRFQ}
                         isFavorite={favorites.has(item.id)}
                         onToggleFavorite={toggleFavorite}
@@ -511,6 +519,13 @@ const DesignerStudioDashboard = () => {
           </Tabs>
         </div>
       </main>
+
+      <ProductQuickView
+        item={quickViewItem}
+        open={isQuickViewOpen}
+        onOpenChange={setIsQuickViewOpen}
+        onQuickRFQ={handleQuickRFQ}
+      />
 
       <QuickRFQDialog
         open={isQuickRFQOpen}
