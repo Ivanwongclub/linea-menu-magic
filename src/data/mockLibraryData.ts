@@ -1,3 +1,16 @@
+import metalButton from '@/assets/products/metal-button.jpg';
+import resinButtons from '@/assets/products/resin-buttons.jpg';
+import metalZipper from '@/assets/products/metal-zipper.jpg';
+import nylonZipper from '@/assets/products/nylon-zipper.jpg';
+import beltBuckle from '@/assets/products/belt-buckle.jpg';
+import snapButton from '@/assets/products/snap-button.jpg';
+import cottonLace from '@/assets/products/cotton-lace.jpg';
+import engravedButton from '@/assets/products/engraved-button.jpg';
+import brandedZipper from '@/assets/products/branded-zipper.jpg';
+import metalClasp from '@/assets/products/metal-clasp.jpg';
+import brandButton from '@/assets/products/brand-button.jpg';
+import wovenLabel from '@/assets/products/woven-label.jpg';
+
 export interface LibraryItem {
   id: string;
   itemCode: string;
@@ -36,7 +49,7 @@ export const mockLibraryItems: LibraryItem[] = [
     },
     isPublic: true,
     modelUrl: '/models/button.obj',
-    thumbnailUrl: '/placeholder.svg',
+    thumbnailUrl: metalButton,
     createdAt: '2024-01-15T10:00:00Z',
     updatedAt: '2024-01-15T10:00:00Z',
   },
@@ -54,7 +67,7 @@ export const mockLibraryItems: LibraryItem[] = [
       finish: '啞光',
     },
     isPublic: true,
-    thumbnailUrl: '/placeholder.svg',
+    thumbnailUrl: resinButtons,
     createdAt: '2024-01-20T10:00:00Z',
     updatedAt: '2024-01-20T10:00:00Z',
   },
@@ -73,7 +86,7 @@ export const mockLibraryItems: LibraryItem[] = [
     },
     isPublic: true,
     modelUrl: '/models/zipper.obj',
-    thumbnailUrl: '/placeholder.svg',
+    thumbnailUrl: metalZipper,
     createdAt: '2024-02-01T10:00:00Z',
     updatedAt: '2024-02-01T10:00:00Z',
   },
@@ -91,7 +104,7 @@ export const mockLibraryItems: LibraryItem[] = [
       finish: '標準',
     },
     isPublic: true,
-    thumbnailUrl: '/placeholder.svg',
+    thumbnailUrl: nylonZipper,
     createdAt: '2024-02-10T10:00:00Z',
     updatedAt: '2024-02-10T10:00:00Z',
   },
@@ -110,7 +123,7 @@ export const mockLibraryItems: LibraryItem[] = [
     },
     isPublic: true,
     modelUrl: '/models/hardware.obj',
-    thumbnailUrl: '/placeholder.svg',
+    thumbnailUrl: beltBuckle,
     createdAt: '2024-02-15T10:00:00Z',
     updatedAt: '2024-02-15T10:00:00Z',
   },
@@ -128,7 +141,7 @@ export const mockLibraryItems: LibraryItem[] = [
       finish: '電鍍',
     },
     isPublic: true,
-    thumbnailUrl: '/placeholder.svg',
+    thumbnailUrl: snapButton,
     createdAt: '2024-02-20T10:00:00Z',
     updatedAt: '2024-02-20T10:00:00Z',
   },
@@ -145,7 +158,7 @@ export const mockLibraryItems: LibraryItem[] = [
       color: '白色',
     },
     isPublic: true,
-    thumbnailUrl: '/placeholder.svg',
+    thumbnailUrl: cottonLace,
     createdAt: '2024-03-01T10:00:00Z',
     updatedAt: '2024-03-01T10:00:00Z',
   },
@@ -166,7 +179,7 @@ export const mockLibraryItems: LibraryItem[] = [
     teamId: 'team-nike',
     teamName: 'Nike',
     modelUrl: '/models/button.obj',
-    thumbnailUrl: '/placeholder.svg',
+    thumbnailUrl: engravedButton,
     createdAt: '2024-03-10T10:00:00Z',
     updatedAt: '2024-03-10T10:00:00Z',
   },
@@ -187,7 +200,7 @@ export const mockLibraryItems: LibraryItem[] = [
     teamId: 'team-nike',
     teamName: 'Nike',
     modelUrl: '/models/zipper.obj',
-    thumbnailUrl: '/placeholder.svg',
+    thumbnailUrl: brandedZipper,
     createdAt: '2024-03-15T10:00:00Z',
     updatedAt: '2024-03-15T10:00:00Z',
   },
@@ -208,7 +221,7 @@ export const mockLibraryItems: LibraryItem[] = [
     teamId: 'team-adidas',
     teamName: 'Adidas',
     modelUrl: '/models/hardware.obj',
-    thumbnailUrl: '/placeholder.svg',
+    thumbnailUrl: metalClasp,
     createdAt: '2024-03-18T10:00:00Z',
     updatedAt: '2024-03-18T10:00:00Z',
   },
@@ -228,7 +241,7 @@ export const mockLibraryItems: LibraryItem[] = [
     isPublic: false,
     teamId: 'team-puma',
     teamName: 'Puma',
-    thumbnailUrl: '/placeholder.svg',
+    thumbnailUrl: brandButton,
     createdAt: '2024-03-20T10:00:00Z',
     updatedAt: '2024-03-20T10:00:00Z',
   },
@@ -245,7 +258,7 @@ export const mockLibraryItems: LibraryItem[] = [
       color: '可訂製',
     },
     isPublic: true,
-    thumbnailUrl: '/placeholder.svg',
+    thumbnailUrl: wovenLabel,
     createdAt: '2024-03-20T10:00:00Z',
     updatedAt: '2024-03-20T10:00:00Z',
   },
