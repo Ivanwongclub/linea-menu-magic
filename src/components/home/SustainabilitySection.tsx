@@ -15,8 +15,39 @@ const SustainabilitySection = () => {
   ];
 
   return (
-    <section className="py-24 px-6 lg:px-8 bg-background overflow-hidden">
-      <div className="max-w-7xl mx-auto">
+    <section className="py-24 px-6 lg:px-8 bg-background overflow-hidden relative">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.08]">
+        <div 
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `
+              radial-gradient(circle at 25% 25%, hsl(var(--foreground)) 1px, transparent 1px),
+              radial-gradient(circle at 75% 75%, hsl(var(--foreground)) 1px, transparent 1px)
+            `,
+            backgroundSize: '60px 60px',
+          }}
+        />
+        {/* Diagonal lines pattern */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `repeating-linear-gradient(
+              45deg,
+              transparent,
+              transparent 40px,
+              hsl(var(--foreground) / 0.3) 40px,
+              hsl(var(--foreground) / 0.3) 41px
+            )`,
+          }}
+        />
+      </div>
+      {/* Decorative leaf-like shapes */}
+      <div className="absolute top-20 left-10 w-32 h-32 border border-foreground/10 rounded-full opacity-40" />
+      <div className="absolute bottom-20 right-10 w-48 h-48 border border-foreground/10 rounded-full opacity-30" />
+      <div className="absolute top-1/2 right-1/4 w-24 h-24 border border-foreground/5 rounded-full opacity-50" />
+      
+      <div className="max-w-7xl mx-auto relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           {/* Visual */}
           <div ref={imageRef} className="relative">
