@@ -23,7 +23,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link to="/" className="flex flex-col items-start">
-            <span className="text-xl font-serif font-medium tracking-wide text-foreground">
+            <span className="text-xl font-serif font-medium tracking-wide text-[#EC1C24]">
               WIN-CYC
             </span>
             <span className="text-[10px] tracking-[0.15em] text-muted-foreground uppercase">
