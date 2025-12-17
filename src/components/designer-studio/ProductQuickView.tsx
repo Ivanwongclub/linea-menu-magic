@@ -222,10 +222,10 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
             </div>
 
             {/* Details Section */}
-            <ScrollArea className="h-[500px] md:h-auto md:max-h-[90vh]">
-              <div className="p-6 flex flex-col">
-                {/* Header */}
-                <div className="space-y-2 mb-4">
+            <div className="h-[500px] md:h-auto md:max-h-[90vh] overflow-hidden flex flex-col">
+              {/* Sticky Header */}
+              <div className="sticky top-0 z-10 bg-background p-6 pb-4 border-b">
+                <div className="space-y-2">
                   <div className="flex items-center gap-2 flex-wrap">
                     <Badge variant="outline" className="text-xs">
                       {categoryLabels[item.category]}
@@ -246,8 +246,10 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                   <h2 className="text-2xl font-semibold text-foreground">{item.name}</h2>
                   <p className="text-sm text-muted-foreground">{item.nameEn}</p>
                 </div>
+              </div>
 
-                <Separator className="my-4" />
+              <ScrollArea className="flex-1">
+              <div className="p-6 pt-4 flex flex-col">
 
                 {/* Description */}
                 <div className="space-y-2">
@@ -564,7 +566,8 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                   </Button>
                 </div>
               </div>
-            </ScrollArea>
+              </ScrollArea>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
