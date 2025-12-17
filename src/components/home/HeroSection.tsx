@@ -73,15 +73,16 @@ const HeroSection = () => {
 
       {/* Content with fade on scroll */}
       <div 
-        className="relative z-10 max-w-5xl mx-auto px-6 lg:px-8 text-center transition-all duration-100 ease-out"
+        className="relative z-10 mx-auto px-6 lg:px-8 text-center transition-all duration-100 ease-out"
         style={{ 
           transform: `translateY(${parallaxOffset * 0.15}px)`,
           opacity: opacityFade 
         }}
       >
+        <div className="mx-auto max-w-3xl bg-background/90 backdrop-blur-lg border border-border/60 px-6 py-10 md:px-10 md:py-12 shadow-[0_24px_80px_-44px_hsl(var(--foreground)/0.35)]">
         {/* Tagline */}
         <p 
-          className={`text-subtitle mb-6 transition-all duration-700 ease-out ${
+          className={`text-subtitle mb-6 text-foreground drop-shadow transition-all duration-700 ease-out ${
             heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
           style={{ transitionDelay: '200ms' }}
@@ -91,14 +92,14 @@ const HeroSection = () => {
 
         {/* Main Heading */}
         <h1 
-          className={`text-display text-foreground mb-6 transition-all duration-700 ease-out ${
+          className={`text-display text-foreground mb-6 drop-shadow-md transition-all duration-700 ease-out ${
             heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
           style={{ transitionDelay: '400ms' }}
         >
           雋永工藝
           <span 
-            className={`block mt-2 text-3xl md:text-4xl lg:text-5xl font-light transition-all duration-700 ease-out ${
+            className={`block mt-2 text-3xl md:text-4xl lg:text-5xl font-light text-foreground drop-shadow-md transition-all duration-700 ease-out ${
               heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}
             style={{ transitionDelay: '500ms' }}
@@ -109,7 +110,7 @@ const HeroSection = () => {
 
         {/* Subheading */}
         <p 
-          className={`text-lg md:text-xl text-muted-foreground font-light mb-4 transition-all duration-700 ease-out ${
+          className={`text-lg md:text-xl text-foreground/90 font-light mb-4 drop-shadow transition-all duration-700 ease-out ${
             heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
           style={{ transitionDelay: '600ms' }}
@@ -118,7 +119,7 @@ const HeroSection = () => {
         </p>
         
         <p 
-          className={`text-sm text-muted-foreground tracking-wider mb-12 transition-all duration-700 ease-out ${
+          className={`text-sm text-foreground/80 tracking-wider mb-12 drop-shadow transition-all duration-700 ease-out ${
             heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
           style={{ transitionDelay: '700ms' }}
@@ -163,6 +164,7 @@ const HeroSection = () => {
             <span className="text-xs tracking-[0.3em] uppercase">Since 1979</span>
             <span className={`h-px bg-border transition-all duration-1000 ease-out ${heroVisible ? 'w-12' : 'w-0'}`} style={{ transitionDelay: '1200ms' }} />
           </div>
+        </div>
         </div>
       </div>
 
