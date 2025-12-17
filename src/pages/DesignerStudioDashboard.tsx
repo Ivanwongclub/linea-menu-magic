@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,11 +11,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { Tabs as FilterTabs, TabsList as FilterTabsList, TabsTrigger as FilterTabsTrigger } from "@/components/ui/tabs";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { 
   Search, 
-  Filter, 
+  Filter,
   Plus, 
   Library, 
   FileText,
@@ -26,15 +27,14 @@ import {
   Package,
   Grid3X3,
   List,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown
+  Star,
+  X
 } from "lucide-react";
 
 // Library imports
 import { mockLibraryItems, LibraryItem, categoryLabels } from "@/data/mockLibraryData";
 import LibraryItemCard from "@/components/designer-studio/LibraryItemCard";
-import LibraryItemListRow from "@/components/designer-studio/LibraryItemListRow";
+import LibraryTable from "@/components/designer-studio/LibraryTable";
 import LibraryItemDetail from "@/components/designer-studio/LibraryItemDetail";
 import QuickRFQDialog from "@/components/designer-studio/QuickRFQDialog";
 
@@ -63,6 +63,28 @@ const DesignerStudioDashboard = () => {
   const [libraryViewMode, setLibraryViewMode] = useState<"grid" | "list">("grid");
   const [sortField, setSortField] = useState<SortField>("itemCode");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [favorites, setFavorites] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem('library-favorites');
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  });
+
+  // Persist favorites to localStorage
+  useEffect(() => {
+    localStorage.setItem('library-favorites', JSON.stringify([...favorites]));
+  }, [favorites]);
+
+  const toggleFavorite = (itemId: string) => {
+    setFavorites(prev => {
+      const next = new Set(prev);
+      if (next.has(itemId)) {
+        next.delete(itemId);
+      } else {
+        next.add(itemId);
+      }
+      return next;
+    });
+  };
 
   // RFQ states
   const [rfqs, setRfqs] = useState<RFQ[]>(mockRFQs);
@@ -89,7 +111,9 @@ const DesignerStudioDashboard = () => {
       const matchesCategory =
         categoryFilter === "all" || item.category === categoryFilter;
 
-      return matchesSearch && matchesVisibility && matchesCategory;
+      const matchesFavorites = !showFavoritesOnly || favorites.has(item.id);
+
+      return matchesSearch && matchesVisibility && matchesCategory && matchesFavorites;
     });
 
     // Sort items
@@ -111,7 +135,21 @@ const DesignerStudioDashboard = () => {
       }
       return sortOrder === "asc" ? comparison : -comparison;
     });
-  }, [searchQuery, visibilityFilter, categoryFilter, sortField, sortOrder]);
+  }, [searchQuery, visibilityFilter, categoryFilter, sortField, sortOrder, showFavoritesOnly, favorites]);
+
+  // Count active filters
+  const activeFilterCount = [
+    visibilityFilter !== "all",
+    categoryFilter !== "all",
+    showFavoritesOnly
+  ].filter(Boolean).length;
+
+  const clearAllFilters = () => {
+    setVisibilityFilter("all");
+    setCategoryFilter("all");
+    setShowFavoritesOnly(false);
+    setSearchQuery("");
+  };
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -251,44 +289,92 @@ const DesignerStudioDashboard = () => {
             <TabsContent value="library" className="mt-0">
               {/* Library Filters */}
               <div className="bg-card border border-border rounded-lg p-4 mb-6">
-                <div className="flex flex-col md:flex-row gap-4">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      placeholder="搜尋品項代碼、名稱或描述..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10"
-                    />
+                <div className="flex flex-col gap-4">
+                  {/* First row: Search and main filters */}
+                  <div className="flex flex-col md:flex-row gap-4">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        placeholder="搜尋品項代碼、名稱或描述..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+
+                    <Button
+                      variant={showFavoritesOnly ? "default" : "outline"}
+                      size="sm"
+                      className={`gap-2 ${showFavoritesOnly ? 'btn-red-glow' : ''}`}
+                      onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+                    >
+                      <Star className={`w-4 h-4 ${showFavoritesOnly ? 'fill-current' : ''}`} />
+                      我的收藏 ({favorites.size})
+                    </Button>
+
+                    <FilterTabs
+                      value={visibilityFilter}
+                      onValueChange={(v) => setVisibilityFilter(v as VisibilityFilter)}
+                    >
+                      <FilterTabsList>
+                        <FilterTabsTrigger value="all">全部</FilterTabsTrigger>
+                        <FilterTabsTrigger value="public">公開</FilterTabsTrigger>
+                        <FilterTabsTrigger value="private">團隊專屬</FilterTabsTrigger>
+                      </FilterTabsList>
+                    </FilterTabs>
+
+                    <Select
+                      value={categoryFilter}
+                      onValueChange={(v) => setCategoryFilter(v as CategoryFilter)}
+                    >
+                      <SelectTrigger className="w-[160px]">
+                        <SelectValue placeholder="產品類別" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">全部類別</SelectItem>
+                        <SelectItem value="buttons">{categoryLabels.buttons}</SelectItem>
+                        <SelectItem value="zippers">{categoryLabels.zippers}</SelectItem>
+                        <SelectItem value="lace">{categoryLabels.lace}</SelectItem>
+                        <SelectItem value="hardware">{categoryLabels.hardware}</SelectItem>
+                        <SelectItem value="other">{categoryLabels.other}</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
-                  <FilterTabs
-                    value={visibilityFilter}
-                    onValueChange={(v) => setVisibilityFilter(v as VisibilityFilter)}
-                  >
-                    <FilterTabsList>
-                      <FilterTabsTrigger value="all">全部</FilterTabsTrigger>
-                      <FilterTabsTrigger value="public">公開</FilterTabsTrigger>
-                      <FilterTabsTrigger value="private">團隊專屬</FilterTabsTrigger>
-                    </FilterTabsList>
-                  </FilterTabs>
-
-                  <Select
-                    value={categoryFilter}
-                    onValueChange={(v) => setCategoryFilter(v as CategoryFilter)}
-                  >
-                    <SelectTrigger className="w-[160px]">
-                      <SelectValue placeholder="產品類別" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">全部類別</SelectItem>
-                      <SelectItem value="buttons">{categoryLabels.buttons}</SelectItem>
-                      <SelectItem value="zippers">{categoryLabels.zippers}</SelectItem>
-                      <SelectItem value="lace">{categoryLabels.lace}</SelectItem>
-                      <SelectItem value="hardware">{categoryLabels.hardware}</SelectItem>
-                      <SelectItem value="other">{categoryLabels.other}</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  {/* Active filters row */}
+                  {activeFilterCount > 0 && (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm text-muted-foreground">已啟用篩選:</span>
+                      {showFavoritesOnly && (
+                        <Badge variant="secondary" className="gap-1">
+                          <Star className="w-3 h-3 fill-current" />
+                          我的收藏
+                          <button onClick={() => setShowFavoritesOnly(false)} className="ml-1 hover:text-destructive">
+                            <X className="w-3 h-3" />
+                          </button>
+                        </Badge>
+                      )}
+                      {visibilityFilter !== "all" && (
+                        <Badge variant="secondary" className="gap-1">
+                          {visibilityFilter === "public" ? "公開" : "團隊專屬"}
+                          <button onClick={() => setVisibilityFilter("all")} className="ml-1 hover:text-destructive">
+                            <X className="w-3 h-3" />
+                          </button>
+                        </Badge>
+                      )}
+                      {categoryFilter !== "all" && (
+                        <Badge variant="secondary" className="gap-1">
+                          {categoryLabels[categoryFilter]}
+                          <button onClick={() => setCategoryFilter("all")} className="ml-1 hover:text-destructive">
+                            <X className="w-3 h-3" />
+                          </button>
+                        </Badge>
+                      )}
+                      <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-xs h-6">
+                        清除全部
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -312,7 +398,7 @@ const DesignerStudioDashboard = () => {
                 </ToggleGroup>
               </div>
 
-              {/* Items Grid/List */}
+              {/* Items Grid/Table */}
               {filteredLibraryItems.length > 0 ? (
                 libraryViewMode === "grid" ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -322,54 +408,22 @@ const DesignerStudioDashboard = () => {
                         item={item}
                         onView={handleViewLibraryItem}
                         onQuickRFQ={handleQuickRFQ}
+                        isFavorite={favorites.has(item.id)}
+                        onToggleFavorite={toggleFavorite}
                       />
                     ))}
                   </div>
                 ) : (
-                  <div className="flex flex-col gap-2">
-                    {/* Sortable Header */}
-                    <div className="flex items-center gap-4 px-4 py-2 bg-muted/50 border border-border rounded-lg text-sm font-medium text-muted-foreground">
-                      <div className="w-16 flex-shrink-0">圖片</div>
-                      <button 
-                        onClick={() => handleSort("itemCode")}
-                        className="w-28 flex items-center gap-1 hover:text-foreground transition-colors"
-                      >
-                        品項代碼
-                        <SortIcon field="itemCode" currentField={sortField} order={sortOrder} />
-                      </button>
-                      <button 
-                        onClick={() => handleSort("name")}
-                        className="flex-1 flex items-center gap-1 hover:text-foreground transition-colors"
-                      >
-                        名稱
-                        <SortIcon field="name" currentField={sortField} order={sortOrder} />
-                      </button>
-                      <button 
-                        onClick={() => handleSort("category")}
-                        className="w-24 flex items-center gap-1 hover:text-foreground transition-colors"
-                      >
-                        類別
-                        <SortIcon field="category" currentField={sortField} order={sortOrder} />
-                      </button>
-                      <button 
-                        onClick={() => handleSort("createdAt")}
-                        className="w-24 flex items-center gap-1 hover:text-foreground transition-colors"
-                      >
-                        建立日期
-                        <SortIcon field="createdAt" currentField={sortField} order={sortOrder} />
-                      </button>
-                      <div className="w-48 flex-shrink-0 text-right">操作</div>
-                    </div>
-                    {/* List Items */}
-                    {filteredLibraryItems.map((item) => (
-                      <LibraryItemListRow
-                        key={item.id}
-                        item={item}
-                        onView={handleViewLibraryItem}
-                        onQuickRFQ={handleQuickRFQ}
-                      />
-                    ))}
-                  </div>
+                  <LibraryTable
+                    items={filteredLibraryItems}
+                    onView={handleViewLibraryItem}
+                    onQuickRFQ={handleQuickRFQ}
+                    onToggleFavorite={toggleFavorite}
+                    favorites={favorites}
+                    sortField={sortField}
+                    sortOrder={sortOrder}
+                    onSort={handleSort}
+                  />
                 )
               ) : (
                 <div className="text-center py-16">
@@ -492,22 +546,5 @@ const StatCard = ({
     <p className="text-sm text-muted-foreground">{label}</p>
   </div>
 );
-
-const SortIcon = ({ 
-  field, 
-  currentField, 
-  order 
-}: { 
-  field: SortField; 
-  currentField: SortField; 
-  order: SortOrder;
-}) => {
-  if (field !== currentField) {
-    return <ArrowUpDown className="w-3 h-3 opacity-50" />;
-  }
-  return order === "asc" 
-    ? <ArrowUp className="w-3 h-3" /> 
-    : <ArrowDown className="w-3 h-3" />;
-};
 
 export default DesignerStudioDashboard;

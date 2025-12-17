@@ -1,16 +1,18 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, FileText, Lock, Globe } from "lucide-react";
+import { Eye, FileText, Lock, Globe, Star } from "lucide-react";
 import { LibraryItem, categoryLabels } from "@/data/mockLibraryData";
 
 interface LibraryItemCardProps {
   item: LibraryItem;
   onView: (item: LibraryItem) => void;
   onQuickRFQ: (item: LibraryItem) => void;
+  isFavorite?: boolean;
+  onToggleFavorite?: (itemId: string) => void;
 }
 
-const LibraryItemCard = ({ item, onView, onQuickRFQ }: LibraryItemCardProps) => {
+const LibraryItemCard = ({ item, onView, onQuickRFQ, isFavorite = false, onToggleFavorite }: LibraryItemCardProps) => {
   return (
     <Card className="group hover:shadow-lg transition-all duration-300 overflow-hidden">
       <div className="relative aspect-square bg-muted">
@@ -19,6 +21,31 @@ const LibraryItemCard = ({ item, onView, onQuickRFQ }: LibraryItemCardProps) => 
           alt={item.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
+        {/* Favorite button */}
+        {onToggleFavorite && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleFavorite(item.id);
+            }}
+            className="absolute top-2 left-2 p-1.5 rounded-full bg-background/80 hover:bg-background transition-colors"
+          >
+            <Star 
+              className={`w-4 h-4 transition-colors ${
+                isFavorite 
+                  ? "fill-yellow-400 text-yellow-400" 
+                  : "text-muted-foreground hover:text-yellow-400"
+              }`} 
+            />
+          </button>
+        )}
+        {/* 3D badge */}
+        {item.modelUrl && (
+          <div className={`absolute ${onToggleFavorite ? 'top-2 left-10' : 'top-2 left-2'}`}>
+            <Badge className="bg-primary/90">3D</Badge>
+          </div>
+        )}
+        {/* Visibility badge */}
         <div className="absolute top-2 right-2">
           {item.isPublic ? (
             <Badge variant="secondary" className="gap-1">
@@ -32,11 +59,6 @@ const LibraryItemCard = ({ item, onView, onQuickRFQ }: LibraryItemCardProps) => 
             </Badge>
           )}
         </div>
-        {item.modelUrl && (
-          <div className="absolute top-2 left-2">
-            <Badge className="bg-primary/90">3D</Badge>
-          </div>
-        )}
       </div>
       <CardContent className="p-4">
         <div className="mb-2">
