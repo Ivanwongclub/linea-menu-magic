@@ -259,151 +259,182 @@ const DesignerStudioDashboard = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       
-      <main className="flex-1 py-8 px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-            <div>
-              <h1 className="font-serif text-3xl font-light text-foreground mb-2">
+      {/* Sticky Navigation Bar */}
+      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 lg:px-6">
+          {/* Compact Header Row */}
+          <div className="flex items-center justify-between py-3">
+            <div className="flex items-center gap-6">
+              <h1 className="font-serif text-xl font-light text-foreground">
                 設計師工作室
               </h1>
-              <p className="text-muted-foreground">
-                Designer Studio
-              </p>
+              
+              {/* Main Tabs - Inline */}
+              <Tabs value={activeMainTab} onValueChange={(v) => setActiveMainTab(v as "library" | "rfq")} className="hidden sm:block">
+                <TabsList className="h-9">
+                  <TabsTrigger value="library" className="gap-1.5 text-sm px-3 h-7">
+                    <Library className="w-3.5 h-3.5" />
+                    素材庫
+                  </TabsTrigger>
+                  <TabsTrigger value="rfq" className="gap-1.5 text-sm px-3 h-7">
+                    <FileText className="w-3.5 h-3.5" />
+                    我的報價 ({statusCounts.all})
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
+            
             <Button 
               onClick={() => setIsCreateDialogOpen(true)}
-              className="btn-red-glow"
+              className="btn-red-glow h-9 text-sm"
+              size="sm"
             >
-              <Plus className="w-4 h-4 mr-2" />
-              新增報價請求
+              <Plus className="w-4 h-4 mr-1.5" />
+              <span className="hidden sm:inline">新增報價請求</span>
+              <span className="sm:hidden">新增</span>
             </Button>
           </div>
+          
+          {/* Mobile Tabs */}
+          <div className="sm:hidden pb-3">
+            <Tabs value={activeMainTab} onValueChange={(v) => setActiveMainTab(v as "library" | "rfq")}>
+              <TabsList className="w-full grid grid-cols-2">
+                <TabsTrigger value="library" className="gap-1.5 text-sm">
+                  <Library className="w-3.5 h-3.5" />
+                  素材庫
+                </TabsTrigger>
+                <TabsTrigger value="rfq" className="gap-1.5 text-sm">
+                  <FileText className="w-3.5 h-3.5" />
+                  報價 ({statusCounts.all})
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
 
-          {/* Main Tabs */}
-          <Tabs value={activeMainTab} onValueChange={(v) => setActiveMainTab(v as "library" | "rfq")} className="w-full">
-            <TabsList className="grid w-full max-w-md grid-cols-2 mb-8">
-              <TabsTrigger value="library" className="gap-2">
-                <Library className="w-4 h-4" />
-                素材庫
-              </TabsTrigger>
-              <TabsTrigger value="rfq" className="gap-2">
-                <FileText className="w-4 h-4" />
-                我的報價 ({statusCounts.all})
-              </TabsTrigger>
-            </TabsList>
-
-            {/* Library Tab Content */}
-            <TabsContent value="library" className="mt-0">
-              {/* Library Filters */}
-              <div className="bg-card border border-border rounded-lg p-4 mb-6">
-                <div className="flex flex-col gap-4">
-                  {/* First row: Search and main filters */}
-                  <div className="flex flex-col md:flex-row gap-4">
-                    <div className="relative flex-1">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        placeholder="搜尋品項代碼、名稱或描述..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
-
-                    <Button
-                      variant={showFavoritesOnly ? "default" : "outline"}
-                      size="sm"
-                      className={`gap-2 ${showFavoritesOnly ? 'btn-red-glow' : ''}`}
-                      onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
-                    >
-                      <Star className={`w-4 h-4 ${showFavoritesOnly ? 'fill-current' : ''}`} />
-                      我的收藏 ({favorites.size})
-                    </Button>
-
-                    <FilterTabs
-                      value={visibilityFilter}
-                      onValueChange={(v) => setVisibilityFilter(v as VisibilityFilter)}
-                    >
-                      <FilterTabsList>
-                        <FilterTabsTrigger value="all">全部</FilterTabsTrigger>
-                        <FilterTabsTrigger value="public">公開</FilterTabsTrigger>
-                        <FilterTabsTrigger value="private">團隊專屬</FilterTabsTrigger>
-                      </FilterTabsList>
-                    </FilterTabs>
-
-                    <Select
-                      value={categoryFilter}
-                      onValueChange={(v) => setCategoryFilter(v as CategoryFilter)}
-                    >
-                      <SelectTrigger className="w-[160px]">
-                        <SelectValue placeholder="產品類別" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">全部類別</SelectItem>
-                        <SelectItem value="buttons">{categoryLabels.buttons}</SelectItem>
-                        <SelectItem value="zippers">{categoryLabels.zippers}</SelectItem>
-                        <SelectItem value="lace">{categoryLabels.lace}</SelectItem>
-                        <SelectItem value="hardware">{categoryLabels.hardware}</SelectItem>
-                        <SelectItem value="other">{categoryLabels.other}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Active filters row */}
-                  {activeFilterCount > 0 && (
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-sm text-muted-foreground">已啟用篩選:</span>
-                      {showFavoritesOnly && (
-                        <Badge variant="secondary" className="gap-1">
-                          <Star className="w-3 h-3 fill-current" />
-                          我的收藏
-                          <button onClick={() => setShowFavoritesOnly(false)} className="ml-1 hover:text-destructive">
-                            <X className="w-3 h-3" />
-                          </button>
-                        </Badge>
-                      )}
-                      {visibilityFilter !== "all" && (
-                        <Badge variant="secondary" className="gap-1">
-                          {visibilityFilter === "public" ? "公開" : "團隊專屬"}
-                          <button onClick={() => setVisibilityFilter("all")} className="ml-1 hover:text-destructive">
-                            <X className="w-3 h-3" />
-                          </button>
-                        </Badge>
-                      )}
-                      {categoryFilter !== "all" && (
-                        <Badge variant="secondary" className="gap-1">
-                          {categoryLabels[categoryFilter]}
-                          <button onClick={() => setCategoryFilter("all")} className="ml-1 hover:text-destructive">
-                            <X className="w-3 h-3" />
-                          </button>
-                        </Badge>
-                      )}
-                      <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-xs h-6">
-                        清除全部
-                      </Button>
-                    </div>
-                  )}
-                </div>
+          {/* Library Filters - Compact inline */}
+          {activeMainTab === "library" && (
+            <div className="flex items-center gap-2 pb-3 overflow-x-auto scrollbar-hide">
+              <div className="relative flex-shrink-0 w-48 lg:w-64">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                <Input
+                  placeholder="搜尋..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-8 h-8 text-sm"
+                />
               </div>
 
-              {/* Results Count & View Toggle */}
-              <div className="flex items-center justify-between mb-6">
-                <p className="text-sm text-muted-foreground">
-                  顯示 {filteredLibraryItems.length} 個項目
+              <div className="h-5 w-px bg-border flex-shrink-0" />
+
+              <Button
+                variant={showFavoritesOnly ? "default" : "ghost"}
+                size="sm"
+                className={`gap-1.5 h-8 flex-shrink-0 ${showFavoritesOnly ? 'btn-red-glow' : ''}`}
+                onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+              >
+                <Star className={`w-3.5 h-3.5 ${showFavoritesOnly ? 'fill-current' : ''}`} />
+                <span className="hidden lg:inline">收藏</span>
+                ({favorites.size})
+              </Button>
+
+              <FilterTabs
+                value={visibilityFilter}
+                onValueChange={(v) => setVisibilityFilter(v as VisibilityFilter)}
+                className="flex-shrink-0"
+              >
+                <FilterTabsList className="h-8">
+                  <FilterTabsTrigger value="all" className="text-xs px-2.5 h-6">全部</FilterTabsTrigger>
+                  <FilterTabsTrigger value="public" className="text-xs px-2.5 h-6">公開</FilterTabsTrigger>
+                  <FilterTabsTrigger value="private" className="text-xs px-2.5 h-6">專屬</FilterTabsTrigger>
+                </FilterTabsList>
+              </FilterTabs>
+
+              <Select
+                value={categoryFilter}
+                onValueChange={(v) => setCategoryFilter(v as CategoryFilter)}
+              >
+                <SelectTrigger className="w-[120px] h-8 text-sm flex-shrink-0">
+                  <SelectValue placeholder="類別" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">全部類別</SelectItem>
+                  <SelectItem value="buttons">{categoryLabels.buttons}</SelectItem>
+                  <SelectItem value="zippers">{categoryLabels.zippers}</SelectItem>
+                  <SelectItem value="lace">{categoryLabels.lace}</SelectItem>
+                  <SelectItem value="hardware">{categoryLabels.hardware}</SelectItem>
+                  <SelectItem value="other">{categoryLabels.other}</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <div className="h-5 w-px bg-border flex-shrink-0" />
+
+              <ToggleGroup 
+                type="single" 
+                value={libraryViewMode} 
+                onValueChange={(value) => value && setLibraryViewMode(value as "grid" | "list")}
+                className="bg-muted rounded-md p-0.5 flex-shrink-0"
+              >
+                <ToggleGroupItem value="grid" aria-label="Grid view" className="px-2 h-7">
+                  <Grid3X3 className="w-3.5 h-3.5" />
+                </ToggleGroupItem>
+                <ToggleGroupItem value="list" aria-label="List view" className="px-2 h-7">
+                  <List className="w-3.5 h-3.5" />
+                </ToggleGroupItem>
+              </ToggleGroup>
+
+              {activeFilterCount > 0 && (
+                <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-xs h-7 px-2 flex-shrink-0 text-muted-foreground hover:text-foreground">
+                  <X className="w-3 h-3 mr-1" />
+                  清除 ({activeFilterCount})
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+      
+      <main className="flex-1 py-4 px-4 lg:px-6">
+        <div className="max-w-7xl mx-auto">
+          <Tabs value={activeMainTab} onValueChange={(v) => setActiveMainTab(v as "library" | "rfq")} className="w-full">
+            {/* Library Tab Content */}
+            <TabsContent value="library" className="mt-0">
+              {/* Active filters badges */}
+              {activeFilterCount > 0 && (
+                <div className="flex items-center gap-2 flex-wrap mb-4">
+                  <span className="text-xs text-muted-foreground">篩選:</span>
+                  {showFavoritesOnly && (
+                    <Badge variant="secondary" className="gap-1 text-xs py-0.5">
+                      <Star className="w-3 h-3 fill-current" />
+                      收藏
+                      <button onClick={() => setShowFavoritesOnly(false)} className="ml-1 hover:text-destructive">
+                        <X className="w-3 h-3" />
+                      </button>
+                    </Badge>
+                  )}
+                  {visibilityFilter !== "all" && (
+                    <Badge variant="secondary" className="gap-1 text-xs py-0.5">
+                      {visibilityFilter === "public" ? "公開" : "專屬"}
+                      <button onClick={() => setVisibilityFilter("all")} className="ml-1 hover:text-destructive">
+                        <X className="w-3 h-3" />
+                      </button>
+                    </Badge>
+                  )}
+                  {categoryFilter !== "all" && (
+                    <Badge variant="secondary" className="gap-1 text-xs py-0.5">
+                      {categoryLabels[categoryFilter]}
+                      <button onClick={() => setCategoryFilter("all")} className="ml-1 hover:text-destructive">
+                        <X className="w-3 h-3" />
+                      </button>
+                    </Badge>
+                  )}
+                </div>
+              )}
+
+              {/* Results Count */}
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-xs text-muted-foreground">
+                  {filteredLibraryItems.length} 個項目
                 </p>
-                <ToggleGroup 
-                  type="single" 
-                  value={libraryViewMode} 
-                  onValueChange={(value) => value && setLibraryViewMode(value as "grid" | "list")}
-                  className="bg-muted rounded-md p-1"
-                >
-                  <ToggleGroupItem value="grid" aria-label="Grid view" className="px-3">
-                    <Grid3X3 className="w-4 h-4" />
-                  </ToggleGroupItem>
-                  <ToggleGroupItem value="list" aria-label="List view" className="px-3">
-                    <List className="w-4 h-4" />
-                  </ToggleGroupItem>
-                </ToggleGroup>
               </div>
 
               {/* Items Grid/Table */}
@@ -442,59 +473,65 @@ const DesignerStudioDashboard = () => {
 
             {/* RFQ Tab Content */}
             <TabsContent value="rfq" className="mt-0">
-              {/* Stats Cards */}
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
+              {/* Compact Stats Row */}
+              <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pb-4 mb-4">
                 <StatCard 
                   label="待處理" 
                   value={statusCounts.submitted} 
-                  icon={<FileText className="w-5 h-5" />}
+                  icon={<FileText className="w-4 h-4" />}
                   color="text-amber-500"
+                  compact
                 />
                 <StatCard 
-                  label="模型已上傳" 
+                  label="模型上傳" 
                   value={statusCounts.model_uploaded} 
-                  icon={<Upload className="w-5 h-5" />}
+                  icon={<Upload className="w-4 h-4" />}
                   color="text-blue-500"
+                  compact
                 />
                 <StatCard 
                   label="設計確認" 
                   value={statusCounts.design_confirmed} 
-                  icon={<CheckCircle className="w-5 h-5" />}
+                  icon={<CheckCircle className="w-4 h-4" />}
                   color="text-green-500"
+                  compact
                 />
                 <StatCard 
-                  label="3D列印中" 
+                  label="列印中" 
                   value={statusCounts.printing} 
-                  icon={<Clock className="w-5 h-5" />}
+                  icon={<Clock className="w-4 h-4" />}
                   color="text-purple-500"
+                  compact
                 />
                 <StatCard 
                   label="樣品審核" 
                   value={statusCounts.sample_review} 
-                  icon={<Eye className="w-5 h-5" />}
+                  icon={<Eye className="w-4 h-4" />}
                   color="text-orange-500"
+                  compact
                 />
                 <StatCard 
                   label="生產中" 
                   value={statusCounts.production} 
-                  icon={<Package className="w-5 h-5" />}
+                  icon={<Package className="w-4 h-4" />}
                   color="text-emerald-500"
+                  compact
                 />
               </div>
 
-              {/* RFQ Search */}
-              <div className="flex flex-col md:flex-row gap-4 mb-6">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              {/* RFQ Search & Filters */}
+              <div className="flex items-center gap-3 mb-4">
+                <div className="relative flex-1 max-w-xs">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                   <Input 
-                    placeholder="搜尋 RFQ 編號或品項代碼..."
+                    placeholder="搜尋 RFQ..."
                     value={rfqSearchQuery}
                     onChange={(e) => setRfqSearchQuery(e.target.value)}
-                    className="pl-10"
+                    className="pl-8 h-8 text-sm"
                   />
                 </div>
-                <Button variant="outline" className="gap-2">
-                  <Filter className="w-4 h-4" />
+                <Button variant="outline" size="sm" className="gap-1.5 h-8">
+                  <Filter className="w-3.5 h-3.5" />
                   篩選
                 </Button>
               </div>
@@ -548,18 +585,28 @@ const StatCard = ({
   label, 
   value, 
   icon, 
-  color 
+  color,
+  compact = false
 }: { 
   label: string; 
   value: number; 
   icon: React.ReactNode;
   color: string;
+  compact?: boolean;
 }) => (
-  <div className="bg-card border border-border rounded-lg p-4 hover:shadow-md transition-shadow">
-    <div className={`${color} mb-2`}>{icon}</div>
-    <p className="text-2xl font-semibold text-foreground">{value}</p>
-    <p className="text-sm text-muted-foreground">{label}</p>
-  </div>
+  compact ? (
+    <div className="flex items-center gap-2 bg-card border border-border rounded-lg px-3 py-2 flex-shrink-0 hover:shadow-sm transition-shadow">
+      <div className={`${color}`}>{icon}</div>
+      <span className="text-lg font-semibold text-foreground">{value}</span>
+      <span className="text-xs text-muted-foreground whitespace-nowrap">{label}</span>
+    </div>
+  ) : (
+    <div className="bg-card border border-border rounded-lg p-4 hover:shadow-md transition-shadow">
+      <div className={`${color} mb-2`}>{icon}</div>
+      <p className="text-2xl font-semibold text-foreground">{value}</p>
+      <p className="text-sm text-muted-foreground">{label}</p>
+    </div>
+  )
 );
 
 export default DesignerStudioDashboard;
