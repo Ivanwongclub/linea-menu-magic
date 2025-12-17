@@ -16,36 +16,63 @@ const SustainabilitySection = () => {
 
   return (
     <section className="py-24 px-6 lg:px-8 bg-background overflow-hidden relative">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-[0.08]">
+      {/* Background Pattern - More Visible */}
+      <div className="absolute inset-0">
+        {/* Dot grid pattern */}
         <div 
-          className="absolute inset-0"
+          className="absolute inset-0 opacity-[0.15]"
           style={{
             backgroundImage: `
-              radial-gradient(circle at 25% 25%, hsl(var(--foreground)) 1px, transparent 1px),
-              radial-gradient(circle at 75% 75%, hsl(var(--foreground)) 1px, transparent 1px)
+              radial-gradient(circle at 25% 25%, hsl(var(--foreground)) 2px, transparent 2px),
+              radial-gradient(circle at 75% 75%, hsl(var(--foreground)) 2px, transparent 2px)
             `,
-            backgroundSize: '60px 60px',
+            backgroundSize: '50px 50px',
           }}
         />
         {/* Diagonal lines pattern */}
         <div 
-          className="absolute inset-0"
+          className="absolute inset-0 opacity-[0.12]"
           style={{
             backgroundImage: `repeating-linear-gradient(
               45deg,
               transparent,
-              transparent 40px,
-              hsl(var(--foreground) / 0.3) 40px,
-              hsl(var(--foreground) / 0.3) 41px
+              transparent 30px,
+              hsl(var(--foreground)) 30px,
+              hsl(var(--foreground)) 31px
             )`,
           }}
         />
+        {/* Cross-hatch pattern */}
+        <div 
+          className="absolute inset-0 opacity-[0.08]"
+          style={{
+            backgroundImage: `repeating-linear-gradient(
+              -45deg,
+              transparent,
+              transparent 30px,
+              hsl(var(--foreground)) 30px,
+              hsl(var(--foreground)) 31px
+            )`,
+          }}
+        />
+        {/* Hexagon-like pattern overlay */}
+        <div 
+          className="absolute inset-0 opacity-[0.06]"
+          style={{
+            backgroundImage: `
+              radial-gradient(circle at 50% 50%, hsl(var(--foreground)) 1px, transparent 1px)
+            `,
+            backgroundSize: '25px 25px',
+          }}
+        />
       </div>
-      {/* Decorative leaf-like shapes */}
-      <div className="absolute top-20 left-10 w-32 h-32 border border-foreground/10 rounded-full opacity-40" />
-      <div className="absolute bottom-20 right-10 w-48 h-48 border border-foreground/10 rounded-full opacity-30" />
-      <div className="absolute top-1/2 right-1/4 w-24 h-24 border border-foreground/5 rounded-full opacity-50" />
+      {/* Decorative geometric shapes */}
+      <div className="absolute top-16 left-8 w-40 h-40 border-2 border-foreground/15 rounded-full" />
+      <div className="absolute top-24 left-16 w-24 h-24 border border-foreground/20 rounded-full" />
+      <div className="absolute bottom-16 right-8 w-56 h-56 border-2 border-foreground/12 rounded-full" />
+      <div className="absolute bottom-32 right-24 w-32 h-32 border border-foreground/18 rounded-full" />
+      <div className="absolute top-1/3 right-1/5 w-20 h-20 border border-foreground/10 rounded-full" />
+      <div className="absolute bottom-1/3 left-1/4 w-28 h-28 border border-foreground/8 rounded-full" />
       
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
