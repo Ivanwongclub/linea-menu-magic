@@ -68,6 +68,7 @@ export default {
           red: "hsl(var(--brand-red))",
           "red-muted": "hsl(var(--brand-red-muted))",
           "red-subtle": "hsl(var(--brand-red-subtle))",
+          "red-accent": "hsl(var(--brand-red-accent))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
