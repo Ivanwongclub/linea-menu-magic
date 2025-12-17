@@ -11,6 +11,16 @@ import metalClasp from '@/assets/products/metal-clasp.jpg';
 import brandButton from '@/assets/products/brand-button.jpg';
 import wovenLabel from '@/assets/products/woven-label.jpg';
 
+export interface DownloadableFile {
+  id: string;
+  name: string;
+  description: string;
+  fileType: 'obj' | 'stl' | 'step' | 'pdf' | 'ai' | 'dwg' | 'other';
+  fileSize: string;
+  url: string;
+  uploadedAt: string;
+}
+
 export interface LibraryItem {
   id: string;
   itemCode: string;
@@ -42,6 +52,7 @@ export interface LibraryItem {
   certifications: string[];
   availableColors: string[];
   applications: string[];
+  downloadableFiles?: DownloadableFile[];
   isPublic: boolean;
   teamId?: string;
   teamName?: string;
@@ -86,6 +97,26 @@ export const mockLibraryItems: LibraryItem[] = [
     certifications: ['OEKO-TEX® Standard 100', 'REACH Compliant', 'Nickel-Free'],
     availableColors: ['銀色', '金色', '古銅色', '黑鎳', '玫瑰金', '槍色'],
     applications: ['外套', '西裝', '襯衫', '牛仔褲', '風衣'],
+    downloadableFiles: [
+      {
+        id: 'file-001-1',
+        name: 'BTN-M4H-001.obj',
+        description: '3D 模型檔案 - 可用於設計軟體預覽與編輯',
+        fileType: 'obj',
+        fileSize: '2.4 MB',
+        url: '/models/button.obj',
+        uploadedAt: '2024-01-15T10:00:00Z',
+      },
+      {
+        id: 'file-001-2',
+        name: 'BTN-M4H-001_spec.pdf',
+        description: '產品規格書 - 包含詳細尺寸與材質說明',
+        fileType: 'pdf',
+        fileSize: '856 KB',
+        url: '/specs/btn-m4h-001-spec.pdf',
+        uploadedAt: '2024-01-15T10:00:00Z',
+      },
+    ],
     isPublic: true,
     modelUrl: '/models/button.obj',
     thumbnailUrl: metalButton,
@@ -162,6 +193,26 @@ export const mockLibraryItems: LibraryItem[] = [
     certifications: ['OEKO-TEX® Standard 100', 'REACH Compliant', 'YKK Quality Standard'],
     availableColors: ['古銅色', '金色', '銀色', '黑鎳', '青古銅', '紅銅'],
     applications: ['外套', '皮衣', '牛仔褲', '包包', '靴子'],
+    downloadableFiles: [
+      {
+        id: 'file-003-1',
+        name: 'ZIP-M5-001.obj',
+        description: '3D 模型檔案 - 拉鏈完整結構模型',
+        fileType: 'obj',
+        fileSize: '3.8 MB',
+        url: '/models/zipper.obj',
+        uploadedAt: '2024-02-01T10:00:00Z',
+      },
+      {
+        id: 'file-003-2',
+        name: 'ZIP-M5-001.step',
+        description: 'STEP 格式 - 適用於 CAD 軟體',
+        fileType: 'step',
+        fileSize: '5.2 MB',
+        url: '/models/zipper.step',
+        uploadedAt: '2024-02-01T10:00:00Z',
+      },
+    ],
     isPublic: true,
     modelUrl: '/models/zipper.obj',
     thumbnailUrl: metalZipper,
