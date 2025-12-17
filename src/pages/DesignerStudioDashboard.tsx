@@ -25,7 +25,10 @@ import {
   Eye,
   Package,
   Grid3X3,
-  List
+  List,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown
 } from "lucide-react";
 
 // Library imports
@@ -43,6 +46,8 @@ import CreateRFQDialog from "@/components/designer-studio/CreateRFQDialog";
 
 type VisibilityFilter = "all" | "public" | "private";
 type CategoryFilter = "all" | LibraryItem["category"];
+type SortField = "name" | "itemCode" | "category" | "createdAt";
+type SortOrder = "asc" | "desc";
 
 const DesignerStudioDashboard = () => {
   // Main tab state
@@ -56,6 +61,8 @@ const DesignerStudioDashboard = () => {
   const [quickRFQItem, setQuickRFQItem] = useState<LibraryItem | null>(null);
   const [isQuickRFQOpen, setIsQuickRFQOpen] = useState(false);
   const [libraryViewMode, setLibraryViewMode] = useState<"grid" | "list">("grid");
+  const [sortField, setSortField] = useState<SortField>("itemCode");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
 
   // RFQ states
   const [rfqs, setRfqs] = useState<RFQ[]>(mockRFQs);
@@ -64,9 +71,9 @@ const DesignerStudioDashboard = () => {
   const [activeRFQTab, setActiveRFQTab] = useState("all");
   const [rfqSearchQuery, setRfqSearchQuery] = useState("");
 
-  // Library filtering
+  // Library filtering and sorting
   const filteredLibraryItems = useMemo(() => {
-    return mockLibraryItems.filter((item) => {
+    const filtered = mockLibraryItems.filter((item) => {
       const matchesSearch =
         searchQuery === "" ||
         item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -84,7 +91,36 @@ const DesignerStudioDashboard = () => {
 
       return matchesSearch && matchesVisibility && matchesCategory;
     });
-  }, [searchQuery, visibilityFilter, categoryFilter]);
+
+    // Sort items
+    return filtered.sort((a, b) => {
+      let comparison = 0;
+      switch (sortField) {
+        case "name":
+          comparison = a.name.localeCompare(b.name, 'zh-TW');
+          break;
+        case "itemCode":
+          comparison = a.itemCode.localeCompare(b.itemCode);
+          break;
+        case "category":
+          comparison = categoryLabels[a.category].localeCompare(categoryLabels[b.category], 'zh-TW');
+          break;
+        case "createdAt":
+          comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          break;
+      }
+      return sortOrder === "asc" ? comparison : -comparison;
+    });
+  }, [searchQuery, visibilityFilter, categoryFilter, sortField, sortOrder]);
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortOrder("asc");
+    }
+  };
 
   // RFQ filtering
   const filteredRFQs = rfqs.filter(rfq => {
@@ -290,7 +326,41 @@ const DesignerStudioDashboard = () => {
                     ))}
                   </div>
                 ) : (
-                  <div className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-2">
+                    {/* Sortable Header */}
+                    <div className="flex items-center gap-4 px-4 py-2 bg-muted/50 border border-border rounded-lg text-sm font-medium text-muted-foreground">
+                      <div className="w-16 flex-shrink-0">圖片</div>
+                      <button 
+                        onClick={() => handleSort("itemCode")}
+                        className="w-28 flex items-center gap-1 hover:text-foreground transition-colors"
+                      >
+                        品項代碼
+                        <SortIcon field="itemCode" currentField={sortField} order={sortOrder} />
+                      </button>
+                      <button 
+                        onClick={() => handleSort("name")}
+                        className="flex-1 flex items-center gap-1 hover:text-foreground transition-colors"
+                      >
+                        名稱
+                        <SortIcon field="name" currentField={sortField} order={sortOrder} />
+                      </button>
+                      <button 
+                        onClick={() => handleSort("category")}
+                        className="w-24 flex items-center gap-1 hover:text-foreground transition-colors"
+                      >
+                        類別
+                        <SortIcon field="category" currentField={sortField} order={sortOrder} />
+                      </button>
+                      <button 
+                        onClick={() => handleSort("createdAt")}
+                        className="w-24 flex items-center gap-1 hover:text-foreground transition-colors"
+                      >
+                        建立日期
+                        <SortIcon field="createdAt" currentField={sortField} order={sortOrder} />
+                      </button>
+                      <div className="w-48 flex-shrink-0 text-right">操作</div>
+                    </div>
+                    {/* List Items */}
                     {filteredLibraryItems.map((item) => (
                       <LibraryItemListRow
                         key={item.id}
@@ -422,5 +492,22 @@ const StatCard = ({
     <p className="text-sm text-muted-foreground">{label}</p>
   </div>
 );
+
+const SortIcon = ({ 
+  field, 
+  currentField, 
+  order 
+}: { 
+  field: SortField; 
+  currentField: SortField; 
+  order: SortOrder;
+}) => {
+  if (field !== currentField) {
+    return <ArrowUpDown className="w-3 h-3 opacity-50" />;
+  }
+  return order === "asc" 
+    ? <ArrowUp className="w-3 h-3" /> 
+    : <ArrowDown className="w-3 h-3" />;
+};
 
 export default DesignerStudioDashboard;
