@@ -274,19 +274,18 @@ const DesignerStudioDashboard = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      {/* Auto-hiding Header + Navigation wrapper */}
-      <div 
-        className={`sticky top-0 z-50 transition-transform duration-300 [&>header]:static ${
-          isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
-        }`}
-      >
-        <Header />
-        
-        {/* Sticky Navigation Bar */}
-        <div className="bg-background/95 backdrop-blur-sm border-b border-border">
-          <div className="max-w-7xl mx-auto px-4 lg:px-6">
-            {/* Compact Header Row */}
-            <div className="flex items-center justify-between py-3">
+      <Header />
+      
+      {/* Sticky Navigation Bar */}
+      <div className="sticky top-20 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 lg:px-6">
+          {/* Auto-hiding Title Row */}
+          <div 
+            className={`overflow-hidden transition-all duration-300 ${
+              isHeaderVisible ? 'max-h-16 opacity-100 py-3' : 'max-h-0 opacity-0 py-0'
+            }`}
+          >
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-6">
                 <h1 className="font-serif text-xl font-light text-foreground">
                   設計師工作室
@@ -317,6 +316,7 @@ const DesignerStudioDashboard = () => {
               <span className="sm:hidden">新增</span>
             </Button>
           </div>
+        </div>
           
           {/* Mobile Tabs */}
           <div className="sm:hidden pb-3">
@@ -415,9 +415,8 @@ const DesignerStudioDashboard = () => {
           )}
         </div>
       </div>
-    </div>
       
-    <main className="flex-1 py-4 px-4 lg:px-6">
+      <main className="flex-1 py-4 px-4 lg:px-6">
         <div className="max-w-7xl mx-auto">
           <Tabs value={activeMainTab} onValueChange={(v) => setActiveMainTab(v as "library" | "rfq")} className="w-full">
             {/* Library Tab Content */}
