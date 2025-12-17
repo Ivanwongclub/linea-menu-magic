@@ -10,7 +10,8 @@ import {
   Box, Globe, Lock, Calendar, Tag, Layers, X, 
   DollarSign, Package, Clock, Factory, Award, 
   Palette, Shirt, MapPin, TrendingDown, FileText,
-  RotateCcw, Sun, Moon, Image
+  RotateCcw, Sun, Moon, Image, Download, File,
+  FileType, FileCode
 } from "lucide-react";
 import { LibraryItem, categoryLabels } from "@/data/mockLibraryData";
 import { format } from "date-fns";
@@ -447,6 +448,73 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                             {cert}
                           </Badge>
                         ))}
+                      </div>
+                    </div>
+                    <Separator className="my-4" />
+                  </>
+                )}
+
+                {/* Downloadable Files */}
+                {item.downloadableFiles && item.downloadableFiles.length > 0 && (
+                  <>
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
+                        <Download className="w-4 h-4 text-muted-foreground" />
+                        可下載檔案
+                      </h3>
+                      <div className="space-y-2">
+                        {item.downloadableFiles.map((file) => {
+                          const getFileIcon = () => {
+                            switch (file.fileType) {
+                              case 'obj':
+                              case 'stl':
+                              case 'step':
+                                return <Box className="w-4 h-4 text-blue-500" />;
+                              case 'pdf':
+                                return <FileText className="w-4 h-4 text-red-500" />;
+                              case 'ai':
+                              case 'dwg':
+                                return <FileCode className="w-4 h-4 text-orange-500" />;
+                              default:
+                                return <File className="w-4 h-4 text-muted-foreground" />;
+                            }
+                          };
+                          
+                          return (
+                            <div 
+                              key={file.id}
+                              className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg hover:bg-muted/80 transition-colors group"
+                            >
+                              <div className="p-2 bg-background rounded-md shadow-sm">
+                                {getFileIcon()}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium truncate">{file.name}</p>
+                                <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                                  {file.description}
+                                </p>
+                                <div className="flex items-center gap-2 mt-1.5">
+                                  <Badge variant="outline" className="text-xs uppercase">
+                                    {file.fileType}
+                                  </Badge>
+                                  <span className="text-xs text-muted-foreground">{file.fileSize}</span>
+                                </div>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  // Mock download - in real app would trigger actual download
+                                  window.open(file.url, '_blank');
+                                }}
+                              >
+                                <Download className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                     <Separator className="my-4" />
