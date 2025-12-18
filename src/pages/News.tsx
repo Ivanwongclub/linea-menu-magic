@@ -46,7 +46,7 @@ const newsItems = [
     date: "2024年11月",
     location: "香港",
     image: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=800&auto=format&fit=crop",
-    description: "WIN-CYC榮獲OEKO-TEX®環保認證，進一步鞏固集團在可持續發展領域的領先地位。",
+    description: "WIN-CYC榮獲OEKO-TEX環保認證，進一步鞏固集團在可持續發展領域的領先地位。",
     featured: false,
   },
   {
@@ -77,22 +77,14 @@ const greenLifeImages = [
   {
     image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600&auto=format&fit=crop",
     title: "自然共生",
-    description: "與大自然和諧相處",
   },
   {
     image: "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=600&auto=format&fit=crop",
     title: "清新空氣",
-    description: "呼吸更純淨的空氣",
   },
   {
     image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=600&auto=format&fit=crop",
     title: "綠色城市",
-    description: "打造宜居的生活環境",
-  },
-  {
-    image: "https://images.unsplash.com/photo-1473448912268-2022ce9509d8?w=600&auto=format&fit=crop",
-    title: "永續森林",
-    description: "守護地球的綠色屏障",
   },
 ];
 
@@ -104,97 +96,89 @@ const News = () => {
     <div className="min-h-screen bg-white">
       <Header />
       
-      {/* Hero Section */}
-      <section className="pt-24 pb-16 px-6 bg-white">
+      {/* Hero Section - Compact */}
+      <section className="pt-20 pb-8 px-6 bg-white border-b border-border">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-serif font-light text-foreground mb-4 tracking-tight">
+          <h1 className="text-3xl md:text-4xl font-serif font-light text-foreground mb-2 tracking-tight">
             最新動態
           </h1>
-          <p className="text-lg text-muted-foreground font-light max-w-2xl">
+          <p className="text-base text-muted-foreground font-light">
             展覽資訊 · 企業新聞 · 行業動態
           </p>
         </div>
       </section>
 
-      {/* Green Footprint Banner */}
-      <section className="relative py-20 px-6 bg-white overflow-hidden">
-        {/* Decorative Elements */}
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-green-sage/30 to-transparent" />
-        <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-green-sage/30 to-transparent" />
-        <div className="absolute top-10 right-10 w-32 h-32 rounded-full border border-green-mist/40 opacity-60" />
-        <div className="absolute bottom-10 left-10 w-24 h-24 rounded-full border border-green-sage/30 opacity-40" />
-        
+      {/* Green Footprint Banner - Optimized */}
+      <section className="py-12 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            {/* Text Content */}
-            <div className="space-y-8">
-              <div className="inline-flex items-center gap-3 px-4 py-2 border border-green-sage/30 rounded-full">
-                <Leaf className="w-4 h-4 text-green-forest" />
-                <span className="text-sm text-green-forest tracking-wide">Green Initiative</span>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* Text Content - 5 columns */}
+            <div className="lg:col-span-5 space-y-5">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 border border-green-sage/30 rounded-full">
+                <Leaf className="w-3.5 h-3.5 text-green-forest" />
+                <span className="text-xs text-green-forest tracking-wide">Green Initiative</span>
               </div>
               
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-light text-foreground leading-tight">
+              <h2 className="text-2xl md:text-3xl font-serif font-light text-foreground leading-tight">
                 綠色足跡
-                <span className="block text-green-forest mt-2">永續未來</span>
+                <span className="block text-green-forest mt-1">永續未來</span>
               </h2>
               
-              <p className="text-muted-foreground leading-relaxed max-w-lg">
-                我們致力於減少碳足跡，採用環保材料與可持續生產流程。
-                每一個選擇，都是為了更美好的明天。
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                我們致力於減少碳足跡，採用環保材料與可持續生產流程。每一個選擇，都是為了更美好的明天。
               </p>
               
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-3">
                 <Button 
                   variant="outline" 
-                  className="border-green-forest text-green-forest hover:bg-green-forest hover:text-white transition-all duration-300 rounded-none px-6"
+                  size="sm"
+                  className="border-green-forest text-green-forest hover:bg-green-forest hover:text-white transition-all duration-300 rounded-none text-xs h-9"
                 >
-                  <Recycle className="w-4 h-4 mr-2" />
+                  <Recycle className="w-3.5 h-3.5 mr-1.5" />
                   了解環保認證
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="border-green-sage text-green-sage hover:bg-green-sage hover:text-white transition-all duration-300 rounded-none px-6"
+                  size="sm"
+                  className="border-green-sage text-green-sage hover:bg-green-sage hover:text-white transition-all duration-300 rounded-none text-xs h-9"
                 >
-                  <TreePine className="w-4 h-4 mr-2" />
+                  <TreePine className="w-3.5 h-3.5 mr-1.5" />
                   可持續發展報告
                 </Button>
               </div>
               
-              {/* Stats */}
-              <div className="flex gap-12 pt-6 border-t border-green-mist/30">
+              {/* Stats - Compact */}
+              <div className="flex gap-8 pt-4 border-t border-green-mist/30">
                 <div>
-                  <p className="text-3xl font-serif text-green-forest">30%</p>
-                  <p className="text-sm text-muted-foreground mt-1">碳排放減少</p>
+                  <p className="text-2xl font-serif text-green-forest">30%</p>
+                  <p className="text-xs text-muted-foreground">碳排放減少</p>
                 </div>
                 <div>
-                  <p className="text-3xl font-serif text-green-forest">100%</p>
-                  <p className="text-sm text-muted-foreground mt-1">可回收包裝</p>
+                  <p className="text-2xl font-serif text-green-forest">100%</p>
+                  <p className="text-xs text-muted-foreground">可回收包裝</p>
                 </div>
                 <div>
-                  <p className="text-3xl font-serif text-green-forest">50+</p>
-                  <p className="text-sm text-muted-foreground mt-1">環保產品線</p>
+                  <p className="text-2xl font-serif text-green-forest">50+</p>
+                  <p className="text-xs text-muted-foreground">環保產品線</p>
                 </div>
               </div>
             </div>
             
-            {/* Image Grid */}
-            <div className="grid grid-cols-2 gap-4">
+            {/* Image Grid - 7 columns, aligned */}
+            <div className="lg:col-span-7 grid grid-cols-3 gap-2">
               {greenLifeImages.map((item, index) => (
                 <div 
                   key={index}
-                  className={`relative overflow-hidden group ${index === 0 ? 'row-span-2' : ''}`}
+                  className="relative overflow-hidden group aspect-[4/5]"
                 >
                   <img
                     src={item.image}
                     alt={item.title}
-                    className={`w-full object-cover transition-transform duration-700 group-hover:scale-105 ${
-                      index === 0 ? 'h-full' : 'h-48'
-                    }`}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-green-deep/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
-                    <p className="text-white font-light text-sm">{item.title}</p>
-                    <p className="text-white/70 text-xs">{item.description}</p>
+                  <div className="absolute inset-0 bg-gradient-to-t from-green-deep/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
+                    <p className="text-white font-light text-xs">{item.title}</p>
                   </div>
                 </div>
               ))}
@@ -203,122 +187,54 @@ const News = () => {
         </div>
       </section>
 
-      {/* Green Vision Section */}
-      <section className="py-16 px-6 bg-green-light/50">
+      {/* Green Vision Section - Compact */}
+      <section className="py-10 px-6 bg-green-light/40">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h3 className="text-2xl md:text-3xl font-serif font-light text-foreground mb-4">
-              邁向更美好的生活
-            </h3>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              當我們共同努力減少碳足跡，世界將會變得更加美好
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {[
-              { icon: Wind, title: "清新空氣", desc: "減少污染物排放" },
-              { icon: TreePine, title: "綠色森林", desc: "保護自然生態" },
-              { icon: Recycle, title: "循環經濟", desc: "資源永續利用" },
-              { icon: Leaf, title: "健康生活", desc: "與自然和諧共處" },
-            ].map((item, index) => (
-              <div 
-                key={index}
-                className="bg-white p-8 text-center group hover:shadow-lg transition-all duration-500"
-              >
-                <div className="w-16 h-16 mx-auto mb-4 border border-green-sage/30 rounded-full flex items-center justify-center group-hover:border-green-forest group-hover:bg-green-forest transition-all duration-300">
-                  <item.icon className="w-6 h-6 text-green-sage group-hover:text-white transition-colors duration-300" />
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div>
+              <h3 className="text-xl font-serif font-light text-foreground mb-1">
+                邁向更美好的生活
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                當我們共同努力減少碳足跡，世界將會變得更加美好
+              </p>
+            </div>
+            
+            <div className="flex flex-wrap gap-4">
+              {[
+                { icon: Wind, title: "清新空氣" },
+                { icon: TreePine, title: "綠色森林" },
+                { icon: Recycle, title: "循環經濟" },
+                { icon: Leaf, title: "健康生活" },
+              ].map((item, index) => (
+                <div 
+                  key={index}
+                  className="flex items-center gap-2 bg-white px-4 py-2 group hover:bg-green-forest transition-all duration-300"
+                >
+                  <item.icon className="w-4 h-4 text-green-forest group-hover:text-white transition-colors duration-300" />
+                  <span className="text-sm text-foreground group-hover:text-white transition-colors duration-300">{item.title}</span>
                 </div>
-                <h4 className="font-light text-foreground mb-2">{item.title}</h4>
-                <p className="text-sm text-muted-foreground">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-          
-          <div className="text-center mt-10">
-            <Link to="/sustainability">
-              <Button 
-                className="bg-green-forest hover:bg-green-deep text-white rounded-none px-8 py-3 transition-all duration-300"
-              >
-                探索我們的綠色承諾
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </Link>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
       {/* Featured Section */}
-      <section className="py-16 px-6 bg-white">
+      <section className="py-12 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center gap-4 mb-8">
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-widest">
+          <div className="flex items-center gap-4 mb-6">
+            <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-widest">
               焦點消息
             </h2>
             <div className="flex-1 h-px bg-border" />
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {featuredItems.map((item) => (
               <article
                 key={item.id}
                 className="group relative overflow-hidden bg-white border border-border hover:border-green-sage/40 transition-all duration-500"
-              >
-                <div className="aspect-[16/10] overflow-hidden">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                </div>
-                <div className="p-8">
-                  <div className="flex items-center gap-4 mb-4">
-                    <span className="text-xs font-medium uppercase tracking-widest text-green-forest">
-                      {item.type === "exhibition" ? "展覽" : "新聞"}
-                    </span>
-                    <span className="w-8 h-px bg-green-mist" />
-                  </div>
-                  <h3 className="text-2xl font-serif font-light text-foreground mb-2 group-hover:text-green-forest transition-colors duration-300">
-                    {item.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {item.subtitle}
-                  </p>
-                  <p className="text-sm text-foreground/80 leading-relaxed mb-6">
-                    {item.description}
-                  </p>
-                  <div className="flex items-center gap-6 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-2">
-                      <Calendar className="w-3.5 h-3.5" />
-                      {item.date}
-                    </span>
-                    <span className="flex items-center gap-2">
-                      <MapPin className="w-3.5 h-3.5" />
-                      {item.location}
-                    </span>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Regular News Grid */}
-      <section className="py-16 px-6 bg-muted/20">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center gap-4 mb-8">
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-widest">
-              更多消息
-            </h2>
-            <div className="flex-1 h-px bg-border" />
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {regularItems.map((item) => (
-              <article
-                key={item.id}
-                className="group bg-white border border-border hover:border-green-sage/40 transition-all duration-500"
               >
                 <div className="aspect-[16/9] overflow-hidden">
                   <img
@@ -332,14 +248,18 @@ const News = () => {
                     <span className="text-xs font-medium uppercase tracking-widest text-green-forest">
                       {item.type === "exhibition" ? "展覽" : "新聞"}
                     </span>
+                    <span className="w-6 h-px bg-green-mist" />
                   </div>
-                  <h3 className="text-lg font-serif font-light text-foreground mb-2 group-hover:text-green-forest transition-colors duration-300 line-clamp-2">
+                  <h3 className="text-xl font-serif font-light text-foreground mb-1 group-hover:text-green-forest transition-colors duration-300">
                     {item.title}
                   </h3>
-                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    {item.subtitle}
+                  </p>
+                  <p className="text-sm text-foreground/80 leading-relaxed mb-4">
                     {item.description}
                   </p>
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-5 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1.5">
                       <Calendar className="w-3 h-3" />
                       {item.date}
@@ -356,18 +276,65 @@ const News = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 px-6 bg-white border-t border-border">
+      {/* Regular News Grid */}
+      <section className="py-12 px-6 bg-muted/20">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center gap-4 mb-6">
+            <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-widest">
+              更多消息
+            </h2>
+            <div className="flex-1 h-px bg-border" />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {regularItems.map((item) => (
+              <article
+                key={item.id}
+                className="group bg-white border border-border hover:border-green-sage/40 transition-all duration-500"
+              >
+                <div className="aspect-[16/10] overflow-hidden">
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                </div>
+                <div className="p-4">
+                  <span className="text-[10px] font-medium uppercase tracking-widest text-green-forest">
+                    {item.type === "exhibition" ? "展覽" : "新聞"}
+                  </span>
+                  <h3 className="text-sm font-serif font-light text-foreground mt-1 mb-2 group-hover:text-green-forest transition-colors duration-300 line-clamp-2">
+                    {item.title}
+                  </h3>
+                  <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-2.5 h-2.5" />
+                      {item.date}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <MapPin className="w-2.5 h-2.5" />
+                      {item.location}
+                    </span>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section - Compact */}
+      <section className="py-12 px-6 bg-white border-t border-border">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-2xl md:text-3xl font-serif font-light text-foreground mb-4">
+          <h2 className="text-xl md:text-2xl font-serif font-light text-foreground mb-2">
             訂閱最新資訊
           </h2>
-          <p className="text-muted-foreground mb-8 font-light">
+          <p className="text-sm text-muted-foreground mb-6 font-light">
             獲取展覽預告、產品發布及行業動態
           </p>
           <Link
             to="/contact"
-            className="inline-flex items-center gap-2 px-8 py-3 bg-green-forest text-white hover:bg-green-deep transition-colors duration-300 text-sm"
+            className="inline-flex items-center gap-2 px-6 py-2.5 bg-green-forest text-white hover:bg-green-deep transition-colors duration-300 text-sm"
           >
             <span>聯絡我們</span>
             <ArrowRight className="w-4 h-4" />
