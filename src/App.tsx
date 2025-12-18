@@ -21,7 +21,6 @@ import OurStory from "./pages/about/OurStory";
 import Factory from "./pages/about/Factory";
 import Certificates from "./pages/about/Certificates";
 import AboutSustainability from "./pages/about/Sustainability";
-import StoreLocator from "./pages/about/StoreLocator";
 
 const queryClient = new QueryClient();
 
@@ -40,7 +39,6 @@ const App = () => (
           <Route path="/about/factory" element={<Factory />} />
           <Route path="/about/certificates" element={<Certificates />} />
           <Route path="/about/sustainability" element={<AboutSustainability />} />
-          <Route path="/about/store-locator" element={<StoreLocator />} />
           <Route path="/products" element={<Products />} />
           <Route path="/sustainability" element={<Sustainability />} />
           <Route path="/news" element={<News />} />
