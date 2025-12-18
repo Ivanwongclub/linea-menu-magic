@@ -11,6 +11,7 @@ const Header = () => {
     { href: "/about", label: "關於我們", labelEn: "About" },
     { href: "/products", label: "產品", labelEn: "Products" },
     { href: "/sustainability", label: "可持續發展", labelEn: "Sustainability" },
+    { href: "/news", label: "最新動態", labelEn: "News" },
     { href: "/designer-studio", label: "設計師工作室", labelEn: "Designer Studio" },
     { href: "/contact", label: "聯絡我們", labelEn: "Contact" },
   ];
