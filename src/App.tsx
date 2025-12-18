@@ -10,6 +10,7 @@ import About from "./pages/About";
 import Products from "./pages/Products";
 import Sustainability from "./pages/Sustainability";
 import News from "./pages/News";
+import NewsDetail from "./pages/NewsDetail";
 import DesignerStudio from "./pages/DesignerStudio";
 import DesignerStudioDashboard from "./pages/DesignerStudioDashboard";
 import Contact from "./pages/Contact";
@@ -33,6 +34,7 @@ const App = () => (
           <Route path="/products" element={<Products />} />
           <Route path="/sustainability" element={<Sustainability />} />
           <Route path="/news" element={<News />} />
+          <Route path="/news/:id" element={<NewsDetail />} />
           <Route path="/designer-studio" element={<DesignerStudio />} />
           <Route path="/designer-studio/dashboard" element={<DesignerStudioDashboard />} />
           <Route path="/contact" element={<Contact />} />
