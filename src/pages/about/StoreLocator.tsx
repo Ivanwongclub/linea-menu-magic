@@ -1,33 +1,43 @@
-import Header from "../../components/header/Header";
-import Footer from "../../components/footer/Footer";
+import Header from "../../components/layout/Header";
+import Footer from "../../components/layout/Footer";
 import PageHeader from "../../components/about/PageHeader";
 import ContentSection from "../../components/about/ContentSection";
-import StoreMap from "../../components/about/StoreMap";
 import { Button } from "../../components/ui/button";
-import AboutSidebar from "../../components/about/AboutSidebar";
+import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
+import { MapPin, Phone, Clock, Mail } from "lucide-react";
 
 const StoreLocator = () => {
-  const stores = [
+  const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation();
+  const { ref: locationsRef, isVisible: locationsVisible, getDelay } = useStaggeredAnimation(3, 150);
+  const { ref: contactRef, isVisible: contactVisible } = useScrollAnimation();
+
+  const offices = [
     {
-      name: "LINEA Madison Avenue",
-      address: "789 Madison Avenue, New York, NY 10065",
-      phone: "+1 (212) 555-0123",
-      hours: "Mon-Sat: 10AM-8PM, Sun: 12PM-6PM",
-      services: ["Personal Shopping", "Custom Design", "Repairs", "Appraisals"]
+      name: "香港總部",
+      nameEn: "Hong Kong Headquarters",
+      address: "香港九龍觀塘偉業街123號企業中心18樓",
+      addressEn: "18/F, Enterprise Centre, 123 Wai Yip Street, Kwun Tong, Kowloon, Hong Kong",
+      phone: "+852 2345 6789",
+      email: "info@wincyc.com",
+      hours: "週一至週五: 9:00-18:00",
     },
     {
-      name: "LINEA Beverly Hills",
-      address: "456 Rodeo Drive, Beverly Hills, CA 90210",
-      phone: "+1 (310) 555-0456",
-      hours: "Mon-Sat: 10AM-8PM, Sun: 12PM-6PM",
-      services: ["Personal Shopping", "Custom Design", "VIP Suites", "Repairs"]
+      name: "深圳辦事處",
+      nameEn: "Shenzhen Office",
+      address: "深圳市福田區華強北路1000號科技大廈12樓",
+      addressEn: "12/F, Tech Tower, 1000 Huaqiang North Road, Futian District, Shenzhen",
+      phone: "+86 755 8888 9999",
+      email: "shenzhen@wincyc.com",
+      hours: "週一至週五: 9:00-18:00",
     },
     {
-      name: "LINEA SoHo",
-      address: "123 Spring Street, New York, NY 10012",
-      phone: "+1 (212) 555-0789",
-      hours: "Mon-Sat: 11AM-8PM, Sun: 12PM-7PM",
-      services: ["Browse & Buy", "Repairs", "Gift Wrapping"]
+      name: "東莞生產基地",
+      nameEn: "Dongguan Factory",
+      address: "東莞市虎門鎮工業區南路88號",
+      addressEn: "88 South Industrial Road, Humen Town, Dongguan",
+      phone: "+86 769 8765 4321",
+      email: "factory@wincyc.com",
+      hours: "週一至週六: 8:00-17:30",
     }
   ];
 
@@ -35,110 +45,83 @@ const StoreLocator = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <div className="flex">
-        <div className="hidden lg:block">
-          <AboutSidebar />
+      <main className="py-16 px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div ref={headerRef} className={`transition-all duration-700 ${headerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+            <PageHeader 
+              title="聯絡據點" 
+              subtitle="歡迎蒞臨參觀，了解更多產品與服務"
+            />
+          </div>
+
+          <div ref={locationsRef}>
+            <ContentSection title="辦事處及工廠">
+              <div className="grid gap-8">
+                {offices.map((office, index) => (
+                  <div 
+                    key={index} 
+                    className={`bg-background border border-border p-8 transition-all duration-500 hover:shadow-lg ${
+                      locationsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+                    }`}
+                    style={getDelay(index)}
+                  >
+                    <div className="grid md:grid-cols-2 gap-8">
+                      <div className="space-y-4">
+                        <div>
+                          <h3 className="text-xl font-light text-foreground">{office.name}</h3>
+                          <p className="text-sm text-muted-foreground">{office.nameEn}</p>
+                        </div>
+                        <div className="space-y-3 text-muted-foreground">
+                          <div className="flex items-start gap-3">
+                            <MapPin size={18} className="mt-1 flex-shrink-0" />
+                            <div>
+                              <p>{office.address}</p>
+                              <p className="text-sm">{office.addressEn}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <Phone size={18} className="flex-shrink-0" />
+                            <p>{office.phone}</p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <Mail size={18} className="flex-shrink-0" />
+                            <p>{office.email}</p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <Clock size={18} className="flex-shrink-0" />
+                            <p>{office.hours}</p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-center md:justify-end">
+                        <Button variant="outline" className="rounded-none">
+                          查看地圖
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ContentSection>
+          </div>
+
+          <div ref={contactRef} className={`transition-all duration-700 ${contactVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+            <ContentSection title="預約參觀">
+              <div className="bg-secondary p-8">
+                <h3 className="text-xl font-light text-foreground mb-4">歡迎預約參觀工廠</h3>
+                <p className="text-muted-foreground mb-6">
+                  如您希望深入了解我們的生產設施與品質管理流程，歡迎預約參觀我們的東莞生產基地。
+                  我們的專業團隊將為您提供詳細的介紹與產品展示。
+                </p>
+                <Button className="rounded-none bg-brand-red-accent hover:bg-foreground text-white">
+                  預約參觀
+                </Button>
+              </div>
+            </ContentSection>
+          </div>
         </div>
-        
-        <main className="w-full lg:w-[70vw] lg:ml-auto px-6">
-        <PageHeader 
-          title="Store Locator" 
-          subtitle="Visit us in person for a personalized jewelry experience"
-        />
-        
-        <ContentSection title="Interactive Store Map">
-          <StoreMap />
-        </ContentSection>
-
-        <ContentSection title="Our Locations">
-          <div className="grid gap-8">
-            {stores.map((store, index) => (
-              <div key={index} className="bg-background rounded-lg p-8 border border-border">
-                <div className="grid md:grid-cols-2 gap-8">
-                  <div className="space-y-4">
-                    <h3 className="text-xl font-light text-foreground">{store.name}</h3>
-                    <div className="space-y-2 text-muted-foreground">
-                      <p>{store.address}</p>
-                      <p>{store.phone}</p>
-                      <p>{store.hours}</p>
-                    </div>
-                    
-                    <div className="flex flex-col sm:flex-row gap-3 pt-4">
-                      <Button variant="outline" className="rounded-none">
-                        Get Directions
-                      </Button>
-                      <Button className="rounded-none">
-                        Book Appointment
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <h4 className="text-lg font-light text-foreground">Available Services</h4>
-                    <ul className="grid grid-cols-2 gap-2">
-                      {store.services.map((service, serviceIndex) => (
-                        <li key={serviceIndex} className="text-sm text-muted-foreground flex items-center">
-                          <span className="w-2 h-2 bg-primary rounded-full mr-3 flex-shrink-0"></span>
-                          {service}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </ContentSection>
-
-        <ContentSection title="Private Appointments">
-          <div className="space-y-6">
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              Experience personalized service with a private appointment. Our jewelry consultants will guide you through our collections, help with custom designs, and provide expert advice in a comfortable, private setting.
-            </p>
-            
-            <div className="grid md:grid-cols-3 gap-8 mt-12">
-              <div className="space-y-3">
-                <h4 className="text-lg font-light text-foreground">Personal Shopping</h4>
-                <p className="text-muted-foreground text-sm">
-                  One-on-one guidance to find the perfect piece for any occasion
-                </p>
-              </div>
-              <div className="space-y-3">
-                <h4 className="text-lg font-light text-foreground">Custom Design</h4>
-                <p className="text-muted-foreground text-sm">
-                  Work with our designers to create a unique piece just for you
-                </p>
-              </div>
-              <div className="space-y-3">
-                <h4 className="text-lg font-light text-foreground">Expert Services</h4>
-                <p className="text-muted-foreground text-sm">
-                  Professional appraisals, repairs, and maintenance services
-                </p>
-              </div>
-            </div>
-            
-            <div className="pt-8">
-              <Button size="lg" className="rounded-none">
-                Schedule Your Appointment
-              </Button>
-            </div>
-          </div>
-        </ContentSection>
-
-        <ContentSection title="Virtual Consultations">
-          <div className="bg-muted/10 rounded-lg p-8">
-            <h3 className="text-xl font-light text-foreground mb-4">Can't visit in person?</h3>
-            <p className="text-muted-foreground mb-6">
-              Book a virtual consultation with one of our jewelry experts. We'll showcase pieces via video call, 
-              answer your questions, and help you make the perfect selection from the comfort of your home.
-            </p>
-            <Button variant="outline" className="rounded-none">
-              Book Virtual Consultation
-            </Button>
-          </div>
-        </ContentSection>
-        </main>
-      </div>
+      </main>
       
       <Footer />
     </div>

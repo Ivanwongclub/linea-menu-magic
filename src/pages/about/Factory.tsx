@@ -1,8 +1,7 @@
-import Header from "../../components/header/Header";
-import Footer from "../../components/footer/Footer";
+import Header from "../../components/layout/Header";
+import Footer from "../../components/layout/Footer";
 import PageHeader from "../../components/about/PageHeader";
 import ContentSection from "../../components/about/ContentSection";
-import AboutSidebar from "../../components/about/AboutSidebar";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 import { Settings, Cpu, Users, Shield, Leaf, Zap } from "lucide-react";
 
@@ -54,12 +53,7 @@ const Factory = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <div className="flex">
-        <div className="hidden lg:block">
-          <AboutSidebar />
-        </div>
-        
-        <main className="w-full lg:w-[70vw] lg:ml-auto">
+      <main className="w-full">
           {/* Hero Section */}
           <section ref={heroRef} className="relative h-[50vh] overflow-hidden">
             <img 
@@ -220,7 +214,6 @@ const Factory = () => {
             </div>
           </section>
         </main>
-      </div>
       
       <Footer />
     </div>

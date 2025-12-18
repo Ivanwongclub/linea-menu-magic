@@ -1,8 +1,7 @@
-import Header from "../../components/header/Header";
-import Footer from "../../components/footer/Footer";
+import Header from "../../components/layout/Header";
+import Footer from "../../components/layout/Footer";
 import PageHeader from "../../components/about/PageHeader";
 import ContentSection from "../../components/about/ContentSection";
-import AboutSidebar from "../../components/about/AboutSidebar";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 import { Award, Shield, Leaf, CheckCircle, FileCheck, Globe } from "lucide-react";
 
@@ -86,12 +85,7 @@ const Certificates = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <div className="flex">
-        <div className="hidden lg:block">
-          <AboutSidebar />
-        </div>
-        
-        <main className="w-full lg:w-[70vw] lg:ml-auto">
+      <main className="w-full">
           {/* Hero Section */}
           <section ref={heroRef} className="py-24 px-6 bg-secondary overflow-hidden">
             <div className="max-w-3xl">
@@ -232,7 +226,6 @@ const Certificates = () => {
             </div>
           </section>
         </main>
-      </div>
       
       <Footer />
     </div>
