@@ -132,7 +132,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl p-0 overflow-hidden max-h-[90vh]">
+        <DialogContent className="max-w-6xl p-0 overflow-hidden max-h-[95vh] md:max-h-[90vh]">
           {/* Mobile Header with Back Button */}
           <div className="sticky top-0 z-10 flex items-center gap-3 p-4 bg-background border-b md:hidden">
             <button
@@ -222,7 +222,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
             </div>
 
             {/* Details Section */}
-            <div className="h-[500px] md:h-[80vh] overflow-hidden flex flex-col min-h-0">
+            <div className="flex-1 md:h-[85vh] overflow-hidden flex flex-col min-h-0 max-h-[60vh] md:max-h-none">
               {/* Sticky Header */}
               <div className="bg-background p-6 pb-4 border-b flex-shrink-0">
                 <div className="space-y-2">
