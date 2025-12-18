@@ -21,7 +21,6 @@ const Header = () => {
     { href: "/about/factory", label: "工廠", labelEn: "Factory" },
     { href: "/about/certificates", label: "認證", labelEn: "Certificates" },
     { href: "/about/sustainability", label: "可持續發展", labelEn: "Sustainability" },
-    { href: "/about/store-locator", label: "門市位置", labelEn: "Store Locator" },
   ];
 
   const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + '/');
@@ -120,7 +119,7 @@ const Header = () => {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="lg:hidden py-4 border-t border-border animate-fade-in">
+          <div className="lg:hidden py-4 border-t border-border animate-fade-in max-h-[calc(100vh-56px)] overflow-y-auto">
             <nav className="flex flex-col space-y-2">
               {navLinks.map((link) => (
                 link.hasSubmenu ? (
