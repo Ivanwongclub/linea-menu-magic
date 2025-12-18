@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, ChevronDown } from "lucide-react";
 
@@ -130,17 +131,17 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Mobile Navigation with Backdrop */}
-      {isMenuOpen && (
+      {/* Mobile Navigation with Backdrop - rendered via portal to escape stacking context */}
+      {isMenuOpen && createPortal(
         <>
           {/* Backdrop overlay - click to close */}
           <div 
-            className="lg:hidden fixed inset-0 top-14 bg-black/40 z-[60] animate-fade-in"
+            className="lg:hidden fixed inset-0 top-14 bg-black/40 z-[9998] animate-fade-in"
             onClick={() => setIsMenuOpen(false)}
           />
           
           {/* Menu content */}
-          <div className="lg:hidden fixed top-14 left-0 right-0 bg-background border-b border-border z-[70] animate-slide-down max-h-[calc(100vh-56px)] overflow-y-auto px-6">
+          <div className="lg:hidden fixed top-14 left-0 right-0 bg-background border-b border-border z-[9999] animate-slide-down max-h-[calc(100vh-56px)] overflow-y-auto px-6">
             <nav className="flex flex-col space-y-2 py-4">
               {navLinks.map((link, index) => (
                 link.hasSubmenu ? (
@@ -212,7 +213,8 @@ const Header = () => {
               </Link>
             </nav>
           </div>
-        </>
+        </>,
+        document.body
       )}
     </header>
   );
