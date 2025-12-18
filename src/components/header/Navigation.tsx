@@ -28,27 +28,27 @@ const Navigation = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([
     {
       id: 1,
-      name: "Pantheon",
-      price: "€2,850",
+      name: "Metal Button MBT-001",
+      price: "詢價",
       image: pantheonImage,
-      quantity: 1,
-      category: "Earrings"
+      quantity: 100,
+      category: "Buttons"
     },
     {
       id: 2,
-      name: "Eclipse",
-      price: "€3,200", 
+      name: "Metal Zipper MZ-205",
+      price: "詢價", 
       image: eclipseImage,
-      quantity: 1,
-      category: "Bracelets"
+      quantity: 50,
+      category: "Zippers"
     },
     {
       id: 3,
-      name: "Halo",
-      price: "€1,950",
+      name: "Cotton Lace CL-088",
+      price: "詢價",
       image: haloImage, 
-      quantity: 1,
-      category: "Earrings"
+      quantity: 200,
+      category: "Lace"
     }
   ]);
 
@@ -69,10 +69,6 @@ const Navigation = () => {
   // Preload dropdown images for faster display
   useEffect(() => {
     const imagesToPreload = [
-      "/rings-collection.png",
-      "/earrings-collection.png", 
-      "/arcus-bracelet.png",
-      "/span-bracelet.png",
       "/founders.png"
     ];
     
@@ -83,47 +79,40 @@ const Navigation = () => {
   }, []);
 
   const popularSearches = [
-    "Gold Rings",
-    "Silver Necklaces", 
-    "Pearl Earrings",
-    "Designer Bracelets",
-    "Wedding Rings",
-    "Vintage Collection"
+    "Metal Buttons",
+    "YKK Zippers", 
+    "Cotton Lace",
+    "Belt Buckles",
+    "Snap Buttons",
+    "Woven Labels"
   ];
   
   const navItems = [
     { 
-      name: "Shop", 
-      href: "/category/shop",
+      name: "產品", 
+      href: "/products",
       submenuItems: [
-        "Rings",
-        "Necklaces", 
-        "Earrings",
-        "Bracelets",
-        "Watches"
+        "Buttons",
+        "Zippers", 
+        "Lace",
+        "Hardware",
+        "Other Products"
       ],
-      images: [
-        { src: "/rings-collection.png", alt: "Rings Collection", label: "Rings" },
-        { src: "/earrings-collection.png", alt: "Earrings Collection", label: "Earrings" }
-      ]
+      images: []
     },
     { 
-      name: "New in", 
-      href: "/category/new-in",
+      name: "最新動態", 
+      href: "/news",
       submenuItems: [
-        "This Week's Arrivals",
-        "Spring Collection",
-        "Featured Designers",
-        "Limited Edition",
-        "Pre-Orders"
+        "行業動態",
+        "產品發布",
+        "認證消息",
+        "合作夥伴"
       ],
-      images: [
-        { src: "/arcus-bracelet.png", alt: "Arcus Bracelet", label: "Arcus Bracelet" },
-        { src: "/span-bracelet.png", alt: "Span Bracelet", label: "Span Bracelet" }
-      ]
+      images: []
     },
     { 
-      name: "About", 
+      name: "關於我們", 
       href: "/about/our-story",
       submenuItems: [
         "Our Story",
@@ -133,7 +122,7 @@ const Navigation = () => {
         "Store Locator"
       ],
       images: [
-        { src: "/founders.png", alt: "Company Founders", label: "Read our story" }
+        { src: "/founders.png", alt: "Company Founders", label: "了解更多" }
       ]
     }
   ];
@@ -250,7 +239,12 @@ const Navigation = () => {
                      ?.submenuItems.map((subItem, index) => (
                       <li key={index}>
                         <Link 
-                          to={activeDropdown === "About" ? `/about/${subItem.toLowerCase().replace(/\s+/g, '-')}` : `/category/${subItem.toLowerCase()}`}
+                          to={activeDropdown === "關於我們" 
+                            ? `/about/${subItem.toLowerCase().replace(/\s+/g, '-')}` 
+                            : activeDropdown === "產品"
+                            ? `/category/${subItem.toLowerCase().replace(/\s+/g, '-')}`
+                            : `/news`
+                          }
                           className="text-nav-foreground hover:text-brand-red-muted transition-colors duration-200 text-sm font-light block py-2"
                         >
                           {subItem}
@@ -267,13 +261,7 @@ const Navigation = () => {
                   ?.images.map((image, index) => {
                     // Determine the link destination based on dropdown and image
                     let linkTo = "/";
-                    if (activeDropdown === "Shop") {
-                      if (image.label === "Rings") linkTo = "/category/rings";
-                      else if (image.label === "Earrings") linkTo = "/category/earrings";
-                    } else if (activeDropdown === "New in") {
-                      if (image.label === "Arcus Bracelet") linkTo = "/product/arcus-bracelet";
-                      else if (image.label === "Span Bracelet") linkTo = "/product/span-bracelet";
-                    } else if (activeDropdown === "About") {
+                    if (activeDropdown === "關於我們") {
                       linkTo = "/about/our-story";
                     }
                     
@@ -284,12 +272,10 @@ const Navigation = () => {
                           alt={image.alt}
                           className="w-full h-full object-cover transition-opacity duration-200 group-hover:opacity-90"
                         />
-                        {(activeDropdown === "Shop" || activeDropdown === "New in" || activeDropdown === "About") && (
-                          <div className="absolute bottom-2 left-2 text-white text-xs font-light flex items-center gap-1">
-                            <span>{image.label}</span>
-                            <ArrowRight size={12} />
-                          </div>
-                        )}
+                        <div className="absolute bottom-2 left-2 text-white text-xs font-light flex items-center gap-1">
+                          <span>{image.label}</span>
+                          <ArrowRight size={12} />
+                        </div>
                       </Link>
                     );
                   })}
@@ -314,7 +300,7 @@ const Navigation = () => {
                   </svg>
                   <input
                     type="text"
-                    placeholder="Search for jewelry..."
+                    placeholder="搜尋產品..."
                     className="flex-1 bg-transparent text-nav-foreground placeholder:text-nav-foreground/60 outline-none text-lg"
                     autoFocus
                   />
@@ -358,7 +344,12 @@ const Navigation = () => {
                      {item.submenuItems.map((subItem, subIndex) => (
                        <Link
                          key={subIndex}
-                         to={item.name === "About" ? `/about/${subItem.toLowerCase().replace(/\s+/g, '-')}` : `/category/${subItem.toLowerCase()}`}
+                         to={item.name === "關於我們" 
+                           ? `/about/${subItem.toLowerCase().replace(/\s+/g, '-')}` 
+                           : item.name === "產品"
+                           ? `/category/${subItem.toLowerCase().replace(/\s+/g, '-')}`
+                           : `/news`
+                         }
                          className="text-nav-foreground/70 hover:text-brand-red-muted text-sm font-light block py-1"
                          onClick={() => setIsMobileMenuOpen(false)}
                        >

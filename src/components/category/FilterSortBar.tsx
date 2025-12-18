@@ -28,9 +28,9 @@ interface FilterSortBarProps {
 const FilterSortBar = ({ filtersOpen, setFiltersOpen, itemCount }: FilterSortBarProps) => {
   const [sortBy, setSortBy] = useState("featured");
 
-  const categories = ["Earrings", "Bracelets", "Rings", "Necklaces"];
-  const priceRanges = ["Under €1,000", "€1,000 - €2,000", "€2,000 - €3,000", "Over €3,000"];
-  const materials = ["Gold", "Silver", "Rose Gold", "Platinum"];
+  const categories = ["Buttons", "Zippers", "Lace", "Hardware", "Other Products"];
+  const priceRanges = ["詢價", "標準", "高端", "訂製"];
+  const materials = ["Metal", "Resin", "Cotton", "Nylon", "Brass"];
 
   return (
     <>
