@@ -70,6 +70,13 @@ export default {
           "red-subtle": "hsl(var(--brand-red-subtle))",
           "red-accent": "hsl(var(--brand-red-accent))",
         },
+        green: {
+          deep: "hsl(var(--green-deep))",
+          forest: "hsl(var(--green-forest))",
+          sage: "hsl(var(--green-sage))",
+          mist: "hsl(var(--green-mist))",
+          light: "hsl(var(--green-light))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

@@ -62,6 +62,13 @@
     --brand-red-subtle: 358 25% 55%;
     --brand-red-accent: 358 40% 48%;
     
+    /* Green sustainability palette */
+    --green-deep: 158 35% 18%;
+    --green-forest: 155 30% 25%;
+    --green-sage: 150 20% 40%;
+    --green-mist: 145 15% 75%;
+    --green-light: 140 20% 92%;
+    
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-elegant: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -118,6 +125,13 @@
     --brand-red-muted: 358 30% 55%;
     --brand-red-subtle: 358 20% 60%;
     --brand-red-accent: 358 35% 52%;
+    
+    /* Green sustainability palette - dark mode */
+    --green-deep: 158 30% 30%;
+    --green-forest: 155 25% 35%;
+    --green-sage: 150 18% 50%;
+    --green-mist: 145 12% 60%;
+    --green-light: 140 15% 20%;
   }
 }
 
