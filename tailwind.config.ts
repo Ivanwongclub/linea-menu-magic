@@ -114,6 +114,10 @@ export default {
           from: { transform: "translateX(100%)" },
           to: { transform: "translateX(0)" },
         },
+        "slide-down": {
+          from: { opacity: "0", transform: "translateY(-10px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -121,6 +125,7 @@ export default {
         "fade-in": "fade-in 0.4s ease-out",
         "fade-up": "fade-up 0.6s ease-out",
         "slide-in-right": "slide-in-right 0.3s ease-out",
+        "slide-down": "slide-down 0.25s ease-out",
       },
       transitionTimingFunction: {
         elegant: "cubic-bezier(0.25, 0.46, 0.45, 0.94)",
