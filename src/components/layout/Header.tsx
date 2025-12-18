@@ -135,12 +135,12 @@ const Header = () => {
         <>
           {/* Backdrop overlay - click to close */}
           <div 
-            className="lg:hidden fixed inset-0 top-14 bg-black/40 z-40 animate-fade-in"
+            className="lg:hidden fixed inset-0 top-14 bg-black/40 z-[60] animate-fade-in"
             onClick={() => setIsMenuOpen(false)}
           />
           
           {/* Menu content */}
-          <div className="lg:hidden fixed top-14 left-0 right-0 bg-background border-b border-border z-50 animate-slide-down max-h-[calc(100vh-56px)] overflow-y-auto px-6">
+          <div className="lg:hidden fixed top-14 left-0 right-0 bg-background border-b border-border z-[70] animate-slide-down max-h-[calc(100vh-56px)] overflow-y-auto px-6">
             <nav className="flex flex-col space-y-2 py-4">
               {navLinks.map((link, index) => (
                 link.hasSubmenu ? (
