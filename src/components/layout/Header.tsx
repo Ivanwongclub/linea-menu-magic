@@ -3,10 +3,19 @@ import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, ChevronDown } from "lucide-react";
 
+type Language = 'zh-TW' | 'zh-CN' | 'en';
+
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [currentLang, setCurrentLang] = useState<Language>('zh-TW');
   const location = useLocation();
+
+  const languages: { code: Language; label: string }[] = [
+    { code: 'zh-TW', label: '繁' },
+    { code: 'zh-CN', label: '簡' },
+    { code: 'en', label: 'ENG' },
+  ];
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
@@ -110,8 +119,28 @@ const Header = () => {
             ))}
           </nav>
 
-          {/* CTA Button */}
-          <div className="hidden lg:flex items-center space-x-4">
+          {/* Language Switcher & CTA Button */}
+          <div className="hidden lg:flex items-center space-x-6">
+            {/* Language Switcher */}
+            <div className="flex items-center text-sm">
+              {languages.map((lang, index) => (
+                <span key={lang.code} className="flex items-center">
+                  <button
+                    onClick={() => setCurrentLang(lang.code)}
+                    className={`transition-colors duration-200 ${
+                      currentLang === lang.code
+                        ? 'text-foreground font-medium'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    {lang.label}
+                  </button>
+                  {index < languages.length - 1 && (
+                    <span className="mx-1.5 text-border">丨</span>
+                  )}
+                </span>
+              ))}
+            </div>
             <Link
               to="/contact"
               className="px-6 py-2.5 bg-brand-red-accent text-white text-xs tracking-widest uppercase transition-all duration-300 hover:bg-foreground btn-red-glow"
@@ -142,6 +171,27 @@ const Header = () => {
           
           {/* Menu content */}
           <div className="lg:hidden fixed top-14 left-0 right-0 bg-background border-b border-border z-[9999] animate-slide-down max-h-[calc(100vh-56px)] overflow-y-auto px-6">
+            {/* Mobile Language Switcher */}
+            <div className="flex items-center justify-center py-3 border-b border-border opacity-0 animate-fade-in" style={{ animationFillMode: 'forwards' }}>
+              {languages.map((lang, index) => (
+                <span key={lang.code} className="flex items-center">
+                  <button
+                    onClick={() => setCurrentLang(lang.code)}
+                    className={`text-sm transition-colors duration-200 ${
+                      currentLang === lang.code
+                        ? 'text-foreground font-medium'
+                        : 'text-muted-foreground'
+                    }`}
+                  >
+                    {lang.label}
+                  </button>
+                  {index < languages.length - 1 && (
+                    <span className="mx-2 text-border">丨</span>
+                  )}
+                </span>
+              ))}
+            </div>
+            
             <nav className="flex flex-col space-y-2 py-4">
               {navLinks.map((link, index) => (
                 link.hasSubmenu ? (
