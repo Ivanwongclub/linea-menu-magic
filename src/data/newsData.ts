@@ -165,6 +165,99 @@ export const newsItems: NewsItem[] = [
       "我們將繼續加大在環保材料研發及綠色生產方面的投入，為建設更可持續的時尚產業貢獻力量。"
     ],
   },
+  {
+    id: 9,
+    type: "exhibition",
+    category: "industry",
+    title: "Munich Fabric Start 2025",
+    subtitle: "歐洲紡織面料展",
+    date: "2025年1月",
+    location: "德國慕尼黑",
+    image: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&auto=format&fit=crop",
+    description: "展示最新環保材料及創新設計，與歐洲買家建立聯繫。",
+    featured: false,
+    content: [
+      "WIN-CYC將參展Munich Fabric Start 2025，展示最新環保材料及創新設計系列。",
+      "這是歐洲最重要的紡織面料展覽會之一，匯聚全球優質供應商及買家。"
+    ],
+  },
+  {
+    id: 10,
+    type: "news",
+    category: "product",
+    title: "全新金屬配件系列發佈",
+    subtitle: "工藝革新",
+    date: "2024年7月",
+    location: "深圳",
+    image: "https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?w=800&auto=format&fit=crop",
+    description: "推出全新高端金屬配件系列，採用先進電鍍工藝，光澤持久耐用。",
+    featured: false,
+    content: [
+      "WIN-CYC推出全新高端金屬配件系列，採用先進電鍍工藝及環保表面處理技術。",
+      "新系列產品包括拉鏈頭、鈕扣、扣環等，適用於高端時裝及運動服飾。"
+    ],
+  },
+  {
+    id: 11,
+    type: "news",
+    category: "partnership",
+    title: "與日本紡織集團建立合作",
+    subtitle: "亞太市場拓展",
+    date: "2024年6月",
+    location: "東京",
+    image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&auto=format&fit=crop",
+    description: "與日本領先紡織集團簽署合作備忘錄，共同開發亞太市場。",
+    featured: false,
+    content: [
+      "WIN-CYC與日本知名紡織集團簽署戰略合作備忘錄，共同開拓亞太市場。",
+      "合作範圍涵蓋產品研發、技術交流及市場推廣等多個領域。"
+    ],
+  },
+  {
+    id: 12,
+    type: "exhibition",
+    category: "industry",
+    title: "Canton Fair 2025春季",
+    subtitle: "中國進出口商品交易會",
+    date: "2025年4月",
+    location: "中國廣州",
+    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&auto=format&fit=crop",
+    description: "於中國最大貿易展覽會展示完整產品系列，接待全球買家。",
+    featured: false,
+    content: [
+      "WIN-CYC將於2025年春季Canton Fair展示完整產品系列，歡迎全球買家蒞臨參觀。"
+    ],
+  },
+  {
+    id: 13,
+    type: "news",
+    category: "certification",
+    title: "ISO 9001:2015認證更新",
+    subtitle: "品質管理系統",
+    date: "2024年5月",
+    location: "香港",
+    image: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=800&auto=format&fit=crop",
+    description: "順利通過ISO 9001:2015品質管理系統認證年度審核。",
+    featured: false,
+    content: [
+      "WIN-CYC順利通過ISO 9001:2015品質管理系統認證年度審核，確保品質管理達國際標準。"
+    ],
+  },
+  {
+    id: 14,
+    type: "news",
+    category: "product",
+    title: "環保再生鈕扣系列上市",
+    subtitle: "綠色產品線",
+    date: "2024年4月",
+    location: "東莞",
+    image: "https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?w=800&auto=format&fit=crop",
+    description: "採用100%再生材料製造的環保鈕扣系列正式推出市場。",
+    featured: false,
+    content: [
+      "WIN-CYC推出採用100%再生材料製造的環保鈕扣系列，為環保時尚提供理想選擇。"
+    ],
+  },
 ];
 
 export const categoryOptions = [

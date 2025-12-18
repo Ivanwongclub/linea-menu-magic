@@ -127,9 +127,9 @@ const Navigation = () => {
       href: "/about/our-story",
       submenuItems: [
         "Our Story",
+        "Factory",
+        "Certificates",
         "Sustainability",
-        "Size Guide",
-        "Customer Care",
         "Store Locator"
       ],
       images: [

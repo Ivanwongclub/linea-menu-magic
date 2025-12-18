@@ -187,7 +187,7 @@ const News = () => {
                 }`} style={{ transformOrigin: 'left', transitionDelay: '200ms' }} />
               </div>
               
-              <div ref={regularRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div ref={regularRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredRegularItems.map((item, index) => (
                   <Link
                     key={item.id}
@@ -205,25 +205,32 @@ const News = () => {
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                       </div>
-                      <div className="p-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-[10px] font-medium uppercase tracking-widest text-foreground/70">
+                      <div className="p-5">
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="text-xs font-medium uppercase tracking-widest text-foreground/70">
                             {item.type === "exhibition" ? "展覽" : "新聞"}
                           </span>
-                          <span className="text-[10px] text-muted-foreground">
+                          <span className="w-4 h-px bg-border" />
+                          <span className="text-xs text-muted-foreground">
                             {categoryOptions.find(c => c.key === item.category)?.label}
                           </span>
                         </div>
-                        <h3 className="text-sm font-serif font-light text-foreground mt-1 mb-2 group-hover:text-foreground/80 transition-colors duration-300 line-clamp-2">
+                        <h3 className="text-base font-serif font-light text-foreground mb-2 group-hover:text-foreground/80 transition-colors duration-300 line-clamp-2">
                           {item.title}
                         </h3>
-                        <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Calendar className="w-2.5 h-2.5" />
+                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                          {item.subtitle}
+                        </p>
+                        <p className="text-sm text-foreground/70 leading-relaxed mb-4 line-clamp-2">
+                          {item.description}
+                        </p>
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground pt-3 border-t border-border">
+                          <span className="flex items-center gap-1.5">
+                            <Calendar className="w-3 h-3" />
                             {item.date}
                           </span>
-                          <span className="flex items-center gap-1">
-                            <MapPin className="w-2.5 h-2.5" />
+                          <span className="flex items-center gap-1.5">
+                            <MapPin className="w-3 h-3" />
                             {item.location}
                           </span>
                         </div>
