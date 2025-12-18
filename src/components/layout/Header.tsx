@@ -142,9 +142,13 @@ const Header = () => {
           {/* Menu content */}
           <div className="lg:hidden fixed top-14 left-0 right-0 bg-background border-b border-border z-50 animate-slide-down max-h-[calc(100vh-56px)] overflow-y-auto px-6">
             <nav className="flex flex-col space-y-2 py-4">
-              {navLinks.map((link) => (
+              {navLinks.map((link, index) => (
                 link.hasSubmenu ? (
-                  <div key={link.href}>
+                  <div 
+                    key={link.href}
+                    className="opacity-0 animate-fade-in"
+                    style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'forwards' }}
+                  >
                     <button
                       onClick={() => setIsAboutOpen(!isAboutOpen)}
                       className={`w-full flex items-center justify-between text-sm tracking-wide py-2 transition-colors ${
@@ -161,16 +165,17 @@ const Header = () => {
                     </button>
                     {isAboutOpen && (
                       <div className="pl-4 mt-1 space-y-1 border-l border-border ml-2">
-                        {aboutSubmenu.map((sublink) => (
+                        {aboutSubmenu.map((sublink, subIndex) => (
                           <Link
                             key={sublink.href}
                             to={sublink.href}
                             onClick={() => setIsMenuOpen(false)}
-                            className={`block text-sm py-1.5 transition-colors ${
+                            className={`block text-sm py-1.5 transition-colors opacity-0 animate-fade-in ${
                               location.pathname === sublink.href
                                 ? "text-foreground"
                                 : "text-muted-foreground hover:text-foreground"
                             }`}
+                            style={{ animationDelay: `${subIndex * 30}ms`, animationFillMode: 'forwards' }}
                           >
                             {sublink.label}
                           </Link>
@@ -183,11 +188,12 @@ const Header = () => {
                     key={link.href}
                     to={link.href}
                     onClick={() => setIsMenuOpen(false)}
-                    className={`text-sm tracking-wide py-2 transition-colors ${
+                    className={`text-sm tracking-wide py-2 transition-colors opacity-0 animate-fade-in ${
                       isActive(link.href)
                         ? "text-foreground font-medium"
                         : "text-muted-foreground"
                     }`}
+                    style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'forwards' }}
                   >
                     {link.label}
                     <span className="text-xs text-muted-foreground ml-2">
@@ -199,7 +205,8 @@ const Header = () => {
               <Link
                 to="/contact"
                 onClick={() => setIsMenuOpen(false)}
-                className="mt-4 py-3 bg-brand-red-accent text-white text-center text-xs tracking-widest uppercase transition-all duration-300 hover:bg-foreground btn-red-glow"
+                className="mt-4 py-3 bg-brand-red-accent text-white text-center text-xs tracking-widest uppercase transition-all duration-300 hover:bg-foreground btn-red-glow opacity-0 animate-fade-in"
+                style={{ animationDelay: `${navLinks.length * 50}ms`, animationFillMode: 'forwards' }}
               >
                 獲取報價
               </Link>
