@@ -3,6 +3,7 @@ import Footer from "@/components/footer/Footer";
 import { ArrowRight, Calendar, MapPin, Leaf, Recycle, TreePine, Wind } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 const newsItems = [
   {
@@ -88,9 +89,17 @@ const greenLifeImages = [
   },
 ];
 
+type FilterType = "all" | "exhibition" | "news";
+
 const News = () => {
-  const featuredItems = newsItems.filter((item) => item.featured);
-  const regularItems = newsItems.filter((item) => !item.featured);
+  const [activeFilter, setActiveFilter] = useState<FilterType>("all");
+  
+  const filteredFeaturedItems = newsItems.filter(
+    (item) => item.featured && (activeFilter === "all" || item.type === activeFilter)
+  );
+  const filteredRegularItems = newsItems.filter(
+    (item) => !item.featured && (activeFilter === "all" || item.type === activeFilter)
+  );
 
   return (
     <div className="min-h-screen bg-white">
@@ -107,6 +116,31 @@ const News = () => {
           </p>
         </div>
       </section>
+
+      {/* Sticky Category Filter Bar */}
+      <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-border">
+        <div className="max-w-7xl mx-auto px-6 py-3">
+          <div className="flex items-center gap-2">
+            {[
+              { key: "all" as FilterType, label: "全部" },
+              { key: "exhibition" as FilterType, label: "展覽" },
+              { key: "news" as FilterType, label: "新聞" },
+            ].map((filter) => (
+              <button
+                key={filter.key}
+                onClick={() => setActiveFilter(filter.key)}
+                className={`px-4 py-1.5 text-sm transition-all duration-300 ${
+                  activeFilter === filter.key
+                    ? "bg-green-forest text-white"
+                    : "bg-transparent text-foreground hover:bg-green-light/50 border border-border"
+                }`}
+              >
+                {filter.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
 
       {/* Green Footprint Banner - Optimized */}
       <section className="py-12 px-6 bg-white">
@@ -231,7 +265,7 @@ const News = () => {
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {featuredItems.map((item) => (
+            {filteredFeaturedItems.map((item) => (
               <article
                 key={item.id}
                 className="group relative overflow-hidden bg-white border border-border hover:border-green-sage/40 transition-all duration-500"
@@ -287,7 +321,7 @@ const News = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {regularItems.map((item) => (
+            {filteredRegularItems.map((item) => (
               <article
                 key={item.id}
                 className="group bg-white border border-border hover:border-green-sage/40 transition-all duration-500"
