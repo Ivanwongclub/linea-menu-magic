@@ -1,14 +1,15 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/footer/Footer";
-import { ArrowRight, Calendar, MapPin, Leaf, Recycle, TreePine, Wind } from "lucide-react";
+import { ArrowRight, Calendar, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 
 const newsItems = [
   {
     id: 1,
     type: "exhibition",
+    category: "industry",
     title: "Première Vision Paris 2025",
     subtitle: "全球紡織面料展覽會",
     date: "2025年2月11-13日",
@@ -20,6 +21,7 @@ const newsItems = [
   {
     id: 2,
     type: "news",
+    category: "product",
     title: "WIN-CYC+ 數碼轉型計劃正式啟動",
     subtitle: "引領行業創新",
     date: "2024年12月",
@@ -31,6 +33,7 @@ const newsItems = [
   {
     id: 3,
     type: "exhibition",
+    category: "industry",
     title: "Intertextile Shanghai 2025",
     subtitle: "中國國際紡織面料及輔料博覽會",
     date: "2025年3月",
@@ -42,6 +45,7 @@ const newsItems = [
   {
     id: 4,
     type: "news",
+    category: "certification",
     title: "環保認證再獲殊榮",
     subtitle: "可持續發展里程碑",
     date: "2024年11月",
@@ -53,6 +57,7 @@ const newsItems = [
   {
     id: 5,
     type: "exhibition",
+    category: "industry",
     title: "Hong Kong Fashion Week 2025",
     subtitle: "香港時裝週",
     date: "2025年1月",
@@ -64,6 +69,7 @@ const newsItems = [
   {
     id: 6,
     type: "news",
+    category: "product",
     title: "設計師工作室平台上線",
     subtitle: "數碼化服務升級",
     date: "2024年10月",
@@ -72,309 +78,305 @@ const newsItems = [
     description: "全新Designer Studio平台正式上線，為設計師提供一站式數碼化產品瀏覽及報價服務。",
     featured: false,
   },
-];
-
-const greenLifeImages = [
   {
-    image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600&auto=format&fit=crop",
-    title: "自然共生",
+    id: 7,
+    type: "news",
+    category: "partnership",
+    title: "與國際時裝品牌簽署戰略合作協議",
+    subtitle: "全球業務拓展",
+    date: "2024年9月",
+    location: "香港",
+    image: "https://images.unsplash.com/photo-1573164713988-8665fc963095?w=800&auto=format&fit=crop",
+    description: "與多個國際知名時裝品牌建立長期戰略合作夥伴關係，進一步擴大全球業務版圖。",
+    featured: false,
   },
   {
-    image: "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=600&auto=format&fit=crop",
-    title: "清新空氣",
-  },
-  {
-    image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=600&auto=format&fit=crop",
-    title: "綠色城市",
+    id: 8,
+    type: "news",
+    category: "certification",
+    title: "GRS認證審核順利通過",
+    subtitle: "環保承諾",
+    date: "2024年8月",
+    location: "東莞",
+    image: "https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?w=800&auto=format&fit=crop",
+    description: "集團生產基地順利通過全球回收標準(GRS)年度審核，持續推動可持續發展。",
+    featured: false,
   },
 ];
 
 type FilterType = "all" | "exhibition" | "news";
+type CategoryType = "all" | "industry" | "product" | "certification" | "partnership";
+
+const filterOptions: { key: FilterType; label: string }[] = [
+  { key: "all", label: "全部" },
+  { key: "exhibition", label: "展覽" },
+  { key: "news", label: "新聞" },
+];
+
+const categoryOptions: { key: CategoryType; label: string }[] = [
+  { key: "all", label: "所有類別" },
+  { key: "industry", label: "行業動態" },
+  { key: "product", label: "產品發佈" },
+  { key: "certification", label: "認證資訊" },
+  { key: "partnership", label: "合作夥伴" },
+];
 
 const News = () => {
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
+  const [activeCategory, setActiveCategory] = useState<CategoryType>("all");
   
-  const filteredFeaturedItems = newsItems.filter(
-    (item) => item.featured && (activeFilter === "all" || item.type === activeFilter)
-  );
-  const filteredRegularItems = newsItems.filter(
-    (item) => !item.featured && (activeFilter === "all" || item.type === activeFilter)
-  );
+  const { ref: heroRef, isVisible: heroVisible } = useScrollAnimation();
+  const { ref: filterRef, isVisible: filterVisible } = useScrollAnimation();
+  const { ref: featuredHeaderRef, isVisible: featuredHeaderVisible } = useScrollAnimation();
+  const { ref: featuredRef, isVisible: featuredVisible, getDelay: getFeaturedDelay } = useStaggeredAnimation(2, 150);
+  const { ref: regularHeaderRef, isVisible: regularHeaderVisible } = useScrollAnimation();
+  const { ref: regularRef, isVisible: regularVisible, getDelay: getRegularDelay } = useStaggeredAnimation(8, 100);
+  const { ref: ctaRef, isVisible: ctaVisible } = useScrollAnimation();
+
+  const filteredItems = newsItems.filter((item) => {
+    const typeMatch = activeFilter === "all" || item.type === activeFilter;
+    const categoryMatch = activeCategory === "all" || item.category === activeCategory;
+    return typeMatch && categoryMatch;
+  });
+
+  const filteredFeaturedItems = filteredItems.filter((item) => item.featured);
+  const filteredRegularItems = filteredItems.filter((item) => !item.featured);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       <Header />
       
-      {/* Hero Section - Compact */}
-      <section className="pt-20 pb-8 px-6 bg-white border-b border-border">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl md:text-4xl font-serif font-light text-foreground mb-2 tracking-tight">
-            最新動態
-          </h1>
-          <p className="text-base text-muted-foreground font-light">
-            展覽資訊 · 企業新聞 · 行業動態
-          </p>
-        </div>
-      </section>
-
-      {/* Sticky Category Filter Bar */}
-      <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-border">
-        <div className="max-w-7xl mx-auto px-6 py-3">
-          <div className="flex items-center gap-2">
-            {[
-              { key: "all" as FilterType, label: "全部" },
-              { key: "exhibition" as FilterType, label: "展覽" },
-              { key: "news" as FilterType, label: "新聞" },
-            ].map((filter) => (
-              <button
-                key={filter.key}
-                onClick={() => setActiveFilter(filter.key)}
-                className={`px-4 py-1.5 text-sm transition-all duration-300 ${
-                  activeFilter === filter.key
-                    ? "bg-green-forest text-white"
-                    : "bg-transparent text-foreground hover:bg-green-light/50 border border-border"
-                }`}
-              >
-                {filter.label}
-              </button>
-            ))}
+      <main>
+        {/* Hero Section - Same style as About page */}
+        <section ref={heroRef} className="py-24 px-6 lg:px-8 bg-secondary overflow-hidden">
+          <div className="max-w-4xl mx-auto text-center">
+            <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${
+              heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}>News & Events</p>
+            <h1 className={`font-serif text-4xl md:text-5xl font-light text-foreground mb-6 transition-all duration-700 ease-out ${
+              heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`} style={{ transitionDelay: '100ms' }}>
+              最新動態
+            </h1>
+            <p className={`text-lg text-muted-foreground leading-relaxed transition-all duration-700 ease-out ${
+              heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`} style={{ transitionDelay: '200ms' }}>
+              展覽資訊 · 企業新聞 · 行業動態
+            </p>
           </div>
-        </div>
-      </div>
+        </section>
 
-      {/* Green Footprint Banner - Optimized */}
-      <section className="py-12 px-6 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            {/* Text Content - 5 columns */}
-            <div className="lg:col-span-5 space-y-5">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 border border-green-sage/30 rounded-full">
-                <Leaf className="w-3.5 h-3.5 text-green-forest" />
-                <span className="text-xs text-green-forest tracking-wide">Green Initiative</span>
+        {/* Sticky Category Filter Bar */}
+        <div ref={filterRef} className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
+          <div className="max-w-7xl mx-auto px-6 py-4">
+            <div className={`flex flex-col sm:flex-row sm:items-center gap-4 transition-all duration-700 ease-out ${
+              filterVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+            }`}>
+              {/* Type Filter */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground mr-2">類型</span>
+                {filterOptions.map((filter) => (
+                  <button
+                    key={filter.key}
+                    onClick={() => setActiveFilter(filter.key)}
+                    className={`px-3 py-1.5 text-sm transition-all duration-300 ${
+                      activeFilter === filter.key
+                        ? "bg-foreground text-background"
+                        : "bg-transparent text-foreground hover:bg-secondary border border-border"
+                    }`}
+                  >
+                    {filter.label}
+                  </button>
+                ))}
               </div>
               
-              <h2 className="text-2xl md:text-3xl font-serif font-light text-foreground leading-tight">
-                綠色足跡
-                <span className="block text-green-forest mt-1">永續未來</span>
-              </h2>
-              
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                我們致力於減少碳足跡，採用環保材料與可持續生產流程。每一個選擇，都是為了更美好的明天。
-              </p>
-              
-              <div className="flex flex-wrap gap-3">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="border-green-forest text-green-forest hover:bg-green-forest hover:text-white transition-all duration-300 rounded-none text-xs h-9"
-                >
-                  <Recycle className="w-3.5 h-3.5 mr-1.5" />
-                  了解環保認證
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="border-green-sage text-green-sage hover:bg-green-sage hover:text-white transition-all duration-300 rounded-none text-xs h-9"
-                >
-                  <TreePine className="w-3.5 h-3.5 mr-1.5" />
-                  可持續發展報告
-                </Button>
-              </div>
-              
-              {/* Stats - Compact */}
-              <div className="flex gap-8 pt-4 border-t border-green-mist/30">
-                <div>
-                  <p className="text-2xl font-serif text-green-forest">30%</p>
-                  <p className="text-xs text-muted-foreground">碳排放減少</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-serif text-green-forest">100%</p>
-                  <p className="text-xs text-muted-foreground">可回收包裝</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-serif text-green-forest">50+</p>
-                  <p className="text-xs text-muted-foreground">環保產品線</p>
+              {/* Category Filter */}
+              <div className="flex items-center gap-2 sm:ml-6">
+                <span className="text-xs text-muted-foreground mr-2">分類</span>
+                <div className="flex flex-wrap gap-2">
+                  {categoryOptions.map((category) => (
+                    <button
+                      key={category.key}
+                      onClick={() => setActiveCategory(category.key)}
+                      className={`px-3 py-1.5 text-sm transition-all duration-300 ${
+                        activeCategory === category.key
+                          ? "bg-foreground text-background"
+                          : "bg-transparent text-foreground hover:bg-secondary border border-border"
+                      }`}
+                    >
+                      {category.label}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
-            
-            {/* Image Grid - 7 columns, aligned */}
-            <div className="lg:col-span-7 grid grid-cols-3 gap-2">
-              {greenLifeImages.map((item, index) => (
-                <div 
-                  key={index}
-                  className="relative overflow-hidden group aspect-[4/5]"
-                >
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-green-deep/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
-                    <p className="text-white font-light text-xs">{item.title}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
-      </section>
 
-      {/* Green Vision Section - Compact */}
-      <section className="py-10 px-6 bg-green-light/40">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-            <div>
-              <h3 className="text-xl font-serif font-light text-foreground mb-1">
-                邁向更美好的生活
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                當我們共同努力減少碳足跡，世界將會變得更加美好
-              </p>
+        {/* Featured Section */}
+        {filteredFeaturedItems.length > 0 && (
+          <section className="py-16 px-6 lg:px-8 overflow-hidden">
+            <div className="max-w-7xl mx-auto">
+              <div ref={featuredHeaderRef} className="flex items-center gap-4 mb-8">
+                <h2 className={`text-xs font-medium text-muted-foreground uppercase tracking-widest transition-all duration-700 ease-out ${
+                  featuredHeaderVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'
+                }`}>
+                  焦點消息
+                </h2>
+                <div className={`flex-1 h-px bg-border transition-all duration-700 ease-out ${
+                  featuredHeaderVisible ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0'
+                }`} style={{ transformOrigin: 'left', transitionDelay: '200ms' }} />
+              </div>
+              
+              <div ref={featuredRef} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {filteredFeaturedItems.map((item, index) => (
+                  <article
+                    key={item.id}
+                    className={`group relative overflow-hidden bg-background border border-border hover:border-foreground/20 transition-all duration-500 ${
+                      featuredVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+                    }`}
+                    style={getFeaturedDelay(index)}
+                  >
+                    <div className="aspect-[16/9] overflow-hidden">
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                    </div>
+                    <div className="p-6">
+                      <div className="flex items-center gap-3 mb-3">
+                        <span className="text-xs font-medium uppercase tracking-widest text-foreground/70">
+                          {item.type === "exhibition" ? "展覽" : "新聞"}
+                        </span>
+                        <span className="w-6 h-px bg-border" />
+                        <span className="text-xs text-muted-foreground">
+                          {categoryOptions.find(c => c.key === item.category)?.label}
+                        </span>
+                      </div>
+                      <h3 className="text-xl font-serif font-light text-foreground mb-1 group-hover:text-foreground/80 transition-colors duration-300">
+                        {item.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        {item.subtitle}
+                      </p>
+                      <p className="text-sm text-foreground/80 leading-relaxed mb-4">
+                        {item.description}
+                      </p>
+                      <div className="flex items-center gap-5 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1.5">
+                          <Calendar className="w-3 h-3" />
+                          {item.date}
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <MapPin className="w-3 h-3" />
+                          {item.location}
+                        </span>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
             </div>
-            
-            <div className="flex flex-wrap gap-4">
-              {[
-                { icon: Wind, title: "清新空氣" },
-                { icon: TreePine, title: "綠色森林" },
-                { icon: Recycle, title: "循環經濟" },
-                { icon: Leaf, title: "健康生活" },
-              ].map((item, index) => (
-                <div 
-                  key={index}
-                  className="flex items-center gap-2 bg-white px-4 py-2 group hover:bg-green-forest transition-all duration-300"
-                >
-                  <item.icon className="w-4 h-4 text-green-forest group-hover:text-white transition-colors duration-300" />
-                  <span className="text-sm text-foreground group-hover:text-white transition-colors duration-300">{item.title}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+          </section>
+        )}
 
-      {/* Featured Section */}
-      <section className="py-12 px-6 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center gap-4 mb-6">
-            <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-widest">
-              焦點消息
+        {/* Regular News Grid */}
+        {filteredRegularItems.length > 0 && (
+          <section className="py-16 px-6 lg:px-8 bg-secondary overflow-hidden">
+            <div className="max-w-7xl mx-auto">
+              <div ref={regularHeaderRef} className="flex items-center gap-4 mb-8">
+                <h2 className={`text-xs font-medium text-muted-foreground uppercase tracking-widest transition-all duration-700 ease-out ${
+                  regularHeaderVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'
+                }`}>
+                  更多消息
+                </h2>
+                <div className={`flex-1 h-px bg-border transition-all duration-700 ease-out ${
+                  regularHeaderVisible ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0'
+                }`} style={{ transformOrigin: 'left', transitionDelay: '200ms' }} />
+              </div>
+              
+              <div ref={regularRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {filteredRegularItems.map((item, index) => (
+                  <article
+                    key={item.id}
+                    className={`group bg-background border border-border hover:border-foreground/20 transition-all duration-500 ${
+                      regularVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+                    }`}
+                    style={getRegularDelay(index)}
+                  >
+                    <div className="aspect-[16/10] overflow-hidden">
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                    </div>
+                    <div className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-[10px] font-medium uppercase tracking-widest text-foreground/70">
+                          {item.type === "exhibition" ? "展覽" : "新聞"}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground">
+                          {categoryOptions.find(c => c.key === item.category)?.label}
+                        </span>
+                      </div>
+                      <h3 className="text-sm font-serif font-light text-foreground mt-1 mb-2 group-hover:text-foreground/80 transition-colors duration-300 line-clamp-2">
+                        {item.title}
+                      </h3>
+                      <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-2.5 h-2.5" />
+                          {item.date}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <MapPin className="w-2.5 h-2.5" />
+                          {item.location}
+                        </span>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Empty State */}
+        {filteredItems.length === 0 && (
+          <section className="py-24 px-6 lg:px-8">
+            <div className="max-w-7xl mx-auto text-center">
+              <p className="text-muted-foreground">暫無符合條件的內容</p>
+            </div>
+          </section>
+        )}
+
+        {/* CTA Section */}
+        <section ref={ctaRef} className="py-16 px-6 lg:px-8 border-t border-border overflow-hidden">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className={`text-xl md:text-2xl font-serif font-light text-foreground mb-2 transition-all duration-700 ease-out ${
+              ctaVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}>
+              訂閱最新資訊
             </h2>
-            <div className="flex-1 h-px bg-border" />
+            <p className={`text-sm text-muted-foreground mb-6 font-light transition-all duration-700 ease-out ${
+              ctaVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`} style={{ transitionDelay: '100ms' }}>
+              獲取展覽預告、產品發布及行業動態
+            </p>
+            <Link
+              to="/contact"
+              className={`inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background hover:bg-foreground/90 transition-all duration-300 text-sm ${
+                ctaVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+              }`}
+              style={{ transitionDelay: '200ms' }}
+            >
+              <span>聯絡我們</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {filteredFeaturedItems.map((item) => (
-              <article
-                key={item.id}
-                className="group relative overflow-hidden bg-white border border-border hover:border-green-sage/40 transition-all duration-500"
-              >
-                <div className="aspect-[16/9] overflow-hidden">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                </div>
-                <div className="p-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="text-xs font-medium uppercase tracking-widest text-green-forest">
-                      {item.type === "exhibition" ? "展覽" : "新聞"}
-                    </span>
-                    <span className="w-6 h-px bg-green-mist" />
-                  </div>
-                  <h3 className="text-xl font-serif font-light text-foreground mb-1 group-hover:text-green-forest transition-colors duration-300">
-                    {item.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    {item.subtitle}
-                  </p>
-                  <p className="text-sm text-foreground/80 leading-relaxed mb-4">
-                    {item.description}
-                  </p>
-                  <div className="flex items-center gap-5 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1.5">
-                      <Calendar className="w-3 h-3" />
-                      {item.date}
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <MapPin className="w-3 h-3" />
-                      {item.location}
-                    </span>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Regular News Grid */}
-      <section className="py-12 px-6 bg-muted/20">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center gap-4 mb-6">
-            <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-widest">
-              更多消息
-            </h2>
-            <div className="flex-1 h-px bg-border" />
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {filteredRegularItems.map((item) => (
-              <article
-                key={item.id}
-                className="group bg-white border border-border hover:border-green-sage/40 transition-all duration-500"
-              >
-                <div className="aspect-[16/10] overflow-hidden">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                </div>
-                <div className="p-4">
-                  <span className="text-[10px] font-medium uppercase tracking-widest text-green-forest">
-                    {item.type === "exhibition" ? "展覽" : "新聞"}
-                  </span>
-                  <h3 className="text-sm font-serif font-light text-foreground mt-1 mb-2 group-hover:text-green-forest transition-colors duration-300 line-clamp-2">
-                    {item.title}
-                  </h3>
-                  <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-2.5 h-2.5" />
-                      {item.date}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <MapPin className="w-2.5 h-2.5" />
-                      {item.location}
-                    </span>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section - Compact */}
-      <section className="py-12 px-6 bg-white border-t border-border">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-xl md:text-2xl font-serif font-light text-foreground mb-2">
-            訂閱最新資訊
-          </h2>
-          <p className="text-sm text-muted-foreground mb-6 font-light">
-            獲取展覽預告、產品發布及行業動態
-          </p>
-          <Link
-            to="/contact"
-            className="inline-flex items-center gap-2 px-6 py-2.5 bg-green-forest text-white hover:bg-green-deep transition-colors duration-300 text-sm"
-          >
-            <span>聯絡我們</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-      </section>
+        </section>
+      </main>
 
       <Footer />
     </div>
