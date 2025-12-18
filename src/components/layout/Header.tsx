@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, ChevronDown } from "lucide-react";
 
@@ -6,6 +6,18 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const location = useLocation();
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMenuOpen]);
 
   const navLinks = [
     { href: "/about", label: "關於我們", labelEn: "About", hasSubmenu: true },
@@ -116,11 +128,20 @@ const Header = () => {
             {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
+      </div>
 
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="lg:hidden py-4 border-t border-border animate-fade-in max-h-[calc(100vh-56px)] overflow-y-auto">
-            <nav className="flex flex-col space-y-2">
+      {/* Mobile Navigation with Backdrop */}
+      {isMenuOpen && (
+        <>
+          {/* Backdrop overlay - click to close */}
+          <div 
+            className="lg:hidden fixed inset-0 top-14 bg-black/40 z-40"
+            onClick={() => setIsMenuOpen(false)}
+          />
+          
+          {/* Menu content */}
+          <div className="lg:hidden fixed top-14 left-0 right-0 bg-background border-b border-border z-50 animate-fade-in max-h-[calc(100vh-56px)] overflow-y-auto px-6">
+            <nav className="flex flex-col space-y-2 py-4">
               {navLinks.map((link) => (
                 link.hasSubmenu ? (
                   <div key={link.href}>
@@ -184,8 +205,8 @@ const Header = () => {
               </Link>
             </nav>
           </div>
-        )}
-      </div>
+        </>
+      )}
     </header>
   );
 };
