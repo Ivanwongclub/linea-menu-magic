@@ -792,6 +792,56 @@ export const mockLibraryItems: LibraryItem[] = [
     createdAt: '2024-03-20T10:00:00Z',
     updatedAt: '2024-03-20T10:00:00Z',
   },
+  {
+    id: 'item-011',
+    itemCode: 'BTN-POLO-001',
+    name: 'Polo 鈕扣 10.8mm',
+    nameEn: 'Polo Button 10.8mm',
+    category: 'buttons',
+    description: 'Polo 風格圓形鈕扣，直徑 10.8mm，適用於 Polo 衫、休閒襯衫等服飾。附有 3D OBJ 模型檔案，可供設計師直接下載編輯。',
+    specifications: {
+      material: '樹脂',
+      size: '10.8mm',
+      color: '自然色',
+      finish: '啞光',
+      weight: '0.8g',
+      thickness: '2.5mm',
+    },
+    pricing: {
+      unitPrice: 0.12,
+      currency: 'USD',
+      moq: 5000,
+      priceBreaks: [
+        { quantity: 10000, price: 0.10 },
+        { quantity: 50000, price: 0.08 },
+      ],
+    },
+    production: {
+      leadTime: '15-20 天',
+      sampleTime: '5 天',
+      origin: '台灣',
+      capacity: '500,000 pcs/月',
+    },
+    certifications: ['OEKO-TEX', 'REACH'],
+    availableColors: ['自然色', '黑色', '白色', '深藍', '咖啡色'],
+    applications: ['Polo衫', '休閒襯衫', '針織上衣', '童裝'],
+    downloadableFiles: [
+      {
+        id: 'file-011-1',
+        name: 'Polo_Button_10.8.obj',
+        description: '3D 模型檔案 - Rhino OBJ 格式',
+        fileType: 'obj',
+        fileSize: '2.1 MB',
+        url: '/models/Polo_Button_10.8.obj',
+        uploadedAt: '2026-03-06T10:00:00Z',
+      },
+    ],
+    isPublic: true,
+    modelUrl: '/models/Polo_Button_10.8.obj',
+    thumbnailUrl: resinButtons,
+    createdAt: '2026-03-06T10:00:00Z',
+    updatedAt: '2026-03-06T10:00:00Z',
+  },
 ];
 
 export const categoryLabels: Record<LibraryItem['category'], string> = {
