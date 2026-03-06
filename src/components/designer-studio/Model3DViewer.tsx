@@ -1,6 +1,6 @@
 import { Suspense, useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Environment, ContactShadows, PresentationControls, Center } from "@react-three/drei";
+import { OrbitControls, Environment, ContactShadows, PresentationControls, Center, Html, useProgress } from "@react-three/drei";
 import { Box, RotateCcw, Maximize2, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import * as THREE from "three";
@@ -226,13 +226,20 @@ const Scene = ({ modelType, autoRotate, lightMode, modelUrl }: { modelType: stri
   );
 };
 
-// Loading fallback
-const Loader = () => (
-  <mesh>
-    <boxGeometry args={[0.5, 0.5, 0.5]} />
-    <meshStandardMaterial color="#666" wireframe />
-  </mesh>
-);
+// Loading fallback with progress
+const Loader = () => {
+  const { progress } = useProgress();
+  return (
+    <Html center>
+      <div className="flex flex-col items-center gap-2 text-center">
+        <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        <p className="text-sm text-muted-foreground whitespace-nowrap">
+          載入模型中... {progress.toFixed(0)}%
+        </p>
+      </div>
+    </Html>
+  );
+};
 
 const Model3DViewer = ({ hasModel, modelType = 'button', modelUrl }: Model3DViewerProps) => {
   const [autoRotate, setAutoRotate] = useState(true);
