@@ -32,6 +32,14 @@ const OBJModel = ({ url, autoRotate = false, material }: OBJModelProps) => {
         (child as THREE.Mesh).receiveShadow = true;
       }
     });
+    // Normalize model size to fit within ~2 units
+    const box = new THREE.Box3().setFromObject(clone);
+    const size = box.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    if (maxDim > 0) {
+      const scale = 2 / maxDim;
+      clone.scale.setScalar(scale);
+    }
     return clone;
   }, [obj, material?.color, material?.metalness, material?.roughness]);
 
