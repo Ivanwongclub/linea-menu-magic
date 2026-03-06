@@ -118,7 +118,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                   <CardTitle className="text-lg">3D 模型預覽</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Model3DViewer hasModel={true} modelType={getModelType(item.category)} />
+                  <Model3DViewer hasModel={true} modelType={getModelType(item.category)} modelUrl={item.modelUrl} />
                   <div className="mt-4 flex gap-2">
                     <Button variant="outline" className="gap-2 flex-1">
                       <Download className="w-4 h-4" />
