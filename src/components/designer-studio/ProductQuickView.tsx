@@ -1,10 +1,10 @@
-import { useState, Suspense } from "react";
+import { useState, Suspense, useRef } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Environment, ContactShadows, PresentationControls, Center } from "@react-three/drei";
 import { 
   Box, Globe, Lock, Calendar, Tag, Layers, X, 
@@ -17,9 +17,8 @@ import { LibraryItem, categoryLabels } from "@/data/mockLibraryData";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
 import QuickRFQDialog from "./QuickRFQDialog";
+import OBJModel from "./OBJModelLoader";
 import * as THREE from "three";
-import { useRef } from "react";
-import { useFrame } from "@react-three/fiber";
 
 interface ProductQuickViewProps {
   item: LibraryItem | null;
@@ -87,8 +86,11 @@ const AutoRotate = ({ children, autoRotate }: { children: React.ReactNode; autoR
   return <group ref={groupRef}>{children}</group>;
 };
 
-const MiniScene = ({ modelType, autoRotate, lightMode }: { modelType: string; autoRotate: boolean; lightMode: boolean }) => {
+const MiniScene = ({ modelType, autoRotate, lightMode, modelUrl }: { modelType: string; autoRotate: boolean; lightMode: boolean; modelUrl?: string }) => {
   const getModel = () => {
+    if (modelUrl) {
+      return <OBJModel url={modelUrl} autoRotate={autoRotate} />;
+    }
     switch (modelType) {
       case 'zippers': return <ZipperModel />;
       case 'hardware': return <HardwareModel />;
@@ -103,17 +105,21 @@ const MiniScene = ({ modelType, autoRotate, lightMode }: { modelType: string; au
       <directionalLight position={[-5, 3, -5]} intensity={0.4} />
       <Environment preset={lightMode ? "studio" : "night"} />
       <Center>
-        <AutoRotate autoRotate={autoRotate}>
-          <PresentationControls
-            global
-            config={{ mass: 2, tension: 500 }}
-            snap={{ mass: 4, tension: 1500 }}
-            polar={[-Math.PI / 3, Math.PI / 3]}
-            azimuth={[-Math.PI / 1.4, Math.PI / 2]}
-          >
-            {getModel()}
-          </PresentationControls>
-        </AutoRotate>
+        {modelUrl ? (
+          getModel()
+        ) : (
+          <AutoRotate autoRotate={autoRotate}>
+            <PresentationControls
+              global
+              config={{ mass: 2, tension: 500 }}
+              snap={{ mass: 4, tension: 1500 }}
+              polar={[-Math.PI / 3, Math.PI / 3]}
+              azimuth={[-Math.PI / 1.4, Math.PI / 2]}
+            >
+              {getModel()}
+            </PresentationControls>
+          </AutoRotate>
+        )}
       </Center>
       <ContactShadows position={[0, -0.8, 0]} opacity={0.5} scale={3} blur={2.5} far={4} />
       <OrbitControls enablePan enableZoom enableRotate minDistance={1.5} maxDistance={6} />
@@ -156,7 +162,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                     gl={{ antialias: true, alpha: true }}
                   >
                     <Suspense fallback={null}>
-                      <MiniScene modelType={item.category} autoRotate={autoRotate} lightMode={lightMode} />
+                      <MiniScene modelType={item.category} autoRotate={autoRotate} lightMode={lightMode} modelUrl={item.modelUrl} />
                     </Suspense>
                   </Canvas>
                   

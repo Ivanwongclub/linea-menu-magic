@@ -1,13 +1,15 @@
 import { Suspense, useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Environment, ContactShadows, PresentationControls, Center } from "@react-three/drei";
-import { Box, RotateCcw, ZoomIn, ZoomOut, Maximize2, Sun, Moon } from "lucide-react";
+import { Box, RotateCcw, Maximize2, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import * as THREE from "three";
+import OBJModel from "./OBJModelLoader";
 
 interface Model3DViewerProps {
   hasModel: boolean;
   modelType?: 'button' | 'zipper' | 'lace' | 'hardware';
+  modelUrl?: string;
 }
 
 // Demo 3D Button Model
@@ -143,8 +145,11 @@ const AutoRotate = ({ children, autoRotate }: { children: React.ReactNode; autoR
   return <group ref={groupRef}>{children}</group>;
 };
 
-const Scene = ({ modelType, autoRotate, lightMode }: { modelType: string; autoRotate: boolean; lightMode: boolean }) => {
+const Scene = ({ modelType, autoRotate, lightMode, modelUrl }: { modelType: string; autoRotate: boolean; lightMode: boolean; modelUrl?: string }) => {
   const getModel = () => {
+    if (modelUrl) {
+      return <OBJModel url={modelUrl} autoRotate={autoRotate} />;
+    }
     switch (modelType) {
       case 'zipper':
         return <ZipperModel />;
@@ -178,19 +183,25 @@ const Scene = ({ modelType, autoRotate, lightMode }: { modelType: string; autoRo
       <Environment preset={lightMode ? "studio" : "night"} />
       
       {/* Model */}
-      <Center>
-        <AutoRotate autoRotate={autoRotate}>
-          <PresentationControls
-            global
-            config={{ mass: 2, tension: 500 }}
-            snap={{ mass: 4, tension: 1500 }}
-            polar={[-Math.PI / 3, Math.PI / 3]}
-            azimuth={[-Math.PI / 1.4, Math.PI / 2]}
-          >
-            {getModel()}
-          </PresentationControls>
-        </AutoRotate>
-      </Center>
+      {modelUrl ? (
+        <Center>
+          {getModel()}
+        </Center>
+      ) : (
+        <Center>
+          <AutoRotate autoRotate={autoRotate}>
+            <PresentationControls
+              global
+              config={{ mass: 2, tension: 500 }}
+              snap={{ mass: 4, tension: 1500 }}
+              polar={[-Math.PI / 3, Math.PI / 3]}
+              azimuth={[-Math.PI / 1.4, Math.PI / 2]}
+            >
+              {getModel()}
+            </PresentationControls>
+          </AutoRotate>
+        </Center>
+      )}
       
       {/* Shadow */}
       <ContactShadows 
@@ -223,7 +234,7 @@ const Loader = () => (
   </mesh>
 );
 
-const Model3DViewer = ({ hasModel, modelType = 'button' }: Model3DViewerProps) => {
+const Model3DViewer = ({ hasModel, modelType = 'button', modelUrl }: Model3DViewerProps) => {
   const [autoRotate, setAutoRotate] = useState(true);
   const [lightMode, setLightMode] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -249,7 +260,7 @@ const Model3DViewer = ({ hasModel, modelType = 'button' }: Model3DViewerProps) =
           gl={{ antialias: true, alpha: true }}
         >
           <Suspense fallback={<Loader />}>
-            <Scene modelType={modelType} autoRotate={autoRotate} lightMode={lightMode} />
+            <Scene modelType={modelType} autoRotate={autoRotate} lightMode={lightMode} modelUrl={modelUrl} />
           </Suspense>
         </Canvas>
 
