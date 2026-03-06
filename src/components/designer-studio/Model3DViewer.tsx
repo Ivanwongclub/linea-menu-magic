@@ -217,8 +217,8 @@ const Scene = ({ modelType, autoRotate, lightMode, modelUrl }: { modelType: stri
         enablePan={true}
         enableZoom={true}
         enableRotate={true}
-        minDistance={1.5}
-        maxDistance={6}
+        minDistance={0.5}
+        maxDistance={10}
         minPolarAngle={Math.PI / 6}
         maxPolarAngle={Math.PI / 1.5}
       />
@@ -253,6 +253,7 @@ const Model3DViewer = ({ hasModel, modelType = 'button', modelUrl }: Model3DView
       {/* 3D Canvas */}
       <div 
         className={`${isFullscreen ? 'fixed inset-0 z-50' : 'aspect-video'} bg-gradient-to-br from-muted/30 to-muted/60 rounded-lg overflow-hidden relative`}
+        onWheel={(e) => e.stopPropagation()}
       >
         <Canvas
           shadows
