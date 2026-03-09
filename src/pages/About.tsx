@@ -1,6 +1,7 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
+import LetterReveal from "@/components/ui/LetterReveal";
 import aboutHeritageImage from "@/assets/about-heritage.jpg";
 import aboutShowroomImage from "@/assets/about-showroom.jpg";
 
@@ -33,19 +34,24 @@ const About = () => {
       
       <main>
         {/* Hero */}
-        <section ref={heroRef} className="py-24 px-6 lg:px-8 bg-secondary overflow-hidden">
-          <div className="max-w-4xl mx-auto text-center">
-            <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${
-              heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`}>About Us</p>
-            <h1 className={`text-4xl md:text-5xl font-bold text-foreground mb-6 transition-all duration-700 ease-out ${
-              heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`} style={{ transitionDelay: '100ms' }}>
-              關於我們
-            </h1>
+        <section ref={heroRef} className="py-32 px-6 lg:px-8 bg-secondary overflow-hidden">
+          <div className="max-w-5xl mx-auto text-center">
+            <div className="flex items-center justify-center gap-6 mb-6">
+              <span className={`h-px bg-accent/40 transition-all duration-1000 ${heroVisible ? 'w-16' : 'w-0'}`} />
+              <span className={`text-xs tracking-[0.2em] uppercase text-muted-foreground transition-all duration-700 ease-out ${heroVisible ? 'opacity-100' : 'opacity-0'}`}>About Us</span>
+              <span className={`h-px bg-accent/40 transition-all duration-1000 ${heroVisible ? 'w-16' : 'w-0'}`} />
+            </div>
+            <LetterReveal
+              text="關於我們"
+              as="h1"
+              className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6"
+              isVisible={heroVisible}
+              startDelay={200}
+              letterDelay={80}
+            />
             <p className={`text-lg text-muted-foreground leading-relaxed transition-all duration-700 ease-out ${
               heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`} style={{ transitionDelay: '200ms' }}>
+            }`} style={{ transitionDelay: '600ms' }}>
               四十五年的匠心傳承，造就卓越品質
             </p>
           </div>
@@ -56,14 +62,30 @@ const About = () => {
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
               <div>
-                <h2 className={`text-3xl font-bold text-foreground mb-6 transition-all duration-700 ease-out ${
-                  storyVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-                }`}>
-                  品牌故事
+                <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${storyVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'}`}>
+                  Heritage
+                </p>
+                <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6">
+                  <LetterReveal
+                    text="品牌"
+                    as="span"
+                    className="text-outline inline-block mr-2"
+                    isVisible={storyVisible}
+                    startDelay={100}
+                    letterDelay={80}
+                  />
+                  <LetterReveal
+                    text="故事"
+                    as="span"
+                    className="inline-block"
+                    isVisible={storyVisible}
+                    startDelay={300}
+                    letterDelay={80}
+                  />
                 </h2>
                 <div className={`space-y-6 text-muted-foreground leading-relaxed transition-all duration-700 ease-out ${
                   storyVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-                }`} style={{ transitionDelay: '150ms' }}>
+                }`} style={{ transitionDelay: '500ms' }}>
                   <p>
                     WIN-CYC GROUP LIMITED（雲傑震業集團有限公司）自1979年創立以來，
                     一直專注於服裝輔料的研發、製造與供應。
@@ -78,7 +100,7 @@ const About = () => {
                   </p>
                 </div>
               </div>
-              <div className={`aspect-[4/5] bg-muted overflow-hidden transition-all duration-700 ease-out ${
+              <div className={`aspect-[4/5] bg-muted overflow-hidden rounded-lg transition-all duration-700 ease-out ${
                 storyVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'
               }`} style={{ transitionDelay: '300ms' }}>
                 <img 
@@ -98,18 +120,21 @@ const About = () => {
               <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${
                 valuesHeaderVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}>Our Values</p>
-               <h2 className={`text-3xl font-bold text-foreground transition-all duration-700 ease-out ${
-                valuesHeaderVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-              }`} style={{ transitionDelay: '100ms' }}>
-                核心價值
-              </h2>
+              <LetterReveal
+                text="核心價值"
+                as="h2"
+                className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground font-serif-display"
+                isVisible={valuesHeaderVisible}
+                startDelay={100}
+                letterDelay={80}
+              />
             </div>
 
             <div ref={valuesRef} className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {values.map((value, index) => (
                 <div 
                   key={value.title}
-                  className={`p-8 bg-background text-center transition-all duration-500 ease-out hover:shadow-lg hover:-translate-y-1 ${
+                  className={`p-8 bg-background rounded-lg text-center transition-all duration-500 ease-out hover:shadow-lg hover:-translate-y-1 ${
                     valuesVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
                   }`}
                   style={getValuesDelay(index)}
@@ -129,11 +154,14 @@ const About = () => {
               <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${
                 timelineHeaderVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}>Milestones</p>
-              <h2 className={`text-3xl font-bold text-foreground transition-all duration-700 ease-out ${
-                timelineHeaderVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-              }`} style={{ transitionDelay: '100ms' }}>
-                發展歷程
-              </h2>
+              <LetterReveal
+                text="發展歷程"
+                as="h2"
+                className="text-5xl md:text-6xl lg:text-7xl font-light text-foreground italic font-serif-display"
+                isVisible={timelineHeaderVisible}
+                startDelay={100}
+                letterDelay={80}
+              />
             </div>
 
             <div ref={timelineRef} className="space-y-8">
