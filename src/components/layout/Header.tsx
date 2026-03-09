@@ -35,13 +35,15 @@ const Header = () => {
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo */}
-          <Link to="/" className="flex flex-col items-start">
-            <span className="text-lg lg:text-xl font-bold tracking-wide text-foreground">
-              WIN-CYC
-            </span>
-            <span className="text-[8px] lg:text-[10px] tracking-[0.15em] text-muted-foreground uppercase">
-              Group Limited
-            </span>
+          <Link to="/" className="inline-flex items-center bg-primary px-4 py-2 lg:px-5 lg:py-2.5">
+            <div className="flex flex-col items-start leading-none">
+              <span className="text-lg lg:text-xl text-primary-foreground tracking-[0.15em] uppercase" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>
+                WIN-CYC
+              </span>
+              <span className="text-[7px] lg:text-[8px] tracking-[0.12em] text-primary-foreground/60 uppercase">
+                Group Limited
+              </span>
+            </div>
           </Link>
 
           {/* Desktop Navigation */}
