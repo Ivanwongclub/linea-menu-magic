@@ -113,7 +113,7 @@ const Sustainability = () => {
         {/* Vision */}
         <section ref={visionRef} className="py-24 px-6 lg:px-8 overflow-hidden">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className={`font-serif text-3xl font-light text-foreground mb-8 transition-all duration-700 ease-out ${
+            <h2 className={`text-3xl font-bold text-foreground mb-8 transition-all duration-700 ease-out ${
               visionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}>
               我們的承諾
