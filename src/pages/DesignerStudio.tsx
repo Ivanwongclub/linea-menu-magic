@@ -132,7 +132,7 @@ const DesignerStudio = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div>
                 <div className="w-12 h-12 bg-secondary flex items-center justify-center mx-auto mb-4">
-                  <span className="font-serif text-xl text-foreground">1</span>
+                  <span className="text-xl font-bold text-foreground">1</span>
                 </div>
                 <h3 className="text-foreground mb-2">聯絡我們</h3>
                 <p className="text-sm text-muted-foreground">
