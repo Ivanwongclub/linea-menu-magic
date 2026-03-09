@@ -3,6 +3,7 @@ import Footer from "@/components/layout/Footer";
 import { Leaf, Recycle, Award, Factory, TreePine, Wind, Droplets, Sun } from "lucide-react";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 import { Button } from "@/components/ui/button";
+import LetterReveal from "@/components/ui/LetterReveal";
 
 const Sustainability = () => {
   const { ref: heroRef, isVisible: heroVisible } = useScrollAnimation();
@@ -92,19 +93,27 @@ const Sustainability = () => {
       
       <main>
         {/* Hero */}
-        <section ref={heroRef} className="py-24 px-6 lg:px-8 bg-secondary overflow-hidden">
-          <div className="max-w-4xl mx-auto text-center">
-            <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${
-              heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`}>Sustainability</p>
-            <h1 className={`text-4xl md:text-5xl font-bold text-foreground mb-6 transition-all duration-700 ease-out ${
-              heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`} style={{ transitionDelay: '100ms' }}>
-              可持續發展
-            </h1>
+        <section ref={heroRef} className="py-32 px-6 lg:px-8 bg-secondary overflow-hidden">
+          <div className="max-w-5xl mx-auto text-center">
+            <div className="flex items-center justify-center gap-6 mb-6">
+              <span className={`h-px bg-accent/40 transition-all duration-1000 ${heroVisible ? 'w-16' : 'w-0'}`} />
+              <span className={`text-xs tracking-[0.2em] uppercase text-muted-foreground transition-all duration-700 ease-out ${heroVisible ? 'opacity-100' : 'opacity-0'}`}>
+                <Leaf className="w-4 h-4 inline-block mr-2 -mt-0.5" strokeWidth={1.5} />
+                Sustainability
+              </span>
+              <span className={`h-px bg-accent/40 transition-all duration-1000 ${heroVisible ? 'w-16' : 'w-0'}`} />
+            </div>
+            <LetterReveal
+              text="可持續發展"
+              as="h1"
+              className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6"
+              isVisible={heroVisible}
+              startDelay={200}
+              letterDelay={70}
+            />
             <p className={`text-lg text-muted-foreground leading-relaxed transition-all duration-700 ease-out ${
               heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`} style={{ transitionDelay: '200ms' }}>
+            }`} style={{ transitionDelay: '600ms' }}>
               永續願景，綠色未來
             </p>
           </div>
@@ -113,14 +122,30 @@ const Sustainability = () => {
         {/* Vision */}
         <section ref={visionRef} className="py-24 px-6 lg:px-8 overflow-hidden">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className={`text-3xl font-bold text-foreground mb-8 transition-all duration-700 ease-out ${
-              visionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`}>
-              我們的承諾
-            </h2>
+            <div className="flex items-start justify-center gap-4 mb-8">
+              <span className={`w-1 bg-accent self-stretch min-h-[3rem] transition-all duration-700 ${visionVisible ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: '200ms' }} />
+              <div className="text-5xl md:text-6xl lg:text-7xl text-foreground leading-[0.9]">
+                <LetterReveal
+                  text="我們的"
+                  as="span"
+                  className="font-light block"
+                  isVisible={visionVisible}
+                  startDelay={100}
+                  letterDelay={60}
+                />
+                <LetterReveal
+                  text="承諾"
+                  as="span"
+                  className="font-bold block"
+                  isVisible={visionVisible}
+                  startDelay={350}
+                  letterDelay={80}
+                />
+              </div>
+            </div>
             <p className={`text-muted-foreground leading-relaxed text-lg transition-all duration-700 ease-out ${
               visionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`} style={{ transitionDelay: '150ms' }}>
+            }`} style={{ transitionDelay: '600ms' }}>
               作為服裝輔料行業的領導者，我們深知企業對環境的責任。
               透過創新技術與永續實踐，我們致力於在保持產品品質的同時，
               將環境影響降至最低。
@@ -135,23 +160,26 @@ const Sustainability = () => {
               <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${
                 initHeaderVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}>Initiatives</p>
-               <h2 className={`text-3xl font-bold text-foreground transition-all duration-700 ease-out ${
-                initHeaderVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-              }`} style={{ transitionDelay: '100ms' }}>
-                環保行動
-              </h2>
+              <LetterReveal
+                text="環保行動"
+                as="h2"
+                className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground font-serif-display"
+                isVisible={initHeaderVisible}
+                startDelay={100}
+                letterDelay={80}
+              />
             </div>
 
             <div ref={initRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {initiatives.map((initiative, index) => (
                 <div 
                   key={initiative.titleEn} 
-                  className={`p-8 bg-background transition-all duration-500 ease-out hover:shadow-lg hover:-translate-y-1 ${
+                  className={`p-8 bg-background rounded-lg transition-all duration-500 ease-out hover:shadow-lg hover:-translate-y-1 ${
                     initVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
                   }`}
                   style={getInitDelay(index)}
                 >
-                  <initiative.icon className="w-8 h-8 text-foreground mb-6" strokeWidth={1.5} />
+                  <initiative.icon className="w-8 h-8 text-accent mb-6" strokeWidth={1.5} />
                   <h3 className="text-xl font-semibold text-foreground mb-2">
                     {initiative.titleCn}
                   </h3>
@@ -167,7 +195,7 @@ const Sustainability = () => {
           </div>
         </section>
 
-        {/* Green Footprint Banner - Moved from News */}
+        {/* Green Footprint Banner */}
         <section ref={greenRef} className="py-20 px-6 lg:px-8 bg-secondary overflow-hidden">
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
@@ -179,9 +207,14 @@ const Sustainability = () => {
                    <Leaf className="w-5 h-5 text-accent" strokeWidth={1.5} />
                   <span className="text-xs tracking-[0.2em] uppercase text-accent">Green Initiative</span>
                 </div>
-                <h2 className="text-3xl font-bold text-foreground mb-4">
-                  綠色願景
-                </h2>
+                <LetterReveal
+                  text="綠色願景"
+                  as="h2"
+                  className="text-4xl md:text-5xl font-bold text-foreground mb-4"
+                  isVisible={greenVisible}
+                  startDelay={100}
+                  letterDelay={70}
+                />
                 <p className="text-muted-foreground leading-relaxed mb-6">
                   我們相信，每一個微小的改變都能為地球帶來深遠的影響。
                   從材料選擇到生產製程，我們不斷探索更環保的方式，
@@ -191,7 +224,7 @@ const Sustainability = () => {
                 {/* Green Vision Items */}
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   {greenVisionItems.map((item) => (
-                    <div key={item.title} className="flex items-start gap-3 p-3 bg-white/50">
+                    <div key={item.title} className="flex items-start gap-3 p-3 bg-white/50 rounded-lg">
                        <item.icon className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" strokeWidth={1.5} />
                       <div>
                         <p className="text-sm font-medium text-foreground">{item.title}</p>
@@ -233,7 +266,7 @@ const Sustainability = () => {
               }`} style={{ transitionDelay: '200ms' }}>
                 <div className="grid grid-cols-3 gap-3">
                   {greenLifeImages.map((image, index) => (
-                    <div key={index} className="aspect-[4/3] overflow-hidden">
+                    <div key={index} className="aspect-[4/3] overflow-hidden rounded-lg">
                       <img
                         src={image.src}
                         alt={image.alt}
@@ -254,23 +287,26 @@ const Sustainability = () => {
               <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${
                 certHeaderVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}>Certifications</p>
-              <h2 className={`text-3xl font-bold text-foreground transition-all duration-700 ease-out ${
-                certHeaderVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-              }`} style={{ transitionDelay: '100ms' }}>
-                國際認證
-              </h2>
+              <LetterReveal
+                text="國際認證"
+                as="h2"
+                className="text-5xl md:text-6xl lg:text-7xl font-light text-foreground italic font-serif-display"
+                isVisible={certHeaderVisible}
+                startDelay={100}
+                letterDelay={80}
+              />
             </div>
 
             <div ref={certRef} className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {certifications.map((cert, index) => (
                 <div 
                   key={cert.name} 
-                  className={`p-8 border border-border flex items-start space-x-6 transition-all duration-500 ease-out hover:border-foreground/20 ${
+                  className={`p-8 border border-border rounded-lg flex items-start space-x-6 transition-all duration-500 ease-out hover:border-foreground/20 ${
                     certVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
                   }`}
                   style={getCertDelay(index)}
                 >
-                  <div className="flex-shrink-0 w-16 h-16 bg-secondary flex items-center justify-center">
+                  <div className="flex-shrink-0 w-16 h-16 bg-secondary flex items-center justify-center rounded-lg">
                     <span className="text-lg font-semibold text-foreground">{cert.name}</span>
                   </div>
                   <div>
@@ -293,13 +329,18 @@ const Sustainability = () => {
                 <p className="text-xs tracking-[0.2em] uppercase text-primary-foreground/60 mb-4">
                   Featured Technology
                 </p>
-                <h2 className="text-3xl font-bold mb-6">
-                  環保電鍍技術
-                </h2>
-                <h3 className="text-xl text-primary-foreground/80 mb-6">
+                <LetterReveal
+                  text="環保電鍍技術"
+                  as="h2"
+                  className="text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground mb-6 uppercase tracking-[0.05em]"
+                  isVisible={ecoVisible}
+                  startDelay={100}
+                  letterDelay={60}
+                />
+                <h3 className={`text-xl text-primary-foreground/80 mb-6 transition-all duration-700 ease-out ${ecoVisible ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: '500ms' }}>
                   Eco-Friendly Electroless Plating
                 </h3>
-                <div className="space-y-4 text-primary-foreground/70">
+                <div className={`space-y-4 text-primary-foreground/70 transition-all duration-700 ease-out ${ecoVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`} style={{ transitionDelay: '600ms' }}>
                   <p>
                     我們引進先進的環保電鍍技術，相比傳統電鍍方式：
                   </p>
@@ -323,7 +364,7 @@ const Sustainability = () => {
                   </ul>
                 </div>
               </div>
-              <div className={`aspect-square bg-primary-foreground/10 transition-all duration-700 ease-out ${
+              <div className={`aspect-square bg-primary-foreground/10 rounded-lg transition-all duration-700 ease-out ${
                 ecoVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'
               }`} style={{ transitionDelay: '200ms' }} />
             </div>
