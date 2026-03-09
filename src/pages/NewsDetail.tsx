@@ -110,7 +110,7 @@ const NewsDetail = () => {
                 </div>
                 
                 {/* Title */}
-                <h1 className={`font-serif text-3xl md:text-4xl font-light text-foreground mb-2 transition-all duration-700 ease-out ${
+                <h1 className={`text-3xl md:text-4xl font-bold text-foreground mb-2 transition-all duration-700 ease-out ${
                   contentVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`} style={{ transitionDelay: '150ms' }}>
                   {newsItem.title}
