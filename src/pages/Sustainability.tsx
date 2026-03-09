@@ -179,7 +179,7 @@ const Sustainability = () => {
                    <Leaf className="w-5 h-5 text-accent" strokeWidth={1.5} />
                   <span className="text-xs tracking-[0.2em] uppercase text-accent">Green Initiative</span>
                 </div>
-                <h2 className="font-serif text-3xl font-light text-green-deep mb-4">
+                <h2 className="text-3xl font-bold text-foreground mb-4">
                   綠色願景
                 </h2>
                 <p className="text-green-forest/80 leading-relaxed mb-6">
