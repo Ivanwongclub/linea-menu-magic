@@ -141,7 +141,7 @@ const DesignerStudio = () => {
               </div>
               <div>
                 <div className="w-12 h-12 bg-secondary flex items-center justify-center mx-auto mb-4">
-                  <span className="font-serif text-xl text-foreground">2</span>
+                  <span className="text-xl font-bold text-foreground">2</span>
                 </div>
                 <h3 className="text-foreground mb-2">資格審核</h3>
                 <p className="text-sm text-muted-foreground">
