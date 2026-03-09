@@ -114,7 +114,7 @@ const About = () => {
                   }`}
                   style={getValuesDelay(index)}
                 >
-                  <h3 className="font-serif text-xl text-foreground mb-4">{value.title}</h3>
+                  <h3 className="text-xl font-semibold text-foreground mb-4">{value.title}</h3>
                   <p className="text-sm text-muted-foreground">{value.desc}</p>
                 </div>
               ))}
