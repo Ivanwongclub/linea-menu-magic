@@ -255,7 +255,7 @@ const News = () => {
         {/* CTA Section */}
         <section ref={ctaRef} className="py-16 px-6 lg:px-8 border-t border-border overflow-hidden">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className={`text-xl md:text-2xl font-serif font-light text-foreground mb-2 transition-all duration-700 ease-out ${
+            <h2 className={`text-xl md:text-2xl font-semibold text-foreground mb-2 transition-all duration-700 ease-out ${
               ctaVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}>
               訂閱最新資訊

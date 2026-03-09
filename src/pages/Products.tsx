@@ -184,7 +184,7 @@ const Products = () => {
             </p>
             <Link
               to="/contact"
-              className={`inline-block px-12 py-4 bg-brand-red-accent text-white text-xs tracking-[0.2em] uppercase transition-all duration-300 hover:bg-primary-foreground hover:text-foreground btn-red-glow ${
+              className={`inline-block px-12 py-4 bg-accent text-accent-foreground text-xs tracking-[0.2em] uppercase rounded-full transition-all duration-300 hover:bg-accent/90 ${
                 ctaVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}
               style={{ transitionDelay: '200ms' }}
