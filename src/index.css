@@ -2,136 +2,98 @@
 @tailwind components;
 @tailwind utilities;
 
-/* WIN-CYC Corporate Design System - Elegant & Timeless */
+/* WIN-CYC Design System — Frameless-inspired: Monochrome + Teal */
 
 @layer base {
   :root {
-    /* Core palette - Sophisticated neutrals with warm undertones */
-    --background: 40 20% 98%;
-    --foreground: 30 10% 12%;
-    
-    /* Header/Navigation */
-    --nav-background: 40 20% 98%;
-    --nav-foreground: 30 10% 20%;
-    --nav-hover: 30 10% 8%;
-    
-    /* Primary - Deep charcoal with warmth */
-    --primary: 30 10% 15%;
-    --primary-foreground: 40 20% 98%;
-    --primary-hover: 30 10% 25%;
-    
-    /* Secondary - Warm cream */
-    --secondary: 40 25% 95%;
-    --secondary-foreground: 30 10% 20%;
-    
-    /* Muted elements */
-    --muted: 40 15% 94%;
-    --muted-foreground: 30 8% 45%;
-    
-    /* Accent - Subtle gold/bronze */
-    --accent: 35 35% 88%;
-    --accent-foreground: 30 15% 15%;
-    
-    /* Borders and inputs */
-    --border: 40 15% 88%;
-    --input: 40 15% 90%;
-    --ring: 30 10% 15%;
-    
-    /* Cards and surfaces */
-    --card: 40 20% 99%;
-    --card-foreground: 30 10% 12%;
-    
-    --popover: 40 20% 99%;
-    --popover-foreground: 30 10% 12%;
-    
-    /* Status/destructive */
+    /* Core palette — pure white & near-black */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 13%;
+
+    /* Navigation */
+    --nav-background: 0 0% 100%;
+    --nav-foreground: 0 0% 13%;
+    --nav-hover: 0 0% 0%;
+
+    /* Primary — black */
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 0 0% 20%;
+
+    /* Secondary — light gray */
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 13%;
+
+    /* Muted */
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 45%;
+
+    /* Accent — teal #26B4C5 ≈ hsl(187, 67%, 46%) */
+    --accent: 187 67% 46%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Borders & inputs */
+    --border: 0 0% 90%;
+    --input: 0 0% 92%;
+    --ring: 187 67% 46%;
+
+    /* Cards */
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 13%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 13%;
+
+    /* Destructive */
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
-    
-    --radius: 0.25rem;
-    
-    /* Custom corporate colors */
-    --corporate-gold: 38 50% 55%;
-    --corporate-bronze: 30 40% 40%;
-    --corporate-cream: 42 40% 96%;
-    --corporate-charcoal: 30 10% 18%;
-    
-    /* Brand red accent - muted version of #EC1C24 */
-    --brand-red: 358 50% 45%;
-    --brand-red-muted: 358 35% 50%;
-    --brand-red-subtle: 358 25% 55%;
-    --brand-red-accent: 358 40% 48%;
-    
-    /* Green sustainability palette */
-    --green-deep: 158 35% 18%;
-    --green-forest: 155 30% 25%;
-    --green-sage: 150 20% 40%;
-    --green-mist: 145 15% 75%;
-    --green-light: 140 20% 92%;
-    
-    /* Transitions */
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-elegant: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
-    --sidebar-background: 40 20% 97%;
-    --sidebar-foreground: 30 10% 26%;
-    --sidebar-primary: 30 10% 10%;
-    --sidebar-primary-foreground: 40 20% 98%;
-    --sidebar-accent: 40 15% 94%;
-    --sidebar-accent-foreground: 30 10% 10%;
-    --sidebar-border: 40 15% 88%;
-    --sidebar-ring: 30 10% 15%;
+    --radius: 0.5rem;
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 0 0% 20%;
+    --sidebar-primary: 0 0% 0%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 94%;
+    --sidebar-accent-foreground: 0 0% 10%;
+    --sidebar-border: 0 0% 90%;
+    --sidebar-ring: 187 67% 46%;
   }
 
   .dark {
-    --background: 30 10% 8%;
-    --foreground: 40 15% 95%;
-    
-    --nav-background: 30 10% 8%;
-    --nav-foreground: 40 15% 85%;
-    --nav-hover: 40 15% 95%;
-    
-    --primary: 40 15% 95%;
-    --primary-foreground: 30 10% 8%;
-    --primary-hover: 40 15% 85%;
-    
-    --secondary: 30 10% 15%;
-    --secondary-foreground: 40 15% 85%;
-    
-    --muted: 30 10% 15%;
-    --muted-foreground: 40 10% 60%;
-    
-    --accent: 30 15% 18%;
-    --accent-foreground: 40 15% 95%;
-    
-    --border: 30 10% 20%;
-    --input: 30 10% 20%;
-    --ring: 40 15% 95%;
-    
-    --card: 30 10% 10%;
-    --card-foreground: 40 15% 95%;
-    
-    --popover: 30 10% 10%;
-    --popover-foreground: 40 15% 95%;
-    
+    --background: 0 0% 6%;
+    --foreground: 0 0% 95%;
+
+    --nav-background: 0 0% 6%;
+    --nav-foreground: 0 0% 85%;
+    --nav-hover: 0 0% 100%;
+
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 6%;
+    --primary-hover: 0 0% 80%;
+
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 85%;
+
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 55%;
+
+    --accent: 187 60% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 187 60% 50%;
+
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 95%;
+
+    --popover: 0 0% 8%;
+    --popover-foreground: 0 0% 95%;
+
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 98%;
-    
-    --corporate-gold: 38 45% 50%;
-    --corporate-bronze: 30 35% 35%;
-    
-    /* Brand red accent - muted for dark mode */
-    --brand-red: 358 45% 50%;
-    --brand-red-muted: 358 30% 55%;
-    --brand-red-subtle: 358 20% 60%;
-    --brand-red-accent: 358 35% 52%;
-    
-    /* Green sustainability palette - dark mode */
-    --green-deep: 158 30% 30%;
-    --green-forest: 155 25% 35%;
-    --green-sage: 150 18% 50%;
-    --green-mist: 145 12% 60%;
-    --green-light: 140 15% 20%;
   }
 }
 
@@ -142,81 +104,63 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', 'Noto Sans TC', sans-serif;
+    font-family: 'Poppins', 'Noto Sans TC', sans-serif;
   }
-  
+
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Cormorant Garamond', 'Noto Sans TC', serif;
+    font-family: 'Poppins', 'Noto Sans TC', sans-serif;
   }
 }
 
 @layer components {
-  /* Elegant link underline animation */
+  /* Link underline animation — teal */
   .link-elegant {
     @apply relative inline-block;
   }
-  
+
   .link-elegant::after {
     content: '';
     @apply absolute w-full h-px bottom-0 left-0 origin-bottom-right transition-transform duration-300 scale-x-0;
-    background: hsl(var(--brand-red-muted));
+    background: hsl(var(--accent));
   }
-  
+
   .link-elegant:hover::after {
     @apply origin-bottom-left scale-x-100;
   }
-  
-  /* Accent line */
+
+  /* Accent line — teal */
   .accent-line {
     @apply h-px;
-    background: linear-gradient(90deg, transparent, hsl(var(--brand-red-subtle) / 0.6), transparent);
+    background: linear-gradient(90deg, transparent, hsl(var(--accent) / 0.5), transparent);
   }
-  
+
   .accent-line-solid {
     @apply h-px;
-    background: hsl(var(--brand-red-muted) / 0.4);
+    background: hsl(var(--accent) / 0.4);
   }
-  
+
   /* Section divider */
   .section-divider {
     @apply w-16 h-px bg-border mx-auto;
   }
-  
-  /* Elegant button */
-  .btn-elegant {
-    @apply px-8 py-3 border border-foreground text-foreground text-sm tracking-widest uppercase transition-all duration-300;
-  }
-  
-  .btn-elegant:hover {
-    @apply bg-foreground text-background;
-  }
-  
-  /* Card hover effect */
-  .card-hover {
-    @apply transition-all duration-500;
-  }
-  
-  .card-hover:hover {
-    @apply shadow-lg;
-  }
-  
+
   /* Text styles */
   .text-display {
-    font-family: 'Cormorant Garamond', serif;
-    @apply text-4xl md:text-5xl lg:text-6xl font-light tracking-wide;
+    font-family: 'Poppins', sans-serif;
+    @apply text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight;
   }
-  
+
   .text-subtitle {
-    @apply text-sm tracking-[0.2em] uppercase text-muted-foreground;
+    @apply text-sm tracking-[0.15em] uppercase text-muted-foreground font-medium;
   }
-  
+
   .text-body-cn {
     font-family: 'Noto Sans TC', sans-serif;
   }
 }
 
 @layer utilities {
-  /* Hide scrollbar utility */
+  /* Hide scrollbar */
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -228,100 +172,42 @@
   .animate-fade-up {
     animation: fadeUp 0.6s ease-out forwards;
   }
-  
+
   @keyframes fadeUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
   }
-  
-  .animation-delay-100 {
-    animation-delay: 100ms;
-  }
-  
-  .animation-delay-200 {
-    animation-delay: 200ms;
-  }
-  
-  .animation-delay-300 {
-    animation-delay: 300ms;
-  }
-  
-  .animation-delay-400 {
-    animation-delay: 400ms;
-  }
-  
-  /* Smooth scroll behavior */
-  html {
-    scroll-behavior: smooth;
-  }
-  
+
+  .animation-delay-100 { animation-delay: 100ms; }
+  .animation-delay-200 { animation-delay: 200ms; }
+  .animation-delay-300 { animation-delay: 300ms; }
+  .animation-delay-400 { animation-delay: 400ms; }
+
+  html { scroll-behavior: smooth; }
+
   /* Custom scrollbar */
-  ::-webkit-scrollbar {
-    width: 8px;
-  }
-  
-  ::-webkit-scrollbar-track {
-    background: hsl(var(--secondary));
-  }
-  
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: hsl(var(--secondary)); }
   ::-webkit-scrollbar-thumb {
-    background: hsl(var(--muted-foreground) / 0.3);
-    border-radius: 4px;
+    background: hsl(var(--muted-foreground) / 0.2);
+    border-radius: 3px;
   }
-  
   ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--muted-foreground) / 0.5);
+    background: hsl(var(--muted-foreground) / 0.4);
   }
-  
-  /* Hover lift effect */
+
+  /* Hover lift */
   .hover-lift {
     @apply transition-all duration-300;
   }
-  
   .hover-lift:hover {
     @apply -translate-y-1 shadow-lg;
   }
 
-  /* Red accent button glow */
-  .btn-red-glow {
-    @apply transition-all duration-300;
-    box-shadow: 0 0 0 0 hsl(var(--brand-red-accent) / 0);
-  }
-  
-  .btn-red-glow:hover {
-    box-shadow: 0 4px 20px -2px hsl(var(--brand-red-accent) / 0.4);
-  }
-
-  /* Subtle pulse animation for CTAs */
-  @keyframes subtle-pulse {
-    0%, 100% {
-      box-shadow: 0 0 0 0 hsl(var(--brand-red-accent) / 0.3);
-    }
-    50% {
-      box-shadow: 0 0 0 6px hsl(var(--brand-red-accent) / 0);
-    }
-  }
-
-  .btn-red-pulse {
-    animation: subtle-pulse 2.5s ease-in-out infinite;
-  }
-
-  .btn-red-pulse:hover {
-    animation: none;
-    box-shadow: 0 4px 20px -2px hsl(var(--brand-red-accent) / 0.4);
-  }
-  
-  /* Text reveal animation */
+  /* Text reveal */
   .text-reveal {
     @apply overflow-hidden;
   }
-  
   .text-reveal span {
     @apply inline-block transition-transform duration-700 ease-out;
   }
