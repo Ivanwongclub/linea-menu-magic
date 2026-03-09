@@ -1,30 +1,53 @@
 
 
-## Problem
+# Remove Hero Sections, Add Subtle Breadcrumbs
 
-The Polo Button OBJ file has large geometry dimensions in world units. The camera starts at position `[0, 1.5, 3]`, which places it **inside** the model, causing the zoomed-in/clipped view shown in the screenshot.
+## Overview
+Replace all hero/banner sections on non-homepage pages with a simple, subtle breadcrumb navigation. This creates a cleaner, more utilitarian feel and lets content speak for itself.
 
-## Solution
+## Pages to Modify
 
-Normalize the OBJ model size in `OBJModelLoader.tsx` after loading. Compute the bounding box, then scale the model so it fits within a consistent size (e.g., radius ~1.5 units), regardless of the original OBJ dimensions.
+### 1. `src/pages/Products.tsx`
+- Remove the hero `<section>` (lines 145-161) with bg-secondary, large heading, subtitle
+- Add a simple breadcrumb bar: `Home > Products` with small top padding (`pt-8 pb-4 px-6`)
 
-### Changes
+### 2. `src/pages/About.tsx`
+- Remove the hero `<section>` (lines 37-58) with accent lines, LetterReveal, subtitle
+- Add breadcrumb: `Home > About`
 
-**`src/components/designer-studio/OBJModelLoader.tsx`**
-- After cloning and applying materials, compute the bounding box of the model
-- Calculate the max dimension and derive a scale factor to normalize to ~1.5 units
-- Apply the scale to the cloned object
+### 3. `src/pages/Sustainability.tsx`
+- Remove the hero `<section>` (lines 96-120) with accent lines, LetterReveal, subtitle
+- Add breadcrumb: `Home > Sustainability`
 
-This is a ~5-line addition in the `useMemo` block:
+### 4. `src/pages/News.tsx`
+- Remove the hero `<section>` (lines 39-55)
+- Add breadcrumb: `Home > News`
 
-```ts
-// After traverse, normalize size
-const box = new THREE.Box3().setFromObject(clone);
-const size = box.getSize(new THREE.Vector3());
-const maxDim = Math.max(size.x, size.y, size.z);
-const scale = 2 / maxDim; // fit within ~2 units
-clone.scale.setScalar(scale);
-```
+### 5. `src/pages/Contact.tsx`
+- Remove the hero `<section>` (lines 58-84) with background image overlay
+- Add breadcrumb: `Home > Contact`
 
-No other files need changes. The `<Center>` component already handles centering the model at origin.
+### 6. `src/pages/about/Factory.tsx`
+- Remove the hero `<section>` (lines 58-80) with background image
+- Add breadcrumb: `Home > About > Factory`
+
+### 7. `src/pages/about/Certificates.tsx`
+- Remove the hero `<section>` (lines 90-106)
+- Add breadcrumb: `Home > About > Certificates`
+
+### 8. `src/pages/about/OurStory.tsx`
+- Already uses `PageHeader` component — replace with breadcrumb: `Home > About > Our Story`
+
+### 9. `src/pages/about/Sustainability.tsx`
+- Already uses `PageHeader` — replace with breadcrumb: `Home > About > Sustainability`
+
+## Breadcrumb Style
+- Use existing `Breadcrumb` components from `@/components/ui/breadcrumb`
+- Minimal layout: `pt-8 pb-4 px-6 lg:px-8` wrapper, `max-w-7xl mx-auto`
+- Small muted text, chevron separators — consistent with existing `CategoryHeader` and `ProductInfo` usage
+- Also include a simple page title below the breadcrumb: `text-2xl font-light` — keeps orientation without the heavy hero
+
+## Cleanup
+- Remove unused `heroRef`/`heroVisible` scroll animation refs from each page
+- Remove `LetterReveal` import from pages that no longer use it (if not used elsewhere in the file)
 
