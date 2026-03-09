@@ -174,7 +174,7 @@ const ProductsSidebar = ({
 
       {/* Special Filters — multi-select */}
       <div>
-        <h3 className="text-xs tracking-[0.2em] uppercase text-muted-foreground mb-4">
+        <h3 className="text-base tracking-[0.2em] uppercase text-muted-foreground mb-4 font-medium">
           Filter By
         </h3>
         <div className="flex flex-wrap gap-2">
