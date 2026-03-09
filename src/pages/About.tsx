@@ -56,7 +56,7 @@ const About = () => {
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
               <div>
-                <h2 className={`font-serif text-3xl font-light text-foreground mb-6 transition-all duration-700 ease-out ${
+                <h2 className={`text-3xl font-bold text-foreground mb-6 transition-all duration-700 ease-out ${
                   storyVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}>
                   品牌故事
