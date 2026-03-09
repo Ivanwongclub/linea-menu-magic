@@ -168,7 +168,7 @@ const Sustainability = () => {
         </section>
 
         {/* Green Footprint Banner - Moved from News */}
-        <section ref={greenRef} className="py-20 px-6 lg:px-8 bg-green-light/30 overflow-hidden">
+        <section ref={greenRef} className="py-20 px-6 lg:px-8 bg-secondary overflow-hidden">
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               {/* Content */}
