@@ -184,7 +184,7 @@ const ProductsSidebar = ({
               <button
                 key={f.value}
                 onClick={() => onFilterToggle(f.value)}
-                className={`px-3 py-1.5 text-xs rounded-full border transition-colors duration-200 ${
+                className={`px-3 py-2 text-sm rounded-full border transition-colors duration-200 ${
                   isActive
                     ? "bg-sidebar-primary text-sidebar-primary-foreground border-sidebar-primary"
                     : "bg-transparent text-muted-foreground border-sidebar-border hover:border-sidebar-foreground hover:text-sidebar-foreground"
