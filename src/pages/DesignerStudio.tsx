@@ -70,7 +70,7 @@ const DesignerStudio = () => {
               {features.map((feature) => (
                 <div key={feature.titleEn} className="p-8 border border-border text-center">
                   <feature.icon className="w-10 h-10 text-foreground mx-auto mb-6" strokeWidth={1.5} />
-                  <h3 className="font-serif text-xl text-foreground mb-2">
+                  <h3 className="text-xl font-semibold text-foreground mb-2">
                     {feature.titleCn}
                   </h3>
                   <p className="text-xs text-muted-foreground tracking-wide mb-4">
