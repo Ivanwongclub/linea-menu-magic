@@ -13,9 +13,9 @@ const Footer = () => {
                      <span className="text-sm lg:text-base text-primary-foreground font-normal" style={{ fontFamily: "'Libre Caslon Text', serif" }}>
                        WIN-CYC
                      </span>
-                     <span className="text-[4px] lg:text-[5px] tracking-[0.12em] text-primary-foreground/60 uppercase">
-                       Group Limited
-                     </span>
+                      <span className="text-[7px] lg:text-xs tracking-[0.12em] text-primary-foreground/60 uppercase">
+                        Group Limited
+                      </span>
                    </div>
                  </div>
                </div>
