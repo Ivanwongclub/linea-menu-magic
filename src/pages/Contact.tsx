@@ -70,7 +70,7 @@ const Contact = () => {
             <p className={`text-xs tracking-[0.2em] uppercase text-primary-foreground/70 mb-4 transition-all duration-700 ease-out ${
               heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}>Contact Us</p>
-            <h1 className={`font-serif text-4xl md:text-5xl font-light text-primary-foreground mb-6 transition-all duration-700 ease-out ${
+            <h1 className={`text-4xl md:text-5xl font-bold text-primary-foreground mb-6 transition-all duration-700 ease-out ${
               heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`} style={{ transitionDelay: '100ms' }}>
               聯絡我們
