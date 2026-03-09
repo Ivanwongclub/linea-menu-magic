@@ -204,16 +204,16 @@ const Sustainability = () => {
                 {/* Stats */}
                 <div className="flex gap-8 mb-6">
                   <div>
-                    <p className="font-serif text-2xl text-green-deep">30%</p>
-                    <p className="text-xs text-green-forest/70">再生材料使用</p>
+                     <p className="text-2xl font-bold text-foreground">30%</p>
+                    <p className="text-xs text-muted-foreground">再生材料使用</p>
                   </div>
                   <div>
-                    <p className="font-serif text-2xl text-green-deep">100%</p>
-                    <p className="text-xs text-green-forest/70">合規環保標準</p>
+                    <p className="text-2xl font-bold text-foreground">100%</p>
+                    <p className="text-xs text-muted-foreground">合規環保標準</p>
                   </div>
                   <div>
-                    <p className="font-serif text-2xl text-green-deep">50+</p>
-                    <p className="text-xs text-green-forest/70">環保產品線</p>
+                    <p className="text-2xl font-bold text-foreground">50+</p>
+                    <p className="text-xs text-muted-foreground">環保產品線</p>
                   </div>
                 </div>
                 
