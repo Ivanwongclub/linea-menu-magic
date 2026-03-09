@@ -271,7 +271,7 @@ const Sustainability = () => {
                   style={getCertDelay(index)}
                 >
                   <div className="flex-shrink-0 w-16 h-16 bg-secondary flex items-center justify-center">
-                    <span className="font-serif text-lg text-foreground">{cert.name}</span>
+                    <span className="text-lg font-semibold text-foreground">{cert.name}</span>
                   </div>
                   <div>
                     <h3 className="text-foreground font-medium mb-1">{cert.fullName}</h3>
