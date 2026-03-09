@@ -125,7 +125,7 @@ const Contact = () => {
 
               {/* Contact Form */}
               <div ref={formRef} className="lg:col-span-2">
-                <h2 className={`font-serif text-2xl font-light text-foreground mb-8 transition-all duration-700 ease-out ${
+                <h2 className={`text-2xl font-semibold text-foreground mb-8 transition-all duration-700 ease-out ${
                   formVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}>
                   獲取報價
