@@ -98,7 +98,7 @@ const About = () => {
               <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${
                 valuesHeaderVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}>Our Values</p>
-              <h2 className={`font-serif text-3xl font-light text-foreground transition-all duration-700 ease-out ${
+               <h2 className={`text-3xl font-bold text-foreground transition-all duration-700 ease-out ${
                 valuesHeaderVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`} style={{ transitionDelay: '100ms' }}>
                 核心價值
