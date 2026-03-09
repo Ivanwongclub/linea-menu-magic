@@ -8,16 +8,16 @@ const Footer = () => {
           {/* Brand */}
           <div className="lg:col-span-1">
               <div className="mb-6">
-                 <div className="inline-flex items-center justify-center bg-primary px-6 py-1.5 lg:px-8 lg:py-1.5">
-                   <div className="flex flex-col items-center justify-center leading-none">
-                     <span className="text-sm lg:text-base text-primary-foreground font-normal" style={{ fontFamily: "'Libre Caslon Text', serif" }}>
-                       WIN-CYC
-                     </span>
-                      <span className="text-[7px] lg:text-xs tracking-[0.12em] text-primary-foreground/60 uppercase">
-                        Group Limited
+                  <div className="inline-flex items-center justify-center bg-primary px-6 py-1.5 lg:px-8 lg:py-1.5">
+                    <div className="flex flex-col items-center justify-center leading-none">
+                      <span className="text-sm lg:text-base text-white font-normal" style={{ fontFamily: "'Libre Caslon Text', serif" }}>
+                        WIN-CYC
                       </span>
-                   </div>
-                 </div>
+                       <span className="text-[7px] lg:text-xs tracking-[0.12em] text-white/60 uppercase">
+                         Group Limited
+                       </span>
+                    </div>
+                  </div>
                </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
               Timeless Craftsmanship in Garment Accessories since 1979.
