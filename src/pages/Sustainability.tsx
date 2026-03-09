@@ -176,8 +176,8 @@ const Sustainability = () => {
                 greenVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'
               }`}>
                 <div className="flex items-center gap-2 mb-4">
-                  <Leaf className="w-5 h-5 text-green-forest" strokeWidth={1.5} />
-                  <span className="text-xs tracking-[0.2em] uppercase text-green-forest">Green Initiative</span>
+                   <Leaf className="w-5 h-5 text-accent" strokeWidth={1.5} />
+                  <span className="text-xs tracking-[0.2em] uppercase text-accent">Green Initiative</span>
                 </div>
                 <h2 className="font-serif text-3xl font-light text-green-deep mb-4">
                   綠色願景
