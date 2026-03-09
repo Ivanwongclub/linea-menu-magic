@@ -222,7 +222,7 @@ const NewsDetail = () => {
                                 <span className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
                                   {item.type === "exhibition" ? "展覽" : "新聞"}
                                 </span>
-                                <h4 className="text-sm font-serif text-foreground group-hover:text-foreground/80 transition-colors line-clamp-2 mt-1">
+                                <h4 className="text-sm font-medium text-foreground group-hover:text-foreground/80 transition-colors line-clamp-2 mt-1">
                                   {item.title}
                                 </h4>
                                 <p className="text-[10px] text-muted-foreground mt-1">{item.date}</p>
