@@ -97,14 +97,6 @@ const ProductsSidebar = ({
 
   return (
     <div className="space-y-6 bg-transparent text-sidebar-foreground p-6 rounded-sm">
-      {/* Title */}
-      <div>
-        <h1 className="text-5xl md:text-6xl font-light tracking-tight">Products</h1>
-        <p className="text-xl text-muted-foreground mt-2">產品系列</p>
-      </div>
-
-      <Separator className="bg-sidebar-border" />
-
       {/* Category Groups */}
       <nav className="space-y-1">
         {categoryGroups.map((group) => {
