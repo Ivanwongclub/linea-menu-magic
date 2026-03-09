@@ -89,7 +89,7 @@ const Contact = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
               {/* Contact Info */}
               <div className="lg:col-span-1">
-                <h2 className={`font-serif text-2xl font-light text-foreground mb-8 transition-all duration-700 ease-out ${
+                 <h2 className={`text-2xl font-semibold text-foreground mb-8 transition-all duration-700 ease-out ${
                   infoVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}>
                   聯絡資訊
