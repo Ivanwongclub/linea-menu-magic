@@ -148,16 +148,16 @@ const ProductsSidebar = ({
                     const tagCount = countByTag(products, tag);
                     return (
                       <button
-                        key={tag}
+                         key={tag}
                         onClick={() => onTagClick(tag)}
-                        className={`flex items-center justify-between w-full text-left text-sm py-1.5 pl-3 pr-1 border-l-2 transition-all duration-200 ${
+                        className={`flex items-center justify-between w-full text-left text-base py-2 pl-3 pr-1 border-l-2 transition-all duration-200 ${
                           activeTag === tag
                             ? "border-sidebar-primary text-sidebar-foreground font-medium"
                             : "border-transparent text-muted-foreground hover:text-sidebar-foreground hover:border-muted-foreground/40"
                         }`}
                       >
                         <span>{tag}</span>
-                        <span className="text-[10px] text-muted-foreground tabular-nums">
+                        <span className="text-xs text-muted-foreground tabular-nums">
                           {tagCount}
                         </span>
                       </button>
