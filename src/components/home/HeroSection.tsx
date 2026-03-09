@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useScrollAnimation } from "@/hooks/use-scroll-animation";
 import { useEffect, useState } from "react";
+import LetterReveal from "@/components/ui/LetterReveal";
 
 const HeroSection = () => {
   const { ref: heroRef, isVisible: heroVisible } = useScrollAnimation({ threshold: 0.2 });
@@ -45,21 +46,30 @@ const HeroSection = () => {
           Since 1979
         </p>
 
-        <h1
-          className={`text-6xl md:text-7xl lg:text-8xl font-light tracking-tight text-foreground mb-6 transition-all duration-700 ease-out ${
-            heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}
-          style={{ transitionDelay: '400ms' }}
-        >
-          Timeless
-          <span className="block mt-2 font-bold">Craftsmanship</span>
-        </h1>
+        <div className="mb-6">
+          <LetterReveal
+            text="Timeless"
+            as="h1"
+            className="text-6xl md:text-7xl lg:text-8xl font-light tracking-tight text-foreground"
+            isVisible={heroVisible}
+            startDelay={400}
+            letterDelay={40}
+          />
+          <LetterReveal
+            text="Craftsmanship"
+            as="span"
+            className="block mt-2 text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight text-foreground"
+            isVisible={heroVisible}
+            startDelay={750}
+            letterDelay={35}
+          />
+        </div>
 
         <p
           className={`text-lg md:text-xl text-muted-foreground font-light mb-4 transition-all duration-700 ease-out ${
             heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
-          style={{ transitionDelay: '600ms' }}
+          style={{ transitionDelay: '1200ms' }}
         >
           匠心傳承 · 觸動靈魂的細節之美
         </p>
@@ -68,7 +78,7 @@ const HeroSection = () => {
           className={`text-sm text-muted-foreground tracking-wider mb-12 transition-all duration-700 ease-out ${
             heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
-          style={{ transitionDelay: '700ms' }}
+          style={{ transitionDelay: '1300ms' }}
         >
           Premium Garment Accessories Manufacturer
         </p>
@@ -78,7 +88,7 @@ const HeroSection = () => {
           className={`flex flex-col sm:flex-row items-center justify-center gap-4 transition-all duration-700 ease-out ${
             heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
-          style={{ transitionDelay: '800ms' }}
+          style={{ transitionDelay: '1400ms' }}
         >
           <Link
             to="/products"
@@ -99,12 +109,12 @@ const HeroSection = () => {
           className={`mt-20 transition-all duration-1000 ease-out ${
             heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
-          style={{ transitionDelay: '1000ms' }}
+          style={{ transitionDelay: '1600ms' }}
         >
           <div className="inline-flex items-center space-x-4 text-muted-foreground">
-            <span className={`h-px bg-accent/40 transition-all duration-1000 ease-out ${heroVisible ? 'w-12' : 'w-0'}`} style={{ transitionDelay: '1200ms' }} />
+            <span className={`h-px bg-accent/40 transition-all duration-1000 ease-out ${heroVisible ? 'w-12' : 'w-0'}`} style={{ transitionDelay: '1800ms' }} />
             <span className="text-xs tracking-[0.3em] uppercase">Est. 1979</span>
-            <span className={`h-px bg-accent/40 transition-all duration-1000 ease-out ${heroVisible ? 'w-12' : 'w-0'}`} style={{ transitionDelay: '1200ms' }} />
+            <span className={`h-px bg-accent/40 transition-all duration-1000 ease-out ${heroVisible ? 'w-12' : 'w-0'}`} style={{ transitionDelay: '1800ms' }} />
           </div>
         </div>
       </div>
@@ -114,7 +124,7 @@ const HeroSection = () => {
         className={`absolute bottom-8 left-1/2 -translate-x-1/2 transition-all duration-700 ${
           heroVisible ? 'opacity-100' : 'opacity-0'
         }`}
-        style={{ transitionDelay: '1400ms', opacity: opacityFade * 0.8 }}
+        style={{ transitionDelay: '2000ms', opacity: opacityFade * 0.8 }}
       >
         <div className="w-6 h-10 border border-muted-foreground/30 rounded-full flex justify-center">
           <div className="w-1 h-2 bg-muted-foreground/50 rounded-full mt-2 animate-bounce" />

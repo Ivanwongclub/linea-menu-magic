@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
+import LetterReveal from "@/components/ui/LetterReveal";
 
 import buttonsImage from "@/assets/products/buttons-category.jpg";
 import zippersImage from "@/assets/products/zippers-category.jpg";
@@ -41,9 +42,14 @@ const ProductCategories = () => {
             <span className="text-xs tracking-[0.2em] uppercase text-muted-foreground">Collection</span>
             <span className={`h-px bg-accent/40 transition-all duration-1000 ${headerVisible ? 'w-16' : 'w-0'}`} />
           </div>
-          <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground font-serif-display">
-            Our Products
-          </h2>
+          <LetterReveal
+            text="Our Products"
+            as="h2"
+            className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground font-serif-display"
+            isVisible={headerVisible}
+            startDelay={200}
+            letterDelay={45}
+          />
         </div>
 
         <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

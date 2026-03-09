@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
+import LetterReveal from "@/components/ui/LetterReveal";
 import sustainabilityImage from "@/assets/sustainability.jpg";
 
 const SustainabilitySection = () => {
@@ -28,15 +29,28 @@ const SustainabilitySection = () => {
             <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${contentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}>
               Sustainability
             </p>
-            <div className={`flex items-start gap-4 mb-6 transition-all duration-700 ease-out ${contentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`} style={{ transitionDelay: '100ms' }}>
+            <div className={`flex items-start gap-4 mb-6`}>
               <span className={`w-1 bg-accent self-stretch transition-all duration-700 ${contentVisible ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: '300ms' }} />
-              <h2 className="text-5xl md:text-6xl lg:text-7xl text-foreground leading-[0.9]">
-                <span className="font-light">Our</span>
-                <br />
-                <span className="font-bold">Commitment</span>
-              </h2>
+              <div className="text-5xl md:text-6xl lg:text-7xl text-foreground leading-[0.9]">
+                <LetterReveal
+                  text="Our"
+                  as="span"
+                  className="font-light block"
+                  isVisible={contentVisible}
+                  startDelay={100}
+                  letterDelay={60}
+                />
+                <LetterReveal
+                  text="Commitment"
+                  as="span"
+                  className="font-bold block"
+                  isVisible={contentVisible}
+                  startDelay={300}
+                  letterDelay={40}
+                />
+              </div>
             </div>
-            <p className={`text-muted-foreground leading-relaxed mb-8 transition-all duration-700 ease-out ${contentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`} style={{ transitionDelay: '200ms' }}>
+            <p className={`text-muted-foreground leading-relaxed mb-8 transition-all duration-700 ease-out ${contentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`} style={{ transitionDelay: '600ms' }}>
               We believe that quality products should be environmentally responsible. Through internationally certified sustainable processes, we are committed to reducing our ecological footprint while maintaining exceptional quality standards.
             </p>
 
@@ -58,7 +72,7 @@ const SustainabilitySection = () => {
             <Link
               to="/sustainability"
               className={`group inline-flex items-center text-sm tracking-wider text-foreground link-elegant transition-all duration-700 ease-out ${contentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}
-              style={{ transitionDelay: '400ms' }}
+              style={{ transitionDelay: '700ms' }}
             >
               Learn More
               <svg className="ml-2 w-4 h-4 transition-transform duration-300 group-hover:translate-x-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useScrollAnimation } from "@/hooks/use-scroll-animation";
+import LetterReveal from "@/components/ui/LetterReveal";
 import heritageCraftsmanship from "@/assets/heritage-craftsmanship.jpg";
 
 const HeritageSection = () => {
@@ -14,9 +15,23 @@ const HeritageSection = () => {
             <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${contentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'}`}>
               Heritage
             </p>
-            <h2 className={`text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 transition-all duration-700 ease-out ${contentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'}`} style={{ transitionDelay: '100ms' }}>
-              <span className="text-outline">Our</span>{" "}
-              <span>Story</span>
+            <h2 className={`text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6`}>
+              <LetterReveal
+                text="Our"
+                as="span"
+                className="text-outline inline-block mr-4"
+                isVisible={contentVisible}
+                startDelay={100}
+                letterDelay={60}
+              />
+              <LetterReveal
+                text="Story"
+                as="span"
+                className="inline-block"
+                isVisible={contentVisible}
+                startDelay={300}
+                letterDelay={60}
+              />
             </h2>
             <div className="space-y-6 text-muted-foreground leading-relaxed">
               <p className={`transition-all duration-700 ease-out ${contentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'}`} style={{ transitionDelay: '200ms' }}>
