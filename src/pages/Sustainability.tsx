@@ -192,10 +192,10 @@ const Sustainability = () => {
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   {greenVisionItems.map((item) => (
                     <div key={item.title} className="flex items-start gap-3 p-3 bg-white/50">
-                      <item.icon className="w-5 h-5 text-green-forest flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+                       <item.icon className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" strokeWidth={1.5} />
                       <div>
-                        <p className="text-sm font-medium text-green-deep">{item.title}</p>
-                        <p className="text-xs text-green-forest/70">{item.desc}</p>
+                        <p className="text-sm font-medium text-foreground">{item.title}</p>
+                        <p className="text-xs text-muted-foreground">{item.desc}</p>
                       </div>
                     </div>
                   ))}
