@@ -14,8 +14,9 @@ const HeritageSection = () => {
             <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${contentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'}`}>
               Heritage
             </p>
-            <h2 className={`text-3xl md:text-4xl font-bold text-foreground mb-6 transition-all duration-700 ease-out ${contentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'}`} style={{ transitionDelay: '100ms' }}>
-              Our Story
+            <h2 className={`text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 transition-all duration-700 ease-out ${contentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'}`} style={{ transitionDelay: '100ms' }}>
+              <span className="text-outline">Our</span>{" "}
+              <span>Story</span>
             </h2>
             <div className="space-y-6 text-muted-foreground leading-relaxed">
               <p className={`transition-all duration-700 ease-out ${contentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'}`} style={{ transitionDelay: '200ms' }}>

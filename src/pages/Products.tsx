@@ -172,7 +172,7 @@ const Products = () => {
         {/* CTA */}
         <section ref={ctaRef} className="py-24 px-6 lg:px-8 bg-foreground text-primary-foreground overflow-hidden">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className={`text-3xl font-bold mb-6 transition-all duration-700 ease-out ${
+            <h2 className={`text-4xl md:text-5xl font-bold mb-6 transition-all duration-700 ease-out ${
               ctaVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}>
               需要定制產品？

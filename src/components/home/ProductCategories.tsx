@@ -36,8 +36,12 @@ const ProductCategories = () => {
             headerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
           }`}
         >
-          <p className="text-subtitle mb-4">Collection</p>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground">
+          <div className="flex items-center justify-center gap-6 mb-6">
+            <span className={`h-px bg-accent/40 transition-all duration-1000 ${headerVisible ? 'w-16' : 'w-0'}`} />
+            <span className="text-xs tracking-[0.2em] uppercase text-muted-foreground">Collection</span>
+            <span className={`h-px bg-accent/40 transition-all duration-1000 ${headerVisible ? 'w-16' : 'w-0'}`} />
+          </div>
+          <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground font-serif-display">
             Our Products
           </h2>
         </div>

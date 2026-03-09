@@ -28,9 +28,14 @@ const SustainabilitySection = () => {
             <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${contentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}>
               Sustainability
             </p>
-            <h2 className={`text-3xl md:text-4xl font-bold text-foreground mb-6 transition-all duration-700 ease-out ${contentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`} style={{ transitionDelay: '100ms' }}>
-              Our Commitment
-            </h2>
+            <div className={`flex items-start gap-4 mb-6 transition-all duration-700 ease-out ${contentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`} style={{ transitionDelay: '100ms' }}>
+              <span className={`w-1 bg-accent self-stretch transition-all duration-700 ${contentVisible ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: '300ms' }} />
+              <h2 className="text-5xl md:text-6xl lg:text-7xl text-foreground leading-[0.9]">
+                <span className="font-light">Our</span>
+                <br />
+                <span className="font-bold">Commitment</span>
+              </h2>
+            </div>
             <p className={`text-muted-foreground leading-relaxed mb-8 transition-all duration-700 ease-out ${contentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`} style={{ transitionDelay: '200ms' }}>
               We believe that quality products should be environmentally responsible. Through internationally certified sustainable processes, we are committed to reducing our ecological footprint while maintaining exceptional quality standards.
             </p>
