@@ -37,7 +37,7 @@ const Header = () => {
            {/* Logo */}
             <Link to="/" className="inline-flex items-center justify-center bg-primary px-6 py-1.5 lg:px-8 lg:py-1.5">
               <div className="flex flex-col items-center justify-center leading-none">
-                <span className="text-sm lg:text-base text-white font-normal" style={{ fontFamily: "'Libre Caslon Text', serif" }}>
+                <span className="text-sm lg:text-base text-white font-semibold" style={{ fontFamily: "'Libre Caslon Text', serif" }}>
                   WIN-CYC
                 </span>
                     <span className="text-[7px] lg:text-xs tracking-[0.12em] text-white/60 uppercase">
