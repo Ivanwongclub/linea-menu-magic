@@ -2,11 +2,10 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 import LetterReveal from "@/components/ui/LetterReveal";
+import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
 import aboutHeritageImage from "@/assets/about-heritage.jpg";
-import aboutShowroomImage from "@/assets/about-showroom.jpg";
 
 const About = () => {
-  const { ref: heroRef, isVisible: heroVisible } = useScrollAnimation();
   const { ref: storyRef, isVisible: storyVisible } = useScrollAnimation();
   const { ref: valuesHeaderRef, isVisible: valuesHeaderVisible } = useScrollAnimation();
   const { ref: valuesRef, isVisible: valuesVisible, getDelay: getValuesDelay } = useStaggeredAnimation(3, 150);
@@ -33,29 +32,13 @@ const About = () => {
       <Header />
       
       <main>
-        {/* Hero */}
-        <section ref={heroRef} className="py-32 px-6 lg:px-8 bg-secondary overflow-hidden">
-          <div className="max-w-5xl mx-auto text-center">
-            <div className="flex items-center justify-center gap-6 mb-6">
-              <span className={`h-px bg-accent/40 transition-all duration-1000 ${heroVisible ? 'w-16' : 'w-0'}`} />
-              <span className={`text-xs tracking-[0.2em] uppercase text-muted-foreground transition-all duration-700 ease-out ${heroVisible ? 'opacity-100' : 'opacity-0'}`}>About Us</span>
-              <span className={`h-px bg-accent/40 transition-all duration-1000 ${heroVisible ? 'w-16' : 'w-0'}`} />
-            </div>
-            <LetterReveal
-              text="關於我們"
-              as="h1"
-              className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6"
-              isVisible={heroVisible}
-              startDelay={200}
-              letterDelay={80}
-            />
-            <p className={`text-lg text-muted-foreground leading-relaxed transition-all duration-700 ease-out ${
-              heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`} style={{ transitionDelay: '600ms' }}>
-              四十五年的匠心傳承，造就卓越品質
-            </p>
-          </div>
-        </section>
+        <PageBreadcrumb
+          segments={[
+            { label: "Home", href: "/" },
+            { label: "About" },
+          ]}
+          title="關於我們"
+        />
 
         {/* Story */}
         <section ref={storyRef} className="py-24 px-6 lg:px-8 overflow-hidden">

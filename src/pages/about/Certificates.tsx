@@ -1,12 +1,10 @@
 import Header from "../../components/layout/Header";
 import Footer from "../../components/layout/Footer";
-import PageHeader from "../../components/about/PageHeader";
-import ContentSection from "../../components/about/ContentSection";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 import { Award, Shield, Leaf, CheckCircle, FileCheck, Globe } from "lucide-react";
+import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
 
 const Certificates = () => {
-  const { ref: heroRef, isVisible: heroVisible } = useScrollAnimation();
   const { ref: certsRef, isVisible: certsVisible, getDelay: getCertsDelay } = useStaggeredAnimation(6, 100);
   const { ref: standardsRef, isVisible: standardsVisible, getDelay: getStandardsDelay } = useStaggeredAnimation(4, 150);
   const { ref: commitmentRef, isVisible: commitmentVisible } = useScrollAnimation();
@@ -86,146 +84,124 @@ const Certificates = () => {
       <Header />
       
       <main className="w-full">
-          {/* Hero Section */}
-          <section ref={heroRef} className="py-24 px-6 bg-secondary overflow-hidden">
-            <div className="max-w-3xl">
-              <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${
-                heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-              }`}>Quality Assurance</p>
-              <h1 className={`text-4xl md:text-5xl font-bold text-foreground mb-6 transition-all duration-700 ease-out ${
-                heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-              }`} style={{ transitionDelay: '100ms' }}>
-                認證與標準
-              </h1>
-              <p className={`text-lg text-muted-foreground leading-relaxed transition-all duration-700 ease-out ${
-                heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-              }`} style={{ transitionDelay: '200ms' }}>
-                品質保證 · 環保合規 · 社會責任 · 國際認可
-              </p>
-            </div>
-          </section>
+        <PageBreadcrumb
+          segments={[
+            { label: "Home", href: "/" },
+            { label: "About", href: "/about" },
+            { label: "Certificates" },
+          ]}
+          title="認證與標準"
+        />
 
-          {/* Certificates Grid */}
-          <section className="py-16 px-6 overflow-hidden">
-            <div className="mb-10">
-              <h2 className="text-2xl font-light text-foreground mb-2">國際認證</h2>
-              <p className="text-sm text-muted-foreground">我們持有的主要國際認證與合規證書</p>
-            </div>
-            <div ref={certsRef} className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {certificates.map((cert, index) => (
-                <div 
-                  key={index}
-                  className={`p-6 bg-background border border-border hover:border-foreground/20 transition-all duration-500 group ${
-                    certsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
-                  }`}
-                  style={getCertsDelay(index)}
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <cert.icon className="w-8 h-8 text-foreground/60 group-hover:text-foreground/80 transition-colors duration-300" strokeWidth={1.5} />
-                    <span className="text-xs text-muted-foreground bg-secondary px-2 py-1">有效至 {cert.validUntil}</span>
-                  </div>
-                  <h3 className="text-lg font-light text-foreground mb-1">{cert.name}</h3>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3">{cert.category}</p>
-                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">{cert.description}</p>
-                  <div className="pt-4 border-t border-border">
-                    <span className="text-xs text-muted-foreground">適用範圍：{cert.scope}</span>
-                  </div>
+        {/* Certificates Grid */}
+        <section className="py-16 px-6 overflow-hidden">
+          <div className="mb-10">
+            <h2 className="text-2xl font-light text-foreground mb-2">國際認證</h2>
+            <p className="text-sm text-muted-foreground">我們持有的主要國際認證與合規證書</p>
+          </div>
+          <div ref={certsRef} className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {certificates.map((cert, index) => (
+              <div 
+                key={index}
+                className={`p-6 bg-background border border-border hover:border-foreground/20 transition-all duration-500 group ${
+                  certsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+                }`}
+                style={getCertsDelay(index)}
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <cert.icon className="w-8 h-8 text-foreground/60 group-hover:text-foreground/80 transition-colors duration-300" strokeWidth={1.5} />
+                  <span className="text-xs text-muted-foreground bg-secondary px-2 py-1">有效至 {cert.validUntil}</span>
                 </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Standards Section */}
-          <section className="py-16 px-6 bg-secondary overflow-hidden">
-            <div className="mb-10">
-              <h2 className="text-2xl font-light text-foreground mb-2">合規標準</h2>
-              <p className="text-sm text-muted-foreground">我們嚴格遵循的品質與合規標準體系</p>
-            </div>
-            <div ref={standardsRef} className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {standards.map((standard, index) => (
-                <div 
-                  key={index}
-                  className={`p-6 bg-background border border-border transition-all duration-500 ${
-                    standardsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
-                  }`}
-                  style={getStandardsDelay(index)}
-                >
-                  <h3 className="text-base font-light text-foreground mb-4 pb-4 border-b border-border">{standard.title}</h3>
-                  <ul className="space-y-3">
-                    {standard.items.map((item, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                        <CheckCircle className="w-4 h-4 text-foreground/40 mt-0.5 flex-shrink-0" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Testing & Verification */}
-          <section ref={commitmentRef} className="py-16 px-6 overflow-hidden">
-            <div className="grid md:grid-cols-2 gap-12 items-center">
-              <div className={`transition-all duration-700 ease-out ${
-                commitmentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'
-              }`}>
-                <h2 className="text-2xl font-light text-foreground mb-4">第三方測試與驗證</h2>
-                <p className="text-muted-foreground leading-relaxed mb-6">
-                  我們與多家國際知名測試機構合作，定期對產品進行獨立第三方測試及驗證。這些測試涵蓋物理性能、化學安全、環保合規等多個範疇，確保產品符合全球各市場的監管要求。
-                </p>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-4 p-4 bg-secondary">
-                    <div className="w-12 h-12 flex items-center justify-center bg-background">
-                      <span className="text-xs font-medium text-foreground">SGS</span>
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-foreground">SGS Testing Services</div>
-                      <div className="text-xs text-muted-foreground">全球領先的測試認證機構</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4 p-4 bg-secondary">
-                    <div className="w-12 h-12 flex items-center justify-center bg-background">
-                      <span className="text-xs font-medium text-foreground">BV</span>
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-foreground">Bureau Veritas</div>
-                      <div className="text-xs text-muted-foreground">國際檢驗認證集團</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4 p-4 bg-secondary">
-                    <div className="w-12 h-12 flex items-center justify-center bg-background">
-                      <span className="text-xs font-medium text-foreground">ITS</span>
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-foreground">Intertek</div>
-                      <div className="text-xs text-muted-foreground">質量與安全解決方案提供商</div>
-                    </div>
-                  </div>
+                <h3 className="text-lg font-light text-foreground mb-1">{cert.name}</h3>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3">{cert.category}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4">{cert.description}</p>
+                <div className="pt-4 border-t border-border">
+                  <span className="text-xs text-muted-foreground">適用範圍：{cert.scope}</span>
                 </div>
               </div>
-              <div className={`aspect-square overflow-hidden transition-all duration-700 ease-out ${
-                commitmentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'
-              }`} style={{ transitionDelay: '200ms' }}>
-                <img 
-                  src="https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=800&auto=format&fit=crop"
-                  alt="Quality testing laboratory"
-                  className="w-full h-full object-cover"
-                />
+            ))}
+          </div>
+        </section>
+
+        {/* Standards Section */}
+        <section className="py-16 px-6 bg-secondary overflow-hidden">
+          <div className="mb-10">
+            <h2 className="text-2xl font-light text-foreground mb-2">合規標準</h2>
+            <p className="text-sm text-muted-foreground">我們嚴格遵循的品質與合規標準體系</p>
+          </div>
+          <div ref={standardsRef} className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {standards.map((standard, index) => (
+              <div 
+                key={index}
+                className={`p-6 bg-background border border-border transition-all duration-500 ${
+                  standardsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+                }`}
+                style={getStandardsDelay(index)}
+              >
+                <h3 className="text-base font-light text-foreground mb-4 pb-4 border-b border-border">{standard.title}</h3>
+                <ul className="space-y-3">
+                  {standard.items.map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <CheckCircle className="w-4 h-4 text-foreground/40 mt-0.5 flex-shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Testing & Verification */}
+        <section ref={commitmentRef} className="py-16 px-6 overflow-hidden">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className={`transition-all duration-700 ease-out ${
+              commitmentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'
+            }`}>
+              <h2 className="text-2xl font-light text-foreground mb-4">第三方測試與驗證</h2>
+              <p className="text-muted-foreground leading-relaxed mb-6">
+                我們與多家國際知名測試機構合作，定期對產品進行獨立第三方測試及驗證。這些測試涵蓋物理性能、化學安全、環保合規等多個範疇，確保產品符合全球各市場的監管要求。
+              </p>
+              <div className="space-y-4">
+                {[
+                  { abbr: "SGS", name: "SGS Testing Services", desc: "全球領先的測試認證機構" },
+                  { abbr: "BV", name: "Bureau Veritas", desc: "國際檢驗認證集團" },
+                  { abbr: "ITS", name: "Intertek", desc: "質量與安全解決方案提供商" },
+                ].map((org) => (
+                  <div key={org.abbr} className="flex items-center gap-4 p-4 bg-secondary">
+                    <div className="w-12 h-12 flex items-center justify-center bg-background">
+                      <span className="text-xs font-medium text-foreground">{org.abbr}</span>
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-foreground">{org.name}</div>
+                      <div className="text-xs text-muted-foreground">{org.desc}</div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-          </section>
-
-          {/* Commitment Banner */}
-          <section className="py-16 px-6 bg-secondary border-t border-border overflow-hidden">
-            <div className="max-w-3xl">
-              <h2 className="text-2xl font-light text-foreground mb-4">我們的承諾</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                WIN-CYC承諾持續投資於品質管理及認證體系的完善。我們相信，嚴格的標準與透明的合規措施是建立客戶信任的基石。未來，我們將繼續擴展認證範圍，以滿足全球客戶及監管機構日益嚴格的要求。
-              </p>
+            <div className={`aspect-square overflow-hidden transition-all duration-700 ease-out ${
+              commitmentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'
+            }`} style={{ transitionDelay: '200ms' }}>
+              <img 
+                src="https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=800&auto=format&fit=crop"
+                alt="Quality testing laboratory"
+                className="w-full h-full object-cover"
+              />
             </div>
-          </section>
-        </main>
+          </div>
+        </section>
+
+        {/* Commitment Banner */}
+        <section className="py-16 px-6 bg-secondary border-t border-border overflow-hidden">
+          <div className="max-w-3xl">
+            <h2 className="text-2xl font-light text-foreground mb-4">我們的承諾</h2>
+            <p className="text-muted-foreground leading-relaxed">
+              WIN-CYC承諾持續投資於品質管理及認證體系的完善。我們相信，嚴格的標準與透明的合規措施是建立客戶信任的基石。未來，我們將繼續擴展認證範圍，以滿足全球客戶及監管機構日益嚴格的要求。
+            </p>
+          </div>
+        </section>
+      </main>
       
       <Footer />
     </div>

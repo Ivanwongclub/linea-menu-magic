@@ -1,10 +1,9 @@
 import Header from "../../components/layout/Header";
 import Footer from "../../components/layout/Footer";
-import PageHeader from "../../components/about/PageHeader";
 import ContentSection from "../../components/about/ContentSection";
 import ImageTextBlock from "../../components/about/ImageTextBlock";
-import AboutSidebar from "../../components/about/AboutSidebar";
 import { useScrollAnimation } from "@/hooks/use-scroll-animation";
+import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
 
 const OurStory = () => {
   const { ref: section1Ref, isVisible: section1Visible } = useScrollAnimation();
@@ -17,9 +16,13 @@ const OurStory = () => {
       
       <main className="py-16 px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <PageHeader 
-            title="我們的故事" 
-            subtitle="四十五年匠心傳承，服務全球品牌"
+          <PageBreadcrumb
+            segments={[
+              { label: "Home", href: "/" },
+              { label: "About", href: "/about" },
+              { label: "Our Story" },
+            ]}
+            title="我們的故事"
           />
           
           <div ref={section1Ref} className={`transition-all duration-700 ${section1Visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>

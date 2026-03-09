@@ -1,12 +1,11 @@
 import Header from "../../components/layout/Header";
 import Footer from "../../components/layout/Footer";
-import PageHeader from "../../components/about/PageHeader";
 import ContentSection from "../../components/about/ContentSection";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 import { Settings, Cpu, Users, Shield, Leaf, Zap } from "lucide-react";
+import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
 
 const Factory = () => {
-  const { ref: heroRef, isVisible: heroVisible } = useScrollAnimation();
   const { ref: statsRef, isVisible: statsVisible, getDelay: getStatsDelay } = useStaggeredAnimation(4, 100);
   const { ref: facilitiesRef, isVisible: facilitiesVisible, getDelay: getFacilitiesDelay } = useStaggeredAnimation(3, 150);
   const { ref: processRef, isVisible: processVisible, getDelay: getProcessDelay } = useStaggeredAnimation(6, 100);
@@ -54,166 +53,138 @@ const Factory = () => {
       <Header />
       
       <main className="w-full">
-          {/* Hero Section */}
-          <section ref={heroRef} className="relative h-[50vh] overflow-hidden">
-            <img 
-              src="https://images.unsplash.com/photo-1565793298595-6a879b1d9492?w=1920&auto=format&fit=crop"
-              alt="Manufacturing facility"
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-8">
-              <p className={`text-subtitle mb-2 transition-all duration-700 ease-out ${
-                heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-              }`}>Manufacturing Excellence</p>
-              <h1 className={`text-4xl md:text-5xl font-bold text-foreground mb-4 transition-all duration-700 ease-out ${
-                heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-              }`} style={{ transitionDelay: '100ms' }}>
-                生產設施
-              </h1>
-              <p className={`text-lg text-muted-foreground max-w-2xl transition-all duration-700 ease-out ${
-                heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-              }`} style={{ transitionDelay: '200ms' }}>
-                匠心傳承 · 精益求精 · 現代化生產體系
-              </p>
-            </div>
-          </section>
+        <PageBreadcrumb
+          segments={[
+            { label: "Home", href: "/" },
+            { label: "About", href: "/about" },
+            { label: "Factory" },
+          ]}
+          title="生產設施"
+        />
 
-          {/* Stats Section */}
-          <section className="py-16 px-6 border-b border-border overflow-hidden">
-            <div ref={statsRef} className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              {stats.map((stat, index) => (
-                <div 
-                  key={index}
-                  className={`text-center transition-all duration-700 ease-out ${
-                    statsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-                  }`}
-                  style={getStatsDelay(index)}
-                >
-                  <div className="text-3xl md:text-4xl font-light text-foreground mb-2">{stat.value}</div>
-                  <div className="text-sm text-foreground font-medium">{stat.label}</div>
-                  <div className="text-xs text-muted-foreground">{stat.sublabel}</div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Facilities Section */}
-          <ContentSection title="生產基地" className="px-6">
-            <div ref={facilitiesRef} className="grid md:grid-cols-3 gap-6">
-              {facilities.map((facility, index) => (
-                <div 
-                  key={index}
-                  className={`group transition-all duration-700 ease-out ${
-                    facilitiesVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
-                  }`}
-                  style={getFacilitiesDelay(index)}
-                >
-                  <div className="aspect-[4/3] overflow-hidden mb-4">
-                    <img 
-                      src={facility.image}
-                      alt={facility.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
-                  </div>
-                  <h3 className="text-lg font-light text-foreground mb-1">{facility.title}</h3>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3">{facility.subtitle}</p>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{facility.description}</p>
-                </div>
-              ))}
-            </div>
-          </ContentSection>
-
-          {/* Production Process */}
-          <section className="py-16 px-6 bg-secondary overflow-hidden">
-            <div className="mb-8">
-              <h2 className="text-2xl font-light text-foreground mb-2">生產工藝</h2>
-              <p className="text-sm text-muted-foreground">先進設備與傳統工藝的完美結合</p>
-            </div>
-            <div ref={processRef} className="grid grid-cols-2 md:grid-cols-3 gap-6">
-              {processes.map((process, index) => (
-                <div 
-                  key={index}
-                  className={`p-6 bg-background border border-border hover:border-foreground/20 transition-all duration-500 ${
-                    processVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
-                  }`}
-                  style={getProcessDelay(index)}
-                >
-                  <process.icon className="w-6 h-6 text-foreground/70 mb-4" strokeWidth={1.5} />
-                  <h3 className="text-base font-light text-foreground mb-2">{process.title}</h3>
-                  <p className="text-sm text-muted-foreground">{process.desc}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Equipment Section */}
-          <section ref={equipmentRef} className="py-16 px-6 overflow-hidden">
-            <div className="grid md:grid-cols-2 gap-12 items-center">
-              <div className={`transition-all duration-700 ease-out ${
-                equipmentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'
-              }`}>
-                <h2 className="text-2xl font-light text-foreground mb-4">先進生產設備</h2>
-                <p className="text-muted-foreground leading-relaxed mb-6">
-                  我們持續投資先進生產設備，包括日本及歐洲進口的精密模具加工機器、自動化電鍍生產線、以及最新的品質檢測儀器。這些設備確保每件產品都能達到國際一流水準。
-                </p>
-                <ul className="space-y-3 text-sm text-muted-foreground">
-                  <li className="flex items-center gap-3">
-                    <span className="w-1.5 h-1.5 bg-foreground/40" />
-                    日本FANUC CNC加工中心
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <span className="w-1.5 h-1.5 bg-foreground/40" />
-                    德國TRUMPF激光切割機
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <span className="w-1.5 h-1.5 bg-foreground/40" />
-                    瑞士Stratasys 3D打印系統
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <span className="w-1.5 h-1.5 bg-foreground/40" />
-                    自動化環保電鍍生產線
-                  </li>
-                </ul>
+        {/* Stats Section */}
+        <section className="py-16 px-6 border-b border-border overflow-hidden">
+          <div ref={statsRef} className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {stats.map((stat, index) => (
+              <div 
+                key={index}
+                className={`text-center transition-all duration-700 ease-out ${
+                  statsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                }`}
+                style={getStatsDelay(index)}
+              >
+                <div className="text-3xl md:text-4xl font-light text-foreground mb-2">{stat.value}</div>
+                <div className="text-sm text-foreground font-medium">{stat.label}</div>
+                <div className="text-xs text-muted-foreground">{stat.sublabel}</div>
               </div>
-              <div className={`aspect-[4/3] overflow-hidden transition-all duration-700 ease-out ${
-                equipmentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'
-              }`} style={{ transitionDelay: '200ms' }}>
-                <img 
-                  src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&auto=format&fit=crop"
-                  alt="Advanced manufacturing equipment"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </div>
-          </section>
+            ))}
+          </div>
+        </section>
 
-          {/* Quality Commitment */}
-          <section className="py-16 px-6 bg-secondary border-t border-border overflow-hidden">
-            <div className="max-w-3xl">
-              <h2 className="text-2xl font-light text-foreground mb-4">品質承諾</h2>
+        {/* Facilities Section */}
+        <ContentSection title="生產基地" className="px-6">
+          <div ref={facilitiesRef} className="grid md:grid-cols-3 gap-6">
+            {facilities.map((facility, index) => (
+              <div 
+                key={index}
+                className={`group transition-all duration-700 ease-out ${
+                  facilitiesVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+                }`}
+                style={getFacilitiesDelay(index)}
+              >
+                <div className="aspect-[4/3] overflow-hidden mb-4">
+                  <img 
+                    src={facility.image}
+                    alt={facility.title}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                </div>
+                <h3 className="text-lg font-light text-foreground mb-1">{facility.title}</h3>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3">{facility.subtitle}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">{facility.description}</p>
+              </div>
+            ))}
+          </div>
+        </ContentSection>
+
+        {/* Production Process */}
+        <section className="py-16 px-6 bg-secondary overflow-hidden">
+          <div className="mb-8">
+            <h2 className="text-2xl font-light text-foreground mb-2">生產工藝</h2>
+            <p className="text-sm text-muted-foreground">先進設備與傳統工藝的完美結合</p>
+          </div>
+          <div ref={processRef} className="grid grid-cols-2 md:grid-cols-3 gap-6">
+            {processes.map((process, index) => (
+              <div 
+                key={index}
+                className={`p-6 bg-background border border-border hover:border-foreground/20 transition-all duration-500 ${
+                  processVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+                }`}
+                style={getProcessDelay(index)}
+              >
+                <process.icon className="w-6 h-6 text-foreground/70 mb-4" strokeWidth={1.5} />
+                <h3 className="text-base font-light text-foreground mb-2">{process.title}</h3>
+                <p className="text-sm text-muted-foreground">{process.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Equipment Section */}
+        <section ref={equipmentRef} className="py-16 px-6 overflow-hidden">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className={`transition-all duration-700 ease-out ${
+              equipmentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'
+            }`}>
+              <h2 className="text-2xl font-light text-foreground mb-4">先進生產設備</h2>
               <p className="text-muted-foreground leading-relaxed mb-6">
-                WIN-CYC始終堅持「品質至上」的經營理念。從原材料採購、生產製造到成品檢驗，每個環節都嚴格遵循ISO 9001品質管理體系標準。我們的品質控制團隊對每批產品進行多重檢測，確保交付給客戶的每件產品都達到最高品質標準。
+                我們持續投資先進生產設備，包括日本及歐洲進口的精密模具加工機器、自動化電鍍生產線、以及最新的品質檢測儀器。這些設備確保每件產品都能達到國際一流水準。
               </p>
-              <div className="flex items-center gap-6">
-                <div className="text-center">
-                  <div className="text-2xl font-light text-foreground">99.8%</div>
-                  <div className="text-xs text-muted-foreground">產品合格率</div>
-                </div>
-                <div className="w-px h-12 bg-border" />
-                <div className="text-center">
-                  <div className="text-2xl font-light text-foreground">&lt;0.1%</div>
-                  <div className="text-xs text-muted-foreground">客戶投訴率</div>
-                </div>
-                <div className="w-px h-12 bg-border" />
-                <div className="text-center">
-                  <div className="text-2xl font-light text-foreground">100%</div>
-                  <div className="text-xs text-muted-foreground">交期達成率</div>
-                </div>
+              <ul className="space-y-3 text-sm text-muted-foreground">
+                <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 bg-foreground/40" />日本FANUC CNC加工中心</li>
+                <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 bg-foreground/40" />德國TRUMPF激光切割機</li>
+                <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 bg-foreground/40" />瑞士Stratasys 3D打印系統</li>
+                <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 bg-foreground/40" />自動化環保電鍍生產線</li>
+              </ul>
+            </div>
+            <div className={`aspect-[4/3] overflow-hidden transition-all duration-700 ease-out ${
+              equipmentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'
+            }`} style={{ transitionDelay: '200ms' }}>
+              <img 
+                src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&auto=format&fit=crop"
+                alt="Advanced manufacturing equipment"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Quality Commitment */}
+        <section className="py-16 px-6 bg-secondary border-t border-border overflow-hidden">
+          <div className="max-w-3xl">
+            <h2 className="text-2xl font-light text-foreground mb-4">品質承諾</h2>
+            <p className="text-muted-foreground leading-relaxed mb-6">
+              WIN-CYC始終堅持「品質至上」的經營理念。從原材料採購、生產製造到成品檢驗，每個環節都嚴格遵循ISO 9001品質管理體系標準。我們的品質控制團隊對每批產品進行多重檢測，確保交付給客戶的每件產品都達到最高品質標準。
+            </p>
+            <div className="flex items-center gap-6">
+              <div className="text-center">
+                <div className="text-2xl font-light text-foreground">99.8%</div>
+                <div className="text-xs text-muted-foreground">產品合格率</div>
+              </div>
+              <div className="w-px h-12 bg-border" />
+              <div className="text-center">
+                <div className="text-2xl font-light text-foreground">&lt;0.1%</div>
+                <div className="text-xs text-muted-foreground">客戶投訴率</div>
+              </div>
+              <div className="w-px h-12 bg-border" />
+              <div className="text-center">
+                <div className="text-2xl font-light text-foreground">100%</div>
+                <div className="text-xs text-muted-foreground">交期達成率</div>
               </div>
             </div>
-          </section>
-        </main>
+          </div>
+        </section>
+      </main>
       
       <Footer />
     </div>
