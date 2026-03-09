@@ -166,7 +166,7 @@ const Navigation = () => {
             >
               <Link
                 to={item.href}
-                className="text-nav-foreground hover:text-brand-red-muted transition-colors duration-200 text-sm font-light py-6 block"
+                className="text-nav-foreground hover:text-accent transition-colors duration-200 text-sm font-light py-6 block"
               >
                 {item.name}
               </Link>
@@ -245,7 +245,7 @@ const Navigation = () => {
                             ? `/category/${subItem.toLowerCase().replace(/\s+/g, '-')}`
                             : `/news`
                           }
-                          className="text-nav-foreground hover:text-brand-red-muted transition-colors duration-200 text-sm font-light block py-2"
+                          className="text-nav-foreground hover:text-accent transition-colors duration-200 text-sm font-light block py-2"
                         >
                           {subItem}
                         </Link>
@@ -335,7 +335,7 @@ const Navigation = () => {
                 <div key={item.name}>
                   <Link
                     to={item.href}
-                    className="text-nav-foreground hover:text-brand-red-muted transition-colors duration-200 text-lg font-light block py-2"
+                    className="text-nav-foreground hover:text-accent transition-colors duration-200 text-lg font-light block py-2"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     {item.name}
@@ -350,7 +350,7 @@ const Navigation = () => {
                            ? `/category/${subItem.toLowerCase().replace(/\s+/g, '-')}`
                            : `/news`
                          }
-                         className="text-nav-foreground/70 hover:text-brand-red-muted text-sm font-light block py-1"
+                         className="text-nav-foreground/70 hover:text-accent text-sm font-light block py-1"
                          onClick={() => setIsMobileMenuOpen(false)}
                        >
                          {subItem}

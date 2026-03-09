@@ -94,7 +94,7 @@ const QuickRFQDialog = ({ open, onOpenChange, item }: QuickRFQDialogProps) => {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="font-serif text-xl">快速報價請求</DialogTitle>
+          <DialogTitle className="text-xl font-semibold">快速報價請求</DialogTitle>
           <DialogDescription>
             為 <span className="font-medium text-foreground">{item.name}</span> 建立報價請求
           </DialogDescription>
@@ -227,7 +227,7 @@ const QuickRFQDialog = ({ open, onOpenChange, item }: QuickRFQDialogProps) => {
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             取消
           </Button>
-          <Button onClick={handleSubmit} className="btn-red-glow">
+          <Button onClick={handleSubmit}>
             提交報價請求
           </Button>
         </DialogFooter>

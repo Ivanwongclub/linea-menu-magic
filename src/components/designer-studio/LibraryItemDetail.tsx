@@ -101,7 +101,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                   </Badge>
                 )}
               </div>
-              <h1 className="font-serif text-2xl font-light text-foreground">{item.name}</h1>
+              <h1 className="text-2xl font-semibold text-foreground">{item.name}</h1>
               <p className="text-muted-foreground font-mono">{item.itemCode}</p>
             </div>
           </div>

@@ -97,7 +97,7 @@ const Sustainability = () => {
             <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${
               heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}>Sustainability</p>
-            <h1 className={`font-serif text-4xl md:text-5xl font-light text-foreground mb-6 transition-all duration-700 ease-out ${
+            <h1 className={`text-4xl md:text-5xl font-bold text-foreground mb-6 transition-all duration-700 ease-out ${
               heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`} style={{ transitionDelay: '100ms' }}>
               可持續發展
@@ -113,7 +113,7 @@ const Sustainability = () => {
         {/* Vision */}
         <section ref={visionRef} className="py-24 px-6 lg:px-8 overflow-hidden">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className={`font-serif text-3xl font-light text-foreground mb-8 transition-all duration-700 ease-out ${
+            <h2 className={`text-3xl font-bold text-foreground mb-8 transition-all duration-700 ease-out ${
               visionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}>
               我們的承諾
@@ -135,7 +135,7 @@ const Sustainability = () => {
               <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${
                 initHeaderVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}>Initiatives</p>
-              <h2 className={`font-serif text-3xl font-light text-foreground transition-all duration-700 ease-out ${
+               <h2 className={`text-3xl font-bold text-foreground transition-all duration-700 ease-out ${
                 initHeaderVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`} style={{ transitionDelay: '100ms' }}>
                 環保行動
@@ -152,7 +152,7 @@ const Sustainability = () => {
                   style={getInitDelay(index)}
                 >
                   <initiative.icon className="w-8 h-8 text-foreground mb-6" strokeWidth={1.5} />
-                  <h3 className="font-serif text-xl text-foreground mb-2">
+                  <h3 className="text-xl font-semibold text-foreground mb-2">
                     {initiative.titleCn}
                   </h3>
                   <p className="text-xs text-muted-foreground tracking-wide mb-4">
@@ -168,7 +168,7 @@ const Sustainability = () => {
         </section>
 
         {/* Green Footprint Banner - Moved from News */}
-        <section ref={greenRef} className="py-20 px-6 lg:px-8 bg-green-light/30 overflow-hidden">
+        <section ref={greenRef} className="py-20 px-6 lg:px-8 bg-secondary overflow-hidden">
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               {/* Content */}
@@ -176,13 +176,13 @@ const Sustainability = () => {
                 greenVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'
               }`}>
                 <div className="flex items-center gap-2 mb-4">
-                  <Leaf className="w-5 h-5 text-green-forest" strokeWidth={1.5} />
-                  <span className="text-xs tracking-[0.2em] uppercase text-green-forest">Green Initiative</span>
+                   <Leaf className="w-5 h-5 text-accent" strokeWidth={1.5} />
+                  <span className="text-xs tracking-[0.2em] uppercase text-accent">Green Initiative</span>
                 </div>
-                <h2 className="font-serif text-3xl font-light text-green-deep mb-4">
+                <h2 className="text-3xl font-bold text-foreground mb-4">
                   綠色願景
                 </h2>
-                <p className="text-green-forest/80 leading-relaxed mb-6">
+                <p className="text-muted-foreground leading-relaxed mb-6">
                   我們相信，每一個微小的改變都能為地球帶來深遠的影響。
                   從材料選擇到生產製程，我們不斷探索更環保的方式，
                   為下一代創造更美好的未來。
@@ -192,10 +192,10 @@ const Sustainability = () => {
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   {greenVisionItems.map((item) => (
                     <div key={item.title} className="flex items-start gap-3 p-3 bg-white/50">
-                      <item.icon className="w-5 h-5 text-green-forest flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+                       <item.icon className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" strokeWidth={1.5} />
                       <div>
-                        <p className="text-sm font-medium text-green-deep">{item.title}</p>
-                        <p className="text-xs text-green-forest/70">{item.desc}</p>
+                        <p className="text-sm font-medium text-foreground">{item.title}</p>
+                        <p className="text-xs text-muted-foreground">{item.desc}</p>
                       </div>
                     </div>
                   ))}
@@ -204,24 +204,24 @@ const Sustainability = () => {
                 {/* Stats */}
                 <div className="flex gap-8 mb-6">
                   <div>
-                    <p className="font-serif text-2xl text-green-deep">30%</p>
-                    <p className="text-xs text-green-forest/70">再生材料使用</p>
+                     <p className="text-2xl font-bold text-foreground">30%</p>
+                    <p className="text-xs text-muted-foreground">再生材料使用</p>
                   </div>
                   <div>
-                    <p className="font-serif text-2xl text-green-deep">100%</p>
-                    <p className="text-xs text-green-forest/70">合規環保標準</p>
+                    <p className="text-2xl font-bold text-foreground">100%</p>
+                    <p className="text-xs text-muted-foreground">合規環保標準</p>
                   </div>
                   <div>
-                    <p className="font-serif text-2xl text-green-deep">50+</p>
-                    <p className="text-xs text-green-forest/70">環保產品線</p>
+                    <p className="text-2xl font-bold text-foreground">50+</p>
+                    <p className="text-xs text-muted-foreground">環保產品線</p>
                   </div>
                 </div>
                 
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-green-forest text-green-forest hover:bg-green-forest hover:text-white">
+                   <Button variant="outline" className="border-accent text-accent hover:bg-accent hover:text-accent-foreground">
                     了解環保認證
                   </Button>
-                  <Button variant="ghost" className="text-green-forest hover:bg-green-light">
+                  <Button variant="ghost" className="text-accent hover:bg-secondary">
                     可持續發展報告
                   </Button>
                 </div>
@@ -254,7 +254,7 @@ const Sustainability = () => {
               <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${
                 certHeaderVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}>Certifications</p>
-              <h2 className={`font-serif text-3xl font-light text-foreground transition-all duration-700 ease-out ${
+              <h2 className={`text-3xl font-bold text-foreground transition-all duration-700 ease-out ${
                 certHeaderVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`} style={{ transitionDelay: '100ms' }}>
                 國際認證
@@ -271,7 +271,7 @@ const Sustainability = () => {
                   style={getCertDelay(index)}
                 >
                   <div className="flex-shrink-0 w-16 h-16 bg-secondary flex items-center justify-center">
-                    <span className="font-serif text-lg text-foreground">{cert.name}</span>
+                    <span className="text-lg font-semibold text-foreground">{cert.name}</span>
                   </div>
                   <div>
                     <h3 className="text-foreground font-medium mb-1">{cert.fullName}</h3>
@@ -293,7 +293,7 @@ const Sustainability = () => {
                 <p className="text-xs tracking-[0.2em] uppercase text-primary-foreground/60 mb-4">
                   Featured Technology
                 </p>
-                <h2 className="font-serif text-3xl font-light mb-6">
+                <h2 className="text-3xl font-bold mb-6">
                   環保電鍍技術
                 </h2>
                 <h3 className="text-xl text-primary-foreground/80 mb-6">

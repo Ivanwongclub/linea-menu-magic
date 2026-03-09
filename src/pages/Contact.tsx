@@ -70,7 +70,7 @@ const Contact = () => {
             <p className={`text-xs tracking-[0.2em] uppercase text-primary-foreground/70 mb-4 transition-all duration-700 ease-out ${
               heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}>Contact Us</p>
-            <h1 className={`font-serif text-4xl md:text-5xl font-light text-primary-foreground mb-6 transition-all duration-700 ease-out ${
+            <h1 className={`text-4xl md:text-5xl font-bold text-primary-foreground mb-6 transition-all duration-700 ease-out ${
               heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`} style={{ transitionDelay: '100ms' }}>
               聯絡我們
@@ -89,7 +89,7 @@ const Contact = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
               {/* Contact Info */}
               <div className="lg:col-span-1">
-                <h2 className={`font-serif text-2xl font-light text-foreground mb-8 transition-all duration-700 ease-out ${
+                 <h2 className={`text-2xl font-semibold text-foreground mb-8 transition-all duration-700 ease-out ${
                   infoVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}>
                   聯絡資訊
@@ -125,7 +125,7 @@ const Contact = () => {
 
               {/* Contact Form */}
               <div ref={formRef} className="lg:col-span-2">
-                <h2 className={`font-serif text-2xl font-light text-foreground mb-8 transition-all duration-700 ease-out ${
+                <h2 className={`text-2xl font-semibold text-foreground mb-8 transition-all duration-700 ease-out ${
                   formVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}>
                   獲取報價
@@ -231,7 +231,7 @@ const Contact = () => {
 
                   <button
                     type="submit"
-                    className="px-12 py-4 bg-brand-red-accent text-white text-xs tracking-[0.2em] uppercase transition-all duration-300 hover:bg-foreground btn-red-glow"
+                    className="px-12 py-4 bg-primary text-primary-foreground text-xs tracking-[0.2em] uppercase rounded-full transition-all duration-300 hover:bg-primary-hover"
                   >
                     發送訊息 Send Message
                   </button>

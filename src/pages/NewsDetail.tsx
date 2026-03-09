@@ -23,7 +23,7 @@ const NewsDetail = () => {
         <Header />
         <main className="py-24 px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="font-serif text-3xl text-foreground mb-4">找不到此新聞</h1>
+            <h1 className="text-3xl font-bold text-foreground mb-4">找不到此新聞</h1>
             <p className="text-muted-foreground mb-8">您查詢的新聞頁面不存在或已被移除。</p>
             <Link to="/news" className="inline-flex items-center gap-2 text-foreground hover:text-foreground/80 transition-colors">
               <ArrowLeft className="w-4 h-4" />
@@ -110,7 +110,7 @@ const NewsDetail = () => {
                 </div>
                 
                 {/* Title */}
-                <h1 className={`font-serif text-3xl md:text-4xl font-light text-foreground mb-2 transition-all duration-700 ease-out ${
+                <h1 className={`text-3xl md:text-4xl font-bold text-foreground mb-2 transition-all duration-700 ease-out ${
                   contentVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`} style={{ transitionDelay: '150ms' }}>
                   {newsItem.title}
@@ -149,7 +149,7 @@ const NewsDetail = () => {
                 {/* Gallery */}
                 {newsItem.gallery && newsItem.gallery.length > 0 && (
                   <div ref={galleryRef} className="mt-12">
-                    <h3 className="font-serif text-xl text-foreground mb-6">相關圖片</h3>
+                    <h3 className="text-xl font-semibold text-foreground mb-6">相關圖片</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       {newsItem.gallery.map((image, index) => (
                         <div 
@@ -222,7 +222,7 @@ const NewsDetail = () => {
                                 <span className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
                                   {item.type === "exhibition" ? "展覽" : "新聞"}
                                 </span>
-                                <h4 className="text-sm font-serif text-foreground group-hover:text-foreground/80 transition-colors line-clamp-2 mt-1">
+                                <h4 className="text-sm font-medium text-foreground group-hover:text-foreground/80 transition-colors line-clamp-2 mt-1">
                                   {item.title}
                                 </h4>
                                 <p className="text-[10px] text-muted-foreground mt-1">{item.date}</p>
@@ -236,7 +236,7 @@ const NewsDetail = () => {
                   
                   {/* CTA */}
                   <div className="p-6 bg-foreground text-background">
-                    <h3 className="font-serif text-lg mb-2">訂閱最新資訊</h3>
+                    <h3 className="text-lg font-semibold mb-2">訂閱最新資訊</h3>
                     <p className="text-sm text-background/70 mb-4">獲取展覽預告及行業動態</p>
                     <Link to="/contact">
                       <Button variant="outline" className="w-full border-background text-background hover:bg-background hover:text-foreground">

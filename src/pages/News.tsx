@@ -41,7 +41,7 @@ const News = () => {
             <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${
               heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}>News & Events</p>
-            <h1 className={`font-serif text-4xl md:text-5xl font-light text-foreground mb-6 transition-all duration-700 ease-out ${
+            <h1 className={`text-4xl md:text-5xl font-bold text-foreground mb-6 transition-all duration-700 ease-out ${
               heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`} style={{ transitionDelay: '100ms' }}>
               最新動態
@@ -144,7 +144,7 @@ const News = () => {
                             {categoryOptions.find(c => c.key === item.category)?.label}
                           </span>
                         </div>
-                        <h3 className="text-xl font-serif font-light text-foreground mb-1 group-hover:text-foreground/80 transition-colors duration-300">
+                        <h3 className="text-xl font-semibold text-foreground mb-1 group-hover:text-foreground/80 transition-colors duration-300">
                           {item.title}
                         </h3>
                         <p className="text-sm text-muted-foreground mb-3">
@@ -215,7 +215,7 @@ const News = () => {
                             {categoryOptions.find(c => c.key === item.category)?.label}
                           </span>
                         </div>
-                        <h3 className="text-base font-serif font-light text-foreground mb-2 group-hover:text-foreground/80 transition-colors duration-300 line-clamp-2">
+                        <h3 className="text-base font-semibold text-foreground mb-2 group-hover:text-foreground/80 transition-colors duration-300 line-clamp-2">
                           {item.title}
                         </h3>
                         <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
@@ -255,7 +255,7 @@ const News = () => {
         {/* CTA Section */}
         <section ref={ctaRef} className="py-16 px-6 lg:px-8 border-t border-border overflow-hidden">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className={`text-xl md:text-2xl font-serif font-light text-foreground mb-2 transition-all duration-700 ease-out ${
+            <h2 className={`text-xl md:text-2xl font-semibold text-foreground mb-2 transition-all duration-700 ease-out ${
               ctaVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}>
               訂閱最新資訊

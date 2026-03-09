@@ -35,7 +35,7 @@ const DesignerStudio = () => {
         <section className="py-24 px-6 lg:px-8 bg-secondary">
           <div className="max-w-4xl mx-auto text-center">
             <p className="text-subtitle mb-4">Exclusive Access</p>
-            <h1 className="font-serif text-4xl md:text-5xl font-light text-foreground mb-6">
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
               設計師工作室
             </h1>
             <p className="text-lg text-muted-foreground leading-relaxed mb-8">
@@ -45,7 +45,7 @@ const DesignerStudio = () => {
             {/* Dashboard Link */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/designer-studio/dashboard">
-                <Button className="btn-red-glow gap-2">
+                <Button className="gap-2">
                   <Library className="w-4 h-4" />
                   進入工作室
                 </Button>
@@ -58,7 +58,7 @@ const DesignerStudio = () => {
         <section className="py-24 px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="font-serif text-3xl font-light text-foreground mb-6">
+              <h2 className="text-3xl font-bold text-foreground mb-6">
                 專為設計師打造
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -70,7 +70,7 @@ const DesignerStudio = () => {
               {features.map((feature) => (
                 <div key={feature.titleEn} className="p-8 border border-border text-center">
                   <feature.icon className="w-10 h-10 text-foreground mx-auto mb-6" strokeWidth={1.5} />
-                  <h3 className="font-serif text-xl text-foreground mb-2">
+                  <h3 className="text-xl font-semibold text-foreground mb-2">
                     {feature.titleCn}
                   </h3>
                   <p className="text-xs text-muted-foreground tracking-wide mb-4">
@@ -89,7 +89,7 @@ const DesignerStudio = () => {
         <section className="py-24 px-6 lg:px-8 bg-foreground text-primary-foreground">
           <div className="max-w-md mx-auto text-center">
             <Lock className="w-12 h-12 text-primary-foreground/60 mx-auto mb-8" strokeWidth={1.5} />
-            <h2 className="font-serif text-2xl font-light mb-4">
+            <h2 className="text-2xl font-semibold mb-4">
               會員登入
             </h2>
             <p className="text-primary-foreground/70 mb-8">
@@ -126,13 +126,13 @@ const DesignerStudio = () => {
         {/* Info Section */}
         <section className="py-24 px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="font-serif text-3xl font-light text-foreground mb-8">
+            <h2 className="text-3xl font-bold text-foreground mb-8">
               如何獲得存取權限？
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div>
                 <div className="w-12 h-12 bg-secondary flex items-center justify-center mx-auto mb-4">
-                  <span className="font-serif text-xl text-foreground">1</span>
+                  <span className="text-xl font-bold text-foreground">1</span>
                 </div>
                 <h3 className="text-foreground mb-2">聯絡我們</h3>
                 <p className="text-sm text-muted-foreground">
@@ -141,7 +141,7 @@ const DesignerStudio = () => {
               </div>
               <div>
                 <div className="w-12 h-12 bg-secondary flex items-center justify-center mx-auto mb-4">
-                  <span className="font-serif text-xl text-foreground">2</span>
+                  <span className="text-xl font-bold text-foreground">2</span>
                 </div>
                 <h3 className="text-foreground mb-2">資格審核</h3>
                 <p className="text-sm text-muted-foreground">
@@ -150,7 +150,7 @@ const DesignerStudio = () => {
               </div>
               <div>
                 <div className="w-12 h-12 bg-secondary flex items-center justify-center mx-auto mb-4">
-                  <span className="font-serif text-xl text-foreground">3</span>
+                  <span className="text-xl font-bold text-foreground">3</span>
                 </div>
                 <h3 className="text-foreground mb-2">開通帳戶</h3>
                 <p className="text-sm text-muted-foreground">

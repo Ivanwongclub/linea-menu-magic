@@ -143,7 +143,7 @@ const RFQDetail = ({ rfq, onBack, onStatusChange }: RFQDetailProps) => {
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
               <div>
                 <div className="flex items-center gap-3 mb-2">
-                  <h1 className="font-serif text-2xl font-light text-foreground">
+                  <h1 className="text-2xl font-semibold text-foreground">
                     {rfq.id}
                   </h1>
                   <Badge className={statusColors[rfq.status]}>
@@ -162,7 +162,7 @@ const RFQDetail = ({ rfq, onBack, onStatusChange }: RFQDetailProps) => {
                       key={action.status}
                       variant={action.variant || 'default'}
                       onClick={() => onStatusChange(rfq.id, action.status)}
-                      className={action.variant === 'default' || !action.variant ? 'btn-red-glow' : ''}
+                      className={action.variant === 'default' || !action.variant ? '' : ''}
                     >
                       {action.icon}
                       <span className="ml-2">{action.label}</span>

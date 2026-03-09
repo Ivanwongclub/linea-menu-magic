@@ -14,8 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'Noto Sans TC', 'sans-serif'],
-        serif: ['Cormorant Garamond', 'Noto Sans TC', 'serif'],
+        sans: ['Poppins', 'Noto Sans TC', 'sans-serif'],
         chinese: ['Noto Sans TC', 'sans-serif'],
       },
       colors: {
@@ -57,25 +56,6 @@ export default {
           DEFAULT: "hsl(var(--nav-background))",
           foreground: "hsl(var(--nav-foreground))",
           hover: "hsl(var(--nav-hover))",
-        },
-        corporate: {
-          gold: "hsl(var(--corporate-gold))",
-          bronze: "hsl(var(--corporate-bronze))",
-          cream: "hsl(var(--corporate-cream))",
-          charcoal: "hsl(var(--corporate-charcoal))",
-        },
-        brand: {
-          red: "hsl(var(--brand-red))",
-          "red-muted": "hsl(var(--brand-red-muted))",
-          "red-subtle": "hsl(var(--brand-red-subtle))",
-          "red-accent": "hsl(var(--brand-red-accent))",
-        },
-        green: {
-          deep: "hsl(var(--green-deep))",
-          forest: "hsl(var(--green-forest))",
-          sage: "hsl(var(--green-sage))",
-          mist: "hsl(var(--green-mist))",
-          light: "hsl(var(--green-light))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
@@ -126,13 +106,6 @@ export default {
         "fade-up": "fade-up 0.6s ease-out",
         "slide-in-right": "slide-in-right 0.3s ease-out",
         "slide-down": "slide-down 0.25s ease-out",
-      },
-      transitionTimingFunction: {
-        elegant: "cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-      },
-      letterSpacing: {
-        widest: "0.2em",
-        wider: "0.1em",
       },
     },
   },

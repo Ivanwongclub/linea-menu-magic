@@ -38,7 +38,7 @@ const About = () => {
             <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${
               heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}>About Us</p>
-            <h1 className={`font-serif text-4xl md:text-5xl font-light text-foreground mb-6 transition-all duration-700 ease-out ${
+            <h1 className={`text-4xl md:text-5xl font-bold text-foreground mb-6 transition-all duration-700 ease-out ${
               heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`} style={{ transitionDelay: '100ms' }}>
               關於我們
@@ -56,7 +56,7 @@ const About = () => {
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
               <div>
-                <h2 className={`font-serif text-3xl font-light text-foreground mb-6 transition-all duration-700 ease-out ${
+                <h2 className={`text-3xl font-bold text-foreground mb-6 transition-all duration-700 ease-out ${
                   storyVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}>
                   品牌故事
@@ -98,7 +98,7 @@ const About = () => {
               <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${
                 valuesHeaderVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}>Our Values</p>
-              <h2 className={`font-serif text-3xl font-light text-foreground transition-all duration-700 ease-out ${
+               <h2 className={`text-3xl font-bold text-foreground transition-all duration-700 ease-out ${
                 valuesHeaderVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`} style={{ transitionDelay: '100ms' }}>
                 核心價值
@@ -114,7 +114,7 @@ const About = () => {
                   }`}
                   style={getValuesDelay(index)}
                 >
-                  <h3 className="font-serif text-xl text-foreground mb-4">{value.title}</h3>
+                  <h3 className="text-xl font-semibold text-foreground mb-4">{value.title}</h3>
                   <p className="text-sm text-muted-foreground">{value.desc}</p>
                 </div>
               ))}
@@ -129,7 +129,7 @@ const About = () => {
               <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${
                 timelineHeaderVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}>Milestones</p>
-              <h2 className={`font-serif text-3xl font-light text-foreground transition-all duration-700 ease-out ${
+              <h2 className={`text-3xl font-bold text-foreground transition-all duration-700 ease-out ${
                 timelineHeaderVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`} style={{ transitionDelay: '100ms' }}>
                 發展歷程
@@ -146,7 +146,7 @@ const About = () => {
                   style={getTimelineDelay(index)}
                 >
                   <div className="flex-shrink-0 w-20 text-right">
-                    <span className="font-serif text-2xl text-foreground">{milestone.year}</span>
+                    <span className="text-2xl font-bold text-foreground">{milestone.year}</span>
                   </div>
                   <div className="flex-shrink-0 w-px h-16 bg-border group-last:hidden" />
                   <div className="pt-1">

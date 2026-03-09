@@ -54,7 +54,7 @@ const Sustainability = () => {
                       className={`transition-all duration-500 ${goalsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
                       style={getGoalsDelay(index)}
                     >
-                      <div className="text-3xl font-light text-brand-red-accent mb-2">{goal.value}</div>
+                      <div className="text-3xl font-bold text-accent mb-2">{goal.value}</div>
                       <p className="text-sm text-muted-foreground">{goal.label}</p>
                     </div>
                   ))}

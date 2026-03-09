@@ -288,7 +288,7 @@ const DesignerStudioDashboard = () => {
             {/* Compact Header Row */}
             <div className="flex items-center justify-between py-3">
               <div className="flex items-center gap-6">
-                <h1 className="font-serif text-xl font-light text-foreground">
+                <h1 className="text-xl font-semibold text-foreground">
                   設計師工作室
                 </h1>
                 
@@ -342,7 +342,7 @@ const DesignerStudioDashboard = () => {
               <Button
                 variant={showFavoritesOnly ? "default" : "ghost"}
                 size="sm"
-                className={`gap-1.5 h-8 flex-shrink-0 ${showFavoritesOnly ? 'btn-red-glow' : ''}`}
+                className={`gap-1.5 h-8 flex-shrink-0`}
                 onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
               >
                 <Star className={`w-3.5 h-3.5 ${showFavoritesOnly ? 'fill-current' : ''}`} />
