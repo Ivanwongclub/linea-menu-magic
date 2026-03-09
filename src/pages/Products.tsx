@@ -79,7 +79,7 @@ const ProductCategory = ({ product, index }: { product: Product; index: number }
           }`}>
             {product.count} 款
           </span>
-          <h2 className={`font-serif text-3xl text-foreground mt-2 mb-2 transition-all duration-700 ease-out ${
+          <h2 className={`text-3xl font-semibold text-foreground mt-2 mb-2 transition-all duration-700 ease-out ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`} style={{ transitionDelay: '100ms' }}>
             {product.titleCn}
