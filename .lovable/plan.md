@@ -1,61 +1,30 @@
 
 
-# Redesign Products Page with Sidebar + Tag Filtering
+## Problem
 
-## Overview
-Replace the current vertically-stacked Products page layout with a sidebar + grid layout inspired by the Frameless reference. Left sidebar shows "CATEGORY" tag links for filtering; right side shows a grid of product cards with images and labels.
+The Polo Button OBJ file has large geometry dimensions in world units. The camera starts at position `[0, 1.5, 3]`, which places it **inside** the model, causing the zoomed-in/clipped view shown in the screenshot.
 
-## Layout Structure
+## Solution
 
-```text
-┌──────────────────────────────────────────────┐
-│  Header                                      │
-├──────────────────────────────────────────────┤
-│  Breadcrumb: Home > Products                 │
-├────────────┬─────────────────────────────────┤
-│  CATEGORY  │  ┌─────┐ ┌─────┐ ┌─────┐ ┌───┐│
-│            │  │ img │ │ img │ │ img │ │img││
-│  • Beads   │  │     │ │     │ │     │ │   ││
-│  • Badges  │  │label│ │label│ │label│ │lbl││
-│  • Buttons │  ├─────┤ ├─────┤ ├─────┤ ├───┤│
-│  • Buckles │  │ img │ │ img │ │ img │ │img││
-│  • ...     │  │     │ │     │ │     │ │   ││
-│  (all tags)│  │label│ │label│ │label│ │lbl││
-│            │  └─────┘ └─────┘ └─────┘ └───┘│
-├────────────┴─────────────────────────────────┤
-│  CTA Section                                 │
-├──────────────────────────────────────────────┤
-│  Footer                                      │
-└──────────────────────────────────────────────┘
+Normalize the OBJ model size in `OBJModelLoader.tsx` after loading. Compute the bounding box, then scale the model so it fits within a consistent size (e.g., radius ~1.5 units), regardless of the original OBJ dimensions.
+
+### Changes
+
+**`src/components/designer-studio/OBJModelLoader.tsx`**
+- After cloning and applying materials, compute the bounding box of the model
+- Calculate the max dimension and derive a scale factor to normalize to ~1.5 units
+- Apply the scale to the cloned object
+
+This is a ~5-line addition in the `useMemo` block:
+
+```ts
+// After traverse, normalize size
+const box = new THREE.Box3().setFromObject(clone);
+const size = box.getSize(new THREE.Vector3());
+const maxDim = Math.max(size.x, size.y, size.z);
+const scale = 2 / maxDim; // fit within ~2 units
+clone.scale.setScalar(scale);
 ```
 
-## Tag Data
-Expand subcategories into individual "tags" (matching the reference style):
-- Beads, Badges, Buttons, Buckles, Cord Ends, Cord Stoppers, Drawcords/Drawstrings, Eyelets, Hook & Eyes, Jeans Buttons, Rivets, Shank Buttons, Snap Buttons, Straps/Webbings, Zipper Pullers, Toggles, Cotton Lace, Labels, Hangtags
-
-Each tag links to a filtered view. Clicking a tag filters the product grid to show only items matching that tag. An "All" option shows everything.
-
-## Product Grid Items
-Flatten the existing 5 categories + their sub-items into individual product cards, each with:
-- Image (reuse existing category images, mapped per parent category)
-- Label text below the image
-- Hover zoom effect (consistent with existing site style)
-
-## Sidebar Behavior
-- Desktop: sticky left sidebar (~220px wide) with "CATEGORY" heading and tag list as text links
-- Active tag highlighted (underline or bold)
-- Mobile: sidebar collapses — show tags as horizontal scrollable chips above the grid
-- URL state via `?tag=buttons` search param for shareable filtered views
-
-## Files to Modify
-1. **`src/pages/Products.tsx`** — Complete redesign: sidebar + grid layout with tag filtering state
-2. No new components needed — keep it self-contained in the page file
-
-## Technical Details
-- Use `useState` for active tag, or `useSearchParams` for URL-driven filtering
-- Product data array with `tag` field and `image` mapping
-- Sidebar is a simple `<aside>` with `sticky top-32`, not the Shadcn Sidebar component (overkill for a simple tag list)
-- Mobile: render tags as a horizontal scroll row with `overflow-x-auto flex gap-2`
-- Keep the CTA section at the bottom
-- Keep the `PageBreadcrumb` at top
+No other files need changes. The `<Center>` component already handles centering the model at origin.
 
