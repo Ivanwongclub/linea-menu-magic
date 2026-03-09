@@ -288,7 +288,7 @@ const DesignerStudioDashboard = () => {
             {/* Compact Header Row */}
             <div className="flex items-center justify-between py-3">
               <div className="flex items-center gap-6">
-                <h1 className="font-serif text-xl font-light text-foreground">
+                <h1 className="text-xl font-semibold text-foreground">
                   設計師工作室
                 </h1>
                 
