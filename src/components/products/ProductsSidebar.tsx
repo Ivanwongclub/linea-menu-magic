@@ -201,7 +201,7 @@ const ProductsSidebar = ({
 
       {/* Sort */}
       <div>
-        <h3 className="text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">
+        <h3 className="text-base tracking-[0.2em] uppercase text-muted-foreground mb-3 font-medium">
           Sort
         </h3>
         <Select value={sortBy} onValueChange={onSortChange}>
