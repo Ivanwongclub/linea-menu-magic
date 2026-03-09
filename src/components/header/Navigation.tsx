@@ -335,7 +335,7 @@ const Navigation = () => {
                 <div key={item.name}>
                   <Link
                     to={item.href}
-                    className="text-nav-foreground hover:text-brand-red-muted transition-colors duration-200 text-lg font-light block py-2"
+                    className="text-nav-foreground hover:text-accent transition-colors duration-200 text-lg font-light block py-2"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     {item.name}
