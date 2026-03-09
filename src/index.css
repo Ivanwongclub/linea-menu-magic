@@ -50,14 +50,14 @@
 
     --radius: 0.5rem;
 
-    /* Sidebar */
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 0 0% 20%;
-    --sidebar-primary: 0 0% 0%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 94%;
-    --sidebar-accent-foreground: 0 0% 10%;
-    --sidebar-border: 0 0% 90%;
+    /* Sidebar — dark gray */
+    --sidebar-background: 0 0% 15%;
+    --sidebar-foreground: 0 0% 88%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 0 0% 10%;
+    --sidebar-accent: 0 0% 22%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 0 0% 28%;
     --sidebar-ring: 187 67% 46%;
   }
 
