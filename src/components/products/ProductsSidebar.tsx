@@ -124,7 +124,7 @@ const ProductsSidebar = ({
               >
                 <span className="flex items-center gap-2">
                   <span
-                    className={`text-xs tracking-[0.2em] uppercase transition-colors ${
+                    className={`text-sm tracking-[0.2em] uppercase transition-colors ${
                       isGroupActive
                         ? "text-sidebar-primary font-medium"
                         : "text-muted-foreground group-hover:text-sidebar-foreground"
@@ -132,7 +132,7 @@ const ProductsSidebar = ({
                   >
                     {group.name}
                   </span>
-                  <span className="text-[10px] text-muted-foreground tabular-nums">
+                  <span className="text-xs text-muted-foreground tabular-nums">
                     ({groupCount})
                   </span>
                 </span>
