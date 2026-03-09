@@ -227,7 +227,7 @@ const QuickRFQDialog = ({ open, onOpenChange, item }: QuickRFQDialogProps) => {
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             取消
           </Button>
-          <Button onClick={handleSubmit} className="btn-red-glow">
+          <Button onClick={handleSubmit}>
             提交報價請求
           </Button>
         </DialogFooter>
