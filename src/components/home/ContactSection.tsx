@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Mail, Phone, MapPin } from "lucide-react";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
+import LetterReveal from "@/components/ui/LetterReveal";
 
 const ContactSection = () => {
   const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation();
@@ -19,9 +20,14 @@ const ContactSection = () => {
           <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${headerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             Get in Touch
           </p>
-          <h2 className={`text-5xl md:text-6xl lg:text-7xl font-serif-display italic text-foreground mb-12 transition-all duration-700 ease-out ${headerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`} style={{ transitionDelay: '100ms' }}>
-            Contact Us
-          </h2>
+          <LetterReveal
+            text="Contact Us"
+            as="h2"
+            className="text-5xl md:text-6xl lg:text-7xl font-serif-display italic text-foreground mb-12"
+            isVisible={headerVisible}
+            startDelay={100}
+            letterDelay={55}
+          />
         </div>
 
         <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
