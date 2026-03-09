@@ -99,8 +99,8 @@ const ProductsSidebar = ({
     <div className="space-y-6 bg-transparent text-sidebar-foreground p-6 rounded-sm">
       {/* Title */}
       <div>
-        <h1 className="text-4xl font-light tracking-tight">Products</h1>
-        <p className="text-lg text-muted-foreground mt-1">產品系列</p>
+        <h1 className="text-5xl md:text-6xl font-light tracking-tight">Products</h1>
+        <p className="text-xl text-muted-foreground mt-2">產品系列</p>
       </div>
 
       <Separator className="bg-sidebar-border" />
@@ -124,7 +124,7 @@ const ProductsSidebar = ({
               >
                 <span className="flex items-center gap-2">
                   <span
-                    className={`text-xs tracking-[0.2em] uppercase transition-colors ${
+                    className={`text-sm tracking-[0.2em] uppercase transition-colors ${
                       isGroupActive
                         ? "text-sidebar-primary font-medium"
                         : "text-muted-foreground group-hover:text-sidebar-foreground"
@@ -132,7 +132,7 @@ const ProductsSidebar = ({
                   >
                     {group.name}
                   </span>
-                  <span className="text-[10px] text-muted-foreground tabular-nums">
+                  <span className="text-xs text-muted-foreground tabular-nums">
                     ({groupCount})
                   </span>
                 </span>
@@ -148,16 +148,16 @@ const ProductsSidebar = ({
                     const tagCount = countByTag(products, tag);
                     return (
                       <button
-                        key={tag}
+                         key={tag}
                         onClick={() => onTagClick(tag)}
-                        className={`flex items-center justify-between w-full text-left text-sm py-1.5 pl-3 pr-1 border-l-2 transition-all duration-200 ${
+                        className={`flex items-center justify-between w-full text-left text-base py-2 pl-3 pr-1 border-l-2 transition-all duration-200 ${
                           activeTag === tag
                             ? "border-sidebar-primary text-sidebar-foreground font-medium"
                             : "border-transparent text-muted-foreground hover:text-sidebar-foreground hover:border-muted-foreground/40"
                         }`}
                       >
                         <span>{tag}</span>
-                        <span className="text-[10px] text-muted-foreground tabular-nums">
+                        <span className="text-xs text-muted-foreground tabular-nums">
                           {tagCount}
                         </span>
                       </button>
@@ -174,7 +174,7 @@ const ProductsSidebar = ({
 
       {/* Special Filters — multi-select */}
       <div>
-        <h3 className="text-xs tracking-[0.2em] uppercase text-muted-foreground mb-4">
+        <h3 className="text-base tracking-[0.2em] uppercase text-muted-foreground mb-4 font-medium">
           Filter By
         </h3>
         <div className="flex flex-wrap gap-2">
@@ -184,7 +184,7 @@ const ProductsSidebar = ({
               <button
                 key={f.value}
                 onClick={() => onFilterToggle(f.value)}
-                className={`px-3 py-1.5 text-xs rounded-full border transition-colors duration-200 ${
+                className={`px-3 py-2 text-sm rounded-full border transition-colors duration-200 ${
                   isActive
                     ? "bg-sidebar-primary text-sidebar-primary-foreground border-sidebar-primary"
                     : "bg-transparent text-muted-foreground border-sidebar-border hover:border-sidebar-foreground hover:text-sidebar-foreground"
@@ -201,7 +201,7 @@ const ProductsSidebar = ({
 
       {/* Sort */}
       <div>
-        <h3 className="text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">
+        <h3 className="text-base tracking-[0.2em] uppercase text-muted-foreground mb-3 font-medium">
           Sort
         </h3>
         <Select value={sortBy} onValueChange={onSortChange}>
