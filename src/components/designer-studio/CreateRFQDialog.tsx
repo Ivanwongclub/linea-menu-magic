@@ -70,7 +70,7 @@ const CreateRFQDialog = ({ open, onOpenChange, onSubmit }: CreateRFQDialogProps)
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="font-serif text-xl">新增報價請求</DialogTitle>
+          <DialogTitle className="text-xl font-semibold">新增報價請求</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
