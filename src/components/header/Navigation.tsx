@@ -166,7 +166,7 @@ const Navigation = () => {
             >
               <Link
                 to={item.href}
-                className="text-nav-foreground hover:text-brand-red-muted transition-colors duration-200 text-sm font-light py-6 block"
+                className="text-nav-foreground hover:text-accent transition-colors duration-200 text-sm font-light py-6 block"
               >
                 {item.name}
               </Link>
