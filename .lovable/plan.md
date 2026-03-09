@@ -1,26 +1,30 @@
 
-## Plan: Update Logo Font to Poppins Bold
 
-**Goal**: Replace the serif "Libre Caslon Text" font on the "WIN-CYC" logo text with Poppins Bold (font-weight: 700) for a more contemporary, playful aesthetic while maintaining clean design principles.
+## Problem
 
-**Implementation Approach**:
+The Polo Button OBJ file has large geometry dimensions in world units. The camera starts at position `[0, 1.5, 3]`, which places it **inside** the model, causing the zoomed-in/clipped view shown in the screenshot.
 
-1. **Update Header Logo** (`src/components/layout/Header.tsx`):
-   - Change the "WIN-CYC" text styling from `font-semibold` with `'Libre Caslon Text'` serif to `font-bold` with `'Poppins'` sans-serif
-   - Keep the white color and existing sizing (text-xs lg:text-sm)
-   - Leave "Group Limited" subtext styling unchanged
+## Solution
 
-2. **Update Footer Logo** (`src/components/layout/Footer.tsx`):
-   - Apply identical font changes to the "WIN-CYC" text in the footer for consistency
-   - Maintain all other styling properties
+Normalize the OBJ model size in `OBJModelLoader.tsx` after loading. Compute the bounding box, then scale the model so it fits within a consistent size (e.g., radius ~1.5 units), regardless of the original OBJ dimensions.
 
-**Technical Details**:
-- **Font Change**: Replace `style={{ fontFamily: "'Libre Caslon Text', serif" }}` with `style={{ fontFamily: "'Poppins', sans-serif" }}`
-- **Weight Adjustment**: Change `font-semibold` (600) to `font-bold` (700) to match the bold weight recommendation
-- **Poppins is already available** in the project (confirmed in package.json and loaded in index.html)
+### Changes
 
-**Files to Modify**:
-- `src/components/layout/Header.tsx` (lines 40-42)
-- `src/components/layout/Footer.tsx` (lines 13-15)
+**`src/components/designer-studio/OBJModelLoader.tsx`**
+- After cloning and applying materials, compute the bounding box of the model
+- Calculate the max dimension and derive a scale factor to normalize to ~1.5 units
+- Apply the scale to the cloned object
 
-**Expected Result**: The logo will now have a modern, geometric, playful appearance with Poppins Bold while maintaining its white color and compact sizing.
+This is a ~5-line addition in the `useMemo` block:
+
+```ts
+// After traverse, normalize size
+const box = new THREE.Box3().setFromObject(clone);
+const size = box.getSize(new THREE.Vector3());
+const maxDim = Math.max(size.x, size.y, size.z);
+const scale = 2 / maxDim; // fit within ~2 units
+clone.scale.setScalar(scale);
+```
+
+No other files need changes. The `<Center>` component already handles centering the model at origin.
+
