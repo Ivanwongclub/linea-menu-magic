@@ -126,7 +126,7 @@ const DesignerStudio = () => {
         {/* Info Section */}
         <section className="py-24 px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="font-serif text-3xl font-light text-foreground mb-8">
+            <h2 className="text-3xl font-bold text-foreground mb-8">
               如何獲得存取權限？
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
