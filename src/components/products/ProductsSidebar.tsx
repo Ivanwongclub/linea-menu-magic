@@ -96,7 +96,7 @@ const ProductsSidebar = ({
   const hasActiveFilters = activeCategory || activeTag || activeFilters.length > 0 || sortBy !== "featured";
 
   return (
-    <div className="space-y-6 bg-sidebar text-sidebar-foreground p-6 rounded-sm">
+    <div className="space-y-6 bg-transparent text-sidebar-foreground p-6 rounded-sm">
       {/* Title */}
       <div>
         <h1 className="text-4xl font-light tracking-tight">Products</h1>
