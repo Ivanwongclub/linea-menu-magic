@@ -23,7 +23,7 @@ const NewsDetail = () => {
         <Header />
         <main className="py-24 px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="font-serif text-3xl text-foreground mb-4">找不到此新聞</h1>
+            <h1 className="text-3xl font-bold text-foreground mb-4">找不到此新聞</h1>
             <p className="text-muted-foreground mb-8">您查詢的新聞頁面不存在或已被移除。</p>
             <Link to="/news" className="inline-flex items-center gap-2 text-foreground hover:text-foreground/80 transition-colors">
               <ArrowLeft className="w-4 h-4" />

@@ -564,7 +564,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                     關閉
                   </Button>
                   <Button
-                    className="flex-1 btn-red-glow gap-2"
+                    className="flex-1 gap-2"
                     onClick={() => setShowRFQDialog(true)}
                   >
                     <FileText className="w-4 h-4" />

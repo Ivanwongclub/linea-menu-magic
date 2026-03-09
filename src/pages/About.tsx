@@ -146,7 +146,7 @@ const About = () => {
                   style={getTimelineDelay(index)}
                 >
                   <div className="flex-shrink-0 w-20 text-right">
-                    <span className="font-serif text-2xl text-foreground">{milestone.year}</span>
+                    <span className="text-2xl font-bold text-foreground">{milestone.year}</span>
                   </div>
                   <div className="flex-shrink-0 w-px h-16 bg-border group-last:hidden" />
                   <div className="pt-1">
