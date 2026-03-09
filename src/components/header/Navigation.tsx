@@ -350,7 +350,7 @@ const Navigation = () => {
                            ? `/category/${subItem.toLowerCase().replace(/\s+/g, '-')}`
                            : `/news`
                          }
-                         className="text-nav-foreground/70 hover:text-brand-red-muted text-sm font-light block py-1"
+                         className="text-nav-foreground/70 hover:text-accent text-sm font-light block py-1"
                          onClick={() => setIsMobileMenuOpen(false)}
                        >
                          {subItem}
