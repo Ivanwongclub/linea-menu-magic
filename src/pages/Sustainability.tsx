@@ -182,7 +182,7 @@ const Sustainability = () => {
                 <h2 className="text-3xl font-bold text-foreground mb-4">
                   綠色願景
                 </h2>
-                <p className="text-green-forest/80 leading-relaxed mb-6">
+                <p className="text-muted-foreground leading-relaxed mb-6">
                   我們相信，每一個微小的改變都能為地球帶來深遠的影響。
                   從材料選擇到生產製程，我們不斷探索更環保的方式，
                   為下一代創造更美好的未來。
