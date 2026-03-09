@@ -40,7 +40,7 @@ const Header = () => {
                 <span className="text-sm lg:text-base text-white font-semibold" style={{ fontFamily: "'Libre Caslon Text', serif" }}>
                   WIN-CYC
                 </span>
-                    <span className="text-[7px] lg:text-xs tracking-[0.12em] text-white/60 uppercase">
+                    <span className="text-[7px] lg:text-xs tracking-[0.12em] text-white uppercase">
                       Group Limited
                     </span>
               </div>
