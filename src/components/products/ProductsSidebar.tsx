@@ -48,42 +48,62 @@ const specialFilters = [
   { label: "Best Sellers", value: "best" },
 ] as const;
 
+interface ProductItem {
+  id: string;
+  name: string;
+  tag: string;
+  category: string;
+  isNew?: boolean;
+  isSeasonal?: boolean;
+  isBestSeller?: boolean;
+}
+
 interface ProductsSidebarProps {
   activeCategory: string | null;
   activeTag: string | null;
-  activeFilter: string | null;
+  activeFilters: string[];
   sortBy: string;
+  products: ProductItem[];
   onCategoryClick: (category: string) => void;
   onTagClick: (tag: string) => void;
-  onFilterClick: (filter: string) => void;
+  onFilterToggle: (filter: string) => void;
   onSortChange: (sort: string) => void;
   onClearAll: () => void;
 }
 
 export { categoryGroups, specialFilters };
 
+function countByCategory(products: ProductItem[], categoryKey: string): number {
+  return products.filter((p) => p.category === categoryKey).length;
+}
+
+function countByTag(products: ProductItem[], tag: string): number {
+  return products.filter((p) => p.tag === tag).length;
+}
+
 const ProductsSidebar = ({
   activeCategory,
   activeTag,
-  activeFilter,
+  activeFilters,
   sortBy,
+  products,
   onCategoryClick,
   onTagClick,
-  onFilterClick,
+  onFilterToggle,
   onSortChange,
   onClearAll,
 }: ProductsSidebarProps) => {
-  const hasActiveFilters = activeCategory || activeTag || activeFilter || sortBy !== "featured";
+  const hasActiveFilters = activeCategory || activeTag || activeFilters.length > 0 || sortBy !== "featured";
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 bg-sidebar text-sidebar-foreground p-6 rounded-sm">
       {/* Title */}
       <div>
-        <h1 className="text-4xl font-light tracking-tight text-foreground">Products</h1>
+        <h1 className="text-4xl font-light tracking-tight">Products</h1>
         <p className="text-lg text-muted-foreground mt-1">產品系列</p>
       </div>
 
-      <Separator />
+      <Separator className="bg-sidebar-border" />
 
       {/* Category Groups */}
       <nav className="space-y-1">
@@ -91,24 +111,30 @@ const ProductsSidebar = ({
           const isGroupActive = activeCategory === group.key;
           const hasActiveChild = group.tags.includes(activeTag || "");
           const isOpen = isGroupActive || hasActiveChild;
+          const groupCount = countByCategory(products, group.key);
 
           return (
             <Collapsible key={group.key} defaultOpen={isOpen}>
               <CollapsibleTrigger
-                className="flex items-center justify-between w-full py-2 group"
+                className="flex items-center justify-between w-full py-2.5 group"
                 onClick={(e) => {
                   e.preventDefault();
                   onCategoryClick(group.key);
                 }}
               >
-                <span
-                  className={`text-xs tracking-[0.2em] uppercase transition-colors ${
-                    isGroupActive
-                      ? "text-foreground font-medium"
-                      : "text-muted-foreground group-hover:text-foreground"
-                  }`}
-                >
-                  {group.name}
+                <span className="flex items-center gap-2">
+                  <span
+                    className={`text-xs tracking-[0.2em] uppercase transition-colors ${
+                      isGroupActive
+                        ? "text-sidebar-primary font-medium"
+                        : "text-muted-foreground group-hover:text-sidebar-foreground"
+                    }`}
+                  >
+                    {group.name}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground tabular-nums">
+                    ({groupCount})
+                  </span>
                 </span>
                 <ChevronDown
                   className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 ${
@@ -118,19 +144,25 @@ const ProductsSidebar = ({
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <div className="ml-0 mt-1 mb-3 space-y-0.5">
-                  {group.tags.map((tag) => (
-                    <button
-                      key={tag}
-                      onClick={() => onTagClick(tag)}
-                      className={`block w-full text-left text-sm py-1.5 pl-3 border-l-2 transition-all duration-200 ${
-                        activeTag === tag
-                          ? "border-foreground text-foreground font-medium"
-                          : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground/40"
-                      }`}
-                    >
-                      {tag}
-                    </button>
-                  ))}
+                  {group.tags.map((tag) => {
+                    const tagCount = countByTag(products, tag);
+                    return (
+                      <button
+                        key={tag}
+                        onClick={() => onTagClick(tag)}
+                        className={`flex items-center justify-between w-full text-left text-sm py-1.5 pl-3 pr-1 border-l-2 transition-all duration-200 ${
+                          activeTag === tag
+                            ? "border-sidebar-primary text-sidebar-foreground font-medium"
+                            : "border-transparent text-muted-foreground hover:text-sidebar-foreground hover:border-muted-foreground/40"
+                        }`}
+                      >
+                        <span>{tag}</span>
+                        <span className="text-[10px] text-muted-foreground tabular-nums">
+                          {tagCount}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </CollapsibleContent>
             </Collapsible>
@@ -138,31 +170,34 @@ const ProductsSidebar = ({
         })}
       </nav>
 
-      <Separator />
+      <Separator className="bg-sidebar-border" />
 
-      {/* Special Filters */}
+      {/* Special Filters — multi-select */}
       <div>
         <h3 className="text-xs tracking-[0.2em] uppercase text-muted-foreground mb-4">
           Filter By
         </h3>
         <div className="flex flex-wrap gap-2">
-          {specialFilters.map((f) => (
-            <button
-              key={f.value}
-              onClick={() => onFilterClick(f.value)}
-              className={`px-3 py-1.5 text-xs rounded-full border transition-colors duration-200 ${
-                activeFilter === f.value
-                  ? "bg-foreground text-background border-foreground"
-                  : "bg-transparent text-muted-foreground border-border hover:border-foreground hover:text-foreground"
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
+          {specialFilters.map((f) => {
+            const isActive = activeFilters.includes(f.value);
+            return (
+              <button
+                key={f.value}
+                onClick={() => onFilterToggle(f.value)}
+                className={`px-3 py-1.5 text-xs rounded-full border transition-colors duration-200 ${
+                  isActive
+                    ? "bg-sidebar-primary text-sidebar-primary-foreground border-sidebar-primary"
+                    : "bg-transparent text-muted-foreground border-sidebar-border hover:border-sidebar-foreground hover:text-sidebar-foreground"
+                }`}
+              >
+                {f.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      <Separator />
+      <Separator className="bg-sidebar-border" />
 
       {/* Sort */}
       <div>
@@ -170,7 +205,7 @@ const ProductsSidebar = ({
           Sort
         </h3>
         <Select value={sortBy} onValueChange={onSortChange}>
-          <SelectTrigger className="w-full border-border bg-transparent text-sm font-light rounded-none">
+          <SelectTrigger className="w-full border-sidebar-border bg-transparent text-sm font-light rounded-none">
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="rounded-none bg-background">
@@ -184,10 +219,10 @@ const ProductsSidebar = ({
 
       {hasActiveFilters && (
         <>
-          <Separator />
+          <Separator className="bg-sidebar-border" />
           <button
             onClick={onClearAll}
-            className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors"
+            className="text-xs text-muted-foreground hover:text-sidebar-foreground underline underline-offset-4 transition-colors"
           >
             Clear All Filters
           </button>
