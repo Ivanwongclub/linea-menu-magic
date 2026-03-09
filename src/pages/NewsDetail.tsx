@@ -149,7 +149,7 @@ const NewsDetail = () => {
                 {/* Gallery */}
                 {newsItem.gallery && newsItem.gallery.length > 0 && (
                   <div ref={galleryRef} className="mt-12">
-                    <h3 className="font-serif text-xl text-foreground mb-6">相關圖片</h3>
+                    <h3 className="text-xl font-semibold text-foreground mb-6">相關圖片</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       {newsItem.gallery.map((image, index) => (
                         <div 
