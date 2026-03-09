@@ -45,7 +45,7 @@ const DesignerStudio = () => {
             {/* Dashboard Link */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/designer-studio/dashboard">
-                <Button className="btn-red-glow gap-2">
+                <Button className="gap-2">
                   <Library className="w-4 h-4" />
                   進入工作室
                 </Button>
