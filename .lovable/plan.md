@@ -1,92 +1,30 @@
 
 
-# Enhanced Products Sidebar with Deep Filtering
+## Problem
 
-## Counter-Proposal
+The Polo Button OBJ file has large geometry dimensions in world units. The camera starts at position `[0, 1.5, 3]`, which places it **inside** the model, causing the zoomed-in/clipped view shown in the screenshot.
 
-Instead of a flat tag list, redesign the sidebar into a **multi-layered navigation system** with collapsible category groups, sorting controls, and special filter sections — all inline in the sidebar rather than hidden behind a sheet/modal.
+## Solution
 
-## Sidebar Structure
+Normalize the OBJ model size in `OBJModelLoader.tsx` after loading. Compute the bounding box, then scale the model so it fits within a consistent size (e.g., radius ~1.5 units), regardless of the original OBJ dimensions.
 
-```text
-┌─────────────────────┐
-│  PRODUCTS           │  ← Large typography title (text-4xl, font-light)
-│  產品系列             │  ← Chinese subtitle
-│                     │
-│  ─────────────────  │
-│                     │
-│  ▾ FASTENERS        │  ← Collapsible group (Radix Collapsible)
-│    Buttons          │
-│    Jeans Buttons    │
-│    Shank Buttons    │
-│    Snap Buttons     │
-│    Rivets           │
-│    Hook & Eyes      │
-│    Eyelets          │
-│                     │
-│  ▾ CLOSURES         │
-│    Zipper Pullers   │
-│    Buckles          │
-│    Cord Ends        │
-│    Cord Stoppers    │
-│    Toggles          │
-│                     │
-│  ▾ TRIMS            │
-│    Cotton Lace      │
-│    Drawcords        │
-│    Straps & Webbings│
-│    Beads            │
-│    Badges           │
-│                     │
-│  ▾ LABELING         │
-│    Labels           │
-│    Hangtags         │
-│                     │
-│  ─────────────────  │
-│                     │
-│  FILTER BY          │
-│  ○ New Arrivals     │  ← Toggle chips
-│  ○ Seasonal         │
-│  ○ Best Sellers     │
-│                     │
-│  ─────────────────  │
-│                     │
-│  SORT               │
-│  Featured        ▾  │  ← Inline select
-│                     │
-│  ─────────────────  │
-│  Clear All Filters  │
-└─────────────────────┘
+### Changes
+
+**`src/components/designer-studio/OBJModelLoader.tsx`**
+- After cloning and applying materials, compute the bounding box of the model
+- Calculate the max dimension and derive a scale factor to normalize to ~1.5 units
+- Apply the scale to the cloned object
+
+This is a ~5-line addition in the `useMemo` block:
+
+```ts
+// After traverse, normalize size
+const box = new THREE.Box3().setFromObject(clone);
+const size = box.getSize(new THREE.Vector3());
+const maxDim = Math.max(size.x, size.y, size.z);
+const scale = 2 / maxDim; // fit within ~2 units
+clone.scale.setScalar(scale);
 ```
 
-## Key Design Decisions
-
-1. **Hierarchical categories** — Tags grouped into 4 parent categories (Fasteners, Closures, Trims, Labeling) using Radix `Collapsible`. Clicking a parent shows all products in that group; clicking a child filters to that specific tag.
-
-2. **Special filters** — "New Arrivals", "Seasonal", "Best Sellers" as toggle chips below the category tree. These add a `filter` search param alongside `tag`.
-
-3. **Inline sort** — Move the sort dropdown into the sidebar instead of a top bar, keeping the grid area clean.
-
-4. **Large typography** — The sidebar header uses `text-4xl font-light` for "Products" with the Chinese subtitle below, replacing the breadcrumb title.
-
-5. **Active state** — Active parent group auto-expands; active tag gets `font-medium text-foreground` with a left accent border.
-
-6. **Mobile** — Sidebar becomes a slide-out `Sheet` triggered by a "Filters & Categories" button above the grid. Contains the same full sidebar content.
-
-7. **URL state** — All filters stored in search params: `?category=fasteners&tag=Buttons&filter=new&sort=newest` for shareable links.
-
-## Product Data Enhancement
-Add `category` (parent group), `isNew`, `isSeasonal`, `isBestSeller` fields to each product item.
-
-## Files to Modify
-
-1. **`src/pages/Products.tsx`** — Add category groups, filter/sort state, hierarchical sidebar, mobile sheet
-2. **`src/components/category/FilterSortBar.tsx`** — Remove (no longer needed, functionality moves to sidebar)
-
-## Technical Details
-- Use `@radix-ui/react-collapsible` (already installed) for expandable category groups
-- `useSearchParams` for all filter state (category, tag, filter, sort)
-- Sidebar width: `w-64` on desktop, full `Sheet` on mobile
-- Product items gain: `category: "fasteners" | "closures" | "trims" | "labeling"` plus boolean flags
-- Filtering chain: category → tag → special filter → sort
+No other files need changes. The `<Center>` component already handles centering the model at origin.
 
