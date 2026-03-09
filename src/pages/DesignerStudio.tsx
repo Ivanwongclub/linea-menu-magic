@@ -35,7 +35,7 @@ const DesignerStudio = () => {
         <section className="py-24 px-6 lg:px-8 bg-secondary">
           <div className="max-w-4xl mx-auto text-center">
             <p className="text-subtitle mb-4">Exclusive Access</p>
-            <h1 className="font-serif text-4xl md:text-5xl font-light text-foreground mb-6">
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
               設計師工作室
             </h1>
             <p className="text-lg text-muted-foreground leading-relaxed mb-8">
