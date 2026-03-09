@@ -293,7 +293,7 @@ const Sustainability = () => {
                 <p className="text-xs tracking-[0.2em] uppercase text-primary-foreground/60 mb-4">
                   Featured Technology
                 </p>
-                <h2 className="font-serif text-3xl font-light mb-6">
+                <h2 className="text-3xl font-bold mb-6">
                   環保電鍍技術
                 </h2>
                 <h3 className="text-xl text-primary-foreground/80 mb-6">
