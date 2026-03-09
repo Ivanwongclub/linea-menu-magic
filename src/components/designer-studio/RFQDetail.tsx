@@ -162,7 +162,7 @@ const RFQDetail = ({ rfq, onBack, onStatusChange }: RFQDetailProps) => {
                       key={action.status}
                       variant={action.variant || 'default'}
                       onClick={() => onStatusChange(rfq.id, action.status)}
-                      className={action.variant === 'default' || !action.variant ? 'btn-red-glow' : ''}
+                      className={action.variant === 'default' || !action.variant ? '' : ''}
                     >
                       {action.icon}
                       <span className="ml-2">{action.label}</span>

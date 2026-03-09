@@ -178,7 +178,7 @@ const CreateRFQDialog = ({ open, onOpenChange, onSubmit }: CreateRFQDialogProps)
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               取消
             </Button>
-            <Button type="submit" className="btn-red-glow">
+            <Button type="submit">
               提交請求
             </Button>
           </DialogFooter>

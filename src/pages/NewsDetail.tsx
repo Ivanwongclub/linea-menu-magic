@@ -236,7 +236,7 @@ const NewsDetail = () => {
                   
                   {/* CTA */}
                   <div className="p-6 bg-foreground text-background">
-                    <h3 className="font-serif text-lg mb-2">訂閱最新資訊</h3>
+                    <h3 className="text-lg font-semibold mb-2">訂閱最新資訊</h3>
                     <p className="text-sm text-background/70 mb-4">獲取展覽預告及行業動態</p>
                     <Link to="/contact">
                       <Button variant="outline" className="w-full border-background text-background hover:bg-background hover:text-foreground">

@@ -342,7 +342,7 @@ const DesignerStudioDashboard = () => {
               <Button
                 variant={showFavoritesOnly ? "default" : "ghost"}
                 size="sm"
-                className={`gap-1.5 h-8 flex-shrink-0 ${showFavoritesOnly ? 'btn-red-glow' : ''}`}
+                className={`gap-1.5 h-8 flex-shrink-0`}
                 onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
               >
                 <Star className={`w-3.5 h-3.5 ${showFavoritesOnly ? 'fill-current' : ''}`} />
