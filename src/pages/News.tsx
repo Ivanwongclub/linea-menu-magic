@@ -215,7 +215,7 @@ const News = () => {
                             {categoryOptions.find(c => c.key === item.category)?.label}
                           </span>
                         </div>
-                        <h3 className="text-base font-serif font-light text-foreground mb-2 group-hover:text-foreground/80 transition-colors duration-300 line-clamp-2">
+                        <h3 className="text-base font-semibold text-foreground mb-2 group-hover:text-foreground/80 transition-colors duration-300 line-clamp-2">
                           {item.title}
                         </h3>
                         <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
