@@ -89,7 +89,7 @@ const DesignerStudio = () => {
         <section className="py-24 px-6 lg:px-8 bg-foreground text-primary-foreground">
           <div className="max-w-md mx-auto text-center">
             <Lock className="w-12 h-12 text-primary-foreground/60 mx-auto mb-8" strokeWidth={1.5} />
-            <h2 className="font-serif text-2xl font-light mb-4">
+            <h2 className="text-2xl font-semibold mb-4">
               會員登入
             </h2>
             <p className="text-primary-foreground/70 mb-8">
