@@ -189,6 +189,15 @@ const Products = () => {
       <main className="pt-8">
         <section className="px-6 lg:px-8 pb-24">
           <div className="max-w-7xl mx-auto">
+            {/* Breadcrumbs */}
+            <div className="mb-8">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Link to="/" className="hover:text-foreground transition-colors">Home</Link>
+                <span>/</span>
+                <span className="text-foreground font-medium">Products</span>
+              </div>
+            </div>
+
             <div className="flex gap-12">
               {/* Desktop Sidebar */}
               <aside className="hidden lg:block w-72 shrink-0">
@@ -199,10 +208,8 @@ const Products = () => {
 
               {/* Main Content */}
               <div className="flex-1 min-w-0">
-                {/* Mobile: Title + Filter trigger */}
+                {/* Mobile: Filter trigger only */}
                 <div className="lg:hidden mb-8">
-                  <h1 className="text-3xl font-light tracking-tight text-foreground">Products</h1>
-                  <p className="text-base text-muted-foreground mt-1 mb-4">產品系列</p>
                   <Sheet>
                     <SheetTrigger asChild>
                       <Button variant="outline" size="sm" className="rounded-none border-border text-xs tracking-wider uppercase gap-2">
