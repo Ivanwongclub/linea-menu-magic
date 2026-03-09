@@ -57,7 +57,7 @@ const Header = () => {
                   onMouseLeave={() => setIsAboutOpen(false)}
                 >
                   <button
-                    className={`text-sm tracking-wide transition-colors duration-200 flex items-center gap-1 ${
+                    className={`text-base tracking-wide transition-colors duration-200 flex items-center gap-1 ${
                       isActive(link.href) ? "text-foreground font-medium" : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
@@ -88,7 +88,7 @@ const Header = () => {
                 <Link
                   key={link.href}
                   to={link.href}
-                  className={`text-sm tracking-wide transition-colors duration-200 ${
+                  className={`text-base tracking-wide transition-colors duration-200 ${
                     isActive(link.href) ? "text-foreground font-medium" : "text-muted-foreground hover:text-foreground"
                   }`}
                 >

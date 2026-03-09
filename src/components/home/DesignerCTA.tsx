@@ -13,8 +13,9 @@ const DesignerCTA = () => {
           <span className={`h-px bg-primary-foreground/30 transition-all duration-700 ${isVisible ? 'w-8' : 'w-0'}`} style={{ transitionDelay: '200ms' }} />
         </div>
 
-        <h2 className={`text-3xl md:text-4xl lg:text-5xl font-bold mb-6 transition-all duration-700 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`} style={{ transitionDelay: '100ms' }}>
-          Designer Studio
+        <h2 className={`text-5xl md:text-6xl lg:text-7xl font-bold uppercase tracking-[0.15em] mb-6 transition-all duration-700 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`} style={{ transitionDelay: '100ms' }}>
+          Designer
+          <span className="block">Studio</span>
         </h2>
 
         <p className={`text-primary-foreground/70 leading-relaxed max-w-2xl mx-auto mb-12 transition-all duration-700 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`} style={{ transitionDelay: '300ms' }}>

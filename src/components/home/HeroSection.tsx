@@ -46,13 +46,13 @@ const HeroSection = () => {
         </p>
 
         <h1
-          className={`text-display text-foreground mb-6 transition-all duration-700 ease-out ${
+          className={`text-6xl md:text-7xl lg:text-8xl font-light tracking-tight text-foreground mb-6 transition-all duration-700 ease-out ${
             heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
           style={{ transitionDelay: '400ms' }}
         >
           Timeless
-          <span className="block mt-2">Craftsmanship</span>
+          <span className="block mt-2 font-bold">Craftsmanship</span>
         </h1>
 
         <p

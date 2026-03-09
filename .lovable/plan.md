@@ -1,56 +1,30 @@
 
 
-# Large Typography Headings & Section Redesign
+## Problem
 
-## Overview
-Implement bold, oversized typography for section headings across the homepage and products page, with each section getting a distinct heading style to create visual variety and editorial impact.
+The Polo Button OBJ file has large geometry dimensions in world units. The camera starts at position `[0, 1.5, 3]`, which places it **inside** the model, causing the zoomed-in/clipped view shown in the screenshot.
 
-## Heading Styles Per Section
+## Solution
 
-### 1. HeroSection — Giant stacked display type
-- Increase to `text-6xl md:text-7xl lg:text-8xl` with tight letter-spacing
-- Use ultra-light weight with one word bold for contrast
-- Keep the existing parallax and scroll indicator
+Normalize the OBJ model size in `OBJModelLoader.tsx` after loading. Compute the bounding box, then scale the model so it fits within a consistent size (e.g., radius ~1.5 units), regardless of the original OBJ dimensions.
 
-### 2. ProductCategories — Horizontal rule + massive serif heading
-- Heading `text-5xl md:text-6xl lg:text-7xl` in serif font (Libre Caslon Text)
-- Add horizontal accent lines flanking the subtitle
-- Remove the small "Collection" subtitle, replace with a thin tracked uppercase label integrated with lines
+### Changes
 
-### 3. HeritageSection — Outlined/stroke text heading
-- Heading `text-5xl md:text-6xl lg:text-7xl` 
-- Style "Our Story" with `-webkit-text-stroke` for an outlined/hollow effect on part of the heading
-- Keep the image + "45 Years" badge layout
+**`src/components/designer-studio/OBJModelLoader.tsx`**
+- After cloning and applying materials, compute the bounding box of the model
+- Calculate the max dimension and derive a scale factor to normalize to ~1.5 units
+- Apply the scale to the cloned object
 
-### 4. SustainabilitySection — Split large heading
-- Heading `text-5xl md:text-6xl lg:text-7xl`
-- "Our" in light weight, "Commitment" in bold — two-line split
-- Add a vertical teal accent bar to the left of the heading
+This is a ~5-line addition in the `useMemo` block:
 
-### 5. DesignerCTA — All-caps condensed massive heading
-- Heading `text-5xl md:text-6xl lg:text-7xl` uppercase with extreme tracking `tracking-[0.15em]`
-- Bold weight, white on dark background
-- More dramatic presence for the CTA section
+```ts
+// After traverse, normalize size
+const box = new THREE.Box3().setFromObject(clone);
+const size = box.getSize(new THREE.Vector3());
+const maxDim = Math.max(size.x, size.y, size.z);
+const scale = 2 / maxDim; // fit within ~2 units
+clone.scale.setScalar(scale);
+```
 
-### 6. ContactSection — Elegant italic serif heading
-- Heading `text-5xl md:text-6xl lg:text-7xl` in serif font with italic style
-- Paired with small sans-serif uppercase subtitle above
-
-### 7. Products page hero — Oversized number-style heading
-- Main heading `text-5xl md:text-6xl lg:text-7xl` bold
-- Products page category headings (`ProductCategory`) bumped to `text-4xl md:text-5xl`
-
-## Navigation Menu Text
-- Increase desktop nav link text from `text-sm` to `text-base` for better presence in the Header component
-
-## Files to Modify
-1. `src/components/layout/Header.tsx` — nav link size
-2. `src/components/home/HeroSection.tsx` — giant display heading
-3. `src/components/home/ProductCategories.tsx` — serif + accent lines heading
-4. `src/components/home/HeritageSection.tsx` — outlined text heading
-5. `src/components/home/SustainabilitySection.tsx` — split weight heading with accent bar
-6. `src/components/home/DesignerCTA.tsx` — all-caps condensed heading
-7. `src/components/home/ContactSection.tsx` — italic serif heading
-8. `src/pages/Products.tsx` — oversized product page headings
-9. `src/index.css` — add utility class for text-stroke/outlined heading if needed
+No other files need changes. The `<Center>` component already handles centering the model at origin.
 

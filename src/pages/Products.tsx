@@ -79,7 +79,7 @@ const ProductCategory = ({ product, index }: { product: Product; index: number }
           }`}>
             {product.count} 款
           </span>
-          <h2 className={`text-3xl font-semibold text-foreground mt-2 mb-2 transition-all duration-700 ease-out ${
+          <h2 className={`text-4xl md:text-5xl font-semibold text-foreground mt-2 mb-2 transition-all duration-700 ease-out ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`} style={{ transitionDelay: '100ms' }}>
             {product.titleCn}
@@ -147,7 +147,7 @@ const Products = () => {
             <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${
               heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}>Our Products</p>
-            <h1 className={`text-4xl md:text-5xl font-bold text-foreground mb-6 transition-all duration-700 ease-out ${
+            <h1 className={`text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 transition-all duration-700 ease-out ${
               heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`} style={{ transitionDelay: '100ms' }}>
               產品系列
@@ -172,7 +172,7 @@ const Products = () => {
         {/* CTA */}
         <section ref={ctaRef} className="py-24 px-6 lg:px-8 bg-foreground text-primary-foreground overflow-hidden">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className={`text-3xl font-bold mb-6 transition-all duration-700 ease-out ${
+            <h2 className={`text-4xl md:text-5xl font-bold mb-6 transition-all duration-700 ease-out ${
               ctaVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}>
               需要定制產品？
