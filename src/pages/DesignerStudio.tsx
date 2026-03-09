@@ -58,7 +58,7 @@ const DesignerStudio = () => {
         <section className="py-24 px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="font-serif text-3xl font-light text-foreground mb-6">
+              <h2 className="text-3xl font-bold text-foreground mb-6">
                 專為設計師打造
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
