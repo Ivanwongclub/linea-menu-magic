@@ -1,11 +1,10 @@
 import Header from "../../components/layout/Header";
 import Footer from "../../components/layout/Footer";
-import PageHeader from "../../components/about/PageHeader";
 import ContentSection from "../../components/about/ContentSection";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
+import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
 
 const Sustainability = () => {
-  const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation();
   const { ref: commitmentRef, isVisible: commitmentVisible } = useScrollAnimation();
   const { ref: goalsRef, isVisible: goalsVisible, getDelay: getGoalsDelay } = useStaggeredAnimation(3, 150);
   const { ref: practicesRef, isVisible: practicesVisible } = useScrollAnimation();
@@ -17,12 +16,14 @@ const Sustainability = () => {
       
       <main className="py-16 px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div ref={headerRef} className={`transition-all duration-700 ${headerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-            <PageHeader 
-              title="可持續發展" 
-              subtitle="以負責任的態度，為時尚產業創造可持續未來"
-            />
-          </div>
+          <PageBreadcrumb
+            segments={[
+              { label: "Home", href: "/" },
+              { label: "About", href: "/about" },
+              { label: "Sustainability" },
+            ]}
+            title="可持續發展"
+          />
         
           <div ref={commitmentRef} className={`transition-all duration-700 ${commitmentVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <ContentSection title="環保承諾">

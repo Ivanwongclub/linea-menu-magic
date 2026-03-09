@@ -4,9 +4,9 @@ import { Leaf, Recycle, Award, Factory, TreePine, Wind, Droplets, Sun } from "lu
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 import { Button } from "@/components/ui/button";
 import LetterReveal from "@/components/ui/LetterReveal";
+import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
 
 const Sustainability = () => {
-  const { ref: heroRef, isVisible: heroVisible } = useScrollAnimation();
   const { ref: visionRef, isVisible: visionVisible } = useScrollAnimation();
   const { ref: initHeaderRef, isVisible: initHeaderVisible } = useScrollAnimation();
   const { ref: initRef, isVisible: initVisible, getDelay: getInitDelay } = useStaggeredAnimation(4, 150);
@@ -92,32 +92,13 @@ const Sustainability = () => {
       <Header />
       
       <main>
-        {/* Hero */}
-        <section ref={heroRef} className="py-32 px-6 lg:px-8 bg-secondary overflow-hidden">
-          <div className="max-w-5xl mx-auto text-center">
-            <div className="flex items-center justify-center gap-6 mb-6">
-              <span className={`h-px bg-accent/40 transition-all duration-1000 ${heroVisible ? 'w-16' : 'w-0'}`} />
-              <span className={`text-xs tracking-[0.2em] uppercase text-muted-foreground transition-all duration-700 ease-out ${heroVisible ? 'opacity-100' : 'opacity-0'}`}>
-                <Leaf className="w-4 h-4 inline-block mr-2 -mt-0.5" strokeWidth={1.5} />
-                Sustainability
-              </span>
-              <span className={`h-px bg-accent/40 transition-all duration-1000 ${heroVisible ? 'w-16' : 'w-0'}`} />
-            </div>
-            <LetterReveal
-              text="可持續發展"
-              as="h1"
-              className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6"
-              isVisible={heroVisible}
-              startDelay={200}
-              letterDelay={70}
-            />
-            <p className={`text-lg text-muted-foreground leading-relaxed transition-all duration-700 ease-out ${
-              heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`} style={{ transitionDelay: '600ms' }}>
-              永續願景，綠色未來
-            </p>
-          </div>
-        </section>
+        <PageBreadcrumb
+          segments={[
+            { label: "Home", href: "/" },
+            { label: "Sustainability" },
+          ]}
+          title="可持續發展"
+        />
 
         {/* Vision */}
         <section ref={visionRef} className="py-24 px-6 lg:px-8 overflow-hidden">
@@ -199,12 +180,11 @@ const Sustainability = () => {
         <section ref={greenRef} className="py-20 px-6 lg:px-8 bg-secondary overflow-hidden">
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-              {/* Content */}
               <div className={`lg:col-span-5 transition-all duration-700 ease-out ${
                 greenVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'
               }`}>
                 <div className="flex items-center gap-2 mb-4">
-                   <Leaf className="w-5 h-5 text-accent" strokeWidth={1.5} />
+                  <Leaf className="w-5 h-5 text-accent" strokeWidth={1.5} />
                   <span className="text-xs tracking-[0.2em] uppercase text-accent">Green Initiative</span>
                 </div>
                 <LetterReveal
@@ -221,11 +201,10 @@ const Sustainability = () => {
                   為下一代創造更美好的未來。
                 </p>
                 
-                {/* Green Vision Items */}
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   {greenVisionItems.map((item) => (
                     <div key={item.title} className="flex items-start gap-3 p-3 bg-white/50 rounded-lg">
-                       <item.icon className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+                      <item.icon className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" strokeWidth={1.5} />
                       <div>
                         <p className="text-sm font-medium text-foreground">{item.title}</p>
                         <p className="text-xs text-muted-foreground">{item.desc}</p>
@@ -234,10 +213,9 @@ const Sustainability = () => {
                   ))}
                 </div>
                 
-                {/* Stats */}
                 <div className="flex gap-8 mb-6">
                   <div>
-                     <p className="text-2xl font-bold text-foreground">30%</p>
+                    <p className="text-2xl font-bold text-foreground">30%</p>
                     <p className="text-xs text-muted-foreground">再生材料使用</p>
                   </div>
                   <div>
@@ -251,7 +229,7 @@ const Sustainability = () => {
                 </div>
                 
                 <div className="flex gap-3">
-                   <Button variant="outline" className="border-accent text-accent hover:bg-accent hover:text-accent-foreground">
+                  <Button variant="outline" className="border-accent text-accent hover:bg-accent hover:text-accent-foreground">
                     了解環保認證
                   </Button>
                   <Button variant="ghost" className="text-accent hover:bg-secondary">
@@ -260,7 +238,6 @@ const Sustainability = () => {
                 </div>
               </div>
               
-              {/* Images */}
               <div className={`lg:col-span-7 transition-all duration-700 ease-out ${
                 greenVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'
               }`} style={{ transitionDelay: '200ms' }}>

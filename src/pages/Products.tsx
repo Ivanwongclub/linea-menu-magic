@@ -1,7 +1,8 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Link } from "react-router-dom";
-import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
+import { useScrollAnimation } from "@/hooks/use-scroll-animation";
+import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
 
 // Import product images
 import buttonsImage from "@/assets/products/buttons-category.jpg";
@@ -133,7 +134,6 @@ const ProductCategory = ({ product, index }: { product: Product; index: number }
 };
 
 const Products = () => {
-  const { ref: heroRef, isVisible: heroVisible } = useScrollAnimation();
   const { ref: ctaRef, isVisible: ctaVisible } = useScrollAnimation();
 
   return (
@@ -141,24 +141,13 @@ const Products = () => {
       <Header />
       
       <main>
-        {/* Hero */}
-        <section ref={heroRef} className="py-24 px-6 lg:px-8 bg-secondary overflow-hidden">
-          <div className="max-w-4xl mx-auto text-center">
-            <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${
-              heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`}>Our Products</p>
-            <h1 className={`text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 transition-all duration-700 ease-out ${
-              heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`} style={{ transitionDelay: '100ms' }}>
-              產品系列
-            </h1>
-            <p className={`text-lg text-muted-foreground leading-relaxed transition-all duration-700 ease-out ${
-              heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`} style={{ transitionDelay: '200ms' }}>
-              全方位服裝輔料解決方案
-            </p>
-          </div>
-        </section>
+        <PageBreadcrumb
+          segments={[
+            { label: "Home", href: "/" },
+            { label: "Products" },
+          ]}
+          title="產品系列"
+        />
 
         {/* Product Categories */}
         <section className="py-24 px-6 lg:px-8">

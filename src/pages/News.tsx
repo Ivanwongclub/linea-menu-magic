@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 import { newsItems, categoryOptions, filterOptions } from "@/data/newsData";
+import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
 
 type FilterType = "all" | "exhibition" | "news";
 type CategoryType = "all" | "industry" | "product" | "certification" | "partnership";
@@ -13,7 +14,6 @@ const News = () => {
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
   const [activeCategory, setActiveCategory] = useState<CategoryType>("all");
   
-  const { ref: heroRef, isVisible: heroVisible } = useScrollAnimation();
   const { ref: filterRef, isVisible: filterVisible } = useScrollAnimation();
   const { ref: featuredHeaderRef, isVisible: featuredHeaderVisible } = useScrollAnimation();
   const { ref: featuredRef, isVisible: featuredVisible, getDelay: getFeaturedDelay } = useStaggeredAnimation(2, 150);
@@ -35,24 +35,13 @@ const News = () => {
       <Header />
       
       <main>
-        {/* Hero Section - Same style as About page */}
-        <section ref={heroRef} className="py-24 px-6 lg:px-8 bg-secondary overflow-hidden">
-          <div className="max-w-4xl mx-auto text-center">
-            <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${
-              heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`}>News & Events</p>
-            <h1 className={`text-4xl md:text-5xl font-bold text-foreground mb-6 transition-all duration-700 ease-out ${
-              heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`} style={{ transitionDelay: '100ms' }}>
-              最新動態
-            </h1>
-            <p className={`text-lg text-muted-foreground leading-relaxed transition-all duration-700 ease-out ${
-              heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`} style={{ transitionDelay: '200ms' }}>
-              展覽資訊 · 企業新聞 · 行業動態
-            </p>
-          </div>
-        </section>
+        <PageBreadcrumb
+          segments={[
+            { label: "Home", href: "/" },
+            { label: "News" },
+          ]}
+          title="最新動態"
+        />
 
         {/* Sticky Category Filter Bar */}
         <div ref={filterRef} className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
@@ -60,7 +49,6 @@ const News = () => {
             <div className={`flex flex-col sm:flex-row sm:items-center gap-4 transition-all duration-700 ease-out ${
               filterVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}>
-              {/* Type Filter */}
               <div className="flex items-center gap-2">
                 <span className="text-xs text-muted-foreground mr-2">類型</span>
                 {filterOptions.map((filter) => (
@@ -78,7 +66,6 @@ const News = () => {
                 ))}
               </div>
               
-              {/* Category Filter */}
               <div className="flex items-center gap-2 sm:ml-6">
                 <span className="text-xs text-muted-foreground mr-2">分類</span>
                 <div className="flex flex-wrap gap-2">

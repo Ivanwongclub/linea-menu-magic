@@ -4,11 +4,10 @@ import { Mail, Phone, MapPin, Clock } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
-import contactHongkongImage from "@/assets/contact-hongkong.jpg";
+import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
 
 const Contact = () => {
   const { toast } = useToast();
-  const { ref: heroRef, isVisible: heroVisible } = useScrollAnimation();
   const { ref: infoRef, isVisible: infoVisible, getDelay: getInfoDelay } = useStaggeredAnimation(5, 100);
   const { ref: formRef, isVisible: formVisible } = useScrollAnimation();
   
@@ -27,14 +26,7 @@ const Contact = () => {
       title: "訊息已發送",
       description: "感謝您的來信，我們將盡快回覆。",
     });
-    setFormData({
-      name: "",
-      company: "",
-      email: "",
-      phone: "",
-      subject: "",
-      message: "",
-    });
+    setFormData({ name: "", company: "", email: "", phone: "", subject: "", message: "" });
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -54,34 +46,13 @@ const Contact = () => {
       <Header />
       
       <main>
-        {/* Hero with Background Image */}
-        <section ref={heroRef} className="relative py-32 px-6 lg:px-8 overflow-hidden">
-          {/* Background Image */}
-          <div className="absolute inset-0">
-            <img 
-              src={contactHongkongImage} 
-              alt="Hong Kong skyline" 
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-foreground/60" />
-          </div>
-          
-          <div className="relative max-w-4xl mx-auto text-center">
-            <p className={`text-xs tracking-[0.2em] uppercase text-primary-foreground/70 mb-4 transition-all duration-700 ease-out ${
-              heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`}>Contact Us</p>
-            <h1 className={`text-4xl md:text-5xl font-bold text-primary-foreground mb-6 transition-all duration-700 ease-out ${
-              heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`} style={{ transitionDelay: '100ms' }}>
-              聯絡我們
-            </h1>
-            <p className={`text-lg text-primary-foreground/80 leading-relaxed transition-all duration-700 ease-out ${
-              heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`} style={{ transitionDelay: '200ms' }}>
-              我們期待與您合作
-            </p>
-          </div>
-        </section>
+        <PageBreadcrumb
+          segments={[
+            { label: "Home", href: "/" },
+            { label: "Contact" },
+          ]}
+          title="聯絡我們"
+        />
 
         {/* Contact Info & Form */}
         <section className="py-24 px-6 lg:px-8 overflow-hidden">
@@ -89,7 +60,7 @@ const Contact = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
               {/* Contact Info */}
               <div className="lg:col-span-1">
-                 <h2 className={`text-2xl font-semibold text-foreground mb-8 transition-all duration-700 ease-out ${
+                <h2 className={`text-2xl font-semibold text-foreground mb-8 transition-all duration-700 ease-out ${
                   infoVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}>
                   聯絡資訊
@@ -140,71 +111,29 @@ const Contact = () => {
                 >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm text-foreground mb-2">
-                        姓名 Name *
-                      </label>
-                      <input
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-4 py-3 border border-border bg-transparent text-foreground text-sm focus:outline-none focus:border-foreground transition-colors"
-                      />
+                      <label className="block text-sm text-foreground mb-2">姓名 Name *</label>
+                      <input type="text" name="name" value={formData.name} onChange={handleChange} required className="w-full px-4 py-3 border border-border bg-transparent text-foreground text-sm focus:outline-none focus:border-foreground transition-colors" />
                     </div>
                     <div>
-                      <label className="block text-sm text-foreground mb-2">
-                        公司 Company
-                      </label>
-                      <input
-                        type="text"
-                        name="company"
-                        value={formData.company}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 border border-border bg-transparent text-foreground text-sm focus:outline-none focus:border-foreground transition-colors"
-                      />
+                      <label className="block text-sm text-foreground mb-2">公司 Company</label>
+                      <input type="text" name="company" value={formData.company} onChange={handleChange} className="w-full px-4 py-3 border border-border bg-transparent text-foreground text-sm focus:outline-none focus:border-foreground transition-colors" />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm text-foreground mb-2">
-                        電郵 Email *
-                      </label>
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-4 py-3 border border-border bg-transparent text-foreground text-sm focus:outline-none focus:border-foreground transition-colors"
-                      />
+                      <label className="block text-sm text-foreground mb-2">電郵 Email *</label>
+                      <input type="email" name="email" value={formData.email} onChange={handleChange} required className="w-full px-4 py-3 border border-border bg-transparent text-foreground text-sm focus:outline-none focus:border-foreground transition-colors" />
                     </div>
                     <div>
-                      <label className="block text-sm text-foreground mb-2">
-                        電話 Phone
-                      </label>
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 border border-border bg-transparent text-foreground text-sm focus:outline-none focus:border-foreground transition-colors"
-                      />
+                      <label className="block text-sm text-foreground mb-2">電話 Phone</label>
+                      <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className="w-full px-4 py-3 border border-border bg-transparent text-foreground text-sm focus:outline-none focus:border-foreground transition-colors" />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm text-foreground mb-2">
-                      查詢主題 Subject *
-                    </label>
-                    <select
-                      name="subject"
-                      value={formData.subject}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 border border-border bg-transparent text-foreground text-sm focus:outline-none focus:border-foreground transition-colors"
-                    >
+                    <label className="block text-sm text-foreground mb-2">查詢主題 Subject *</label>
+                    <select name="subject" value={formData.subject} onChange={handleChange} required className="w-full px-4 py-3 border border-border bg-transparent text-foreground text-sm focus:outline-none focus:border-foreground transition-colors">
                       <option value="">請選擇 Please select</option>
                       <option value="quote">產品報價 Product Quote</option>
                       <option value="sample">樣品申請 Sample Request</option>
@@ -215,24 +144,11 @@ const Contact = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm text-foreground mb-2">
-                      訊息 Message *
-                    </label>
-                    <textarea
-                      name="message"
-                      value={formData.message}
-                      onChange={handleChange}
-                      required
-                      rows={6}
-                      className="w-full px-4 py-3 border border-border bg-transparent text-foreground text-sm focus:outline-none focus:border-foreground transition-colors resize-none"
-                      placeholder="請描述您的需求..."
-                    />
+                    <label className="block text-sm text-foreground mb-2">訊息 Message *</label>
+                    <textarea name="message" value={formData.message} onChange={handleChange} required rows={6} className="w-full px-4 py-3 border border-border bg-transparent text-foreground text-sm focus:outline-none focus:border-foreground transition-colors resize-none" placeholder="請描述您的需求..." />
                   </div>
 
-                  <button
-                    type="submit"
-                    className="px-12 py-4 bg-primary text-primary-foreground text-xs tracking-[0.2em] uppercase rounded-full transition-all duration-300 hover:bg-primary-hover"
-                  >
+                  <button type="submit" className="px-12 py-4 bg-primary text-primary-foreground text-xs tracking-[0.2em] uppercase rounded-full transition-all duration-300 hover:bg-primary-hover">
                     發送訊息 Send Message
                   </button>
                 </form>
