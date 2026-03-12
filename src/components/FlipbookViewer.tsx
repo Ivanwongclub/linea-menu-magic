@@ -304,6 +304,24 @@ const FlipbookViewer = ({ pages, currentSpread, onSpreadChange }: FlipbookViewer
         />
       </div>
 
+      {/* Navigation arrows — visible on hover (desktop) */}
+      {canGoBack && (
+        <button
+          onClick={goPrev}
+          className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all opacity-0 group-hover:opacity-100 z-40"
+        >
+          <ChevronLeft size={20} />
+        </button>
+      )}
+      {canGoForward && (
+        <button
+          onClick={goNext}
+          className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all opacity-0 group-hover:opacity-100 z-40"
+        >
+          <ChevronRight size={20} />
+        </button>
+      )}
+
       {/* Keyframes injected via style tag */}
       <style>{`
         @keyframes flipForward {
