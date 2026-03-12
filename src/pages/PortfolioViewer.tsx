@@ -1,16 +1,24 @@
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import { brochures } from "@/data/brochures";
+import { useBrochure } from "@/hooks/useBrochure";
 
 const PortfolioViewer = () => {
   const { id } = useParams<{ id: string }>();
-  const brochure = brochures.find((b) => b.id === id);
+  const { brochure, loading, error } = useBrochure(id);
 
-  if (!brochure) {
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#1a1a2e" }}>
+        <div className="text-white/50 text-sm animate-pulse">Loading brochure…</div>
+      </div>
+    );
+  }
+
+  if (error || !brochure) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#1a1a2e" }}>
         <div className="text-center">
-          <p className="text-white/70 text-lg mb-4">Brochure not found</p>
+          <p className="text-white/70 text-lg mb-4">{error ?? "Brochure not found"}</p>
           <Link to="/portfolio" className="text-white underline underline-offset-4 text-sm hover:text-white/80">
             Back to Portfolio
           </Link>
@@ -21,7 +29,6 @@ const PortfolioViewer = () => {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#1a1a2e" }}>
-      {/* Top bar */}
       <header className="flex items-center justify-between px-6 py-4 border-b border-white/10">
         <Link
           to="/portfolio"
@@ -34,7 +41,6 @@ const PortfolioViewer = () => {
         <div className="w-24" />
       </header>
 
-      {/* Placeholder viewer area */}
       <main className="flex-1 flex items-center justify-center p-8">
         <div className="text-center max-w-md">
           <img

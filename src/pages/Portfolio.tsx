@@ -3,6 +3,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
 import { brochures } from "@/data/brochures";
+import type { Brochure } from "@/types/flipbook";
 
 const Portfolio = () => {
   return (
