@@ -126,7 +126,12 @@ const FlipbookViewer = ({ pages, currentSpread, onSpreadChange }: FlipbookViewer
   if (isMobile) {
     const page = pages[currentSpread] ?? null;
     return (
-      <div className="flex items-center justify-center w-full h-full p-4">
+      <div
+        ref={containerRef}
+        className="relative flex items-center justify-center w-full h-full p-4"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         <div
           className="relative bg-white rounded-lg overflow-hidden"
           style={{
@@ -137,6 +142,22 @@ const FlipbookViewer = ({ pages, currentSpread, onSpreadChange }: FlipbookViewer
         >
           <PageImage page={page} />
         </div>
+        {canGoBack && (
+          <button
+            onClick={goPrev}
+            className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/20 hover:bg-black/30 flex items-center justify-center text-white transition-colors z-40"
+          >
+            <ChevronLeft size={18} />
+          </button>
+        )}
+        {canGoForward && (
+          <button
+            onClick={goNext}
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/20 hover:bg-black/30 flex items-center justify-center text-white transition-colors z-40"
+          >
+            <ChevronRight size={18} />
+          </button>
+        )}
       </div>
     );
   }
