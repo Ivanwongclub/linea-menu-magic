@@ -7,9 +7,7 @@ import FlipbookViewer from "@/components/FlipbookViewer";
 const PortfolioViewer = () => {
   const { id } = useParams<{ id: string }>();
   const { brochure, loading, error } = useBrochure(id);
-  const isMobile = useIsMobile();
   const [currentSpread, setCurrentSpread] = useState(0);
-  const [isFlipping, setIsFlipping] = useState(false);
 
   const navigate = useCallback((delta: number) => {
     if (isFlipping) return;
