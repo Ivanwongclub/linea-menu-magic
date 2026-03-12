@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { Page } from "@/types/flipbook";
 
@@ -34,10 +35,70 @@ const FlipbookViewer = ({ pages, currentSpread, onSpreadChange }: FlipbookViewer
   const [animationDirection, setAnimationDirection] = useState<"forward" | "backward">("forward");
   const [animationPhase, setAnimationPhase] = useState<"idle" | "flipping">("idle");
   const prefersReducedMotion = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef<number | null>(null);
+
+  const maxSpread = isMobile
+    ? pages.length - 1
+    : Math.ceil(pages.length / 2) - 1;
+
+  const canGoBack = currentSpread > 0;
+  const canGoForward = currentSpread < maxSpread;
+
+  const goNext = useCallback(() => {
+    if (isAnimating || !canGoForward) return;
+    onSpreadChange(currentSpread + 1);
+  }, [isAnimating, canGoForward, currentSpread, onSpreadChange]);
+
+  const goPrev = useCallback(() => {
+    if (isAnimating || !canGoBack) return;
+    onSpreadChange(currentSpread - 1);
+  }, [isAnimating, canGoBack, currentSpread, onSpreadChange]);
 
   useEffect(() => {
     prefersReducedMotion.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   }, []);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      switch (e.key) {
+        case "ArrowRight":
+        case "ArrowDown":
+          goNext();
+          break;
+        case " ":
+          e.preventDefault();
+          goNext();
+          break;
+        case "ArrowLeft":
+        case "ArrowUp":
+          goPrev();
+          break;
+        case "Home":
+          if (!isAnimating && currentSpread !== 0) onSpreadChange(0);
+          break;
+        case "End":
+          if (!isAnimating && currentSpread !== maxSpread) onSpreadChange(maxSpread);
+          break;
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [goNext, goPrev, isAnimating, currentSpread, maxSpread, onSpreadChange]);
+
+  // Touch/swipe navigation
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const delta = e.changedTouches[0].clientX - touchStartX.current;
+    touchStartX.current = null;
+    if (delta < -50) goNext();
+    else if (delta > 50) goPrev();
+  }, [goNext, goPrev]);
 
   // Detect spread changes from parent and trigger animation
   useEffect(() => {
@@ -65,7 +126,12 @@ const FlipbookViewer = ({ pages, currentSpread, onSpreadChange }: FlipbookViewer
   if (isMobile) {
     const page = pages[currentSpread] ?? null;
     return (
-      <div className="flex items-center justify-center w-full h-full p-4">
+      <div
+        ref={containerRef}
+        className="relative flex items-center justify-center w-full h-full p-4"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         <div
           className="relative bg-white rounded-lg overflow-hidden"
           style={{
@@ -76,6 +142,22 @@ const FlipbookViewer = ({ pages, currentSpread, onSpreadChange }: FlipbookViewer
         >
           <PageImage page={page} />
         </div>
+        {canGoBack && (
+          <button
+            onClick={goPrev}
+            className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/20 hover:bg-black/30 flex items-center justify-center text-white transition-colors z-40"
+          >
+            <ChevronLeft size={18} />
+          </button>
+        )}
+        {canGoForward && (
+          <button
+            onClick={goNext}
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/20 hover:bg-black/30 flex items-center justify-center text-white transition-colors z-40"
+          >
+            <ChevronRight size={18} />
+          </button>
+        )}
       </div>
     );
   }
@@ -101,7 +183,12 @@ const FlipbookViewer = ({ pages, currentSpread, onSpreadChange }: FlipbookViewer
   };
 
   return (
-    <div className="flex items-center justify-center w-full h-full p-8">
+    <div
+      ref={containerRef}
+      className="group relative flex items-center justify-center w-full h-full p-8"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       <div
         className="relative bg-white rounded-lg"
         style={{ ...bookStyle, perspective: "1800px" }}
@@ -216,6 +303,24 @@ const FlipbookViewer = ({ pages, currentSpread, onSpreadChange }: FlipbookViewer
           }}
         />
       </div>
+
+      {/* Navigation arrows — visible on hover (desktop) */}
+      {canGoBack && (
+        <button
+          onClick={goPrev}
+          className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all opacity-0 group-hover:opacity-100 z-40"
+        >
+          <ChevronLeft size={20} />
+        </button>
+      )}
+      {canGoForward && (
+        <button
+          onClick={goNext}
+          className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all opacity-0 group-hover:opacity-100 z-40"
+        >
+          <ChevronRight size={20} />
+        </button>
+      )}
 
       {/* Keyframes injected via style tag */}
       <style>{`
