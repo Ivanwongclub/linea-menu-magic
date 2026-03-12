@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { useBrochure } from "@/hooks/useBrochure";
@@ -10,6 +10,14 @@ const PortfolioViewer = () => {
   const { brochure, loading, error } = useBrochure(id);
   const isMobile = useIsMobile();
   const [currentSpread, setCurrentSpread] = useState(0);
+  const [isFlipping, setIsFlipping] = useState(false);
+
+  const navigate = useCallback((delta: number) => {
+    if (isFlipping) return;
+    setIsFlipping(true);
+    setCurrentSpread((s) => s + delta);
+    setTimeout(() => setIsFlipping(false), 400);
+  }, [isFlipping]);
 
   if (loading) {
     return (
