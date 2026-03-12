@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { useBrochure } from "@/hooks/useBrochure";
@@ -10,6 +10,14 @@ const PortfolioViewer = () => {
   const { brochure, loading, error } = useBrochure(id);
   const isMobile = useIsMobile();
   const [currentSpread, setCurrentSpread] = useState(0);
+  const [isFlipping, setIsFlipping] = useState(false);
+
+  const navigate = useCallback((delta: number) => {
+    if (isFlipping) return;
+    setIsFlipping(true);
+    setCurrentSpread((s) => s + delta);
+    setTimeout(() => setIsFlipping(false), 400);
+  }, [isFlipping]);
 
   if (loading) {
     return (
@@ -62,16 +70,18 @@ const PortfolioViewer = () => {
             <>
               {currentSpread > 0 && (
                 <button
-                  onClick={() => setCurrentSpread((s) => s - 1)}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
+                  onClick={() => navigate(-1)}
+                  disabled={isFlipping}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors disabled:opacity-30"
                 >
                   <ChevronLeft size={20} />
                 </button>
               )}
               {currentSpread < maxSpread && (
                 <button
-                  onClick={() => setCurrentSpread((s) => s + 1)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
+                  onClick={() => navigate(1)}
+                  disabled={isFlipping}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors disabled:opacity-30"
                 >
                   <ChevronRight size={20} />
                 </button>
