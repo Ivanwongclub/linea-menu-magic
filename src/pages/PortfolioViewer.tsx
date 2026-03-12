@@ -1,8 +1,7 @@
 import { useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useBrochure } from "@/hooks/useBrochure";
-import { useIsMobile } from "@/hooks/use-mobile";
 import FlipbookViewer from "@/components/FlipbookViewer";
 
 const PortfolioViewer = () => {
