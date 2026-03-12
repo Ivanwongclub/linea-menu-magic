@@ -50,35 +50,6 @@ const PortfolioViewer = () => {
           currentSpread={currentSpread}
           onSpreadChange={setCurrentSpread}
         />
-
-        {/* Navigation arrows */}
-        {(() => {
-          const maxSpread = isMobile
-            ? brochure.pages.length - 1
-            : Math.ceil(brochure.pages.length / 2) - 1;
-          return (
-            <>
-              {currentSpread > 0 && (
-                <button
-                  onClick={() => navigate(-1)}
-                  disabled={isFlipping}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors disabled:opacity-30"
-                >
-                  <ChevronLeft size={20} />
-                </button>
-              )}
-              {currentSpread < maxSpread && (
-                <button
-                  onClick={() => navigate(1)}
-                  disabled={isFlipping}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors disabled:opacity-30"
-                >
-                  <ChevronRight size={20} />
-                </button>
-              )}
-            </>
-          );
-        })()}
       </main>
     </div>
   );
