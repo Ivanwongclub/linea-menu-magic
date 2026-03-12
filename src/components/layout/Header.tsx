@@ -18,6 +18,7 @@ const Header = () => {
     { href: "/about", label: "About", hasSubmenu: true },
     { href: "/sustainability", label: "Sustainability" },
     { href: "/news", label: "News" },
+    { href: "/portfolio", label: "Portfolio" },
     { href: "/designer-studio", label: "Designer Studio" },
   ];
 
