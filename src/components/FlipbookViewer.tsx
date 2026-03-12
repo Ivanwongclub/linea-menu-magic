@@ -35,10 +35,70 @@ const FlipbookViewer = ({ pages, currentSpread, onSpreadChange }: FlipbookViewer
   const [animationDirection, setAnimationDirection] = useState<"forward" | "backward">("forward");
   const [animationPhase, setAnimationPhase] = useState<"idle" | "flipping">("idle");
   const prefersReducedMotion = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef<number | null>(null);
+
+  const maxSpread = isMobile
+    ? pages.length - 1
+    : Math.ceil(pages.length / 2) - 1;
+
+  const canGoBack = currentSpread > 0;
+  const canGoForward = currentSpread < maxSpread;
+
+  const goNext = useCallback(() => {
+    if (isAnimating || !canGoForward) return;
+    onSpreadChange(currentSpread + 1);
+  }, [isAnimating, canGoForward, currentSpread, onSpreadChange]);
+
+  const goPrev = useCallback(() => {
+    if (isAnimating || !canGoBack) return;
+    onSpreadChange(currentSpread - 1);
+  }, [isAnimating, canGoBack, currentSpread, onSpreadChange]);
 
   useEffect(() => {
     prefersReducedMotion.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   }, []);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      switch (e.key) {
+        case "ArrowRight":
+        case "ArrowDown":
+          goNext();
+          break;
+        case " ":
+          e.preventDefault();
+          goNext();
+          break;
+        case "ArrowLeft":
+        case "ArrowUp":
+          goPrev();
+          break;
+        case "Home":
+          if (!isAnimating && currentSpread !== 0) onSpreadChange(0);
+          break;
+        case "End":
+          if (!isAnimating && currentSpread !== maxSpread) onSpreadChange(maxSpread);
+          break;
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [goNext, goPrev, isAnimating, currentSpread, maxSpread, onSpreadChange]);
+
+  // Touch/swipe navigation
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const delta = e.changedTouches[0].clientX - touchStartX.current;
+    touchStartX.current = null;
+    if (delta < -50) goNext();
+    else if (delta > 50) goPrev();
+  }, [goNext, goPrev]);
 
   // Detect spread changes from parent and trigger animation
   useEffect(() => {
