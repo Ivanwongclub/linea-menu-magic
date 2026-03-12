@@ -46,17 +46,39 @@ const PortfolioViewer = () => {
         <div className="w-24" />
       </header>
 
-      <main className="flex-1 flex items-center justify-center p-8">
-        <div className="text-center max-w-md">
-          <img
-            src={brochure.coverImage}
-            alt={brochure.title}
-            className="w-64 mx-auto rounded-lg shadow-2xl mb-8"
-          />
-          <h2 className="text-white text-xl font-semibold mb-2">{brochure.title}</h2>
-          <p className="text-white/50 text-sm mb-6">{brochure.pages.length} pages</p>
-          <p className="text-white/30 text-xs">Flipbook viewer coming soon — this is the foundation page.</p>
-        </div>
+      <main className="flex-1 flex items-center justify-center relative">
+        <FlipbookViewer
+          pages={brochure.pages}
+          currentSpread={currentSpread}
+          onSpreadChange={setCurrentSpread}
+        />
+
+        {/* Navigation arrows */}
+        {(() => {
+          const maxSpread = isMobile
+            ? brochure.pages.length - 1
+            : Math.ceil(brochure.pages.length / 2) - 1;
+          return (
+            <>
+              {currentSpread > 0 && (
+                <button
+                  onClick={() => setCurrentSpread((s) => s - 1)}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+              )}
+              {currentSpread < maxSpread && (
+                <button
+                  onClick={() => setCurrentSpread((s) => s + 1)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              )}
+            </>
+          );
+        })()}
       </main>
     </div>
   );
