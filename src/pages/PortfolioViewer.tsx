@@ -1,10 +1,15 @@
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { useBrochure } from "@/hooks/useBrochure";
+import { useIsMobile } from "@/hooks/use-mobile";
+import FlipbookViewer from "@/components/FlipbookViewer";
 
 const PortfolioViewer = () => {
   const { id } = useParams<{ id: string }>();
   const { brochure, loading, error } = useBrochure(id);
+  const isMobile = useIsMobile();
+  const [currentSpread, setCurrentSpread] = useState(0);
 
   if (loading) {
     return (
