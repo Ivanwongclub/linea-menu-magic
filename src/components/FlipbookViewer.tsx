@@ -183,7 +183,12 @@ const FlipbookViewer = ({ pages, currentSpread, onSpreadChange }: FlipbookViewer
   };
 
   return (
-    <div className="flex items-center justify-center w-full h-full p-8">
+    <div
+      ref={containerRef}
+      className="group relative flex items-center justify-center w-full h-full p-8"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       <div
         className="relative bg-white rounded-lg"
         style={{ ...bookStyle, perspective: "1800px" }}
