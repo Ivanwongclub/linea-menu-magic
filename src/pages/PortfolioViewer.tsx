@@ -9,13 +9,6 @@ const PortfolioViewer = () => {
   const { brochure, loading, error } = useBrochure(id);
   const [currentSpread, setCurrentSpread] = useState(0);
 
-  const navigate = useCallback((delta: number) => {
-    if (isFlipping) return;
-    setIsFlipping(true);
-    setCurrentSpread((s) => s + delta);
-    setTimeout(() => setIsFlipping(false), 400);
-  }, [isFlipping]);
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#1a1a2e" }}>
