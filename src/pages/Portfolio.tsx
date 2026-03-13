@@ -10,7 +10,7 @@ import { brochures } from "@/data/brochures";
 import { toast } from "sonner";
 
 const Portfolio = () => {
-  const [embedModal, setEmbedModal] = useState<{ id: string; title: string } | null>(null);
+  const [embedModal, setEmbedModal] = useState<{ slug: string; title: string } | null>(null);
   const [showUpload, setShowUpload] = useState(false);
   const [loading, setLoading] = useState(true);
 
