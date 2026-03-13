@@ -136,7 +136,7 @@ const ViewerToolbar = ({
     >
       {/* Left: title + page indicator */}
       <div className="flex items-center gap-3 min-w-0 flex-1 relative">
-        <span className="text-white/90 text-sm font-medium truncate max-w-[180px] hidden sm:inline">
+        <span className="text-white/90 text-sm font-medium truncate max-w-[180px] hidden md:inline">
           {title}
         </span>
         <button
