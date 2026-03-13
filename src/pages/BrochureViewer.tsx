@@ -137,6 +137,7 @@ export default function BrochureViewer() {
           onJumpToPage={setCurrentSpread}
           showHotlinks={showHotlinks}
           onToggleHotlinks={() => setShowHotlinks((v) => !v)}
+          embedMode
         />
         <main className="flex-1 flex items-center justify-center overflow-hidden">
           <FlipbookViewer
