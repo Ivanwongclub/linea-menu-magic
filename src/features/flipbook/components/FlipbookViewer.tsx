@@ -9,6 +9,7 @@ import {
 import { ChevronLeft, ChevronRight, ImageOff } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { BrochureWithPages, Page } from "../types";
+import PageHotlinks from "./PageHotlinks";
 
 /* ------------------------------------------------------------------ */
 /*  Props                                                              */
