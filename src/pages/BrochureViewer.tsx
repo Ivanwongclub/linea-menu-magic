@@ -26,6 +26,7 @@ export default function BrochureViewer() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showHotlinks, setShowHotlinks] = useState(false);
   const [thumbnailCollapsed, setThumbnailCollapsed] = useState(false);
+  const [showEmbed, setShowEmbed] = useState(false);
   const [imagesReady, setImagesReady] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
