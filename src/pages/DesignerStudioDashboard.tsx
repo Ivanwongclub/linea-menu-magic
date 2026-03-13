@@ -45,6 +45,7 @@ import RFQList from "@/components/designer-studio/RFQList";
 import RFQDetail from "@/components/designer-studio/RFQDetail";
 import CreateRFQDialog from "@/components/designer-studio/CreateRFQDialog";
 import BrochuresPanel from "@/components/designer-studio/BrochuresPanel";
+import BrochureEditor from "@/components/designer-studio/BrochureEditor";
 type VisibilityFilter = "all" | "public" | "private";
 type CategoryFilter = "all" | LibraryItem["category"];
 type SortField = "name" | "itemCode" | "category" | "createdAt";
