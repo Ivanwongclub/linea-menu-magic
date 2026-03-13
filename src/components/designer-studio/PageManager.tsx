@@ -463,6 +463,17 @@ export default function PageManager({ brochureId, onEditLinks }: PageManagerProp
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Hotlink editor modal */}
+      {hotlinkPage && (
+        <HotlinkEditorModal
+          open={!!hotlinkPageId}
+          onOpenChange={(open) => !open && setHotlinkPageId(null)}
+          pageId={hotlinkPage.id}
+          imageUrl={hotlinkPage.image_url}
+          pageNumber={hotlinkPage.page_number}
+        />
+      )}
     </div>
   );
 }
