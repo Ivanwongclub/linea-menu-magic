@@ -168,7 +168,7 @@ const FlipbookViewer = ({ pages, currentSpread, onSpreadChange, showHotlinks = f
             boxShadow: "0 8px 40px rgba(0,0,0,0.4)",
           }}
         >
-          <PageImage page={page} />
+          <PageImage page={page} showHotlinks={showHotlinks} />
         </div>
         {canGoBack && (
           <button
