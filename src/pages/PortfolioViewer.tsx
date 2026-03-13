@@ -5,6 +5,7 @@ import { useBrochure } from "@/hooks/useBrochure";
 import { useIsMobile } from "@/hooks/use-mobile";
 import FlipbookViewer from "@/components/FlipbookViewer";
 import ViewerToolbar from "@/components/ViewerToolbar";
+import ThumbnailStrip from "@/components/ThumbnailStrip";
 
 const PortfolioViewer = () => {
   const { id } = useParams<{ id: string }>();
@@ -119,6 +120,14 @@ const PortfolioViewer = () => {
           />
         </div>
       </main>
+
+      {/* Thumbnail strip */}
+      <ThumbnailStrip
+        pages={brochure.pages}
+        currentSpread={currentSpread}
+        isMobile={isMobile}
+        onNavigate={setCurrentSpread}
+      />
     </div>
   );
 };
