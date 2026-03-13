@@ -9,6 +9,7 @@ import {
 import { ChevronLeft, ChevronRight, ImageOff } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { BrochureWithPages, Page } from "../types";
+import PageHotlinks from "./PageHotlinks";
 
 /* ------------------------------------------------------------------ */
 /*  Props                                                              */
@@ -17,6 +18,8 @@ import type { BrochureWithPages, Page } from "../types";
 interface FlipbookViewerProps {
   brochure: BrochureWithPages;
   embedMode?: boolean;
+  showHotlinks?: boolean;
+  editHints?: boolean;
 }
 
 /* ------------------------------------------------------------------ */
@@ -31,12 +34,19 @@ function prefersReducedMotion(): boolean {
 /*  Single page renderer                                               */
 /* ------------------------------------------------------------------ */
 
-function PageSlot({ page }: { page: Page | undefined }) {
+function PageSlot({
+  page,
+  showHotlinks = false,
+  editHints = false,
+}: {
+  page: Page | undefined;
+  showHotlinks?: boolean;
+  editHints?: boolean;
+}) {
   const [status, setStatus] = useState<"loading" | "loaded" | "error">(
     "loading"
   );
 
-  // Reset when the page changes
   useEffect(() => {
     setStatus("loading");
   }, [page?.id]);
@@ -47,12 +57,10 @@ function PageSlot({ page }: { page: Page | undefined }) {
 
   return (
     <div className="flex-1 h-full relative bg-white overflow-hidden">
-      {/* Skeleton pulse while loading */}
       {status === "loading" && (
         <div className="absolute inset-0 bg-muted animate-pulse" />
       )}
 
-      {/* Error fallback */}
       {status === "error" && (
         <div className="absolute inset-0 bg-muted flex flex-col items-center justify-center gap-2">
           <ImageOff size={28} className="text-muted-foreground" />
@@ -62,7 +70,6 @@ function PageSlot({ page }: { page: Page | undefined }) {
         </div>
       )}
 
-      {/* The actual image */}
       <img
         src={page.image_url}
         alt={`Page ${page.page_number}`}
@@ -73,6 +80,11 @@ function PageSlot({ page }: { page: Page | undefined }) {
         }`}
         draggable={false}
       />
+
+      {/* Hotlink overlays */}
+      {showHotlinks && page.hotlinks && page.hotlinks.length > 0 && (
+        <PageHotlinks hotlinks={page.hotlinks} editHints={editHints} />
+      )}
     </div>
   );
 }
@@ -84,6 +96,8 @@ function PageSlot({ page }: { page: Page | undefined }) {
 export default function FlipbookViewer({
   brochure,
   embedMode = false,
+  showHotlinks = false,
+  editHints = false,
 }: FlipbookViewerProps) {
   const isMobile = useIsMobile();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -260,10 +274,10 @@ export default function FlipbookViewer({
         )}
 
         {/* Left page */}
-        <PageSlot page={leftPage} />
+        <PageSlot page={leftPage} showHotlinks={showHotlinks} editHints={editHints} />
 
         {/* Right page (desktop only) */}
-        {!isMobile && <PageSlot page={rightPage} />}
+        {!isMobile && <PageSlot page={rightPage} showHotlinks={showHotlinks} editHints={editHints} />}
 
         {/* Page-turn overlay */}
         {turning && (
