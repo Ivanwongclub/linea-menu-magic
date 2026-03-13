@@ -28,6 +28,7 @@ import {
   Grid3X3,
   List,
   Star,
+  BookOpen,
   X
 } from "lucide-react";
 
