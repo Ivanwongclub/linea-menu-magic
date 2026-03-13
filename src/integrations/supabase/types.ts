@@ -14,7 +14,109 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      flipbook_brochures: {
+        Row: {
+          cover_image_url: string | null
+          created_at: string
+          description: string | null
+          id: string
+          slug: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          slug: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          slug?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      flipbook_hotlinks: {
+        Row: {
+          height: number | null
+          id: string
+          label: string | null
+          page_id: string
+          url: string | null
+          width: number | null
+          x: number | null
+          y: number | null
+        }
+        Insert: {
+          height?: number | null
+          id?: string
+          label?: string | null
+          page_id: string
+          url?: string | null
+          width?: number | null
+          x?: number | null
+          y?: number | null
+        }
+        Update: {
+          height?: number | null
+          id?: string
+          label?: string | null
+          page_id?: string
+          url?: string | null
+          width?: number | null
+          x?: number | null
+          y?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flipbook_hotlinks_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "flipbook_pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      flipbook_pages: {
+        Row: {
+          brochure_id: string
+          id: string
+          image_url: string
+          page_number: number
+        }
+        Insert: {
+          brochure_id: string
+          id?: string
+          image_url: string
+          page_number: number
+        }
+        Update: {
+          brochure_id?: string
+          id?: string
+          image_url?: string
+          page_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flipbook_pages_brochure_id_fkey"
+            columns: ["brochure_id"]
+            isOneToOne: false
+            referencedRelation: "flipbook_brochures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
