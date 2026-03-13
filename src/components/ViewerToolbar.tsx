@@ -248,6 +248,16 @@ const ViewerToolbar = ({
         >
           <Share2 size={16} />
         </button>
+
+        {!embedMode && onEmbed && (
+          <button
+            onClick={onEmbed}
+            className={`${btnBase} text-white`}
+            aria-label="Embed"
+          >
+            <Code2 size={16} />
+          </button>
+        )}
       </div>
     </div>
   );

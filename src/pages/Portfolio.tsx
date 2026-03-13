@@ -131,7 +131,7 @@ const Portfolio = () => {
 
       {embedModal && (
         <EmbedModal
-          brochureId={embedModal.id}
+          slug={embedModal.slug}
           brochureTitle={embedModal.title}
           isOpen={true}
           onClose={() => setEmbedModal(null)}
