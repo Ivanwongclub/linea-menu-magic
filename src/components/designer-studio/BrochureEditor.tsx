@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-
+import PageManager from "@/components/designer-studio/PageManager";
 import Header from "@/components/layout/Header";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
