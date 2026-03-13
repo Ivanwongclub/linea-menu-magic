@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ImageOff } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { Page } from "@/types/flipbook";
 
@@ -12,6 +12,13 @@ interface FlipbookViewerProps {
 const ANIMATION_DURATION = 380;
 
 function PageImage({ page }: { page: Page | null }) {
+  const [status, setStatus] = useState<"loading" | "loaded" | "error">("loading");
+
+  // Reset status when page changes
+  useEffect(() => {
+    setStatus("loading");
+  }, [page?.imageUrl]);
+
   if (!page) {
     return (
       <div className="w-full h-full flex items-center justify-center text-neutral-400 text-sm bg-neutral-50">
@@ -19,12 +26,28 @@ function PageImage({ page }: { page: Page | null }) {
       </div>
     );
   }
+
   return (
-    <img
-      src={page.imageUrl}
-      alt={`Page ${page.pageNumber}`}
-      className="w-full h-full object-cover"
-    />
+    <div className="w-full h-full relative">
+      {/* Skeleton loader */}
+      {status === "loading" && (
+        <div className="absolute inset-0 bg-neutral-200 animate-pulse" />
+      )}
+      {/* Error state */}
+      {status === "error" && (
+        <div className="absolute inset-0 bg-neutral-100 flex flex-col items-center justify-center gap-2 text-neutral-400">
+          <ImageOff size={24} />
+          <span className="text-xs">Page unavailable</span>
+        </div>
+      )}
+      <img
+        src={page.imageUrl}
+        alt={`Page ${page.pageNumber}`}
+        className={`w-full h-full object-cover transition-opacity duration-200 ${status === "loaded" ? "opacity-100" : "opacity-0"}`}
+        onLoad={() => setStatus("loaded")}
+        onError={() => setStatus("error")}
+      />
+    </div>
   );
 }
 
