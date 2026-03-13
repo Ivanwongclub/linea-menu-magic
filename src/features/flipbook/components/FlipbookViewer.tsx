@@ -274,10 +274,10 @@ export default function FlipbookViewer({
         )}
 
         {/* Left page */}
-        <PageSlot page={leftPage} />
+        <PageSlot page={leftPage} showHotlinks={showHotlinks} editHints={editHints} />
 
         {/* Right page (desktop only) */}
-        {!isMobile && <PageSlot page={rightPage} />}
+        {!isMobile && <PageSlot page={rightPage} showHotlinks={showHotlinks} editHints={editHints} />}
 
         {/* Page-turn overlay */}
         {turning && (
