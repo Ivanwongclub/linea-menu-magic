@@ -209,7 +209,7 @@ const ViewerToolbar = ({
         >
           <ZoomOut size={16} />
         </button>
-        <span className="text-white/70 text-xs w-10 text-center tabular-nums">
+        <span className="text-white/70 text-xs w-10 text-center tabular-nums hidden sm:inline">
           {zoom}%
         </span>
         <button
