@@ -1,11 +1,15 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { Code } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
+import EmbedModal from "@/components/EmbedModal";
 import { brochures } from "@/data/brochures";
 
 const Portfolio = () => {
+  const [embedModal, setEmbedModal] = useState<{ id: string; title: string } | null>(null);
+
   useEffect(() => {
     document.title = "Portfolio — Digital Brochure Viewer";
   }, []);
@@ -53,17 +57,35 @@ const Portfolio = () => {
               <div className="p-5">
                 <h2 className="text-lg font-semibold text-foreground mb-1">{brochure.title}</h2>
                 <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{brochure.description}</p>
-                <Link
-                  to={`/portfolio/view/${brochure.id}`}
-                  className="inline-block px-6 py-2.5 bg-primary text-primary-foreground text-xs tracking-widest uppercase rounded-full transition-all duration-300 hover:bg-primary-hover"
-                >
-                  Read Now
-                </Link>
+                <div className="flex items-center gap-2">
+                  <Link
+                    to={`/portfolio/view/${brochure.id}`}
+                    className="inline-block px-6 py-2.5 bg-primary text-primary-foreground text-xs tracking-widest uppercase rounded-full transition-all duration-300 hover:bg-primary-hover"
+                  >
+                    Read Now
+                  </Link>
+                  <button
+                    onClick={() => setEmbedModal({ id: brochure.id, title: brochure.title })}
+                    className="inline-flex items-center gap-1.5 px-4 py-2.5 border border-border text-muted-foreground text-xs tracking-widest uppercase rounded-full transition-all duration-300 hover:bg-muted hover:text-foreground"
+                  >
+                    <Code size={14} />
+                    Embed
+                  </button>
+                </div>
               </div>
             </div>
           ))}
         </div>
       </main>
+
+      {embedModal && (
+        <EmbedModal
+          brochureId={embedModal.id}
+          brochureTitle={embedModal.title}
+          isOpen={true}
+          onClose={() => setEmbedModal(null)}
+        />
+      )}
 
       <Footer />
     </div>

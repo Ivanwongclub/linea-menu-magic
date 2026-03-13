@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, BookX } from "lucide-react";
+import { useParams, Link, useSearchParams } from "react-router-dom";
+import { ArrowLeft, BookX, ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 import { useBrochure } from "@/hooks/useBrochure";
 import { useIsMobile } from "@/hooks/use-mobile";
 import FlipbookViewer from "@/components/FlipbookViewer";
@@ -11,6 +11,8 @@ const PRELOAD_COUNT = 4;
 
 const PortfolioViewer = () => {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const isEmbed = searchParams.get("embed") === "true";
   const { brochure, loading, error } = useBrochure(id);
   const isMobile = useIsMobile();
   const [currentSpread, setCurrentSpread] = useState(0);
@@ -52,7 +54,6 @@ const PortfolioViewer = () => {
     return () => document.removeEventListener("fullscreenchange", handler);
   }, []);
 
-  // Dynamic page title
   useEffect(() => {
     if (brochure) {
       document.title = `${brochure.title} | FlipBook`;
@@ -60,7 +61,6 @@ const PortfolioViewer = () => {
     return () => { document.title = "Portfolio — Digital Brochure Viewer"; };
   }, [brochure]);
 
-  // Preload first N images before showing viewer
   useEffect(() => {
     if (!brochure) return;
     const toLoad = brochure.pages.slice(0, PRELOAD_COUNT);
@@ -75,13 +75,11 @@ const PortfolioViewer = () => {
     });
   }, [brochure]);
 
-  // Preload adjacent spreads
   useEffect(() => {
     if (!brochure) return;
     const indices = isMobile
       ? [currentSpread - 1, currentSpread + 1]
       : [currentSpread * 2 - 2, currentSpread * 2 - 1, currentSpread * 2 + 2, currentSpread * 2 + 3];
-
     indices.forEach((i) => {
       if (i >= 0 && i < brochure.pages.length) {
         const img = new Image();
@@ -126,13 +124,73 @@ const PortfolioViewer = () => {
     );
   }
 
+  // Embed mode page indicator
+  const leftPage = isMobile ? currentSpread + 1 : currentSpread * 2 + 1;
+  const rightPage = isMobile ? currentSpread + 1 : Math.min(currentSpread * 2 + 2, brochure.pages.length);
+  const embedPageLabel = isMobile || leftPage === rightPage
+    ? `${leftPage} / ${brochure.pages.length}`
+    : `${leftPage}–${rightPage} / ${brochure.pages.length}`;
+
+  const fullViewerUrl = `${window.location.origin}/portfolio/view/${id}`;
+
+  if (isEmbed) {
+    return (
+      <div
+        ref={containerRef}
+        className="h-screen flex flex-col"
+        style={{ backgroundColor: "#1a1a2e" }}
+      >
+        {/* Slim embed toolbar */}
+        <div
+          className="flex items-center justify-between px-3 py-1.5 shrink-0 select-none"
+          style={{ backgroundColor: "rgba(15, 15, 26, 0.9)" }}
+        >
+          <div className="flex items-center gap-1">
+            <button
+              onClick={goPrev}
+              disabled={!canGoBack}
+              className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-md text-white hover:bg-white/10 disabled:opacity-30 transition-colors"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <span className="text-white/50 text-xs tabular-nums px-1">{embedPageLabel}</span>
+            <button
+              onClick={goNext}
+              disabled={!canGoForward}
+              className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-md text-white hover:bg-white/10 disabled:opacity-30 transition-colors"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
+          <a
+            href={fullViewerUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-white/60 hover:text-white text-xs transition-colors"
+          >
+            Open full version
+            <ExternalLink size={12} />
+          </a>
+        </div>
+
+        <main className="flex-1 flex items-center justify-center overflow-hidden">
+          <FlipbookViewer
+            pages={brochure.pages}
+            currentSpread={currentSpread}
+            onSpreadChange={setCurrentSpread}
+            showHotlinks={false}
+          />
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div
       ref={containerRef}
       className="min-h-screen flex flex-col"
       style={{ backgroundColor: "#1a1a2e" }}
     >
-      {/* Back header — hide in fullscreen on mobile for space */}
       <header className={`flex items-center justify-between px-6 py-3 border-b border-white/10 shrink-0 ${isFullscreen && isMobile ? "hidden" : ""}`}>
         <Link
           to="/portfolio"
