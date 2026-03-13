@@ -120,7 +120,7 @@ const Portfolio = () => {
                 key={brochure.id}
                 brochure={brochure}
                 index={index}
-                onEmbed={() => setEmbedModal({ id: brochure.id, title: brochure.title })}
+                onEmbed={() => setEmbedModal({ slug: brochure.id, title: brochure.title })}
                 onCopyLink={(e) => handleCopyLink(brochure.id, e)}
               />
             ))}
