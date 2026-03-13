@@ -7,6 +7,7 @@ import {
   Maximize,
   Minimize,
   Share2,
+  MousePointerClick,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -24,6 +25,8 @@ interface ViewerToolbarProps {
   isFullscreen: boolean;
   onToggleFullscreen: () => void;
   onJumpToPage?: (spread: number) => void;
+  showHotlinks: boolean;
+  onToggleHotlinks: () => void;
 }
 
 const ZOOM_MIN = 50;
@@ -44,6 +47,8 @@ const ViewerToolbar = ({
   isFullscreen,
   onToggleFullscreen,
   onJumpToPage,
+  showHotlinks,
+  onToggleHotlinks,
 }: ViewerToolbarProps) => {
   const [showPageJump, setShowPageJump] = useState(false);
   const [pageInput, setPageInput] = useState("");
@@ -209,6 +214,16 @@ const ViewerToolbar = ({
           aria-label="Zoom in"
         >
           <ZoomIn size={16} />
+        </button>
+
+        <div className="w-px h-4 bg-white/15 mx-1" />
+
+        <button
+          onClick={onToggleHotlinks}
+          className={`${btnBase} ${showHotlinks ? "text-indigo-400 bg-white/10" : "text-white"}`}
+          aria-label={showHotlinks ? "Hide hotlinks" : "Show hotlinks"}
+        >
+          <MousePointerClick size={16} />
         </button>
 
         <div className="w-px h-4 bg-white/15 mx-1" />

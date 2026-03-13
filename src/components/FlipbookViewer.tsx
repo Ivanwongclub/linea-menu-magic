@@ -1,17 +1,19 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { ChevronLeft, ChevronRight, ImageOff } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import HotlinkOverlay from "@/components/HotlinkOverlay";
 import type { Page } from "@/types/flipbook";
 
 interface FlipbookViewerProps {
   pages: Page[];
   currentSpread: number;
   onSpreadChange: (spread: number) => void;
+  showHotlinks?: boolean;
 }
 
 const ANIMATION_DURATION = 380;
 
-function PageImage({ page }: { page: Page | null }) {
+function PageImage({ page, showHotlinks = false }: { page: Page | null; showHotlinks?: boolean }) {
   const [status, setStatus] = useState<"loading" | "loaded" | "error">("loading");
 
   // Reset status when page changes
@@ -47,11 +49,14 @@ function PageImage({ page }: { page: Page | null }) {
         onLoad={() => setStatus("loaded")}
         onError={() => setStatus("error")}
       />
+      {page.links && page.links.length > 0 && status === "loaded" && (
+        <HotlinkOverlay links={page.links} showHints={showHotlinks} />
+      )}
     </div>
   );
 }
 
-const FlipbookViewer = ({ pages, currentSpread, onSpreadChange }: FlipbookViewerProps) => {
+const FlipbookViewer = ({ pages, currentSpread, onSpreadChange, showHotlinks = false }: FlipbookViewerProps) => {
   const isMobile = useIsMobile();
   const [displayedSpread, setDisplayedSpread] = useState(currentSpread);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -163,7 +168,7 @@ const FlipbookViewer = ({ pages, currentSpread, onSpreadChange }: FlipbookViewer
             boxShadow: "0 8px 40px rgba(0,0,0,0.4)",
           }}
         >
-          <PageImage page={page} />
+          <PageImage page={page} showHotlinks={showHotlinks} />
         </div>
         {canGoBack && (
           <button
@@ -219,10 +224,10 @@ const FlipbookViewer = ({ pages, currentSpread, onSpreadChange }: FlipbookViewer
         {/* Base layer: the NEW spread (revealed underneath the flipping page) */}
         <div className="absolute inset-0 flex rounded-lg overflow-hidden">
           <div className="w-1/2 h-full">
-            <PageImage page={isAnimating ? newLeftPage : (pages[displayedSpread * 2] ?? null)} />
+            <PageImage page={isAnimating ? newLeftPage : (pages[displayedSpread * 2] ?? null)} showHotlinks={showHotlinks} />
           </div>
           <div className="w-1/2 h-full">
-            <PageImage page={isAnimating ? newRightPage : (pages[displayedSpread * 2 + 1] ?? null)} />
+            <PageImage page={isAnimating ? newRightPage : (pages[displayedSpread * 2 + 1] ?? null)} showHotlinks={showHotlinks} />
           </div>
         </div>
 

@@ -15,6 +15,7 @@ const PortfolioViewer = () => {
   const isMobile = useIsMobile();
   const [currentSpread, setCurrentSpread] = useState(0);
   const [zoom, setZoom] = useState(100);
+  const [showHotlinks, setShowHotlinks] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [imagesReady, setImagesReady] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -149,6 +150,8 @@ const PortfolioViewer = () => {
         isFullscreen={isFullscreen}
         onToggleFullscreen={toggleFullscreen}
         onJumpToPage={setCurrentSpread}
+        showHotlinks={showHotlinks}
+        onToggleHotlinks={() => setShowHotlinks((v) => !v)}
       />
 
       <main className="flex-1 flex items-center justify-center relative overflow-hidden">
@@ -164,6 +167,7 @@ const PortfolioViewer = () => {
             pages={brochure.pages}
             currentSpread={currentSpread}
             onSpreadChange={setCurrentSpread}
+            showHotlinks={showHotlinks}
           />
         </div>
       </main>
