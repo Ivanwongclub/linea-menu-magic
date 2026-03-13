@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useState, useRef, useEffect } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -23,6 +23,7 @@ interface ViewerToolbarProps {
   onZoomChange: (zoom: number) => void;
   isFullscreen: boolean;
   onToggleFullscreen: () => void;
+  onJumpToPage?: (spread: number) => void;
 }
 
 const ZOOM_MIN = 50;
@@ -42,7 +43,13 @@ const ViewerToolbar = ({
   onZoomChange,
   isFullscreen,
   onToggleFullscreen,
+  onJumpToPage,
 }: ViewerToolbarProps) => {
+  const [showPageJump, setShowPageJump] = useState(false);
+  const [pageInput, setPageInput] = useState("");
+  const popoverRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const leftPage = isMobile
     ? currentSpread + 1
     : currentSpread * 2 + 1;
@@ -70,6 +77,50 @@ const ViewerToolbar = ({
     });
   }, []);
 
+  const openPageJump = useCallback(() => {
+    setPageInput(String(leftPage));
+    setShowPageJump(true);
+    setTimeout(() => inputRef.current?.select(), 50);
+  }, [leftPage]);
+
+  const closePageJump = useCallback(() => {
+    setShowPageJump(false);
+    setPageInput("");
+  }, []);
+
+  const handlePageJump = useCallback(() => {
+    const num = parseInt(pageInput, 10);
+    if (isNaN(num) || num < 1 || num > totalPages) {
+      toast.error(`Enter a page between 1 and ${totalPages}`);
+      return;
+    }
+    const spread = isMobile ? num - 1 : Math.floor((num - 1) / 2);
+    onJumpToPage?.(spread);
+    closePageJump();
+  }, [pageInput, totalPages, isMobile, onJumpToPage, closePageJump]);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!showPageJump) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closePageJump();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [showPageJump, closePageJump]);
+
+  // Close on click outside
+  useEffect(() => {
+    if (!showPageJump) return;
+    const handler = (e: MouseEvent) => {
+      if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
+        closePageJump();
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [showPageJump, closePageJump]);
+
   const btnBase =
     "w-8 h-8 flex items-center justify-center rounded-md transition-colors hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed";
 
@@ -79,11 +130,43 @@ const ViewerToolbar = ({
       style={{ backgroundColor: "rgba(15, 15, 26, 0.9)" }}
     >
       {/* Left: title + page indicator */}
-      <div className="flex items-center gap-3 min-w-0 flex-1">
+      <div className="flex items-center gap-3 min-w-0 flex-1 relative">
         <span className="text-white/90 text-sm font-medium truncate max-w-[180px] hidden sm:inline">
           {title}
         </span>
-        <span className="text-white/50 text-xs whitespace-nowrap">{pageLabel}</span>
+        <button
+          onClick={openPageJump}
+          className="text-white/50 text-xs whitespace-nowrap hover:text-white/80 transition-colors cursor-pointer underline-offset-2 hover:underline"
+        >
+          {pageLabel}
+        </button>
+
+        {/* Page jump popover */}
+        {showPageJump && (
+          <div
+            ref={popoverRef}
+            className="absolute top-full left-0 mt-2 z-50 rounded-lg p-3 flex items-center gap-2 animate-scale-in"
+            style={{ backgroundColor: "rgba(15, 15, 26, 0.95)", border: "1px solid rgba(255,255,255,0.15)" }}
+          >
+            <label className="text-white/60 text-xs whitespace-nowrap">Go to page</label>
+            <input
+              ref={inputRef}
+              type="number"
+              min={1}
+              max={totalPages}
+              value={pageInput}
+              onChange={(e) => setPageInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") handlePageJump(); }}
+              className="w-16 h-7 rounded bg-white/10 border border-white/20 text-white text-xs text-center outline-none focus:border-white/40"
+            />
+            <button
+              onClick={handlePageJump}
+              className="h-7 px-3 rounded bg-white/15 hover:bg-white/25 text-white text-xs font-medium transition-colors"
+            >
+              Go
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Center: nav buttons */}
