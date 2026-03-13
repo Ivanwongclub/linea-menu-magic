@@ -4,6 +4,8 @@ import {
   useEffect,
   useRef,
   useMemo,
+  useImperativeHandle,
+  forwardRef,
   type TouchEvent as ReactTouchEvent,
 } from "react";
 import { ChevronLeft, ChevronRight, ImageOff } from "lucide-react";
