@@ -303,7 +303,7 @@ export default function BrochureEditor({ brochureId, onBack }: BrochureEditorPro
                 )}
                 Save changes
                 {isDirty && !saving && (
-                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-orange-500 border-2 border-background" />
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-destructive border-2 border-background" />
                 )}
               </Button>
             </div>
