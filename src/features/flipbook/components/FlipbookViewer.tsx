@@ -152,38 +152,38 @@ export default function FlipbookViewer({
   const goNext = useCallback(() => {
     if (!canGoForward || turning) return;
     if (turnDuration === 0) {
-      setCurrentSpread((s) => s + 1);
+      updateSpread((s) => s + 1);
       return;
     }
     setTurning("forward");
     setTimeout(() => {
-      setCurrentSpread((s) => s + 1);
+      updateSpread((s) => s + 1);
       setTurning(null);
     }, turnDuration);
-  }, [canGoForward, turning, turnDuration]);
+  }, [canGoForward, turning, turnDuration, updateSpread]);
 
   const goPrev = useCallback(() => {
     if (!canGoBack || turning) return;
     if (turnDuration === 0) {
-      setCurrentSpread((s) => s - 1);
+      updateSpread((s) => s - 1);
       return;
     }
     setTurning("backward");
     setTimeout(() => {
-      setCurrentSpread((s) => s - 1);
+      updateSpread((s) => s - 1);
       setTurning(null);
     }, turnDuration);
-  }, [canGoBack, turning, turnDuration]);
+  }, [canGoBack, turning, turnDuration, updateSpread]);
 
   const goFirst = useCallback(() => {
     if (turning) return;
-    setCurrentSpread(0);
-  }, [turning]);
+    updateSpread(0);
+  }, [turning, updateSpread]);
 
   const goLast = useCallback(() => {
     if (turning) return;
-    setCurrentSpread(maxSpread);
-  }, [turning, maxSpread]);
+    updateSpread(maxSpread);
+  }, [turning, maxSpread, updateSpread]);
 
   /* ---- keyboard ---- */
   useEffect(() => {
