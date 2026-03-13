@@ -47,6 +47,8 @@ const ViewerToolbar = ({
   isFullscreen,
   onToggleFullscreen,
   onJumpToPage,
+  showHotlinks,
+  onToggleHotlinks,
 }: ViewerToolbarProps) => {
   const [showPageJump, setShowPageJump] = useState(false);
   const [pageInput, setPageInput] = useState("");

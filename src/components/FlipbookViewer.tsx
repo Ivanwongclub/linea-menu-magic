@@ -224,10 +224,10 @@ const FlipbookViewer = ({ pages, currentSpread, onSpreadChange, showHotlinks = f
         {/* Base layer: the NEW spread (revealed underneath the flipping page) */}
         <div className="absolute inset-0 flex rounded-lg overflow-hidden">
           <div className="w-1/2 h-full">
-            <PageImage page={isAnimating ? newLeftPage : (pages[displayedSpread * 2] ?? null)} />
+            <PageImage page={isAnimating ? newLeftPage : (pages[displayedSpread * 2] ?? null)} showHotlinks={showHotlinks} />
           </div>
           <div className="w-1/2 h-full">
-            <PageImage page={isAnimating ? newRightPage : (pages[displayedSpread * 2 + 1] ?? null)} />
+            <PageImage page={isAnimating ? newRightPage : (pages[displayedSpread * 2 + 1] ?? null)} showHotlinks={showHotlinks} />
           </div>
         </div>
 
