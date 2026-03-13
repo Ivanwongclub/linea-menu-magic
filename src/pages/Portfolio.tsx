@@ -126,7 +126,7 @@ const Portfolio = () => {
             ))}
             </div>
           </>
-        )
+        )}
       </main>
 
       {embedModal && (
