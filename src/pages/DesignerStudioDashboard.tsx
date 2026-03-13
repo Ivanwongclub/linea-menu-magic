@@ -591,7 +591,7 @@ const DesignerStudioDashboard = () => {
 
             {/* Brochures Tab Content */}
             <TabsContent value="brochures" className="mt-0">
-              <BrochuresPanel />
+              <BrochuresPanel onOpenEditor={(id) => setEditingBrochureId(id ?? undefined)} />
             </TabsContent>
           </Tabs>
         </div>
