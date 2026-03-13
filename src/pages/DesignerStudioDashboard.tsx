@@ -95,6 +95,9 @@ const DesignerStudioDashboard = () => {
   const [activeRFQTab, setActiveRFQTab] = useState("all");
   const [rfqSearchQuery, setRfqSearchQuery] = useState("");
 
+  // Brochure editor state: null = list, undefined = new, string = edit by id
+  const [editingBrochureId, setEditingBrochureId] = useState<string | null | undefined>(null);
+
   // Header auto-hide on scroll
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const lastScrollY = useRef(0);
