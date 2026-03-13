@@ -7,6 +7,7 @@ import {
   Maximize,
   Minimize,
   Share2,
+  MousePointerClick,
 } from "lucide-react";
 import { toast } from "sonner";
 
