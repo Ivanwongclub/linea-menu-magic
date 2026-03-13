@@ -25,9 +25,10 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 
-import { useBrochure } from "@/features/flipbook/hooks/useBrochure";
+import { useQuery } from "@tanstack/react-query";
 import { useBrochureMutations } from "@/features/flipbook/hooks/useBrochureMutations";
 import { uploadFlipbookImage } from "@/features/flipbook/upload";
+import type { Brochure, BrochureStatus } from "@/features/flipbook/types";
 import type { BrochureStatus } from "@/features/flipbook/types";
 import { supabase } from "@/integrations/supabase/client";
 
