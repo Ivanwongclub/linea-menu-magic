@@ -51,7 +51,7 @@ type SortOrder = "asc" | "desc";
 
 const DesignerStudioDashboard = () => {
   // Main tab state
-  const [activeMainTab, setActiveMainTab] = useState<"library" | "rfq">("library");
+  const [activeMainTab, setActiveMainTab] = useState<"library" | "rfq" | "brochures">("library");
 
   // Library states
   const [searchQuery, setSearchQuery] = useState("");
