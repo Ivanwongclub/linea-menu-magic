@@ -28,6 +28,8 @@ interface ViewerToolbarProps {
   onJumpToPage?: (spread: number) => void;
   showHotlinks: boolean;
   onToggleHotlinks: () => void;
+  embedMode?: boolean;
+  onEmbed?: () => void;
 }
 
 const ZOOM_MIN = 50;
