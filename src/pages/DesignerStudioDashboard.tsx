@@ -45,6 +45,7 @@ import RFQList from "@/components/designer-studio/RFQList";
 import RFQDetail from "@/components/designer-studio/RFQDetail";
 import CreateRFQDialog from "@/components/designer-studio/CreateRFQDialog";
 import BrochuresPanel from "@/components/designer-studio/BrochuresPanel";
+import BrochureEditor from "@/components/designer-studio/BrochureEditor";
 type VisibilityFilter = "all" | "public" | "private";
 type CategoryFilter = "all" | LibraryItem["category"];
 type SortField = "name" | "itemCode" | "category" | "createdAt";
@@ -93,6 +94,9 @@ const DesignerStudioDashboard = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [activeRFQTab, setActiveRFQTab] = useState("all");
   const [rfqSearchQuery, setRfqSearchQuery] = useState("");
+
+  // Brochure editor state: null = list, undefined = new, string = edit by id
+  const [editingBrochureId, setEditingBrochureId] = useState<string | null | undefined>(null);
 
   // Header auto-hide on scroll
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
@@ -251,6 +255,16 @@ const DesignerStudioDashboard = () => {
     setIsCreateDialogOpen(false);
     setActiveMainTab("rfq"); // Switch to RFQ tab after creation
   };
+
+  // Show Brochure editor
+  if (editingBrochureId !== null) {
+    return (
+      <BrochureEditor
+        brochureId={editingBrochureId}
+        onBack={() => setEditingBrochureId(null)}
+      />
+    );
+  }
 
   // Show Library item detail view
   if (selectedLibraryItem) {
@@ -577,7 +591,7 @@ const DesignerStudioDashboard = () => {
 
             {/* Brochures Tab Content */}
             <TabsContent value="brochures" className="mt-0">
-              <BrochuresPanel />
+              <BrochuresPanel onOpenEditor={(id) => setEditingBrochureId(id ?? undefined)} />
             </TabsContent>
           </Tabs>
         </div>
