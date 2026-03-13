@@ -28,6 +28,13 @@ interface FlipbookViewerProps {
   onSpreadChange?: (spread: number) => void;
 }
 
+export interface FlipbookViewerHandle {
+  goNext: () => void;
+  goPrev: () => void;
+  goFirst: () => void;
+  goLast: () => void;
+}
+
 /* ------------------------------------------------------------------ */
 /*  Reduced-motion helper                                              */
 /* ------------------------------------------------------------------ */
