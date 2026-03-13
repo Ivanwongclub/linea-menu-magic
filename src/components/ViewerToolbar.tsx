@@ -52,6 +52,8 @@ const ViewerToolbar = ({
   onJumpToPage,
   showHotlinks,
   onToggleHotlinks,
+  embedMode,
+  onEmbed,
 }: ViewerToolbarProps) => {
   const [showPageJump, setShowPageJump] = useState(false);
   const [pageInput, setPageInput] = useState("");
