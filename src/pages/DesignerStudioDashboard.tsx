@@ -574,6 +574,11 @@ const DesignerStudioDashboard = () => {
                 </TabsContent>
               </Tabs>
             </TabsContent>
+
+            {/* Brochures Tab Content */}
+            <TabsContent value="brochures" className="mt-0">
+              <BrochuresPanel />
+            </TabsContent>
           </Tabs>
         </div>
       </main>
