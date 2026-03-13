@@ -158,6 +158,10 @@ export default function PageManager({ brochureId, onEditLinks }: PageManagerProp
   const { data: pages = [], isLoading } = usePages(brochureId);
   const { insertPage, deletePage, reorderPages } = usePageMutations(brochureId);
 
+  // Hotlink editor modal state
+  const [hotlinkPageId, setHotlinkPageId] = useState<string | null>(null);
+  const hotlinkPage = hotlinkPageId ? pages.find((p) => p.id === hotlinkPageId) : null;
+
   const [localPages, setLocalPages] = useState<PageWithCount[] | null>(null);
   const displayPages = localPages ?? pages;
 
