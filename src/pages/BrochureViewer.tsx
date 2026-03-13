@@ -8,6 +8,7 @@ import FlipbookViewer, {
 } from "@/features/flipbook/components/FlipbookViewer";
 import ViewerToolbar from "@/components/ViewerToolbar";
 import ThumbnailStrip from "@/features/flipbook/components/ThumbnailStrip";
+import EmbedModal from "@/components/EmbedModal";
 
 const PRELOAD_COUNT = 4;
 const SITE_NAME = "Linea Jewelry";
