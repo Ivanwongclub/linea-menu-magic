@@ -13,7 +13,7 @@ interface FlipbookViewerProps {
 
 const ANIMATION_DURATION = 380;
 
-function PageImage({ page }: { page: Page | null }) {
+function PageImage({ page, showHotlinks = false }: { page: Page | null; showHotlinks?: boolean }) {
   const [status, setStatus] = useState<"loading" | "loaded" | "error">("loading");
 
   // Reset status when page changes
