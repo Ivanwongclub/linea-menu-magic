@@ -157,6 +157,7 @@ interface BrochureCardProps {
 const BrochureCard = ({ brochure, index, onEmbed, onCopyLink }: BrochureCardProps) => {
   const [linkTooltip, setLinkTooltip] = useState(false);
   const pageCount = brochure.pages?.length ?? 0;
+  const coverSrc = brochure.pages?.[0]?.imageUrl ?? brochure.coverImage ?? null;
 
   const handleCopyLink = (e: React.MouseEvent) => {
     onCopyLink(e);
