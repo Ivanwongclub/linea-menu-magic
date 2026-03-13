@@ -20,6 +20,10 @@ interface FlipbookViewerProps {
   embedMode?: boolean;
   showHotlinks?: boolean;
   editHints?: boolean;
+  /** Controlled spread index (optional — uncontrolled if omitted) */
+  currentSpread?: number;
+  /** Called when the spread changes internally */
+  onSpreadChange?: (spread: number) => void;
 }
 
 /* ------------------------------------------------------------------ */
