@@ -120,6 +120,14 @@ const PortfolioViewer = () => {
           />
         </div>
       </main>
+
+      {/* Thumbnail strip */}
+      <ThumbnailStrip
+        pages={brochure.pages}
+        currentSpread={currentSpread}
+        isMobile={isMobile}
+        onNavigate={setCurrentSpread}
+      />
     </div>
   );
 };
