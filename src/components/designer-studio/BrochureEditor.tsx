@@ -91,7 +91,21 @@ export default function BrochureEditor({ brochureId, onBack }: BrochureEditorPro
   const effectiveId = brochureId ?? idForNew;
 
   // Load existing brochure (only when editing)
-  const { data: existing, isLoading } = useBrochure(brochureId ?? undefined);
+  const { data: existing, isLoading } = useQuery<Brochure | null>({
+    queryKey: ["flipbook-brochure-by-id", brochureId],
+    enabled: !!brochureId,
+    queryFn: async () => {
+      if (!brochureId) return null;
+      const { data, error } = await supabase
+        .from("flipbook_brochures")
+        .select("*")
+        .eq("id", brochureId)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) return null;
+      return { ...data, status: data.status as BrochureStatus };
+    },
+  });
 
   const { createBrochure, updateBrochure } = useBrochureMutations();
 
