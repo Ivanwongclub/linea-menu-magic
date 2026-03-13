@@ -368,4 +368,6 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(fun
       </div>
     </div>
   );
-}
+});
+
+export default FlipbookViewer;
