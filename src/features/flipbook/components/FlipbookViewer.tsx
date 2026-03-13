@@ -18,6 +18,8 @@ import PageHotlinks from "./PageHotlinks";
 interface FlipbookViewerProps {
   brochure: BrochureWithPages;
   embedMode?: boolean;
+  showHotlinks?: boolean;
+  editHints?: boolean;
 }
 
 /* ------------------------------------------------------------------ */
