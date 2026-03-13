@@ -387,7 +387,7 @@ export default function PageManager({ brochureId, onEditLinks }: PageManagerProp
                   key={page.id}
                   page={page}
                   onDelete={setDeleteTarget}
-                  onEditLinks={onEditLinks ?? (() => {})}
+                  onEditLinks={(id) => setHotlinkPageId(id)}
                 />
               ))}
             </div>
