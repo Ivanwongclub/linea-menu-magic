@@ -34,12 +34,19 @@ function prefersReducedMotion(): boolean {
 /*  Single page renderer                                               */
 /* ------------------------------------------------------------------ */
 
-function PageSlot({ page }: { page: Page | undefined }) {
+function PageSlot({
+  page,
+  showHotlinks = false,
+  editHints = false,
+}: {
+  page: Page | undefined;
+  showHotlinks?: boolean;
+  editHints?: boolean;
+}) {
   const [status, setStatus] = useState<"loading" | "loaded" | "error">(
     "loading"
   );
 
-  // Reset when the page changes
   useEffect(() => {
     setStatus("loading");
   }, [page?.id]);
@@ -50,12 +57,10 @@ function PageSlot({ page }: { page: Page | undefined }) {
 
   return (
     <div className="flex-1 h-full relative bg-white overflow-hidden">
-      {/* Skeleton pulse while loading */}
       {status === "loading" && (
         <div className="absolute inset-0 bg-muted animate-pulse" />
       )}
 
-      {/* Error fallback */}
       {status === "error" && (
         <div className="absolute inset-0 bg-muted flex flex-col items-center justify-center gap-2">
           <ImageOff size={28} className="text-muted-foreground" />
@@ -65,7 +70,6 @@ function PageSlot({ page }: { page: Page | undefined }) {
         </div>
       )}
 
-      {/* The actual image */}
       <img
         src={page.image_url}
         alt={`Page ${page.page_number}`}
@@ -76,6 +80,11 @@ function PageSlot({ page }: { page: Page | undefined }) {
         }`}
         draggable={false}
       />
+
+      {/* Hotlink overlays */}
+      {showHotlinks && page.hotlinks && page.hotlinks.length > 0 && (
+        <PageHotlinks hotlinks={page.hotlinks} editHints={editHints} />
+      )}
     </div>
   );
 }
