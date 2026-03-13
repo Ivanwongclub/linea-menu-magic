@@ -106,14 +106,14 @@ function PageSlot({
 /*  Main viewer                                                        */
 /* ------------------------------------------------------------------ */
 
-export default function FlipbookViewer({
+const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(function FlipbookViewer({
   brochure,
   embedMode = false,
   showHotlinks = false,
   editHints = false,
   currentSpread: controlledSpread,
   onSpreadChange,
-}: FlipbookViewerProps) {
+}, ref) {
   const isMobile = useIsMobile();
   const containerRef = useRef<HTMLDivElement>(null);
 
