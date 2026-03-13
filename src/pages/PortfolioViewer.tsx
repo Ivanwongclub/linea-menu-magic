@@ -101,6 +101,7 @@ const PortfolioViewer = () => {
         onZoomChange={setZoom}
         isFullscreen={isFullscreen}
         onToggleFullscreen={toggleFullscreen}
+        onJumpToPage={setCurrentSpread}
       />
 
       {/* Flipbook area with zoom */}
