@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from "react";
+import HotlinkEditorModal from "@/components/designer-studio/HotlinkEditorModal";
 import {
   DndContext,
   closestCenter,
@@ -157,6 +158,10 @@ interface PageManagerProps {
 export default function PageManager({ brochureId, onEditLinks }: PageManagerProps) {
   const { data: pages = [], isLoading } = usePages(brochureId);
   const { insertPage, deletePage, reorderPages } = usePageMutations(brochureId);
+
+  // Hotlink editor modal state
+  const [hotlinkPageId, setHotlinkPageId] = useState<string | null>(null);
+  const hotlinkPage = hotlinkPageId ? pages.find((p) => p.id === hotlinkPageId) : null;
 
   const [localPages, setLocalPages] = useState<PageWithCount[] | null>(null);
   const displayPages = localPages ?? pages;
@@ -382,7 +387,7 @@ export default function PageManager({ brochureId, onEditLinks }: PageManagerProp
                   key={page.id}
                   page={page}
                   onDelete={setDeleteTarget}
-                  onEditLinks={onEditLinks ?? (() => {})}
+                  onEditLinks={(id) => setHotlinkPageId(id)}
                 />
               ))}
             </div>
@@ -458,6 +463,17 @@ export default function PageManager({ brochureId, onEditLinks }: PageManagerProp
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Hotlink editor modal */}
+      {hotlinkPage && (
+        <HotlinkEditorModal
+          open={!!hotlinkPageId}
+          onOpenChange={(open) => !open && setHotlinkPageId(null)}
+          pageId={hotlinkPage.id}
+          imageUrl={hotlinkPage.image_url}
+          pageNumber={hotlinkPage.page_number}
+        />
+      )}
     </div>
   );
 }
