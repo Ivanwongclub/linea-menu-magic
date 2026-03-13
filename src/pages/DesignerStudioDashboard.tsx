@@ -256,6 +256,16 @@ const DesignerStudioDashboard = () => {
     setActiveMainTab("rfq"); // Switch to RFQ tab after creation
   };
 
+  // Show Brochure editor
+  if (editingBrochureId !== null) {
+    return (
+      <BrochureEditor
+        brochureId={editingBrochureId}
+        onBack={() => setEditingBrochureId(null)}
+      />
+    );
+  }
+
   // Show Library item detail view
   if (selectedLibraryItem) {
     return (
