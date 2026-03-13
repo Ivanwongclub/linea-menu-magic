@@ -157,6 +157,7 @@ interface BrochureCardProps {
 const BrochureCard = ({ brochure, index, onEmbed, onCopyLink }: BrochureCardProps) => {
   const [linkTooltip, setLinkTooltip] = useState(false);
   const pageCount = brochure.pages?.length ?? 0;
+  const coverSrc = brochure.pages?.[0]?.imageUrl ?? brochure.coverImage ?? null;
 
   const handleCopyLink = (e: React.MouseEvent) => {
     onCopyLink(e);
@@ -182,12 +183,19 @@ const BrochureCard = ({ brochure, index, onEmbed, onCopyLink }: BrochureCardProp
             boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
           }}
         >
-          <img
-            src={brochure.coverImage}
-            alt={brochure.title}
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
+          {coverSrc ? (
+            <img
+              src={coverSrc}
+              alt={brochure.title}
+              className="w-full h-full object-cover object-top"
+              loading="lazy"
+            />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center bg-muted">
+              <BookOpen size={32} className="text-muted-foreground" />
+              <span className="text-xs text-muted-foreground mt-2">No pages yet</span>
+            </div>
+          )}
 
           {/* Right spine shadow */}
           <div
