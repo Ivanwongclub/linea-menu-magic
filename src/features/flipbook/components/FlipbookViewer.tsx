@@ -4,6 +4,8 @@ import {
   useEffect,
   useRef,
   useMemo,
+  useImperativeHandle,
+  forwardRef,
   type TouchEvent as ReactTouchEvent,
 } from "react";
 import { ChevronLeft, ChevronRight, ImageOff } from "lucide-react";
@@ -20,6 +22,17 @@ interface FlipbookViewerProps {
   embedMode?: boolean;
   showHotlinks?: boolean;
   editHints?: boolean;
+  /** Controlled spread index (optional — uncontrolled if omitted) */
+  currentSpread?: number;
+  /** Called when the spread changes internally */
+  onSpreadChange?: (spread: number) => void;
+}
+
+export interface FlipbookViewerHandle {
+  goNext: () => void;
+  goPrev: () => void;
+  goFirst: () => void;
+  goLast: () => void;
 }
 
 /* ------------------------------------------------------------------ */
@@ -93,12 +106,14 @@ function PageSlot({
 /*  Main viewer                                                        */
 /* ------------------------------------------------------------------ */
 
-export default function FlipbookViewer({
+const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(function FlipbookViewer({
   brochure,
   embedMode = false,
   showHotlinks = false,
   editHints = false,
-}: FlipbookViewerProps) {
+  currentSpread: controlledSpread,
+  onSpreadChange,
+}, ref) {
   const isMobile = useIsMobile();
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -110,7 +125,20 @@ export default function FlipbookViewer({
     ? totalPages - 1
     : Math.max(Math.ceil(totalPages / 2) - 1, 0);
 
-  const [currentSpread, setCurrentSpread] = useState(0);
+  const [internalSpread, setInternalSpread] = useState(0);
+  const isControlled = controlledSpread !== undefined;
+  const currentSpread = isControlled ? controlledSpread : internalSpread;
+
+  const updateSpread = useCallback(
+    (next: number | ((prev: number) => number)) => {
+      const value = typeof next === "function" ? next(currentSpread) : next;
+      const clamped = Math.max(0, Math.min(value, maxSpread));
+      if (!isControlled) setInternalSpread(clamped);
+      onSpreadChange?.(clamped);
+    },
+    [currentSpread, maxSpread, isControlled, onSpreadChange]
+  );
+
   const [turning, setTurning] = useState<"forward" | "backward" | null>(null);
 
   const canGoBack = currentSpread > 0;
@@ -133,40 +161,41 @@ export default function FlipbookViewer({
   const goNext = useCallback(() => {
     if (!canGoForward || turning) return;
     if (turnDuration === 0) {
-      setCurrentSpread((s) => s + 1);
+      updateSpread((s) => s + 1);
       return;
     }
     setTurning("forward");
     setTimeout(() => {
-      setCurrentSpread((s) => s + 1);
+      updateSpread((s) => s + 1);
       setTurning(null);
     }, turnDuration);
-  }, [canGoForward, turning, turnDuration]);
+  }, [canGoForward, turning, turnDuration, updateSpread]);
 
   const goPrev = useCallback(() => {
     if (!canGoBack || turning) return;
     if (turnDuration === 0) {
-      setCurrentSpread((s) => s - 1);
+      updateSpread((s) => s - 1);
       return;
     }
     setTurning("backward");
     setTimeout(() => {
-      setCurrentSpread((s) => s - 1);
+      updateSpread((s) => s - 1);
       setTurning(null);
     }, turnDuration);
-  }, [canGoBack, turning, turnDuration]);
+  }, [canGoBack, turning, turnDuration, updateSpread]);
 
   const goFirst = useCallback(() => {
     if (turning) return;
-    setCurrentSpread(0);
-  }, [turning]);
+    updateSpread(0);
+  }, [turning, updateSpread]);
 
   const goLast = useCallback(() => {
     if (turning) return;
-    setCurrentSpread(maxSpread);
-  }, [turning, maxSpread]);
+    updateSpread(maxSpread);
+  }, [turning, maxSpread, updateSpread]);
 
-  /* ---- keyboard ---- */
+  useImperativeHandle(ref, () => ({ goNext, goPrev, goFirst, goLast }), [goNext, goPrev, goFirst, goLast]);
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
@@ -340,4 +369,6 @@ export default function FlipbookViewer({
       </div>
     </div>
   );
-}
+});
+
+export default FlipbookViewer;
