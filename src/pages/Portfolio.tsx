@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Code2, Link2, Upload, Info, BookOpen } from "lucide-react";
 import Header from "@/components/layout/Header";
