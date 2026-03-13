@@ -25,6 +25,8 @@ interface ViewerToolbarProps {
   isFullscreen: boolean;
   onToggleFullscreen: () => void;
   onJumpToPage?: (spread: number) => void;
+  showHotlinks: boolean;
+  onToggleHotlinks: () => void;
 }
 
 const ZOOM_MIN = 50;
