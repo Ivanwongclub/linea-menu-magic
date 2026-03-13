@@ -150,6 +150,8 @@ const PortfolioViewer = () => {
         isFullscreen={isFullscreen}
         onToggleFullscreen={toggleFullscreen}
         onJumpToPage={setCurrentSpread}
+        showHotlinks={showHotlinks}
+        onToggleHotlinks={() => setShowHotlinks((v) => !v)}
       />
 
       <main className="flex-1 flex items-center justify-center relative overflow-hidden">
