@@ -158,7 +158,7 @@ export default function PageManager({ brochureId, onEditLinks }: PageManagerProp
   const { data: pages = [], isLoading } = usePages(brochureId);
   const { insertPage, deletePage, reorderPages } = usePageMutations(brochureId);
 
-  const [localPages, setLocalPages] = useState<Page[] | null>(null);
+  const [localPages, setLocalPages] = useState<PageWithCount[] | null>(null);
   const displayPages = localPages ?? pages;
 
   // Keep localPages in sync when server data changes (and we're not mid-drag)
