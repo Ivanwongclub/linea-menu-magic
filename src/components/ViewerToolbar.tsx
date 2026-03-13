@@ -127,7 +127,7 @@ const ViewerToolbar = ({
   }, [showPageJump, closePageJump]);
 
   const btnBase =
-    "w-8 h-8 flex items-center justify-center rounded-md transition-colors hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed";
+    "min-w-[44px] min-h-[44px] md:min-w-[32px] md:min-h-[32px] w-8 h-8 flex items-center justify-center rounded-md transition-colors hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed";
 
   return (
     <div
@@ -136,7 +136,7 @@ const ViewerToolbar = ({
     >
       {/* Left: title + page indicator */}
       <div className="flex items-center gap-3 min-w-0 flex-1 relative">
-        <span className="text-white/90 text-sm font-medium truncate max-w-[180px] hidden sm:inline">
+        <span className="text-white/90 text-sm font-medium truncate max-w-[180px] hidden md:inline">
           {title}
         </span>
         <button
