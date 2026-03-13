@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { ChevronLeft, ChevronRight, ImageOff } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import HotlinkOverlay from "@/components/HotlinkOverlay";
 import type { Page } from "@/types/flipbook";
 
 interface FlipbookViewerProps {
   pages: Page[];
   currentSpread: number;
   onSpreadChange: (spread: number) => void;
+  showHotlinks?: boolean;
 }
 
 const ANIMATION_DURATION = 380;
