@@ -49,7 +49,7 @@ import { uploadFlipbookImage, convertPdfToImages } from "@/features/flipbook/upl
 /* ------------------------------------------------------------------ */
 
 interface SortablePageRowProps {
-  page: Page;
+  page: PageWithCount;
   onDelete: (id: string) => void;
   onEditLinks: (id: string) => void;
 }
