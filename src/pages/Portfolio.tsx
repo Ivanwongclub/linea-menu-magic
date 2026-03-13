@@ -101,7 +101,20 @@ const Portfolio = () => {
           </div>
         ) : (
           /* Brochure grid */
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <>
+            <style>{`
+              @media (prefers-reduced-motion: no-preference) {
+                .brochure-card-animate {
+                  opacity: 0;
+                  animation: brochureCardIn 350ms ease-out forwards;
+                }
+              }
+              @keyframes brochureCardIn {
+                from { opacity: 0; transform: translateY(16px); }
+                to { opacity: 1; transform: translateY(0); }
+              }
+            `}</style>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {brochures.map((brochure, index) => (
               <BrochureCard
                 key={brochure.id}
