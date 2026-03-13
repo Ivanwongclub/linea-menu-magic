@@ -102,6 +102,8 @@ export default function FlipbookViewer({
   embedMode = false,
   showHotlinks = false,
   editHints = false,
+  currentSpread: controlledSpread,
+  onSpreadChange,
 }: FlipbookViewerProps) {
   const isMobile = useIsMobile();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -114,7 +116,20 @@ export default function FlipbookViewer({
     ? totalPages - 1
     : Math.max(Math.ceil(totalPages / 2) - 1, 0);
 
-  const [currentSpread, setCurrentSpread] = useState(0);
+  const [internalSpread, setInternalSpread] = useState(0);
+  const isControlled = controlledSpread !== undefined;
+  const currentSpread = isControlled ? controlledSpread : internalSpread;
+
+  const updateSpread = useCallback(
+    (next: number | ((prev: number) => number)) => {
+      const value = typeof next === "function" ? next(currentSpread) : next;
+      const clamped = Math.max(0, Math.min(value, maxSpread));
+      if (!isControlled) setInternalSpread(clamped);
+      onSpreadChange?.(clamped);
+    },
+    [currentSpread, maxSpread, isControlled, onSpreadChange]
+  );
+
   const [turning, setTurning] = useState<"forward" | "backward" | null>(null);
 
   const canGoBack = currentSpread > 0;
