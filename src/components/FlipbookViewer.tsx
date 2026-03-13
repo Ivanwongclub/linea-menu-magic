@@ -49,6 +49,9 @@ function PageImage({ page, showHotlinks = false }: { page: Page | null; showHotl
         onLoad={() => setStatus("loaded")}
         onError={() => setStatus("error")}
       />
+      {page.links && page.links.length > 0 && status === "loaded" && (
+        <HotlinkOverlay links={page.links} showHints={showHotlinks} />
+      )}
     </div>
   );
 }
