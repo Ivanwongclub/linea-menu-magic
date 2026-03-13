@@ -15,6 +15,7 @@ const PortfolioViewer = () => {
   const isMobile = useIsMobile();
   const [currentSpread, setCurrentSpread] = useState(0);
   const [zoom, setZoom] = useState(100);
+  const [showHotlinks, setShowHotlinks] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [imagesReady, setImagesReady] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
