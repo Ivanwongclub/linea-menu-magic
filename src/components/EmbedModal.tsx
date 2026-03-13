@@ -1,19 +1,32 @@
 import { useState, useCallback } from "react";
-import { Code, X, Copy, Check } from "lucide-react";
+import { Code, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface EmbedModalProps {
-  brochureId: string;
+  slug: string;
   brochureTitle: string;
   isOpen: boolean;
   onClose: () => void;
 }
 
-const EmbedModal = ({ brochureId, brochureTitle, isOpen, onClose }: EmbedModalProps) => {
-  const [copied, setCopied] = useState(false);
+const HEIGHT_PRESETS = [
+  { label: "Compact", value: 500 },
+  { label: "Standard", value: 700 },
+  { label: "Full", value: 900 },
+] as const;
 
-  const embedUrl = `${window.location.origin}/portfolio/view/${brochureId}?embed=true`;
-  const embedCode = `<iframe src="${embedUrl}" width="100%" height="600" frameborder="0" allowfullscreen></iframe>`;
+const EmbedModal = ({ slug, brochureTitle, isOpen, onClose }: EmbedModalProps) => {
+  const [copied, setCopied] = useState(false);
+  const [height, setHeight] = useState(700);
+
+  const embedUrl = `${window.location.origin}/brochures/${slug}?embed=true`;
+  const embedCode = `<iframe src="${embedUrl}" width="100%" height="${height}" frameborder="0" allowfullscreen></iframe>`;
 
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(embedCode).then(() => {
@@ -25,59 +38,66 @@ const EmbedModal = ({ brochureId, brochureTitle, isOpen, onClose }: EmbedModalPr
     });
   }, [embedCode]);
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/60" />
-      <div
-        className="relative bg-card border border-border rounded-xl shadow-2xl w-full max-w-2xl animate-scale-in"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-          <div className="flex items-center gap-2">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-2xl p-0 gap-0">
+        <DialogHeader className="px-6 pt-5 pb-4 border-b border-border">
+          <DialogTitle className="flex items-center gap-2 text-base">
             <Code size={18} className="text-muted-foreground" />
-            <h3 className="text-base font-semibold text-foreground">Embed "{brochureTitle}"</h3>
+            Embed "{brochureTitle}"
+          </DialogTitle>
+        </DialogHeader>
+
+        {/* Height presets */}
+        <div className="px-6 pt-4">
+          <p className="text-xs text-muted-foreground mb-2 uppercase tracking-wider font-medium">Height</p>
+          <div className="flex gap-2">
+            {HEIGHT_PRESETS.map((preset) => (
+              <button
+                key={preset.value}
+                onClick={() => setHeight(preset.value)}
+                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                  height === preset.value
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {preset.label} ({preset.value}px)
+              </button>
+            ))}
           </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-muted transition-colors text-muted-foreground"
-          >
-            <X size={18} />
-          </button>
         </div>
 
         {/* Preview */}
-        <div className="px-6 py-4">
-          <p className="text-xs text-muted-foreground mb-3 uppercase tracking-wider font-medium">Preview</p>
-          <div className="rounded-lg overflow-hidden border border-border" style={{ height: "300px" }}>
+        <div className="px-6 pt-4">
+          <p className="text-xs text-muted-foreground mb-2 uppercase tracking-wider font-medium">Preview</p>
+          <div className="rounded-lg overflow-hidden border border-border" style={{ height: Math.min(height, 300) }}>
             <iframe
               src={embedUrl}
-              className="w-full h-full"
+              className="w-full h-full border-none"
               title={`Embed preview: ${brochureTitle}`}
             />
           </div>
         </div>
 
         {/* Code snippet */}
-        <div className="px-6 pb-6">
-          <p className="text-xs text-muted-foreground mb-3 uppercase tracking-wider font-medium">Embed Code</p>
+        <div className="px-6 pt-4 pb-6">
+          <p className="text-xs text-muted-foreground mb-2 uppercase tracking-wider font-medium">Embed Code</p>
           <div className="relative">
-            <pre className="bg-muted rounded-lg p-4 text-xs text-foreground overflow-x-auto font-mono leading-relaxed">
+            <pre className="bg-muted rounded-lg p-4 pr-28 text-xs text-foreground overflow-x-auto font-mono leading-relaxed">
               {embedCode}
             </pre>
             <button
               onClick={handleCopy}
-              className="absolute top-2 right-2 flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-medium transition-colors hover:bg-primary-hover"
+              className="absolute top-2 right-2 flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-medium transition-colors hover:opacity-90"
             >
               {copied ? <Check size={14} /> : <Copy size={14} />}
-              {copied ? "Copied" : "Copy code"}
+              {copied ? "Copied!" : "Copy code"}
             </button>
           </div>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

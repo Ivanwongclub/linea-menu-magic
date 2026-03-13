@@ -10,7 +10,7 @@ import { brochures } from "@/data/brochures";
 import { toast } from "sonner";
 
 const Portfolio = () => {
-  const [embedModal, setEmbedModal] = useState<{ id: string; title: string } | null>(null);
+  const [embedModal, setEmbedModal] = useState<{ slug: string; title: string } | null>(null);
   const [showUpload, setShowUpload] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -120,7 +120,7 @@ const Portfolio = () => {
                 key={brochure.id}
                 brochure={brochure}
                 index={index}
-                onEmbed={() => setEmbedModal({ id: brochure.id, title: brochure.title })}
+                onEmbed={() => setEmbedModal({ slug: brochure.id, title: brochure.title })}
                 onCopyLink={(e) => handleCopyLink(brochure.id, e)}
               />
             ))}
@@ -131,7 +131,7 @@ const Portfolio = () => {
 
       {embedModal && (
         <EmbedModal
-          brochureId={embedModal.id}
+          slug={embedModal.slug}
           brochureTitle={embedModal.title}
           isOpen={true}
           onClose={() => setEmbedModal(null)}

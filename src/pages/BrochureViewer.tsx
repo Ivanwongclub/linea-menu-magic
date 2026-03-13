@@ -8,6 +8,7 @@ import FlipbookViewer, {
 } from "@/features/flipbook/components/FlipbookViewer";
 import ViewerToolbar from "@/components/ViewerToolbar";
 import ThumbnailStrip from "@/features/flipbook/components/ThumbnailStrip";
+import EmbedModal from "@/components/EmbedModal";
 
 const PRELOAD_COUNT = 4;
 const SITE_NAME = "Linea Jewelry";
@@ -25,6 +26,7 @@ export default function BrochureViewer() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showHotlinks, setShowHotlinks] = useState(false);
   const [thumbnailCollapsed, setThumbnailCollapsed] = useState(false);
+  const [showEmbed, setShowEmbed] = useState(false);
   const [imagesReady, setImagesReady] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -135,6 +137,7 @@ export default function BrochureViewer() {
           onJumpToPage={setCurrentSpread}
           showHotlinks={showHotlinks}
           onToggleHotlinks={() => setShowHotlinks((v) => !v)}
+          embedMode
         />
         <main className="flex-1 flex items-center justify-center overflow-hidden">
           <FlipbookViewer
@@ -180,6 +183,7 @@ export default function BrochureViewer() {
         onJumpToPage={setCurrentSpread}
         showHotlinks={showHotlinks}
         onToggleHotlinks={() => setShowHotlinks((v) => !v)}
+        onEmbed={() => setShowEmbed(true)}
       />
 
       <main className="flex-1 flex items-center justify-center relative overflow-hidden">
@@ -210,6 +214,15 @@ export default function BrochureViewer() {
         isMobile={isMobile}
         isFullscreen={isFullscreen}
       />
+
+      {brochure && slug && (
+        <EmbedModal
+          slug={slug}
+          brochureTitle={brochure.title}
+          isOpen={showEmbed}
+          onClose={() => setShowEmbed(false)}
+        />
+      )}
     </div>
   );
 }

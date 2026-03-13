@@ -8,6 +8,7 @@ import {
   Minimize,
   Share2,
   MousePointerClick,
+  Code2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -27,6 +28,8 @@ interface ViewerToolbarProps {
   onJumpToPage?: (spread: number) => void;
   showHotlinks: boolean;
   onToggleHotlinks: () => void;
+  embedMode?: boolean;
+  onEmbed?: () => void;
 }
 
 const ZOOM_MIN = 50;
@@ -49,6 +52,8 @@ const ViewerToolbar = ({
   onJumpToPage,
   showHotlinks,
   onToggleHotlinks,
+  embedMode,
+  onEmbed,
 }: ViewerToolbarProps) => {
   const [showPageJump, setShowPageJump] = useState(false);
   const [pageInput, setPageInput] = useState("");
@@ -243,6 +248,16 @@ const ViewerToolbar = ({
         >
           <Share2 size={16} />
         </button>
+
+        {!embedMode && onEmbed && (
+          <button
+            onClick={onEmbed}
+            className={`${btnBase} text-white`}
+            aria-label="Embed"
+          >
+            <Code2 size={16} />
+          </button>
+        )}
       </div>
     </div>
   );
