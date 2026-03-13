@@ -70,7 +70,7 @@ function SortablePageRow({ page, onDelete, onEditLinks }: SortablePageRowProps) 
     opacity: isDragging ? 0.5 : 1,
   };
 
-  const hotlinkCount = page.hotlinks?.length ?? 0;
+  const hotlinkCount = page.hotlink_count ?? 0;
 
   return (
     <div
