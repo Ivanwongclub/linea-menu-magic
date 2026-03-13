@@ -315,8 +315,8 @@ const DesignerStudioDashboard = () => {
           
           {/* Mobile Tabs */}
           <div className="sm:hidden pb-3">
-            <Tabs value={activeMainTab} onValueChange={(v) => setActiveMainTab(v as "library" | "rfq")}>
-              <TabsList className="w-full grid grid-cols-2">
+            <Tabs value={activeMainTab} onValueChange={(v) => setActiveMainTab(v as "library" | "rfq" | "brochures")}>
+              <TabsList className="w-full grid grid-cols-3">
                 <TabsTrigger value="library" className="gap-1.5 text-sm">
                   <Library className="w-3.5 h-3.5" />
                   素材庫
@@ -324,6 +324,10 @@ const DesignerStudioDashboard = () => {
                 <TabsTrigger value="rfq" className="gap-1.5 text-sm">
                   <FileText className="w-3.5 h-3.5" />
                   報價 ({statusCounts.all})
+                </TabsTrigger>
+                <TabsTrigger value="brochures" className="gap-1.5 text-sm">
+                  <BookOpen className="w-3.5 h-3.5" />
+                  Brochures
                 </TabsTrigger>
               </TabsList>
             </Tabs>
