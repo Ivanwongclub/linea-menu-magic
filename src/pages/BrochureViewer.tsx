@@ -183,6 +183,7 @@ export default function BrochureViewer() {
         onJumpToPage={setCurrentSpread}
         showHotlinks={showHotlinks}
         onToggleHotlinks={() => setShowHotlinks((v) => !v)}
+        onEmbed={() => setShowEmbed(true)}
       />
 
       <main className="flex-1 flex items-center justify-center relative overflow-hidden">
