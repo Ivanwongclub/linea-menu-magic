@@ -56,7 +56,7 @@ function PageImage({ page, showHotlinks = false }: { page: Page | null; showHotl
   );
 }
 
-const FlipbookViewer = ({ pages, currentSpread, onSpreadChange }: FlipbookViewerProps) => {
+const FlipbookViewer = ({ pages, currentSpread, onSpreadChange, showHotlinks = false }: FlipbookViewerProps) => {
   const isMobile = useIsMobile();
   const [displayedSpread, setDisplayedSpread] = useState(currentSpread);
   const [isAnimating, setIsAnimating] = useState(false);
