@@ -194,7 +194,8 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(fun
     updateSpread(maxSpread);
   }, [turning, maxSpread, updateSpread]);
 
-  /* ---- keyboard ---- */
+  useImperativeHandle(ref, () => ({ goNext, goPrev, goFirst, goLast }), [goNext, goPrev, goFirst, goLast]);
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
