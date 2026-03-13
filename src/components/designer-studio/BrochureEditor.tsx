@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-
+import PageManager from "@/components/designer-studio/PageManager";
 import Header from "@/components/layout/Header";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -436,13 +436,9 @@ export default function BrochureEditor({ brochureId, onBack }: BrochureEditorPro
             </div>
           </div>
 
-          {/* Right panel — page manager placeholder */}
+          {/* Right panel — page manager */}
           <div className="flex-1 min-w-0">
-            <div className="rounded-lg border border-dashed border-border bg-muted/20 flex items-center justify-center min-h-[400px]">
-              <p className="text-sm text-muted-foreground">
-                Page manager will be added here
-              </p>
-            </div>
+            <PageManager brochureId={effectiveId} />
           </div>
         </div>
       </main>
