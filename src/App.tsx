@@ -16,6 +16,7 @@ import DesignerStudioDashboard from "./pages/DesignerStudioDashboard";
 import Portfolio from "./pages/Portfolio";
 import PortfolioViewer from "./pages/PortfolioViewer";
 import BrochureViewer from "./pages/BrochureViewer";
+import Brochures from "./pages/Brochures";
 import Contact from "./pages/Contact";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
