@@ -41,9 +41,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-import { usePages, usePageMutations } from "@/features/flipbook/hooks/usePages";
+import { usePages, usePageMutations, type PageWithCount } from "@/features/flipbook/hooks/usePages";
 import { uploadFlipbookImage, convertPdfToImages } from "@/features/flipbook/upload";
-import type { Page } from "@/features/flipbook/types";
 
 /* ------------------------------------------------------------------ */
 /*  Sortable page row                                                   */

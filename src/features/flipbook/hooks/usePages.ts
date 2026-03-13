@@ -2,9 +2,14 @@ import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Page } from "../types";
 
+/** A page with just a hotlink count for the list view. */
+export interface PageWithCount extends Omit<Page, "hotlinks"> {
+  hotlink_count: number;
+}
+
 /** Fetch all pages (with hotlink counts) for a given brochure. */
 export function usePages(brochureId: string | undefined) {
-  return useQuery<Page[]>({
+  return useQuery<PageWithCount[]>({
     queryKey: ["flipbook-pages", brochureId],
     enabled: !!brochureId,
     queryFn: async () => {
@@ -20,7 +25,7 @@ export function usePages(brochureId: string | undefined) {
         brochure_id: row.brochure_id,
         page_number: row.page_number,
         image_url: row.image_url,
-        hotlinks: row.flipbook_hotlinks ?? [],
+        hotlink_count: (row.flipbook_hotlinks ?? []).length,
       }));
     },
   });
