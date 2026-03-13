@@ -214,6 +214,15 @@ export default function BrochureViewer() {
         isMobile={isMobile}
         isFullscreen={isFullscreen}
       />
+
+      {brochure && slug && (
+        <EmbedModal
+          slug={slug}
+          brochureTitle={brochure.title}
+          isOpen={showEmbed}
+          onClose={() => setShowEmbed(false)}
+        />
+      )}
     </div>
   );
 }
