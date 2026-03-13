@@ -166,25 +166,11 @@ const BrochureCard = ({ brochure, index, onEmbed, onCopyLink }: BrochureCardProp
 
   return (
     <div
-      className="group rounded-lg border border-transparent bg-card overflow-hidden transition-all duration-300 hover:border-accent/40"
+      className="brochure-card-animate group rounded-lg border border-transparent bg-card overflow-hidden transition-all duration-300 hover:border-accent/40"
       style={{
         animationDelay: `${index * 60}ms`,
-        animationFillMode: "forwards",
       }}
     >
-      <style>{`
-        @media (prefers-reduced-motion: no-preference) {
-          .brochure-card-animate {
-            opacity: 0;
-            animation: brochureCardIn 350ms ease-out forwards;
-          }
-        }
-        @keyframes brochureCardIn {
-          from { opacity: 0; transform: translateY(16px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
-
       {/* Cover area */}
       <Link
         to={`/portfolio/view/${brochure.id}`}
