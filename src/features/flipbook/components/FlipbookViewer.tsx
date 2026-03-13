@@ -96,6 +96,8 @@ function PageSlot({
 export default function FlipbookViewer({
   brochure,
   embedMode = false,
+  showHotlinks = false,
+  editHints = false,
 }: FlipbookViewerProps) {
   const isMobile = useIsMobile();
   const containerRef = useRef<HTMLDivElement>(null);
