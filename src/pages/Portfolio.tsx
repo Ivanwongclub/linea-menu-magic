@@ -124,8 +124,9 @@ const Portfolio = () => {
                 onCopyLink={(e) => handleCopyLink(brochure.id, e)}
               />
             ))}
-          </div>
-        )}
+            </div>
+          </>
+        )
       </main>
 
       {embedModal && (
