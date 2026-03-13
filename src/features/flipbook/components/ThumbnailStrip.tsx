@@ -75,7 +75,7 @@ const ThumbnailStrip = ({
       >
         <div
           ref={scrollRef}
-          className="flex gap-2 px-4 py-3 overflow-x-auto"
+          className="flex gap-2 px-4 py-3 overflow-x-auto overscroll-x-contain touch-pan-x"
           style={{
             scrollbarWidth: "thin",
             scrollbarColor: "hsl(var(--muted-foreground) / 0.2) transparent",
