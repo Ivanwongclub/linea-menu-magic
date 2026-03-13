@@ -167,6 +167,7 @@ const PortfolioViewer = () => {
             pages={brochure.pages}
             currentSpread={currentSpread}
             onSpreadChange={setCurrentSpread}
+            showHotlinks={showHotlinks}
           />
         </div>
       </main>

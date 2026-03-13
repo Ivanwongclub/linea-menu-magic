@@ -219,6 +219,16 @@ const ViewerToolbar = ({
         <div className="w-px h-4 bg-white/15 mx-1" />
 
         <button
+          onClick={onToggleHotlinks}
+          className={`${btnBase} ${showHotlinks ? "text-indigo-400 bg-white/10" : "text-white"}`}
+          aria-label={showHotlinks ? "Hide hotlinks" : "Show hotlinks"}
+        >
+          <MousePointerClick size={16} />
+        </button>
+
+        <div className="w-px h-4 bg-white/15 mx-1" />
+
+        <button
           onClick={onToggleFullscreen}
           className={`${btnBase} text-white`}
           aria-label={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
