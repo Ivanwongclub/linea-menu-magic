@@ -1,30 +1,43 @@
 
 
-## Problem
+## Plan: Replace Brochure 1 Images and Rename
 
-The Polo Button OBJ file has large geometry dimensions in world units. The camera starts at position `[0, 1.5, 3]`, which places it **inside** the model, causing the zoomed-in/clipped view shown in the screenshot.
+### Current State
+- Brochure 1 (id: `31e65670-ec13-4c35-9a44-aa756deddb75`, slug: `spring-collection-2025`) has 10 pages with picsum placeholder images
+- User uploaded 10 product catalog images (buttons: B30-B34, RDEL series)
 
-## Solution
+### Steps
 
-Normalize the OBJ model size in `OBJModelLoader.tsx` after loading. Compute the bounding box, then scale the model so it fits within a consistent size (e.g., radius ~1.5 units), regardless of the original OBJ dimensions.
+**1. Copy uploaded images to project**
+Copy all 10 images to `public/brochure-pages/` directory for direct serving.
 
-### Changes
+**2. Update brochure metadata via SQL migration**
+- Title: "Button Brochure" 
+- Description: "Products featuring polyester and metal buttons"
+- Slug: `button-brochure`
 
-**`src/components/designer-studio/OBJModelLoader.tsx`**
-- After cloning and applying materials, compute the bounding box of the model
-- Calculate the max dimension and derive a scale factor to normalize to ~1.5 units
-- Apply the scale to the cloned object
-
-This is a ~5-line addition in the `useMemo` block:
-
-```ts
-// After traverse, normalize size
-const box = new THREE.Box3().setFromObject(clone);
-const size = box.getSize(new THREE.Vector3());
-const maxDim = Math.max(size.x, size.y, size.z);
-const scale = 2 / maxDim; // fit within ~2 units
-clone.scale.setScalar(scale);
+```sql
+UPDATE flipbook_brochures 
+SET title = 'Button Brochure',
+    description = 'Products featuring polyester and metal buttons',
+    slug = 'button-brochure'
+WHERE id = '31e65670-ec13-4c35-9a44-aa756deddb75';
 ```
 
-No other files need changes. The `<Center>` component already handles centering the model at origin.
+**3. Update page image URLs via SQL migration**
+Update each of the 10 existing page records to point to the new images in order:
+1. B30.jpg, 2. B31.jpg, 3. B32.jpg, 4. B33.jpg, 5. B34.jpg, 6. RDEL-07-10690.jpg, 7. RDEL-07-10691.jpg, 8. RDEL-07-10692.jpg, 9. RDEL-07-10695.jpg, 10. RDEL-11-11833.jpg
+
+**4. Update cover image**
+Set the brochure's `cover_image_url` to the first page image (B30.jpg).
+
+**5. Update any hardcoded references**
+- Check `UploadModal.tsx` which navigates to `spring-collection-2025` slug and update to `button-brochure`
+- Check `brochures.ts` mock data if still referenced
+
+### Files touched
+- `public/brochure-pages/` (10 new image files)
+- SQL migration (rename + update page URLs)
+- `src/components/UploadModal.tsx` (update demo slug)
+- `src/data/brochures.ts` (update if still used)
 
