@@ -100,7 +100,7 @@ export default function BrochureViewer() {
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-white/10 hover:bg-white/20 text-white text-sm transition-colors"
           >
             <ArrowLeft size={16} />
-            Back to Portfolio
+            Back to Brochures
           </Link>
         </div>
       </div>
