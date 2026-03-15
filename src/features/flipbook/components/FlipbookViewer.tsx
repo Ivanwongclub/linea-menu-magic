@@ -22,9 +22,7 @@ interface FlipbookViewerProps {
   embedMode?: boolean;
   showHotlinks?: boolean;
   editHints?: boolean;
-  /** Controlled spread index (optional — uncontrolled if omitted) */
   currentSpread?: number;
-  /** Called when the spread changes internally */
   onSpreadChange?: (spread: number) => void;
 }
 
@@ -36,12 +34,10 @@ export interface FlipbookViewerHandle {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Reduced-motion helper                                              */
+/*  Constants                                                          */
 /* ------------------------------------------------------------------ */
 
-function prefersReducedMotion(): boolean {
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-}
+const ANIMATION_DURATION = 380;
 
 /* ------------------------------------------------------------------ */
 /*  Single page renderer                                               */
@@ -52,37 +48,31 @@ function PageSlot({
   showHotlinks = false,
   editHints = false,
 }: {
-  page: Page | undefined;
+  page: Page | undefined | null;
   showHotlinks?: boolean;
   editHints?: boolean;
 }) {
-  const [status, setStatus] = useState<"loading" | "loaded" | "error">(
-    "loading"
-  );
+  const [status, setStatus] = useState<"loading" | "loaded" | "error">("loading");
 
   useEffect(() => {
     setStatus("loading");
   }, [page?.id]);
 
   if (!page) {
-    return <div className="flex-1 h-full bg-white" />;
+    return <div className="w-full h-full bg-white" />;
   }
 
   return (
-    <div className="flex-1 h-full relative bg-white overflow-hidden">
+    <div className="w-full h-full relative bg-white overflow-hidden">
       {status === "loading" && (
         <div className="absolute inset-0 bg-muted animate-pulse" />
       )}
-
       {status === "error" && (
         <div className="absolute inset-0 bg-muted flex flex-col items-center justify-center gap-2">
           <ImageOff size={28} className="text-muted-foreground" />
-          <span className="text-xs text-muted-foreground">
-            Page unavailable
-          </span>
+          <span className="text-xs text-muted-foreground">Page unavailable</span>
         </div>
       )}
-
       <img
         src={page.image_url}
         alt={`Page ${page.page_number}`}
@@ -93,8 +83,6 @@ function PageSlot({
         }`}
         draggable={false}
       />
-
-      {/* Hotlink overlays */}
       {showHotlinks && page.hotlinks && page.hotlinks.length > 0 && (
         <PageHotlinks hotlinks={page.hotlinks} editHints={editHints} />
       )}
@@ -106,242 +94,360 @@ function PageSlot({
 /*  Main viewer                                                        */
 /* ------------------------------------------------------------------ */
 
-const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(function FlipbookViewer({
-  brochure,
-  embedMode = false,
-  showHotlinks = false,
-  editHints = false,
-  currentSpread: controlledSpread,
-  onSpreadChange,
-}, ref) {
-  const isMobile = useIsMobile();
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const pages = brochure.pages;
-  const totalPages = pages.length;
-
-  /* ---- spread logic ---- */
-  const maxSpread = isMobile
-    ? totalPages - 1
-    : Math.max(Math.ceil(totalPages / 2) - 1, 0);
-
-  const [internalSpread, setInternalSpread] = useState(0);
-  const isControlled = controlledSpread !== undefined;
-  const currentSpread = isControlled ? controlledSpread : internalSpread;
-
-  const updateSpread = useCallback(
-    (next: number | ((prev: number) => number)) => {
-      const value = typeof next === "function" ? next(currentSpread) : next;
-      const clamped = Math.max(0, Math.min(value, maxSpread));
-      if (!isControlled) setInternalSpread(clamped);
-      onSpreadChange?.(clamped);
+const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
+  function FlipbookViewer(
+    {
+      brochure,
+      embedMode = false,
+      showHotlinks = false,
+      editHints = false,
+      currentSpread: controlledSpread,
+      onSpreadChange,
     },
-    [currentSpread, maxSpread, isControlled, onSpreadChange]
-  );
+    ref
+  ) {
+    const isMobile = useIsMobile();
+    const containerRef = useRef<HTMLDivElement>(null);
+    const prefersReducedMotion = useRef(false);
 
-  const [turning, setTurning] = useState<"forward" | "backward" | null>(null);
+    const pages = brochure.pages;
+    const totalPages = pages.length;
 
-  const canGoBack = currentSpread > 0;
-  const canGoForward = currentSpread < maxSpread;
+    /* ---- spread logic ---- */
+    const maxSpread = isMobile
+      ? totalPages - 1
+      : Math.max(Math.ceil(totalPages / 2) - 1, 0);
 
-  /* ---- visible pages ---- */
-  const { leftPage, rightPage } = useMemo(() => {
+    const [internalSpread, setInternalSpread] = useState(0);
+    const isControlled = controlledSpread !== undefined;
+    const currentSpread = isControlled ? controlledSpread : internalSpread;
+
+    /* ---- animation state ---- */
+    const [displayedSpread, setDisplayedSpread] = useState(currentSpread);
+    const [isAnimating, setIsAnimating] = useState(false);
+    const [animationDirection, setAnimationDirection] = useState<"forward" | "backward">("forward");
+
+    const canGoBack = currentSpread > 0;
+    const canGoForward = currentSpread < maxSpread;
+
+    useEffect(() => {
+      prefersReducedMotion.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    }, []);
+
+    const updateSpread = useCallback(
+      (next: number | ((prev: number) => number)) => {
+        const value = typeof next === "function" ? next(currentSpread) : next;
+        const clamped = Math.max(0, Math.min(value, maxSpread));
+        if (!isControlled) setInternalSpread(clamped);
+        onSpreadChange?.(clamped);
+      },
+      [currentSpread, maxSpread, isControlled, onSpreadChange]
+    );
+
+    /* ---- navigation ---- */
+    const goNext = useCallback(() => {
+      if (!canGoForward || isAnimating) return;
+      updateSpread((s) => s + 1);
+    }, [canGoForward, isAnimating, updateSpread]);
+
+    const goPrev = useCallback(() => {
+      if (!canGoBack || isAnimating) return;
+      updateSpread((s) => s - 1);
+    }, [canGoBack, isAnimating, updateSpread]);
+
+    const goFirst = useCallback(() => {
+      if (isAnimating) return;
+      updateSpread(0);
+    }, [isAnimating, updateSpread]);
+
+    const goLast = useCallback(() => {
+      if (isAnimating) return;
+      updateSpread(maxSpread);
+    }, [isAnimating, maxSpread, updateSpread]);
+
+    useImperativeHandle(ref, () => ({ goNext, goPrev, goFirst, goLast }), [
+      goNext, goPrev, goFirst, goLast,
+    ]);
+
+    /* ---- detect spread changes & trigger animation ---- */
+    useEffect(() => {
+      if (currentSpread === displayedSpread) return;
+
+      if (prefersReducedMotion.current) {
+        setDisplayedSpread(currentSpread);
+        return;
+      }
+
+      const direction = currentSpread > displayedSpread ? "forward" : "backward";
+      setAnimationDirection(direction);
+      setIsAnimating(true);
+
+      const timer = setTimeout(() => {
+        setDisplayedSpread(currentSpread);
+        setIsAnimating(false);
+      }, ANIMATION_DURATION);
+
+      return () => clearTimeout(timer);
+    }, [currentSpread]); // intentionally only depend on currentSpread
+
+    /* ---- keyboard ---- */
+    useEffect(() => {
+      const handler = (e: KeyboardEvent) => {
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+        switch (e.key) {
+          case "ArrowRight":
+          case " ":
+            e.preventDefault();
+            goNext();
+            break;
+          case "ArrowLeft":
+            e.preventDefault();
+            goPrev();
+            break;
+          case "Home":
+            e.preventDefault();
+            goFirst();
+            break;
+          case "End":
+            e.preventDefault();
+            goLast();
+            break;
+        }
+      };
+      window.addEventListener("keydown", handler);
+      return () => window.removeEventListener("keydown", handler);
+    }, [goNext, goPrev, goFirst, goLast]);
+
+    /* ---- touch swipe ---- */
+    const touchStartX = useRef<number | null>(null);
+
+    const onTouchStart = (e: ReactTouchEvent) => {
+      touchStartX.current = e.touches[0].clientX;
+    };
+
+    const onTouchEnd = (e: ReactTouchEvent) => {
+      if (touchStartX.current === null) return;
+      const delta = touchStartX.current - e.changedTouches[0].clientX;
+      if (Math.abs(delta) > 50) {
+        delta > 0 ? goNext() : goPrev();
+      }
+      touchStartX.current = null;
+    };
+
+    /* ---- preload adjacent spreads ---- */
+    useEffect(() => {
+      if (!pages.length) return;
+      const indices = isMobile
+        ? [currentSpread - 1, currentSpread + 1]
+        : [
+            currentSpread * 2 - 2,
+            currentSpread * 2 - 1,
+            currentSpread * 2 + 2,
+            currentSpread * 2 + 3,
+          ];
+      indices.forEach((i) => {
+        if (i >= 0 && i < totalPages) {
+          const img = new Image();
+          img.src = pages[i].image_url;
+        }
+      });
+    }, [currentSpread, pages, isMobile, totalPages]);
+
+    /* ---- page references ---- */
+    const newLeftPage = isMobile ? pages[currentSpread] : pages[currentSpread * 2];
+    const newRightPage = isMobile ? undefined : pages[currentSpread * 2 + 1];
+    const oldLeftPage = isMobile ? pages[displayedSpread] : pages[displayedSpread * 2];
+    const oldRightPage = isMobile ? undefined : pages[displayedSpread * 2 + 1];
+
+    /* ---- render: mobile ---- */
     if (isMobile) {
-      return { leftPage: pages[currentSpread], rightPage: undefined };
-    }
-    return {
-      leftPage: pages[currentSpread * 2],
-      rightPage: pages[currentSpread * 2 + 1],
-    };
-  }, [currentSpread, isMobile, pages]);
-
-  /* ---- navigation ---- */
-  const turnDuration = prefersReducedMotion() ? 0 : 380;
-
-  const goNext = useCallback(() => {
-    if (!canGoForward || turning) return;
-    if (turnDuration === 0) {
-      updateSpread((s) => s + 1);
-      return;
-    }
-    setTurning("forward");
-    setTimeout(() => {
-      updateSpread((s) => s + 1);
-      setTurning(null);
-    }, turnDuration);
-  }, [canGoForward, turning, turnDuration, updateSpread]);
-
-  const goPrev = useCallback(() => {
-    if (!canGoBack || turning) return;
-    if (turnDuration === 0) {
-      updateSpread((s) => s - 1);
-      return;
-    }
-    setTurning("backward");
-    setTimeout(() => {
-      updateSpread((s) => s - 1);
-      setTurning(null);
-    }, turnDuration);
-  }, [canGoBack, turning, turnDuration, updateSpread]);
-
-  const goFirst = useCallback(() => {
-    if (turning) return;
-    updateSpread(0);
-  }, [turning, updateSpread]);
-
-  const goLast = useCallback(() => {
-    if (turning) return;
-    updateSpread(maxSpread);
-  }, [turning, maxSpread, updateSpread]);
-
-  useImperativeHandle(ref, () => ({ goNext, goPrev, goFirst, goLast }), [goNext, goPrev, goFirst, goLast]);
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      switch (e.key) {
-        case "ArrowRight":
-        case " ":
-          e.preventDefault();
-          goNext();
-          break;
-        case "ArrowLeft":
-          e.preventDefault();
-          goPrev();
-          break;
-        case "Home":
-          e.preventDefault();
-          goFirst();
-          break;
-        case "End":
-          e.preventDefault();
-          goLast();
-          break;
-      }
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [goNext, goPrev, goFirst, goLast]);
-
-  /* ---- touch swipe ---- */
-  const touchStartX = useRef<number | null>(null);
-
-  const onTouchStart = (e: ReactTouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
-
-  const onTouchEnd = (e: ReactTouchEvent) => {
-    if (touchStartX.current === null) return;
-    const delta = touchStartX.current - e.changedTouches[0].clientX;
-    if (Math.abs(delta) > 50) {
-      delta > 0 ? goNext() : goPrev();
-    }
-    touchStartX.current = null;
-  };
-
-  /* ---- preload adjacent spreads ---- */
-  useEffect(() => {
-    if (!pages.length) return;
-    const indices = isMobile
-      ? [currentSpread - 1, currentSpread + 1]
-      : [
-          currentSpread * 2 - 2,
-          currentSpread * 2 - 1,
-          currentSpread * 2 + 2,
-          currentSpread * 2 + 3,
-        ];
-    indices.forEach((i) => {
-      if (i >= 0 && i < totalPages) {
-        const img = new Image();
-        img.src = pages[i].image_url;
-      }
-    });
-  }, [currentSpread, pages, isMobile, totalPages]);
-
-  /* ---- page-turn animation styles ---- */
-  const turnStyle = useMemo(() => {
-    if (!turning) return {};
-    const deg = turning === "forward" ? "-180deg" : "180deg";
-    return {
-      transform: `perspective(1200px) rotateY(${deg})`,
-      transition: `transform ${turnDuration}ms ease-in-out`,
-    };
-  }, [turning, turnDuration]);
-
-  /* ---- render ---- */
-  return (
-    <div
-      ref={containerRef}
-      className="relative select-none w-full h-full flex items-center justify-center"
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}
-      role="region"
-      aria-label={`${brochure.title} flipbook viewer`}
-    >
-      {/* Book container */}
-      <div
-        className="relative flex bg-white rounded-lg overflow-hidden"
-        style={{
-          aspectRatio: isMobile ? "0.707" : "1.41",
-          maxWidth: isMobile ? "90vw" : "85vw",
-          maxHeight: embedMode ? "calc(100% - 16px)" : "75vh",
-          width: "100%",
-          boxShadow:
-            "0 12px 40px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.12)",
-        }}
-      >
-        {/* Center spine shadow (desktop only) */}
-        {!isMobile && (
+      return (
+        <div
+          ref={containerRef}
+          className="relative select-none w-full h-full flex items-center justify-center"
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+          role="region"
+          aria-label={`${brochure.title} flipbook viewer`}
+        >
           <div
-            className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 z-10 pointer-events-none"
+            className="relative bg-white rounded-lg overflow-hidden"
             style={{
-              width: 20,
-              background:
-                "linear-gradient(to right, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.18) 45%, rgba(0,0,0,0.18) 55%, rgba(0,0,0,0.08) 100%)",
-            }}
-          />
-        )}
-
-        {/* Left page */}
-        <PageSlot page={leftPage} showHotlinks={showHotlinks} editHints={editHints} />
-
-        {/* Right page (desktop only) */}
-        {!isMobile && <PageSlot page={rightPage} showHotlinks={showHotlinks} editHints={editHints} />}
-
-        {/* Page-turn overlay */}
-        {turning && (
-          <div
-            className="absolute top-0 bottom-0 z-20 overflow-hidden"
-            style={{
-              width: isMobile ? "100%" : "50%",
-              left: turning === "forward" ? (isMobile ? 0 : "50%") : 0,
-              transformOrigin:
-                turning === "forward" ? "left center" : "right center",
-              ...turnStyle,
-              backfaceVisibility: "hidden",
+              aspectRatio: "0.707",
+              maxWidth: "90vw",
+              maxHeight: embedMode ? "calc(100% - 16px)" : "75vh",
+              width: "100%",
+              boxShadow: "0 12px 40px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.12)",
             }}
           >
-            {/* Face of the turning page */}
-            <div className="w-full h-full bg-white relative">
-              {/* Shadow gradient on inner face */}
-              <div
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  background:
-                    turning === "forward"
-                      ? "linear-gradient(to left, rgba(0,0,0,0.15), transparent 60%)"
-                      : "linear-gradient(to right, rgba(0,0,0,0.15), transparent 60%)",
-                }}
+            <PageSlot page={newLeftPage} showHotlinks={showHotlinks} editHints={editHints} />
+          </div>
+
+          {canGoBack && (
+            <button
+              onClick={goPrev}
+              className="absolute left-2 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-black/20 hover:bg-black/40 text-white flex items-center justify-center backdrop-blur-sm transition-colors"
+              aria-label="Previous page"
+            >
+              <ChevronLeft size={20} />
+            </button>
+          )}
+          {canGoForward && (
+            <button
+              onClick={goNext}
+              className="absolute right-2 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-black/20 hover:bg-black/40 text-white flex items-center justify-center backdrop-blur-sm transition-colors"
+              aria-label="Next page"
+            >
+              <ChevronRight size={20} />
+            </button>
+          )}
+
+          {/* Page indicator */}
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 px-3 py-1 rounded-full bg-black/50 backdrop-blur-sm text-white text-xs tabular-nums">
+            {currentSpread + 1} / {totalPages}
+          </div>
+        </div>
+      );
+    }
+
+    /* ---- render: desktop with 3D page-turn ---- */
+    const bookStyle: React.CSSProperties = {
+      aspectRatio: "1.41 / 1",
+      maxWidth: "85vw",
+      maxHeight: embedMode ? "calc(100% - 16px)" : "75vh",
+      width: "100%",
+      boxShadow: "0 12px 40px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.12)",
+    };
+
+    return (
+      <div
+        ref={containerRef}
+        className="group relative select-none w-full h-full flex items-center justify-center"
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+        role="region"
+        aria-label={`${brochure.title} flipbook viewer`}
+      >
+        <div
+          className="relative bg-white rounded-lg"
+          style={{ ...bookStyle, perspective: "1800px" }}
+        >
+          {/* Base layer: the NEW spread (revealed underneath the flipping page) */}
+          <div className="absolute inset-0 flex rounded-lg overflow-hidden">
+            <div className="w-1/2 h-full">
+              <PageSlot
+                page={isAnimating ? newLeftPage : (pages[displayedSpread * 2] ?? null)}
+                showHotlinks={showHotlinks}
+                editHints={editHints}
+              />
+            </div>
+            <div className="w-1/2 h-full">
+              <PageSlot
+                page={isAnimating ? newRightPage : (pages[displayedSpread * 2 + 1] ?? null)}
+                showHotlinks={showHotlinks}
+                editHints={editHints}
               />
             </div>
           </div>
-        )}
+
+          {/* Forward flip: old right page flips left (rotateY 0 → -180) */}
+          {isAnimating && animationDirection === "forward" && (
+            <div
+              className="absolute top-0 right-0 w-1/2 h-full z-20"
+              style={{
+                transformOrigin: "left center",
+                animation: `flipForward ${ANIMATION_DURATION}ms ease-in-out forwards`,
+                transformStyle: "preserve-3d",
+              }}
+            >
+              <div
+                className="absolute inset-0 overflow-hidden rounded-r-lg"
+                style={{ backfaceVisibility: "hidden" }}
+              >
+                <PageSlot page={oldRightPage} />
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background: "linear-gradient(to left, rgba(0,0,0,0.03), rgba(0,0,0,0.15))",
+                    animation: `shadowIn ${ANIMATION_DURATION}ms ease-in-out forwards`,
+                  }}
+                />
+              </div>
+              <div
+                className="absolute inset-0 overflow-hidden rounded-l-lg"
+                style={{
+                  backfaceVisibility: "hidden",
+                  transform: "rotateY(180deg)",
+                }}
+              >
+                <PageSlot page={newLeftPage} />
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background: "linear-gradient(to right, rgba(0,0,0,0.15), rgba(0,0,0,0.03))",
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Backward flip: old left page flips right (rotateY 0 → 180) */}
+          {isAnimating && animationDirection === "backward" && (
+            <div
+              className="absolute top-0 left-0 w-1/2 h-full z-20"
+              style={{
+                transformOrigin: "right center",
+                animation: `flipBackward ${ANIMATION_DURATION}ms ease-in-out forwards`,
+                transformStyle: "preserve-3d",
+              }}
+            >
+              <div
+                className="absolute inset-0 overflow-hidden rounded-l-lg"
+                style={{ backfaceVisibility: "hidden" }}
+              >
+                <PageSlot page={oldLeftPage} />
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background: "linear-gradient(to right, rgba(0,0,0,0.03), rgba(0,0,0,0.15))",
+                    animation: `shadowIn ${ANIMATION_DURATION}ms ease-in-out forwards`,
+                  }}
+                />
+              </div>
+              <div
+                className="absolute inset-0 overflow-hidden rounded-r-lg"
+                style={{
+                  backfaceVisibility: "hidden",
+                  transform: "rotateY(-180deg)",
+                }}
+              >
+                <PageSlot page={newRightPage} />
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background: "linear-gradient(to left, rgba(0,0,0,0.15), rgba(0,0,0,0.03))",
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Center spine shadow */}
+          <div
+            className="absolute left-1/2 top-0 -translate-x-1/2 h-full pointer-events-none z-30"
+            style={{
+              width: 30,
+              background:
+                "linear-gradient(to right, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.02) 40%, transparent 50%, rgba(0,0,0,0.02) 60%, rgba(0,0,0,0.08) 100%)",
+            }}
+          />
+        </div>
 
         {/* Navigation arrows */}
         {canGoBack && (
           <button
             onClick={goPrev}
-            className="absolute left-2 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-black/20 hover:bg-black/40 text-white flex items-center justify-center backdrop-blur-sm transition-colors"
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"
             aria-label="Previous page"
           >
             <ChevronLeft size={20} />
@@ -350,25 +456,37 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(fun
         {canGoForward && (
           <button
             onClick={goNext}
-            className="absolute right-2 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-black/20 hover:bg-black/40 text-white flex items-center justify-center backdrop-blur-sm transition-colors"
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"
             aria-label="Next page"
           >
             <ChevronRight size={20} />
           </button>
         )}
-      </div>
 
-      {/* Page indicator */}
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 px-3 py-1 rounded-full bg-black/50 backdrop-blur-sm text-white text-xs tabular-nums">
-        {isMobile
-          ? `${currentSpread + 1} / ${totalPages}`
-          : `${currentSpread * 2 + 1}–${Math.min(
-              currentSpread * 2 + 2,
-              totalPages
-            )} / ${totalPages}`}
+        {/* Page indicator */}
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 px-3 py-1 rounded-full bg-black/50 backdrop-blur-sm text-white text-xs tabular-nums">
+          {currentSpread * 2 + 1}–{Math.min(currentSpread * 2 + 2, totalPages)} / {totalPages}
+        </div>
+
+        {/* Keyframes */}
+        <style>{`
+          @keyframes flipForward {
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(-180deg); }
+          }
+          @keyframes flipBackward {
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(180deg); }
+          }
+          @keyframes shadowIn {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+          }
+        `}</style>
       </div>
-    </div>
-  );
-});
+    );
+  }
+);
 
 export default FlipbookViewer;
