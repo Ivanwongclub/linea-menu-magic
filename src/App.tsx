@@ -26,6 +26,7 @@ import AboutSustainability from "./pages/about/Sustainability";
 
 const queryClient = new QueryClient();
 
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
