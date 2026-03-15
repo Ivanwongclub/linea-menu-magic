@@ -3,7 +3,7 @@ import {
   useCallback,
   useEffect,
   useRef,
-  useMemo,
+  useReducer,
   useImperativeHandle,
   forwardRef,
   type TouchEvent as ReactTouchEvent,
@@ -40,50 +40,38 @@ export interface FlipbookViewerHandle {
 const ANIMATION_DURATION = 380;
 
 /* ------------------------------------------------------------------ */
-/*  Single page renderer                                               */
+/*  Single page renderer (uses shared loaded state)                    */
 /* ------------------------------------------------------------------ */
 
 function PageSlot({
   page,
   showHotlinks = false,
   editHints = false,
+  isLoaded = false,
 }: {
   page: Page | undefined | null;
   showHotlinks?: boolean;
   editHints?: boolean;
+  isLoaded?: boolean;
 }) {
-  const [status, setStatus] = useState<"loading" | "loaded" | "error">("loading");
-
-  useEffect(() => {
-    setStatus("loading");
-  }, [page?.id]);
-
   if (!page) {
     return <div className="w-full h-full bg-white" />;
   }
 
   return (
     <div className="w-full h-full relative bg-white overflow-hidden">
-      {status === "loading" && (
+      {!isLoaded && (
         <div className="absolute inset-0 bg-muted animate-pulse" />
-      )}
-      {status === "error" && (
-        <div className="absolute inset-0 bg-muted flex flex-col items-center justify-center gap-2">
-          <ImageOff size={28} className="text-muted-foreground" />
-          <span className="text-xs text-muted-foreground">Page unavailable</span>
-        </div>
       )}
       <img
         src={page.image_url}
         alt={`Page ${page.page_number}`}
-        onLoad={() => setStatus("loaded")}
-        onError={() => setStatus("error")}
         className={`w-full h-full object-contain transition-opacity duration-200 ${
-          status === "loaded" ? "opacity-100" : "opacity-0"
+          isLoaded ? "opacity-100" : "opacity-0"
         }`}
         draggable={false}
       />
-      {showHotlinks && page.hotlinks && page.hotlinks.length > 0 && (
+      {showHotlinks && page.hotlinks && page.hotlinks.length > 0 && isLoaded && (
         <PageHotlinks hotlinks={page.hotlinks} editHints={editHints} />
       )}
     </div>
@@ -133,6 +121,53 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
     useEffect(() => {
       prefersReducedMotion.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     }, []);
+
+    /* ---- image preload tracking ---- */
+    const loadedPages = useRef<Set<string>>(new Set());
+    const preloadRefs = useRef<Record<string, HTMLImageElement | null>>({});
+    const [, forceUpdate] = useReducer((x: number) => x + 1, 0);
+
+    const isPageInCurrentSpread = useCallback(
+      (pageId: string) => {
+        if (isMobile) {
+          return pages[currentSpread]?.id === pageId;
+        }
+        const leftIdx = currentSpread * 2;
+        const rightIdx = currentSpread * 2 + 1;
+        return pages[leftIdx]?.id === pageId || pages[rightIdx]?.id === pageId;
+      },
+      [currentSpread, isMobile, pages]
+    );
+
+    const markPageLoaded = useCallback(
+      (pageId: string) => {
+        loadedPages.current.add(pageId);
+        if (isPageInCurrentSpread(pageId)) {
+          forceUpdate();
+        }
+      },
+      [isPageInCurrentSpread]
+    );
+
+    const isLoaded = useCallback((page: Page | undefined | null) => {
+      if (!page) return false;
+      return loadedPages.current.has(page.id);
+    }, []);
+
+    /* ---- update fetch priority on spread change ---- */
+    useEffect(() => {
+      pages.forEach((page, index) => {
+        const spreadIndex = isMobile ? index : Math.floor(index / 2);
+        const distance = Math.abs(spreadIndex - currentSpread);
+        const el = preloadRefs.current[page.id];
+        if (!el) return;
+        if (distance === 0) el.fetchPriority = "high";
+        else if (distance <= 2) el.fetchPriority = "auto";
+        else el.fetchPriority = "low";
+      });
+      // Also force re-render so visible spread gets updated isLoaded
+      forceUpdate();
+    }, [currentSpread, pages, isMobile]);
 
     const updateSpread = useCallback(
       (next: number | ((prev: number) => number)) => {
@@ -234,30 +269,55 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
       touchStartX.current = null;
     };
 
-    /* ---- preload adjacent spreads ---- */
-    useEffect(() => {
-      if (!pages.length) return;
-      const indices = isMobile
-        ? [currentSpread - 1, currentSpread + 1]
-        : [
-            currentSpread * 2 - 2,
-            currentSpread * 2 - 1,
-            currentSpread * 2 + 2,
-            currentSpread * 2 + 3,
-          ];
-      indices.forEach((i) => {
-        if (i >= 0 && i < totalPages) {
-          const img = new Image();
-          img.src = pages[i].image_url;
-        }
-      });
-    }, [currentSpread, pages, isMobile, totalPages]);
-
     /* ---- page references ---- */
     const newLeftPage = isMobile ? pages[currentSpread] : pages[currentSpread * 2];
     const newRightPage = isMobile ? undefined : pages[currentSpread * 2 + 1];
     const oldLeftPage = isMobile ? pages[displayedSpread] : pages[displayedSpread * 2];
     const oldRightPage = isMobile ? undefined : pages[displayedSpread * 2 + 1];
+
+    /* ---- compute fetch priority for preload container ---- */
+    const getPagePriority = useCallback(
+      (index: number): "high" | "auto" | "low" => {
+        const spreadIndex = isMobile ? index : Math.floor(index / 2);
+        const distance = Math.abs(spreadIndex - currentSpread);
+        if (distance === 0) return "high";
+        if (distance <= 2) return "auto";
+        return "low";
+      },
+      [currentSpread, isMobile]
+    );
+
+    /* ---- hidden preload container for ALL pages ---- */
+    const preloadContainer = (
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          width: 0,
+          height: 0,
+          overflow: "hidden",
+          pointerEvents: "none",
+        }}
+      >
+        {pages.map((page, index) => {
+          const priority = getPagePriority(index);
+          return (
+            <img
+              key={page.id}
+              ref={(el) => {
+                preloadRefs.current[page.id] = el;
+              }}
+              src={page.image_url}
+              alt=""
+              fetchPriority={priority}
+              loading={priority === "low" ? "lazy" : undefined}
+              onLoad={() => markPageLoaded(page.id)}
+              onError={() => markPageLoaded(page.id)}
+            />
+          );
+        })}
+      </div>
+    );
 
     /* ---- render: mobile ---- */
     if (isMobile) {
@@ -270,6 +330,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
           role="region"
           aria-label={`${brochure.title} flipbook viewer`}
         >
+          {preloadContainer}
           <div
             className="relative bg-white rounded-lg overflow-hidden"
             style={{
@@ -280,7 +341,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
               boxShadow: "0 12px 40px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.12)",
             }}
           >
-            <PageSlot page={newLeftPage} showHotlinks={showHotlinks} editHints={editHints} />
+            <PageSlot page={newLeftPage} showHotlinks={showHotlinks} editHints={editHints} isLoaded={isLoaded(newLeftPage)} />
           </div>
 
           {canGoBack && (
@@ -328,6 +389,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
         role="region"
         aria-label={`${brochure.title} flipbook viewer`}
       >
+        {preloadContainer}
         <div
           className="relative bg-white rounded-lg"
           style={{ ...bookStyle, perspective: "1800px" }}
@@ -339,6 +401,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
                 page={isAnimating ? newLeftPage : (pages[displayedSpread * 2] ?? null)}
                 showHotlinks={showHotlinks}
                 editHints={editHints}
+                isLoaded={isLoaded(isAnimating ? newLeftPage : (pages[displayedSpread * 2] ?? null))}
               />
             </div>
             <div className="w-1/2 h-full">
@@ -346,6 +409,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
                 page={isAnimating ? newRightPage : (pages[displayedSpread * 2 + 1] ?? null)}
                 showHotlinks={showHotlinks}
                 editHints={editHints}
+                isLoaded={isLoaded(isAnimating ? newRightPage : (pages[displayedSpread * 2 + 1] ?? null))}
               />
             </div>
           </div>
@@ -364,7 +428,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
                 className="absolute inset-0 overflow-hidden rounded-r-lg"
                 style={{ backfaceVisibility: "hidden" }}
               >
-                <PageSlot page={oldRightPage} />
+                <PageSlot page={oldRightPage} isLoaded={isLoaded(oldRightPage)} />
                 <div
                   className="absolute inset-0 pointer-events-none"
                   style={{
@@ -380,7 +444,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
                   transform: "rotateY(180deg)",
                 }}
               >
-                <PageSlot page={newLeftPage} />
+                <PageSlot page={newLeftPage} isLoaded={isLoaded(newLeftPage)} />
                 <div
                   className="absolute inset-0 pointer-events-none"
                   style={{
@@ -405,7 +469,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
                 className="absolute inset-0 overflow-hidden rounded-l-lg"
                 style={{ backfaceVisibility: "hidden" }}
               >
-                <PageSlot page={oldLeftPage} />
+                <PageSlot page={oldLeftPage} isLoaded={isLoaded(oldLeftPage)} />
                 <div
                   className="absolute inset-0 pointer-events-none"
                   style={{
@@ -421,7 +485,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
                   transform: "rotateY(-180deg)",
                 }}
               >
-                <PageSlot page={newRightPage} />
+                <PageSlot page={newRightPage} isLoaded={isLoaded(newRightPage)} />
                 <div
                   className="absolute inset-0 pointer-events-none"
                   style={{
