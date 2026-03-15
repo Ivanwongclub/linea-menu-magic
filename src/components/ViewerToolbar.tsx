@@ -6,7 +6,9 @@ import {
   ZoomOut,
   Maximize,
   Minimize,
+  Share2,
   MousePointerClick,
+  Code2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -27,6 +29,7 @@ interface ViewerToolbarProps {
   showHotlinks: boolean;
   onToggleHotlinks: () => void;
   embedMode?: boolean;
+  onEmbed?: () => void;
 }
 
 const ZOOM_MIN = 50;
@@ -49,19 +52,24 @@ const ViewerToolbar = ({
   onJumpToPage,
   showHotlinks,
   onToggleHotlinks,
+  embedMode,
+  onEmbed,
 }: ViewerToolbarProps) => {
   const [showPageJump, setShowPageJump] = useState(false);
   const [pageInput, setPageInput] = useState("");
   const popoverRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const leftPage = isMobile ? currentSpread + 1 : currentSpread * 2 + 1;
-  const rightPage = isMobile ? currentSpread + 1 : Math.min(currentSpread * 2 + 2, totalPages);
+  const leftPage = isMobile
+    ? currentSpread + 1
+    : currentSpread * 2 + 1;
+  const rightPage = isMobile
+    ? currentSpread + 1
+    : Math.min(currentSpread * 2 + 2, totalPages);
 
-  const pageLabel =
-    isMobile || leftPage === rightPage
-      ? `Page ${leftPage} of ${totalPages}`
-      : `Pages ${leftPage}–${rightPage} of ${totalPages}`;
+  const pageLabel = isMobile || leftPage === rightPage
+    ? `Page ${leftPage} of ${totalPages}`
+    : `Pages ${leftPage}–${rightPage} of ${totalPages}`;
 
   const handleZoomIn = useCallback(() => {
     onZoomChange(Math.min(zoom + ZOOM_STEP, ZOOM_MAX));
@@ -70,6 +78,14 @@ const ViewerToolbar = ({
   const handleZoomOut = useCallback(() => {
     onZoomChange(Math.max(zoom - ZOOM_STEP, ZOOM_MIN));
   }, [zoom, onZoomChange]);
+
+  const handleShare = useCallback(() => {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      toast.success("Link copied!");
+    }).catch(() => {
+      toast.error("Failed to copy link");
+    });
+  }, []);
 
   const openPageJump = useCallback(() => {
     setPageInput(String(leftPage));
@@ -93,6 +109,7 @@ const ViewerToolbar = ({
     closePageJump();
   }, [pageInput, totalPages, isMobile, onJumpToPage, closePageJump]);
 
+  // Close on Escape
   useEffect(() => {
     if (!showPageJump) return;
     const handler = (e: KeyboardEvent) => {
@@ -102,6 +119,7 @@ const ViewerToolbar = ({
     return () => window.removeEventListener("keydown", handler);
   }, [showPageJump, closePageJump]);
 
+  // Close on click outside
   useEffect(() => {
     if (!showPageJump) return;
     const handler = (e: MouseEvent) => {
@@ -129,11 +147,11 @@ const ViewerToolbar = ({
         <button
           onClick={openPageJump}
           className="text-white/50 text-xs whitespace-nowrap hover:text-white/80 transition-colors cursor-pointer underline-offset-2 hover:underline"
-          aria-label="Jump to page"
         >
           {pageLabel}
         </button>
 
+        {/* Page jump popover */}
         {showPageJump && (
           <div
             ref={popoverRef}
@@ -150,7 +168,6 @@ const ViewerToolbar = ({
               onChange={(e) => setPageInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") handlePageJump(); }}
               className="w-16 h-7 rounded bg-white/10 border border-white/20 text-white text-xs text-center outline-none focus:border-white/40"
-              aria-label="Page number"
             />
             <button
               onClick={handlePageJump}
@@ -182,7 +199,7 @@ const ViewerToolbar = ({
         </button>
       </div>
 
-      {/* Right: zoom, hotlinks, fullscreen */}
+      {/* Right: zoom, fullscreen, share */}
       <div className="flex items-center gap-1 flex-1 justify-end">
         <button
           onClick={handleZoomOut}
@@ -223,6 +240,24 @@ const ViewerToolbar = ({
         >
           {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
         </button>
+
+        <button
+          onClick={handleShare}
+          className={`${btnBase} text-white`}
+          aria-label="Share"
+        >
+          <Share2 size={16} />
+        </button>
+
+        {!embedMode && onEmbed && (
+          <button
+            onClick={onEmbed}
+            className={`${btnBase} text-white`}
+            aria-label="Embed"
+          >
+            <Code2 size={16} />
+          </button>
+        )}
       </div>
     </div>
   );
