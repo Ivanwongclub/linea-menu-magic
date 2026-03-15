@@ -139,7 +139,7 @@ const UploadModal = ({ isOpen, onClose }: UploadModalProps) => {
               <button
                 onClick={() => {
                   onClose();
-                  navigate("/brochures/spring-collection-2025");
+                  navigate("/brochures/button-brochure");
                 }}
                 className="px-6 py-2.5 bg-primary text-primary-foreground text-xs tracking-widest uppercase rounded-full transition-all duration-300 hover:bg-primary-hover"
               >
