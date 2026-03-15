@@ -9,9 +9,10 @@ import FlipbookViewer, {
 import ViewerToolbar from "@/components/ViewerToolbar";
 import ThumbnailStrip from "@/features/flipbook/components/ThumbnailStrip";
 import EmbedModal from "@/components/EmbedModal";
+import BrandedLoader from "@/components/viewer/BrandedLoader";
 
 const PRELOAD_COUNT = 4;
-const SITE_NAME = "Linea Jewelry";
+const SITE_NAME = "WIN-CYC Group Limited";
 
 export default function BrochureViewer() {
   const { slug } = useParams<{ slug: string }>();
@@ -28,6 +29,7 @@ export default function BrochureViewer() {
   const [thumbnailCollapsed, setThumbnailCollapsed] = useState(false);
   const [showEmbed, setShowEmbed] = useState(false);
   const [imagesReady, setImagesReady] = useState(false);
+  const [loadedCount, setLoadedCount] = useState(0);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<FlipbookViewerHandle>(null);
@@ -63,26 +65,34 @@ export default function BrochureViewer() {
     };
   }, [brochure]);
 
-  /* ---- preload first N images ---- */
+  /* ---- preload first N images with progress ---- */
   useEffect(() => {
     if (!brochure) return;
     const toLoad = brochure.pages.slice(0, PRELOAD_COUNT);
     let loaded = 0;
+    setLoadedCount(0);
     toLoad.forEach((page) => {
       const img = new Image();
       img.onload = img.onerror = () => {
         loaded++;
-        if (loaded >= toLoad.length) setImagesReady(true);
+        setLoadedCount(loaded);
+        if (loaded >= toLoad.length) {
+          // imagesReady is set via BrandedLoader onComplete
+        }
       };
       img.src = page.image_url;
     });
   }, [brochure]);
 
-  /* ---- loading ---- */
+  /* ---- loading (data fetch) ---- */
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#1a1a2e" }}>
-        <div className="text-white/50 text-sm animate-pulse">Loading brochure…</div>
+      <div className="min-h-screen flex items-center justify-center bg-background dark:bg-gray-950">
+        <BrandedLoader
+          totalToLoad={1}
+          loadedCount={0}
+          onComplete={() => {}}
+        />
       </div>
     );
   }
@@ -107,13 +117,14 @@ export default function BrochureViewer() {
     );
   }
 
-  /* ---- image preload gate ---- */
+  /* ---- branded image preload gate ---- */
   if (!imagesReady) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ backgroundColor: "#1a1a2e" }}>
-        <div className="w-8 h-8 border-2 border-white/20 border-t-white/70 rounded-full animate-spin" />
-        <p className="text-white/60 text-sm">{brochure.title}</p>
-      </div>
+      <BrandedLoader
+        totalToLoad={Math.min(PRELOAD_COUNT, brochure.pages.length)}
+        loadedCount={loadedCount}
+        onComplete={() => setImagesReady(true)}
+      />
     );
   }
 
@@ -138,6 +149,7 @@ export default function BrochureViewer() {
           showHotlinks={showHotlinks}
           onToggleHotlinks={() => setShowHotlinks((v) => !v)}
           embedMode
+          brochureTitle={brochure.title}
         />
         <main className="flex-1 flex items-center justify-center overflow-hidden">
           <FlipbookViewer
@@ -184,6 +196,7 @@ export default function BrochureViewer() {
         showHotlinks={showHotlinks}
         onToggleHotlinks={() => setShowHotlinks((v) => !v)}
         onEmbed={() => setShowEmbed(true)}
+        brochureTitle={brochure.title}
       />
 
       <main className="flex-1 flex items-center justify-center relative overflow-hidden">
