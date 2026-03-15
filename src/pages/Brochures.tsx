@@ -1,23 +1,13 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
-import { BookOpen, Code2, Link2 } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
-import EmbedModal from "@/components/EmbedModal";
 import { useBrochures } from "@/features/flipbook/hooks/useBrochures";
-import { toast } from "sonner";
 import type { Brochure } from "@/features/flipbook/types";
 
 export default function Brochures() {
   const { data: brochures, isLoading } = useBrochures();
-  const [embedModal, setEmbedModal] = useState<{ slug: string; title: string } | null>(null);
-
-  const handleCopyLink = (slug: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const url = `${window.location.origin}/brochures/${slug}`;
-    navigator.clipboard.writeText(url).then(() => toast.success("Link copied!"));
-  };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -59,26 +49,11 @@ export default function Brochures() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {brochures.map((b, i) => (
-              <BrochureCard
-                key={b.id}
-                brochure={b}
-                index={i}
-                onEmbed={() => setEmbedModal({ slug: b.slug, title: b.title })}
-                onCopyLink={(e) => handleCopyLink(b.slug, e)}
-              />
+              <BrochureCard key={b.id} brochure={b} index={i} />
             ))}
           </div>
         )}
       </main>
-
-      {embedModal && (
-        <EmbedModal
-          slug={embedModal.slug}
-          brochureTitle={embedModal.title}
-          isOpen
-          onClose={() => setEmbedModal(null)}
-        />
-      )}
 
       <Footer />
     </div>
@@ -87,25 +62,7 @@ export default function Brochures() {
 
 /* ─── Card ─── */
 
-function BrochureCard({
-  brochure,
-  index,
-  onEmbed,
-  onCopyLink,
-}: {
-  brochure: Brochure;
-  index: number;
-  onEmbed: () => void;
-  onCopyLink: (e: React.MouseEvent) => void;
-}) {
-  const [linkTooltip, setLinkTooltip] = useState(false);
-
-  const handleCopy = (e: React.MouseEvent) => {
-    onCopyLink(e);
-    setLinkTooltip(true);
-    setTimeout(() => setLinkTooltip(false), 1500);
-  };
-
+function BrochureCard({ brochure, index }: { brochure: Brochure; index: number }) {
   return (
     <div
       className="group rounded-lg border border-transparent bg-card overflow-hidden transition-all duration-300 hover:border-accent/40 opacity-0 animate-fade-up"
@@ -144,7 +101,7 @@ function BrochureCard({
           </p>
         )}
 
-        <div className="flex items-center justify-between mt-3">
+        <div className="mt-3">
           <Link
             to={`/brochures/${brochure.slug}`}
             className="text-[13px] font-semibold text-accent hover:underline inline-flex items-center gap-1"
@@ -152,30 +109,6 @@ function BrochureCard({
             Read
             <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">→</span>
           </Link>
-
-          <div className="flex items-center gap-1">
-            <div className="relative">
-              <button
-                onClick={handleCopy}
-                className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                aria-label="Copy link"
-              >
-                <Link2 size={15} />
-              </button>
-              {linkTooltip && (
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded bg-foreground text-background text-[11px] whitespace-nowrap animate-fade-in">
-                  Copied!
-                </div>
-              )}
-            </div>
-            <button
-              onClick={(e) => { e.stopPropagation(); onEmbed(); }}
-              className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-              aria-label="Embed brochure"
-            >
-              <Code2 size={15} />
-            </button>
-          </div>
         </div>
       </div>
     </div>

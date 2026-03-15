@@ -13,8 +13,6 @@ import News from "./pages/News";
 import NewsDetail from "./pages/NewsDetail";
 import DesignerStudio from "./pages/DesignerStudio";
 import DesignerStudioDashboard from "./pages/DesignerStudioDashboard";
-import Portfolio from "./pages/Portfolio";
-import PortfolioViewer from "./pages/PortfolioViewer";
 import BrochureViewer from "./pages/BrochureViewer";
 import Brochures from "./pages/Brochures";
 import Contact from "./pages/Contact";
@@ -47,8 +45,6 @@ const App = () => (
           <Route path="/sustainability" element={<Sustainability />} />
           <Route path="/news" element={<News />} />
           <Route path="/news/:id" element={<NewsDetail />} />
-          <Route path="/portfolio" element={<Portfolio />} />
-          <Route path="/portfolio/view/:id" element={<PortfolioViewer />} />
           <Route path="/brochures" element={<Brochures />} />
           <Route path="/brochures/:slug" element={<BrochureViewer />} />
           <Route path="/designer-studio" element={<DesignerStudio />} />
