@@ -162,7 +162,7 @@ export default function BrochureViewer() {
           className="flex items-center gap-2 text-white/70 hover:text-white text-sm transition-colors"
         >
           <ArrowLeft size={16} />
-          <span className="hidden sm:inline">Back to Portfolio</span>
+          <span className="hidden sm:inline">Back to Brochures</span>
         </Link>
         <div className="w-24" />
       </header>
