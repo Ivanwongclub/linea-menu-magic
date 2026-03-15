@@ -158,7 +158,7 @@ export default function BrochureViewer() {
     <div ref={containerRef} className="min-h-screen flex flex-col" style={{ backgroundColor: "#1a1a2e" }}>
       <header className={`flex items-center justify-between px-6 py-3 border-b border-white/10 shrink-0 ${isFullscreen && isMobile ? "hidden" : ""}`}>
         <Link
-          to="/portfolio"
+          to="/brochures"
           className="flex items-center gap-2 text-white/70 hover:text-white text-sm transition-colors"
         >
           <ArrowLeft size={16} />
