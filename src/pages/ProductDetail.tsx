@@ -184,6 +184,17 @@ export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
   const { product, loading, error } = useProduct(slug ?? '');
   const [show3D, setShow3D] = useState(false);
+  const galleryImages = useMemo<ProductImage[]>(() => {
+    if (!product) return [];
+
+    return Array.from({ length: 4 }, (_, i) => ({
+      id: `placeholder-${product.id}-${i}`,
+      url: resolveProductImage(product, i, 800),
+      sort_order: i,
+      is_primary: i === 0,
+      alt_text: `${product.name_en ?? product.name} — view ${i + 1}`,
+    }));
+  }, [product]);
 
   if (loading) {
     return (
