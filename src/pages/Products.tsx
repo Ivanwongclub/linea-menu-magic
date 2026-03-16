@@ -239,51 +239,87 @@ export default function Products() {
                 </Sheet>
               </div>
 
-              {/* Product Grid */}
-              {loading ? (
-                <ProductGridSkeleton />
-              ) : products.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-                  {products.map((product) => (
-                    <Link
-                      key={product.id}
-                      to={`/products/${product.slug}`}
-                      className="group"
+              {/* Results header */}
+              <div className="flex items-center justify-between mb-6">
+                <span className="text-sm text-muted-foreground">
+                  {loading ? '…' : `${totalCount} product${totalCount !== 1 ? 's' : ''}`}
+                </span>
+
+                <div className="flex items-center gap-3">
+                  {/* View toggle */}
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`p-1 transition-colors ${viewMode === 'grid' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                      aria-label="Grid view"
                     >
-                      <div className="aspect-square overflow-hidden bg-muted/10 mb-3 relative">
-                        {product.thumbnail_url ? (
-                          <img
-                            src={product.thumbnail_url}
-                            alt={product.name_en ?? product.name}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-secondary flex items-center justify-center">
-                            <span className="text-xs text-muted-foreground uppercase tracking-wider">
-                              {product.item_code}
-                            </span>
-                          </div>
-                        )}
-                        {/* Tag badges */}
-                        {product.tags && product.tags.length > 0 && (
-                          <span className="absolute top-3 left-3 bg-foreground text-background text-[10px] tracking-[0.15em] uppercase px-2 py-1">
-                            {product.tags[0].name}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm text-foreground">
-                        {product.name_en ?? product.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {product.primary_category?.name ?? product.item_code}
-                      </p>
+                      <LayoutGrid className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`p-1 transition-colors ${viewMode === 'list' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                      aria-label="List view"
+                    >
+                      <List className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  <span className="text-border">|</span>
+
+                  {/* Sort select */}
+                  <Select
+                    value={filters.sort ?? 'default'}
+                    onValueChange={(val) =>
+                      setFilters({ sort: val === 'default' ? undefined : (val as any) })
+                    }
+                  >
+                    <SelectTrigger className="h-8 text-xs w-[140px]">
+                      <SelectValue placeholder="Sort" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="default">Featured</SelectItem>
+                      <SelectItem value="newest">Newest</SelectItem>
+                      <SelectItem value="name_asc">Name A–Z</SelectItem>
+                      <SelectItem value="name_desc">Name Z–A</SelectItem>
+                      <SelectItem value="category">By Category</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Product Grid / List */}
+              {loading ? (
+                <ProductGridSkeleton viewMode={viewMode} />
+              ) : products.length > 0 ? (
+                <div
+                  className={
+                    viewMode === 'grid'
+                      ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5'
+                      : 'flex flex-col gap-3'
+                  }
+                >
+                  {products.map((product) => (
+                    <Link key={product.id} to={`/products/${product.slug}`}>
+                      <ProductCard
+                        product={product}
+                        viewMode={viewMode}
+                        onQuickView={() => setQuickViewProduct(product)}
+                      />
                     </Link>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-20 text-muted-foreground text-sm">
-                  No products match the current filters.
+                <div className="flex flex-col items-center justify-center py-24 text-center">
+                  <PackageOpen className="h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-sm font-medium text-foreground mb-1">
+                    No products found
+                  </p>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Try adjusting your filters.
+                  </p>
+                  <Button variant="outline" size="sm" onClick={clearFilters}>
+                    Clear filters
+                  </Button>
                 </div>
               )}
             </div>
