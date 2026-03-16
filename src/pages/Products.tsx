@@ -235,10 +235,12 @@ export default function Products() {
                   </SheetTrigger>
                   <SheetContent
                     side="left"
-                    className="w-80 overflow-y-auto bg-background p-6"
+                    className="w-80 bg-background p-0 flex flex-col"
                   >
                     <SheetTitle className="sr-only">Filters</SheetTitle>
-                    <ProductsSidebar {...sidebarProps} />
+                    <div className="flex-1 overflow-y-auto overscroll-contain p-6 pb-24">
+                      <ProductsSidebar {...sidebarProps} />
+                    </div>
                   </SheetContent>
                 </Sheet>
               </div>
