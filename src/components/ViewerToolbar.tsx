@@ -232,40 +232,58 @@ const ViewerToolbar = ({
 
           <div className="w-px h-4 bg-white/15 mx-1" />
 
-          <button
-            onClick={onToggleHotlinks}
-            className={`${btnBase} ${showHotlinks ? "text-indigo-400 bg-white/10" : "text-white"}`}
-            aria-label={showHotlinks ? "Hide hotlinks" : "Show hotlinks"}
-          >
-            <MousePointerClick size={16} />
-          </button>
+          {!embedMode && (
+            <button
+              onClick={onToggleHotlinks}
+              className={`${btnBase} ${showHotlinks ? "text-indigo-400 bg-white/10" : "text-white"}`}
+              aria-label={showHotlinks ? "Hide hotlinks" : "Show hotlinks"}
+            >
+              <MousePointerClick size={16} />
+            </button>
+          )}
 
           <div className="w-px h-4 bg-white/15 mx-1" />
 
-          <button
-            onClick={onToggleFullscreen}
-            className={`${btnBase} text-white`}
-            aria-label={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
-          >
-            {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
-          </button>
-
-          <button
-            onClick={() => setShowShare(true)}
-            className={`${btnBase} text-white`}
-            aria-label="Share"
-          >
-            <Share2 size={16} />
-          </button>
-
-          {!embedMode && onEmbed && (
+          {!embedMode && (
             <button
-              onClick={onEmbed}
+              onClick={onToggleFullscreen}
               className={`${btnBase} text-white`}
-              aria-label="Embed"
+              aria-label={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
             >
-              <Code2 size={16} />
+              {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
             </button>
+          )}
+
+          {embedMode ? (
+            <a
+              href={window.location.href.replace("?embed=true", "").replace("&embed=true", "")}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${btnBase} text-white text-xs gap-1 hidden sm:flex`}
+              aria-label="Open full version"
+            >
+              Open full ↗
+            </a>
+          ) : (
+            <>
+              <button
+                onClick={() => setShowShare(true)}
+                className={`${btnBase} text-white`}
+                aria-label="Share"
+              >
+                <Share2 size={16} />
+              </button>
+
+              {onEmbed && (
+                <button
+                  onClick={onEmbed}
+                  className={`${btnBase} text-white`}
+                  aria-label="Embed"
+                >
+                  <Code2 size={16} />
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>

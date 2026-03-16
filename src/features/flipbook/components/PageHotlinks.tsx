@@ -54,6 +54,7 @@ const PageHotlinks = ({ hotlinks, editHints = false }: PageHotlinksProps) => {
               height: `${hl.height}%`,
             }}
             title={hl.label ?? undefined}
+            aria-label={hl.label ?? "Hotlink"}
           >
             {/* Hover border + glow */}
             <div
