@@ -29,37 +29,39 @@ const queryClient = new QueryClient();
 
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <ScrollToTop />
-        <BackToTop />
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/about/our-story" element={<OurStory />} />
-          <Route path="/about/factory" element={<Factory />} />
-          <Route path="/about/certificates" element={<Certificates />} />
-          <Route path="/about/sustainability" element={<AboutSustainability />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/sustainability" element={<Sustainability />} />
-          <Route path="/news" element={<News />} />
-          <Route path="/news/:id" element={<NewsDetail />} />
-          <Route path="/brochures" element={<Brochures />} />
-          <Route path="/brochures/:slug" element={<BrochureViewer />} />
-          <Route path="/designer-studio" element={<DesignerStudio />} />
-          <Route path="/designer-studio/dashboard" element={<DesignerStudioDashboard />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/terms-of-service" element={<TermsOfService />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <CookieProvider>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <ScrollToTop />
+          <BackToTop />
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/about/our-story" element={<OurStory />} />
+            <Route path="/about/factory" element={<Factory />} />
+            <Route path="/about/certificates" element={<Certificates />} />
+            <Route path="/about/sustainability" element={<AboutSustainability />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/sustainability" element={<Sustainability />} />
+            <Route path="/news" element={<News />} />
+            <Route path="/news/:id" element={<NewsDetail />} />
+            <Route path="/brochures" element={<Brochures />} />
+            <Route path="/brochures/:slug" element={<BrochureViewer />} />
+            <Route path="/designer-studio" element={<DesignerStudio />} />
+            <Route path="/designer-studio/dashboard" element={<DesignerStudioDashboard />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-of-service" element={<TermsOfService />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </CookieProvider>
 );
 
 export default App;
