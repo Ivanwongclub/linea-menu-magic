@@ -1,5 +1,6 @@
 import { Sparkles, Heart, Eye } from 'lucide-react';
 import type { Product } from '@/features/products/types';
+import { getProductPlaceholderUrl } from '@/features/products/utils/productImagePlaceholder';
 
 type ViewMode = 'grid' | 'list';
 
@@ -9,6 +10,33 @@ interface ProductCardProps {
   onQuickView?: (product: Product) => void;
   onAddToLibrary?: (product: Product) => void;
   isInLibrary?: boolean;
+}
+
+function resolveProductImage(
+  product: Product,
+  size: 'thumb' | 'full' = 'thumb',
+): string {
+  const blockedHosts = ['picsum', 'unsplash', 'lorempixel'];
+  const isBlocked = (url: string) => blockedHosts.some((host) => url.toLowerCase().includes(host));
+
+  if (product.images?.length) {
+    const primary = product.images.find((img) => img.is_primary) ?? product.images[0];
+    if (primary?.url && !isBlocked(primary.url)) {
+      return primary.url;
+    }
+  }
+
+  if (product.thumbnail_url && !isBlocked(product.thumbnail_url)) {
+    return product.thumbnail_url;
+  }
+
+  return getProductPlaceholderUrl(
+    product.name_en ?? product.name,
+    product.item_code,
+    product.primary_category?.slug,
+    product.primary_category?.name,
+    size === 'thumb' ? 400 : 800,
+  );
 }
 
 export default function ProductCard({
@@ -26,6 +54,7 @@ export default function ProductCard({
   const visibleTags = tags.slice(0, 2);
   const extraTagCount = tags.length - 2;
   const certs = product.certifications ?? [];
+  const imageUrl = resolveProductImage(product, 'thumb');
 
   return (
     <div className="group bg-card border border-border rounded-[var(--radius)] overflow-hidden cursor-pointer transition-[border-color,box-shadow] duration-200 hover:border-foreground hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)]">

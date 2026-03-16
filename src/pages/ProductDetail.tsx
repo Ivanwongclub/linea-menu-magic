@@ -13,7 +13,31 @@ import ProductCard from '@/components/products/ProductCard';
 import Model3DViewer from '@/components/designer-studio/Model3DViewer';
 import { useProduct } from '@/features/products/hooks/useProduct';
 import { useProducts } from '@/features/products/hooks/useProducts';
+import { getProductPlaceholderUrl } from '@/features/products/utils/productImagePlaceholder';
 import type { Product, ProductImage } from '@/features/products/types';
+
+function resolveProductImage(
+  product: Product,
+  index = 0,
+  size = 800,
+): string {
+  const blockedHosts = ['picsum', 'unsplash', 'lorempixel'];
+  const isBlocked = (url: string) => blockedHosts.some((host) => url.toLowerCase().includes(host));
+  const orderedImages = [...(product.images ?? [])].sort((a, b) => a.sort_order - b.sort_order);
+  const img = orderedImages[index];
+
+  if (img?.url && !isBlocked(img.url)) {
+    return img.url;
+  }
+
+  return getProductPlaceholderUrl(
+    product.name_en ?? product.name,
+    `${product.item_code}-${index}`,
+    product.primary_category?.slug,
+    product.primary_category?.name,
+    size,
+  );
+}
 
 /* ─── Image Gallery ──────────────────────────────────── */
 
