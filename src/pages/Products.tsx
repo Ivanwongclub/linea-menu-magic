@@ -29,6 +29,8 @@ export default function Products() {
   const taxonomy = useProductTaxonomy();
   const { filters, setFilters, clearFilters } = useProductFiltersFromURL();
   const { products, loading, totalCount } = useProducts(filters);
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
 
   // Count products per category (from current result set)
   const categoryCounts = useMemo(() => {
