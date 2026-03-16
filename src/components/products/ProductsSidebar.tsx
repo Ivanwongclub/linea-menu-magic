@@ -278,8 +278,9 @@ export default function ProductsSidebar({
       <FilterSection label="Sustainability" defaultOpen={false}>
         <div className="space-y-2">
           {taxonomy.certifications.map((cert) => (
-            <label key={cert.id} className="flex items-center gap-2 cursor-pointer group">
+            <div key={cert.id} className="flex items-center gap-2">
               <Checkbox
+                id={`cert-${cert.abbreviation.toLowerCase()}`}
                 checked={
                   filters.certifications?.includes(cert.abbreviation.toLowerCase()) ?? false
                 }
@@ -292,13 +293,13 @@ export default function ProductsSidebar({
                   })
                 }
               />
-              <div>
-                <span className="text-sm text-foreground group-hover:text-foreground/80 block">
+              <label htmlFor={`cert-${cert.abbreviation.toLowerCase()}`}>
+                <span className="text-sm text-foreground cursor-pointer group-hover:text-foreground/80 block">
                   {cert.abbreviation}
                 </span>
                 <span className="text-xs text-muted-foreground">{cert.name}</span>
-              </div>
-            </label>
+              </label>
+            </div>
           ))}
         </div>
       </FilterSection>
