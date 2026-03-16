@@ -297,6 +297,15 @@ const DesignerStudioDashboard = () => {
 
   // ─── Early returns for detail views ─────────────────────
 
+  if (editingProductId !== null) {
+    return (
+      <ProductEditor
+        productId={editingProductId}
+        onBack={() => setEditingProductId(null)}
+      />
+    );
+  }
+
   if (editingBrochureId !== null) {
     return (
       <BrochureEditor
