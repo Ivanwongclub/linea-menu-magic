@@ -1,57 +1,63 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, Lock, Globe, Star, Box } from "lucide-react";
-import { LibraryItem, categoryLabels } from "@/data/mockLibraryData";
+import { Eye, Heart, Box } from "lucide-react";
+import type { UserLibraryItem } from "@/features/products/types";
 
 interface LibraryItemCardProps {
-  item: LibraryItem;
-  onView: (item: LibraryItem) => void;
-  isFavorite?: boolean;
+  item: UserLibraryItem;
+  onView: (item: UserLibraryItem) => void;
   onToggleFavorite?: (itemId: string) => void;
 }
 
-const LibraryItemCard = ({ item, onView, isFavorite = false, onToggleFavorite }: LibraryItemCardProps) => {
+const LibraryItemCard = ({ item, onView, onToggleFavorite }: LibraryItemCardProps) => {
+  const product = item.product;
+  const displayName = item.custom_name || product?.name_en || product?.name || 'Untitled';
+  const itemCode = product?.item_code ?? '';
+  const thumbnailUrl = product?.thumbnail_url;
+  const categoryName = product?.primary_category?.name ?? product?.categories?.[0]?.name;
+  const hasModel = !!product?.model_url;
+
   return (
-    <div 
+    <div
       className="group cursor-pointer"
       onClick={() => onView(item)}
     >
       {/* Image Container */}
-      <div className="relative aspect-square bg-muted rounded-lg overflow-hidden mb-3">
-        <img
-          src={item.thumbnailUrl || '/placeholder.svg'}
-          alt={item.name}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-        />
-        
+      <div className="relative aspect-square bg-secondary rounded-[var(--radius)] overflow-hidden mb-3">
+        {thumbnailUrl ? (
+          <img
+            src={thumbnailUrl}
+            alt={displayName}
+            className="w-full h-full object-contain p-3 transition-transform duration-500 group-hover:scale-110"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider font-mono">
+              {itemCode || '—'}
+            </span>
+          </div>
+        )}
+
         {/* Overlay on hover */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300" />
-        
+
         {/* Top badges */}
         <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
           <div className="flex gap-1.5">
-            {item.modelUrl && (
+            {hasModel && (
               <Badge className="bg-primary text-primary-foreground text-xs">
                 <Box className="w-3 h-3 mr-1" />
                 3D
               </Badge>
             )}
+            {item.custom_brand && (
+              <Badge variant="secondary" className="bg-background/90 text-xs">
+                {item.custom_brand}
+              </Badge>
+            )}
           </div>
-          
-          {/* Visibility badge */}
-          {item.isPublic ? (
-            <Badge variant="secondary" className="bg-background/90 text-xs gap-1">
-              <Globe className="w-3 h-3" />
-              公開
-            </Badge>
-          ) : (
-            <Badge variant="outline" className="bg-background/90 text-xs gap-1 border-amber-500/50 text-amber-700 dark:text-amber-400">
-              <Lock className="w-3 h-3" />
-              專屬
-            </Badge>
-          )}
         </div>
-        
+
         {/* Favorite button - fixed bottom-left corner */}
         {onToggleFavorite && (
           <button
@@ -61,19 +67,19 @@ const LibraryItemCard = ({ item, onView, isFavorite = false, onToggleFavorite }:
               onToggleFavorite(item.id);
             }}
             className={`absolute bottom-14 left-3 p-2 rounded-full bg-background/90 hover:bg-background shadow-sm transition-all z-10 ${
-              isFavorite ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+              item.is_favourite ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
             }`}
           >
-            <Star 
+            <Heart
               className={`w-4 h-4 transition-colors ${
-                isFavorite 
-                  ? "fill-yellow-400 text-yellow-400" 
-                  : "text-muted-foreground hover:text-yellow-400"
-              }`} 
+                item.is_favourite
+                  ? "fill-red-500 text-red-500"
+                  : "text-muted-foreground hover:text-red-500"
+              }`}
             />
           </button>
         )}
-        
+
         {/* Hover action */}
         <div className="absolute inset-x-0 bottom-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <Button
@@ -86,25 +92,30 @@ const LibraryItemCard = ({ item, onView, isFavorite = false, onToggleFavorite }:
             }}
           >
             <Eye className="w-4 h-4" />
-            查看詳情
+            Quick View
           </Button>
         </div>
       </div>
-      
+
       {/* Product Info */}
       <div className="space-y-1">
-        <p className="text-xs text-muted-foreground font-mono">{item.itemCode}</p>
+        <p className="text-xs text-muted-foreground font-mono">{itemCode}</p>
         <h3 className="font-medium text-foreground leading-tight line-clamp-1 group-hover:text-primary transition-colors">
-          {item.name}
+          {displayName}
         </h3>
         <div className="flex items-center justify-between">
-          <Badge variant="outline" className="text-xs">
-            {categoryLabels[item.category]}
-          </Badge>
-          {item.teamName && !item.isPublic && (
-            <span className="text-xs text-muted-foreground">{item.teamName}</span>
+          {categoryName && (
+            <Badge variant="outline" className="text-xs">
+              {categoryName}
+            </Badge>
+          )}
+          {item.team_name && (
+            <span className="text-xs text-muted-foreground">{item.team_name}</span>
           )}
         </div>
+        {item.notes && (
+          <p className="text-xs text-muted-foreground italic line-clamp-1">{item.notes}</p>
+        )}
       </div>
     </div>
   );
