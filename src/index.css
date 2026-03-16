@@ -113,6 +113,43 @@
 }
 
 @layer components {
+  /* Section system */
+  .section-light {
+    background: hsl(var(--background));
+    padding: 96px 0;
+  }
+
+  .section-off-white {
+    background: hsl(var(--secondary));
+    padding: 96px 0;
+  }
+
+  .section-inverse {
+    background: hsl(var(--foreground));
+    color: hsl(var(--background));
+    padding: 96px 0;
+  }
+
+  .section-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: hsl(var(--muted-foreground));
+    display: block;
+    margin-bottom: 12px;
+  }
+
+  .section-inverse .section-label {
+    color: rgba(255, 255, 255, 0.45);
+  }
+
   /* Link underline animation */
   .link-elegant {
     @apply relative inline-block;

@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useScrollAnimation } from "@/hooks/use-scroll-animation";
 import { useEffect, useState } from "react";
 import LetterReveal from "@/components/ui/LetterReveal";
+import { Button } from "@/components/ui/button";
 
 const HeroSection = () => {
   const { ref: heroRef, isVisible: heroVisible } = useScrollAnimation({ threshold: 0.2 });
@@ -19,13 +20,13 @@ const HeroSection = () => {
   return (
     <section
       ref={heroRef}
-      className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-secondary"
+      className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-foreground"
     >
       {/* Subtle geometric background */}
       <div
         className="absolute inset-0 opacity-[0.03]"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23fff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }}
       />
 
@@ -38,7 +39,7 @@ const HeroSection = () => {
         }}
       >
         <p
-          className={`text-subtitle mb-6 transition-all duration-700 ease-out ${
+          className={`section-label !text-white/45 mb-6 transition-all duration-700 ease-out ${
             heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
           style={{ transitionDelay: '200ms' }}
@@ -50,7 +51,7 @@ const HeroSection = () => {
           <LetterReveal
             text="Timeless"
             as="h1"
-            className="text-6xl md:text-7xl lg:text-8xl font-light tracking-tight text-foreground"
+            className="text-6xl md:text-7xl lg:text-8xl font-light tracking-tight text-white"
             isVisible={heroVisible}
             startDelay={400}
             letterDelay={40}
@@ -58,7 +59,7 @@ const HeroSection = () => {
           <LetterReveal
             text="Craftsmanship"
             as="span"
-            className="block mt-2 text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight text-foreground"
+            className="block mt-2 text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight text-white"
             isVisible={heroVisible}
             startDelay={750}
             letterDelay={35}
@@ -66,7 +67,7 @@ const HeroSection = () => {
         </div>
 
         <p
-          className={`text-lg md:text-xl text-muted-foreground font-light mb-4 transition-all duration-700 ease-out ${
+          className={`text-lg md:text-xl text-white/70 font-light mb-4 transition-all duration-700 ease-out ${
             heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
           style={{ transitionDelay: '1200ms' }}
@@ -75,7 +76,7 @@ const HeroSection = () => {
         </p>
 
         <p
-          className={`text-sm text-muted-foreground tracking-wider mb-12 transition-all duration-700 ease-out ${
+          className={`text-sm text-white/50 tracking-wider mb-12 transition-all duration-700 ease-out ${
             heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
           style={{ transitionDelay: '1300ms' }}
@@ -83,24 +84,22 @@ const HeroSection = () => {
           Premium Garment Accessories Manufacturer
         </p>
 
-        {/* CTA Buttons — pill shaped */}
+        {/* CTA Buttons */}
         <div
           className={`flex flex-col sm:flex-row items-center justify-center gap-4 transition-all duration-700 ease-out ${
             heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
           style={{ transitionDelay: '1400ms' }}
         >
-          <Link
-            to="/products"
-            className="px-10 py-4 bg-primary text-primary-foreground text-xs tracking-[0.2em] uppercase rounded-full transition-all duration-300 hover:bg-primary-hover hover:scale-105"
-          >
-            Explore Products
+          <Link to="/products">
+            <Button variant="outline-inverse" size="lg">
+              Explore Products
+            </Button>
           </Link>
-          <Link
-            to="/contact"
-            className="px-10 py-4 border border-foreground text-foreground text-xs tracking-[0.2em] uppercase rounded-full transition-all duration-300 hover:bg-foreground hover:text-background hover:scale-105"
-          >
-            Get in Touch
+          <Link to="/contact">
+            <Button variant="outline-inverse" size="lg">
+              Get in Touch
+            </Button>
           </Link>
         </div>
 
@@ -111,10 +110,10 @@ const HeroSection = () => {
           }`}
           style={{ transitionDelay: '1600ms' }}
         >
-          <div className="inline-flex items-center space-x-4 text-muted-foreground">
-            <span className={`h-px bg-accent/40 transition-all duration-1000 ease-out ${heroVisible ? 'w-12' : 'w-0'}`} style={{ transitionDelay: '1800ms' }} />
+          <div className="inline-flex items-center space-x-4 text-white/40">
+            <span className={`h-px bg-white/30 transition-all duration-1000 ease-out ${heroVisible ? 'w-12' : 'w-0'}`} style={{ transitionDelay: '1800ms' }} />
             <span className="text-xs tracking-[0.3em] uppercase">Est. 1979</span>
-            <span className={`h-px bg-accent/40 transition-all duration-1000 ease-out ${heroVisible ? 'w-12' : 'w-0'}`} style={{ transitionDelay: '1800ms' }} />
+            <span className={`h-px bg-white/30 transition-all duration-1000 ease-out ${heroVisible ? 'w-12' : 'w-0'}`} style={{ transitionDelay: '1800ms' }} />
           </div>
         </div>
       </div>
@@ -126,12 +125,10 @@ const HeroSection = () => {
         }`}
         style={{ transitionDelay: '2000ms', opacity: opacityFade * 0.8 }}
       >
-        <div className="w-6 h-10 border border-muted-foreground/30 rounded-full flex justify-center">
-          <div className="w-1 h-2 bg-muted-foreground/50 rounded-full mt-2 animate-bounce" />
+        <div className="w-6 h-10 border border-white/30 rounded-full flex justify-center">
+          <div className="w-1 h-2 bg-white/50 rounded-full mt-2 animate-bounce" />
         </div>
       </div>
-
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent pointer-events-none" />
     </section>
   );
 };

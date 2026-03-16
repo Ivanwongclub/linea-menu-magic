@@ -8,13 +8,13 @@ const HeritageSection = () => {
   const { ref: imageRef, isVisible: imageVisible } = useScrollAnimation({ threshold: 0.3 });
 
   return (
-    <section className="py-24 px-6 lg:px-8 bg-secondary overflow-hidden">
-      <div className="max-w-7xl mx-auto">
+    <section className="section-light overflow-hidden">
+      <div className="section-inner">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div ref={contentRef} className="order-2 lg:order-1">
-            <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${contentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'}`}>
+            <span className={`section-label transition-all duration-700 ease-out ${contentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'}`}>
               Heritage
-            </p>
+            </span>
             <h2 className={`text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6`}>
               <LetterReveal
                 text="Our"
@@ -27,7 +27,7 @@ const HeritageSection = () => {
               <LetterReveal
                 text="Story"
                 as="span"
-                className="inline-block"
+                className="inline-block font-serif-display"
                 isVisible={contentVisible}
                 startDelay={300}
                 letterDelay={60}
@@ -53,10 +53,10 @@ const HeritageSection = () => {
 
           <div ref={imageRef} className="order-1 lg:order-2">
             <div className="relative">
-              <div className={`aspect-[4/5] overflow-hidden rounded-lg transition-all duration-1000 ease-out ${imageVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
+              <div className={`aspect-[4/5] overflow-hidden rounded-[var(--radius)] transition-all duration-1000 ease-out ${imageVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
                 <img src={heritageCraftsmanship} alt="Artisan craftsmanship" className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
               </div>
-              <div className={`absolute -bottom-6 -left-6 w-32 h-32 bg-accent text-accent-foreground flex items-center justify-center rounded-lg transition-all duration-700 ease-out ${imageVisible ? 'opacity-100 translate-x-0 translate-y-0' : 'opacity-0 translate-x-4 translate-y-4'}`} style={{ transitionDelay: '400ms' }}>
+              <div className={`absolute -bottom-6 -left-6 w-32 h-32 bg-foreground text-background flex items-center justify-center rounded-[var(--radius)] transition-all duration-700 ease-out ${imageVisible ? 'opacity-100 translate-x-0 translate-y-0' : 'opacity-0 translate-x-4 translate-y-4'}`} style={{ transitionDelay: '400ms' }}>
                 <div className="text-center">
                   <span className="text-4xl font-bold">45</span>
                   <p className="text-xs tracking-wider mt-1">Years</p>
