@@ -36,6 +36,7 @@ interface ProductItem {
   isBestSeller?: boolean;
 }
 
+// MIGRATED TO SUPABASE — pending UI update
 const products: ProductItem[] = [
   // FASTENERS
   { id: "metal-button", name: "Metal Buttons", tag: "Buttons", category: "fasteners", image: metalButton, isBestSeller: true },

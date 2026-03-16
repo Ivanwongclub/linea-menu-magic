@@ -14,119 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
-      categories: {
-        Row: {
-          created_at: string
-          id: string
-          name: string
-          name_en: string | null
-          parent_id: string | null
-          slug: string
-          sort_order: number
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name: string
-          name_en?: string | null
-          parent_id?: string | null
-          slug: string
-          sort_order?: number
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string
-          name_en?: string | null
-          parent_id?: string | null
-          slug?: string
-          sort_order?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "categories_parent_id_fkey"
-            columns: ["parent_id"]
-            isOneToOne: false
-            referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      certifications: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          name: string
-          slug: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          name: string
-          slug: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          name?: string
-          slug?: string
-        }
-        Relationships: []
-      }
       customization_requests: {
         Row: {
           created_at: string
-          estimated_delivery: string | null
           id: string
-          metadata: Json | null
           notes: string | null
-          product_id: string
-          quantity: number
-          status: Database["public"]["Enums"]["customization_status"]
-          target_date: string | null
-          target_price: number | null
+          product_id: string | null
+          request_code: string | null
+          requirements: Json | null
+          status: string
           team_id: string | null
-          team_name: string | null
-          tracking_number: string | null
           updated_at: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
-          estimated_delivery?: string | null
           id?: string
-          metadata?: Json | null
           notes?: string | null
-          product_id: string
-          quantity?: number
-          status?: Database["public"]["Enums"]["customization_status"]
-          target_date?: string | null
-          target_price?: number | null
+          product_id?: string | null
+          request_code?: string | null
+          requirements?: Json | null
+          status?: string
           team_id?: string | null
-          team_name?: string | null
-          tracking_number?: string | null
           updated_at?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
-          estimated_delivery?: string | null
           id?: string
-          metadata?: Json | null
           notes?: string | null
-          product_id?: string
-          quantity?: number
-          status?: Database["public"]["Enums"]["customization_status"]
-          target_date?: string | null
-          target_price?: number | null
+          product_id?: string | null
+          request_code?: string | null
+          requirements?: Json | null
+          status?: string
           team_id?: string | null
-          team_name?: string | null
-          tracking_number?: string | null
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -241,77 +164,59 @@ export type Database = {
           },
         ]
       }
-      industries: {
-        Row: {
-          created_at: string
-          id: string
-          name: string
-          name_en: string | null
-          slug: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name: string
-          name_en?: string | null
-          slug: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string
-          name_en?: string | null
-          slug?: string
-        }
-        Relationships: []
-      }
-      materials: {
-        Row: {
-          created_at: string
-          id: string
-          name: string
-          name_en: string | null
-          slug: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name: string
-          name_en?: string | null
-          slug: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string
-          name_en?: string | null
-          slug?: string
-        }
-        Relationships: []
-      }
       product_categories: {
         Row: {
+          created_at: string
+          icon_url: string | null
+          id: string
+          name: string
+          slug: string | null
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          icon_url?: string | null
+          id?: string
+          name: string
+          slug?: string | null
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          icon_url?: string | null
+          id?: string
+          name?: string
+          slug?: string | null
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      product_category_map: {
+        Row: {
           category_id: string
+          is_primary: boolean
           product_id: string
         }
         Insert: {
           category_id: string
+          is_primary?: boolean
           product_id: string
         }
         Update: {
           category_id?: string
+          is_primary?: boolean
           product_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "product_categories_category_id_fkey"
+            foreignKeyName: "product_category_map_category_id_fkey"
             columns: ["category_id"]
             isOneToOne: false
-            referencedRelation: "categories"
+            referencedRelation: "product_categories"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "product_categories_product_id_fkey"
+            foreignKeyName: "product_category_map_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
@@ -319,7 +224,7 @@ export type Database = {
           },
         ]
       }
-      product_certifications: {
+      product_certification_map: {
         Row: {
           certification_id: string
           product_id: string
@@ -334,14 +239,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "product_certifications_certification_id_fkey"
+            foreignKeyName: "product_certification_map_certification_id_fkey"
             columns: ["certification_id"]
             isOneToOne: false
-            referencedRelation: "certifications"
+            referencedRelation: "product_certifications"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "product_certifications_product_id_fkey"
+            foreignKeyName: "product_certification_map_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
@@ -349,33 +254,54 @@ export type Database = {
           },
         ]
       }
+      product_certifications: {
+        Row: {
+          abbreviation: string | null
+          id: string
+          logo_url: string | null
+          name: string
+        }
+        Insert: {
+          abbreviation?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+        }
+        Update: {
+          abbreviation?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+        }
+        Relationships: []
+      }
       product_images: {
         Row: {
           alt_text: string | null
           created_at: string
           id: string
-          image_url: string
-          is_thumbnail: boolean
+          is_primary: boolean
           product_id: string
           sort_order: number
+          url: string
         }
         Insert: {
           alt_text?: string | null
           created_at?: string
           id?: string
-          image_url: string
-          is_thumbnail?: boolean
+          is_primary?: boolean
           product_id: string
           sort_order?: number
+          url: string
         }
         Update: {
           alt_text?: string | null
           created_at?: string
           id?: string
-          image_url?: string
-          is_thumbnail?: boolean
+          is_primary?: boolean
           product_id?: string
           sort_order?: number
+          url?: string
         }
         Relationships: [
           {
@@ -388,6 +314,27 @@ export type Database = {
         ]
       }
       product_industries: {
+        Row: {
+          id: string
+          name: string
+          slug: string | null
+          sort_order: number
+        }
+        Insert: {
+          id?: string
+          name: string
+          slug?: string | null
+          sort_order?: number
+        }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string | null
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      product_industry_map: {
         Row: {
           industry_id: string
           product_id: string
@@ -402,14 +349,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "product_industries_industry_id_fkey"
+            foreignKeyName: "product_industry_map_industry_id_fkey"
             columns: ["industry_id"]
             isOneToOne: false
-            referencedRelation: "industries"
+            referencedRelation: "product_industries"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "product_industries_product_id_fkey"
+            foreignKeyName: "product_industry_map_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
@@ -417,7 +364,7 @@ export type Database = {
           },
         ]
       }
-      product_materials: {
+      product_material_map: {
         Row: {
           material_id: string
           product_id: string
@@ -432,14 +379,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "product_materials_material_id_fkey"
+            foreignKeyName: "product_material_map_material_id_fkey"
             columns: ["material_id"]
             isOneToOne: false
-            referencedRelation: "materials"
+            referencedRelation: "product_materials"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "product_materials_product_id_fkey"
+            foreignKeyName: "product_material_map_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
@@ -447,7 +394,28 @@ export type Database = {
           },
         ]
       }
-      product_tags: {
+      product_materials: {
+        Row: {
+          id: string
+          is_sustainable: boolean
+          name: string
+          slug: string | null
+        }
+        Insert: {
+          id?: string
+          is_sustainable?: boolean
+          name: string
+          slug?: string | null
+        }
+        Update: {
+          id?: string
+          is_sustainable?: boolean
+          name?: string
+          slug?: string | null
+        }
+        Relationships: []
+      }
+      product_tag_map: {
         Row: {
           product_id: string
           tag_id: string
@@ -462,180 +430,144 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "product_tags_product_id_fkey"
+            foreignKeyName: "product_tag_map_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "product_tags_tag_id_fkey"
+            foreignKeyName: "product_tag_map_tag_id_fkey"
             columns: ["tag_id"]
             isOneToOne: false
-            referencedRelation: "tags"
+            referencedRelation: "product_tags"
             referencedColumns: ["id"]
           },
         ]
       }
-      products: {
+      product_tags: {
         Row: {
-          applications: string[] | null
-          available_colors: string[] | null
-          capacity: string | null
-          created_at: string
-          currency: string
-          description: string | null
+          color: string | null
           id: string
-          is_public: boolean
-          item_code: string | null
-          lead_time: string | null
-          model_url: string | null
-          moq: number | null
           name: string
-          name_en: string | null
-          origin: string | null
-          price_breaks: Json | null
-          sample_time: string | null
-          slug: string
-          spec_color: string | null
-          spec_finish: string | null
-          spec_material: string | null
-          spec_size: string | null
-          spec_tensile_strength: string | null
-          spec_thickness: string | null
-          spec_weight: string | null
-          status: Database["public"]["Enums"]["product_status"]
-          unit_price: number | null
-          updated_at: string
+          slug: string | null
         }
         Insert: {
-          applications?: string[] | null
-          available_colors?: string[] | null
-          capacity?: string | null
-          created_at?: string
-          currency?: string
-          description?: string | null
+          color?: string | null
           id?: string
-          is_public?: boolean
-          item_code?: string | null
-          lead_time?: string | null
-          model_url?: string | null
-          moq?: number | null
           name: string
-          name_en?: string | null
-          origin?: string | null
-          price_breaks?: Json | null
-          sample_time?: string | null
-          slug: string
-          spec_color?: string | null
-          spec_finish?: string | null
-          spec_material?: string | null
-          spec_size?: string | null
-          spec_tensile_strength?: string | null
-          spec_thickness?: string | null
-          spec_weight?: string | null
-          status?: Database["public"]["Enums"]["product_status"]
-          unit_price?: number | null
-          updated_at?: string
+          slug?: string | null
         }
         Update: {
-          applications?: string[] | null
-          available_colors?: string[] | null
-          capacity?: string | null
-          created_at?: string
-          currency?: string
-          description?: string | null
+          color?: string | null
           id?: string
-          is_public?: boolean
-          item_code?: string | null
-          lead_time?: string | null
-          model_url?: string | null
-          moq?: number | null
           name?: string
-          name_en?: string | null
-          origin?: string | null
-          price_breaks?: Json | null
-          sample_time?: string | null
-          slug?: string
-          spec_color?: string | null
-          spec_finish?: string | null
-          spec_material?: string | null
-          spec_size?: string | null
-          spec_tensile_strength?: string | null
-          spec_thickness?: string | null
-          spec_weight?: string | null
-          status?: Database["public"]["Enums"]["product_status"]
-          unit_price?: number | null
-          updated_at?: string
+          slug?: string | null
         }
         Relationships: []
       }
-      tags: {
+      products: {
         Row: {
-          color: string | null
           created_at: string
+          description: string | null
+          description_en: string | null
           id: string
+          is_customizable: boolean
+          is_public: boolean
+          item_code: string | null
+          model_url: string | null
           name: string
+          name_en: string | null
+          production: Json | null
           slug: string
           sort_order: number
+          specifications: Json | null
+          status: string
+          thumbnail_url: string | null
+          updated_at: string
         }
         Insert: {
-          color?: string | null
           created_at?: string
+          description?: string | null
+          description_en?: string | null
           id?: string
+          is_customizable?: boolean
+          is_public?: boolean
+          item_code?: string | null
+          model_url?: string | null
           name: string
+          name_en?: string | null
+          production?: Json | null
           slug: string
           sort_order?: number
+          specifications?: Json | null
+          status?: string
+          thumbnail_url?: string | null
+          updated_at?: string
         }
         Update: {
-          color?: string | null
           created_at?: string
+          description?: string | null
+          description_en?: string | null
           id?: string
+          is_customizable?: boolean
+          is_public?: boolean
+          item_code?: string | null
+          model_url?: string | null
           name?: string
+          name_en?: string | null
+          production?: Json | null
           slug?: string
           sort_order?: number
+          specifications?: Json | null
+          status?: string
+          thumbnail_url?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
       user_library_items: {
         Row: {
-          created_at: string
+          added_at: string
+          added_by: string | null
           custom_brand: string | null
+          custom_description: string | null
+          custom_name: string | null
           custom_specs: Json | null
           id: string
-          is_favorite: boolean
+          is_favourite: boolean
           notes: string | null
           product_id: string
-          team_id: string | null
+          team_id: string
           team_name: string | null
-          updated_at: string
-          user_id: string
         }
         Insert: {
-          created_at?: string
+          added_at?: string
+          added_by?: string | null
           custom_brand?: string | null
+          custom_description?: string | null
+          custom_name?: string | null
           custom_specs?: Json | null
           id?: string
-          is_favorite?: boolean
+          is_favourite?: boolean
           notes?: string | null
           product_id: string
-          team_id?: string | null
+          team_id: string
           team_name?: string | null
-          updated_at?: string
-          user_id: string
         }
         Update: {
-          created_at?: string
+          added_at?: string
+          added_by?: string | null
           custom_brand?: string | null
+          custom_description?: string | null
+          custom_name?: string | null
           custom_specs?: Json | null
           id?: string
-          is_favorite?: boolean
+          is_favourite?: boolean
           notes?: string | null
           product_id?: string
-          team_id?: string | null
+          team_id?: string
           team_name?: string | null
-          updated_at?: string
-          user_id?: string
         }
         Relationships: [
           {
@@ -655,17 +587,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      customization_status:
-        | "submitted"
-        | "model_uploaded"
-        | "design_confirmed"
-        | "ready_for_printing"
-        | "printing"
-        | "shipped"
-        | "sample_review"
-        | "production"
-        | "closed"
-      product_status: "draft" | "active" | "archived"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -792,19 +714,6 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {
-      customization_status: [
-        "submitted",
-        "model_uploaded",
-        "design_confirmed",
-        "ready_for_printing",
-        "printing",
-        "shipped",
-        "sample_review",
-        "production",
-        "closed",
-      ],
-      product_status: ["draft", "active", "archived"],
-    },
+    Enums: {},
   },
 } as const
