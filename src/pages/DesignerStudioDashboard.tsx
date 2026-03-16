@@ -56,6 +56,10 @@ import CreateRFQDialog from "@/components/designer-studio/CreateRFQDialog";
 import BrochuresPanel from "@/components/designer-studio/BrochuresPanel";
 import BrochureEditor from "@/components/designer-studio/BrochureEditor";
 
+// Products CMS
+import ProductsPanel from "@/components/designer-studio/products/ProductsPanel";
+import ProductEditor from "@/components/designer-studio/products/ProductEditor";
+
 import { supabase } from "@/integrations/supabase/client";
 
 // ─── Adapter: UserLibraryItem → legacy LibraryItem ──────
@@ -106,7 +110,10 @@ const DesignerStudioDashboard = () => {
   }, []);
 
   // Main tab state
-  const [activeMainTab, setActiveMainTab] = useState<"library" | "rfq" | "brochures">("library");
+  const [activeMainTab, setActiveMainTab] = useState<"library" | "rfq" | "brochures" | "products">("library");
+
+  // Product editor state
+  const [editingProductId, setEditingProductId] = useState<string | null | undefined>(null);
 
   // Library — Supabase data
   const { items: libraryItems, loading: libraryLoading, toggleFavourite, removeItem } = useUserLibrary(teamId);
@@ -290,6 +297,15 @@ const DesignerStudioDashboard = () => {
 
   // ─── Early returns for detail views ─────────────────────
 
+  if (editingProductId !== null) {
+    return (
+      <ProductEditor
+        productId={editingProductId}
+        onBack={() => setEditingProductId(null)}
+      />
+    );
+  }
+
   if (editingBrochureId !== null) {
     return (
       <BrochureEditor
@@ -353,6 +369,10 @@ const DesignerStudioDashboard = () => {
                       <BookOpen className="w-3.5 h-3.5" />
                       Brochures
                     </TabsTrigger>
+                    <TabsTrigger value="products" className="gap-1.5 text-sm px-3 h-7">
+                      <Package className="w-3.5 h-3.5" />
+                      Products
+                    </TabsTrigger>
                   </TabsList>
                 </Tabs>
               </div>
@@ -396,6 +416,10 @@ const DesignerStudioDashboard = () => {
                   <TabsTrigger value="brochures" className="gap-1.5 text-sm">
                     <BookOpen className="w-3.5 h-3.5" />
                     Brochures
+                  </TabsTrigger>
+                  <TabsTrigger value="products" className="gap-1.5 text-sm">
+                    <Package className="w-3.5 h-3.5" />
+                    Products
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
@@ -616,6 +640,11 @@ const DesignerStudioDashboard = () => {
             {/* Brochures Tab Content (unchanged) */}
             <TabsContent value="brochures" className="mt-0">
               <BrochuresPanel onOpenEditor={(id) => setEditingBrochureId(id ?? undefined)} />
+            </TabsContent>
+
+            {/* Products Tab Content */}
+            <TabsContent value="products" className="mt-0">
+              <ProductsPanel onOpenEditor={(id) => setEditingProductId(id ?? undefined)} />
             </TabsContent>
           </Tabs>
         </div>
