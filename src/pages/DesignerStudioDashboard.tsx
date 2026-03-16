@@ -641,6 +641,11 @@ const DesignerStudioDashboard = () => {
             <TabsContent value="brochures" className="mt-0">
               <BrochuresPanel onOpenEditor={(id) => setEditingBrochureId(id ?? undefined)} />
             </TabsContent>
+
+            {/* Products Tab Content */}
+            <TabsContent value="products" className="mt-0">
+              <ProductsPanel onOpenEditor={(id) => setEditingProductId(id ?? undefined)} />
+            </TabsContent>
           </Tabs>
         </div>
       </main>
