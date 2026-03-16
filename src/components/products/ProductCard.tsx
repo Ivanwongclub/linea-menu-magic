@@ -67,7 +67,7 @@ export default function ProductCard({
           </div>
         )}
 
-        {/* Quick View button (center, on hover) */}
+        {/* Quick View button (center, on hover or keyboard focus) */}
         {onQuickView && (
           <button
             onClick={(e) => {
@@ -75,7 +75,13 @@ export default function ProductCard({
               e.stopPropagation();
               onQuickView(product);
             }}
-            className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-200 ease-out"
+            aria-label={`Quick view ${product.name_en ?? product.name}`}
+            className="absolute inset-0 flex items-center justify-center
+              opacity-0 group-hover:opacity-100 focus-visible:opacity-100
+              translate-y-1 group-hover:translate-y-0 focus-visible:translate-y-0
+              transition-all duration-200 ease-out
+              focus-visible:outline-none focus-visible:ring-2
+              focus-visible:ring-[hsl(var(--foreground))] focus-visible:ring-offset-2"
           >
             <span className="inline-flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-foreground border border-border text-xs font-medium px-3 py-1.5 rounded-[var(--radius)]">
               <Eye className="h-3.5 w-3.5" />
