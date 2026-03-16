@@ -70,7 +70,8 @@ const ReviewProduct = () => {
           <Button 
             onClick={submitReview}
             disabled={rating === 0 || review.trim() === ""}
-            className="w-full h-12 bg-foreground text-background hover:bg-foreground/90 font-light rounded-none"
+            size="lg"
+            className="w-full"
           >
             Submit review
           </Button>

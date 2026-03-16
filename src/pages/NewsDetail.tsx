@@ -239,7 +239,7 @@ const NewsDetail = () => {
                     <h3 className="text-lg font-semibold mb-2">訂閱最新資訊</h3>
                     <p className="text-sm text-background/70 mb-4">獲取展覽預告及行業動態</p>
                     <Link to="/contact">
-                      <Button variant="outline" className="w-full border-background text-background hover:bg-background hover:text-foreground">
+                      <Button variant="outline-inverse" className="w-full">
                         聯絡我們
                       </Button>
                     </Link>
