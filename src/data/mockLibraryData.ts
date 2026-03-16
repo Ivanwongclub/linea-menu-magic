@@ -13,6 +13,8 @@ import wovenLabel from '@/assets/products/woven-label.jpg';
 
 // MIGRATED — types moved to src/features/products/legacyTypes.ts
 // This file can be deleted when mockLibraryItems usages are removed
+import type { LibraryItem } from '@/features/products/legacyTypes';
+
 /** @deprecated Import from '@/features/products/legacyTypes' instead */
 export type { DownloadableFile, LibraryItem } from '@/features/products/legacyTypes';
 /** @deprecated Import from '@/features/products/legacyTypes' instead */
