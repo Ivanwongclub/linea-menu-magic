@@ -29,6 +29,14 @@ import AboutSustainability from "./pages/about/Sustainability";
 
 const queryClient = new QueryClient();
 
+// ANALYTICS PLACEHOLDER
+// Wire tracking scripts here once consent is granted.
+// Use consent.analytics for GA4, consent.marketing for Meta/LinkedIn.
+//
+// Example:
+//   const { consent } = useCookieContext();
+//   useEffect(() => { if (consent.analytics) { gtag('config', 'G-XXXXXXXX'); } }, [consent.analytics]);
+//   useEffect(() => { if (consent.marketing) { fbq('init', 'XXXXXXXXXX'); } }, [consent.marketing]);
 
 const App = () => (
   <CookieProvider>
