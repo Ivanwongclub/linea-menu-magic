@@ -195,7 +195,7 @@ export default function ProductDetail() {
   const images = product.images ?? [];
   const primaryCat = product.primary_category ?? product.categories?.[0];
 
-  const breadcrumbItems = [
+  const breadcrumbSegments = [
     { label: 'Home', href: '/' },
     { label: 'Trim Library', href: '/products' },
     ...(primaryCat
@@ -210,9 +210,7 @@ export default function ProductDetail() {
 
       <main className="pb-16">
         {/* Breadcrumb */}
-        <div className="section-inner pt-6 pb-4">
-          <PageBreadcrumb items={breadcrumbItems} />
-        </div>
+        <PageBreadcrumb segments={breadcrumbSegments} title={product.name_en ?? product.name} />
 
         {/* Two-column layout */}
         <div className="section-inner">
