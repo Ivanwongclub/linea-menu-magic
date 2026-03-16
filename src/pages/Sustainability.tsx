@@ -160,7 +160,7 @@ const Sustainability = () => {
                   }`}
                   style={getInitDelay(index)}
                 >
-                  <initiative.icon className="w-8 h-8 text-accent mb-6" strokeWidth={1.5} />
+                  <initiative.icon className="w-8 h-8 text-foreground mb-6" strokeWidth={1.5} />
                   <h3 className="text-xl font-semibold text-foreground mb-2">
                     {initiative.titleCn}
                   </h3>
