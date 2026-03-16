@@ -214,33 +214,41 @@ export default function ProductsSidebar({
             <>
               <span className="text-xs italic text-muted-foreground block mb-1">Sustainable</span>
               {sustainableMaterials.map((mat) => (
-                <label key={mat.id} className="flex items-center gap-2 cursor-pointer group">
+                <div key={mat.id} className="flex items-center gap-2">
                   <Checkbox
+                    id={`mat-${mat.slug}`}
                     checked={filters.materials?.includes(mat.slug) ?? false}
                     onCheckedChange={() =>
                       setFilters({ materials: toggleArrayFilter(filters.materials, mat.slug) })
                     }
                   />
-                  <span className="text-sm text-foreground group-hover:text-foreground/80">
+                  <label
+                    htmlFor={`mat-${mat.slug}`}
+                    className="text-sm text-foreground cursor-pointer group-hover:text-foreground/80"
+                  >
                     {mat.name}
-                  </span>
-                </label>
+                  </label>
+                </div>
               ))}
               <div className="h-2" />
             </>
           )}
           {standardMaterials.map((mat) => (
-            <label key={mat.id} className="flex items-center gap-2 cursor-pointer group">
+            <div key={mat.id} className="flex items-center gap-2">
               <Checkbox
+                id={`mat-${mat.slug}`}
                 checked={filters.materials?.includes(mat.slug) ?? false}
                 onCheckedChange={() =>
                   setFilters({ materials: toggleArrayFilter(filters.materials, mat.slug) })
                 }
               />
-              <span className="text-sm text-foreground group-hover:text-foreground/80">
+              <label
+                htmlFor={`mat-${mat.slug}`}
+                className="text-sm text-foreground cursor-pointer group-hover:text-foreground/80"
+              >
                 {mat.name}
-              </span>
-            </label>
+              </label>
+            </div>
           ))}
         </div>
       </FilterSection>
