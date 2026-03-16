@@ -369,6 +369,10 @@ const DesignerStudioDashboard = () => {
                       <BookOpen className="w-3.5 h-3.5" />
                       Brochures
                     </TabsTrigger>
+                    <TabsTrigger value="products" className="gap-1.5 text-sm px-3 h-7">
+                      <Package className="w-3.5 h-3.5" />
+                      Products
+                    </TabsTrigger>
                   </TabsList>
                 </Tabs>
               </div>
