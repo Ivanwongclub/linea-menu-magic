@@ -122,7 +122,7 @@ function buildPattern(size: number, theme: CategoryTheme, variation: ProductVari
     for (let x = Math.floor(step / 2); x <= size; x += step) {
       for (let y = Math.floor(step / 2); y <= size; y += step) {
         parts.push(`<path d="M ${x - arm} ${y} H ${x + arm}" stroke="${stroke}" stroke-width="1.1"/>`);
-        parts.push(`<path d="M ${x} ${y - arm} V ${x === x ? y + arm : y}" stroke="${stroke}" stroke-width="1.1"/>`);
+        parts.push(`<path d="M ${x} ${y - arm} V ${y + arm}" stroke="${stroke}" stroke-width="1.1"/>`);
       }
     }
   }
