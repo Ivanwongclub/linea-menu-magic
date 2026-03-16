@@ -104,7 +104,7 @@ const Sustainability = () => {
         <section ref={visionRef} className="py-24 px-6 lg:px-8 overflow-hidden">
           <div className="max-w-4xl mx-auto text-center">
             <div className="flex items-start justify-center gap-4 mb-8">
-              <span className={`w-1 bg-accent self-stretch min-h-[3rem] transition-all duration-700 ${visionVisible ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: '200ms' }} />
+              <span className={`w-1 bg-foreground self-stretch min-h-[3rem] transition-all duration-700 ${visionVisible ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: '200ms' }} />
               <div className="text-5xl md:text-6xl lg:text-7xl text-foreground leading-[0.9]">
                 <LetterReveal
                   text="我們的"
@@ -160,7 +160,7 @@ const Sustainability = () => {
                   }`}
                   style={getInitDelay(index)}
                 >
-                  <initiative.icon className="w-8 h-8 text-accent mb-6" strokeWidth={1.5} />
+                  <initiative.icon className="w-8 h-8 text-foreground mb-6" strokeWidth={1.5} />
                   <h3 className="text-xl font-semibold text-foreground mb-2">
                     {initiative.titleCn}
                   </h3>
@@ -184,8 +184,8 @@ const Sustainability = () => {
                 greenVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'
               }`}>
                 <div className="flex items-center gap-2 mb-4">
-                  <Leaf className="w-5 h-5 text-accent" strokeWidth={1.5} />
-                  <span className="text-xs tracking-[0.2em] uppercase text-accent">Green Initiative</span>
+                  <Leaf className="w-5 h-5 text-foreground" strokeWidth={1.5} />
+                  <span className="text-xs tracking-[0.2em] uppercase text-muted-foreground">Green Initiative</span>
                 </div>
                 <LetterReveal
                   text="綠色願景"
@@ -204,7 +204,7 @@ const Sustainability = () => {
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   {greenVisionItems.map((item) => (
                     <div key={item.title} className="flex items-start gap-3 p-3 bg-white/50 rounded-lg">
-                      <item.icon className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+                      <item.icon className="w-5 h-5 text-foreground flex-shrink-0 mt-0.5" strokeWidth={1.5} />
                       <div>
                         <p className="text-sm font-medium text-foreground">{item.title}</p>
                         <p className="text-xs text-muted-foreground">{item.desc}</p>

@@ -21,23 +21,23 @@ interface PageBreadcrumbProps {
 const PageBreadcrumb = ({ segments, title }: PageBreadcrumbProps) => {
   return (
     <div className="pt-8 pb-4 px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-[1200px] mx-auto">
         <Breadcrumb>
-          <BreadcrumbList>
+          <BreadcrumbList className="text-xs uppercase tracking-[0.06em] text-muted-foreground">
             {segments.map((segment, index) => {
               const isLast = index === segments.length - 1;
               return (
                 <span key={index} className="contents">
                   <BreadcrumbItem>
                     {isLast ? (
-                      <BreadcrumbPage>{segment.label}</BreadcrumbPage>
+                      <BreadcrumbPage className="text-xs uppercase tracking-[0.06em]">{segment.label}</BreadcrumbPage>
                     ) : (
                       <BreadcrumbLink asChild>
-                        <Link to={segment.href || "/"}>{segment.label}</Link>
+                        <Link to={segment.href || "/"} className="text-xs uppercase tracking-[0.06em]">{segment.label}</Link>
                       </BreadcrumbLink>
                     )}
                   </BreadcrumbItem>
-                  {!isLast && <BreadcrumbSeparator />}
+                  {!isLast && <BreadcrumbSeparator className="text-muted-foreground" />}
                 </span>
               );
             })}

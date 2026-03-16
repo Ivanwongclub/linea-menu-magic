@@ -89,7 +89,7 @@ const UploadModal = ({ isOpen, onClose }: UploadModalProps) => {
           {state === "idle" && (
             <div
               className={`border-2 border-dashed rounded-xl p-10 text-center transition-colors cursor-pointer ${
-                dragOver ? "border-accent bg-accent/5" : "border-border hover:border-muted-foreground"
+                dragOver ? "border-foreground bg-secondary" : "border-border hover:border-muted-foreground"
               }`}
               onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
               onDragLeave={() => setDragOver(false)}
