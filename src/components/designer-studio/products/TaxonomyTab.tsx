@@ -84,7 +84,7 @@ function TaxonomyTable<T extends TaxonomyItem>({
 
   const handleAdd = async () => {
     setSaving(true);
-    const { error } = await supabase.from(tableName).insert(newValues);
+    const { error } = await (supabase.from(tableName as any) as any).insert(newValues);
     if (error) {
       toast.error(`Add failed: ${error.message}`);
     } else {
