@@ -35,10 +35,7 @@ const ReviewProduct = () => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button 
-          variant="outline" 
-          className="w-full h-12 font-light rounded-none border-foreground text-foreground hover:bg-foreground hover:text-background"
-        >
+        <Button variant="outline" size="lg" className="w-full">
           Review product
         </Button>
       </DialogTrigger>
