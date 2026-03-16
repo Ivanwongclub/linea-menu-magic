@@ -251,7 +251,7 @@ export default function ProductDetail() {
           <div className="grid grid-cols-1 md:grid-cols-[55%_45%] gap-8 lg:gap-12">
             {/* LEFT — Gallery */}
             <div>
-              <ImageGallery images={images} />
+              <ImageGallery images={galleryImages} />
 
               {product.model_url && (
                 <Button
