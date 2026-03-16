@@ -806,10 +806,7 @@ export const mockLibraryItems: LibraryItem[] = [
   },
 ];
 
-export const categoryLabels: Record<LibraryItem['category'], string> = {
-  buttons: '鈕扣',
-  zippers: '拉鏈',
-  lace: '蕾絲花邊',
-  hardware: '五金配件',
-  other: '其他',
-};
+// MIGRATED — categoryLabels moved to src/features/products/legacyTypes.ts
+/** @deprecated Import from '@/features/products/legacyTypes' instead */
+export { categoryLabels } from '@/features/products/legacyTypes';
+
