@@ -70,8 +70,11 @@ function toLegacyItem(item: UserLibraryItem): LibraryItem {
     description: p?.description_en || p?.description || '',
     specifications: (p?.specifications as Record<string, string>) ?? {},
     pricing: { unitPrice: 0, currency: 'USD', moq: 0 },
-    production: (p?.production as { leadTime?: string; sampleTime?: string; origin?: string; capacity?: string }) ?? {
-      leadTime: '', sampleTime: '', origin: '', capacity: '',
+    production: {
+      leadTime: (p?.production as Record<string, string>)?.leadTime ?? '',
+      sampleTime: (p?.production as Record<string, string>)?.sampleTime ?? '',
+      origin: (p?.production as Record<string, string>)?.origin ?? '',
+      capacity: (p?.production as Record<string, string>)?.capacity ?? '',
     },
     certifications: p?.certifications?.map(c => c.name) ?? [],
     availableColors: [],
