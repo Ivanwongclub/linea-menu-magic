@@ -61,7 +61,7 @@ function PageSlot({
   return (
     <div className="w-full h-full relative bg-white overflow-hidden">
       {!isLoaded && (
-        <div className="absolute inset-0 bg-muted animate-pulse" />
+        <div className="absolute inset-0 bg-muted animate-pulse" aria-hidden="true" />
       )}
       <img
         src={page.image_url}
@@ -344,24 +344,22 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
             <PageSlot page={newLeftPage} showHotlinks={showHotlinks} editHints={editHints} isLoaded={isLoaded(newLeftPage)} />
           </div>
 
-          {canGoBack && (
-            <button
-              onClick={goPrev}
-              className="absolute left-2 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-black/20 hover:bg-black/40 text-white flex items-center justify-center backdrop-blur-sm transition-colors"
-              aria-label="Previous page"
-            >
-              <ChevronLeft size={20} />
-            </button>
-          )}
-          {canGoForward && (
-            <button
-              onClick={goNext}
-              className="absolute right-2 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-black/20 hover:bg-black/40 text-white flex items-center justify-center backdrop-blur-sm transition-colors"
-              aria-label="Next page"
-            >
-              <ChevronRight size={20} />
-            </button>
-          )}
+          <button
+            onClick={goPrev}
+            disabled={!canGoBack}
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-black/20 hover:bg-black/40 text-white flex items-center justify-center backdrop-blur-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            aria-label="Previous page"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <button
+            onClick={goNext}
+            disabled={!canGoForward}
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-black/20 hover:bg-black/40 text-white flex items-center justify-center backdrop-blur-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            aria-label="Next page"
+          >
+            <ChevronRight size={20} />
+          </button>
 
           {/* Page indicator */}
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 px-3 py-1 rounded-full bg-black/50 backdrop-blur-sm text-white text-xs tabular-nums">
@@ -508,24 +506,22 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
         </div>
 
         {/* Navigation arrows */}
-        {canGoBack && (
-          <button
-            onClick={goPrev}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"
-            aria-label="Previous page"
-          >
-            <ChevronLeft size={20} />
-          </button>
-        )}
-        {canGoForward && (
-          <button
-            onClick={goNext}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"
-            aria-label="Next page"
-          >
-            <ChevronRight size={20} />
-          </button>
-        )}
+        <button
+          onClick={goPrev}
+          disabled={!canGoBack}
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 disabled:opacity-0 disabled:group-hover:opacity-30 disabled:cursor-not-allowed"
+          aria-label="Previous page"
+        >
+          <ChevronLeft size={20} />
+        </button>
+        <button
+          onClick={goNext}
+          disabled={!canGoForward}
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 disabled:opacity-0 disabled:group-hover:opacity-30 disabled:cursor-not-allowed"
+          aria-label="Next page"
+        >
+          <ChevronRight size={20} />
+        </button>
 
         {/* Page indicator */}
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 px-3 py-1 rounded-full bg-black/50 backdrop-blur-sm text-white text-xs tabular-nums">

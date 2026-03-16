@@ -68,20 +68,20 @@ export default function BrochureViewer() {
   /* ---- preload first N images with progress ---- */
   useEffect(() => {
     if (!brochure) return;
+    let cancelled = false;
     const toLoad = brochure.pages.slice(0, PRELOAD_COUNT);
     let loaded = 0;
     setLoadedCount(0);
     toLoad.forEach((page) => {
       const img = new Image();
       img.onload = img.onerror = () => {
+        if (cancelled) return;
         loaded++;
         setLoadedCount(loaded);
-        if (loaded >= toLoad.length) {
-          // imagesReady is set via BrandedLoader onComplete
-        }
       };
       img.src = page.image_url;
     });
+    return () => { cancelled = true; };
   }, [brochure]);
 
   /* ---- loading (data fetch) ---- */
