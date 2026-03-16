@@ -292,6 +292,7 @@ export default function Products() {
                 <ProductGridSkeleton viewMode={viewMode} />
               ) : products.length > 0 ? (
                 <div
+                  aria-label="Product catalog"
                   className={
                     viewMode === 'grid'
                       ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5'
@@ -309,7 +310,7 @@ export default function Products() {
                   ))}
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center py-24 text-center">
+                <div role="status" className="flex flex-col items-center justify-center py-24 text-center">
                   <PackageOpen className="h-12 w-12 text-muted-foreground mb-4" />
                   <p className="text-sm font-medium text-foreground mb-1">
                     No products found
