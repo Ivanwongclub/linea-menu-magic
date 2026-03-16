@@ -189,17 +189,21 @@ export default function ProductsSidebar({
       <FilterSection label="Collection" defaultOpen>
         <div className="space-y-2">
           {taxonomy.tags.map((tag) => (
-            <label key={tag.id} className="flex items-center gap-2 cursor-pointer group">
+            <div key={tag.id} className="flex items-center gap-2">
               <Checkbox
+                id={`tag-${tag.slug}`}
                 checked={filters.tags?.includes(tag.slug) ?? false}
                 onCheckedChange={() =>
                   setFilters({ tags: toggleArrayFilter(filters.tags, tag.slug) })
                 }
               />
-              <span className="text-sm text-foreground group-hover:text-foreground/80">
+              <label
+                htmlFor={`tag-${tag.slug}`}
+                className="text-sm text-foreground cursor-pointer group-hover:text-foreground/80"
+              >
                 {tag.name}
-              </span>
-            </label>
+              </label>
+            </div>
           ))}
         </div>
       </FilterSection>
