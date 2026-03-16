@@ -10,6 +10,7 @@ import BackToTop from "./components/ui/BackToTop";
 import Index from "./pages/Index";
 import About from "./pages/About";
 import Products from "./pages/Products";
+import ProductDetail from "./pages/ProductDetail";
 import Sustainability from "./pages/Sustainability";
 import News from "./pages/News";
 import NewsDetail from "./pages/NewsDetail";
@@ -56,6 +57,7 @@ const App = () => (
             <Route path="/about/certificates" element={<Certificates />} />
             <Route path="/about/sustainability" element={<AboutSustainability />} />
             <Route path="/products" element={<Products />} />
+            <Route path="/products/:slug" element={<ProductDetail />} />
             <Route path="/sustainability" element={<Sustainability />} />
             <Route path="/news" element={<News />} />
             <Route path="/news/:id" element={<NewsDetail />} />
