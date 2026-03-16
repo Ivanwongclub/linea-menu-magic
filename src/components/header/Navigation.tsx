@@ -111,6 +111,12 @@ const Navigation = () => {
       ],
       images: []
     },
+    {
+      name: "Brochures",
+      href: "/brochures",
+      submenuItems: [],
+      images: []
+    },
     { 
       name: "關於我們", 
       href: "/about/our-story",
