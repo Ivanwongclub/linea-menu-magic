@@ -1,3 +1,5 @@
+// DEPRECATED — Dead route. Replaced by /products with Supabase-backed filters.
+// Do not delete yet; some old bookmarks may reference /category/:slug.
 import { useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import Header from "../components/header/Header";

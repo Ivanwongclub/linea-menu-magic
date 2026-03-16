@@ -62,7 +62,11 @@ export interface LibraryItem {
   updatedAt: string;
 }
 
-// MIGRATED TO SUPABASE — pending UI update
+// DEPRECATED — All product data now lives in Supabase.
+// This array is kept temporarily for legacy component compatibility.
+// Remove once LibraryItemDetail, ProductQuickView, and QuickRFQDialog
+// are migrated to use UserLibraryItem / Product types directly.
+/** @deprecated Use useUserLibrary() or useProducts() hooks instead */
 export const mockLibraryItems: LibraryItem[] = [
   {
     id: 'item-001',

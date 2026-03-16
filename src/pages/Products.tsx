@@ -292,6 +292,7 @@ export default function Products() {
                 <ProductGridSkeleton viewMode={viewMode} />
               ) : products.length > 0 ? (
                 <div
+                  aria-label="Product catalog"
                   className={
                     viewMode === 'grid'
                       ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5'
@@ -309,7 +310,7 @@ export default function Products() {
                   ))}
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center py-24 text-center">
+                <div role="status" className="flex flex-col items-center justify-center py-24 text-center">
                   <PackageOpen className="h-12 w-12 text-muted-foreground mb-4" />
                   <p className="text-sm font-medium text-foreground mb-1">
                     No products found
@@ -390,12 +391,13 @@ function IndustryBar({
             ? Array.from({ length: 5 }).map((_, i) => (
                 <Skeleton key={i} className="h-8 w-24 rounded-[var(--radius)]" />
               ))
-            : industries.map((ind) => {
+              : industries.map((ind) => {
                 const isActive = active?.includes(ind.slug) ?? false;
                 return (
                   <button
                     key={ind.slug}
                     onClick={() => onToggle(ind.slug)}
+                    aria-pressed={isActive}
                     className={`shrink-0 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.08em] rounded-[var(--radius)] border transition-all duration-150 ${
                       isActive
                         ? 'bg-foreground text-background border-foreground'
@@ -417,7 +419,7 @@ function IndustryBar({
 function ProductGridSkeleton({ viewMode = 'grid' }: { viewMode?: ViewMode }) {
   if (viewMode === 'list') {
     return (
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3" aria-hidden="true">
         {Array.from({ length: 8 }).map((_, i) => (
           <div key={i} className="flex items-center gap-4 h-20 border border-border rounded-[var(--radius)] px-3">
             <Skeleton className="h-16 w-16 rounded-[var(--radius)]" />
@@ -432,7 +434,7 @@ function ProductGridSkeleton({ viewMode = 'grid' }: { viewMode?: ViewMode }) {
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5" aria-hidden="true">
       {Array.from({ length: 8 }).map((_, i) => (
         <div key={i} className="border border-border rounded-[var(--radius)] overflow-hidden">
           <Skeleton className="aspect-square w-full" />
