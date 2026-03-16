@@ -13,7 +13,7 @@ import {
   RotateCcw, Sun, Moon, Image, Download, File,
   FileType, FileCode
 } from "lucide-react";
-import { LibraryItem, categoryLabels } from "@/data/mockLibraryData";
+import { LibraryItem, categoryLabels } from "@/features/products/legacyTypes";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
 import QuickRFQDialog from "./QuickRFQDialog";

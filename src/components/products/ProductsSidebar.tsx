@@ -163,20 +163,24 @@ export default function ProductsSidebar({
           {taxonomy.categories.map((cat) => {
             const count = categoryCounts?.[cat.slug] ?? 0;
             return (
-              <label key={cat.id} className="flex items-center gap-2 cursor-pointer group">
+              <div key={cat.id} className="flex items-center gap-2">
                 <Checkbox
+                  id={`cat-${cat.slug}`}
                   checked={filters.categories?.includes(cat.slug) ?? false}
                   onCheckedChange={() =>
                     setFilters({ categories: toggleArrayFilter(filters.categories, cat.slug) })
                   }
                 />
-                <span className="text-sm text-foreground group-hover:text-foreground/80 flex-1">
+                <label
+                  htmlFor={`cat-${cat.slug}`}
+                  className="text-sm text-foreground cursor-pointer group-hover:text-foreground/80 flex-1"
+                >
                   {cat.name}
-                </span>
+                </label>
                 {count > 0 && (
                   <span className="text-xs text-muted-foreground">{count}</span>
                 )}
-              </label>
+              </div>
             );
           })}
         </div>
@@ -185,17 +189,21 @@ export default function ProductsSidebar({
       <FilterSection label="Collection" defaultOpen>
         <div className="space-y-2">
           {taxonomy.tags.map((tag) => (
-            <label key={tag.id} className="flex items-center gap-2 cursor-pointer group">
+            <div key={tag.id} className="flex items-center gap-2">
               <Checkbox
+                id={`tag-${tag.slug}`}
                 checked={filters.tags?.includes(tag.slug) ?? false}
                 onCheckedChange={() =>
                   setFilters({ tags: toggleArrayFilter(filters.tags, tag.slug) })
                 }
               />
-              <span className="text-sm text-foreground group-hover:text-foreground/80">
+              <label
+                htmlFor={`tag-${tag.slug}`}
+                className="text-sm text-foreground cursor-pointer group-hover:text-foreground/80"
+              >
                 {tag.name}
-              </span>
-            </label>
+              </label>
+            </div>
           ))}
         </div>
       </FilterSection>
@@ -206,33 +214,41 @@ export default function ProductsSidebar({
             <>
               <span className="text-xs italic text-muted-foreground block mb-1">Sustainable</span>
               {sustainableMaterials.map((mat) => (
-                <label key={mat.id} className="flex items-center gap-2 cursor-pointer group">
+                <div key={mat.id} className="flex items-center gap-2">
                   <Checkbox
+                    id={`mat-${mat.slug}`}
                     checked={filters.materials?.includes(mat.slug) ?? false}
                     onCheckedChange={() =>
                       setFilters({ materials: toggleArrayFilter(filters.materials, mat.slug) })
                     }
                   />
-                  <span className="text-sm text-foreground group-hover:text-foreground/80">
+                  <label
+                    htmlFor={`mat-${mat.slug}`}
+                    className="text-sm text-foreground cursor-pointer group-hover:text-foreground/80"
+                  >
                     {mat.name}
-                  </span>
-                </label>
+                  </label>
+                </div>
               ))}
               <div className="h-2" />
             </>
           )}
           {standardMaterials.map((mat) => (
-            <label key={mat.id} className="flex items-center gap-2 cursor-pointer group">
+            <div key={mat.id} className="flex items-center gap-2">
               <Checkbox
+                id={`mat-${mat.slug}`}
                 checked={filters.materials?.includes(mat.slug) ?? false}
                 onCheckedChange={() =>
                   setFilters({ materials: toggleArrayFilter(filters.materials, mat.slug) })
                 }
               />
-              <span className="text-sm text-foreground group-hover:text-foreground/80">
+              <label
+                htmlFor={`mat-${mat.slug}`}
+                className="text-sm text-foreground cursor-pointer group-hover:text-foreground/80"
+              >
                 {mat.name}
-              </span>
-            </label>
+              </label>
+            </div>
           ))}
         </div>
       </FilterSection>
@@ -240,17 +256,21 @@ export default function ProductsSidebar({
       <FilterSection label="Application" defaultOpen={false}>
         <div className="space-y-2">
           {taxonomy.industries.map((ind) => (
-            <label key={ind.id} className="flex items-center gap-2 cursor-pointer group">
+            <div key={ind.id} className="flex items-center gap-2">
               <Checkbox
+                id={`ind-${ind.slug}`}
                 checked={filters.industries?.includes(ind.slug) ?? false}
                 onCheckedChange={() =>
                   setFilters({ industries: toggleArrayFilter(filters.industries, ind.slug) })
                 }
               />
-              <span className="text-sm text-foreground group-hover:text-foreground/80">
+              <label
+                htmlFor={`ind-${ind.slug}`}
+                className="text-sm text-foreground cursor-pointer group-hover:text-foreground/80"
+              >
                 {ind.name}
-              </span>
-            </label>
+              </label>
+            </div>
           ))}
         </div>
       </FilterSection>
@@ -258,8 +278,9 @@ export default function ProductsSidebar({
       <FilterSection label="Sustainability" defaultOpen={false}>
         <div className="space-y-2">
           {taxonomy.certifications.map((cert) => (
-            <label key={cert.id} className="flex items-center gap-2 cursor-pointer group">
+            <div key={cert.id} className="flex items-center gap-2">
               <Checkbox
+                id={`cert-${cert.abbreviation.toLowerCase()}`}
                 checked={
                   filters.certifications?.includes(cert.abbreviation.toLowerCase()) ?? false
                 }
@@ -272,13 +293,13 @@ export default function ProductsSidebar({
                   })
                 }
               />
-              <div>
-                <span className="text-sm text-foreground group-hover:text-foreground/80 block">
+              <label htmlFor={`cert-${cert.abbreviation.toLowerCase()}`}>
+                <span className="text-sm text-foreground cursor-pointer group-hover:text-foreground/80 block">
                   {cert.abbreviation}
                 </span>
                 <span className="text-xs text-muted-foreground">{cert.name}</span>
-              </div>
-            </label>
+              </label>
+            </div>
           ))}
         </div>
       </FilterSection>

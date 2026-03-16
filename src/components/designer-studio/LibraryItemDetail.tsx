@@ -19,7 +19,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { ArrowLeft, Download, Globe, Lock, ZoomIn, Package, Clock, MapPin, Award, Palette, Layers } from "lucide-react";
-import { LibraryItem, categoryLabels } from "@/data/mockLibraryData";
+import { LibraryItem, categoryLabels } from "@/features/products/legacyTypes";
 import Model3DViewer from "./Model3DViewer";
 import { cn } from "@/lib/utils";
 
