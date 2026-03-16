@@ -198,27 +198,20 @@ function ProductCardList({
   onQuickView?: (product: Product) => void;
 }) {
   const tags = product.tags ?? [];
+  const imageUrl = resolveProductImage(product, 'thumb');
 
   return (
     <div className="group flex items-center gap-4 h-20 bg-card border border-border rounded-[var(--radius)] overflow-hidden px-3 cursor-pointer transition-[border-color] duration-200 hover:border-foreground">
       {/* Image */}
-      <div className="h-16 w-16 shrink-0 bg-secondary rounded-[var(--radius)] overflow-hidden">
-        {product.thumbnail_url ? (
-          <img
-            src={product.thumbnail_url}
-            alt={`${product.name_en ?? product.name}${product.primary_category ? ` — ${product.primary_category.name}` : ''}`}
-            width={64}
-            height={64}
-            className="w-full h-full object-contain p-1"
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <span className="text-[8px] text-muted-foreground font-mono">
-              {product.item_code}
-            </span>
-          </div>
-        )}
+      <div className="relative h-16 w-16 shrink-0 bg-secondary rounded-[var(--radius)] overflow-hidden">
+        <img
+          src={imageUrl}
+          alt={`${product.name_en ?? product.name}${product.primary_category ? ` — ${product.primary_category.name}` : ''}`}
+          width={64}
+          height={64}
+          className="absolute inset-0 h-full w-full object-cover"
+          loading="lazy"
+        />
       </div>
 
       {/* Info */}
