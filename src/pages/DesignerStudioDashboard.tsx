@@ -106,7 +106,10 @@ const DesignerStudioDashboard = () => {
   }, []);
 
   // Main tab state
-  const [activeMainTab, setActiveMainTab] = useState<"library" | "rfq" | "brochures">("library");
+  const [activeMainTab, setActiveMainTab] = useState<"library" | "rfq" | "brochures" | "products">("library");
+
+  // Product editor state
+  const [editingProductId, setEditingProductId] = useState<string | null | undefined>(null);
 
   // Library — Supabase data
   const { items: libraryItems, loading: libraryLoading, toggleFavourite, removeItem } = useUserLibrary(teamId);
