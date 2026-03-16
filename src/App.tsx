@@ -21,6 +21,7 @@ import Contact from "./pages/Contact";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import NotFound from "./pages/NotFound";
+import CookiePolicy from "./pages/CookiePolicy";
 import OurStory from "./pages/about/OurStory";
 import Factory from "./pages/about/Factory";
 import Certificates from "./pages/about/Certificates";
