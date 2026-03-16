@@ -10,6 +10,7 @@ import BackToTop from "./components/ui/BackToTop";
 import Index from "./pages/Index";
 import About from "./pages/About";
 import Products from "./pages/Products";
+import ProductDetail from "./pages/ProductDetail";
 import Sustainability from "./pages/Sustainability";
 import News from "./pages/News";
 import NewsDetail from "./pages/NewsDetail";
