@@ -334,7 +334,7 @@ function FilterSection({
           />
         </CollapsibleTrigger>
       </SectionHeading>
-      <CollapsibleContent className="pb-4">{children}</CollapsibleContent>
+      <CollapsibleContent className="pb-4 scroll-mt-0">{children}</CollapsibleContent>
     </Collapsible>
   );
 }

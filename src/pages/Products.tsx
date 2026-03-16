@@ -172,39 +172,43 @@ export default function Products() {
           loading={taxonomy.loading}
         />
 
-        {/* Active Filter Chips */}
-        {activeChips.length > 0 && (
-          <div className="px-6 lg:px-8 py-3">
-            <div className="max-w-[1200px] mx-auto flex flex-wrap gap-2 items-center">
-              {activeChips.map((chip) => (
-                <span
-                  key={chip.key}
-                  className="inline-flex items-center gap-1.5 bg-secondary border border-border text-xs font-medium px-3 py-1 rounded-[var(--radius)]"
-                >
-                  {chip.label}
-                  <button onClick={() => removeChip(chip)}>
-                    <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+        {/* Active Filter Chips — always rendered, fixed min-height */}
+        <div className="px-6 lg:px-8 min-h-[44px] flex items-center">
+          <div className="max-w-[1200px] mx-auto w-full">
+            {activeChips.length > 0 ? (
+              <div className="flex flex-wrap gap-2 items-center py-2">
+                {activeChips.map((chip) => (
+                  <span
+                    key={chip.key}
+                    className="inline-flex items-center gap-1.5 bg-secondary border border-border text-xs font-medium px-3 py-1 rounded-[var(--radius)] animate-fade-in"
+                  >
+                    {chip.label}
+                    <button onClick={() => removeChip(chip)}>
+                      <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                    </button>
+                  </span>
+                ))}
+                {activeChips.length >= 2 && (
+                  <button
+                    onClick={clearFilters}
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors ml-1"
+                  >
+                    Clear all
                   </button>
-                </span>
-              ))}
-              {activeChips.length >= 2 && (
-                <button
-                  onClick={clearFilters}
-                  className="text-xs text-muted-foreground hover:text-foreground transition-colors ml-1"
-                >
-                  Clear all
-                </button>
-              )}
-            </div>
+                )}
+              </div>
+            ) : (
+              <span className="invisible">&#8203;</span>
+            )}
           </div>
-        )}
+        </div>
 
         {/* Body: Sidebar + Grid */}
         <section className="px-6 lg:px-8 pb-24">
-          <div className="max-w-[1200px] mx-auto flex gap-10">
+          <div className="max-w-[1200px] mx-auto flex items-start gap-10">
             {/* Desktop Sidebar */}
-            <aside className="hidden lg:block w-60 shrink-0">
-              <div className="sticky top-28">
+            <aside className="hidden lg:block w-60 shrink-0 sticky top-[80px] self-start max-h-[calc(100vh-96px)] overflow-y-auto overscroll-contain scrollbar-hide pb-8">
+              <div className="will-change-auto">
                 <ProductsSidebar {...sidebarProps} />
               </div>
             </aside>
@@ -231,10 +235,12 @@ export default function Products() {
                   </SheetTrigger>
                   <SheetContent
                     side="left"
-                    className="w-80 overflow-y-auto bg-background p-6"
+                    className="w-80 bg-background p-0 flex flex-col"
                   >
                     <SheetTitle className="sr-only">Filters</SheetTitle>
-                    <ProductsSidebar {...sidebarProps} />
+                    <div className="flex-1 overflow-y-auto overscroll-contain p-6 pb-24">
+                      <ProductsSidebar {...sidebarProps} />
+                    </div>
                   </SheetContent>
                 </Sheet>
               </div>
