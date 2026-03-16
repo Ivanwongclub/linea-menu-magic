@@ -228,17 +228,6 @@ export default function ProductDetail() {
   const certs = product.certifications ?? [];
   const industries = product.industries ?? [];
   const primaryCat = product.primary_category ?? product.categories?.[0];
-  const galleryImages = useMemo<ProductImage[]>(
-    () =>
-      Array.from({ length: 4 }, (_, i) => ({
-        id: `placeholder-${product.id}-${i}`,
-        url: resolveProductImage(product, i, 800),
-        sort_order: i,
-        is_primary: i === 0,
-        alt_text: `${product.name_en ?? product.name} — view ${i + 1}`,
-      })),
-    [product],
-  );
 
   const breadcrumbSegments = [
     { label: 'Home', href: '/' },
