@@ -106,9 +106,17 @@ const Footer = () => {
       <div className="border-t border-white/10 mt-12 pt-8">
         <div className="max-w-[1200px] mx-auto px-10">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <p className="text-xs text-white/35">
-              © 2024 WIN-CYC GROUP LIMITED. All rights reserved.
-            </p>
+            <div className="flex items-center gap-4">
+              <p className="text-xs text-white/35">
+                © 2024 WIN-CYC GROUP LIMITED. All rights reserved.
+              </p>
+              <button
+                onClick={() => { resetConsent(); openCustomise(); }}
+                className="text-xs text-white/45 hover:text-white/70 transition-colors duration-150"
+              >
+                Cookie Settings
+              </button>
+            </div>
             <div className="flex space-x-6">
               <Link to="/privacy-policy" className="text-xs text-white/35 hover:text-white transition-colors duration-150">
                 Privacy Policy
