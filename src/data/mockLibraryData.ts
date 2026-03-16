@@ -11,56 +11,13 @@ import metalClasp from '@/assets/products/metal-clasp.jpg';
 import brandButton from '@/assets/products/brand-button.jpg';
 import wovenLabel from '@/assets/products/woven-label.jpg';
 
-export interface DownloadableFile {
-  id: string;
-  name: string;
-  description: string;
-  fileType: 'obj' | 'stl' | 'step' | 'pdf' | 'ai' | 'dwg' | 'other';
-  fileSize: string;
-  url: string;
-  uploadedAt: string;
-}
+// MIGRATED — types moved to src/features/products/legacyTypes.ts
+// This file can be deleted when mockLibraryItems usages are removed
+/** @deprecated Import from '@/features/products/legacyTypes' instead */
+export type { DownloadableFile, LibraryItem } from '@/features/products/legacyTypes';
+/** @deprecated Import from '@/features/products/legacyTypes' instead */
+export { categoryLabels } from '@/features/products/legacyTypes';
 
-export interface LibraryItem {
-  id: string;
-  itemCode: string;
-  name: string;
-  nameEn: string;
-  category: 'buttons' | 'zippers' | 'lace' | 'hardware' | 'other';
-  description: string;
-  specifications: {
-    material?: string;
-    size?: string;
-    color?: string;
-    finish?: string;
-    weight?: string;
-    thickness?: string;
-    tensileStrength?: string;
-  };
-  pricing: {
-    unitPrice: number;
-    currency: string;
-    moq: number;
-    priceBreaks?: { quantity: number; price: number }[];
-  };
-  production: {
-    leadTime: string;
-    sampleTime: string;
-    origin: string;
-    capacity: string;
-  };
-  certifications: string[];
-  availableColors: string[];
-  applications: string[];
-  downloadableFiles?: DownloadableFile[];
-  isPublic: boolean;
-  teamId?: string;
-  teamName?: string;
-  modelUrl?: string;
-  thumbnailUrl?: string;
-  createdAt: string;
-  updatedAt: string;
-}
 
 // DEPRECATED — All product data now lives in Supabase.
 // This array is kept temporarily for legacy component compatibility.
