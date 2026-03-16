@@ -60,22 +60,14 @@ export default function ProductCard({
     <div className="group bg-card border border-border rounded-[var(--radius)] overflow-hidden cursor-pointer transition-[border-color,box-shadow] duration-200 hover:border-foreground hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
       {/* Image area */}
       <div className="aspect-square relative overflow-hidden bg-secondary">
-        {product.thumbnail_url ? (
-          <img
-            src={product.thumbnail_url}
-            alt={`${product.name_en ?? product.name}${product.primary_category ? ` — ${product.primary_category.name}` : ''}`}
-            width={400}
-            height={400}
-            className="w-full h-full object-contain p-4 transition-transform duration-[400ms] ease-out group-hover:scale-[1.06]"
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <span className="text-xs text-muted-foreground uppercase tracking-wider font-mono">
-              {product.item_code}
-            </span>
-          </div>
-        )}
+        <img
+          src={imageUrl}
+          alt={`${product.name_en ?? product.name}${product.primary_category ? ` — ${product.primary_category.name}` : ''}`}
+          width={400}
+          height={400}
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+          loading="lazy"
+        />
 
         {/* Tag badges (top-left, stacked) */}
         {visibleTags.length > 0 && (
