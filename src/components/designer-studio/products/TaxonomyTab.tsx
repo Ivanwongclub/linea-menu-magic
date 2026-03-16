@@ -98,7 +98,7 @@ function TaxonomyTable<T extends TaxonomyItem>({
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
-    const { error } = await supabase.from(tableName).delete().eq("id", deleteTarget.id);
+    const { error } = await (supabase.from(tableName as any) as any).delete().eq("id", deleteTarget.id);
     if (error) {
       toast.error(`Delete failed: ${error.message}`);
     } else {

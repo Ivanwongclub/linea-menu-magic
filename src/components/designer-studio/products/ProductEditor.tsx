@@ -633,35 +633,42 @@ function TaxonomyCheckboxGroup({
 /* ── Junction table sync helpers ─────────────────────────── */
 
 async function syncJunction(
-  table: string,
-  fkCol: string,
+  _table: "product_category_map",
+  _fkCol: string,
   productId: string,
   selectedIds: Set<string>,
   primaryId: string
 ) {
-  await supabase.from(table).delete().eq("product_id", productId);
+  await supabase.from("product_category_map").delete().eq("product_id", productId);
   const rows = [...selectedIds].map((id) => ({
     product_id: productId,
-    [fkCol]: id,
-    ...(table === "product_category_map" ? { is_primary: id === primaryId } : {}),
+    category_id: id,
+    is_primary: id === primaryId,
   }));
-  if (rows.length) {
-    await supabase.from(table).insert(rows);
-  }
+  if (rows.length) await supabase.from("product_category_map").insert(rows);
 }
 
 async function syncSimpleJunction(
-  table: string,
+  table: "product_material_map" | "product_industry_map" | "product_certification_map" | "product_tag_map",
   fkCol: string,
   productId: string,
   selectedIds: Set<string>
 ) {
-  await supabase.from(table).delete().eq("product_id", productId);
-  const rows = [...selectedIds].map((id) => ({
-    product_id: productId,
-    [fkCol]: id,
-  }));
-  if (rows.length) {
-    await supabase.from(table).insert(rows);
+  if (table === "product_material_map") {
+    await supabase.from("product_material_map").delete().eq("product_id", productId);
+    const rows = [...selectedIds].map((id) => ({ product_id: productId, material_id: id }));
+    if (rows.length) await supabase.from("product_material_map").insert(rows);
+  } else if (table === "product_industry_map") {
+    await supabase.from("product_industry_map").delete().eq("product_id", productId);
+    const rows = [...selectedIds].map((id) => ({ product_id: productId, industry_id: id }));
+    if (rows.length) await supabase.from("product_industry_map").insert(rows);
+  } else if (table === "product_certification_map") {
+    await supabase.from("product_certification_map").delete().eq("product_id", productId);
+    const rows = [...selectedIds].map((id) => ({ product_id: productId, certification_id: id }));
+    if (rows.length) await supabase.from("product_certification_map").insert(rows);
+  } else if (table === "product_tag_map") {
+    await supabase.from("product_tag_map").delete().eq("product_id", productId);
+    const rows = [...selectedIds].map((id) => ({ product_id: productId, tag_id: id }));
+    if (rows.length) await supabase.from("product_tag_map").insert(rows);
   }
 }
