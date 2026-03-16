@@ -61,7 +61,7 @@ function PageSlot({
   return (
     <div className="w-full h-full relative bg-white overflow-hidden">
       {!isLoaded && (
-        <div className="absolute inset-0 bg-muted animate-pulse" />
+        <div className="absolute inset-0 bg-muted animate-pulse" aria-hidden="true" />
       )}
       <img
         src={page.image_url}
