@@ -31,6 +31,7 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <CookieProvider>
+    <CookieBanner />
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
