@@ -179,7 +179,9 @@ function ProductCardList({
         {product.thumbnail_url ? (
           <img
             src={product.thumbnail_url}
-            alt={product.name_en ?? product.name}
+            alt={`${product.name_en ?? product.name}${product.primary_category ? ` — ${product.primary_category.name}` : ''}`}
+            width={64}
+            height={64}
             className="w-full h-full object-contain p-1"
             loading="lazy"
           />

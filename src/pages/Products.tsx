@@ -419,7 +419,7 @@ function IndustryBar({
 function ProductGridSkeleton({ viewMode = 'grid' }: { viewMode?: ViewMode }) {
   if (viewMode === 'list') {
     return (
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3" aria-hidden="true">
         {Array.from({ length: 8 }).map((_, i) => (
           <div key={i} className="flex items-center gap-4 h-20 border border-border rounded-[var(--radius)] px-3">
             <Skeleton className="h-16 w-16 rounded-[var(--radius)]" />
@@ -434,7 +434,7 @@ function ProductGridSkeleton({ viewMode = 'grid' }: { viewMode?: ViewMode }) {
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5" aria-hidden="true">
       {Array.from({ length: 8 }).map((_, i) => (
         <div key={i} className="border border-border rounded-[var(--radius)] overflow-hidden">
           <Skeleton className="aspect-square w-full" />
