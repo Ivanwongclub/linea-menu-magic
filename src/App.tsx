@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CookieProvider } from "@/features/cookies/CookieProvider";
+import CookieBanner from "@/features/cookies/CookieBanner";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ScrollToTop from "./components/ScrollToTop";
 import BackToTop from "./components/ui/BackToTop";
@@ -30,6 +31,7 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <CookieProvider>
+    <CookieBanner />
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
