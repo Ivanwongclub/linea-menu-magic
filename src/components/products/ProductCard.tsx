@@ -34,7 +34,9 @@ export default function ProductCard({
         {product.thumbnail_url ? (
           <img
             src={product.thumbnail_url}
-            alt={product.name_en ?? product.name}
+            alt={`${product.name_en ?? product.name}${product.primary_category ? ` — ${product.primary_category.name}` : ''}`}
+            width={400}
+            height={400}
             className="w-full h-full object-contain p-4 transition-transform duration-[400ms] ease-out group-hover:scale-[1.06]"
             loading="lazy"
           />
