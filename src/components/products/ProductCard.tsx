@@ -1,5 +1,6 @@
 import { Sparkles, Heart, Eye } from 'lucide-react';
 import type { Product } from '@/features/products/types';
+import { getProductPlaceholderUrl } from '@/features/products/utils/productImagePlaceholder';
 
 type ViewMode = 'grid' | 'list';
 
@@ -9,6 +10,33 @@ interface ProductCardProps {
   onQuickView?: (product: Product) => void;
   onAddToLibrary?: (product: Product) => void;
   isInLibrary?: boolean;
+}
+
+function resolveProductImage(
+  product: Product,
+  size: 'thumb' | 'full' = 'thumb',
+): string {
+  const blockedHosts = ['picsum', 'unsplash', 'lorempixel'];
+  const isBlocked = (url: string) => blockedHosts.some((host) => url.toLowerCase().includes(host));
+
+  if (product.images?.length) {
+    const primary = product.images.find((img) => img.is_primary) ?? product.images[0];
+    if (primary?.url && !isBlocked(primary.url)) {
+      return primary.url;
+    }
+  }
+
+  if (product.thumbnail_url && !isBlocked(product.thumbnail_url)) {
+    return product.thumbnail_url;
+  }
+
+  return getProductPlaceholderUrl(
+    product.name_en ?? product.name,
+    product.item_code,
+    product.primary_category?.slug,
+    product.primary_category?.name,
+    size === 'thumb' ? 400 : 800,
+  );
 }
 
 export default function ProductCard({
@@ -26,27 +54,20 @@ export default function ProductCard({
   const visibleTags = tags.slice(0, 2);
   const extraTagCount = tags.length - 2;
   const certs = product.certifications ?? [];
+  const imageUrl = resolveProductImage(product, 'thumb');
 
   return (
     <div className="group bg-card border border-border rounded-[var(--radius)] overflow-hidden cursor-pointer transition-[border-color,box-shadow] duration-200 hover:border-foreground hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
       {/* Image area */}
       <div className="aspect-square relative overflow-hidden bg-secondary">
-        {product.thumbnail_url ? (
-          <img
-            src={product.thumbnail_url}
-            alt={`${product.name_en ?? product.name}${product.primary_category ? ` — ${product.primary_category.name}` : ''}`}
-            width={400}
-            height={400}
-            className="w-full h-full object-contain p-4 transition-transform duration-[400ms] ease-out group-hover:scale-[1.06]"
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <span className="text-xs text-muted-foreground uppercase tracking-wider font-mono">
-              {product.item_code}
-            </span>
-          </div>
-        )}
+        <img
+          src={imageUrl}
+          alt={`${product.name_en ?? product.name}${product.primary_category ? ` — ${product.primary_category.name}` : ''}`}
+          width={400}
+          height={400}
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+          loading="lazy"
+        />
 
         {/* Tag badges (top-left, stacked) */}
         {visibleTags.length > 0 && (
@@ -177,27 +198,20 @@ function ProductCardList({
   onQuickView?: (product: Product) => void;
 }) {
   const tags = product.tags ?? [];
+  const imageUrl = resolveProductImage(product, 'thumb');
 
   return (
     <div className="group flex items-center gap-4 h-20 bg-card border border-border rounded-[var(--radius)] overflow-hidden px-3 cursor-pointer transition-[border-color] duration-200 hover:border-foreground">
       {/* Image */}
-      <div className="h-16 w-16 shrink-0 bg-secondary rounded-[var(--radius)] overflow-hidden">
-        {product.thumbnail_url ? (
-          <img
-            src={product.thumbnail_url}
-            alt={`${product.name_en ?? product.name}${product.primary_category ? ` — ${product.primary_category.name}` : ''}`}
-            width={64}
-            height={64}
-            className="w-full h-full object-contain p-1"
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <span className="text-[8px] text-muted-foreground font-mono">
-              {product.item_code}
-            </span>
-          </div>
-        )}
+      <div className="relative h-16 w-16 shrink-0 bg-secondary rounded-[var(--radius)] overflow-hidden">
+        <img
+          src={imageUrl}
+          alt={`${product.name_en ?? product.name}${product.primary_category ? ` — ${product.primary_category.name}` : ''}`}
+          width={64}
+          height={64}
+          className="absolute inset-0 h-full w-full object-cover"
+          loading="lazy"
+        />
       </div>
 
       {/* Info */}

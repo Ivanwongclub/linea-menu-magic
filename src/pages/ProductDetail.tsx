@@ -13,7 +13,31 @@ import ProductCard from '@/components/products/ProductCard';
 import Model3DViewer from '@/components/designer-studio/Model3DViewer';
 import { useProduct } from '@/features/products/hooks/useProduct';
 import { useProducts } from '@/features/products/hooks/useProducts';
+import { getProductPlaceholderUrl } from '@/features/products/utils/productImagePlaceholder';
 import type { Product, ProductImage } from '@/features/products/types';
+
+function resolveProductImage(
+  product: Product,
+  index = 0,
+  size = 800,
+): string {
+  const blockedHosts = ['picsum', 'unsplash', 'lorempixel'];
+  const isBlocked = (url: string) => blockedHosts.some((host) => url.toLowerCase().includes(host));
+  const orderedImages = [...(product.images ?? [])].sort((a, b) => a.sort_order - b.sort_order);
+  const img = orderedImages[index];
+
+  if (img?.url && !isBlocked(img.url)) {
+    return img.url;
+  }
+
+  return getProductPlaceholderUrl(
+    product.name_en ?? product.name,
+    `${product.item_code}-${index}`,
+    product.primary_category?.slug,
+    product.primary_category?.name,
+    size,
+  );
+}
 
 /* ─── Image Gallery ──────────────────────────────────── */
 
@@ -160,6 +184,17 @@ export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
   const { product, loading, error } = useProduct(slug ?? '');
   const [show3D, setShow3D] = useState(false);
+  const galleryImages = useMemo<ProductImage[]>(() => {
+    if (!product) return [];
+
+    return Array.from({ length: 4 }, (_, i) => ({
+      id: `placeholder-${product.id}-${i}`,
+      url: resolveProductImage(product, i, 800),
+      sort_order: i,
+      is_primary: i === 0,
+      alt_text: `${product.name_en ?? product.name} — view ${i + 1}`,
+    }));
+  }, [product]);
 
   if (loading) {
     return (
@@ -192,7 +227,6 @@ export default function ProductDetail() {
   const tags = product.tags ?? [];
   const certs = product.certifications ?? [];
   const industries = product.industries ?? [];
-  const images = product.images ?? [];
   const primaryCat = product.primary_category ?? product.categories?.[0];
 
   const breadcrumbSegments = [
@@ -217,7 +251,7 @@ export default function ProductDetail() {
           <div className="grid grid-cols-1 md:grid-cols-[55%_45%] gap-8 lg:gap-12">
             {/* LEFT — Gallery */}
             <div>
-              <ImageGallery images={images} />
+              <ImageGallery images={galleryImages} />
 
               {product.model_url && (
                 <Button
