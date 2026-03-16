@@ -56,6 +56,10 @@ import CreateRFQDialog from "@/components/designer-studio/CreateRFQDialog";
 import BrochuresPanel from "@/components/designer-studio/BrochuresPanel";
 import BrochureEditor from "@/components/designer-studio/BrochureEditor";
 
+// Products CMS
+import ProductsPanel from "@/components/designer-studio/products/ProductsPanel";
+import ProductEditor from "@/components/designer-studio/products/ProductEditor";
+
 import { supabase } from "@/integrations/supabase/client";
 
 // ─── Adapter: UserLibraryItem → legacy LibraryItem ──────
