@@ -1,6 +1,6 @@
 import { ArrowRight, X, Minus, Plus } from "lucide-react";
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import ShoppingBag from "./ShoppingBag";
@@ -23,6 +23,8 @@ const Navigation = () => {
   const [offCanvasType, setOffCanvasType] = useState<'favorites' | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isShoppingBagOpen, setIsShoppingBagOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const location = useLocation();
   
   // Shopping bag state with 3 mock items
   const [cartItems, setCartItems] = useState<CartItem[]>([
@@ -65,18 +67,31 @@ const Navigation = () => {
       );
     }
   };
+
+  // Scroll listener for navbar transparency
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 80);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
   
   // Preload dropdown images for faster display
   useEffect(() => {
-    const imagesToPreload = [
-      "/founders.png"
-    ];
-    
+    const imagesToPreload = ["/founders.png"];
     imagesToPreload.forEach(src => {
       const img = new Image();
       img.src = src;
     });
   }, []);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    document.body.style.overflow = isMobileMenuOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [isMobileMenuOpen]);
 
   const popularSearches = [
     "Metal Buttons",
@@ -133,36 +148,32 @@ const Navigation = () => {
     }
   ];
 
+  const isActiveLink = (href: string) => {
+    return location.pathname === href || location.pathname.startsWith(href + "/");
+  };
+
   return (
     <nav 
-      className="relative" 
-      style={{
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-        backdropFilter: 'blur(10px)'
-      }}
+      className={`sticky top-0 z-50 transition-all duration-200 ease-in-out ${
+        isScrolled
+          ? "bg-white/95 backdrop-blur-sm border-b border-border"
+          : "bg-transparent border-b border-transparent"
+      }`}
     >
       <div className="flex items-center justify-between h-16 px-6">
         {/* Mobile hamburger button */}
         <button
-          className="lg:hidden p-2 mt-0.5 text-nav-foreground hover:text-nav-hover transition-colors duration-200"
+          className="lg:hidden p-2 mt-0.5 text-foreground hover:opacity-60 transition-opacity duration-150"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           aria-label="Toggle menu"
         >
-          <div className="w-5 h-5 relative">
-            <span className={`absolute block w-5 h-px bg-current transform transition-all duration-300 ${
-              isMobileMenuOpen ? 'rotate-45 top-2.5' : 'top-1.5'
-            }`}></span>
-            <span className={`absolute block w-5 h-px bg-current transform transition-all duration-300 top-2.5 ${
-              isMobileMenuOpen ? 'opacity-0' : 'opacity-100'
-            }`}></span>
-            <span className={`absolute block w-5 h-px bg-current transform transition-all duration-300 ${
-              isMobileMenuOpen ? '-rotate-45 top-2.5' : 'top-3.5'
-            }`}></span>
-          </div>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-[22px] h-[22px]">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          </svg>
         </button>
 
         {/* Left navigation - Hidden on tablets and mobile */}
-        <div className="hidden lg:flex space-x-8">
+        <div className="hidden lg:flex gap-10">
           {navItems.map((item) => (
             <div
               key={item.name}
@@ -172,7 +183,11 @@ const Navigation = () => {
             >
               <Link
                 to={item.href}
-                className="text-nav-foreground hover:text-accent transition-colors duration-200 text-sm font-light py-6 block"
+                className={`text-xs font-medium tracking-[0.08em] uppercase transition-colors duration-150 py-5 block border-b-2 ${
+                  isActiveLink(item.href)
+                    ? "text-foreground border-foreground"
+                    : "text-muted-foreground border-transparent hover:text-foreground"
+                }`}
               >
                 {item.name}
               </Link>
@@ -186,7 +201,7 @@ const Navigation = () => {
             <img 
               src="/LINEA-1.svg" 
               alt="LINEA" 
-              className="h-6 w-auto"
+              className="max-h-8 w-auto object-contain"
             />
           </Link>
         </div>
@@ -194,7 +209,7 @@ const Navigation = () => {
         {/* Right icons */}
         <div className="flex items-center space-x-2">
           <button 
-            className="p-2 text-nav-foreground hover:text-nav-hover transition-colors duration-200"
+            className="p-2 text-foreground hover:opacity-60 transition-opacity duration-150"
             aria-label="Search"
             onClick={() => setIsSearchOpen(!isSearchOpen)}
           >
@@ -203,7 +218,7 @@ const Navigation = () => {
             </svg>
           </button>
           <button 
-            className="hidden lg:block p-2 text-nav-foreground hover:text-nav-hover transition-colors duration-200"
+            className="hidden lg:block p-2 text-foreground hover:opacity-60 transition-opacity duration-150"
             aria-label="Favorites"
             onClick={() => setOffCanvasType('favorites')}
           >
@@ -212,7 +227,7 @@ const Navigation = () => {
             </svg>
           </button>
           <button 
-            className="p-2 text-nav-foreground hover:text-nav-hover transition-colors duration-200 relative"
+            className="p-2 text-foreground hover:opacity-60 transition-opacity duration-150 relative"
             aria-label="Shopping bag"
             onClick={() => setIsShoppingBagOpen(true)}
           >
@@ -220,7 +235,7 @@ const Navigation = () => {
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
             </svg>
             {totalItems > 0 && (
-              <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-[30%] text-[0.5rem] font-semibold text-black pointer-events-none">
+              <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-[30%] text-[0.5rem] font-semibold text-foreground pointer-events-none">
                 {totalItems}
               </span>
             )}
@@ -231,7 +246,7 @@ const Navigation = () => {
       {/* Full width dropdown */}
       {activeDropdown && (
         <div 
-          className="absolute top-full left-0 right-0 bg-nav border-b border-border z-50"
+          className="absolute top-full left-0 right-0 bg-white border border-border rounded-[var(--radius)] shadow-[0_4px_16px_rgba(0,0,0,0.08)] z-50"
           onMouseEnter={() => setActiveDropdown(activeDropdown)}
           onMouseLeave={() => setActiveDropdown(null)}
         >
@@ -239,7 +254,7 @@ const Navigation = () => {
             <div className="flex justify-between w-full">
               {/* Left side - Menu items */}
               <div className="flex-1">
-                <ul className="space-y-2">
+                <ul className="space-y-1">
                    {navItems
                      .find(item => item.name === activeDropdown)
                      ?.submenuItems.map((subItem, index) => (
@@ -251,7 +266,7 @@ const Navigation = () => {
                             ? `/category/${subItem.toLowerCase().replace(/\s+/g, '-')}`
                             : `/news`
                           }
-                          className="text-nav-foreground hover:text-accent transition-colors duration-200 text-sm font-light block py-2"
+                          className="text-sm text-foreground hover:bg-secondary transition-colors duration-150 block py-2 px-3 rounded-[var(--radius)]"
                         >
                           {subItem}
                         </Link>
@@ -265,14 +280,13 @@ const Navigation = () => {
                 {navItems
                   .find(item => item.name === activeDropdown)
                   ?.images.map((image, index) => {
-                    // Determine the link destination based on dropdown and image
                     let linkTo = "/";
                     if (activeDropdown === "關於我們") {
                       linkTo = "/about/our-story";
                     }
                     
                     return (
-                      <Link key={index} to={linkTo} className="w-[400px] h-[280px] cursor-pointer group relative overflow-hidden block">
+                      <Link key={index} to={linkTo} className="w-[400px] h-[280px] cursor-pointer group relative overflow-hidden block rounded-[var(--radius)]">
                         <img 
                           src={image.src}
                           alt={image.alt}
@@ -294,20 +308,20 @@ const Navigation = () => {
       {/* Search overlay */}
       {isSearchOpen && (
         <div 
-          className="absolute top-full left-0 right-0 bg-nav border-b border-border z-50"
+          className="absolute top-full left-0 right-0 bg-white border border-border shadow-[0_4px_16px_rgba(0,0,0,0.08)] z-50"
         >
           <div className="px-6 py-8">
             <div className="max-w-2xl mx-auto">
               {/* Search input */}
               <div className="relative mb-8">
                 <div className="flex items-center border-b border-border pb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5 text-nav-foreground mr-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5 text-muted-foreground mr-3">
                     <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                   </svg>
                   <input
                     type="text"
                     placeholder="搜尋產品..."
-                    className="flex-1 bg-transparent text-nav-foreground placeholder:text-nav-foreground/60 outline-none text-lg"
+                    className="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground outline-none text-lg"
                     autoFocus
                   />
                 </div>
@@ -315,12 +329,12 @@ const Navigation = () => {
 
               {/* Popular searches */}
               <div>
-                <h3 className="text-nav-foreground text-sm font-light mb-4">Popular Searches</h3>
+                <h3 className="text-foreground text-xs font-medium tracking-[0.08em] uppercase mb-4">Popular Searches</h3>
                 <div className="flex flex-wrap gap-3">
                   {popularSearches.map((search, index) => (
                     <button
                       key={index}
-                      className="text-nav-foreground hover:text-nav-hover text-sm font-light py-2 px-4 border border-border rounded-full transition-colors duration-200 hover:border-nav-hover"
+                      className="text-foreground hover:bg-secondary text-sm font-medium py-2 px-4 border border-border rounded-[var(--radius)] transition-colors duration-150"
                     >
                       {search}
                     </button>
@@ -332,43 +346,74 @@ const Navigation = () => {
         </div>
       )}
 
-      {/* Mobile navigation menu */}
-      {isMobileMenuOpen && (
-        <div className="lg:hidden absolute top-full left-0 right-0 bg-nav border-b border-border z-50">
-          <div className="px-6 py-8">
-            <div className="space-y-6">
-              {navItems.map((item, index) => (
-                <div key={item.name}>
-                  <Link
-                    to={item.href}
-                    className="text-nav-foreground hover:text-accent transition-colors duration-200 text-lg font-light block py-2"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    {item.name}
-                  </Link>
-                   <div className="mt-3 pl-4 space-y-2">
-                     {item.submenuItems.map((subItem, subIndex) => (
-                       <Link
-                         key={subIndex}
-                         to={item.name === "關於我們" 
-                           ? `/about/${subItem.toLowerCase().replace(/\s+/g, '-')}` 
-                           : item.name === "產品"
-                           ? `/category/${subItem.toLowerCase().replace(/\s+/g, '-')}`
-                           : `/news`
-                         }
-                         className="text-nav-foreground/70 hover:text-accent text-sm font-light block py-1"
-                         onClick={() => setIsMobileMenuOpen(false)}
-                       >
-                         {subItem}
-                       </Link>
-                     ))}
-                   </div>
+      {/* Mobile navigation menu — full-screen slide-in from right */}
+      <div
+        className={`lg:hidden fixed inset-0 z-[100] bg-white transition-transform duration-300 ${
+          isMobileMenuOpen
+            ? "translate-x-0"
+            : "translate-x-full"
+        }`}
+        style={{ transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)" }}
+      >
+        {/* Close button */}
+        <div className="flex items-center justify-end h-16 px-6">
+          <button
+            className="p-2 text-foreground hover:opacity-60 transition-opacity duration-150"
+            onClick={() => setIsMobileMenuOpen(false)}
+            aria-label="Close menu"
+          >
+            <X size={22} />
+          </button>
+        </div>
+
+        {/* Menu links */}
+        <div className="flex flex-col flex-1">
+          {navItems.map((item) => (
+            <div key={item.name}>
+              <Link
+                to={item.href}
+                className="text-2xl font-semibold tracking-tight text-foreground hover:opacity-60 transition-opacity duration-150 block py-5 px-6 border-b border-border"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {item.name}
+              </Link>
+              {item.submenuItems.length > 0 && (
+                <div className="bg-secondary">
+                  {item.submenuItems.map((subItem, subIndex) => (
+                    <Link
+                      key={subIndex}
+                      to={item.name === "關於我們" 
+                        ? `/about/${subItem.toLowerCase().replace(/\s+/g, '-')}` 
+                        : item.name === "產品"
+                        ? `/category/${subItem.toLowerCase().replace(/\s+/g, '-')}`
+                        : `/news`
+                      }
+                      className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-150 block py-3 px-6 border-b border-border"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      {subItem}
+                    </Link>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
+          ))}
+
+          {/* CTA buttons at bottom */}
+          <div className="mt-auto px-6 pb-8 pt-6 space-y-4">
+            <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)}>
+              <Button className="w-full">
+                聯絡我們
+              </Button>
+            </Link>
+            <Link to="/designer-studio" onClick={() => setIsMobileMenuOpen(false)}>
+              <Button variant="outline" className="w-full">
+                Designer Studio
+              </Button>
+            </Link>
           </div>
         </div>
-      )}
+      </div>
       
       {/* Shopping Bag Component */}
       <ShoppingBag 
@@ -395,10 +440,10 @@ const Navigation = () => {
           <div className="absolute right-0 top-0 h-screen w-96 bg-background border-l border-border animate-slide-in-right flex flex-col">
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-border">
-              <h2 className="text-lg font-light text-foreground">Your Favorites</h2>
+              <h2 className="text-lg font-medium text-foreground">Your Favorites</h2>
               <button
                 onClick={() => setOffCanvasType(null)}
-                className="p-2 text-foreground hover:text-muted-foreground transition-colors"
+                className="p-2 text-foreground hover:opacity-60 transition-opacity"
                 aria-label="Close"
               >
                 <X size={20} />

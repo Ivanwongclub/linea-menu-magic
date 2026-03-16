@@ -18,11 +18,11 @@ const StatusBar = () => {
   }, [usps.length]);
 
   return (
-    <div className="bg-status-bar text-status-bar-foreground py-2">
+    <div className="bg-foreground text-background py-2">
       <div className="container mx-auto px-4 text-center">
         <p 
           key={currentIndex}
-          className="text-sm font-light transition-all duration-700 ease-in-out opacity-100 animate-fade-in"
+          className="text-xs tracking-[0.06em] uppercase font-medium transition-all duration-700 ease-in-out opacity-100 animate-fade-in"
         >
           {usps[currentIndex]}
         </p>
