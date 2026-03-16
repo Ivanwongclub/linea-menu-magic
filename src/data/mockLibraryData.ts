@@ -62,6 +62,7 @@ export interface LibraryItem {
   updatedAt: string;
 }
 
+// MIGRATED TO SUPABASE — pending UI update
 export const mockLibraryItems: LibraryItem[] = [
   {
     id: 'item-001',
