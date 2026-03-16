@@ -1,13 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { BookOpen, Code2, Link2 } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
 import EmbedModal from "@/components/EmbedModal";
-import { useBrochures } from "@/features/flipbook/hooks/useBrochures";
+import { useBrochures, type BrochureWithMeta } from "@/features/flipbook/hooks/useBrochures";
 import { toast } from "sonner";
-import type { Brochure } from "@/features/flipbook/types";
 
 export default function Brochures() {
   const { data: brochures, isLoading } = useBrochures();
@@ -33,7 +32,7 @@ export default function Brochures() {
           Our Brochures
         </h1>
         <p className="text-muted-foreground text-sm md:text-base max-w-xl leading-relaxed">
-          Browse our latest digital publications and catalogues.
+          Browse and read our latest publications
         </p>
       </section>
 
@@ -93,12 +92,25 @@ function BrochureCard({
   onEmbed,
   onCopyLink,
 }: {
-  brochure: Brochure;
+  brochure: BrochureWithMeta;
   index: number;
   onEmbed: () => void;
   onCopyLink: (e: React.MouseEvent) => void;
 }) {
   const [linkTooltip, setLinkTooltip] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Staggered entry with reduced-motion check
+  useEffect(() => {
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced) {
+      setVisible(true);
+      return;
+    }
+    const timer = setTimeout(() => setVisible(true), index * 60);
+    return () => clearTimeout(timer);
+  }, [index]);
 
   const handleCopy = (e: React.MouseEvent) => {
     onCopyLink(e);
@@ -106,19 +118,27 @@ function BrochureCard({
     setTimeout(() => setLinkTooltip(false), 1500);
   };
 
+  const coverSrc = brochure.first_page_url ?? brochure.cover_image_url;
+
   return (
     <div
-      className="group rounded-lg border border-transparent bg-card overflow-hidden transition-all duration-300 hover:border-accent/40 opacity-0 animate-fade-up"
-      style={{ animationDelay: `${index * 60}ms`, animationFillMode: "forwards" }}
+      ref={cardRef}
+      className="group rounded-lg border border-transparent bg-card overflow-hidden transition-all duration-300 hover:border-primary/40"
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translateY(0)" : "translateY(16px)",
+        transition: "opacity 350ms ease-out, transform 350ms ease-out, border-color 300ms",
+      }}
     >
-      <Link to={`/brochures/${brochure.slug}`} className="block relative">
+      {/* Cover area — 65% visual weight */}
+      <Link to={`/brochures/${brochure.slug}`} className="block relative cursor-pointer">
         <div
           className="aspect-[3/4] overflow-hidden relative transition-all duration-300 group-hover:-translate-y-1.5 group-hover:scale-[1.02]"
           style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.18)" }}
         >
-          {brochure.cover_image_url ? (
+          {coverSrc ? (
             <img
-              src={brochure.cover_image_url}
+              src={coverSrc}
               alt={brochure.title}
               className="w-full h-full object-cover object-top"
               loading="lazy"
@@ -129,12 +149,34 @@ function BrochureCard({
               <span className="text-xs text-muted-foreground mt-2">No cover</span>
             </div>
           )}
+
+          {/* Right-side spine shadow */}
+          <div
+            className="absolute top-0 right-0 w-2 h-full pointer-events-none"
+            style={{
+              background: "linear-gradient(to right, rgba(0,0,0,0), rgba(0,0,0,0.25))",
+            }}
+          />
+
+          {/* Left-edge highlight */}
+          <div
+            className="absolute top-0 left-0 w-px h-full pointer-events-none"
+            style={{ backgroundColor: "rgba(255,255,255,0.15)" }}
+          />
+
+          {/* Page count badge */}
+          {brochure.page_count > 0 && (
+            <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded-full bg-black/60 text-white text-[11px] backdrop-blur-sm">
+              {brochure.page_count} pages
+            </div>
+          )}
         </div>
       </Link>
 
+      {/* Info area */}
       <div className="p-4">
         <Link to={`/brochures/${brochure.slug}`}>
-          <h2 className="text-[15px] font-semibold text-foreground truncate leading-snug">
+          <h2 className="text-[16px] font-semibold text-foreground truncate leading-snug hover:text-primary transition-colors">
             {brochure.title}
           </h2>
         </Link>
@@ -147,9 +189,9 @@ function BrochureCard({
         <div className="flex items-center justify-between mt-3">
           <Link
             to={`/brochures/${brochure.slug}`}
-            className="text-[13px] font-semibold text-accent hover:underline inline-flex items-center gap-1"
+            className="text-[13px] font-semibold text-primary hover:underline inline-flex items-center gap-1"
           >
-            Read
+            Read now
             <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">→</span>
           </Link>
 
