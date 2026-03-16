@@ -71,7 +71,7 @@ function TaxonomyTable<T extends TaxonomyItem>({
   const saveEdit = async () => {
     if (!editingId) return;
     setSaving(true);
-    const { error } = await supabase.from(tableName).update(editValues).eq("id", editingId);
+    const { error } = await (supabase.from(tableName as any) as any).update(editValues).eq("id", editingId);
     if (error) {
       toast.error(`Save failed: ${error.message}`);
     } else {
