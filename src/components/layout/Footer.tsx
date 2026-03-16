@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useCookieContext } from "@/features/cookies/CookieProvider";
 
 const Footer = () => {
   return (
