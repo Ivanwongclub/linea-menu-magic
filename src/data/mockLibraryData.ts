@@ -808,7 +808,4 @@ export const mockLibraryItems: LibraryItem[] = [
   },
 ];
 
-// MIGRATED — categoryLabels moved to src/features/products/legacyTypes.ts
-/** @deprecated Import from '@/features/products/legacyTypes' instead */
-export { categoryLabels } from '@/features/products/legacyTypes';
-
+// End of file — all types migrated to src/features/products/legacyTypes.ts
