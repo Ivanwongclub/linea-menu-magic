@@ -163,20 +163,24 @@ export default function ProductsSidebar({
           {taxonomy.categories.map((cat) => {
             const count = categoryCounts?.[cat.slug] ?? 0;
             return (
-              <label key={cat.id} className="flex items-center gap-2 cursor-pointer group">
+              <div key={cat.id} className="flex items-center gap-2">
                 <Checkbox
+                  id={`cat-${cat.slug}`}
                   checked={filters.categories?.includes(cat.slug) ?? false}
                   onCheckedChange={() =>
                     setFilters({ categories: toggleArrayFilter(filters.categories, cat.slug) })
                   }
                 />
-                <span className="text-sm text-foreground group-hover:text-foreground/80 flex-1">
+                <label
+                  htmlFor={`cat-${cat.slug}`}
+                  className="text-sm text-foreground cursor-pointer group-hover:text-foreground/80 flex-1"
+                >
                   {cat.name}
-                </span>
+                </label>
                 {count > 0 && (
                   <span className="text-xs text-muted-foreground">{count}</span>
                 )}
-              </label>
+              </div>
             );
           })}
         </div>
