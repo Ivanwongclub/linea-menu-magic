@@ -271,7 +271,7 @@ const Products = () => {
             </p>
             <Link
               to="/contact"
-              className="inline-block px-12 py-4 bg-accent text-accent-foreground text-xs tracking-[0.2em] uppercase rounded-full transition-all duration-300 hover:bg-accent/90"
+              className="inline-block px-12 py-4 bg-background text-foreground text-xs tracking-[0.06em] uppercase rounded-[var(--radius)] border-2 border-background hover:bg-white/90 transition-all duration-200"
             >
               聯絡我們
             </Link>
