@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Upload, X, FileText, File } from "lucide-react";
-import { LibraryItem, categoryLabels } from "@/data/mockLibraryData";
+import { LibraryItem, categoryLabels } from "@/features/products/legacyTypes";
 import { useToast } from "@/hooks/use-toast";
 
 interface QuickRFQDialogProps {
