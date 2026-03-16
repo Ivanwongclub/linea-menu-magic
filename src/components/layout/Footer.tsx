@@ -2,6 +2,8 @@ import { Link } from "react-router-dom";
 import { useCookieContext } from "@/features/cookies/CookieProvider";
 
 const Footer = () => {
+  const { resetConsent, openCustomise } = useCookieContext();
+
   return (
     <footer className="w-full bg-foreground text-background pt-16 pb-8">
       <div className="max-w-[1200px] mx-auto px-10">
