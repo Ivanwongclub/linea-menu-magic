@@ -1,0 +1,233 @@
+import { Sparkles, Heart, Eye } from 'lucide-react';
+import type { Product } from '@/features/products/types';
+
+type ViewMode = 'grid' | 'list';
+
+interface ProductCardProps {
+  product: Product;
+  viewMode: ViewMode;
+  onQuickView?: (product: Product) => void;
+  onAddToLibrary?: (product: Product) => void;
+  isInLibrary?: boolean;
+}
+
+export default function ProductCard({
+  product,
+  viewMode,
+  onQuickView,
+  onAddToLibrary,
+  isInLibrary,
+}: ProductCardProps) {
+  if (viewMode === 'list') {
+    return <ProductCardList product={product} onQuickView={onQuickView} />;
+  }
+
+  const tags = product.tags ?? [];
+  const visibleTags = tags.slice(0, 2);
+  const extraTagCount = tags.length - 2;
+  const certs = product.certifications ?? [];
+
+  return (
+    <div className="group bg-card border border-border rounded-[var(--radius)] overflow-hidden cursor-pointer transition-[border-color,box-shadow] duration-200 hover:border-foreground hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
+      {/* Image area */}
+      <div className="aspect-square relative overflow-hidden bg-secondary">
+        {product.thumbnail_url ? (
+          <img
+            src={product.thumbnail_url}
+            alt={product.name_en ?? product.name}
+            className="w-full h-full object-contain p-4 transition-transform duration-[400ms] ease-out group-hover:scale-[1.06]"
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider font-mono">
+              {product.item_code}
+            </span>
+          </div>
+        )}
+
+        {/* Tag badges (top-left, stacked) */}
+        {visibleTags.length > 0 && (
+          <div className="absolute top-2.5 left-2.5 flex flex-col gap-1">
+            {visibleTags.map((tag) => (
+              <span
+                key={tag.id}
+                className="bg-foreground text-background text-[10px] font-medium uppercase tracking-[0.06em] px-2 py-0.5 rounded-[var(--radius)]"
+              >
+                {tag.name}
+              </span>
+            ))}
+            {extraTagCount > 0 && (
+              <span className="bg-foreground text-background text-[10px] font-medium px-2 py-0.5 rounded-[var(--radius)]">
+                +{extraTagCount}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Quick View button (center, on hover) */}
+        {onQuickView && (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onQuickView(product);
+            }}
+            className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-200 ease-out"
+          >
+            <span className="inline-flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-foreground border border-border text-xs font-medium px-3 py-1.5 rounded-[var(--radius)]">
+              <Eye className="h-3.5 w-3.5" />
+              Quick View
+            </span>
+          </button>
+        )}
+
+        {/* Customizable badge (bottom-right) */}
+        {product.is_customizable && (
+          <span className="absolute bottom-2.5 right-2.5 inline-flex items-center gap-1 bg-foreground text-background text-[10px] px-2 py-0.5 rounded-[var(--radius)]">
+            <Sparkles className="h-3 w-3" />
+            Custom
+          </span>
+        )}
+      </div>
+
+      {/* Info area */}
+      <div className="p-3">
+        {/* Primary category */}
+        {product.primary_category && (
+          <p className="text-[10px] font-medium uppercase tracking-[0.08em] text-muted-foreground mb-1">
+            {product.primary_category.name}
+          </p>
+        )}
+
+        {/* Product name */}
+        <p className="text-sm font-medium text-foreground line-clamp-2 leading-snug">
+          {product.name_en ?? product.name}
+        </p>
+
+        {/* Item code */}
+        {product.item_code && (
+          <p className="text-[10px] text-muted-foreground font-mono mt-1">
+            {product.item_code}
+          </p>
+        )}
+
+        {/* Certification pills */}
+        {certs.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-2">
+            {certs.map((cert) => (
+              <span
+                key={cert.id}
+                className="bg-secondary text-[9px] font-medium uppercase tracking-[0.04em] px-1.5 py-0.5 border border-border rounded-[var(--radius)]"
+              >
+                {cert.abbreviation}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Action row (hover-revealed on desktop, always on touch) */}
+        <div className="mt-3 pt-3 border-t border-border flex items-center justify-between opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200">
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onQuickView?.(product);
+            }}
+            className="text-xs font-medium uppercase tracking-[0.06em] text-foreground hover:underline"
+          >
+            Enquire →
+          </button>
+
+          {onAddToLibrary && (
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onAddToLibrary(product);
+              }}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Heart
+                className={`h-4 w-4 ${isInLibrary ? 'fill-foreground text-foreground' : ''}`}
+              />
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── List View Card ─────────────────────────────────────
+
+function ProductCardList({
+  product,
+  onQuickView,
+}: {
+  product: Product;
+  onQuickView?: (product: Product) => void;
+}) {
+  const tags = product.tags ?? [];
+
+  return (
+    <div className="group flex items-center gap-4 h-20 bg-card border border-border rounded-[var(--radius)] overflow-hidden px-3 cursor-pointer transition-[border-color] duration-200 hover:border-foreground">
+      {/* Image */}
+      <div className="h-16 w-16 shrink-0 bg-secondary rounded-[var(--radius)] overflow-hidden">
+        {product.thumbnail_url ? (
+          <img
+            src={product.thumbnail_url}
+            alt={product.name_en ?? product.name}
+            className="w-full h-full object-contain p-1"
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <span className="text-[8px] text-muted-foreground font-mono">
+              {product.item_code}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Info */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-medium text-foreground truncate">
+            {product.name_en ?? product.name}
+          </p>
+          {tags.slice(0, 2).map((tag) => (
+            <span
+              key={tag.id}
+              className="shrink-0 bg-foreground text-background text-[9px] font-medium uppercase tracking-[0.04em] px-1.5 py-0.5 rounded-[var(--radius)]"
+            >
+              {tag.name}
+            </span>
+          ))}
+        </div>
+        <p className="text-[10px] text-muted-foreground mt-0.5">
+          {product.primary_category?.name}
+          {product.item_code && ` · ${product.item_code}`}
+        </p>
+      </div>
+
+      {/* Actions */}
+      <div className="shrink-0 flex items-center gap-2">
+        {onQuickView && (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onQuickView(product);
+            }}
+            className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Eye className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export type { ViewMode };

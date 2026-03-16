@@ -1,13 +1,23 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { SlidersHorizontal, X } from 'lucide-react';
+import { SlidersHorizontal, X, LayoutGrid, List, PackageOpen } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import PageBreadcrumb from '@/components/ui/PageBreadcrumb';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import ProductsSidebar from '@/components/products/ProductsSidebar';
+import ProductCard from '@/components/products/ProductCard';
+import type { ViewMode } from '@/components/products/ProductCard';
+import type { Product } from '@/features/products/types';
 
 import { useProducts } from '@/features/products/hooks/useProducts';
 import { useProductTaxonomy } from '@/features/products/hooks/useProductTaxonomy';
@@ -19,6 +29,8 @@ export default function Products() {
   const taxonomy = useProductTaxonomy();
   const { filters, setFilters, clearFilters } = useProductFiltersFromURL();
   const { products, loading, totalCount } = useProducts(filters);
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
 
   // Count products per category (from current result set)
   const categoryCounts = useMemo(() => {
@@ -227,51 +239,87 @@ export default function Products() {
                 </Sheet>
               </div>
 
-              {/* Product Grid */}
-              {loading ? (
-                <ProductGridSkeleton />
-              ) : products.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-                  {products.map((product) => (
-                    <Link
-                      key={product.id}
-                      to={`/products/${product.slug}`}
-                      className="group"
+              {/* Results header */}
+              <div className="flex items-center justify-between mb-6">
+                <span className="text-sm text-muted-foreground">
+                  {loading ? '…' : `${totalCount} product${totalCount !== 1 ? 's' : ''}`}
+                </span>
+
+                <div className="flex items-center gap-3">
+                  {/* View toggle */}
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`p-1 transition-colors ${viewMode === 'grid' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                      aria-label="Grid view"
                     >
-                      <div className="aspect-square overflow-hidden bg-muted/10 mb-3 relative">
-                        {product.thumbnail_url ? (
-                          <img
-                            src={product.thumbnail_url}
-                            alt={product.name_en ?? product.name}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-secondary flex items-center justify-center">
-                            <span className="text-xs text-muted-foreground uppercase tracking-wider">
-                              {product.item_code}
-                            </span>
-                          </div>
-                        )}
-                        {/* Tag badges */}
-                        {product.tags && product.tags.length > 0 && (
-                          <span className="absolute top-3 left-3 bg-foreground text-background text-[10px] tracking-[0.15em] uppercase px-2 py-1">
-                            {product.tags[0].name}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm text-foreground">
-                        {product.name_en ?? product.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {product.primary_category?.name ?? product.item_code}
-                      </p>
+                      <LayoutGrid className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`p-1 transition-colors ${viewMode === 'list' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                      aria-label="List view"
+                    >
+                      <List className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  <span className="text-border">|</span>
+
+                  {/* Sort select */}
+                  <Select
+                    value={filters.sort ?? 'default'}
+                    onValueChange={(val) =>
+                      setFilters({ sort: val === 'default' ? undefined : (val as any) })
+                    }
+                  >
+                    <SelectTrigger className="h-8 text-xs w-[140px]">
+                      <SelectValue placeholder="Sort" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="default">Featured</SelectItem>
+                      <SelectItem value="newest">Newest</SelectItem>
+                      <SelectItem value="name_asc">Name A–Z</SelectItem>
+                      <SelectItem value="name_desc">Name Z–A</SelectItem>
+                      <SelectItem value="category">By Category</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Product Grid / List */}
+              {loading ? (
+                <ProductGridSkeleton viewMode={viewMode} />
+              ) : products.length > 0 ? (
+                <div
+                  className={
+                    viewMode === 'grid'
+                      ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5'
+                      : 'flex flex-col gap-3'
+                  }
+                >
+                  {products.map((product) => (
+                    <Link key={product.id} to={`/products/${product.slug}`}>
+                      <ProductCard
+                        product={product}
+                        viewMode={viewMode}
+                        onQuickView={() => setQuickViewProduct(product)}
+                      />
                     </Link>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-20 text-muted-foreground text-sm">
-                  No products match the current filters.
+                <div className="flex flex-col items-center justify-center py-24 text-center">
+                  <PackageOpen className="h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-sm font-medium text-foreground mb-1">
+                    No products found
+                  </p>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Try adjusting your filters.
+                  </p>
+                  <Button variant="outline" size="sm" onClick={clearFilters}>
+                    Clear filters
+                  </Button>
                 </div>
               )}
             </div>
@@ -366,14 +414,33 @@ function IndustryBar({
 
 // ─── Loading Skeleton ───────────────────────────────────
 
-function ProductGridSkeleton() {
+function ProductGridSkeleton({ viewMode = 'grid' }: { viewMode?: ViewMode }) {
+  if (viewMode === 'list') {
+    return (
+      <div className="flex flex-col gap-3">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="flex items-center gap-4 h-20 border border-border rounded-[var(--radius)] px-3">
+            <Skeleton className="h-16 w-16 rounded-[var(--radius)]" />
+            <div className="flex-1">
+              <Skeleton className="h-4 w-1/2 mb-1" />
+              <Skeleton className="h-3 w-1/3" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-      {Array.from({ length: 9 }).map((_, i) => (
-        <div key={i}>
-          <Skeleton className="aspect-square w-full mb-3" />
-          <Skeleton className="h-4 w-3/4 mb-1" />
-          <Skeleton className="h-3 w-1/2" />
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <div key={i} className="border border-border rounded-[var(--radius)] overflow-hidden">
+          <Skeleton className="aspect-square w-full" />
+          <div className="p-3">
+            <Skeleton className="h-3 w-1/3 mb-2" />
+            <Skeleton className="h-4 w-3/4 mb-1" />
+            <Skeleton className="h-3 w-1/2" />
+          </div>
         </div>
       ))}
     </div>
