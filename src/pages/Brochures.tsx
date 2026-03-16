@@ -40,7 +40,7 @@ export default function Brochures() {
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="rounded-lg border border-border bg-card overflow-hidden">
+              <div key={i} className="rounded-[var(--radius)] border border-border bg-card overflow-hidden">
                 <div className="aspect-[3/4] bg-muted animate-pulse" />
                 <div className="p-4 space-y-3">
                   <div className="h-4 bg-muted animate-pulse rounded w-[80%]" />
@@ -123,24 +123,21 @@ function BrochureCard({
   return (
     <div
       ref={cardRef}
-      className="group rounded-lg border border-transparent bg-card overflow-hidden transition-all duration-300 hover:border-primary/40"
+      className="group rounded-[var(--radius)] border border-border bg-card overflow-hidden transition-[border-color,box-shadow] duration-200 hover:border-foreground hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)]"
       style={{
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(16px)",
-        transition: "opacity 350ms ease-out, transform 350ms ease-out, border-color 300ms",
+        transition: "opacity 350ms ease-out, transform 350ms ease-out, border-color 200ms, box-shadow 200ms",
       }}
     >
-      {/* Cover area — 65% visual weight */}
+      {/* Cover area */}
       <Link to={`/brochures/${brochure.slug}`} className="block relative cursor-pointer">
-        <div
-          className="aspect-[3/4] overflow-hidden relative transition-all duration-300 group-hover:-translate-y-1.5 group-hover:scale-[1.02]"
-          style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.18)" }}
-        >
+        <div className="aspect-[3/4] overflow-hidden relative">
           {coverSrc ? (
             <img
               src={coverSrc}
               alt={brochure.title}
-              className="w-full h-full object-cover object-top"
+              className="w-full h-full object-cover object-top transition-transform duration-[400ms] ease-out group-hover:scale-[1.03]"
               loading="lazy"
             />
           ) : (
@@ -166,7 +163,7 @@ function BrochureCard({
 
           {/* Page count badge */}
           {brochure.page_count > 0 && (
-            <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded-full bg-black/60 text-white text-[11px] backdrop-blur-sm">
+            <div className="absolute bottom-2 left-2 px-2.5 py-1 rounded-[var(--radius)] bg-black/70 text-white text-xs tracking-[0.06em] uppercase backdrop-blur-sm">
               {brochure.page_count} pages
             </div>
           )}
@@ -174,14 +171,14 @@ function BrochureCard({
       </Link>
 
       {/* Info area */}
-      <div className="p-4">
+      <div className="p-4 bg-card border-t border-border">
         <Link to={`/brochures/${brochure.slug}`}>
-          <h2 className="text-[16px] font-semibold text-foreground truncate leading-snug hover:text-primary transition-colors">
+          <h2 className="text-sm font-semibold tracking-tight text-foreground truncate leading-snug hover:opacity-70 transition-opacity">
             {brochure.title}
           </h2>
         </Link>
         {brochure.description && (
-          <p className="text-[13px] text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
+          <p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
             {brochure.description}
           </p>
         )}
@@ -189,7 +186,7 @@ function BrochureCard({
         <div className="flex items-center justify-between mt-3">
           <Link
             to={`/brochures/${brochure.slug}`}
-            className="text-[13px] font-semibold text-primary hover:underline inline-flex items-center gap-1"
+            className="text-xs font-medium uppercase tracking-[0.06em] text-foreground underline-offset-4 hover:underline inline-flex items-center gap-1"
           >
             Read now
             <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">→</span>
@@ -199,20 +196,20 @@ function BrochureCard({
             <div className="relative">
               <button
                 onClick={handleCopy}
-                className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                className="w-7 h-7 flex items-center justify-center rounded-[var(--radius)] text-muted-foreground hover:text-foreground transition-colors"
                 aria-label="Copy link"
               >
                 <Link2 size={15} />
               </button>
               {linkTooltip && (
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded bg-foreground text-background text-[11px] whitespace-nowrap animate-fade-in">
+                <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded-[var(--radius)] bg-foreground text-background text-[11px] whitespace-nowrap animate-fade-in">
                   Copied!
                 </div>
               )}
             </div>
             <button
               onClick={(e) => { e.stopPropagation(); onEmbed(); }}
-              className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              className="w-7 h-7 flex items-center justify-center rounded-[var(--radius)] text-muted-foreground hover:text-foreground transition-colors"
               aria-label="Embed brochure"
             >
               <Code2 size={15} />

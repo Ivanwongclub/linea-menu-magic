@@ -24,6 +24,49 @@ const categories: Category[] = [
   { id: "other", titleEn: "Other Products", count: "28+", description: "Labels, Packaging", image: otherImage },
 ];
 
+const CategoryCard = ({
+  category,
+  aspect,
+  gridVisible,
+  delay,
+}: {
+  category: Category;
+  aspect: string;
+  gridVisible: boolean;
+  delay: React.CSSProperties;
+}) => (
+  <Link
+    key={category.id}
+    to={`/products#${category.id}`}
+    className={`group relative ${aspect} overflow-hidden rounded-[var(--radius)] transition-all duration-700 ease-out ${
+      gridVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-16"
+    }`}
+    style={delay}
+  >
+    <div className="absolute inset-0">
+      <img
+        src={category.image}
+        alt={category.titleEn}
+        className="w-full h-full object-cover transition-transform duration-[400ms] ease-out group-hover:scale-[1.04]"
+      />
+    </div>
+    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+    <div className="absolute inset-0 flex flex-col justify-end p-8">
+      <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+        <span className="text-xs uppercase tracking-widest text-white/60">
+          {category.count} styles
+        </span>
+        <h3 className="text-xs font-medium uppercase tracking-[0.08em] text-white mt-3">
+          {category.titleEn}
+        </h3>
+        <p className="text-xs text-white/60 mt-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+          {category.description}
+        </p>
+      </div>
+    </div>
+  </Link>
+);
+
 const ProductCategories = () => {
   const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation();
   const { ref: gridRef, isVisible: gridVisible, getDelay } = useStaggeredAnimation(5, 150);
@@ -50,51 +93,25 @@ const ProductCategories = () => {
 
         <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {categories.slice(0, 3).map((category, index) => (
-            <Link
+            <CategoryCard
               key={category.id}
-              to={`/products#${category.id}`}
-              className={`group relative aspect-[4/3] bg-white border border-border hover:border-foreground overflow-hidden rounded-[var(--radius)] transition-all duration-700 ease-out ${
-                gridVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-16'
-              }`}
-              style={getDelay(index)}
-            >
-              <div className="absolute inset-0">
-                <img src={category.image} alt={category.titleEn} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-opacity duration-500 group-hover:from-black/85 group-hover:via-black/50" />
-              <div className="absolute inset-0 flex flex-col justify-end p-8">
-                <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                  <span className="text-xs uppercase tracking-widest text-white/60">{category.count} styles</span>
-                  <h3 className="text-2xl font-semibold text-white mt-2">{category.titleEn}</h3>
-                  <p className="text-xs text-white/60 mt-2 opacity-0 group-hover:opacity-100 transition-all duration-300">{category.description}</p>
-                </div>
-              </div>
-            </Link>
+              category={category}
+              aspect="aspect-[4/3]"
+              gridVisible={gridVisible}
+              delay={getDelay(index)}
+            />
           ))}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
           {categories.slice(3).map((category, index) => (
-            <Link
+            <CategoryCard
               key={category.id}
-              to={`/products#${category.id}`}
-              className={`group relative aspect-[16/9] bg-white border border-border hover:border-foreground overflow-hidden rounded-[var(--radius)] transition-all duration-700 ease-out ${
-                gridVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-16'
-              }`}
-              style={getDelay(index + 3)}
-            >
-              <div className="absolute inset-0">
-                <img src={category.image} alt={category.titleEn} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-opacity duration-500 group-hover:from-black/85 group-hover:via-black/50" />
-              <div className="absolute inset-0 flex flex-col justify-end p-8">
-                <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                  <span className="text-xs uppercase tracking-widest text-white/60">{category.count} styles</span>
-                  <h3 className="text-2xl font-semibold text-white mt-2">{category.titleEn}</h3>
-                  <p className="text-xs text-white/60 mt-2 opacity-0 group-hover:opacity-100 transition-all duration-300">{category.description}</p>
-                </div>
-              </div>
-            </Link>
+              category={category}
+              aspect="aspect-[16/9]"
+              gridVisible={gridVisible}
+              delay={getDelay(index + 3)}
+            />
           ))}
         </div>
       </div>
