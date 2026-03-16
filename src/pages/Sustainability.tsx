@@ -229,10 +229,10 @@ const Sustainability = () => {
                 </div>
                 
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-accent text-accent hover:bg-accent hover:text-accent-foreground">
+                  <Button variant="outline">
                     了解環保認證
                   </Button>
-                  <Button variant="ghost" className="text-accent hover:bg-secondary">
+                  <Button variant="ghost">
                     可持續發展報告
                   </Button>
                 </div>

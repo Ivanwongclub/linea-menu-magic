@@ -105,9 +105,7 @@ const ProductInfo = () => {
           </div>
         </div>
 
-        <Button 
-          className="w-full h-12 bg-foreground text-background hover:bg-foreground/90 font-light rounded-none"
-        >
+        <Button size="lg" className="w-full">
           Add to Bag
         </Button>
       </div>
