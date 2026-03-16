@@ -147,6 +147,10 @@ export default function Products() {
           industries={taxonomy.industries}
           active={filters.industries}
           onToggle={(slug) => {
+            if (slug === '__clear__') {
+              setFilters({ industries: undefined });
+              return;
+            }
             const current = filters.industries ?? [];
             const next = current.includes(slug)
               ? current.filter((s) => s !== slug)
