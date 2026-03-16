@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 import LetterReveal from "@/components/ui/LetterReveal";
+import { Button } from "@/components/ui/button";
 import sustainabilityImage from "@/assets/sustainability.jpg";
 
 const SustainabilitySection = () => {
@@ -16,22 +17,22 @@ const SustainabilitySection = () => {
   ];
 
   return (
-    <section className="py-24 px-6 lg:px-8 bg-background overflow-hidden">
-      <div className="max-w-7xl mx-auto">
+    <section className="section-inverse overflow-hidden">
+      <div className="section-inner">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div ref={imageRef} className="relative">
-            <div className={`aspect-square overflow-hidden rounded-lg transition-all duration-1000 ease-out ${imageVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
+            <div className={`aspect-square overflow-hidden rounded-[var(--radius)] transition-all duration-1000 ease-out ${imageVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
               <img src={sustainabilityImage} alt="Sustainability" className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
             </div>
           </div>
 
           <div ref={contentRef}>
-            <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${contentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}>
+            <span className={`section-label transition-all duration-700 ease-out ${contentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}>
               Sustainability
-            </p>
+            </span>
             <div className={`flex items-start gap-4 mb-6`}>
-              <span className={`w-1 bg-accent self-stretch transition-all duration-700 ${contentVisible ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: '300ms' }} />
-              <div className="text-5xl md:text-6xl lg:text-7xl text-foreground leading-[0.9]">
+              <span className={`w-1 bg-white/30 self-stretch transition-all duration-700 ${contentVisible ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: '300ms' }} />
+              <div className="text-5xl md:text-6xl lg:text-7xl text-white leading-[0.9]">
                 <LetterReveal
                   text="Our"
                   as="span"
@@ -50,7 +51,7 @@ const SustainabilitySection = () => {
                 />
               </div>
             </div>
-            <p className={`text-muted-foreground leading-relaxed mb-8 transition-all duration-700 ease-out ${contentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`} style={{ transitionDelay: '600ms' }}>
+            <p className={`text-white/70 leading-relaxed mb-8 transition-all duration-700 ease-out ${contentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`} style={{ transitionDelay: '600ms' }}>
               We believe that quality products should be environmentally responsible. Through internationally certified sustainable processes, we are committed to reducing our ecological footprint while maintaining exceptional quality standards.
             </p>
 
@@ -58,26 +59,25 @@ const SustainabilitySection = () => {
               {certifications.map((cert, index) => (
                 <div
                   key={cert.name}
-                  className={`group p-4 border border-border rounded-lg transition-all duration-500 ease-out hover:border-accent hover:bg-secondary ${
+                  className={`group p-4 border border-white/20 rounded-[var(--radius)] transition-all duration-500 ease-out hover:border-white/50 hover:bg-white/5 ${
                     certVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                   }`}
                   style={getDelay(index)}
                 >
-                  <span className="text-lg font-semibold text-foreground">{cert.name}</span>
-                  <p className="text-xs text-muted-foreground mt-1">{cert.fullName}</p>
+                  <span className="text-lg font-semibold text-white">{cert.name}</span>
+                  <p className="text-xs text-white/50 mt-1">{cert.fullName}</p>
                 </div>
               ))}
             </div>
 
             <Link
               to="/sustainability"
-              className={`group inline-flex items-center text-sm tracking-wider text-foreground link-elegant transition-all duration-700 ease-out ${contentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}
+              className={`transition-all duration-700 ease-out inline-block ${contentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}
               style={{ transitionDelay: '700ms' }}
             >
-              Learn More
-              <svg className="ml-2 w-4 h-4 transition-transform duration-300 group-hover:translate-x-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
+              <Button variant="outline-inverse">
+                Learn More
+              </Button>
             </Link>
           </div>
         </div>

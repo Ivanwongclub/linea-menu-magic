@@ -6,6 +6,7 @@ import HeritageSection from "@/components/home/HeritageSection";
 import DesignerCTA from "@/components/home/DesignerCTA";
 import SustainabilitySection from "@/components/home/SustainabilitySection";
 import ContactSection from "@/components/home/ContactSection";
+import { Separator } from "@/components/ui/separator";
 
 const Index = () => {
   return (
@@ -16,8 +17,10 @@ const Index = () => {
         <HeroSection />
         <ProductCategories />
         <HeritageSection />
+        <Separator className="opacity-50" />
         <SustainabilitySection />
         <DesignerCTA />
+        <Separator className="opacity-50" />
         <ContactSection />
       </main>
       
