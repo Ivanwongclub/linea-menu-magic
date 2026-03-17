@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { format } from "date-fns";
 import {
-  Search, Plus, Pencil, Archive, Trash2, Check,
+  Search, Plus, Pencil, Archive, Trash2, Check, Sparkles, Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,6 +22,10 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
 
 import { useProducts } from "@/features/products/hooks/useProducts";
 import { useProductTaxonomy } from "@/features/products/hooks/useProductTaxonomy";
@@ -288,6 +292,11 @@ export default function ProductCatalogTab({ onOpenEditor }: ProductCatalogTabPro
           </div>
         )}
 
+        <GenerateAIImagesButton
+          productCount={allProducts.filter((p) => !p.thumbnail_url).length}
+          onComplete={fetchAll}
+        />
+
         <Button size="sm" className="gap-1.5 h-8" onClick={() => onOpenEditor?.()}>
           <Plus className="w-3.5 h-3.5" />
           New Product
@@ -426,5 +435,89 @@ export default function ProductCatalogTab({ onOpenEditor }: ProductCatalogTabPro
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  );
+}
+
+/* ── Generate AI Images Button ─────────────────────────── */
+
+function GenerateAIImagesButton({
+  productCount,
+  onComplete,
+}: {
+  productCount: number;
+  onComplete: () => void;
+}) {
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [generating, setGenerating] = useState(false);
+
+  const handleGenerate = async () => {
+    setShowConfirm(false);
+    setGenerating(true);
+    toast.info(`Generating AI images for ${productCount} products. This may take a few minutes…`);
+
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-product-images`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+        },
+      );
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Generation failed");
+
+      toast.success(
+        `Generated ${data.processed} images. ${data.failed ? `${data.failed} failed.` : ""}`,
+      );
+      onComplete();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Image generation failed");
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  return (
+    <>
+      <Button
+        variant="outline"
+        size="sm"
+        className="gap-1.5 h-8"
+        onClick={() => setShowConfirm(true)}
+        disabled={generating || productCount === 0}
+      >
+        {generating ? (
+          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+        ) : (
+          <Sparkles className="w-3.5 h-3.5" />
+        )}
+        {generating ? "Generating…" : "Generate AI Images"}
+      </Button>
+
+      <Dialog open={showConfirm} onOpenChange={setShowConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Generate AI Product Images</DialogTitle>
+            <DialogDescription>
+              This will generate AI product images for {productCount} products without images.
+              This may take a few minutes depending on the number of products.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConfirm(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleGenerate}>
+              <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+              Generate
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
