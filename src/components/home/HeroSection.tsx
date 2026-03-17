@@ -178,7 +178,7 @@ const HeroSection = () => {
 
   return (
     <section
-      className="relative w-full min-h-[90vh] overflow-hidden"
+      className="relative w-full min-h-[100vh] overflow-hidden"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       onTouchStart={handleTouchStart}
@@ -195,6 +195,14 @@ const HeroSection = () => {
           style={{ backgroundColor: slides[prev].bgColor }}
         />
       )}
+
+      {/* Top gradient veil for navbar readability */}
+      <div
+        className="absolute top-0 left-0 right-0 h-28 z-[3] pointer-events-none"
+        style={{
+          background: "linear-gradient(to bottom, rgba(0,0,0,0.25), transparent)",
+        }}
+      />
 
       {/* Slides */}
       {slides.map((slide, index) => {
@@ -230,7 +238,7 @@ const HeroSection = () => {
             )}
 
             <div
-              className="relative h-full min-h-[90vh] flex items-center"
+              className="relative h-full min-h-[100vh] flex items-center pt-[80px]"
               style={{
                 transform: `translateY(${parallaxOffset * 0.15}px)`,
                 opacity: opacityFade,
@@ -344,7 +352,7 @@ const HeroSection = () => {
               </div>
 
               {/* Mobile layout: stacked text over background image */}
-              <div className="w-full md:hidden relative z-10 px-6 pt-20 pb-24 flex flex-col justify-end min-h-[90vh]">
+              <div className="w-full md:hidden relative z-10 px-6 pt-[80px] pb-24 flex flex-col justify-end min-h-[100vh]">
                 <p
                   className="text-xs font-medium uppercase tracking-[0.2em] mb-4 transition-all duration-500"
                   style={{
