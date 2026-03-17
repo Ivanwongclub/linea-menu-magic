@@ -16,6 +16,7 @@ import News from "./pages/News";
 import NewsDetail from "./pages/NewsDetail";
 import DesignerStudio from "./pages/DesignerStudio";
 import DesignerStudioDashboard from "./pages/DesignerStudioDashboard";
+import ComposerPage from "./features/designer/pages/ComposerPage";
 import Brochures from "./pages/Brochures";
 import BrochureViewer from "./pages/BrochureViewer";
 import Contact from "./pages/Contact";
