@@ -8,7 +8,7 @@ import {
   forwardRef,
   type TouchEvent as ReactTouchEvent,
 } from "react";
-import { ChevronLeft, ChevronRight, ImageOff } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { BrochureWithPages, Page } from "../types";
 import PageHotlinks from "./PageHotlinks";
@@ -34,13 +34,38 @@ export interface FlipbookViewerHandle {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Constants                                                          */
+/*  Constants & helpers                                                */
 /* ------------------------------------------------------------------ */
 
 const ANIMATION_DURATION = 380;
 
+function normaliseImageUrl(url: string): string {
+  try {
+    const u = new URL(url);
+    u.searchParams.delete("t");
+    u.searchParams.delete("v");
+    u.searchParams.delete("_");
+    return u.toString();
+  } catch {
+    return url;
+  }
+}
+
+function getSpreadPages(
+  spreadIndex: number,
+  pages: Page[],
+  isMobile: boolean
+): (Page | null)[] {
+  if (isMobile) {
+    return [pages[spreadIndex] ?? null];
+  }
+  const leftIndex = spreadIndex * 2;
+  const rightIndex = leftIndex + 1;
+  return [pages[leftIndex] ?? null, pages[rightIndex] ?? null];
+}
+
 /* ------------------------------------------------------------------ */
-/*  Single page renderer (uses shared loaded state)                    */
+/*  Single page renderer                                               */
 /* ------------------------------------------------------------------ */
 
 function PageSlot({
@@ -58,13 +83,15 @@ function PageSlot({
     return <div className="w-full h-full bg-white" />;
   }
 
+  const src = normaliseImageUrl(page.image_url);
+
   return (
     <div className="w-full h-full relative bg-white overflow-hidden">
       {!isLoaded && (
         <div className="absolute inset-0 bg-muted animate-pulse" aria-hidden="true" />
       )}
       <img
-        src={page.image_url}
+        src={src}
         alt={`Page ${page.page_number}`}
         className={`w-full h-full object-contain transition-opacity duration-200 ${
           isLoaded ? "opacity-100" : "opacity-0"
@@ -114,6 +141,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
     const [displayedSpread, setDisplayedSpread] = useState(currentSpread);
     const [isAnimating, setIsAnimating] = useState(false);
     const [animationDirection, setAnimationDirection] = useState<"forward" | "backward">("forward");
+    const [spreadLoading, setSpreadLoading] = useState(false);
 
     const canGoBack = currentSpread > 0;
     const canGoForward = currentSpread < maxSpread;
@@ -161,44 +189,123 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
         const distance = Math.abs(spreadIndex - currentSpread);
         const el = preloadRefs.current[page.id];
         if (!el) return;
-        if (distance === 0) el.fetchPriority = "high";
-        else if (distance <= 2) el.fetchPriority = "auto";
-        else el.fetchPriority = "low";
+        if (distance <= 1) {
+          el.fetchPriority = "high";
+          el.loading = "eager";
+        } else if (distance <= 3) {
+          el.fetchPriority = "auto";
+          el.loading = "lazy";
+        } else {
+          el.fetchPriority = "low";
+          el.loading = "lazy";
+        }
       });
-      // Also force re-render so visible spread gets updated isLoaded
       forceUpdate();
     }, [currentSpread, pages, isMobile]);
 
-    const updateSpread = useCallback(
-      (next: number | ((prev: number) => number)) => {
-        const value = typeof next === "function" ? next(currentSpread) : next;
+    /* ---- JS Image() preload for adjacent spreads ---- */
+    useEffect(() => {
+      const adjacentSpreads = [currentSpread - 1, currentSpread + 1].filter(
+        (s) => s >= 0 && s <= maxSpread
+      );
+      adjacentSpreads.forEach((spread) => {
+        const spreadPages = getSpreadPages(spread, pages, isMobile);
+        spreadPages.forEach((page) => {
+          if (!page) return;
+          if (loadedPages.current.has(page.id)) return;
+          const img = new window.Image();
+          img.fetchPriority = "high";
+          img.onload = () => {
+            loadedPages.current.add(page.id);
+            if (isPageInCurrentSpread(page.id)) forceUpdate();
+          };
+          img.src = normaliseImageUrl(page.image_url);
+        });
+      });
+    }, [currentSpread, maxSpread, pages, isMobile, isPageInCurrentSpread]);
+
+    /* ---- wait for pages helper ---- */
+    const waitForPages = useCallback(
+      (targetPages: (Page | null)[], timeout: number): Promise<void> => {
+        return new Promise((resolve) => {
+          const timer = setTimeout(resolve, timeout);
+          function check() {
+            const loaded = targetPages.every(
+              (p) => !p || loadedPages.current.has(p.id)
+            );
+            if (loaded) {
+              clearTimeout(timer);
+              resolve();
+            } else {
+              requestAnimationFrame(check);
+            }
+          }
+          check();
+        });
+      },
+      []
+    );
+
+    /* ---- spread update (sets state / calls parent) ---- */
+    const commitSpread = useCallback(
+      (value: number) => {
         const clamped = Math.max(0, Math.min(value, maxSpread));
         if (!isControlled) setInternalSpread(clamped);
         onSpreadChange?.(clamped);
       },
-      [currentSpread, maxSpread, isControlled, onSpreadChange]
+      [maxSpread, isControlled, onSpreadChange]
     );
 
-    /* ---- navigation ---- */
+    /* ---- navigation with preload gate ---- */
+    const navigateToSpread = useCallback(
+      async (targetSpread: number) => {
+        if (isAnimating || spreadLoading) return;
+        const clamped = Math.max(0, Math.min(targetSpread, maxSpread));
+        if (clamped === currentSpread) return;
+
+        const targetPages = getSpreadPages(clamped, pages, isMobile);
+        const allLoaded = targetPages.every(
+          (p) => !p || loadedPages.current.has(p.id)
+        );
+
+        if (allLoaded) {
+          commitSpread(clamped);
+        } else {
+          setSpreadLoading(true);
+          // Kick off high-priority fetches for target pages
+          targetPages.forEach((page) => {
+            if (!page || loadedPages.current.has(page.id)) return;
+            const img = new window.Image();
+            img.fetchPriority = "high";
+            img.onload = () => loadedPages.current.add(page.id);
+            img.src = normaliseImageUrl(page.image_url);
+          });
+          await waitForPages(targetPages, 3000);
+          setSpreadLoading(false);
+          commitSpread(clamped);
+        }
+      },
+      [isAnimating, spreadLoading, maxSpread, currentSpread, pages, isMobile, commitSpread, waitForPages]
+    );
+
+    /* ---- public navigation methods ---- */
     const goNext = useCallback(() => {
-      if (!canGoForward || isAnimating) return;
-      updateSpread((s) => s + 1);
-    }, [canGoForward, isAnimating, updateSpread]);
+      if (!canGoForward) return;
+      navigateToSpread(currentSpread + 1);
+    }, [canGoForward, currentSpread, navigateToSpread]);
 
     const goPrev = useCallback(() => {
-      if (!canGoBack || isAnimating) return;
-      updateSpread((s) => s - 1);
-    }, [canGoBack, isAnimating, updateSpread]);
+      if (!canGoBack) return;
+      navigateToSpread(currentSpread - 1);
+    }, [canGoBack, currentSpread, navigateToSpread]);
 
     const goFirst = useCallback(() => {
-      if (isAnimating) return;
-      updateSpread(0);
-    }, [isAnimating, updateSpread]);
+      navigateToSpread(0);
+    }, [navigateToSpread]);
 
     const goLast = useCallback(() => {
-      if (isAnimating) return;
-      updateSpread(maxSpread);
-    }, [isAnimating, maxSpread, updateSpread]);
+      navigateToSpread(maxSpread);
+    }, [maxSpread, navigateToSpread]);
 
     useImperativeHandle(ref, () => ({ goNext, goPrev, goFirst, goLast }), [
       goNext, goPrev, goFirst, goLast,
@@ -280,11 +387,18 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
       (index: number): "high" | "auto" | "low" => {
         const spreadIndex = isMobile ? index : Math.floor(index / 2);
         const distance = Math.abs(spreadIndex - currentSpread);
-        if (distance === 0) return "high";
-        if (distance <= 2) return "auto";
+        if (distance <= 1) return "high";
+        if (distance <= 3) return "auto";
         return "low";
       },
       [currentSpread, isMobile]
+    );
+
+    /* ---- loading overlay ---- */
+    const loadingOverlay = spreadLoading && (
+      <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/60 backdrop-blur-[1px]">
+        <div className="w-5 h-5 rounded-full border-2 border-[hsl(var(--foreground))]/20 border-t-[hsl(var(--foreground))] animate-spin" />
+      </div>
     );
 
     /* ---- hidden preload container for ALL pages ---- */
@@ -307,7 +421,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
               ref={(el) => {
                 preloadRefs.current[page.id] = el;
               }}
-              src={page.image_url}
+              src={normaliseImageUrl(page.image_url)}
               alt=""
               fetchPriority={priority}
               loading={priority === "low" ? "lazy" : undefined}
@@ -341,6 +455,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
               boxShadow: "0 12px 40px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.12)",
             }}
           >
+            {loadingOverlay}
             <PageSlot page={newLeftPage} showHotlinks={showHotlinks} editHints={editHints} isLoaded={isLoaded(newLeftPage)} />
           </div>
 
@@ -392,6 +507,8 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
           className="relative bg-white rounded-lg"
           style={{ ...bookStyle, perspective: "1800px" }}
         >
+          {loadingOverlay}
+
           {/* Base layer: the NEW spread (revealed underneath the flipping page) */}
           <div className="absolute inset-0 flex rounded-lg overflow-hidden">
             <div className="w-1/2 h-full">
