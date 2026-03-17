@@ -18,7 +18,7 @@ export function useBrochures({ allStatuses = false }: UseBrochuresOptions = {}) 
     queryFn: async () => {
       let query = supabase
         .from("flipbook_brochures")
-        .select("*, flipbook_pages(id, image_url, page_number)")
+        .select("*, flipbook_pages(image_url, page_number)")
         .order("created_at", { ascending: false });
 
       if (!allStatuses) {
