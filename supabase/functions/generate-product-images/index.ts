@@ -32,11 +32,25 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     let productId: string | undefined;
+    let batchSize = 10;
+    let offset = 0;
     try {
       const body = await req.json();
       productId = body?.productId;
+      if (body?.batchSize) batchSize = Math.min(Number(body.batchSize), 20);
+      if (body?.offset) offset = Number(body.offset);
     } catch {
       // No body = process all
+    }
+
+    // Count total remaining first (for non-single-product requests)
+    let totalRemaining = 0;
+    if (!productId) {
+      const { count } = await supabase
+        .from("products")
+        .select("id", { count: "exact", head: true })
+        .is("thumbnail_url", null);
+      totalRemaining = count ?? 0;
     }
 
     // Fetch products that need images
@@ -57,14 +71,14 @@ serve(async (req) => {
     if (productId) {
       query = query.eq("id", productId);
     } else {
-      query = query.is("thumbnail_url", null);
+      query = query.is("thumbnail_url", null).range(offset, offset + batchSize - 1);
     }
 
     const { data: products, error: fetchError } = await query;
     if (fetchError) throw new Error(`Fetch error: ${fetchError.message}`);
     if (!products || products.length === 0) {
       return new Response(
-        JSON.stringify({ success: true, processed: 0, failed: 0, results: [], message: "No products need images" }),
+        JSON.stringify({ success: true, processed: 0, failed: 0, remaining: 0, results: [], message: "No products need images" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
