@@ -102,12 +102,36 @@ const HeroSection = () => {
   const [isPaused, setIsPaused] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval>>();
   const [scrollY, setScrollY] = useState(0);
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Preload first slide image
+  useEffect(() => {
+    if (slides[0].image) {
+      const link = document.createElement("link");
+      link.rel = "preload";
+      link.as = "image";
+      link.href = slides[0].image;
+      document.head.appendChild(link);
+      return () => {
+        document.head.removeChild(link);
+      };
+    }
+  }, []);
+
+  // Preload next slide image
+  useEffect(() => {
+    const next = slides[(current + 1) % slides.length];
+    if (!next.image) return;
+    const img = new Image();
+    img.src = next.image;
+  }, [current]);
 
   const parallaxOffset = scrollY * 0.4;
   const opacityFade = Math.max(0, 1 - scrollY / 600);
@@ -140,13 +164,27 @@ const HeroSection = () => {
     return () => clearInterval(intervalRef.current);
   }, [current, isPaused, isTransitioning, goNext]);
 
+  function handleTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0].clientX;
+  }
+
+  function handleTouchEnd(e: React.TouchEvent) {
+    touchEndX.current = e.changedTouches[0].clientX;
+    const delta = touchStartX.current - touchEndX.current;
+    if (Math.abs(delta) > 50) {
+      delta > 0 ? goNext() : goPrev();
+    }
+  }
+
   return (
     <section
       className="relative w-full min-h-[90vh] overflow-hidden"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
-      {/* Background color layer with transition */}
+      {/* Background color layer */}
       <div
         className="absolute inset-0 transition-colors duration-700 ease-in-out"
         style={{ backgroundColor: slides[current].bgColor }}
@@ -162,18 +200,35 @@ const HeroSection = () => {
       {slides.map((slide, index) => {
         const isActive = index === current;
         const isPrevSlide = index === prev;
-        const isVisible = isActive || isPrevSlide;
 
         return (
           <div
             key={slide.id}
             className="absolute inset-0 transition-opacity duration-700 ease-in-out"
             style={{
-              opacity: isActive ? 1 : isPrevSlide ? 0 : 0,
+              opacity: isActive ? 1 : 0,
               pointerEvents: isActive ? "auto" : "none",
               zIndex: isActive ? 2 : isPrevSlide ? 1 : 0,
             }}
           >
+            {/* MOBILE: full-bleed background image */}
+            {slide.image && (
+              <div className="absolute inset-0 md:hidden">
+                <img
+                  src={slide.image}
+                  alt=""
+                  aria-hidden="true"
+                  className={`w-full h-full object-cover ${isActive ? "slide-active-img" : ""}`}
+                />
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background: `linear-gradient(to top, ${slide.bgColor} 10%, ${slide.bgColor}cc 40%, transparent 100%)`,
+                  }}
+                />
+              </div>
+            )}
+
             <div
               className="relative h-full min-h-[90vh] flex items-center"
               style={{
@@ -181,87 +236,67 @@ const HeroSection = () => {
                 opacity: opacityFade,
               }}
             >
-              <div className="w-full max-w-[1400px] mx-auto px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-5 gap-8 items-center">
-                {/* LEFT: Text content */}
-                <div className="lg:col-span-2 flex flex-col justify-center py-20 lg:py-0">
-                  {/* Label */}
+              {/* Desktop layout: two-column grid */}
+              <div className="w-full max-w-[1400px] mx-auto hidden md:grid md:grid-cols-5 gap-8 items-center px-6 lg:px-12">
+                {/* LEFT: Text */}
+                <div className="col-span-2 flex flex-col justify-center">
                   <p
                     className="text-xs font-medium uppercase tracking-[0.2em] mb-6 transition-all duration-500"
                     style={{
                       color: slide.textColor,
-                      opacity: isVisible ? 0.5 : 0,
-                      transform: isActive
-                        ? "translateY(0)"
-                        : "translateY(12px)",
+                      opacity: isActive ? 0.5 : 0,
+                      transform: isActive ? "translateY(0)" : "translateY(12px)",
                       transitionDelay: isActive ? "200ms" : "0ms",
                     }}
                   >
                     {slide.label}
                   </p>
-
-                  {/* Title */}
                   <h1
-                    className="text-4xl md:text-5xl lg:text-6xl font-light leading-[1.1] mb-2 transition-all duration-600"
+                    className="text-5xl lg:text-6xl font-light leading-[1.1] mb-2 transition-all duration-[600ms]"
                     style={{
                       color: slide.textColor,
                       opacity: isActive ? 1 : 0,
-                      transform: isActive
-                        ? "translateY(0)"
-                        : "translateY(20px)",
+                      transform: isActive ? "translateY(0)" : "translateY(20px)",
                       transitionDelay: isActive ? "300ms" : "0ms",
                     }}
                   >
                     {slide.title}
                     <br />
-                    <span className="font-bold italic">
-                      {slide.titleAccent}
-                    </span>
+                    <span className="font-bold italic">{slide.titleAccent}</span>
                   </h1>
-
-                  {/* Subtitle */}
                   <p
                     className="text-sm uppercase tracking-[0.15em] mt-3 mb-6 transition-all duration-500"
                     style={{
                       color: slide.textColor,
                       opacity: isActive ? 0.6 : 0,
-                      transform: isActive
-                        ? "translateY(0)"
-                        : "translateY(16px)",
+                      transform: isActive ? "translateY(0)" : "translateY(16px)",
                       transitionDelay: isActive ? "450ms" : "0ms",
                     }}
                   >
                     {slide.subtitle}
                   </p>
-
-                  {/* Description */}
                   <p
                     className="text-sm leading-relaxed max-w-md mb-8 transition-all duration-500"
                     style={{
                       color: slide.textColor,
                       opacity: isActive ? 0.65 : 0,
-                      transform: isActive
-                        ? "translateY(0)"
-                        : "translateY(16px)",
+                      transform: isActive ? "translateY(0)" : "translateY(16px)",
                       transitionDelay: isActive ? "550ms" : "0ms",
                     }}
                   >
                     {slide.description}
                   </p>
-
-                  {/* CTA */}
                   <div
                     className="transition-all duration-500"
                     style={{
                       opacity: isActive ? 1 : 0,
-                      transform: isActive
-                        ? "translateY(0)"
-                        : "translateY(16px)",
+                      transform: isActive ? "translateY(0)" : "translateY(16px)",
                       transitionDelay: isActive ? "650ms" : "0ms",
                     }}
                   >
                     <Link
                       to={slide.ctaUrl}
-                      className="inline-flex items-center gap-3 text-sm font-medium uppercase tracking-[0.1em] border-2 px-8 py-3 transition-all duration-200 hover:gap-5"
+                      className="inline-flex items-center gap-3 text-sm font-medium uppercase tracking-[0.1em] border-2 px-8 py-3 transition-all duration-200 hover:gap-5 rounded-[var(--radius)]"
                       style={{
                         color: slide.textColor,
                         borderColor: slide.textColor,
@@ -282,22 +317,20 @@ const HeroSection = () => {
                   </div>
                 </div>
 
-                {/* RIGHT: Image */}
-                {slide.image && (
-                  <div className="lg:col-span-3 relative flex items-center justify-center">
+                {/* RIGHT: Image (desktop) */}
+                {slide.image ? (
+                  <div className="col-span-3 relative flex items-center justify-center">
                     <img
                       src={slide.image}
                       alt={slide.label}
-                      className="w-full h-auto max-h-[70vh] object-contain transition-all duration-700"
+                      className={`w-full h-auto max-h-[70vh] object-contain ${isActive ? "slide-active-img" : ""}`}
                       style={{
                         opacity: isActive ? 1 : 0,
-                        transform: isActive
-                          ? "translateX(0) scale(1)"
-                          : "translateX(30px) scale(0.97)",
+                        transitionProperty: "opacity",
+                        transitionDuration: "700ms",
                         transitionDelay: isActive ? "200ms" : "0ms",
                       }}
                     />
-                    {/* Left-edge gradient fade */}
                     <div
                       className="absolute inset-y-0 left-0 w-24 pointer-events-none"
                       style={{
@@ -305,20 +338,91 @@ const HeroSection = () => {
                       }}
                     />
                   </div>
+                ) : (
+                  <div className="col-span-3" />
                 )}
+              </div>
 
-                {/* Full-width text for image-less slides */}
-                {!slide.image && <div className="lg:col-span-3" />}
+              {/* Mobile layout: stacked text over background image */}
+              <div className="w-full md:hidden relative z-10 px-6 pt-20 pb-24 flex flex-col justify-end min-h-[90vh]">
+                <p
+                  className="text-xs font-medium uppercase tracking-[0.2em] mb-4 transition-all duration-500"
+                  style={{
+                    color: slide.textColor,
+                    opacity: isActive ? 0.5 : 0,
+                    transform: isActive ? "translateY(0)" : "translateY(12px)",
+                    transitionDelay: isActive ? "200ms" : "0ms",
+                  }}
+                >
+                  {slide.label}
+                </p>
+                <h1
+                  className="font-light leading-[1.1] mb-2 transition-all duration-[600ms]"
+                  style={{
+                    fontSize: "clamp(2rem, 8vw, 3rem)",
+                    color: slide.textColor,
+                    opacity: isActive ? 1 : 0,
+                    transform: isActive ? "translateY(0)" : "translateY(20px)",
+                    transitionDelay: isActive ? "300ms" : "0ms",
+                  }}
+                >
+                  {slide.title}
+                  <br />
+                  <span className="font-bold italic">{slide.titleAccent}</span>
+                </h1>
+                <p
+                  className="text-xs uppercase tracking-[0.12em] mt-2 mb-4 transition-all duration-500"
+                  style={{
+                    color: slide.textColor,
+                    opacity: isActive ? 0.6 : 0,
+                    transform: isActive ? "translateY(0)" : "translateY(12px)",
+                    transitionDelay: isActive ? "400ms" : "0ms",
+                  }}
+                >
+                  {slide.subtitle}
+                </p>
+                <p
+                  className="text-sm leading-relaxed mb-6 transition-all duration-500"
+                  style={{
+                    color: slide.textColor,
+                    opacity: isActive ? 0.6 : 0,
+                    transform: isActive ? "translateY(0)" : "translateY(12px)",
+                    transitionDelay: isActive ? "500ms" : "0ms",
+                  }}
+                >
+                  {slide.description}
+                </p>
+                <div
+                  className="transition-all duration-500"
+                  style={{
+                    opacity: isActive ? 1 : 0,
+                    transform: isActive ? "translateY(0)" : "translateY(12px)",
+                    transitionDelay: isActive ? "600ms" : "0ms",
+                  }}
+                >
+                  <Link
+                    to={slide.ctaUrl}
+                    className="inline-flex items-center gap-3 text-sm font-medium uppercase tracking-[0.1em] border-2 px-6 py-2.5 rounded-[var(--radius)]"
+                    style={{
+                      color: slide.textColor,
+                      borderColor: slide.textColor,
+                      background: "transparent",
+                    }}
+                  >
+                    {slide.ctaText}
+                    <span>→</span>
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
         );
       })}
 
-      {/* LEFT ARROW */}
+      {/* LEFT ARROW — hidden on mobile */}
       <button
         onClick={goPrev}
-        className="absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-10 w-11 h-11 flex items-center justify-center rounded-full border transition-all duration-200 hover:scale-110"
+        className="absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-10 w-11 h-11 hidden md:flex items-center justify-center rounded-full border transition-all duration-200 hover:scale-110"
         style={{
           borderColor: slides[current].textColor + "33",
           color: slides[current].textColor,
@@ -329,10 +433,10 @@ const HeroSection = () => {
         <ChevronLeft size={20} />
       </button>
 
-      {/* RIGHT ARROW */}
+      {/* RIGHT ARROW — hidden on mobile */}
       <button
         onClick={goNext}
-        className="absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-10 w-11 h-11 flex items-center justify-center rounded-full border transition-all duration-200 hover:scale-110"
+        className="absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-10 w-11 h-11 hidden md:flex items-center justify-center rounded-full border transition-all duration-200 hover:scale-110"
         style={{
           borderColor: slides[current].textColor + "33",
           color: slides[current].textColor,
@@ -345,7 +449,7 @@ const HeroSection = () => {
 
       {/* DOTS NAVIGATION */}
       <div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2"
+        className="absolute bottom-14 md:bottom-8 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2"
         style={{ opacity: opacityFade }}
       >
         {slides.map((_, index) => (
@@ -366,7 +470,7 @@ const HeroSection = () => {
 
       {/* SLIDE COUNTER */}
       <div
-        className="absolute top-8 right-8 z-10 text-xs font-mono tracking-widest"
+        className="absolute top-8 right-8 z-10 text-xs font-mono tracking-widest hidden md:block"
         style={{
           color: slides[current].textColor,
           opacity: opacityFade * 0.4,
@@ -374,6 +478,19 @@ const HeroSection = () => {
       >
         {String(current + 1).padStart(2, "0")} /{" "}
         {String(slides.length).padStart(2, "0")}
+      </div>
+
+      {/* PROGRESS BAR */}
+      <div className="absolute bottom-0 left-0 right-0 z-10 h-[2px] bg-black/10">
+        <div
+          key={current}
+          className="h-full origin-left hero-progress-bar"
+          style={{
+            background: slides[current].textColor,
+            opacity: 0.5,
+            animationPlayState: isPaused ? "paused" : "running",
+          }}
+        />
       </div>
     </section>
   );
