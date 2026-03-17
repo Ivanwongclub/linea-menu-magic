@@ -210,8 +210,9 @@ serve(async (req) => {
       }
     }
 
+    const remaining = productId ? 0 : Math.max(0, totalRemaining - processed);
     return new Response(
-      JSON.stringify({ success: true, processed, failed, total: products.length, results }),
+      JSON.stringify({ success: true, processed, failed, total: products.length, remaining, results }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (err) {
