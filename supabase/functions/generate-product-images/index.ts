@@ -206,7 +206,7 @@ serve(async (req) => {
 
       // Delay between products to avoid rate limiting
       if (products.length > 1) {
-        await new Promise((r) => setTimeout(r, 500));
+        await new Promise((r) => setTimeout(r, 1500));
       }
     }
 
