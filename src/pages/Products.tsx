@@ -162,52 +162,110 @@ export default function Products() {
 
       <main>
         {/* Editorial Page Header */}
-        <section className="relative overflow-hidden bg-[hsl(var(--background))] border-b border-[hsl(var(--border))] pt-8 pb-0 min-h-[220px]">
+        <section
+          style={{
+            position: 'relative',
+            overflow: 'hidden',
+            background: 'hsl(var(--background))',
+            borderBottom: '1px solid hsl(var(--border))',
+            paddingTop: '32px',
+            paddingBottom: '0',
+            minHeight: '220px',
+          }}
+        >
           {/* Background mosaic of product images */}
           <div
-            className="absolute inset-0 grid grid-cols-8 overflow-hidden pointer-events-none select-none transition-opacity duration-700 ease-out hidden md:grid"
-            style={{ opacity: products.length > 0 ? 1 : 0 }}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'grid',
+              gridTemplateColumns: 'repeat(8, 1fr)',
+              overflow: 'hidden',
+              pointerEvents: 'none',
+              userSelect: 'none',
+              opacity: products.length > 0 ? 1 : 0,
+              transition: 'opacity 700ms ease',
+            }}
+            className="hidden md:grid"
           >
-            {products.slice(0, 8).map((product) => (
-              <div key={product.id} className="relative overflow-hidden">
-                {product.thumbnail_url && (
+            {products.slice(0, 8).map((product) => {
+              const imgSrc = product.thumbnail_url;
+              if (!imgSrc) return <div key={product.id} />;
+              return (
+                <div key={product.id} style={{ position: 'relative', overflow: 'hidden' }}>
                   <img
-                    src={product.thumbnail_url}
+                    src={imgSrc}
                     alt=""
                     aria-hidden="true"
-                    className="w-full h-full object-cover scale-110"
-                    style={{ filter: 'grayscale(100%) blur(8px)', opacity: 0.06 }}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      transform: 'scale(1.1)',
+                      filter: 'grayscale(100%) blur(8px)',
+                      opacity: 0.07,
+                    }}
                   />
-                )}
-              </div>
-            ))}
+                </div>
+              );
+            })}
           </div>
 
-          {/* Right side: larger single product accent */}
+          {/* Right accent: single larger image fading left */}
           {products[0]?.thumbnail_url && (
-            <div className="absolute right-0 top-0 w-[45%] h-full overflow-hidden pointer-events-none select-none hidden lg:block">
+            <div
+              className="hidden lg:block"
+              style={{
+                position: 'absolute',
+                top: 0,
+                right: 0,
+                width: '42%',
+                height: '100%',
+                overflow: 'hidden',
+                pointerEvents: 'none',
+                userSelect: 'none',
+              }}
+            >
               <img
                 src={products[0].thumbnail_url}
                 alt=""
                 aria-hidden="true"
-                className="w-full h-full object-cover object-center scale-105"
-                style={{ filter: 'grayscale(100%)', opacity: 0.07 }}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  objectPosition: 'center',
+                  transform: 'scale(1.05)',
+                  filter: 'grayscale(100%)',
+                  opacity: 0.08,
+                }}
               />
               <div
-                className="absolute inset-y-0 left-0 w-[60%]"
-                style={{ background: 'linear-gradient(to right, hsl(var(--background)), transparent)' }}
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background:
+                    'linear-gradient(to right, hsl(var(--background)) 0%, hsl(var(--background)) 20%, transparent 70%)',
+                }}
               />
             </div>
           )}
 
           {/* Bottom fade */}
           <div
-            className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none"
-            style={{ background: 'linear-gradient(to bottom, transparent, hsl(var(--background)))' }}
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: '64px',
+              pointerEvents: 'none',
+              background: 'linear-gradient(to bottom, transparent, hsl(var(--background)))',
+            }}
           />
 
           {/* Foreground content */}
-          <div className="relative z-10 section-inner">
+          <div className="section-inner" style={{ position: 'relative', zIndex: 10 }}>
             <PageBreadcrumb
               segments={[
                 { label: 'Home', href: '/' },
@@ -215,25 +273,79 @@ export default function Products() {
               ]}
               title=""
             />
-            <div className="flex items-end justify-between mt-6 pb-8">
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'flex-end',
+                justifyContent: 'space-between',
+                marginTop: '24px',
+                paddingBottom: '32px',
+              }}
+            >
               <div>
-                <h1 className="text-5xl lg:text-6xl font-semibold tracking-[-0.03em] leading-none text-[hsl(var(--foreground))]">
+                <h1
+                  style={{
+                    fontSize: 'clamp(2.5rem, 5vw, 3.75rem)',
+                    fontWeight: 600,
+                    letterSpacing: '-0.03em',
+                    lineHeight: 1,
+                    color: 'hsl(var(--foreground))',
+                    margin: 0,
+                  }}
+                >
                   Trim Library
                 </h1>
-                <p className="text-sm text-[hsl(var(--muted-foreground))] mt-3 max-w-sm leading-relaxed">
+                <p
+                  style={{
+                    fontSize: '0.875rem',
+                    color: 'hsl(var(--muted-foreground))',
+                    marginTop: '12px',
+                    maxWidth: '380px',
+                    lineHeight: 1.6,
+                  }}
+                >
                   Precision-engineered trims and accessories for the world's leading fashion brands.
                 </p>
               </div>
-              <div className="hidden lg:flex flex-col items-end flex-shrink-0">
-                <span className="text-[96px] font-bold leading-none tracking-tight text-[hsl(var(--foreground))]/[0.07] tabular-nums select-none translate-y-3">
+              <div
+                className="hidden lg:flex"
+                style={{
+                  flexDirection: 'column',
+                  alignItems: 'flex-end',
+                  flexShrink: 0,
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: '6rem',
+                    fontWeight: 700,
+                    lineHeight: 1,
+                    letterSpacing: '-0.02em',
+                    color: 'hsl(var(--foreground))',
+                    opacity: 0.07,
+                    userSelect: 'none',
+                    fontVariantNumeric: 'tabular-nums',
+                    transform: 'translateY(12px)',
+                    display: 'block',
+                  }}
+                >
                   {loading ? '—' : totalCount}
                 </span>
-                <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-[hsl(var(--muted-foreground))] pb-2">
+                <span
+                  style={{
+                    fontSize: '0.625rem',
+                    fontWeight: 500,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.14em',
+                    color: 'hsl(var(--muted-foreground))',
+                    paddingBottom: '8px',
+                  }}
+                >
                   Products
                 </span>
               </div>
             </div>
-            <div className="h-[2px] w-12 bg-[hsl(var(--foreground))]" />
+            <div style={{ height: '2px', width: '48px', background: 'hsl(var(--foreground))' }} />
           </div>
         </section>
 
