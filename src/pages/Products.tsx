@@ -171,6 +171,7 @@ export default function Products() {
                     { label: 'Home', href: '/' },
                     { label: 'Trim Library' },
                   ]}
+                  title=""
                 />
                 <h1 className="text-display mt-4">Trim Library</h1>
                 <p className="text-sm text-[hsl(var(--muted-foreground))] mt-2 max-w-md">
