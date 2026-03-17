@@ -161,41 +161,35 @@ export default function Products() {
       <Header />
 
       <main>
-        {/* Enhanced Page Header */}
-        <section className="relative section-light border-b border-[hsl(var(--border))] py-12 overflow-hidden">
-          {/* Subtle background image */}
-          {bannerImageUrl && (
-            <img
-              src={bannerImageUrl}
-              alt=""
-              aria-hidden="true"
-              className="absolute inset-0 w-full h-full object-cover grayscale opacity-[0.04] scale-105 pointer-events-none"
+        {/* Editorial Page Header */}
+        <section className="bg-[hsl(var(--background))] border-b border-[hsl(var(--border))] pt-8 pb-0">
+          <div className="section-inner">
+            <PageBreadcrumb
+              segments={[
+                { label: 'Home', href: '/' },
+                { label: 'Trim Library' },
+              ]}
+              title=""
             />
-          )}
-          <div className="relative z-10 section-inner">
-            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+            <div className="flex items-end justify-between mt-6 pb-8">
               <div>
-                <PageBreadcrumb
-                  segments={[
-                    { label: 'Home', href: '/' },
-                    { label: 'Trim Library' },
-                  ]}
-                  title=""
-                />
-                <h1 className="text-display mt-4">Trim Library</h1>
-                <p className="text-sm text-[hsl(var(--muted-foreground))] mt-2 max-w-md">
-                  Explore our full collection of precision-engineered trims and accessories.
+                <h1 className="text-5xl lg:text-6xl font-semibold tracking-[-0.03em] leading-none text-[hsl(var(--foreground))]">
+                  Trim Library
+                </h1>
+                <p className="text-sm text-[hsl(var(--muted-foreground))] mt-3 max-w-sm leading-relaxed">
+                  Precision-engineered trims and accessories for the world's leading fashion brands.
                 </p>
               </div>
-              <div className="hidden lg:flex flex-col items-end">
-                <span className="text-[80px] font-bold leading-none text-[hsl(var(--foreground))]/[0.06] tabular-nums select-none">
+              <div className="hidden lg:flex flex-col items-end flex-shrink-0">
+                <span className="text-[96px] font-bold leading-none tracking-tight text-[hsl(var(--foreground))]/[0.07] tabular-nums select-none translate-y-3">
                   {loading ? '—' : totalCount}
                 </span>
-                <span className="text-xs uppercase tracking-[0.1em] text-[hsl(var(--muted-foreground))] -mt-2">
-                  products
+                <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-[hsl(var(--muted-foreground))] pb-2">
+                  Products
                 </span>
               </div>
             </div>
+            <div className="h-[2px] w-12 bg-[hsl(var(--foreground))]" />
           </div>
         </section>
 
