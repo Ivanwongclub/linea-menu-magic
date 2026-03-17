@@ -69,7 +69,7 @@ export function useUserLibrary(teamId: string): UseUserLibraryResult {
       }>;
       const categories = catMaps
         .filter(m => m.product_categories)
-        .map(m => m.product_categories!);
+        .map(m => ({ ...m.product_categories!, sort_order: 0 }));
       const primaryCat = catMaps.find(m => m.is_primary)?.product_categories ?? categories[0];
 
       // Extract certifications
