@@ -509,7 +509,7 @@ function GenerateAIImagesButton({
         ) : (
           <Sparkles className="w-3.5 h-3.5" />
         )}
-        {generating ? "Generating…" : "Generate AI Images"}
+        {generating ? `Generating… (${progress.done}/${progress.total})` : "Generate AI Images"}
       </Button>
 
       <Dialog open={showConfirm} onOpenChange={setShowConfirm}>
