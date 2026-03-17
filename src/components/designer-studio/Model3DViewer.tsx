@@ -1,18 +1,10 @@
-import { Suspense, useRef, useState, Component, type ReactNode } from "react";
+import { Suspense, useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Environment, ContactShadows, PresentationControls, Center, Html, useProgress } from "@react-three/drei";
 import { Box, RotateCcw, Maximize2, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import * as THREE from "three";
 import OBJModel from "./OBJModelLoader";
-
-// Error boundary to catch OBJ load failures gracefully
-class CanvasErrorBoundary extends Component<{ children: ReactNode; onError: () => void }, { hasError: boolean }> {
-  state = { hasError: false };
-  static getDerivedStateFromError() { return { hasError: true }; }
-  componentDidCatch() { this.props.onError(); }
-  render() { return this.state.hasError ? null : this.props.children; }
-}
 
 interface Model3DViewerProps {
   hasModel: boolean;
@@ -253,18 +245,12 @@ const Model3DViewer = ({ hasModel, modelType = 'button', modelUrl }: Model3DView
   const [autoRotate, setAutoRotate] = useState(true);
   const [lightMode, setLightMode] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [modelError, setModelError] = useState(false);
 
-  if (!hasModel || modelError) {
+  if (!hasModel) {
     return (
-      <div className="aspect-video bg-secondary/50 rounded-lg flex flex-col items-center justify-center border-2 border-dashed border-border">
+      <div className="aspect-video bg-muted/50 rounded-lg flex flex-col items-center justify-center border-2 border-dashed border-border">
         <Box className="w-12 h-12 text-muted-foreground mb-3" />
-        <p className="text-muted-foreground text-sm">
-          {modelError ? '3D model could not be loaded' : '等待製造商上傳 3D 模型'}
-        </p>
-        <p className="text-xs text-muted-foreground/60 text-center px-4 mt-1">
-          Contact us to request a 3D sample
-        </p>
+        <p className="text-muted-foreground text-sm">等待製造商上傳 3D 模型</p>
       </div>
     );
   }
@@ -276,17 +262,15 @@ const Model3DViewer = ({ hasModel, modelType = 'button', modelUrl }: Model3DView
         className={`${isFullscreen ? 'fixed inset-0 z-50' : 'aspect-video'} bg-gradient-to-br from-muted/30 to-muted/60 rounded-lg overflow-hidden relative`}
         onWheel={(e) => e.stopPropagation()}
       >
-        <CanvasErrorBoundary onError={() => setModelError(true)}>
-          <Canvas
-            shadows
-            camera={{ position: [0, 1.5, 3], fov: 45 }}
-            gl={{ antialias: true, alpha: true }}
-          >
-            <Suspense fallback={<Loader />}>
-              <Scene modelType={modelType} autoRotate={autoRotate} lightMode={lightMode} modelUrl={modelUrl} />
-            </Suspense>
-          </Canvas>
-        </CanvasErrorBoundary>
+        <Canvas
+          shadows
+          camera={{ position: [0, 1.5, 3], fov: 45 }}
+          gl={{ antialias: true, alpha: true }}
+        >
+          <Suspense fallback={<Loader />}>
+            <Scene modelType={modelType} autoRotate={autoRotate} lightMode={lightMode} modelUrl={modelUrl} />
+          </Suspense>
+        </Canvas>
 
         {/* Controls Overlay */}
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-background/90 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-lg">

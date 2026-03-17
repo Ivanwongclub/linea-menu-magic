@@ -31,20 +31,10 @@ export function useUserLibrary(teamId: string): UseUserLibraryResult {
         `
         *,
         products(
-          id, item_code, name, name_en, slug, description, description_en,
+          id, item_code, name, name_en, slug, description,
           status, is_public, is_customizable, specifications,
           production, thumbnail_url, model_url, sort_order,
-          created_at, updated_at,
-          product_category_map(
-            is_primary,
-            product_categories(id, name, slug)
-          ),
-          product_certification_map(
-            product_certifications(id, name, abbreviation)
-          ),
-          product_industry_map(
-            product_industries(id, name, slug)
-          )
+          created_at, updated_at
         )
       `
       )
@@ -61,32 +51,6 @@ export function useUserLibrary(teamId: string): UseUserLibraryResult {
     const transformed: UserLibraryItem[] = (data ?? []).map((row) => {
       const r = row as unknown as Record<string, unknown>;
       const productData = r.products as Record<string, unknown> | null;
-
-      // Extract categories from join
-      const catMaps = (productData?.product_category_map ?? []) as Array<{
-        is_primary: boolean;
-        product_categories: { id: string; name: string; slug: string } | null;
-      }>;
-      const categories = catMaps
-        .filter(m => m.product_categories)
-        .map(m => ({ ...m.product_categories!, sort_order: 0 }));
-      const primaryCat = catMaps.find(m => m.is_primary)?.product_categories ?? categories[0];
-
-      // Extract certifications
-      const certMaps = (productData?.product_certification_map ?? []) as Array<{
-        product_certifications: { id: string; name: string; abbreviation: string } | null;
-      }>;
-      const certifications = certMaps
-        .filter(m => m.product_certifications)
-        .map(m => ({ ...m.product_certifications!, logo_url: undefined }));
-
-      // Extract industries
-      const indMaps = (productData?.product_industry_map ?? []) as Array<{
-        product_industries: { id: string; name: string; slug: string } | null;
-      }>;
-      const industries = indMaps
-        .filter(m => m.product_industries)
-        .map(m => ({ ...m.product_industries!, sort_order: 0 }));
 
       return {
         id: r.id as string,
@@ -109,21 +73,20 @@ export function useUserLibrary(teamId: string): UseUserLibraryResult {
               name_en: productData.name_en as string | undefined,
               slug: productData.slug as string,
               description: productData.description as string | undefined,
-              description_en: productData.description_en as string | undefined,
               status: productData.status as 'draft' | 'active' | 'archived',
               is_public: productData.is_public as boolean,
               is_customizable: productData.is_customizable as boolean,
-              specifications: productData.specifications as Record<string, unknown> | undefined,
-              production: productData.production as Record<string, unknown> | undefined,
+              specifications: productData.specifications as
+                | Record<string, unknown>
+                | undefined,
+              production: productData.production as
+                | Record<string, unknown>
+                | undefined,
               thumbnail_url: productData.thumbnail_url as string | undefined,
               model_url: productData.model_url as string | undefined,
               sort_order: productData.sort_order as number,
               created_at: productData.created_at as string,
               updated_at: productData.updated_at as string,
-              categories,
-              primary_category: primaryCat ? { ...primaryCat, sort_order: 0 } : undefined,
-              certifications,
-              industries,
             }
           : undefined,
       };

@@ -65,42 +65,23 @@ import { supabase } from "@/integrations/supabase/client";
 // ─── Adapter: UserLibraryItem → legacy LibraryItem ──────
 function toLegacyItem(item: UserLibraryItem): LibraryItem {
   const p = item.product;
-  const prod = (p?.production ?? {}) as Record<string, string>;
-  const specs = (p?.specifications ?? {}) as Record<string, unknown>;
-
-  // Map category from product's primary_category slug
-  const catSlug = p?.primary_category?.slug ?? p?.categories?.[0]?.slug ?? '';
-  const categoryMap: Record<string, LibraryItem['category']> = {
-    buttons: 'buttons', 'snap-buttons': 'buttons', 'jeans-buttons': 'buttons', 'shank-buttons': 'buttons',
-    'zipper-pullers': 'zippers', zippers: 'zippers',
-    webbing: 'lace', lace: 'lace',
-    buckles: 'hardware', hardware: 'hardware', eyelets: 'hardware', rivets: 'hardware',
-  };
-
   return {
     id: item.id,
     itemCode: p?.item_code ?? '',
     name: item.custom_name || p?.name || 'Untitled',
     nameEn: p?.name_en || p?.name || '',
-    category: categoryMap[catSlug] ?? 'other',
+    category: 'buttons' as LibraryItem['category'], // fallback
     description: p?.description_en || p?.description || '',
-    specifications: {
-      material: specs.material as string | undefined,
-      size: specs.size as string | undefined,
-      finish: specs.finish as string | undefined,
-      weight: specs.weight as string | undefined,
-      thickness: specs.thickness as string | undefined,
-      tensileStrength: specs.tensile_strength as string | undefined,
-    },
+    specifications: (p?.specifications as Record<string, string>) ?? {},
     pricing: { unitPrice: 0, currency: 'USD', moq: 0 },
     production: {
-      leadTime: prod.lead_time ?? prod.leadTime ?? '',
-      sampleTime: prod.sample_time ?? prod.sampleTime ?? '',
-      origin: prod.origin ?? '',
-      capacity: prod.capacity ?? '',
+      leadTime: (p?.production as Record<string, string>)?.leadTime ?? '',
+      sampleTime: (p?.production as Record<string, string>)?.sampleTime ?? '',
+      origin: (p?.production as Record<string, string>)?.origin ?? '',
+      capacity: (p?.production as Record<string, string>)?.capacity ?? '',
     },
     certifications: p?.certifications?.map(c => c.name) ?? [],
-    availableColors: Array.isArray(specs.color_options) ? specs.color_options as string[] : [],
+    availableColors: [],
     applications: p?.industries?.map(i => i.name) ?? [],
     isPublic: p?.is_public ?? true,
     teamId: item.team_id,
@@ -114,7 +95,7 @@ function toLegacyItem(item: UserLibraryItem): LibraryItem {
 
 type SortOrder = "asc" | "desc";
 
-const DEMO_TEAM_ID = 'a0000000-0000-0000-0000-000000000001';
+const DEMO_TEAM_ID = 'demo-team';
 
 const DesignerStudioDashboard = () => {
   const navigate = useNavigate();
