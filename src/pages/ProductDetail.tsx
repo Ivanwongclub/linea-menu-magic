@@ -74,7 +74,7 @@ function ImageGallery({ images }: { images: ProductImage[] }) {
               }`}
             >
               <img
-                src={img.url}
+                src={getOptimizedImageUrl(img.url, 120, 120, 75)}
                 alt={img.alt_text ?? `Thumbnail ${i + 1}`}
                 className="w-full h-full object-contain bg-secondary"
                 loading="lazy"
