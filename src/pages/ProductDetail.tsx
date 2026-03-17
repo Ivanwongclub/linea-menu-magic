@@ -13,7 +13,7 @@ import ProductCard from '@/components/products/ProductCard';
 import Model3DViewer from '@/components/designer-studio/Model3DViewer';
 import { useProduct } from '@/features/products/hooks/useProduct';
 import { useProducts } from '@/features/products/hooks/useProducts';
-import { getProductPlaceholderUrl } from '@/features/products/utils/productImagePlaceholder';
+import { getProductPlaceholderUrl, getOptimizedImageUrl } from '@/features/products/utils/productImagePlaceholder';
 import type { Product, ProductImage } from '@/features/products/types';
 
 function resolveProductImage(
