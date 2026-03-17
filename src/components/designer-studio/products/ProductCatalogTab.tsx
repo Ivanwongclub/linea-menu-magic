@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { format } from "date-fns";
 import {
-  Search, Plus, Pencil, Archive, Trash2, Check,
+  Search, Plus, Pencil, Archive, Trash2, Check, Sparkles, Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
