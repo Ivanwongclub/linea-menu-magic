@@ -569,7 +569,15 @@ const DesignerStudioDashboard = () => {
                         key={item.id}
                         item={item}
                         onView={handleQuickView}
-                        onToggleFavorite={toggleFavourite}
+                        onToggleFavourite={toggleFavourite}
+                        onAddToComposition={(i) => {
+                          // Navigate to composer with item context
+                          navigate('/designer-studio/dashboard?tab=composer');
+                        }}
+                        onRequestSample={(i) => {
+                          // Open RFQ dialog placeholder
+                          toast.info(`Request sample for ${i.product?.name_en ?? i.product?.name ?? 'item'}`);
+                        }}
                       />
                     ))}
                   </div>
