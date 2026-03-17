@@ -22,6 +22,10 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
 
 import { useProducts } from "@/features/products/hooks/useProducts";
 import { useProductTaxonomy } from "@/features/products/hooks/useProductTaxonomy";
