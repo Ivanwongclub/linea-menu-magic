@@ -303,11 +303,12 @@ export default function Products() {
                       : 'flex flex-col gap-3'
                   }
                 >
-                  {products.map((product) => (
+                  {products.map((product, idx) => (
                     <Link key={product.id} to={`/products/${product.slug}`}>
                       <ProductCard
                         product={product}
                         viewMode={viewMode}
+                        index={idx}
                         onQuickView={() => setQuickViewProduct(product)}
                       />
                     </Link>

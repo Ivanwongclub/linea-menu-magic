@@ -1,12 +1,14 @@
+import { useState, useEffect } from 'react';
 import { Sparkles, Heart, Eye } from 'lucide-react';
 import type { Product } from '@/features/products/types';
-import { getProductPlaceholderUrl } from '@/features/products/utils/productImagePlaceholder';
+import { getProductPlaceholderUrl, getOptimizedImageUrl } from '@/features/products/utils/productImagePlaceholder';
 
 type ViewMode = 'grid' | 'list';
 
 interface ProductCardProps {
   product: Product;
   viewMode: ViewMode;
+  index?: number;
   onQuickView?: (product: Product) => void;
   onAddToLibrary?: (product: Product) => void;
   isInLibrary?: boolean;
@@ -35,10 +37,23 @@ function resolveProductImage(
 export default function ProductCard({
   product,
   viewMode,
+  index = 99,
   onQuickView,
   onAddToLibrary,
   isInLibrary,
 }: ProductCardProps) {
+  const rawUrl = resolveProductImage(product, 'thumb');
+  const imageUrl = getOptimizedImageUrl(rawUrl, 400, 400, 80);
+  const isAboveFold = index < 8;
+
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  useEffect(() => {
+    setImageLoaded(false);
+    setImageError(false);
+  }, [imageUrl]);
+
   if (viewMode === 'list') {
     return <ProductCardList product={product} onQuickView={onQuickView} />;
   }
@@ -47,19 +62,45 @@ export default function ProductCard({
   const visibleTags = tags.slice(0, 2);
   const extraTagCount = tags.length - 2;
   const certs = product.certifications ?? [];
-  const imageUrl = resolveProductImage(product, 'thumb');
+
+  const altText = `${product.name_en ?? product.name}${product.primary_category ? ` — ${product.primary_category.name}` : ''}`;
 
   return (
     <div className="group bg-card border border-border rounded-[var(--radius)] overflow-hidden cursor-pointer transition-[border-color,box-shadow] duration-200 hover:border-foreground hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
       {/* Image area */}
       <div className="aspect-square relative overflow-hidden bg-secondary">
+        {/* Skeleton pulse while loading */}
+        {!imageLoaded && !imageError && (
+          <div aria-hidden="true" className="absolute inset-0 bg-secondary animate-pulse" />
+        )}
+
+        {/* Error fallback */}
+        {imageError && (
+          <img
+            src={getProductPlaceholderUrl(
+              product.name_en ?? product.name,
+              product.item_code,
+              product.primary_category?.slug,
+              product.primary_category?.name,
+              400,
+            )}
+            alt={altText}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        )}
+
+        {/* Main image */}
         <img
           src={imageUrl}
-          alt={`${product.name_en ?? product.name}${product.primary_category ? ` — ${product.primary_category.name}` : ''}`}
+          alt={altText}
           width={400}
           height={400}
-          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
-          loading="lazy"
+          loading={isAboveFold ? 'eager' : 'lazy'}
+          fetchPriority={isAboveFold ? 'high' : 'low'}
+          decoding="async"
+          onLoad={() => setImageLoaded(true)}
+          onError={() => setImageError(true)}
+          className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-out group-hover:scale-[1.04] ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
         />
 
         {/* Tag badges (top-left, stacked) */}

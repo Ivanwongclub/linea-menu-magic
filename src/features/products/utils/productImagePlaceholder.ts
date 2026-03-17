@@ -176,6 +176,23 @@ export function getProductPlaceholderUrl(
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
+export function getOptimizedImageUrl(
+  url: string,
+  width: number,
+  height: number,
+  quality = 80,
+): string {
+  if (!url || url.startsWith('data:')) return url;
+  if (!url.includes('supabase.co/storage')) return url;
+
+  return (
+    url.replace(
+      '/storage/v1/object/public/',
+      '/storage/v1/render/image/public/',
+    ) + `?width=${width}&height=${height}&quality=${quality}&resize=cover&format=webp`
+  );
+}
+
 export function getProductThumbnailUrl(
   productName?: string,
   itemCode?: string,

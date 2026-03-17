@@ -13,7 +13,7 @@ import ProductCard from '@/components/products/ProductCard';
 import Model3DViewer from '@/components/designer-studio/Model3DViewer';
 import { useProduct } from '@/features/products/hooks/useProduct';
 import { useProducts } from '@/features/products/hooks/useProducts';
-import { getProductPlaceholderUrl } from '@/features/products/utils/productImagePlaceholder';
+import { getProductPlaceholderUrl, getOptimizedImageUrl } from '@/features/products/utils/productImagePlaceholder';
 import type { Product, ProductImage } from '@/features/products/types';
 
 function resolveProductImage(
@@ -54,7 +54,7 @@ function ImageGallery({ images }: { images: ProductImage[] }) {
       {/* Primary image */}
       <div className="aspect-square bg-secondary border border-border rounded-[calc(var(--radius)*2)] overflow-hidden">
         <img
-          src={activeImage.url}
+          src={getOptimizedImageUrl(activeImage.url, 800, 800, 85)}
           alt={activeImage.alt_text ?? 'Product image'}
           className="w-full h-full object-contain p-4"
         />
@@ -74,7 +74,7 @@ function ImageGallery({ images }: { images: ProductImage[] }) {
               }`}
             >
               <img
-                src={img.url}
+                src={getOptimizedImageUrl(img.url, 120, 120, 75)}
                 alt={img.alt_text ?? `Thumbnail ${i + 1}`}
                 className="w-full h-full object-contain bg-secondary"
                 loading="lazy"
