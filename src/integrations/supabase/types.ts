@@ -680,7 +680,9 @@ export type Database = {
           custom_description: string | null
           custom_name: string | null
           custom_specs: Json | null
+          downloadable_files: Json | null
           id: string
+          is_admin_default: boolean | null
           is_favourite: boolean
           notes: string | null
           product_id: string
@@ -694,7 +696,9 @@ export type Database = {
           custom_description?: string | null
           custom_name?: string | null
           custom_specs?: Json | null
+          downloadable_files?: Json | null
           id?: string
+          is_admin_default?: boolean | null
           is_favourite?: boolean
           notes?: string | null
           product_id: string
@@ -708,7 +712,9 @@ export type Database = {
           custom_description?: string | null
           custom_name?: string | null
           custom_specs?: Json | null
+          downloadable_files?: Json | null
           id?: string
+          is_admin_default?: boolean | null
           is_favourite?: boolean
           notes?: string | null
           product_id?: string
