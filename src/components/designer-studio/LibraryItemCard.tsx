@@ -1,120 +1,194 @@
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Eye, Heart, Box } from "lucide-react";
+import { useState } from "react";
+import { Box, Layers, Eye, Download, FileDown, Heart } from "lucide-react";
 import type { UserLibraryItem } from "@/features/products/types";
 
 interface LibraryItemCardProps {
   item: UserLibraryItem;
   onView: (item: UserLibraryItem) => void;
-  onToggleFavorite?: (itemId: string) => void;
+  onToggleFavourite: (id: string) => void;
+  onAddToComposition: (item: UserLibraryItem) => void;
+  onRequestSample: (item: UserLibraryItem) => void;
 }
 
-const LibraryItemCard = ({ item, onView, onToggleFavorite }: LibraryItemCardProps) => {
-  const product = item.product;
-  const displayName = item.custom_name || product?.name_en || product?.name || 'Untitled';
-  const itemCode = product?.item_code ?? '';
-  const thumbnailUrl = product?.thumbnail_url;
-  const categoryName = product?.primary_category?.name ?? product?.categories?.[0]?.name;
-  const hasModel = !!product?.model_url;
+const LibraryItemCard = ({
+  item,
+  onView,
+  onToggleFavourite,
+  onAddToComposition,
+  onRequestSample,
+}: LibraryItemCardProps) => {
+  const [showDownloads, setShowDownloads] = useState(false);
+
+  const displayName =
+    item.custom_name ?? item.product?.name_en ?? item.product?.name ?? "Untitled";
+
+  const primaryCategory = item.product?.primary_category ?? item.product?.categories?.[0];
+
+  const specs = (item.product?.specifications ?? {}) as {
+    material?: string;
+    size?: string;
+    finish?: string;
+  };
+
+  const downloads = item.downloadable_files ?? [];
+  const hasDownloads = downloads.length > 0;
+  const downloadCount = downloads.length;
 
   return (
     <div
-      className="group cursor-pointer"
+      className="group relative flex flex-col bg-[hsl(var(--background))] border border-[hsl(var(--border))] rounded-[calc(var(--radius)*2)] overflow-hidden transition-all duration-200 hover:border-[hsl(var(--foreground))] hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] cursor-pointer"
       onClick={() => onView(item)}
     >
-      {/* Image Container */}
-      <div className="relative aspect-square bg-secondary rounded-[var(--radius)] overflow-hidden mb-3">
-        {thumbnailUrl ? (
+      {/* Image area */}
+      <div className="relative aspect-square bg-[hsl(var(--secondary))] overflow-hidden">
+        {item.product?.thumbnail_url ? (
           <img
-            src={thumbnailUrl}
+            src={item.product.thumbnail_url}
             alt={displayName}
-            className="w-full h-full object-contain p-3 transition-transform duration-500 group-hover:scale-110"
+            className="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <span className="text-xs text-muted-foreground uppercase tracking-wider font-mono">
-              {itemCode || '—'}
+            <span className="text-xs text-[hsl(var(--muted-foreground))] uppercase tracking-wider font-mono">
+              {item.product?.item_code || "—"}
             </span>
           </div>
         )}
 
-        {/* Overlay on hover */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300" />
-
-        {/* Top badges */}
-        <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
-          <div className="flex gap-1.5">
-            {hasModel && (
-              <Badge className="bg-primary text-primary-foreground text-xs">
-                <Box className="w-3 h-3 mr-1" />
-                3D
-              </Badge>
-            )}
-            {item.custom_brand && (
-              <Badge variant="secondary" className="bg-background/90 text-xs">
-                {item.custom_brand}
-              </Badge>
-            )}
+        {/* Admin default badge */}
+        {item.is_admin_default && (
+          <div className="absolute top-2 left-2 bg-[hsl(var(--foreground))] text-[hsl(var(--background))] text-[9px] font-medium uppercase tracking-[0.08em] px-2 py-0.5 rounded-[var(--radius)]">
+            Collection
           </div>
-        </div>
-
-        {/* Favorite button - fixed bottom-left corner */}
-        {onToggleFavorite && (
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onToggleFavorite(item.id);
-            }}
-            className={`absolute bottom-14 left-3 p-2 rounded-full bg-background/90 hover:bg-background shadow-sm transition-all z-10 ${
-              item.is_favourite ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-            }`}
-          >
-            <Heart
-              className={`w-4 h-4 transition-colors ${
-                item.is_favourite
-                  ? "fill-red-500 text-red-500"
-                  : "text-muted-foreground hover:text-red-500"
-              }`}
-            />
-          </button>
         )}
 
-        {/* Hover action */}
-        <div className="absolute inset-x-0 bottom-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <Button
-            variant="secondary"
-            size="sm"
-            className="w-full bg-background/95 hover:bg-background text-foreground gap-1.5"
+        {/* 3D model badge */}
+        {item.product?.model_url && (
+          <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm text-[hsl(var(--foreground))] text-[9px] font-medium uppercase tracking-[0.08em] px-2 py-0.5 rounded-[var(--radius)] border border-[hsl(var(--border))] flex items-center gap-1">
+            <Box className="w-2.5 h-2.5" />
+            3D
+          </div>
+        )}
+
+        {/* Hover overlay with quick actions */}
+        <div className="absolute inset-0 bg-[hsl(var(--foreground))]/80 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center gap-2 p-4">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onAddToComposition(item);
+            }}
+            className="w-full flex items-center justify-center gap-2 bg-white text-black text-xs font-medium uppercase tracking-[0.06em] px-3 py-2 rounded-[var(--radius)] hover:bg-white/90 transition-colors"
+          >
+            <Layers className="w-3 h-3" />
+            Add to Canvas
+          </button>
+          <button
             onClick={(e) => {
               e.stopPropagation();
               onView(item);
             }}
+            className="w-full flex items-center justify-center gap-2 bg-white/20 text-white text-xs font-medium uppercase tracking-[0.06em] px-3 py-2 rounded-[var(--radius)] hover:bg-white/30 transition-colors border border-white/30"
           >
-            <Eye className="w-4 h-4" />
-            Quick View
-          </Button>
+            <Eye className="w-3 h-3" />
+            View Details
+          </button>
         </div>
       </div>
 
-      {/* Product Info */}
-      <div className="space-y-1">
-        <p className="text-xs text-muted-foreground font-mono">{itemCode}</p>
-        <h3 className="font-medium text-foreground leading-tight line-clamp-1 group-hover:text-primary transition-colors">
-          {displayName}
-        </h3>
+      {/* Info area */}
+      <div className="p-3 flex flex-col gap-2">
+        {/* Category + item code row */}
         <div className="flex items-center justify-between">
-          {categoryName && (
-            <Badge variant="outline" className="text-xs">
-              {categoryName}
-            </Badge>
-          )}
-          {item.team_name && (
-            <span className="text-xs text-muted-foreground">{item.team_name}</span>
-          )}
+          <span className="text-[10px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--muted-foreground))]">
+            {primaryCategory?.name ?? "—"}
+          </span>
+          <span className="text-[10px] font-mono text-[hsl(var(--muted-foreground))]">
+            {item.product?.item_code}
+          </span>
         </div>
-        {item.notes && (
-          <p className="text-xs text-muted-foreground italic line-clamp-1">{item.notes}</p>
+
+        {/* Product name */}
+        <p className="text-sm font-medium text-[hsl(var(--foreground))] leading-snug line-clamp-2">
+          {displayName}
+        </p>
+
+        {/* Key specs row */}
+        {specs.material && (
+          <p className="text-[11px] text-[hsl(var(--muted-foreground))] truncate">
+            {specs.material}
+            {specs.size ? ` · ${specs.size}` : ""}
+            {specs.finish ? ` · ${specs.finish}` : ""}
+          </p>
+        )}
+
+        {/* Action row */}
+        <div className="flex items-center gap-2 mt-1 pt-2 border-t border-[hsl(var(--border))]">
+          {/* Download files */}
+          {hasDownloads && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDownloads(!showDownloads);
+              }}
+              className="flex items-center gap-1 text-[10px] font-medium uppercase tracking-[0.06em] text-[hsl(var(--muted-foreground))] hover:text-foreground transition-colors"
+              title="Download files"
+            >
+              <Download className="w-3 h-3" />
+              Files ({downloadCount})
+            </button>
+          )}
+
+          {/* Spacer */}
+          <div className="flex-1" />
+
+          {/* RFQ button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onRequestSample(item);
+            }}
+            className="text-[10px] font-medium uppercase tracking-[0.06em] text-[hsl(var(--foreground))] hover:underline underline-offset-2 transition-colors"
+          >
+            Request →
+          </button>
+
+          {/* Favourite */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleFavourite(item.id);
+            }}
+            className="p-1 rounded text-[hsl(var(--muted-foreground))] hover:text-foreground transition-colors"
+          >
+            <Heart
+              className={`w-3.5 h-3.5 ${
+                item.is_favourite ? "fill-current text-foreground" : ""
+              }`}
+            />
+          </button>
+        </div>
+
+        {/* Downloads dropdown */}
+        {showDownloads && hasDownloads && (
+          <div className="border border-[hsl(var(--border))] rounded-[var(--radius)] overflow-hidden divide-y divide-[hsl(var(--border))]">
+            {downloads.map((file) => (
+              <a
+                key={file.id}
+                href={file.url}
+                download={file.name}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-3 py-2 text-[11px] text-[hsl(var(--foreground))] hover:bg-[hsl(var(--secondary))] transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <FileDown className="w-3 h-3 flex-shrink-0 text-[hsl(var(--muted-foreground))]" />
+                <span className="flex-1 truncate">{file.name}</span>
+                <span className="text-[10px] text-[hsl(var(--muted-foreground))] uppercase font-mono flex-shrink-0">
+                  {file.type.toUpperCase()}
+                </span>
+              </a>
+            ))}
+          </div>
         )}
       </div>
     </div>

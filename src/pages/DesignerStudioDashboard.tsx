@@ -57,6 +57,7 @@ import CreateRFQDialog from "@/components/designer-studio/CreateRFQDialog";
 import BrochuresPanel from "@/components/designer-studio/BrochuresPanel";
 import BrochureEditor from "@/components/designer-studio/BrochureEditor";
 
+import { toast } from "sonner";
 // Products CMS
 import ProductsPanel from "@/components/designer-studio/products/ProductsPanel";
 import ProductEditor from "@/components/designer-studio/products/ProductEditor";
@@ -569,7 +570,15 @@ const DesignerStudioDashboard = () => {
                         key={item.id}
                         item={item}
                         onView={handleQuickView}
-                        onToggleFavorite={toggleFavourite}
+                        onToggleFavourite={toggleFavourite}
+                        onAddToComposition={(i) => {
+                          // Navigate to composer with item context
+                          navigate('/designer-studio/dashboard?tab=composer');
+                        }}
+                        onRequestSample={(i) => {
+                          // Open RFQ dialog placeholder
+                          toast.info(`Request sample for ${i.product?.name_en ?? i.product?.name ?? 'item'}`);
+                        }}
                       />
                     ))}
                   </div>
