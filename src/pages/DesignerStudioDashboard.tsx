@@ -508,7 +508,7 @@ const DesignerStudioDashboard = () => {
 
       <main className="flex-1 py-4 px-4 lg:px-6">
         <div className="max-w-7xl mx-auto">
-          <Tabs value={activeMainTab} onValueChange={(v) => setActiveMainTab(v as "library" | "rfq" | "brochures")} className="w-full">
+          <Tabs value={activeMainTab} onValueChange={(v) => setActiveMainTab(v as "library" | "rfq" | "brochures" | "products" | "composer")} className="w-full">
             {/* Library Tab Content */}
             <TabsContent value="library" className="mt-0">
               {/* Library header */}
