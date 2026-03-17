@@ -114,7 +114,7 @@ const DesignerStudioDashboard = () => {
   }, []);
 
   // Main tab state
-  const [activeMainTab, setActiveMainTab] = useState<"library" | "rfq" | "brochures" | "products">("library");
+  const [activeMainTab, setActiveMainTab] = useState<"library" | "rfq" | "brochures" | "products" | "composer">("library");
 
   // Product editor state
   const [editingProductId, setEditingProductId] = useState<string | null | undefined>(null);
