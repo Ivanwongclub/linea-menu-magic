@@ -66,6 +66,7 @@ const App = () => (
             <Route path="/brochures/:slug" element={<BrochureViewer />} />
             <Route path="/designer-studio" element={<DesignerStudio />} />
             <Route path="/designer-studio/dashboard" element={<DesignerStudioDashboard />} />
+            <Route path="/designer-studio/compose/:sessionId" element={<ComposerPage />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
