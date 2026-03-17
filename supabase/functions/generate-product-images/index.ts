@@ -32,11 +32,25 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     let productId: string | undefined;
+    let batchSize = 10;
+    let offset = 0;
     try {
       const body = await req.json();
       productId = body?.productId;
+      if (body?.batchSize) batchSize = Math.min(Number(body.batchSize), 20);
+      if (body?.offset) offset = Number(body.offset);
     } catch {
       // No body = process all
+    }
+
+    // Count total remaining first (for non-single-product requests)
+    let totalRemaining = 0;
+    if (!productId) {
+      const { count } = await supabase
+        .from("products")
+        .select("id", { count: "exact", head: true })
+        .is("thumbnail_url", null);
+      totalRemaining = count ?? 0;
     }
 
     // Fetch products that need images
@@ -57,14 +71,14 @@ serve(async (req) => {
     if (productId) {
       query = query.eq("id", productId);
     } else {
-      query = query.is("thumbnail_url", null);
+      query = query.is("thumbnail_url", null).range(offset, offset + batchSize - 1);
     }
 
     const { data: products, error: fetchError } = await query;
     if (fetchError) throw new Error(`Fetch error: ${fetchError.message}`);
     if (!products || products.length === 0) {
       return new Response(
-        JSON.stringify({ success: true, processed: 0, failed: 0, results: [], message: "No products need images" }),
+        JSON.stringify({ success: true, processed: 0, failed: 0, remaining: 0, results: [], message: "No products need images" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
@@ -169,17 +183,17 @@ serve(async (req) => {
           .update({ thumbnail_url: publicUrl })
           .eq("id", pid);
 
-        // Insert into product_images (idempotent)
-        await supabase.from("product_images").upsert(
-          {
-            product_id: pid,
-            url: publicUrl,
-            sort_order: 0,
-            is_primary: true,
-            alt_text: `${productName} — product image`,
-          },
-          { onConflict: "product_id,sort_order", ignoreDuplicates: true },
-        );
+        // Insert into product_images
+        const { error: imgError } = await supabase.from("product_images").insert({
+          product_id: pid,
+          url: publicUrl,
+          sort_order: 0,
+          is_primary: true,
+          alt_text: `${productName} — product image`,
+        });
+        if (imgError && !imgError.message.includes("duplicate")) {
+          console.warn(`product_images insert warning for ${pid}:`, imgError.message);
+        }
 
         results.push({ productId: pid, productName, url: publicUrl, status: "success" });
         processed++;
@@ -192,12 +206,13 @@ serve(async (req) => {
 
       // Delay between products to avoid rate limiting
       if (products.length > 1) {
-        await new Promise((r) => setTimeout(r, 500));
+        await new Promise((r) => setTimeout(r, 1500));
       }
     }
 
+    const remaining = productId ? 0 : Math.max(0, totalRemaining - processed);
     return new Response(
-      JSON.stringify({ success: true, processed, failed, total: products.length, results }),
+      JSON.stringify({ success: true, processed, failed, total: products.length, remaining, results }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (err) {

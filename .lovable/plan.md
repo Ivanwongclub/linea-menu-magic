@@ -2,36 +2,29 @@
 
 ## Problem
 
-From the screenshot and database query: only 14 out of 54 products have AI-generated images (`thumbnail_url`). The remaining 40 show SVG placeholders. The edge function exists and works but was only partially run or timed out.
+The Polo Button OBJ file has large geometry dimensions in world units. The camera starts at position `[0, 1.5, 3]`, which places it **inside** the model, causing the zoomed-in/clipped view shown in the screenshot.
 
-## Plan
+## Solution
 
-### 1. Fix the edge function to process all 54 products reliably
+Normalize the OBJ model size in `OBJModelLoader.tsx` after loading. Compute the bounding box, then scale the model so it fits within a consistent size (e.g., radius ~1.5 units), regardless of the original OBJ dimensions.
 
-The current function processes products where `thumbnail_url IS NULL`. It needs two fixes:
-- **Increase delay** between products from 500ms to 2000ms to avoid rate limiting
-- **Add batch support**: accept an optional `batchSize` + `offset` parameter so we can process in smaller batches (e.g., 10 at a time) if the function times out on 40+ products
-- **Also insert into `product_images`**: currently the `ON CONFLICT` clause references `product_id,sort_order` but there may not be a unique constraint — use upsert logic that works
+### Changes
 
-### 2. Trigger the function to process remaining products
+**`src/components/designer-studio/OBJModelLoader.tsx`**
+- After cloning and applying materials, compute the bounding box of the model
+- Calculate the max dimension and derive a scale factor to normalize to ~1.5 units
+- Apply the scale to the cloned object
 
-After deploying the updated function, invoke it to generate images for the ~40 products still missing thumbnails. Process in batches of 10 to stay within edge function timeout limits.
+This is a ~5-line addition in the `useMemo` block:
 
-### 3. No component changes needed
+```ts
+// After traverse, normalize size
+const box = new THREE.Box3().setFromObject(clone);
+const size = box.getSize(new THREE.Vector3());
+const maxDim = Math.max(size.x, size.y, size.z);
+const scale = 2 / maxDim; // fit within ~2 units
+clone.scale.setScalar(scale);
+```
 
-The `resolveProductImage` in ProductCard.tsx already correctly falls through: DB images → thumbnail_url → SVG placeholder. Once thumbnails are populated in the DB, cards will show AI images automatically.
-
-### Technical details
-
-**Edge function changes** (`supabase/functions/generate-product-images/index.ts`):
-- Add `batchSize` and `offset` body params (default: batchSize=10, offset=0)
-- Add `.limit(batchSize).range(offset, offset + batchSize - 1)` to the query
-- Increase inter-product delay to 1500ms
-- Return `{ remaining: totalWithoutImages - processed }` so the caller knows if more batches are needed
-
-**CMS UI changes** (`ProductCatalogTab.tsx`):
-- Update the generate button handler to call the function in a loop, batch by batch (10 at a time), updating progress between batches
-- Show progress as "Generated X of Y..."
-
-**No other files touched.**
+No other files need changes. The `<Center>` component already handles centering the model at origin.
 
