@@ -42,14 +42,6 @@ export default function ProductCard({
   onAddToLibrary,
   isInLibrary,
 }: ProductCardProps) {
-  if (viewMode === 'list') {
-    return <ProductCardList product={product} onQuickView={onQuickView} />;
-  }
-
-  const tags = product.tags ?? [];
-  const visibleTags = tags.slice(0, 2);
-  const extraTagCount = tags.length - 2;
-  const certs = product.certifications ?? [];
   const rawUrl = resolveProductImage(product, 'thumb');
   const imageUrl = getOptimizedImageUrl(rawUrl, 400, 400, 80);
   const isAboveFold = index < 8;
@@ -61,6 +53,15 @@ export default function ProductCard({
     setImageLoaded(false);
     setImageError(false);
   }, [imageUrl]);
+
+  if (viewMode === 'list') {
+    return <ProductCardList product={product} onQuickView={onQuickView} />;
+  }
+
+  const tags = product.tags ?? [];
+  const visibleTags = tags.slice(0, 2);
+  const extraTagCount = tags.length - 2;
+  const certs = product.certifications ?? [];
 
   const altText = `${product.name_en ?? product.name}${product.primary_category ? ` — ${product.primary_category.name}` : ''}`;
 
