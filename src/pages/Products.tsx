@@ -18,6 +18,7 @@ import ProductsSidebar from '@/components/products/ProductsSidebar';
 import ProductCard from '@/components/products/ProductCard';
 import type { ViewMode } from '@/components/products/ProductCard';
 import type { Product } from '@/features/products/types';
+import { groupBy } from '@/lib/utils';
 
 import { useProducts } from '@/features/products/hooks/useProducts';
 import { useProductTaxonomy } from '@/features/products/hooks/useProductTaxonomy';
@@ -42,6 +43,22 @@ export default function Products() {
     });
     return counts;
   }, [products]);
+
+  // Detect single active category for banner
+  const activeCategory = useMemo(() => {
+    if (filters.categories?.length === 1) {
+      return taxonomy.categories.find((c) => c.slug === filters.categories![0]) ?? null;
+    }
+    return null;
+  }, [filters.categories, taxonomy.categories]);
+
+  const featuredProduct = products[0] ?? null;
+
+  // Grouped products for "By Category" sort
+  const groupedProducts = useMemo(() => {
+    if (filters.sort !== 'category') return null;
+    return groupBy(products, (p) => p.primary_category?.name ?? 'Other');
+  }, [products, filters.sort]);
 
   // Collect all active filter labels for chip display
   const activeChips = useMemo(() => {
@@ -132,27 +149,45 @@ export default function Products() {
     categoryCounts,
   };
 
+  // Resolve first product image for banner
+  const bannerImageUrl = useMemo(() => {
+    if (!featuredProduct) return null;
+    const primary = featuredProduct.images?.find((img) => img.is_primary) ?? featuredProduct.images?.[0];
+    return primary?.url ?? featuredProduct.thumbnail_url ?? null;
+  }, [featuredProduct]);
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
 
       <main>
-        {/* Page Header */}
-        <PageBreadcrumb
-          segments={[
-            { label: 'Home', href: '/' },
-            { label: 'Trim Library' },
-          ]}
-          title="Trim Library"
-        />
-        <div className="px-6 lg:px-8 pb-4">
-          <div className="max-w-[1200px] mx-auto">
-            <p className="text-sm text-muted-foreground max-w-lg">
-              Explore our full collection of precision-engineered trims and
-              accessories.
-            </p>
+        {/* Enhanced Page Header */}
+        <section className="section-light border-b border-[hsl(var(--border))] py-12">
+          <div className="section-inner">
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+              <div>
+                <PageBreadcrumb
+                  segments={[
+                    { label: 'Home', href: '/' },
+                    { label: 'Trim Library' },
+                  ]}
+                />
+                <h1 className="text-display mt-4">Trim Library</h1>
+                <p className="text-sm text-[hsl(var(--muted-foreground))] mt-2 max-w-md">
+                  Explore our full collection of precision-engineered trims and accessories.
+                </p>
+              </div>
+              <div className="hidden lg:flex flex-col items-end">
+                <span className="text-[80px] font-bold leading-none text-[hsl(var(--foreground))]/[0.06] tabular-nums select-none">
+                  {loading ? '—' : totalCount}
+                </span>
+                <span className="text-xs uppercase tracking-[0.1em] text-[hsl(var(--muted-foreground))] -mt-2">
+                  products
+                </span>
+              </div>
+            </div>
           </div>
-        </div>
+        </section>
 
         {/* Industry Filter Bar */}
         <IndustryBar
@@ -172,7 +207,46 @@ export default function Products() {
           loading={taxonomy.loading}
         />
 
-        {/* Active Filter Chips — always rendered, fixed min-height */}
+        {/* Category Hero Banner */}
+        <div
+          className="overflow-hidden transition-all duration-[400ms] ease-out"
+          style={{
+            maxHeight: activeCategory ? '200px' : '0px',
+            opacity: activeCategory ? 1 : 0,
+          }}
+        >
+          <div className="relative w-full h-[200px] overflow-hidden bg-[hsl(var(--secondary))] border-b border-[hsl(var(--border))]">
+            {bannerImageUrl && (
+              <img
+                src={bannerImageUrl}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 w-full h-full object-cover grayscale blur-[2px] scale-110 opacity-20"
+              />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--background))] via-[hsl(var(--background))]/80 to-transparent" />
+            <div className="relative z-10 section-inner h-full flex items-center gap-8">
+              <div>
+                <span className="section-label">Category</span>
+                <h2 className="text-4xl font-semibold tracking-tight mt-1">
+                  {activeCategory?.name}
+                </h2>
+              </div>
+              <div className="w-[1px] h-12 bg-[hsl(var(--border))]" />
+              <div className="flex flex-col gap-1">
+                <span className="text-3xl font-semibold tabular-nums">
+                  {products.length}
+                </span>
+                <span className="section-label">Products</span>
+              </div>
+              <p className="hidden lg:block text-sm text-[hsl(var(--muted-foreground))] max-w-xs leading-relaxed ml-auto">
+                Precision-engineered {activeCategory?.name.toLowerCase()} for leading fashion and apparel brands worldwide.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Active Filter Chips */}
         <div className="px-6 lg:px-8 min-h-[44px] flex items-center">
           <div className="max-w-[1200px] mx-auto w-full">
             {activeChips.length > 0 ? (
@@ -231,10 +305,7 @@ export default function Products() {
                       )}
                     </Button>
                   </SheetTrigger>
-                  <SheetContent
-                    side="left"
-                    className="w-80 bg-background p-0 flex flex-col"
-                  >
+                  <SheetContent side="left" className="w-80 bg-background p-0 flex flex-col">
                     <SheetTitle className="sr-only">Filters</SheetTitle>
                     <div className="flex-1 overflow-y-auto overscroll-contain p-6 pb-24">
                       <ProductsSidebar {...sidebarProps} />
@@ -250,7 +321,6 @@ export default function Products() {
                 </span>
 
                 <div className="flex items-center gap-3">
-                  {/* View toggle */}
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => setViewMode('grid')}
@@ -267,10 +337,7 @@ export default function Products() {
                       <List className="h-4 w-4" />
                     </button>
                   </div>
-
                   <span className="text-border">|</span>
-
-                  {/* Sort select */}
                   <Select
                     value={filters.sort ?? 'default'}
                     onValueChange={(val) =>
@@ -295,37 +362,69 @@ export default function Products() {
               {loading ? (
                 <ProductGridSkeleton viewMode={viewMode} />
               ) : products.length > 0 ? (
-                <div
-                  aria-label="Product catalog"
-                  className={
-                    viewMode === 'grid'
-                      ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5'
-                      : 'flex flex-col gap-3'
-                  }
-                >
-                  {products.map((product, idx) => (
-                    <Link key={product.id} to={`/products/${product.slug}`}>
-                      <ProductCard
-                        product={product}
-                        viewMode={viewMode}
-                        index={idx}
-                        onQuickView={() => setQuickViewProduct(product)}
-                      />
-                    </Link>
-                  ))}
-                </div>
+                groupedProducts ? (
+                  // Category-grouped view with dividers
+                  <div className="space-y-0">
+                    {Object.entries(groupedProducts).map(([catName, catProducts]) => (
+                      <div key={catName}>
+                        <div className="flex items-center gap-4 mb-5 mt-8 first:mt-0">
+                          <span className="text-xs font-medium uppercase tracking-[0.12em] text-[hsl(var(--muted-foreground))] whitespace-nowrap">
+                            {catName}
+                          </span>
+                          <div className="flex-1 h-[1px] bg-[hsl(var(--border))]" />
+                          <span className="text-xs text-[hsl(var(--muted-foreground))] tabular-nums">
+                            {catProducts.length}
+                          </span>
+                        </div>
+                        <div className={viewMode === 'grid' ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5' : 'flex flex-col gap-3'}>
+                          {catProducts.map((product, idx) => (
+                            <Link key={product.id} to={`/products/${product.slug}`}>
+                              <ProductCard
+                                product={product}
+                                viewMode={viewMode}
+                                index={idx}
+                                onQuickView={() => setQuickViewProduct(product)}
+                              />
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  // Default flat grid with featured first card
+                  <div
+                    aria-label="Product catalog"
+                    className={
+                      viewMode === 'grid'
+                        ? 'grid grid-cols-2 md:grid-cols-4 gap-5'
+                        : 'flex flex-col gap-3'
+                    }
+                  >
+                    {products.map((product, idx) => (
+                      <div
+                        key={product.id}
+                        className={viewMode === 'grid' && idx === 0 ? 'col-span-2 row-span-1' : ''}
+                      >
+                        <Link to={`/products/${product.slug}`}>
+                          <ProductCard
+                            product={product}
+                            viewMode={viewMode}
+                            index={idx}
+                            featured={viewMode === 'grid' && idx === 0}
+                            onQuickView={() => setQuickViewProduct(product)}
+                          />
+                        </Link>
+                      </div>
+                    ))}
+                  </div>
+                )
               ) : (
                 <div role="status" className="flex flex-col items-center justify-center py-24 text-center">
                   <PackageOpen className="h-12 w-12 text-muted-foreground mb-4" />
-                  <p className="text-sm font-medium text-foreground mb-1">
-                    No products found
-                  </p>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Try adjusting your filters.
-                  </p>
-                  <Button variant="outline" size="sm" onClick={clearFilters}>
-                    Clear filters
-                  </Button>
+                  <p className="text-sm font-medium text-foreground mb-1">No products found</p>
+                  <p className="text-sm text-muted-foreground mb-4">Try adjusting your filters.</p>
+                  <Button variant="outline" size="sm" onClick={clearFilters}>Clear filters</Button>
                 </div>
               )}
             </div>
@@ -335,12 +434,8 @@ export default function Products() {
         {/* CTA */}
         <section className="py-24 px-6 lg:px-8 bg-foreground text-primary-foreground overflow-hidden">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              需要定制產品？
-            </h2>
-            <p className="text-primary-foreground/70 mb-8">
-              我們提供專業的定制服務，滿足您的獨特需求
-            </p>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">需要定制產品？</h2>
+            <p className="text-primary-foreground/70 mb-8">我們提供專業的定制服務，滿足您的獨特需求</p>
             <Link
               to="/contact"
               className="inline-block px-12 py-4 bg-background text-foreground text-xs tracking-[0.06em] uppercase rounded-[var(--radius)] border-2 border-background hover:bg-white/90 transition-all duration-200"
@@ -375,14 +470,8 @@ function IndustryBar({
     <div className="bg-secondary border-y border-border py-3">
       <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
         <div className="flex gap-2 overflow-x-auto no-scrollbar">
-          {/* "All" pill */}
           <button
-            onClick={() => {
-              if (!noneActive) {
-                // Clear industry filter
-                onToggle('__clear__');
-              }
-            }}
+            onClick={() => { if (!noneActive) onToggle('__clear__'); }}
             className={`shrink-0 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.08em] rounded-[var(--radius)] border transition-all duration-150 ${
               noneActive
                 ? 'bg-foreground text-background border-foreground'
@@ -391,12 +480,11 @@ function IndustryBar({
           >
             All
           </button>
-
           {loading
             ? Array.from({ length: 5 }).map((_, i) => (
                 <Skeleton key={i} className="h-8 w-24 rounded-[var(--radius)]" />
               ))
-              : industries.map((ind) => {
+            : industries.map((ind) => {
                 const isActive = active?.includes(ind.slug) ?? false;
                 return (
                   <button
