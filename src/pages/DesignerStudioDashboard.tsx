@@ -658,6 +658,11 @@ const DesignerStudioDashboard = () => {
             <TabsContent value="products" className="mt-0">
               <ProductsPanel onOpenEditor={(id) => setEditingProductId(id ?? undefined)} />
             </TabsContent>
+
+            {/* Composer Tab Content */}
+            <TabsContent value="composer" className="mt-0">
+              <ComposerSessionList teamId={teamId} />
+            </TabsContent>
           </Tabs>
         </div>
       </main>
