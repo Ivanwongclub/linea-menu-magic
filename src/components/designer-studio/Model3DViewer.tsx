@@ -276,15 +276,17 @@ const Model3DViewer = ({ hasModel, modelType = 'button', modelUrl }: Model3DView
         className={`${isFullscreen ? 'fixed inset-0 z-50' : 'aspect-video'} bg-gradient-to-br from-muted/30 to-muted/60 rounded-lg overflow-hidden relative`}
         onWheel={(e) => e.stopPropagation()}
       >
-        <Canvas
-          shadows
-          camera={{ position: [0, 1.5, 3], fov: 45 }}
-          gl={{ antialias: true, alpha: true }}
-        >
-          <Suspense fallback={<Loader />}>
-            <Scene modelType={modelType} autoRotate={autoRotate} lightMode={lightMode} modelUrl={modelUrl} />
-          </Suspense>
-        </Canvas>
+        <CanvasErrorBoundary onError={() => setModelError(true)}>
+          <Canvas
+            shadows
+            camera={{ position: [0, 1.5, 3], fov: 45 }}
+            gl={{ antialias: true, alpha: true }}
+          >
+            <Suspense fallback={<Loader />}>
+              <Scene modelType={modelType} autoRotate={autoRotate} lightMode={lightMode} modelUrl={modelUrl} />
+            </Suspense>
+          </Canvas>
+        </CanvasErrorBoundary>
 
         {/* Controls Overlay */}
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-background/90 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-lg">
