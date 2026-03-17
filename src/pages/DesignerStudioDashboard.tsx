@@ -359,11 +359,15 @@ const DesignerStudioDashboard = () => {
                 </h1>
 
                 {/* Main Tabs - Inline */}
-                <Tabs value={activeMainTab} onValueChange={(v) => setActiveMainTab(v as "library" | "rfq" | "brochures")} className="hidden sm:block">
+                <Tabs value={activeMainTab} onValueChange={(v) => setActiveMainTab(v as "library" | "rfq" | "brochures" | "products" | "composer")} className="hidden sm:block">
                   <TabsList className="h-9">
                     <TabsTrigger value="library" className="gap-1.5 text-sm px-3 h-7">
                       <Library className="w-3.5 h-3.5" />
                       素材庫
+                    </TabsTrigger>
+                    <TabsTrigger value="composer" className="gap-1.5 text-sm px-3 h-7">
+                      <Layers className="w-3.5 h-3.5" />
+                      視覺設計
                     </TabsTrigger>
                     <TabsTrigger value="rfq" className="gap-1.5 text-sm px-3 h-7">
                       <FileText className="w-3.5 h-3.5" />
