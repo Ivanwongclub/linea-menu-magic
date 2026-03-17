@@ -288,6 +288,11 @@ export default function ProductCatalogTab({ onOpenEditor }: ProductCatalogTabPro
           </div>
         )}
 
+        <GenerateAIImagesButton
+          productCount={allProducts.filter((p) => !p.thumbnail_url).length}
+          onComplete={fetchAll}
+        />
+
         <Button size="sm" className="gap-1.5 h-8" onClick={() => onOpenEditor?.()}>
           <Plus className="w-3.5 h-3.5" />
           New Product
