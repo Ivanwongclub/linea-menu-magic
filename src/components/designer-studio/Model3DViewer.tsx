@@ -1,10 +1,18 @@
-import { Suspense, useRef, useState } from "react";
+import { Suspense, useRef, useState, Component, type ReactNode } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Environment, ContactShadows, PresentationControls, Center, Html, useProgress } from "@react-three/drei";
 import { Box, RotateCcw, Maximize2, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import * as THREE from "three";
 import OBJModel from "./OBJModelLoader";
+
+// Error boundary to catch OBJ load failures gracefully
+class CanvasErrorBoundary extends Component<{ children: ReactNode; onError: () => void }, { hasError: boolean }> {
+  state = { hasError: false };
+  static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidCatch() { this.props.onError(); }
+  render() { return this.state.hasError ? null : this.props.children; }
+}
 
 interface Model3DViewerProps {
   hasModel: boolean;
