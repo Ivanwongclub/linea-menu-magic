@@ -69,8 +69,8 @@ export function useUserLibrary(teamId: string): UseUserLibraryResult {
       const productRaw = r.product as Record<string, unknown> | null;
 
       // Parse category maps
-      let categories: { id: string; name: string; slug: string }[] = [];
-      let primaryCategory: { id: string; name: string; slug: string } | undefined;
+      let categories: { id: string; name: string; slug: string; sort_order: number }[] = [];
+      let primaryCategory: { id: string; name: string; slug: string; sort_order: number } | undefined;
 
       if (productRaw) {
         const catMaps = (productRaw.product_category_map ?? []) as Array<{
@@ -79,7 +79,7 @@ export function useUserLibrary(teamId: string): UseUserLibraryResult {
         }>;
         categories = catMaps
           .filter((m) => m.product_categories)
-          .map((m) => m.product_categories!);
+          .map((m) => ({ ...m.product_categories!, sort_order: 0 }));
         const primary = catMaps.find((m) => m.is_primary && m.product_categories);
         primaryCategory = primary?.product_categories ?? categories[0];
       }
