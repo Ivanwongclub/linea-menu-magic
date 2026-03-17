@@ -16,19 +16,12 @@ function resolveProductImage(
   product: Product,
   size: 'thumb' | 'full' = 'thumb',
 ): string {
-  const blockedHosts = ['picsum', 'unsplash', 'lorempixel'];
-  const isBlocked = (url: string) => blockedHosts.some((host) => url.toLowerCase().includes(host));
-
   if (product.images?.length) {
     const primary = product.images.find((img) => img.is_primary) ?? product.images[0];
-    if (primary?.url && !isBlocked(primary.url)) {
-      return primary.url;
-    }
+    if (primary?.url) return primary.url;
   }
 
-  if (product.thumbnail_url && !isBlocked(product.thumbnail_url)) {
-    return product.thumbnail_url;
-  }
+  if (product.thumbnail_url) return product.thumbnail_url;
 
   return getProductPlaceholderUrl(
     product.name_en ?? product.name,
