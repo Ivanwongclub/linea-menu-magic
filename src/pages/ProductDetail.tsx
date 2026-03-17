@@ -54,7 +54,7 @@ function ImageGallery({ images }: { images: ProductImage[] }) {
       {/* Primary image */}
       <div className="aspect-square bg-secondary border border-border rounded-[calc(var(--radius)*2)] overflow-hidden">
         <img
-          src={activeImage.url}
+          src={getOptimizedImageUrl(activeImage.url, 800, 800, 85)}
           alt={activeImage.alt_text ?? 'Product image'}
           className="w-full h-full object-contain p-4"
         />
