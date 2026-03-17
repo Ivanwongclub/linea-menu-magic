@@ -449,29 +449,43 @@ function GenerateAIImagesButton({
 }) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [progress, setProgress] = useState({ done: 0, total: 0 });
 
   const handleGenerate = async () => {
     setShowConfirm(false);
     setGenerating(true);
-    toast.info(`Generating AI images for ${productCount} products. This may take a few minutes…`);
+    setProgress({ done: 0, total: productCount });
+
+    let totalProcessed = 0;
+    let totalFailed = 0;
+    let hasMore = true;
 
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-product-images`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      while (hasMore) {
+        const res = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-product-images`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            },
+            body: JSON.stringify({ batchSize: 10 }),
           },
-        },
-      );
+        );
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Generation failed");
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Generation failed");
+
+        totalProcessed += data.processed || 0;
+        totalFailed += data.failed || 0;
+        setProgress({ done: totalProcessed, total: productCount });
+
+        hasMore = (data.remaining ?? 0) > 0;
+      }
 
       toast.success(
-        `Generated ${data.processed} images. ${data.failed ? `${data.failed} failed.` : ""}`,
+        `Generated ${totalProcessed} images.${totalFailed ? ` ${totalFailed} failed.` : ""}`,
       );
       onComplete();
     } catch (err) {
