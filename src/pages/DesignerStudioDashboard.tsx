@@ -19,6 +19,7 @@ import {
   Search,
   Filter,
   Plus,
+  Layers,
   Library,
   FileText,
   Clock,
