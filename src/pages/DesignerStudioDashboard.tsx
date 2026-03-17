@@ -61,6 +61,9 @@ import BrochureEditor from "@/components/designer-studio/BrochureEditor";
 import ProductsPanel from "@/components/designer-studio/products/ProductsPanel";
 import ProductEditor from "@/components/designer-studio/products/ProductEditor";
 
+// Composer
+import ComposerSessionList from "@/features/designer/components/ComposerSessionList";
+
 import { supabase } from "@/integrations/supabase/client";
 
 // ─── Adapter: UserLibraryItem → legacy LibraryItem ──────
