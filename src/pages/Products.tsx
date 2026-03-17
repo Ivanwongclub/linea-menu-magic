@@ -228,7 +228,7 @@ export default function Products() {
                 className="absolute inset-0 w-full h-full object-cover grayscale blur-[1px] scale-105 opacity-30"
               />
             )}
-            <div className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--background))] via-[hsl(var(--background))]/80 to-transparent" />
+            
             <div className="relative z-10 section-inner h-full flex items-center gap-8">
               <div>
                 <span className="section-label">Category</span>
