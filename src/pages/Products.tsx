@@ -162,8 +162,17 @@ export default function Products() {
 
       <main>
         {/* Enhanced Page Header */}
-        <section className="section-light border-b border-[hsl(var(--border))] py-12">
-          <div className="section-inner">
+        <section className="relative section-light border-b border-[hsl(var(--border))] py-12 overflow-hidden">
+          {/* Subtle background image */}
+          {bannerImageUrl && (
+            <img
+              src={bannerImageUrl}
+              alt=""
+              aria-hidden="true"
+              className="absolute inset-0 w-full h-full object-cover grayscale opacity-[0.04] scale-105 pointer-events-none"
+            />
+          )}
+          <div className="relative z-10 section-inner">
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
               <div>
                 <PageBreadcrumb
