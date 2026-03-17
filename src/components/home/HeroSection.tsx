@@ -178,7 +178,7 @@ const HeroSection = () => {
 
   return (
     <section
-      className="relative w-full min-h-[90vh] overflow-hidden"
+      className="relative w-full min-h-[100vh] overflow-hidden"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       onTouchStart={handleTouchStart}
@@ -195,6 +195,14 @@ const HeroSection = () => {
           style={{ backgroundColor: slides[prev].bgColor }}
         />
       )}
+
+      {/* Top gradient veil for navbar readability */}
+      <div
+        className="absolute top-0 left-0 right-0 h-28 z-[3] pointer-events-none"
+        style={{
+          background: "linear-gradient(to bottom, rgba(0,0,0,0.25), transparent)",
+        }}
+      />
 
       {/* Slides */}
       {slides.map((slide, index) => {
