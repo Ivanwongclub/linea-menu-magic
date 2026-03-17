@@ -61,6 +61,152 @@ export type Database = {
           },
         ]
       }
+      design_exports: {
+        Row: {
+          created_at: string
+          export_type: string
+          export_url: string | null
+          id: string
+          session_id: string
+        }
+        Insert: {
+          created_at?: string
+          export_type?: string
+          export_url?: string | null
+          id?: string
+          session_id: string
+        }
+        Update: {
+          created_at?: string
+          export_type?: string
+          export_url?: string | null
+          id?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_exports_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "design_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      design_layers: {
+        Row: {
+          created_at: string
+          flip_x: boolean
+          flip_y: boolean
+          id: string
+          image_url: string | null
+          is_locked: boolean
+          is_visible: boolean
+          layer_order: number
+          name: string | null
+          opacity: number
+          product_id: string | null
+          rotation: number
+          scale: number
+          session_id: string
+          x: number
+          y: number
+        }
+        Insert: {
+          created_at?: string
+          flip_x?: boolean
+          flip_y?: boolean
+          id?: string
+          image_url?: string | null
+          is_locked?: boolean
+          is_visible?: boolean
+          layer_order: number
+          name?: string | null
+          opacity?: number
+          product_id?: string | null
+          rotation?: number
+          scale?: number
+          session_id: string
+          x?: number
+          y?: number
+        }
+        Update: {
+          created_at?: string
+          flip_x?: boolean
+          flip_y?: boolean
+          id?: string
+          image_url?: string | null
+          is_locked?: boolean
+          is_visible?: boolean
+          layer_order?: number
+          name?: string | null
+          opacity?: number
+          product_id?: string | null
+          rotation?: number
+          scale?: number
+          session_id?: string
+          x?: number
+          y?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_layers_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_layers_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "design_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      design_sessions: {
+        Row: {
+          background_image_height: number | null
+          background_image_url: string | null
+          background_image_width: number | null
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          status: string
+          team_id: string
+          thumbnail_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          background_image_height?: number | null
+          background_image_url?: string | null
+          background_image_width?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          status?: string
+          team_id: string
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          background_image_height?: number | null
+          background_image_url?: string | null
+          background_image_width?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          status?: string
+          team_id?: string
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       flipbook_brochures: {
         Row: {
           cover_image_url: string | null
