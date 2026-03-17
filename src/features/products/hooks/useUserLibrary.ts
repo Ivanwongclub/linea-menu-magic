@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import type { UserLibraryItem } from '../types';
+import type { UserLibraryItem, DownloadableFile } from '../types';
+
+const ADMIN_DEFAULT_TEAM_ID = '00000000-0000-0000-0000-000000000000';
 
 interface UseUserLibraryResult {
   items: UserLibraryItem[];
@@ -30,15 +32,29 @@ export function useUserLibrary(teamId: string): UseUserLibraryResult {
       .select(
         `
         *,
-        products(
-          id, item_code, name, name_en, slug, description,
-          status, is_public, is_customizable, specifications,
-          production, thumbnail_url, model_url, sort_order,
-          created_at, updated_at
+        product:products (
+          id, item_code, name, name_en,
+          slug, description,
+          thumbnail_url, model_url,
+          is_customizable, is_public, status,
+          specifications, production, sort_order,
+          created_at, updated_at,
+          product_category_map (
+            is_primary,
+            product_categories (
+              id, name, slug
+            )
+          ),
+          product_certification_map (
+            product_certifications (
+              id, name, abbreviation
+            )
+          )
         )
       `
       )
-      .eq('team_id', teamId)
+      .or(`team_id.eq.${teamId},is_admin_default.eq.true`)
+      .order('is_admin_default', { ascending: false })
       .order('added_at', { ascending: false });
 
     if (queryError) {
@@ -50,7 +66,37 @@ export function useUserLibrary(teamId: string): UseUserLibraryResult {
 
     const transformed: UserLibraryItem[] = (data ?? []).map((row) => {
       const r = row as unknown as Record<string, unknown>;
-      const productData = r.products as Record<string, unknown> | null;
+      const productRaw = r.product as Record<string, unknown> | null;
+
+      // Parse category maps
+      let categories: { id: string; name: string; slug: string; sort_order: number }[] = [];
+      let primaryCategory: { id: string; name: string; slug: string; sort_order: number } | undefined;
+
+      if (productRaw) {
+        const catMaps = (productRaw.product_category_map ?? []) as Array<{
+          is_primary: boolean;
+          product_categories: { id: string; name: string; slug: string } | null;
+        }>;
+        categories = catMaps
+          .filter((m) => m.product_categories)
+          .map((m) => ({ ...m.product_categories!, sort_order: 0 }));
+        const primary = catMaps.find((m) => m.is_primary && m.product_categories);
+        primaryCategory = primary?.product_categories ? { ...primary.product_categories, sort_order: 0 } : categories[0];
+      }
+
+      // Parse certifications
+      let certifications: { id: string; name: string; abbreviation: string }[] = [];
+      if (productRaw) {
+        const certMaps = (productRaw.product_certification_map ?? []) as Array<{
+          product_certifications: { id: string; name: string; abbreviation: string } | null;
+        }>;
+        certifications = certMaps
+          .filter((m) => m.product_certifications)
+          .map((m) => m.product_certifications!);
+      }
+
+      const isAdminDefault = r.is_admin_default as boolean;
+      const downloadableFiles = (r.downloadable_files ?? []) as DownloadableFile[];
 
       return {
         id: r.id as string,
@@ -63,30 +109,32 @@ export function useUserLibrary(teamId: string): UseUserLibraryResult {
         custom_specs: r.custom_specs as Record<string, unknown> | undefined,
         notes: r.notes as string | undefined,
         is_favourite: r.is_favourite as boolean,
+        is_admin_default: isAdminDefault,
+        downloadable_files: downloadableFiles,
         added_at: r.added_at as string,
         added_by: r.added_by as string | undefined,
-        product: productData
+        section: isAdminDefault ? 'WIN-CYC Collection' : 'My Library',
+        product: productRaw
           ? {
-              id: productData.id as string,
-              item_code: productData.item_code as string,
-              name: productData.name as string,
-              name_en: productData.name_en as string | undefined,
-              slug: productData.slug as string,
-              description: productData.description as string | undefined,
-              status: productData.status as 'draft' | 'active' | 'archived',
-              is_public: productData.is_public as boolean,
-              is_customizable: productData.is_customizable as boolean,
-              specifications: productData.specifications as
-                | Record<string, unknown>
-                | undefined,
-              production: productData.production as
-                | Record<string, unknown>
-                | undefined,
-              thumbnail_url: productData.thumbnail_url as string | undefined,
-              model_url: productData.model_url as string | undefined,
-              sort_order: productData.sort_order as number,
-              created_at: productData.created_at as string,
-              updated_at: productData.updated_at as string,
+              id: productRaw.id as string,
+              item_code: productRaw.item_code as string,
+              name: productRaw.name as string,
+              name_en: productRaw.name_en as string | undefined,
+              slug: productRaw.slug as string,
+              description: productRaw.description as string | undefined,
+              status: productRaw.status as 'draft' | 'active' | 'archived',
+              is_public: productRaw.is_public as boolean,
+              is_customizable: productRaw.is_customizable as boolean,
+              specifications: productRaw.specifications as Record<string, unknown> | undefined,
+              production: productRaw.production as Record<string, unknown> | undefined,
+              thumbnail_url: productRaw.thumbnail_url as string | undefined,
+              model_url: productRaw.model_url as string | undefined,
+              sort_order: productRaw.sort_order as number,
+              created_at: productRaw.created_at as string,
+              updated_at: productRaw.updated_at as string,
+              categories,
+              primary_category: primaryCategory as any,
+              certifications: certifications as any[],
             }
           : undefined,
       };
@@ -107,7 +155,6 @@ export function useUserLibrary(teamId: string): UseUserLibraryResult {
 
       const newValue = !item.is_favourite;
 
-      // Optimistic update
       setItems((prev) =>
         prev.map((i) =>
           i.id === itemId ? { ...i, is_favourite: newValue } : i
@@ -120,7 +167,6 @@ export function useUserLibrary(teamId: string): UseUserLibraryResult {
         .eq('id', itemId);
 
       if (updateError) {
-        // Revert on failure
         setItems((prev) =>
           prev.map((i) =>
             i.id === itemId ? { ...i, is_favourite: !newValue } : i

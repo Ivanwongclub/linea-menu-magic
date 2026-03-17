@@ -11,7 +11,7 @@ import LayerPanel from '../components/LayerPanel'
 import ProductPickerSheet from '../components/ProductPickerSheet'
 import type { DesignLayer } from '../types'
 
-const DEMO_TEAM_ID = 'demo-team'
+const DEMO_TEAM_ID = '00000000-0000-0000-0000-000000000001'
 
 export default function ComposerPage() {
   const { sessionId } = useParams<{ sessionId: string }>()

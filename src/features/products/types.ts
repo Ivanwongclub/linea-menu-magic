@@ -73,6 +73,14 @@ export type Product = {
   images?: ProductImage[];
 };
 
+export type DownloadableFile = {
+  id: string;
+  name: string;
+  type: 'obj' | 'pdf' | 'step' | 'dwg';
+  url: string;
+  size: string;
+};
+
 export type UserLibraryItem = {
   id: string;
   product_id: string;
@@ -84,9 +92,12 @@ export type UserLibraryItem = {
   custom_specs?: Record<string, unknown>;
   notes?: string;
   is_favourite: boolean;
+  is_admin_default: boolean;
+  downloadable_files: DownloadableFile[];
   added_at: string;
   added_by?: string;
   product?: Product;
+  section: string;
 };
 
 export type ProductFilters = {
