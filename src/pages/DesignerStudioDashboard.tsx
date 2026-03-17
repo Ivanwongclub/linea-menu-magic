@@ -33,6 +33,8 @@ import {
   BookOpen,
   X,
   ExternalLink,
+  ArrowRight,
+  Check,
 } from "lucide-react";
 
 // Library imports — Supabase-backed
@@ -64,6 +66,7 @@ import ProductEditor from "@/components/designer-studio/products/ProductEditor";
 
 // Composer
 import ComposerSessionList from "@/features/designer/components/ComposerSessionList";
+import { useDesignSessions } from "@/features/designer/hooks/useDesignSessions";
 
 import { supabase } from "@/integrations/supabase/client";
 
@@ -75,7 +78,7 @@ function toLegacyItem(item: UserLibraryItem): LibraryItem {
     itemCode: p?.item_code ?? '',
     name: item.custom_name || p?.name || 'Untitled',
     nameEn: p?.name_en || p?.name || '',
-    category: 'buttons' as LibraryItem['category'], // fallback
+    category: 'buttons' as LibraryItem['category'],
     description: p?.description_en || p?.description || '',
     specifications: (p?.specifications as Record<string, string>) ?? {},
     pricing: { unitPrice: 0, currency: 'USD', moq: 0 },
@@ -102,6 +105,9 @@ type SortOrder = "asc" | "desc";
 
 const DEMO_TEAM_ID = '00000000-0000-0000-0000-000000000001';
 
+const validTabs = ['library', 'rfq', 'brochures', 'products', 'composer'] as const;
+type TabId = typeof validTabs[number];
+
 const DesignerStudioDashboard = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -117,9 +123,8 @@ const DesignerStudioDashboard = () => {
 
   // Main tab state — read from URL ?tab= param
   const tabFromUrl = searchParams.get('tab');
-  const validTabs = ['library', 'rfq', 'brochures', 'products', 'composer'] as const;
-  const initialTab = validTabs.includes(tabFromUrl as any) ? tabFromUrl as typeof validTabs[number] : 'library';
-  const [activeMainTab, setActiveMainTab] = useState<"library" | "rfq" | "brochures" | "products" | "composer">(initialTab);
+  const initialTab: TabId = validTabs.includes(tabFromUrl as TabId) ? tabFromUrl as TabId : 'library';
+  const [activeMainTab, setActiveMainTab] = useState<TabId>(initialTab);
 
   // Product editor state
   const [editingProductId, setEditingProductId] = useState<string | null | undefined>(null);
@@ -127,6 +132,12 @@ const DesignerStudioDashboard = () => {
   // Library — Supabase data
   const { items: libraryItems, loading: libraryLoading, toggleFavourite, removeItem } = useUserLibrary(teamId);
   const taxonomy = useProductTaxonomy();
+
+  // Composer sessions
+  const { sessions: recentSessions, loading: sessionsLoading, createSession } = useDesignSessions(teamId);
+
+  // Admin default items for hero
+  const adminDefaultItems = useMemo(() => libraryItems.filter(item => item.is_admin_default), [libraryItems]);
 
   // Library UI states
   const [searchQuery, setSearchQuery] = useState("");
@@ -304,6 +315,16 @@ const DesignerStudioDashboard = () => {
     production: rfqs.filter(r => r.status === 'production').length,
   };
 
+  // Composer handler
+  const handleCreateComposition = async () => {
+    try {
+      const session = await createSession('New Composition');
+      navigate(`/designer-studio/compose/${session.id}`);
+    } catch {
+      toast.error('Failed to create composition');
+    }
+  };
+
   // ─── Early returns for detail views ─────────────────────
 
   if (editingProductId !== null) {
@@ -343,110 +364,212 @@ const DesignerStudioDashboard = () => {
     );
   }
 
+  // Whether to show the hero section (only when no tab is "actively expanded")
+  const showHero = activeMainTab !== 'library' && activeMainTab !== 'composer';
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      {/* Auto-hiding Header + Navigation wrapper */}
+      {/* Auto-hiding Header */}
       <div
         className={`sticky top-0 z-50 transition-transform duration-300 [&>header]:static ${
           isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
         }`}
       >
         <Header />
+      </div>
 
-        {/* Sticky Navigation Bar */}
-        <div className="bg-background/95 backdrop-blur-sm border-b border-border">
-          <div className="max-w-7xl mx-auto px-4 lg:px-6">
-            {/* Compact Header Row */}
-            <div className="flex items-center justify-between py-3">
-              <div className="flex items-center gap-6">
-                <h1 className="text-xl font-semibold text-foreground">
-                  設計師工作室
-                </h1>
+      <main className="flex-1">
+        <div className="max-w-7xl mx-auto px-4 lg:px-6">
 
-                {/* Main Tabs - Inline */}
-                <Tabs value={activeMainTab} onValueChange={(v) => setActiveMainTab(v as "library" | "rfq" | "brochures" | "products" | "composer")} className="hidden sm:block">
-                  <TabsList className="h-9">
-                    <TabsTrigger value="library" className="gap-1.5 text-sm px-3 h-7">
-                      <Library className="w-3.5 h-3.5" />
-                      素材庫
-                    </TabsTrigger>
-                    <TabsTrigger value="composer" className="gap-1.5 text-sm px-3 h-7">
-                      <Layers className="w-3.5 h-3.5" />
-                      視覺設計
-                    </TabsTrigger>
-                    <TabsTrigger value="rfq" className="gap-1.5 text-sm px-3 h-7">
-                      <FileText className="w-3.5 h-3.5" />
-                      我的報價 ({statusCounts.all})
-                    </TabsTrigger>
-                    <TabsTrigger value="brochures" className="gap-1.5 text-sm px-3 h-7">
-                      <BookOpen className="w-3.5 h-3.5" />
-                      Brochures
-                    </TabsTrigger>
-                    <TabsTrigger value="products" className="gap-1.5 text-sm px-3 h-7">
-                      <Package className="w-3.5 h-3.5" />
-                      Products
-                    </TabsTrigger>
-                  </TabsList>
-                </Tabs>
+          {/* Page title */}
+          <div className="py-6 pb-4">
+            <h1 className="text-2xl font-semibold text-foreground tracking-tight">
+              設計師工作室
+            </h1>
+            <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1">
+              Material library, visual composer & project management
+            </p>
+          </div>
+
+          {/* ═══════════ HERO SPLIT SECTION ═══════════ */}
+          {showHero && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+
+              {/* LEFT: 素材庫 entry point */}
+              <div
+                onClick={() => setActiveMainTab('library')}
+                className="relative bg-[hsl(var(--background))] border border-[hsl(var(--border))] rounded-[calc(var(--radius)*2)] p-6 cursor-pointer group transition-all duration-200 hover:border-[hsl(var(--foreground))] hover:shadow-[0_4px_24px_rgba(0,0,0,0.06)] overflow-hidden"
+              >
+                {/* Top: label + icon */}
+                <div className="flex items-start justify-between mb-6">
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-[0.1em] text-[hsl(var(--muted-foreground))] mb-1">
+                      素材庫 · Material Library
+                    </p>
+                    <p className="text-lg font-medium text-[hsl(var(--foreground))] leading-snug">
+                      Browse & download<br />trim specifications
+                    </p>
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-[hsl(var(--secondary))] flex items-center justify-center group-hover:bg-[hsl(var(--foreground))] group-hover:text-[hsl(var(--background))] transition-colors">
+                    <ArrowRight className="w-4 h-4" />
+                  </div>
+                </div>
+
+                {/* Preview strip of admin default items */}
+                <div className="flex items-center gap-2 mb-6">
+                  {adminDefaultItems.slice(0, 4).map(item => (
+                    <div key={item.id} className="w-14 h-14 rounded-[var(--radius)] bg-[hsl(var(--secondary))] overflow-hidden flex-shrink-0 border border-[hsl(var(--border))]">
+                      {item.product?.thumbnail_url ? (
+                        <img src={item.product.thumbnail_url} alt="" className="w-full h-full object-contain p-1.5" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[8px] font-mono text-[hsl(var(--muted-foreground))]">
+                          {item.product?.item_code?.slice(0, 5)}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  {adminDefaultItems.length > 4 && (
+                    <div className="w-14 h-14 rounded-[var(--radius)] bg-[hsl(var(--secondary))] border border-[hsl(var(--border))] flex items-center justify-center flex-shrink-0">
+                      <span className="text-[11px] font-medium text-[hsl(var(--muted-foreground))]">
+                        +{adminDefaultItems.length - 4}
+                      </span>
+                    </div>
+                  )}
+                  {adminDefaultItems.length === 0 && !libraryLoading && (
+                    <div className="text-xs text-[hsl(var(--muted-foreground))]">No items yet</div>
+                  )}
+                </div>
+
+                {/* Feature bullets */}
+                <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+                  {['3D model preview', 'OBJ file download', 'Spec sheets', 'RFQ request'].map(f => (
+                    <span key={f} className="flex items-center gap-1.5 text-[11px] text-[hsl(var(--muted-foreground))]">
+                      <Check className="w-3 h-3" />
+                      {f}
+                    </span>
+                  ))}
+                </div>
               </div>
 
-              {/* Library header actions */}
-              {activeMainTab === "library" && (
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="gap-1.5 h-8"
-                    onClick={() => navigate('/products')}
+              {/* RIGHT: 視覺設計 entry point */}
+              <div
+                onClick={() => setActiveMainTab('composer')}
+                className="relative bg-[hsl(var(--foreground))] text-[hsl(var(--background))] rounded-[calc(var(--radius)*2)] p-6 cursor-pointer group transition-all duration-200 hover:shadow-[0_4px_24px_rgba(0,0,0,0.2)] overflow-hidden"
+              >
+                {/* Background decoration */}
+                <div className="absolute top-4 right-4 opacity-[0.06]">
+                  <Layers className="w-32 h-32" />
+                </div>
+
+                {/* Top: label + icon */}
+                <div className="flex items-start justify-between mb-6 relative z-10">
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-[0.1em] opacity-60 mb-1">
+                      視覺設計 · Visual Composer
+                    </p>
+                    <p className="text-lg font-medium leading-snug">
+                      Place trims on your<br />garment designs
+                    </p>
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors">
+                    <ArrowRight className="w-4 h-4" />
+                  </div>
+                </div>
+
+                {/* Center: recent sessions or CTA */}
+                <div className="flex items-center gap-2 mb-6 relative z-10">
+                  {recentSessions.length > 0 ? (
+                    <>
+                      {recentSessions.slice(0, 3).map(session => (
+                        <div
+                          key={session.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/designer-studio/compose/${session.id}`);
+                          }}
+                          className="w-20 h-16 rounded-[var(--radius)] bg-white/10 border border-white/20 overflow-hidden flex-shrink-0 hover:border-white/50 transition-colors cursor-pointer"
+                        >
+                          {session.thumbnail_url || session.background_image_url ? (
+                            <img src={session.thumbnail_url || session.background_image_url || ''} alt={session.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Layers className="w-4 h-4 opacity-30" />
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCreateComposition();
+                        }}
+                        className="w-20 h-16 rounded-[var(--radius)] border-2 border-dashed border-white/20 hover:border-white/50 flex items-center justify-center flex-shrink-0 transition-colors cursor-pointer"
+                      >
+                        <Plus className="w-5 h-5 opacity-50" />
+                      </div>
+                    </>
+                  ) : (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCreateComposition();
+                      }}
+                      className="flex items-center gap-2 bg-white text-black text-xs font-medium uppercase tracking-[0.08em] px-5 py-2.5 rounded-[var(--radius)] hover:bg-white/90 transition-colors"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      New Composition
+                    </button>
+                  )}
+                </div>
+
+                {/* Bottom: feature bullets */}
+                <div className="flex flex-wrap gap-x-4 gap-y-1.5 relative z-10">
+                  {['Upload garment image', 'Place & scale trims', 'Rotate & layer', 'Export to PNG'].map(f => (
+                    <span key={f} className="flex items-center gap-1.5 text-[11px] opacity-60">
+                      <Check className="w-3 h-3" />
+                      {f}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ═══════════ LIBRARY / COMPOSER EXPANDED CONTENT ═══════════ */}
+          {activeMainTab === 'library' && (
+            <div className="mb-8">
+              {/* Back to hero + Library header */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setActiveMainTab('rfq')}
+                    className="text-xs text-[hsl(var(--muted-foreground))] hover:text-foreground transition-colors"
                   >
+                    ← Back
+                  </button>
+                  <div>
+                    <h2 className="text-lg font-semibold text-foreground">素材庫 · Material Library</h2>
+                    <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                      {libraryItems.length} products{libraryItems[0]?.team_name ? ` · ${libraryItems[0].team_name}` : ''}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" className="gap-1.5 h-8" onClick={() => navigate('/products')}>
                     <ExternalLink className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">Browse Catalog</span>
                   </Button>
-                  <Button
-                    size="sm"
-                    className="gap-1.5 h-8"
-                    onClick={() => setIsSearchDialogOpen(true)}
-                  >
+                  <Button size="sm" className="gap-1.5 h-8" onClick={() => setIsSearchDialogOpen(true)}>
                     <Plus className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">Add to Library</span>
                   </Button>
                 </div>
-              )}
-            </div>
+              </div>
 
-            {/* Mobile Tabs */}
-            <div className="sm:hidden pb-3">
-              <Tabs value={activeMainTab} onValueChange={(v) => setActiveMainTab(v as "library" | "rfq" | "brochures" | "products" | "composer")}>
-                <TabsList className="w-full grid grid-cols-5">
-                  <TabsTrigger value="library" className="gap-1.5 text-sm">
-                    <Library className="w-3.5 h-3.5" />
-                    素材庫
-                  </TabsTrigger>
-                  <TabsTrigger value="composer" className="gap-1.5 text-sm">
-                    <Layers className="w-3.5 h-3.5" />
-                    視覺設計
-                  </TabsTrigger>
-                  <TabsTrigger value="rfq" className="gap-1.5 text-sm">
-                    <FileText className="w-3.5 h-3.5" />
-                    報價 ({statusCounts.all})
-                  </TabsTrigger>
-                  <TabsTrigger value="brochures" className="gap-1.5 text-sm">
-                    <BookOpen className="w-3.5 h-3.5" />
-                    Brochures
-                  </TabsTrigger>
-                  <TabsTrigger value="products" className="gap-1.5 text-sm">
-                    <Package className="w-3.5 h-3.5" />
-                    Products
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
-
-            {/* Library Filters - Compact inline */}
-            {activeMainTab === "library" && (
+              {/* Library Filters */}
               <div className="flex items-center gap-2 pb-3 overflow-x-auto scrollbar-hide">
                 <div className="relative flex-shrink-0 w-48 lg:w-64">
-                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[hsl(var(--muted-foreground))]" />
                   <Input
                     placeholder="Search..."
                     value={searchQuery}
@@ -468,10 +591,7 @@ const DesignerStudioDashboard = () => {
                   ({favouriteCount})
                 </Button>
 
-                <Select
-                  value={categoryFilter}
-                  onValueChange={setCategoryFilter}
-                >
+                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                   <SelectTrigger className="w-[140px] h-8 text-sm flex-shrink-0">
                     <SelectValue placeholder="Category" />
                   </SelectTrigger>
@@ -500,36 +620,17 @@ const DesignerStudioDashboard = () => {
                 </ToggleGroup>
 
                 {activeFilterCount > 0 && (
-                  <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-xs h-7 px-2 flex-shrink-0 text-muted-foreground hover:text-foreground">
+                  <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-xs h-7 px-2 flex-shrink-0 text-[hsl(var(--muted-foreground))] hover:text-foreground">
                     <X className="w-3 h-3 mr-1" />
                     Clear ({activeFilterCount})
                   </Button>
                 )}
               </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <main className="flex-1 py-4 px-4 lg:px-6">
-        <div className="max-w-7xl mx-auto">
-          <Tabs value={activeMainTab} onValueChange={(v) => setActiveMainTab(v as "library" | "rfq" | "brochures" | "products" | "composer")} className="w-full">
-            {/* Library Tab Content */}
-            <TabsContent value="library" className="mt-0">
-              {/* Library header */}
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h2 className="text-lg font-semibold text-foreground">My Library</h2>
-                  <p className="text-xs text-muted-foreground">
-                    {libraryItems.length} products{libraryItems[0]?.team_name ? ` · ${libraryItems[0].team_name}` : ''}
-                  </p>
-                </div>
-              </div>
 
               {/* Active filters badges */}
               {activeFilterCount > 0 && (
                 <div className="flex items-center gap-2 flex-wrap mb-4">
-                  <span className="text-xs text-muted-foreground">Filters:</span>
+                  <span className="text-xs text-[hsl(var(--muted-foreground))]">Filters:</span>
                   {showFavoritesOnly && (
                     <Badge variant="secondary" className="gap-1 text-xs py-0.5">
                       <Heart className="w-3 h-3 fill-current" />
@@ -552,7 +653,7 @@ const DesignerStudioDashboard = () => {
 
               {/* Results Count */}
               <div className="flex items-center justify-between mb-4">
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-[hsl(var(--muted-foreground))]">
                   {filteredLibraryItems.length} items
                 </p>
               </div>
@@ -560,7 +661,7 @@ const DesignerStudioDashboard = () => {
               {/* Loading state */}
               {libraryLoading ? (
                 <div className="text-center py-16">
-                  <p className="text-sm text-muted-foreground">Loading library...</p>
+                  <p className="text-sm text-[hsl(var(--muted-foreground))]">Loading library...</p>
                 </div>
               ) : filteredLibraryItems.length > 0 ? (
                 libraryViewMode === "grid" ? (
@@ -571,14 +672,8 @@ const DesignerStudioDashboard = () => {
                         item={item}
                         onView={handleQuickView}
                         onToggleFavourite={toggleFavourite}
-                        onAddToComposition={(i) => {
-                          // Navigate to composer with item context
-                          navigate('/designer-studio/dashboard?tab=composer');
-                        }}
-                        onRequestSample={(i) => {
-                          // Open RFQ dialog placeholder
-                          toast.info(`Request sample for ${i.product?.name_en ?? i.product?.name ?? 'item'}`);
-                        }}
+                        onAddToComposition={() => setActiveMainTab('composer')}
+                        onRequestSample={(i) => toast.info(`Request sample for ${i.product?.name_en ?? i.product?.name ?? 'item'}`)}
                       />
                     ))}
                   </div>
@@ -594,15 +689,13 @@ const DesignerStudioDashboard = () => {
                 )
               ) : (
                 <div className="text-center py-16">
-                  <Library className="w-12 h-12 text-muted-foreground mx-auto mb-4" strokeWidth={1} />
-                  <p className="text-muted-foreground mb-2">
+                  <Library className="w-12 h-12 text-[hsl(var(--muted-foreground))] mx-auto mb-4" strokeWidth={1} />
+                  <p className="text-[hsl(var(--muted-foreground))] mb-2">
                     {libraryItems.length === 0 ? 'Your library is empty' : 'No items match your filters'}
                   </p>
                   {libraryItems.length === 0 ? (
                     <div className="flex gap-2 justify-center">
-                      <Button variant="outline" size="sm" onClick={() => navigate('/products')}>
-                        Browse Catalog
-                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => navigate('/products')}>Browse Catalog</Button>
                       <Button size="sm" onClick={() => setIsSearchDialogOpen(true)}>
                         <Plus className="w-3.5 h-3.5 mr-1" />
                         Add Products
@@ -613,70 +706,111 @@ const DesignerStudioDashboard = () => {
                   )}
                 </div>
               )}
-            </TabsContent>
+            </div>
+          )}
 
-            {/* RFQ Tab Content (unchanged) */}
-            <TabsContent value="rfq" className="mt-0">
-              {/* Compact Stats Row */}
-              <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pb-4 mb-4">
-                <StatCard label="待處理" value={statusCounts.submitted} icon={<FileText className="w-4 h-4" />} color="text-amber-500" compact />
-                <StatCard label="模型上傳" value={statusCounts.model_uploaded} icon={<Upload className="w-4 h-4" />} color="text-blue-500" compact />
-                <StatCard label="設計確認" value={statusCounts.design_confirmed} icon={<CheckCircle className="w-4 h-4" />} color="text-green-500" compact />
-                <StatCard label="列印中" value={statusCounts.printing} icon={<Clock className="w-4 h-4" />} color="text-purple-500" compact />
-                <StatCard label="樣品審核" value={statusCounts.sample_review} icon={<Eye className="w-4 h-4" />} color="text-orange-500" compact />
-                <StatCard label="生產中" value={statusCounts.production} icon={<Package className="w-4 h-4" />} color="text-emerald-500" compact />
-              </div>
-
-              {/* RFQ Search & Filters */}
+          {activeMainTab === 'composer' && (
+            <div className="mb-8">
               <div className="flex items-center gap-3 mb-4">
-                <div className="relative flex-1 max-w-xs">
-                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                  <Input
-                    placeholder="搜尋 RFQ..."
-                    value={rfqSearchQuery}
-                    onChange={(e) => setRfqSearchQuery(e.target.value)}
-                    className="pl-8 h-8 text-sm"
-                  />
+                <button
+                  onClick={() => setActiveMainTab('rfq')}
+                  className="text-xs text-[hsl(var(--muted-foreground))] hover:text-foreground transition-colors"
+                >
+                  ← Back
+                </button>
+                <div>
+                  <h2 className="text-lg font-semibold text-foreground">視覺設計 · Visual Composer</h2>
                 </div>
-                <Button variant="outline" size="sm" className="gap-1.5 h-8">
-                  <Filter className="w-3.5 h-3.5" />
-                  篩選
-                </Button>
               </div>
-
-              {/* RFQ Status Tabs */}
-              <Tabs value={activeRFQTab} onValueChange={setActiveRFQTab} className="w-full">
-                <TabsList className="w-full justify-start overflow-x-auto">
-                  <TabsTrigger value="all">全部 ({statusCounts.all})</TabsTrigger>
-                  <TabsTrigger value="submitted">待處理</TabsTrigger>
-                  <TabsTrigger value="model_uploaded">模型已上傳</TabsTrigger>
-                  <TabsTrigger value="design_confirmed">設計確認</TabsTrigger>
-                  <TabsTrigger value="printing">列印中</TabsTrigger>
-                  <TabsTrigger value="sample_review">樣品審核</TabsTrigger>
-                  <TabsTrigger value="production">生產中</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value={activeRFQTab} className="mt-6">
-                  <RFQList rfqs={filteredRFQs} onSelect={handleSelectRFQ} />
-                </TabsContent>
-              </Tabs>
-            </TabsContent>
-
-            {/* Brochures Tab Content (unchanged) */}
-            <TabsContent value="brochures" className="mt-0">
-              <BrochuresPanel onOpenEditor={(id) => setEditingBrochureId(id ?? undefined)} />
-            </TabsContent>
-
-            {/* Products Tab Content */}
-            <TabsContent value="products" className="mt-0">
-              <ProductsPanel onOpenEditor={(id) => setEditingProductId(id ?? undefined)} />
-            </TabsContent>
-
-            {/* Composer Tab Content */}
-            <TabsContent value="composer" className="mt-0">
               <ComposerSessionList teamId={teamId} />
-            </TabsContent>
-          </Tabs>
+            </div>
+          )}
+
+          {/* ═══════════ MANAGEMENT TABS ═══════════ */}
+          <div className="pb-8">
+            <Tabs
+              value={activeMainTab === 'library' || activeMainTab === 'composer' ? 'rfq' : activeMainTab}
+              onValueChange={(v) => setActiveMainTab(v as TabId)}
+              className="w-full"
+            >
+              <TabsList className="h-auto p-0 bg-transparent border-b border-[hsl(var(--border))] w-full rounded-none gap-0 justify-start">
+                <TabsTrigger
+                  value="rfq"
+                  className="flex items-center gap-2 px-4 py-3 text-xs font-medium uppercase tracking-[0.08em] rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:text-foreground text-[hsl(var(--muted-foreground))] bg-transparent hover:text-foreground transition-colors"
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  我的報價 ({statusCounts.all})
+                </TabsTrigger>
+                <TabsTrigger
+                  value="brochures"
+                  className="flex items-center gap-2 px-4 py-3 text-xs font-medium uppercase tracking-[0.08em] rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:text-foreground text-[hsl(var(--muted-foreground))] bg-transparent hover:text-foreground transition-colors"
+                >
+                  <BookOpen className="w-3.5 h-3.5" />
+                  Brochures
+                </TabsTrigger>
+                <TabsTrigger
+                  value="products"
+                  className="flex items-center gap-2 px-4 py-3 text-xs font-medium uppercase tracking-[0.08em] rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:text-foreground text-[hsl(var(--muted-foreground))] bg-transparent hover:text-foreground transition-colors"
+                >
+                  <Package className="w-3.5 h-3.5" />
+                  Products
+                </TabsTrigger>
+              </TabsList>
+
+              {/* RFQ Tab Content */}
+              <TabsContent value="rfq" className="mt-6">
+                <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pb-4 mb-4">
+                  <StatCard label="待處理" value={statusCounts.submitted} icon={<FileText className="w-4 h-4" />} color="text-amber-500" compact />
+                  <StatCard label="模型上傳" value={statusCounts.model_uploaded} icon={<Upload className="w-4 h-4" />} color="text-blue-500" compact />
+                  <StatCard label="設計確認" value={statusCounts.design_confirmed} icon={<CheckCircle className="w-4 h-4" />} color="text-green-500" compact />
+                  <StatCard label="列印中" value={statusCounts.printing} icon={<Clock className="w-4 h-4" />} color="text-purple-500" compact />
+                  <StatCard label="樣品審核" value={statusCounts.sample_review} icon={<Eye className="w-4 h-4" />} color="text-orange-500" compact />
+                  <StatCard label="生產中" value={statusCounts.production} icon={<Package className="w-4 h-4" />} color="text-emerald-500" compact />
+                </div>
+
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="relative flex-1 max-w-xs">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[hsl(var(--muted-foreground))]" />
+                    <Input
+                      placeholder="搜尋 RFQ..."
+                      value={rfqSearchQuery}
+                      onChange={(e) => setRfqSearchQuery(e.target.value)}
+                      className="pl-8 h-8 text-sm"
+                    />
+                  </div>
+                  <Button variant="outline" size="sm" className="gap-1.5 h-8">
+                    <Filter className="w-3.5 h-3.5" />
+                    篩選
+                  </Button>
+                </div>
+
+                <Tabs value={activeRFQTab} onValueChange={setActiveRFQTab} className="w-full">
+                  <TabsList className="w-full justify-start overflow-x-auto">
+                    <TabsTrigger value="all">全部 ({statusCounts.all})</TabsTrigger>
+                    <TabsTrigger value="submitted">待處理</TabsTrigger>
+                    <TabsTrigger value="model_uploaded">模型已上傳</TabsTrigger>
+                    <TabsTrigger value="design_confirmed">設計確認</TabsTrigger>
+                    <TabsTrigger value="printing">列印中</TabsTrigger>
+                    <TabsTrigger value="sample_review">樣品審核</TabsTrigger>
+                    <TabsTrigger value="production">生產中</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value={activeRFQTab} className="mt-6">
+                    <RFQList rfqs={filteredRFQs} onSelect={handleSelectRFQ} />
+                  </TabsContent>
+                </Tabs>
+              </TabsContent>
+
+              {/* Brochures Tab Content */}
+              <TabsContent value="brochures" className="mt-6">
+                <BrochuresPanel onOpenEditor={(id) => setEditingBrochureId(id ?? undefined)} />
+              </TabsContent>
+
+              {/* Products Tab Content */}
+              <TabsContent value="products" className="mt-6">
+                <ProductsPanel onOpenEditor={(id) => setEditingProductId(id ?? undefined)} />
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
       </main>
 
@@ -698,8 +832,6 @@ const DesignerStudioDashboard = () => {
         teamId={teamId}
         existingProductIds={existingProductIds}
         onAdded={() => {
-          // The useUserLibrary hook will re-fetch on next render
-          // Force a re-mount by toggling the dialog
           setIsSearchDialogOpen(false);
           setTimeout(() => setIsSearchDialogOpen(true), 100);
         }}
@@ -727,13 +859,13 @@ const StatCard = ({
     <div className="flex items-center gap-2 bg-card border border-border rounded-[var(--radius)] px-3 py-2 flex-shrink-0 hover:shadow-sm transition-shadow">
       <div className={`${color}`}>{icon}</div>
       <span className="text-lg font-semibold text-foreground">{value}</span>
-      <span className="text-xs text-muted-foreground whitespace-nowrap">{label}</span>
+      <span className="text-xs text-[hsl(var(--muted-foreground))] whitespace-nowrap">{label}</span>
     </div>
   ) : (
     <div className="bg-card border border-border rounded-[var(--radius)] p-4 hover:shadow-md transition-shadow">
       <div className={`${color} mb-2`}>{icon}</div>
       <p className="text-2xl font-semibold text-foreground">{value}</p>
-      <p className="text-sm text-muted-foreground">{label}</p>
+      <p className="text-sm text-[hsl(var(--muted-foreground))]">{label}</p>
     </div>
   )
 );
