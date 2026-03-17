@@ -81,7 +81,7 @@ export function useUserLibrary(teamId: string): UseUserLibraryResult {
           .filter((m) => m.product_categories)
           .map((m) => ({ ...m.product_categories!, sort_order: 0 }));
         const primary = catMaps.find((m) => m.is_primary && m.product_categories);
-        primaryCategory = primary?.product_categories ?? categories[0];
+        primaryCategory = primary?.product_categories ? { ...primary.product_categories, sort_order: 0 } : categories[0];
       }
 
       // Parse certifications
