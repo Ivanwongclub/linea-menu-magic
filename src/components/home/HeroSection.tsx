@@ -238,7 +238,7 @@ const HeroSection = () => {
             )}
 
             <div
-              className="relative h-full min-h-[90vh] flex items-center"
+              className="relative h-full min-h-[100vh] flex items-center pt-[80px]"
               style={{
                 transform: `translateY(${parallaxOffset * 0.15}px)`,
                 opacity: opacityFade,
