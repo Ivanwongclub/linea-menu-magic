@@ -31,10 +31,20 @@ export function useUserLibrary(teamId: string): UseUserLibraryResult {
         `
         *,
         products(
-          id, item_code, name, name_en, slug, description,
+          id, item_code, name, name_en, slug, description, description_en,
           status, is_public, is_customizable, specifications,
           production, thumbnail_url, model_url, sort_order,
-          created_at, updated_at
+          created_at, updated_at,
+          product_category_map(
+            is_primary,
+            product_categories(id, name, slug)
+          ),
+          product_certification_map(
+            product_certifications(id, name, abbreviation)
+          ),
+          product_industry_map(
+            product_industries(id, name, slug)
+          )
         )
       `
       )
