@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -19,6 +19,7 @@ import {
   Search,
   Filter,
   Plus,
+  Layers,
   Library,
   FileText,
   Clock,
@@ -60,6 +61,9 @@ import BrochureEditor from "@/components/designer-studio/BrochureEditor";
 import ProductsPanel from "@/components/designer-studio/products/ProductsPanel";
 import ProductEditor from "@/components/designer-studio/products/ProductEditor";
 
+// Composer
+import ComposerSessionList from "@/features/designer/components/ComposerSessionList";
+
 import { supabase } from "@/integrations/supabase/client";
 
 // ─── Adapter: UserLibraryItem → legacy LibraryItem ──────
@@ -99,6 +103,7 @@ const DEMO_TEAM_ID = 'demo-team';
 
 const DesignerStudioDashboard = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   // Auth-based team ID
   const [teamId, setTeamId] = useState(DEMO_TEAM_ID);
@@ -109,8 +114,11 @@ const DesignerStudioDashboard = () => {
     });
   }, []);
 
-  // Main tab state
-  const [activeMainTab, setActiveMainTab] = useState<"library" | "rfq" | "brochures" | "products">("library");
+  // Main tab state — read from URL ?tab= param
+  const tabFromUrl = searchParams.get('tab');
+  const validTabs = ['library', 'rfq', 'brochures', 'products', 'composer'] as const;
+  const initialTab = validTabs.includes(tabFromUrl as any) ? tabFromUrl as typeof validTabs[number] : 'library';
+  const [activeMainTab, setActiveMainTab] = useState<"library" | "rfq" | "brochures" | "products" | "composer">(initialTab);
 
   // Product editor state
   const [editingProductId, setEditingProductId] = useState<string | null | undefined>(null);
@@ -355,11 +363,15 @@ const DesignerStudioDashboard = () => {
                 </h1>
 
                 {/* Main Tabs - Inline */}
-                <Tabs value={activeMainTab} onValueChange={(v) => setActiveMainTab(v as "library" | "rfq" | "brochures")} className="hidden sm:block">
+                <Tabs value={activeMainTab} onValueChange={(v) => setActiveMainTab(v as "library" | "rfq" | "brochures" | "products" | "composer")} className="hidden sm:block">
                   <TabsList className="h-9">
                     <TabsTrigger value="library" className="gap-1.5 text-sm px-3 h-7">
                       <Library className="w-3.5 h-3.5" />
                       素材庫
+                    </TabsTrigger>
+                    <TabsTrigger value="composer" className="gap-1.5 text-sm px-3 h-7">
+                      <Layers className="w-3.5 h-3.5" />
+                      視覺設計
                     </TabsTrigger>
                     <TabsTrigger value="rfq" className="gap-1.5 text-sm px-3 h-7">
                       <FileText className="w-3.5 h-3.5" />
@@ -403,11 +415,15 @@ const DesignerStudioDashboard = () => {
 
             {/* Mobile Tabs */}
             <div className="sm:hidden pb-3">
-              <Tabs value={activeMainTab} onValueChange={(v) => setActiveMainTab(v as "library" | "rfq" | "brochures")}>
-                <TabsList className="w-full grid grid-cols-3">
+              <Tabs value={activeMainTab} onValueChange={(v) => setActiveMainTab(v as "library" | "rfq" | "brochures" | "products" | "composer")}>
+                <TabsList className="w-full grid grid-cols-5">
                   <TabsTrigger value="library" className="gap-1.5 text-sm">
                     <Library className="w-3.5 h-3.5" />
                     素材庫
+                  </TabsTrigger>
+                  <TabsTrigger value="composer" className="gap-1.5 text-sm">
+                    <Layers className="w-3.5 h-3.5" />
+                    視覺設計
                   </TabsTrigger>
                   <TabsTrigger value="rfq" className="gap-1.5 text-sm">
                     <FileText className="w-3.5 h-3.5" />
@@ -496,7 +512,7 @@ const DesignerStudioDashboard = () => {
 
       <main className="flex-1 py-4 px-4 lg:px-6">
         <div className="max-w-7xl mx-auto">
-          <Tabs value={activeMainTab} onValueChange={(v) => setActiveMainTab(v as "library" | "rfq" | "brochures")} className="w-full">
+          <Tabs value={activeMainTab} onValueChange={(v) => setActiveMainTab(v as "library" | "rfq" | "brochures" | "products" | "composer")} className="w-full">
             {/* Library Tab Content */}
             <TabsContent value="library" className="mt-0">
               {/* Library header */}
@@ -645,6 +661,11 @@ const DesignerStudioDashboard = () => {
             {/* Products Tab Content */}
             <TabsContent value="products" className="mt-0">
               <ProductsPanel onOpenEditor={(id) => setEditingProductId(id ?? undefined)} />
+            </TabsContent>
+
+            {/* Composer Tab Content */}
+            <TabsContent value="composer" className="mt-0">
+              <ComposerSessionList teamId={teamId} />
             </TabsContent>
           </Tabs>
         </div>
