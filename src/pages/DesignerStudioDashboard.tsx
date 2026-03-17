@@ -95,7 +95,7 @@ function toLegacyItem(item: UserLibraryItem): LibraryItem {
 
 type SortOrder = "asc" | "desc";
 
-const DEMO_TEAM_ID = 'demo-team';
+const DEMO_TEAM_ID = 'a0000000-0000-0000-0000-000000000001';
 
 const DesignerStudioDashboard = () => {
   const navigate = useNavigate();
