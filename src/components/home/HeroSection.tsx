@@ -352,7 +352,7 @@ const HeroSection = () => {
               </div>
 
               {/* Mobile layout: stacked text over background image */}
-              <div className="w-full md:hidden relative z-10 px-6 pt-20 pb-24 flex flex-col justify-end min-h-[90vh]">
+              <div className="w-full md:hidden relative z-10 px-6 pt-[80px] pb-24 flex flex-col justify-end min-h-[100vh]">
                 <p
                   className="text-xs font-medium uppercase tracking-[0.2em] mb-4 transition-all duration-500"
                   style={{
