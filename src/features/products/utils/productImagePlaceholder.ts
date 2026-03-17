@@ -178,19 +178,12 @@ export function getProductPlaceholderUrl(
 
 export function getOptimizedImageUrl(
   url: string,
-  width: number,
-  height: number,
-  quality = 80,
+  _width?: number,
+  _height?: number,
+  _quality?: number,
 ): string {
-  if (!url || url.startsWith('data:')) return url;
-  if (!url.includes('supabase.co/storage')) return url;
-
-  return (
-    url.replace(
-      '/storage/v1/object/public/',
-      '/storage/v1/render/image/public/',
-    ) + `?width=${width}&height=${height}&quality=${quality}&resize=cover&format=webp`
-  );
+  // Return original URL — Supabase image transforms require a Pro plan
+  return url ?? '';
 }
 
 export function getProductThumbnailUrl(
