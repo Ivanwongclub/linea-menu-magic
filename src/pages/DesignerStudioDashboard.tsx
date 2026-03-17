@@ -103,6 +103,7 @@ const DEMO_TEAM_ID = 'demo-team';
 
 const DesignerStudioDashboard = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   // Auth-based team ID
   const [teamId, setTeamId] = useState(DEMO_TEAM_ID);
@@ -113,8 +114,11 @@ const DesignerStudioDashboard = () => {
     });
   }, []);
 
-  // Main tab state
-  const [activeMainTab, setActiveMainTab] = useState<"library" | "rfq" | "brochures" | "products" | "composer">("library");
+  // Main tab state — read from URL ?tab= param
+  const tabFromUrl = searchParams.get('tab');
+  const validTabs = ['library', 'rfq', 'brochures', 'products', 'composer'] as const;
+  const initialTab = validTabs.includes(tabFromUrl as any) ? tabFromUrl as typeof validTabs[number] : 'library';
+  const [activeMainTab, setActiveMainTab] = useState<"library" | "rfq" | "brochures" | "products" | "composer">(initialTab);
 
   // Product editor state
   const [editingProductId, setEditingProductId] = useState<string | null | undefined>(null);
