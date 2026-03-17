@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
-import LetterReveal from "@/components/ui/LetterReveal";
 
 import buttonsImage from "@/assets/products/buttons-category.jpg";
 import zippersImage from "@/assets/products/zippers-category.jpg";
@@ -18,30 +17,31 @@ interface Category {
 
 const categories: Category[] = [
   { id: "buttons", titleEn: "Buttons", count: "48+", description: "Polyester, Metal, Resin", image: buttonsImage },
+  { id: "hardware", titleEn: "Metal Hardware", count: "64+", description: "Clasps, Buckles, Rivets", image: hardwareImage },
   { id: "zippers", titleEn: "Zippers", count: "36+", description: "Metal, Nylon, Branded", image: zippersImage },
   { id: "lace", titleEn: "Lace & Trimming", count: "52+", description: "Cotton, Elastic Lace", image: laceImage },
-  { id: "hardware", titleEn: "Metal Hardware", count: "64+", description: "Clasps, Buckles, Rivets", image: hardwareImage },
   { id: "other", titleEn: "Other Products", count: "28+", description: "Labels, Packaging", image: otherImage },
 ];
 
 const CategoryCard = ({
   category,
-  aspect,
+  minHeight,
   gridVisible,
   delay,
+  className = "",
 }: {
   category: Category;
-  aspect: string;
+  minHeight: string;
   gridVisible: boolean;
   delay: React.CSSProperties;
+  className?: string;
 }) => (
   <Link
-    key={category.id}
     to={`/products#${category.id}`}
-    className={`group relative ${aspect} overflow-hidden rounded-[var(--radius)] transition-all duration-700 ease-out ${
+    className={`group relative overflow-hidden rounded-[var(--radius)] transition-all duration-700 ease-out ${
       gridVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-16"
-    }`}
-    style={delay}
+    } ${className}`}
+    style={{ ...delay, minHeight }}
   >
     <div className="absolute inset-0">
       <img
@@ -50,19 +50,14 @@ const CategoryCard = ({
         className="w-full h-full object-cover transition-transform duration-[400ms] ease-out group-hover:scale-[1.04]"
       />
     </div>
-    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-    <div className="absolute inset-0 flex flex-col justify-end p-8">
-      <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-        <span className="text-xs uppercase tracking-widest text-white/60">
-          {category.count} styles
-        </span>
-        <h3 className="text-xs font-medium uppercase tracking-[0.08em] text-white mt-3">
-          {category.titleEn}
-        </h3>
-        <p className="text-xs text-white/60 mt-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
-          {category.description}
-        </p>
-      </div>
+    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent transition-opacity duration-400 group-hover:from-black/80" />
+    <div className="absolute inset-0 flex flex-col justify-end p-6 lg:p-8">
+      <h3 className="text-lg font-semibold tracking-tight text-white">
+        {category.titleEn}
+      </h3>
+      <span className="text-xs uppercase tracking-[0.1em] text-white/60 mt-1 inline-flex items-center gap-1 transition-all duration-300 group-hover:gap-2">
+        Explore <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+      </span>
     </div>
   </Link>
 );
@@ -76,43 +71,56 @@ const ProductCategories = () => {
       <div className="section-inner">
         <div
           ref={headerRef}
-          className={`text-center mb-16 transition-all duration-700 ease-out ${
-            headerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+          className={`mb-16 max-w-[560px] transition-all duration-700 ease-out ${
+            headerVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
           }`}
         >
-          <span className="section-label">Collection</span>
-          <LetterReveal
-            text="Our Products"
-            as="h2"
-            className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground font-serif-display"
-            isVisible={headerVisible}
-            startDelay={200}
-            letterDelay={45}
+          <span className="section-label">Our Products</span>
+          <h2 className="text-3xl md:text-4xl font-semibold tracking-tight text-foreground mt-2">
+            Precision-engineered trims for every application
+          </h2>
+        </div>
+
+        {/* Editorial Grid */}
+        <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Left: Tall buttons card spanning 2 rows */}
+          <CategoryCard
+            category={categories[0]}
+            minHeight="520px"
+            gridVisible={gridVisible}
+            delay={getDelay(0)}
+            className="md:row-span-2"
           />
-        </div>
 
-        <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categories.slice(0, 3).map((category, index) => (
-            <CategoryCard
-              key={category.id}
-              category={category}
-              aspect="aspect-[4/3]"
-              gridVisible={gridVisible}
-              delay={getDelay(index)}
-            />
-          ))}
-        </div>
+          {/* Right top: Hardware */}
+          <CategoryCard
+            category={categories[1]}
+            minHeight="260px"
+            gridVisible={gridVisible}
+            delay={getDelay(1)}
+          />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-          {categories.slice(3).map((category, index) => (
-            <CategoryCard
-              key={category.id}
-              category={category}
-              aspect="aspect-[16/9]"
-              gridVisible={gridVisible}
-              delay={getDelay(index + 3)}
-            />
-          ))}
+          {/* Right bottom: Zippers */}
+          <CategoryCard
+            category={categories[2]}
+            minHeight="260px"
+            gridVisible={gridVisible}
+            delay={getDelay(2)}
+          />
+
+          {/* Bottom row: Lace + Other */}
+          <CategoryCard
+            category={categories[3]}
+            minHeight="300px"
+            gridVisible={gridVisible}
+            delay={getDelay(3)}
+          />
+          <CategoryCard
+            category={categories[4]}
+            minHeight="300px"
+            gridVisible={gridVisible}
+            delay={getDelay(4)}
+          />
         </div>
       </div>
     </section>
