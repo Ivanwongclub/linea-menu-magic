@@ -162,8 +162,52 @@ export default function Products() {
 
       <main>
         {/* Editorial Page Header */}
-        <section className="bg-[hsl(var(--background))] border-b border-[hsl(var(--border))] pt-8 pb-0">
-          <div className="section-inner">
+        <section className="relative overflow-hidden bg-[hsl(var(--background))] border-b border-[hsl(var(--border))] pt-8 pb-0 min-h-[220px]">
+          {/* Background mosaic of product images */}
+          <div
+            className="absolute inset-0 grid grid-cols-8 overflow-hidden pointer-events-none select-none transition-opacity duration-700 ease-out hidden md:grid"
+            style={{ opacity: products.length > 0 ? 1 : 0 }}
+          >
+            {products.slice(0, 8).map((product) => (
+              <div key={product.id} className="relative overflow-hidden">
+                {product.thumbnail_url && (
+                  <img
+                    src={product.thumbnail_url}
+                    alt=""
+                    aria-hidden="true"
+                    className="w-full h-full object-cover scale-110"
+                    style={{ filter: 'grayscale(100%) blur(8px)', opacity: 0.06 }}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Right side: larger single product accent */}
+          {products[0]?.thumbnail_url && (
+            <div className="absolute right-0 top-0 w-[45%] h-full overflow-hidden pointer-events-none select-none hidden lg:block">
+              <img
+                src={products[0].thumbnail_url}
+                alt=""
+                aria-hidden="true"
+                className="w-full h-full object-cover object-center scale-105"
+                style={{ filter: 'grayscale(100%)', opacity: 0.07 }}
+              />
+              <div
+                className="absolute inset-y-0 left-0 w-[60%]"
+                style={{ background: 'linear-gradient(to right, hsl(var(--background)), transparent)' }}
+              />
+            </div>
+          )}
+
+          {/* Bottom fade */}
+          <div
+            className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none"
+            style={{ background: 'linear-gradient(to bottom, transparent, hsl(var(--background)))' }}
+          />
+
+          {/* Foreground content */}
+          <div className="relative z-10 section-inner">
             <PageBreadcrumb
               segments={[
                 { label: 'Home', href: '/' },
