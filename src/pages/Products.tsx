@@ -175,10 +175,10 @@ export default function Products() {
         >
           {/* Background mosaic of product images */}
           <div
-            className="hidden md:grid"
             style={{
               position: 'absolute',
               inset: 0,
+              display: 'grid',
               gridTemplateColumns: 'repeat(8, 1fr)',
               overflow: 'hidden',
               pointerEvents: 'none',
@@ -186,28 +186,24 @@ export default function Products() {
               opacity: products.length > 0 ? 1 : 0,
               transition: 'opacity 700ms ease',
             }}
+            className="hidden md:grid"
           >
             {products.slice(0, 8).map((product) => {
               const imgSrc = product.thumbnail_url;
               if (!imgSrc) return <div key={product.id} />;
               return (
-                <div
-                  key={product.id}
-                  style={{ position: 'relative', overflow: 'hidden' }}
-                >
+                <div key={product.id} style={{ position: 'relative', overflow: 'hidden' }}>
                   <img
                     src={imgSrc}
                     alt=""
                     aria-hidden="true"
                     style={{
-                      position: 'absolute',
-                      inset: 0,
                       width: '100%',
                       height: '100%',
                       objectFit: 'cover',
                       transform: 'scale(1.1)',
-                      filter: 'grayscale(100%) blur(6px)',
-                      opacity: 0.09,
+                      filter: 'grayscale(100%) blur(8px)',
+                      opacity: 0.07,
                     }}
                   />
                 </div>
@@ -215,14 +211,15 @@ export default function Products() {
             })}
           </div>
 
-          {/* Right accent: single larger image */}
+          {/* Right accent: single larger image fading left */}
           {products[0]?.thumbnail_url && (
             <div
+              className="hidden lg:block"
               style={{
                 position: 'absolute',
                 top: 0,
                 right: 0,
-                width: '40%',
+                width: '42%',
                 height: '100%',
                 overflow: 'hidden',
                 pointerEvents: 'none',
@@ -240,7 +237,7 @@ export default function Products() {
                   objectPosition: 'center',
                   transform: 'scale(1.05)',
                   filter: 'grayscale(100%)',
-                  opacity: 0.10,
+                  opacity: 0.08,
                 }}
               />
               <div
@@ -248,20 +245,20 @@ export default function Products() {
                   position: 'absolute',
                   inset: 0,
                   background:
-                    'linear-gradient(to right, hsl(var(--background)) 0%, hsl(var(--background)) 15%, transparent 65%)',
+                    'linear-gradient(to right, hsl(var(--background)) 0%, hsl(var(--background)) 20%, transparent 70%)',
                 }}
               />
             </div>
           )}
 
-          {/* Bottom fade into content below */}
+          {/* Bottom fade */}
           <div
             style={{
               position: 'absolute',
               bottom: 0,
               left: 0,
               right: 0,
-              height: '80px',
+              height: '64px',
               pointerEvents: 'none',
               background: 'linear-gradient(to bottom, transparent, hsl(var(--background)))',
             }}
