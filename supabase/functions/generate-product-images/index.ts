@@ -183,17 +183,17 @@ serve(async (req) => {
           .update({ thumbnail_url: publicUrl })
           .eq("id", pid);
 
-        // Insert into product_images (idempotent)
-        await supabase.from("product_images").upsert(
-          {
-            product_id: pid,
-            url: publicUrl,
-            sort_order: 0,
-            is_primary: true,
-            alt_text: `${productName} — product image`,
-          },
-          { onConflict: "product_id,sort_order", ignoreDuplicates: true },
-        );
+        // Insert into product_images
+        const { error: imgError } = await supabase.from("product_images").insert({
+          product_id: pid,
+          url: publicUrl,
+          sort_order: 0,
+          is_primary: true,
+          alt_text: `${productName} — product image`,
+        });
+        if (imgError && !imgError.message.includes("duplicate")) {
+          console.warn(`product_images insert warning for ${pid}:`, imgError.message);
+        }
 
         results.push({ productId: pid, productName, url: publicUrl, status: "success" });
         processed++;
