@@ -222,7 +222,7 @@ export default function Products() {
                 src={bannerImageUrl}
                 alt=""
                 aria-hidden="true"
-                className="absolute inset-0 w-full h-full object-cover grayscale blur-[2px] scale-110 opacity-20"
+                className="absolute inset-0 w-full h-full object-cover grayscale blur-[1px] scale-105 opacity-30"
               />
             )}
             <div className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--background))] via-[hsl(var(--background))]/80 to-transparent" />
