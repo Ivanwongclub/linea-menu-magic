@@ -471,7 +471,7 @@ function IndustryBar({
   const noneActive = !active?.length;
 
   return (
-    <div className="bg-secondary border-y border-border py-3">
+    <div className="bg-[hsl(var(--background))] border-b border-[hsl(var(--border))] py-4">
       <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
         <div className="flex gap-2 overflow-x-auto no-scrollbar">
           <button
