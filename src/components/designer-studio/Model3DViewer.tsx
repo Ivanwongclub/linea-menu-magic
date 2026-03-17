@@ -245,12 +245,18 @@ const Model3DViewer = ({ hasModel, modelType = 'button', modelUrl }: Model3DView
   const [autoRotate, setAutoRotate] = useState(true);
   const [lightMode, setLightMode] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [modelError, setModelError] = useState(false);
 
-  if (!hasModel) {
+  if (!hasModel || modelError) {
     return (
-      <div className="aspect-video bg-muted/50 rounded-lg flex flex-col items-center justify-center border-2 border-dashed border-border">
+      <div className="aspect-video bg-secondary/50 rounded-lg flex flex-col items-center justify-center border-2 border-dashed border-border">
         <Box className="w-12 h-12 text-muted-foreground mb-3" />
-        <p className="text-muted-foreground text-sm">等待製造商上傳 3D 模型</p>
+        <p className="text-muted-foreground text-sm">
+          {modelError ? '3D model could not be loaded' : '等待製造商上傳 3D 模型'}
+        </p>
+        <p className="text-xs text-muted-foreground/60 text-center px-4 mt-1">
+          Contact us to request a 3D sample
+        </p>
       </div>
     );
   }
