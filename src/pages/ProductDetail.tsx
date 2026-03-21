@@ -56,6 +56,9 @@ function ImageGallery({ images }: { images: ProductImage[] }) {
         <img
           src={getOptimizedImageUrl(activeImage.url, 800, 800, 85)}
           alt={activeImage.alt_text ?? 'Product image'}
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
           className="w-full h-full object-contain p-4"
         />
       </div>
