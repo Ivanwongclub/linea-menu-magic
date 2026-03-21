@@ -36,6 +36,8 @@ const HeritageSection = () => {
               <img
                 src={heritageCraftsmanship}
                 alt="Artisan craftsmanship"
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
               />
             </div>
