@@ -226,6 +226,9 @@ const HeroSection = () => {
                   src={slide.image}
                   alt=""
                   aria-hidden="true"
+                  loading={index === 0 ? "eager" : "lazy"}
+                  decoding={index === 0 ? "auto" : "async"}
+                  fetchPriority={index === 0 ? "high" : undefined}
                   className={`w-full h-full object-cover ${isActive ? "slide-active-img" : ""}`}
                 />
                 <div
