@@ -139,6 +139,8 @@ function BrochureCard({
               alt={brochure.title}
               className="w-full h-full object-cover object-top transition-transform duration-[400ms] ease-out group-hover:scale-[1.03]"
               loading="lazy"
+              decoding="async"
+              fetchPriority="low"
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center bg-muted">

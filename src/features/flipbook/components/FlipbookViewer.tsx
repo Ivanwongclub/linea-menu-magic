@@ -178,8 +178,8 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
       (index: number): "high" | "auto" | "low" => {
         const spreadIndex = isMobile ? index : Math.floor(index / 2);
         const distance = Math.abs(spreadIndex - currentSpread);
-        if (distance <= 2) return "high";
-        if (distance <= 5) return "auto";
+        if (distance === 0) return "high";
+        if (distance <= 1) return "auto";
         return "low";
       },
       [currentSpread, isMobile]
@@ -201,7 +201,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
 
     /* ---- JS Image() preload for adjacent spreads ---- */
     useEffect(() => {
-      const adjacentSpreads = [currentSpread - 1, currentSpread, currentSpread + 1, currentSpread + 2].filter(
+      const adjacentSpreads = [currentSpread, currentSpread + 1].filter(
         (s) => s >= 0 && s <= maxSpread
       );
       adjacentSpreads.forEach((spread) => {
@@ -325,7 +325,31 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
     const oldLeftPage = isMobile ? pages[displayedSpread] : pages[displayedSpread * 2];
     const oldRightPage = isMobile ? undefined : pages[displayedSpread * 2 + 1];
 
-    /* ---- hidden preload container for ALL pages ---- */
+    /* ---- hidden preload container for nearby pages only ---- */
+    const preloadIndices = useMemo(() => {
+      const indices = new Set<number>();
+      // Current spread + next spread only
+      const spreads = [currentSpread, currentSpread + 1].filter(s => s >= 0 && s <= maxSpread);
+      spreads.forEach(s => {
+        if (isMobile) {
+          indices.add(s);
+        } else {
+          indices.add(s * 2);
+          indices.add(s * 2 + 1);
+        }
+      });
+      // Also include displayed spread during animation
+      if (displayedSpread !== currentSpread) {
+        if (isMobile) {
+          indices.add(displayedSpread);
+        } else {
+          indices.add(displayedSpread * 2);
+          indices.add(displayedSpread * 2 + 1);
+        }
+      }
+      return indices;
+    }, [currentSpread, displayedSpread, maxSpread, isMobile]);
+
     const preloadContainer = (
       <div
         aria-hidden="true"
@@ -339,6 +363,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
         }}
       >
         {pages.map((page, index) => {
+          if (!preloadIndices.has(index)) return null;
           const priority = getPagePriority(index);
           return (
             <img
