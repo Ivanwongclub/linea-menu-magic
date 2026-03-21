@@ -69,30 +69,28 @@ function PageSlot({
   onGlobalLoad?: () => void;
 }) {
   const resolvedSrc = src ?? page?.image_url;
-  const [ready, setReady] = useState(false);
-
-  // Reset ready state whenever the actual src changes
-  useEffect(() => {
-    setReady(false);
-  }, [resolvedSrc]);
+  const [loadedSrc, setLoadedSrc] = useState<string | null>(null);
+  const ready = !!resolvedSrc && loadedSrc === resolvedSrc;
 
   if (!page) {
     return <div className="w-full h-full bg-white" />;
   }
 
   const handleLoad = () => {
-    setReady(true);
+    if (!resolvedSrc) return;
+    setLoadedSrc(resolvedSrc);
     onGlobalLoad?.();
   };
 
   const handleError = () => {
-    setReady(true); // show whatever loaded (or nothing) rather than infinite skeleton
+    if (!resolvedSrc) return;
+    setLoadedSrc(resolvedSrc); // avoid infinite skeleton on broken image
     onGlobalLoad?.();
   };
 
   return (
     <div className="w-full h-full relative bg-white overflow-hidden">
-      {/* Skeleton — fades out when this specific src loads */}
+      {/* Skeleton — only hides when this exact src has loaded */}
       <div
         aria-hidden="true"
         className={`absolute inset-0 bg-muted transition-opacity duration-300 ${
@@ -100,6 +98,7 @@ function PageSlot({
         }`}
       />
       <img
+        key={resolvedSrc}
         src={resolvedSrc}
         alt={`Page ${page.page_number}`}
         className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${
