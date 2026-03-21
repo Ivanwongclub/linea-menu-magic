@@ -183,7 +183,8 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
       []
     );
 
-    const isLoaded = useCallback((page: Page | undefined | null) => {
+    /** Check if a page's image has been preloaded (used for preload tracking, not display) */
+    const isPagePreloaded = useCallback((page: Page | undefined | null) => {
       if (!page) return false;
       return loadedPages.current.has(page.id);
     }, []);
