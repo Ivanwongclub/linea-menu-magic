@@ -40,9 +40,34 @@ export interface FlipbookViewerHandle {
 
 const ANIMATION_DURATION = 380;
 
-function normaliseImageUrl(url: string): string {
+/**
+ * Max rendered height of a page in the viewer is ~75vh ≈ 610 CSS px.
+ * At 2× DPR that's ~1220px. We cap at 1280px to cover most screens
+ * without over-fetching full-size assets (often 1684px+).
+ */
+const TRANSFORM_HEIGHT = 1280;
+
+/** Convert a Supabase Storage public URL into a resized transform URL. */
+function toTransformUrl(url: string): string {
   try {
     const u = new URL(url, window.location.origin);
+    // Only transform Supabase storage URLs (contain /object/public/)
+    if (!u.pathname.includes("/object/public/")) return url;
+    const transformed = new URL(url, window.location.origin);
+    transformed.pathname = u.pathname.replace("/object/public/", "/render/image/public/");
+    transformed.searchParams.set("height", String(TRANSFORM_HEIGHT));
+    transformed.searchParams.set("resize", "contain");
+    transformed.searchParams.set("quality", "75");
+    return transformed.toString();
+  } catch {
+    return url;
+  }
+}
+
+function normaliseImageUrl(url: string): string {
+  try {
+    const transformed = toTransformUrl(url);
+    const u = new URL(transformed, window.location.origin);
     ["t", "v", "_", "_cb", "cache"].forEach((p) => u.searchParams.delete(p));
     return u.toString();
   } catch {
