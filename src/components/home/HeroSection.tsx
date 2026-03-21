@@ -334,6 +334,9 @@ const HeroSection = () => {
                     <img
                       src={slide.image}
                       alt={slide.label}
+                      loading={index === 0 ? "eager" : "lazy"}
+                      decoding={index === 0 ? "auto" : "async"}
+                      fetchPriority={index === 0 ? "high" : undefined}
                       className={`w-full h-auto max-h-[70vh] object-contain ${isActive ? "slide-active-img" : ""}`}
                       style={{
                         opacity: isActive ? 1 : 0,

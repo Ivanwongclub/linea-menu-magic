@@ -45,6 +45,8 @@ const SustainabilitySection = () => {
               <img
                 src={heritageCraftsmanship}
                 alt="Craftsmanship detail"
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
               />
             </div>

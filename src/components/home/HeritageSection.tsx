@@ -133,6 +133,8 @@ const HeritageSection = () => {
               <img
                 src={aboutShowroom}
                 alt="Showroom"
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover"
               />
             </div>
