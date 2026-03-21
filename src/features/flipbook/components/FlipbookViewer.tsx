@@ -59,42 +59,57 @@ function PageSlot({
   src,
   showHotlinks = false,
   editHints = false,
-  isLoaded = false,
-  onLoad,
-  onError,
+  onGlobalLoad,
 }: {
   page: Page | undefined | null;
   src?: string;
   showHotlinks?: boolean;
   editHints?: boolean;
-  isLoaded?: boolean;
-  onLoad?: () => void;
-  onError?: () => void;
+  /** Notify the parent preload tracker when this src loads */
+  onGlobalLoad?: () => void;
 }) {
+  const resolvedSrc = src ?? page?.image_url;
+  const [ready, setReady] = useState(false);
+
+  // Reset ready state whenever the actual src changes
+  useEffect(() => {
+    setReady(false);
+  }, [resolvedSrc]);
+
   if (!page) {
     return <div className="w-full h-full bg-white" />;
   }
 
+  const handleLoad = () => {
+    setReady(true);
+    onGlobalLoad?.();
+  };
+
+  const handleError = () => {
+    setReady(true); // show whatever loaded (or nothing) rather than infinite skeleton
+    onGlobalLoad?.();
+  };
+
   return (
     <div className="w-full h-full relative bg-white overflow-hidden">
-      {/* Skeleton — fades out when loaded */}
+      {/* Skeleton — fades out when this specific src loads */}
       <div
         aria-hidden="true"
         className={`absolute inset-0 bg-muted transition-opacity duration-300 ${
-          isLoaded ? "opacity-0" : "opacity-100 animate-pulse"
+          ready ? "opacity-0" : "opacity-100 animate-pulse"
         }`}
       />
       <img
-        src={src ?? page.image_url}
+        src={resolvedSrc}
         alt={`Page ${page.page_number}`}
         className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${
-          isLoaded ? "opacity-100" : "opacity-0"
+          ready ? "opacity-100" : "opacity-0"
         }`}
         draggable={false}
-        onLoad={onLoad}
-        onError={onError}
+        onLoad={handleLoad}
+        onError={handleError}
       />
-      {showHotlinks && page.hotlinks && page.hotlinks.length > 0 && isLoaded && (
+      {showHotlinks && page.hotlinks && page.hotlinks.length > 0 && ready && (
         <PageHotlinks hotlinks={page.hotlinks} editHints={editHints} />
       )}
     </div>
@@ -168,7 +183,8 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
       []
     );
 
-    const isLoaded = useCallback((page: Page | undefined | null) => {
+    /** Check if a page's image has been preloaded (used for preload tracking, not display) */
+    const isPagePreloaded = useCallback((page: Page | undefined | null) => {
       if (!page) return false;
       return loadedPages.current.has(page.id);
     }, []);
@@ -415,9 +431,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
               src={getSrc(newLeftPage)}
               showHotlinks={showHotlinks}
               editHints={editHints}
-              isLoaded={isLoaded(newLeftPage)}
-              onLoad={() => newLeftPage && markPageLoaded(newLeftPage.id)}
-              onError={() => newLeftPage && markPageLoaded(newLeftPage.id)}
+              onGlobalLoad={() => newLeftPage && markPageLoaded(newLeftPage.id)}
             />
           </div>
 
@@ -480,9 +494,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
                 src={getSrc(baseLeftPage)}
                 showHotlinks={showHotlinks}
                 editHints={editHints}
-                isLoaded={isLoaded(baseLeftPage)}
-                onLoad={() => baseLeftPage && markPageLoaded(baseLeftPage.id)}
-                onError={() => baseLeftPage && markPageLoaded(baseLeftPage.id)}
+                onGlobalLoad={() => baseLeftPage && markPageLoaded(baseLeftPage.id)}
               />
             </div>
             <div className="w-1/2 h-full">
@@ -491,9 +503,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
                 src={getSrc(baseRightPage)}
                 showHotlinks={showHotlinks}
                 editHints={editHints}
-                isLoaded={isLoaded(baseRightPage)}
-                onLoad={() => baseRightPage && markPageLoaded(baseRightPage.id)}
-                onError={() => baseRightPage && markPageLoaded(baseRightPage.id)}
+                onGlobalLoad={() => baseRightPage && markPageLoaded(baseRightPage.id)}
               />
             </div>
           </div>
@@ -512,7 +522,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
                 className="absolute inset-0 overflow-hidden rounded-r-lg"
                 style={{ backfaceVisibility: "hidden" }}
               >
-                <PageSlot page={oldRightPage} src={getSrc(oldRightPage)} isLoaded={isLoaded(oldRightPage)} />
+                <PageSlot page={oldRightPage} src={getSrc(oldRightPage)} />
                 <div
                   className="absolute inset-0 pointer-events-none"
                   style={{
@@ -528,7 +538,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
                   transform: "rotateY(180deg)",
                 }}
               >
-                <PageSlot page={newLeftPage} src={getSrc(newLeftPage)} isLoaded={isLoaded(newLeftPage)} />
+                <PageSlot page={newLeftPage} src={getSrc(newLeftPage)} />
                 <div
                   className="absolute inset-0 pointer-events-none"
                   style={{
@@ -553,7 +563,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
                 className="absolute inset-0 overflow-hidden rounded-l-lg"
                 style={{ backfaceVisibility: "hidden" }}
               >
-                <PageSlot page={oldLeftPage} src={getSrc(oldLeftPage)} isLoaded={isLoaded(oldLeftPage)} />
+                <PageSlot page={oldLeftPage} src={getSrc(oldLeftPage)} />
                 <div
                   className="absolute inset-0 pointer-events-none"
                   style={{
@@ -569,7 +579,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
                   transform: "rotateY(-180deg)",
                 }}
               >
-                <PageSlot page={newRightPage} src={getSrc(newRightPage)} isLoaded={isLoaded(newRightPage)} />
+                <PageSlot page={newRightPage} src={getSrc(newRightPage)} />
                 <div
                   className="absolute inset-0 pointer-events-none"
                   style={{
