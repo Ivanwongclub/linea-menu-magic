@@ -193,8 +193,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
       (index: number): "high" | "auto" | "low" => {
         const spreadIndex = isMobile ? index : Math.floor(index / 2);
         const distance = Math.abs(spreadIndex - currentSpread);
-        if (distance === 0) return "high";
-        if (distance <= 1) return "auto";
+        if (distance <= 1) return "high";
         return "low";
       },
       [currentSpread, isMobile]
@@ -216,7 +215,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
 
     /* ---- JS Image() preload for adjacent spreads ---- */
     useEffect(() => {
-      const adjacentSpreads = [currentSpread, currentSpread + 1].filter(
+      const adjacentSpreads = [currentSpread - 1, currentSpread, currentSpread + 1].filter(
         (s) => s >= 0 && s <= maxSpread
       );
       adjacentSpreads.forEach((spread) => {
@@ -344,7 +343,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
     const preloadIndices = useMemo(() => {
       const indices = new Set<number>();
       // Current spread + next spread only
-      const spreads = [currentSpread, currentSpread + 1].filter(s => s >= 0 && s <= maxSpread);
+      const spreads = [currentSpread - 1, currentSpread, currentSpread + 1].filter(s => s >= 0 && s <= maxSpread);
       spreads.forEach(s => {
         if (isMobile) {
           indices.add(s);
