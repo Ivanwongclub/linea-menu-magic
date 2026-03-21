@@ -193,8 +193,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
       (index: number): "high" | "auto" | "low" => {
         const spreadIndex = isMobile ? index : Math.floor(index / 2);
         const distance = Math.abs(spreadIndex - currentSpread);
-        if (distance === 0) return "high";
-        if (distance <= 1) return "auto";
+        if (distance <= 1) return "high";
         return "low";
       },
       [currentSpread, isMobile]
