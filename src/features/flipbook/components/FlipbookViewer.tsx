@@ -426,6 +426,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
             }}
           >
             <PageSlot
+              key={newLeftPage?.id ?? "mobile-empty"}
               page={newLeftPage}
               src={getSrc(newLeftPage)}
               showHotlinks={showHotlinks}
@@ -489,6 +490,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
           <div className="absolute inset-0 flex rounded-lg overflow-hidden">
             <div className="w-1/2 h-full">
               <PageSlot
+                key={baseLeftPage?.id ?? `base-left-${displayedSpread}`}
                 page={baseLeftPage}
                 src={getSrc(baseLeftPage)}
                 showHotlinks={showHotlinks}
@@ -498,6 +500,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
             </div>
             <div className="w-1/2 h-full">
               <PageSlot
+                key={baseRightPage?.id ?? `base-right-${displayedSpread}`}
                 page={baseRightPage}
                 src={getSrc(baseRightPage)}
                 showHotlinks={showHotlinks}
@@ -521,7 +524,11 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
                 className="absolute inset-0 overflow-hidden rounded-r-lg"
                 style={{ backfaceVisibility: "hidden" }}
               >
-                <PageSlot page={oldRightPage} src={getSrc(oldRightPage)} />
+                <PageSlot
+                  key={oldRightPage?.id ?? `forward-old-right-${displayedSpread}`}
+                  page={oldRightPage}
+                  src={getSrc(oldRightPage)}
+                />
                 <div
                   className="absolute inset-0 pointer-events-none"
                   style={{
@@ -537,7 +544,11 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
                   transform: "rotateY(180deg)",
                 }}
               >
-                <PageSlot page={newLeftPage} src={getSrc(newLeftPage)} />
+                <PageSlot
+                  key={newLeftPage?.id ?? `forward-new-left-${currentSpread}`}
+                  page={newLeftPage}
+                  src={getSrc(newLeftPage)}
+                />
                 <div
                   className="absolute inset-0 pointer-events-none"
                   style={{
@@ -562,7 +573,11 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
                 className="absolute inset-0 overflow-hidden rounded-l-lg"
                 style={{ backfaceVisibility: "hidden" }}
               >
-                <PageSlot page={oldLeftPage} src={getSrc(oldLeftPage)} />
+                <PageSlot
+                  key={oldLeftPage?.id ?? `backward-old-left-${displayedSpread}`}
+                  page={oldLeftPage}
+                  src={getSrc(oldLeftPage)}
+                />
                 <div
                   className="absolute inset-0 pointer-events-none"
                   style={{
@@ -578,7 +593,11 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
                   transform: "rotateY(-180deg)",
                 }}
               >
-                <PageSlot page={newRightPage} src={getSrc(newRightPage)} />
+                <PageSlot
+                  key={newRightPage?.id ?? `backward-new-right-${currentSpread}`}
+                  page={newRightPage}
+                  src={getSrc(newRightPage)}
+                />
                 <div
                   className="absolute inset-0 pointer-events-none"
                   style={{
