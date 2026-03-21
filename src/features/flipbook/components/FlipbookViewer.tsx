@@ -215,7 +215,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
 
     /* ---- JS Image() preload for adjacent spreads ---- */
     useEffect(() => {
-      const adjacentSpreads = [currentSpread, currentSpread + 1].filter(
+      const adjacentSpreads = [currentSpread - 1, currentSpread, currentSpread + 1].filter(
         (s) => s >= 0 && s <= maxSpread
       );
       adjacentSpreads.forEach((spread) => {
