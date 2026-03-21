@@ -562,7 +562,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
                 className="absolute inset-0 overflow-hidden rounded-l-lg"
                 style={{ backfaceVisibility: "hidden" }}
               >
-                <PageSlot page={oldLeftPage} src={getSrc(oldLeftPage)} isLoaded={isLoaded(oldLeftPage)} />
+                <PageSlot page={oldLeftPage} src={getSrc(oldLeftPage)} />
                 <div
                   className="absolute inset-0 pointer-events-none"
                   style={{
