@@ -493,9 +493,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
                 src={getSrc(baseLeftPage)}
                 showHotlinks={showHotlinks}
                 editHints={editHints}
-                isLoaded={isLoaded(baseLeftPage)}
-                onLoad={() => baseLeftPage && markPageLoaded(baseLeftPage.id)}
-                onError={() => baseLeftPage && markPageLoaded(baseLeftPage.id)}
+                onGlobalLoad={() => baseLeftPage && markPageLoaded(baseLeftPage.id)}
               />
             </div>
             <div className="w-1/2 h-full">
@@ -504,9 +502,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
                 src={getSrc(baseRightPage)}
                 showHotlinks={showHotlinks}
                 editHints={editHints}
-                isLoaded={isLoaded(baseRightPage)}
-                onLoad={() => baseRightPage && markPageLoaded(baseRightPage.id)}
-                onError={() => baseRightPage && markPageLoaded(baseRightPage.id)}
+                onGlobalLoad={() => baseRightPage && markPageLoaded(baseRightPage.id)}
               />
             </div>
           </div>
