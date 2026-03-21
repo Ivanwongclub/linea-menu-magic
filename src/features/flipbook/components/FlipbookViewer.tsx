@@ -343,7 +343,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
     const preloadIndices = useMemo(() => {
       const indices = new Set<number>();
       // Current spread + next spread only
-      const spreads = [currentSpread, currentSpread + 1].filter(s => s >= 0 && s <= maxSpread);
+      const spreads = [currentSpread - 1, currentSpread, currentSpread + 1].filter(s => s >= 0 && s <= maxSpread);
       spreads.forEach(s => {
         if (isMobile) {
           indices.add(s);
