@@ -537,7 +537,7 @@ const FlipbookViewer = forwardRef<FlipbookViewerHandle, FlipbookViewerProps>(
                   transform: "rotateY(180deg)",
                 }}
               >
-                <PageSlot page={newLeftPage} src={getSrc(newLeftPage)} isLoaded={isLoaded(newLeftPage)} />
+                <PageSlot page={newLeftPage} src={getSrc(newLeftPage)} />
                 <div
                   className="absolute inset-0 pointer-events-none"
                   style={{
