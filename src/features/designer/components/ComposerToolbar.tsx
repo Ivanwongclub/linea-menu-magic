@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
-import { ArrowLeft, Upload, Plus, Download, Cloud, CloudOff, Loader2, Share2, Link2, Check, Type } from 'lucide-react'
+import { ArrowLeft, Upload, Plus, Download, Cloud, CloudOff, Loader2, Share2, Link2, Check, Type, Copy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
