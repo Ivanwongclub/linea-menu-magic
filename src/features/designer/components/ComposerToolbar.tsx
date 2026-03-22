@@ -146,6 +146,13 @@ export default function ComposerToolbar({
           <span className="hidden md:inline">Add Component</span>
         </Button>
 
+        {onAddAnnotation && (
+          <Button variant="outline" size="sm" onClick={onAddAnnotation} className="text-xs gap-1.5">
+            <Type className="w-3 h-3" />
+            <span className="hidden md:inline">Annotate</span>
+          </Button>
+        )}
+
         {/* Zoom controls */}
         <div className="flex items-center gap-0.5 ml-2 border border-border rounded-[var(--radius)] overflow-hidden">
           <button
