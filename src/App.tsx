@@ -22,6 +22,7 @@ const NewsDetail = lazy(() => import("./pages/NewsDetail"));
 const DesignerStudio = lazy(() => import("./pages/DesignerStudio"));
 const DesignerStudioDashboard = lazy(() => import("./pages/DesignerStudioDashboard"));
 const ComposerPage = lazy(() => import("./features/designer/pages/ComposerPage"));
+const PresentationPage = lazy(() => import("./features/designer/pages/PresentationPage"));
 const Brochures = lazy(() => import("./pages/Brochures"));
 const BrochureViewer = lazy(() => import("./pages/BrochureViewer"));
 const Contact = lazy(() => import("./pages/Contact"));
