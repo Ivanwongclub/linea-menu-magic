@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
-import { ArrowLeft, Upload, Plus, Download, Cloud, CloudOff, Loader2, Share2, Link2, Check, Type } from 'lucide-react'
+import { ArrowLeft, Upload, Plus, Download, Cloud, CloudOff, Loader2, Share2, Link2, Check, Type, Copy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -26,6 +26,7 @@ interface ComposerToolbarProps {
   onExport: () => void
   onCreateRFQ: () => void
   onShareStatusChange?: (status: 'draft' | 'shared') => void
+  onCreateVariant?: () => void
 }
 
 export default function ComposerToolbar({
@@ -41,6 +42,7 @@ export default function ComposerToolbar({
   onExport,
   onCreateRFQ,
   onShareStatusChange,
+  onCreateVariant,
 }: ComposerToolbarProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editName, setEditName] = useState(session.name)
@@ -202,6 +204,15 @@ export default function ComposerToolbar({
               <Share2 className="w-3.5 h-3.5 mr-2" />
               {isShared ? 'Set to Draft (private)' : 'Mark as Shared'}
             </DropdownMenuItem>
+            {onCreateVariant && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={onCreateVariant}>
+                  <Copy className="w-3.5 h-3.5 mr-2" />
+                  Create Variant
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
 

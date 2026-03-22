@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Layers, MoreHorizontal, Pencil, Trash2, Share2, Lock, Link2, Check } from 'lucide-react'
+import { Plus, Layers, MoreHorizontal, Pencil, Trash2, Share2, Lock, Link2, Check, Copy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -23,7 +23,7 @@ interface ComposerSessionListProps {
 
 export default function ComposerSessionList({ teamId }: ComposerSessionListProps) {
   const navigate = useNavigate()
-  const { sessions, loading, createSession, deleteSession, updateSession } = useDesignSessions(teamId)
+  const { sessions, loading, createSession, deleteSession, updateSession, duplicateSession } = useDesignSessions(teamId)
   const [renamingId, setRenamingId] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState('')
   const [copiedId, setCopiedId] = useState<string | null>(null)
@@ -47,6 +47,16 @@ export default function ComposerSessionList({ teamId }: ComposerSessionListProps
       navigate(`/designer-studio/compose/${session.id}`)
     } catch {
       toast.error('Failed to create session')
+    }
+  }
+
+  const handleCreateVariant = async (session: DesignSession) => {
+    try {
+      const variant = await duplicateSession(session.id)
+      toast.success('Variant created')
+      navigate(`/designer-studio/compose/${variant.id}`)
+    } catch {
+      toast.error('Failed to create variant')
     }
   }
 
@@ -167,6 +177,10 @@ export default function ComposerSessionList({ teamId }: ComposerSessionListProps
                     <DropdownMenuItem onClick={() => { setRenamingId(session.id); setRenameValue(session.name) }}>
                       <Pencil className="w-3.5 h-3.5 mr-2" />
                       Rename
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleCreateVariant(session) }}>
+                      <Copy className="w-3.5 h-3.5 mr-2" />
+                      Create Variant
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => handleDelete(session.id)} className="text-destructive focus:text-destructive">
                       <Trash2 className="w-3.5 h-3.5 mr-2" />
