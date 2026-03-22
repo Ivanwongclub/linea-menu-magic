@@ -13,6 +13,16 @@ export type DesignSession = {
   layers?: DesignLayer[]
 }
 
+export type LayerType = 'image' | 'annotation'
+
+export type TextStyle = {
+  fontSize?: number
+  fontWeight?: 'normal' | 'bold'
+  color?: string
+  backgroundColor?: string
+  textAlign?: 'left' | 'center' | 'right'
+}
+
 export type DesignLayer = {
   id: string
   session_id: string
@@ -30,6 +40,10 @@ export type DesignLayer = {
   is_visible: boolean
   is_locked: boolean
   created_at: string
+  layer_type: LayerType
+  text_content?: string
+  text_style?: TextStyle
+  group_id?: string
   product?: {
     id: string
     name: string
