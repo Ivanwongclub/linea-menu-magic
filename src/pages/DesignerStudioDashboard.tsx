@@ -479,10 +479,6 @@ const DesignerStudioDashboard = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" className="gap-1.5 h-8" onClick={() => navigate('/products')}>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Browse Catalog</span>
-                  </Button>
                   <Button size="sm" className="gap-1.5 h-8" onClick={() => setIsSearchDialogOpen(true)}>
                     <Plus className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">Add Component</span>
