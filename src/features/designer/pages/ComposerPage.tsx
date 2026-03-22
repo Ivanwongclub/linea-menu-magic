@@ -273,6 +273,7 @@ export default function ComposerPage() {
               onSelectLayer={handleSelectLayer}
               onUpdateLayer={handleUpdateLayer}
               onDeleteLayer={handleDeleteLayer}
+              onDuplicateSelected={handleDuplicateSelected}
             />
           </div>
         </div>
