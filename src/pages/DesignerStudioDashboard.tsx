@@ -725,8 +725,6 @@ const DesignerStudioDashboard = () => {
           )}
         </div>
       </main>
-        </div>
-      </main>
 
       <ProductQuickView
         item={quickViewItem}
