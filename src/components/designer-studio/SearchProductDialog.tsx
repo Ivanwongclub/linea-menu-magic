@@ -104,7 +104,7 @@ export default function SearchProductDialog({
             <p className="text-xs text-muted-foreground text-center py-4">Searching...</p>
           )}
           {!loading && query && results.length === 0 && (
-            <p className="text-xs text-muted-foreground text-center py-4">No products found</p>
+            <p className="text-xs text-muted-foreground text-center py-4">No components found</p>
           )}
           {results.map((p) => {
             const alreadyAdded = existingProductIds.has(p.id);

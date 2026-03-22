@@ -612,7 +612,6 @@ const DesignerStudioDashboard = () => {
                   </p>
                   {libraryItems.length === 0 ? (
                     <div className="flex gap-2 justify-center">
-                      <Button variant="outline" size="sm" onClick={() => navigate('/products')}>Browse Catalog</Button>
                       <Button size="sm" onClick={() => setIsSearchDialogOpen(true)}>
                         <Plus className="w-3.5 h-3.5 mr-1" />
                         Add Components
