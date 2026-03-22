@@ -166,6 +166,7 @@ export default function ComposerPage() {
         onZoom={setZoom}
         onExport={handleExport}
         onCreateRFQ={() => toast.info('RFQ creation coming soon')}
+        onShareStatusChange={handleShareStatusChange}
       />
 
       <div className="flex flex-1 overflow-hidden">
