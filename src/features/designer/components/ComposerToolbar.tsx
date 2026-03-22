@@ -42,6 +42,7 @@ export default function ComposerToolbar({
   onExport,
   onCreateRFQ,
   onShareStatusChange,
+  onCreateVariant,
 }: ComposerToolbarProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editName, setEditName] = useState(session.name)
