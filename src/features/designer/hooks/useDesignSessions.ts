@@ -12,7 +12,25 @@ export async function createVariantFromSession(sourceId: string, existingSession
   if (srcErr || !src) throw srcErr ?? new Error('Session not found')
 
   const baseName = ((src as any).name ?? 'Composition').replace(/ — Variant.*$/, '')
-  const siblingCount = (existingSessions ?? []).filter(s => s.name.startsWith(baseName)).length
+  let siblingCount = 0
+
+  const teamId = (src as any).team_id as string | null
+  if (teamId) {
+    const { data: siblingRows, error: siblingErr } = await supabase
+      .from('design_sessions')
+      .select('name')
+      .eq('team_id', teamId)
+      .ilike('name', `${baseName}%`)
+
+    if (!siblingErr && siblingRows) {
+      siblingCount = siblingRows.filter(s => s.name.startsWith(baseName)).length
+    } else {
+      siblingCount = (existingSessions ?? []).filter(s => s.name.startsWith(baseName)).length
+    }
+  } else {
+    siblingCount = (existingSessions ?? []).filter(s => s.name.startsWith(baseName)).length
+  }
+
   const name = `${baseName} — Variant ${siblingCount + 1}`
 
   const user = (await supabase.auth.getUser()).data.user
