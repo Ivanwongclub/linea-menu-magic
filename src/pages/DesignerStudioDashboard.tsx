@@ -524,7 +524,7 @@ const DesignerStudioDashboard = () => {
 
                 {/* Bottom: feature bullets */}
                 <div className="flex flex-wrap gap-x-4 gap-y-1.5 relative z-10">
-                  {['Upload garment image', 'Place & scale trims', 'Rotate & layer', 'Export to PNG'].map(f => (
+                  {['Upload garment image', 'Place & scale components', 'Rotate & layer', 'Export to PNG'].map(f => (
                     <span key={f} className="flex items-center gap-1.5 text-[11px] opacity-60">
                       <Check className="w-3 h-3" />
                       {f}
