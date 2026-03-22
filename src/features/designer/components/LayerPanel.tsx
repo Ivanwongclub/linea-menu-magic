@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Eye, EyeOff, Lock, Unlock, Trash2, GripVertical, Type, Group, Ungroup } from 'lucide-react'
+import { Eye, EyeOff, Lock, Unlock, Trash2, GripVertical, Type, Group, Ungroup, Copy } from 'lucide-react'
 import { Slider } from '@/components/ui/slider'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
