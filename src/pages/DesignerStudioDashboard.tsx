@@ -123,7 +123,7 @@ const DesignerStudioDashboard = () => {
 
   // Main tab state — read from URL ?tab= param
   const tabFromUrl = searchParams.get('tab');
-  const initialTab: TabId = validTabs.includes(tabFromUrl as TabId) ? tabFromUrl as TabId : 'library';
+  const initialTab: TabId = validTabs.includes(tabFromUrl as TabId) ? tabFromUrl as TabId : 'composer';
   const [activeMainTab, setActiveMainTab] = useState<TabId>(initialTab);
 
   // Product editor state
@@ -364,8 +364,8 @@ const DesignerStudioDashboard = () => {
     );
   }
 
-  // Whether to show the hero section (only when no tab is "actively expanded")
-  const showHero = activeMainTab !== 'library' && activeMainTab !== 'composer';
+  // Whether library or management is expanded
+  const showingSessions = activeMainTab !== 'library' && activeMainTab !== 'rfq' && activeMainTab !== 'brochures' && activeMainTab !== 'products';
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -381,175 +381,99 @@ const DesignerStudioDashboard = () => {
       <main className="flex-1">
         <div className="max-w-7xl mx-auto px-4 lg:px-6">
 
-          {/* Page title */}
-          <div className="py-6 pb-4">
-            <h1 className="text-2xl font-semibold text-foreground tracking-tight">
-              設計師工作室
-            </h1>
-            <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1">
-              Component library, visual composer & project management
-            </p>
+          {/* Page title + primary CTA */}
+          <div className="py-6 pb-2 flex items-end justify-between">
+            <div>
+              <h1 className="text-2xl font-semibold text-foreground tracking-tight">
+                設計師工作室
+              </h1>
+              <p className="text-sm text-muted-foreground mt-1">
+                Designer Studio
+              </p>
+            </div>
+            <Button size="sm" className="gap-2" onClick={handleCreateComposition}>
+              <Plus className="w-4 h-4" />
+              New Composition
+            </Button>
           </div>
 
-          {/* ═══════════ HERO SPLIT SECTION ═══════════ */}
-          {showHero && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          {/* ═══════════ PRIMARY: SESSIONS / COMPOSITIONS ═══════════ */}
+          {showingSessions && (
+            <div className="mt-6 mb-8">
+              <ComposerSessionList teamId={teamId} />
+            </div>
+          )}
 
-              {/* LEFT: 素材庫 entry point */}
+          {/* ═══════════ SECONDARY: Quick-access strip ═══════════ */}
+          {showingSessions && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
+              {/* Component Library card */}
               <div
                 onClick={() => setActiveMainTab('library')}
-                className="relative bg-[hsl(var(--background))] border border-[hsl(var(--border))] rounded-[calc(var(--radius)*2)] p-6 cursor-pointer group transition-all duration-200 hover:border-[hsl(var(--foreground))] hover:shadow-[0_4px_24px_rgba(0,0,0,0.06)] overflow-hidden"
+                className="flex items-center gap-4 p-4 bg-[hsl(var(--background))] border border-[hsl(var(--border))] rounded-[calc(var(--radius)*2)] cursor-pointer group transition-all duration-200 hover:border-[hsl(var(--foreground))] hover:shadow-[0_2px_12px_rgba(0,0,0,0.05)]"
               >
-                {/* Top: label + icon */}
-                <div className="flex items-start justify-between mb-6">
-                  <div>
-                    <p className="text-xs font-medium uppercase tracking-[0.1em] text-[hsl(var(--muted-foreground))] mb-1">
-                      素材庫 · Component Library
-                    </p>
-                    <p className="text-lg font-medium text-[hsl(var(--foreground))] leading-snug">
-                      Browse & download<br />studio components
-                    </p>
-                  </div>
-                  <div className="w-10 h-10 rounded-full bg-[hsl(var(--secondary))] flex items-center justify-center group-hover:bg-[hsl(var(--foreground))] group-hover:text-[hsl(var(--background))] transition-colors">
-                    <ArrowRight className="w-4 h-4" />
-                  </div>
+                <div className="w-10 h-10 rounded-[var(--radius)] bg-[hsl(var(--secondary))] flex items-center justify-center flex-shrink-0 group-hover:bg-[hsl(var(--foreground))] group-hover:text-[hsl(var(--background))] transition-colors">
+                  <Library className="w-4 h-4" />
                 </div>
-
-                {/* Preview strip of admin default items */}
-                <div className="flex items-center gap-2 mb-6">
-                  {adminDefaultItems.slice(0, 4).map(item => (
-                    <div key={item.id} className="w-14 h-14 rounded-[var(--radius)] bg-[hsl(var(--secondary))] overflow-hidden flex-shrink-0 border border-[hsl(var(--border))]">
-                      {item.product?.thumbnail_url ? (
-                        <img src={item.product.thumbnail_url} alt="" className="w-full h-full object-contain p-1.5" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-[8px] font-mono text-[hsl(var(--muted-foreground))]">
-                          {item.product?.item_code?.slice(0, 5)}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                  {adminDefaultItems.length > 4 && (
-                    <div className="w-14 h-14 rounded-[var(--radius)] bg-[hsl(var(--secondary))] border border-[hsl(var(--border))] flex items-center justify-center flex-shrink-0">
-                      <span className="text-[11px] font-medium text-[hsl(var(--muted-foreground))]">
-                        +{adminDefaultItems.length - 4}
-                      </span>
-                    </div>
-                  )}
-                  {adminDefaultItems.length === 0 && !libraryLoading && (
-                    <div className="text-xs text-[hsl(var(--muted-foreground))]">No items yet</div>
-                  )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground">Component Library</p>
+                  <p className="text-[11px] text-muted-foreground truncate">
+                    {libraryItems.length} components · Browse & download
+                  </p>
                 </div>
-
-                {/* Feature bullets */}
-                <div className="flex flex-wrap gap-x-4 gap-y-1.5">
-                  {['3D model preview', 'OBJ file download', 'Spec sheets', 'Sample request'].map(f => (
-                    <span key={f} className="flex items-center gap-1.5 text-[11px] text-[hsl(var(--muted-foreground))]">
-                      <Check className="w-3 h-3" />
-                      {f}
-                    </span>
-                  ))}
-                </div>
+                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />
               </div>
 
-              {/* RIGHT: 視覺設計 entry point */}
+              {/* RFQ card */}
               <div
-                onClick={() => setActiveMainTab('composer')}
-                className="relative bg-[hsl(var(--foreground))] text-[hsl(var(--background))] rounded-[calc(var(--radius)*2)] p-6 cursor-pointer group transition-all duration-200 hover:shadow-[0_4px_24px_rgba(0,0,0,0.2)] overflow-hidden"
+                onClick={() => setActiveMainTab('rfq')}
+                className="flex items-center gap-4 p-4 bg-[hsl(var(--background))] border border-[hsl(var(--border))] rounded-[calc(var(--radius)*2)] cursor-pointer group transition-all duration-200 hover:border-[hsl(var(--foreground))] hover:shadow-[0_2px_12px_rgba(0,0,0,0.05)]"
               >
-                {/* Background decoration */}
-                <div className="absolute top-4 right-4 opacity-[0.06]">
-                  <Layers className="w-32 h-32" />
+                <div className="w-10 h-10 rounded-[var(--radius)] bg-[hsl(var(--secondary))] flex items-center justify-center flex-shrink-0 group-hover:bg-[hsl(var(--foreground))] group-hover:text-[hsl(var(--background))] transition-colors">
+                  <FileText className="w-4 h-4" />
                 </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground">Requests & Quotes</p>
+                  <p className="text-[11px] text-muted-foreground truncate">
+                    {statusCounts.all} requests · {statusCounts.submitted} pending
+                  </p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />
+              </div>
 
-                {/* Top: label + icon */}
-                <div className="flex items-start justify-between mb-6 relative z-10">
-                  <div>
-                    <p className="text-xs font-medium uppercase tracking-[0.1em] opacity-60 mb-1">
-                      視覺設計 · Visual Composer
-                    </p>
-                    <p className="text-lg font-medium leading-snug">
-                      Place trims on your<br />garment designs
-                    </p>
-                  </div>
-                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors">
-                    <ArrowRight className="w-4 h-4" />
-                  </div>
+              {/* Brochures + Products card */}
+              <div
+                onClick={() => setActiveMainTab('brochures')}
+                className="flex items-center gap-4 p-4 bg-[hsl(var(--background))] border border-[hsl(var(--border))] rounded-[calc(var(--radius)*2)] cursor-pointer group transition-all duration-200 hover:border-[hsl(var(--foreground))] hover:shadow-[0_2px_12px_rgba(0,0,0,0.05)]"
+              >
+                <div className="w-10 h-10 rounded-[var(--radius)] bg-[hsl(var(--secondary))] flex items-center justify-center flex-shrink-0 group-hover:bg-[hsl(var(--foreground))] group-hover:text-[hsl(var(--background))] transition-colors">
+                  <BookOpen className="w-4 h-4" />
                 </div>
-
-                {/* Center: recent sessions or CTA */}
-                <div className="flex items-center gap-2 mb-6 relative z-10">
-                  {recentSessions.length > 0 ? (
-                    <>
-                      {recentSessions.slice(0, 3).map(session => (
-                        <div
-                          key={session.id}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/designer-studio/compose/${session.id}`);
-                          }}
-                          className="w-20 h-16 rounded-[var(--radius)] bg-white/10 border border-white/20 overflow-hidden flex-shrink-0 hover:border-white/50 transition-colors cursor-pointer"
-                        >
-                          {session.thumbnail_url || session.background_image_url ? (
-                            <img src={session.thumbnail_url || session.background_image_url || ''} alt={session.name} className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <Layers className="w-4 h-4 opacity-30" />
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                      <div
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleCreateComposition();
-                        }}
-                        className="w-20 h-16 rounded-[var(--radius)] border-2 border-dashed border-white/20 hover:border-white/50 flex items-center justify-center flex-shrink-0 transition-colors cursor-pointer"
-                      >
-                        <Plus className="w-5 h-5 opacity-50" />
-                      </div>
-                    </>
-                  ) : (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleCreateComposition();
-                      }}
-                      className="flex items-center gap-2 bg-white text-black text-xs font-medium uppercase tracking-[0.08em] px-5 py-2.5 rounded-[var(--radius)] hover:bg-white/90 transition-colors"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      New Composition
-                    </button>
-                  )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground">Brochures & Content</p>
+                  <p className="text-[11px] text-muted-foreground truncate">
+                    Manage catalogs & product data
+                  </p>
                 </div>
-
-                {/* Bottom: feature bullets */}
-                <div className="flex flex-wrap gap-x-4 gap-y-1.5 relative z-10">
-                  {['Upload garment image', 'Place & scale components', 'Rotate & layer', 'Export to PNG'].map(f => (
-                    <span key={f} className="flex items-center gap-1.5 text-[11px] opacity-60">
-                      <Check className="w-3 h-3" />
-                      {f}
-                    </span>
-                  ))}
-                </div>
+                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />
               </div>
             </div>
           )}
 
-          {/* ═══════════ LIBRARY / COMPOSER EXPANDED CONTENT ═══════════ */}
+          {/* ═══════════ EXPANDED: LIBRARY ═══════════ */}
           {activeMainTab === 'library' && (
             <div className="mb-8">
-              {/* Back to hero + Library header */}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <button
-                    onClick={() => setActiveMainTab('rfq')}
-                    className="text-xs text-[hsl(var(--muted-foreground))] hover:text-foreground transition-colors"
+                    onClick={() => setActiveMainTab('composer')}
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                   >
                     ← Back
                   </button>
                   <div>
                     <h2 className="text-lg font-semibold text-foreground">素材庫 · Component Library</h2>
-                    <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                    <p className="text-xs text-muted-foreground">
                       {libraryItems.length} components{libraryItems[0]?.team_name ? ` · ${libraryItems[0].team_name}` : ''}
                     </p>
                   </div>
@@ -569,7 +493,7 @@ const DesignerStudioDashboard = () => {
               {/* Library Filters */}
               <div className="flex items-center gap-2 pb-3 overflow-x-auto scrollbar-hide">
                 <div className="relative flex-shrink-0 w-48 lg:w-64">
-                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[hsl(var(--muted-foreground))]" />
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                   <Input
                     placeholder="Search..."
                     value={searchQuery}
@@ -620,17 +544,16 @@ const DesignerStudioDashboard = () => {
                 </ToggleGroup>
 
                 {activeFilterCount > 0 && (
-                  <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-xs h-7 px-2 flex-shrink-0 text-[hsl(var(--muted-foreground))] hover:text-foreground">
+                  <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-xs h-7 px-2 flex-shrink-0 text-muted-foreground hover:text-foreground">
                     <X className="w-3 h-3 mr-1" />
                     Clear ({activeFilterCount})
                   </Button>
                 )}
               </div>
 
-              {/* Active filters badges */}
               {activeFilterCount > 0 && (
                 <div className="flex items-center gap-2 flex-wrap mb-4">
-                  <span className="text-xs text-[hsl(var(--muted-foreground))]">Filters:</span>
+                  <span className="text-xs text-muted-foreground">Filters:</span>
                   {showFavoritesOnly && (
                     <Badge variant="secondary" className="gap-1 text-xs py-0.5">
                       <Heart className="w-3 h-3 fill-current" />
@@ -651,17 +574,15 @@ const DesignerStudioDashboard = () => {
                 </div>
               )}
 
-              {/* Results Count */}
               <div className="flex items-center justify-between mb-4">
-                <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                <p className="text-xs text-muted-foreground">
                   {filteredLibraryItems.length} items
                 </p>
               </div>
 
-              {/* Loading state */}
               {libraryLoading ? (
                 <div className="text-center py-16">
-                  <p className="text-sm text-[hsl(var(--muted-foreground))]">Loading library...</p>
+                  <p className="text-sm text-muted-foreground">Loading library...</p>
                 </div>
               ) : filteredLibraryItems.length > 0 ? (
                 libraryViewMode === "grid" ? (
@@ -689,8 +610,8 @@ const DesignerStudioDashboard = () => {
                 )
               ) : (
                 <div className="text-center py-16">
-                  <Library className="w-12 h-12 text-[hsl(var(--muted-foreground))] mx-auto mb-4" strokeWidth={1} />
-                  <p className="text-[hsl(var(--muted-foreground))] mb-2">
+                  <Library className="w-12 h-12 text-muted-foreground mx-auto mb-4" strokeWidth={1} />
+                  <p className="text-muted-foreground mb-2">
                     {libraryItems.length === 0 ? 'Your library is empty' : 'No items match your filters'}
                   </p>
                   {libraryItems.length === 0 ? (
@@ -698,7 +619,7 @@ const DesignerStudioDashboard = () => {
                       <Button variant="outline" size="sm" onClick={() => navigate('/products')}>Browse Catalog</Button>
                       <Button size="sm" onClick={() => setIsSearchDialogOpen(true)}>
                         <Plus className="w-3.5 h-3.5 mr-1" />
-                        Add Products
+                        Add Components
                       </Button>
                     </div>
                   ) : (
@@ -709,108 +630,99 @@ const DesignerStudioDashboard = () => {
             </div>
           )}
 
-          {activeMainTab === 'composer' && (
+          {/* ═══════════ EXPANDED: MANAGEMENT SECTIONS ═══════════ */}
+          {(activeMainTab === 'rfq' || activeMainTab === 'brochures' || activeMainTab === 'products') && (
             <div className="mb-8">
               <div className="flex items-center gap-3 mb-4">
                 <button
-                  onClick={() => setActiveMainTab('rfq')}
-                  className="text-xs text-[hsl(var(--muted-foreground))] hover:text-foreground transition-colors"
+                  onClick={() => setActiveMainTab('composer')}
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  ← Back
+                  ← Back to Projects
                 </button>
-                <div>
-                  <h2 className="text-lg font-semibold text-foreground">視覺設計 · Visual Composer</h2>
-                </div>
               </div>
-              <ComposerSessionList teamId={teamId} />
+
+              <Tabs
+                value={activeMainTab}
+                onValueChange={(v) => setActiveMainTab(v as TabId)}
+                className="w-full"
+              >
+                <TabsList className="h-auto p-0 bg-transparent border-b border-border w-full rounded-none gap-0 justify-start">
+                  <TabsTrigger
+                    value="rfq"
+                    className="flex items-center gap-2 px-4 py-3 text-xs font-medium uppercase tracking-[0.08em] rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:text-foreground text-muted-foreground bg-transparent hover:text-foreground transition-colors"
+                  >
+                    <FileText className="w-3.5 h-3.5" />
+                    Requests ({statusCounts.all})
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="brochures"
+                    className="flex items-center gap-2 px-4 py-3 text-xs font-medium uppercase tracking-[0.08em] rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:text-foreground text-muted-foreground bg-transparent hover:text-foreground transition-colors"
+                  >
+                    <BookOpen className="w-3.5 h-3.5" />
+                    Brochures
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="products"
+                    className="flex items-center gap-2 px-4 py-3 text-xs font-medium uppercase tracking-[0.08em] rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:text-foreground text-muted-foreground bg-transparent hover:text-foreground transition-colors"
+                  >
+                    <Package className="w-3.5 h-3.5" />
+                    Products
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="rfq" className="mt-6">
+                  <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pb-4 mb-4">
+                    <StatCard label="待處理" value={statusCounts.submitted} icon={<FileText className="w-4 h-4" />} color="text-amber-500" compact />
+                    <StatCard label="模型上傳" value={statusCounts.model_uploaded} icon={<Upload className="w-4 h-4" />} color="text-blue-500" compact />
+                    <StatCard label="設計確認" value={statusCounts.design_confirmed} icon={<CheckCircle className="w-4 h-4" />} color="text-green-500" compact />
+                    <StatCard label="列印中" value={statusCounts.printing} icon={<Clock className="w-4 h-4" />} color="text-purple-500" compact />
+                    <StatCard label="樣品審核" value={statusCounts.sample_review} icon={<Eye className="w-4 h-4" />} color="text-orange-500" compact />
+                    <StatCard label="生產中" value={statusCounts.production} icon={<Package className="w-4 h-4" />} color="text-emerald-500" compact />
+                  </div>
+
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="relative flex-1 max-w-xs">
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                      <Input
+                        placeholder="搜尋 RFQ..."
+                        value={rfqSearchQuery}
+                        onChange={(e) => setRfqSearchQuery(e.target.value)}
+                        className="pl-8 h-8 text-sm"
+                      />
+                    </div>
+                    <Button variant="outline" size="sm" className="gap-1.5 h-8">
+                      <Filter className="w-3.5 h-3.5" />
+                      篩選
+                    </Button>
+                  </div>
+
+                  <Tabs value={activeRFQTab} onValueChange={setActiveRFQTab} className="w-full">
+                    <TabsList className="w-full justify-start overflow-x-auto">
+                      <TabsTrigger value="all">全部 ({statusCounts.all})</TabsTrigger>
+                      <TabsTrigger value="submitted">待處理</TabsTrigger>
+                      <TabsTrigger value="model_uploaded">模型已上傳</TabsTrigger>
+                      <TabsTrigger value="design_confirmed">設計確認</TabsTrigger>
+                      <TabsTrigger value="printing">列印中</TabsTrigger>
+                      <TabsTrigger value="sample_review">樣品審核</TabsTrigger>
+                      <TabsTrigger value="production">生產中</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value={activeRFQTab} className="mt-6">
+                      <RFQList rfqs={filteredRFQs} onSelect={handleSelectRFQ} />
+                    </TabsContent>
+                  </Tabs>
+                </TabsContent>
+
+                <TabsContent value="brochures" className="mt-6">
+                  <BrochuresPanel onOpenEditor={(id) => setEditingBrochureId(id ?? undefined)} />
+                </TabsContent>
+
+                <TabsContent value="products" className="mt-6">
+                  <ProductsPanel onOpenEditor={(id) => setEditingProductId(id ?? undefined)} />
+                </TabsContent>
+              </Tabs>
             </div>
           )}
-
-          {/* ═══════════ MANAGEMENT TABS ═══════════ */}
-          <div className="pb-8">
-            <Tabs
-              value={activeMainTab === 'library' || activeMainTab === 'composer' ? 'rfq' : activeMainTab}
-              onValueChange={(v) => setActiveMainTab(v as TabId)}
-              className="w-full"
-            >
-              <TabsList className="h-auto p-0 bg-transparent border-b border-[hsl(var(--border))] w-full rounded-none gap-0 justify-start">
-                <TabsTrigger
-                  value="rfq"
-                  className="flex items-center gap-2 px-4 py-3 text-xs font-medium uppercase tracking-[0.08em] rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:text-foreground text-[hsl(var(--muted-foreground))] bg-transparent hover:text-foreground transition-colors"
-                >
-                  <FileText className="w-3.5 h-3.5" />
-                  我的報價 ({statusCounts.all})
-                </TabsTrigger>
-                <TabsTrigger
-                  value="brochures"
-                  className="flex items-center gap-2 px-4 py-3 text-xs font-medium uppercase tracking-[0.08em] rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:text-foreground text-[hsl(var(--muted-foreground))] bg-transparent hover:text-foreground transition-colors"
-                >
-                  <BookOpen className="w-3.5 h-3.5" />
-                  Brochures
-                </TabsTrigger>
-                <TabsTrigger
-                  value="products"
-                  className="flex items-center gap-2 px-4 py-3 text-xs font-medium uppercase tracking-[0.08em] rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:text-foreground text-[hsl(var(--muted-foreground))] bg-transparent hover:text-foreground transition-colors"
-                >
-                  <Package className="w-3.5 h-3.5" />
-                  Products
-                </TabsTrigger>
-              </TabsList>
-
-              {/* RFQ Tab Content */}
-              <TabsContent value="rfq" className="mt-6">
-                <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pb-4 mb-4">
-                  <StatCard label="待處理" value={statusCounts.submitted} icon={<FileText className="w-4 h-4" />} color="text-amber-500" compact />
-                  <StatCard label="模型上傳" value={statusCounts.model_uploaded} icon={<Upload className="w-4 h-4" />} color="text-blue-500" compact />
-                  <StatCard label="設計確認" value={statusCounts.design_confirmed} icon={<CheckCircle className="w-4 h-4" />} color="text-green-500" compact />
-                  <StatCard label="列印中" value={statusCounts.printing} icon={<Clock className="w-4 h-4" />} color="text-purple-500" compact />
-                  <StatCard label="樣品審核" value={statusCounts.sample_review} icon={<Eye className="w-4 h-4" />} color="text-orange-500" compact />
-                  <StatCard label="生產中" value={statusCounts.production} icon={<Package className="w-4 h-4" />} color="text-emerald-500" compact />
-                </div>
-
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="relative flex-1 max-w-xs">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[hsl(var(--muted-foreground))]" />
-                    <Input
-                      placeholder="搜尋 RFQ..."
-                      value={rfqSearchQuery}
-                      onChange={(e) => setRfqSearchQuery(e.target.value)}
-                      className="pl-8 h-8 text-sm"
-                    />
-                  </div>
-                  <Button variant="outline" size="sm" className="gap-1.5 h-8">
-                    <Filter className="w-3.5 h-3.5" />
-                    篩選
-                  </Button>
-                </div>
-
-                <Tabs value={activeRFQTab} onValueChange={setActiveRFQTab} className="w-full">
-                  <TabsList className="w-full justify-start overflow-x-auto">
-                    <TabsTrigger value="all">全部 ({statusCounts.all})</TabsTrigger>
-                    <TabsTrigger value="submitted">待處理</TabsTrigger>
-                    <TabsTrigger value="model_uploaded">模型已上傳</TabsTrigger>
-                    <TabsTrigger value="design_confirmed">設計確認</TabsTrigger>
-                    <TabsTrigger value="printing">列印中</TabsTrigger>
-                    <TabsTrigger value="sample_review">樣品審核</TabsTrigger>
-                    <TabsTrigger value="production">生產中</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value={activeRFQTab} className="mt-6">
-                    <RFQList rfqs={filteredRFQs} onSelect={handleSelectRFQ} />
-                  </TabsContent>
-                </Tabs>
-              </TabsContent>
-
-              {/* Brochures Tab Content */}
-              <TabsContent value="brochures" className="mt-6">
-                <BrochuresPanel onOpenEditor={(id) => setEditingBrochureId(id ?? undefined)} />
-              </TabsContent>
-
-              {/* Products Tab Content */}
-              <TabsContent value="products" className="mt-6">
-                <ProductsPanel onOpenEditor={(id) => setEditingProductId(id ?? undefined)} />
-              </TabsContent>
-            </Tabs>
-          </div>
         </div>
       </main>
 
