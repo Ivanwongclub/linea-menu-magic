@@ -162,6 +162,12 @@ export default function ComposerSessionList({ teamId }: ComposerSessionListProps
                       {session.status === 'shared' ? <Lock className="w-3.5 h-3.5 mr-2" /> : <Share2 className="w-3.5 h-3.5 mr-2" />}
                       {session.status === 'shared' ? 'Set to Draft' : 'Share'}
                     </DropdownMenuItem>
+                    {session.status === 'shared' && (
+                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleCopyLink(session) }}>
+                        {copiedId === session.id ? <Check className="w-3.5 h-3.5 mr-2" /> : <Link2 className="w-3.5 h-3.5 mr-2" />}
+                        {copiedId === session.id ? 'Copied!' : 'Copy presentation link'}
+                      </DropdownMenuItem>
+                    )
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
