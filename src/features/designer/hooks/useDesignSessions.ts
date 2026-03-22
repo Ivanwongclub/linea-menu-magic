@@ -113,54 +113,11 @@ export function useDesignSessions(teamId: string) {
     setSessions(prev => prev.filter(s => s.id !== id))
   }, [])
 
-  const duplicateSession = useCallback(async (sourceId: string, variantName?: string) => {
-    // Fetch source session
-    const { data: src, error: srcErr } = await supabase
-      .from('design_sessions')
-      .select('*')
-      .eq('id', sourceId)
-      .single()
-    if (srcErr || !src) throw srcErr ?? new Error('Session not found')
-
-    // Count existing variants to generate suffix
-    const baseName = (src as any).name?.replace(/ — Variant \d+$/, '') ?? 'Composition'
-    const name = variantName ?? `${baseName} — Variant ${sessions.filter(s => s.name.startsWith(baseName)).length + 1}`
-
-    const user = (await supabase.auth.getUser()).data.user
-    const { data: newSession, error: createErr } = await supabase
-      .from('design_sessions')
-      .insert({
-        team_id: (src as any).team_id,
-        name,
-        background_image_url: (src as any).background_image_url ?? null,
-        background_image_width: (src as any).background_image_width ?? null,
-        background_image_height: (src as any).background_image_height ?? null,
-        created_by: user?.id ?? null,
-        status: 'draft',
-      })
-      .select()
-      .single()
-    if (createErr || !newSession) throw createErr ?? new Error('Failed to create variant')
-
-    // Copy layers
-    const { data: srcLayers } = await supabase
-      .from('design_layers')
-      .select('*')
-      .eq('session_id', sourceId)
-      .order('layer_order', { ascending: true })
-
-    if (srcLayers && srcLayers.length > 0) {
-      const layerInserts = srcLayers.map(({ id, created_at, ...rest }: any) => ({
-        ...rest,
-        session_id: (newSession as any).id,
-      }))
-      await supabase.from('design_layers').insert(layerInserts)
-    }
-
-    const session = newSession as unknown as DesignSession
+  const duplicateSession = useCallback(async (sourceId: string) => {
+    const session = await createVariantFromSession(sourceId, sessions)
     setSessions(prev => [session, ...prev])
     return session
-  }, [teamId, sessions])
+  }, [sessions])
 
   return { sessions, loading, error, createSession, updateSession, deleteSession, duplicateSession, refetch: fetchSessions }
 }
