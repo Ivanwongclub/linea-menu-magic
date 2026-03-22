@@ -26,6 +26,7 @@ interface ComposerToolbarProps {
   onExport: () => void
   onCreateRFQ: () => void
   onShareStatusChange?: (status: 'draft' | 'shared') => void
+  onCreateVariant?: () => void
 }
 
 export default function ComposerToolbar({
