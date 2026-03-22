@@ -1,12 +1,12 @@
 import React, { useRef, useEffect, useCallback, useState } from 'react'
-import { RotateCw, ImagePlus, Move } from 'lucide-react'
+import { RotateCw, ImagePlus } from 'lucide-react'
 import type { DesignSession, DesignLayer } from '../types'
 
 interface ComposerCanvasProps {
   session: DesignSession
   layers: DesignLayer[]
-  selectedLayerId: string | null
-  onSelectLayer: (id: string | null) => void
+  selectedLayerIds: string[]
+  onSelectLayer: (id: string | null, additive?: boolean) => void
   onUpdateLayer: (id: string, changes: Partial<DesignLayer>) => void
   onDeleteLayer: (id: string) => void
   readOnly?: boolean
@@ -15,7 +15,7 @@ interface ComposerCanvasProps {
 export default function ComposerCanvas({
   session,
   layers,
-  selectedLayerId,
+  selectedLayerIds,
   onSelectLayer,
   onUpdateLayer,
   onDeleteLayer,
@@ -24,7 +24,6 @@ export default function ComposerCanvas({
   const canvasRef = useRef<HTMLDivElement>(null)
   const [canvasBounds, setCanvasBounds] = useState<DOMRect | null>(null)
 
-  // Track canvas size for layer calculations
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -39,33 +38,44 @@ export default function ComposerCanvas({
   // Keyboard shortcuts
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      if (!selectedLayerId) return
-      const layer = layers.find(l => l.id === selectedLayerId)
-      if (!layer || layer.is_locked || readOnly) return
+      if (selectedLayerIds.length === 0) return
+      if (readOnly) return
 
       const nudge = e.shiftKey ? 0.01 : 0.002
 
       switch (e.key) {
         case 'ArrowLeft':
           e.preventDefault()
-          onUpdateLayer(selectedLayerId, { x: Math.max(0, layer.x - nudge) })
+          selectedLayerIds.forEach(id => {
+            const layer = layers.find(l => l.id === id)
+            if (layer && !layer.is_locked) onUpdateLayer(id, { x: Math.max(0, layer.x - nudge) })
+          })
           break
         case 'ArrowRight':
           e.preventDefault()
-          onUpdateLayer(selectedLayerId, { x: Math.min(1, layer.x + nudge) })
+          selectedLayerIds.forEach(id => {
+            const layer = layers.find(l => l.id === id)
+            if (layer && !layer.is_locked) onUpdateLayer(id, { x: Math.min(1, layer.x + nudge) })
+          })
           break
         case 'ArrowUp':
           e.preventDefault()
-          onUpdateLayer(selectedLayerId, { y: Math.max(0, layer.y - nudge) })
+          selectedLayerIds.forEach(id => {
+            const layer = layers.find(l => l.id === id)
+            if (layer && !layer.is_locked) onUpdateLayer(id, { y: Math.max(0, layer.y - nudge) })
+          })
           break
         case 'ArrowDown':
           e.preventDefault()
-          onUpdateLayer(selectedLayerId, { y: Math.min(1, layer.y + nudge) })
+          selectedLayerIds.forEach(id => {
+            const layer = layers.find(l => l.id === id)
+            if (layer && !layer.is_locked) onUpdateLayer(id, { y: Math.min(1, layer.y + nudge) })
+          })
           break
         case 'Delete':
         case 'Backspace':
           if (document.activeElement === canvasRef.current) {
-            onDeleteLayer(selectedLayerId)
+            selectedLayerIds.forEach(id => onDeleteLayer(id))
           }
           break
         case 'Escape':
@@ -76,7 +86,7 @@ export default function ComposerCanvas({
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [selectedLayerId, layers, readOnly, onUpdateLayer, onDeleteLayer, onSelectLayer])
+  }, [selectedLayerIds, layers, readOnly, onUpdateLayer, onDeleteLayer, onSelectLayer])
 
   const handleCanvasClick = useCallback((e: React.MouseEvent) => {
     if (e.target === canvasRef.current || (e.target as HTMLElement).dataset.canvasBg === 'true') {
@@ -92,7 +102,6 @@ export default function ComposerCanvas({
       className="relative w-full h-full overflow-hidden bg-[hsl(var(--muted))] outline-none select-none"
       style={{ touchAction: 'none' }}
     >
-      {/* Background image */}
       {session.background_image_url ? (
         <img
           src={session.background_image_url}
@@ -105,19 +114,31 @@ export default function ComposerCanvas({
         <EmptyCanvasPlaceholder />
       )}
 
-      {/* Trim layers */}
       {[...layers]
         .sort((a, b) => a.layer_order - b.layer_order)
         .map(layer =>
           layer.is_visible ? (
-            <TrimLayer
+            <CanvasLayer
               key={layer.id}
               layer={layer}
               canvasRef={canvasRef}
               canvasBounds={canvasBounds}
-              isSelected={layer.id === selectedLayerId}
-              onSelect={() => onSelectLayer(layer.id)}
+              isSelected={selectedLayerIds.includes(layer.id)}
+              onSelect={(additive) => onSelectLayer(layer.id, additive)}
               onUpdate={(changes) => onUpdateLayer(layer.id, changes)}
+              onGroupDrag={(dx, dy) => {
+                // Move all selected layers together
+                selectedLayerIds.forEach(id => {
+                  const l = layers.find(ll => ll.id === id)
+                  if (l && !l.is_locked && id !== layer.id) {
+                    onUpdateLayer(id, {
+                      x: Math.max(0, Math.min(1, l.x + dx)),
+                      y: Math.max(0, Math.min(1, l.y + dy)),
+                    })
+                  }
+                })
+              }}
+              isMultiSelected={selectedLayerIds.length > 1 && selectedLayerIds.includes(layer.id)}
               readOnly={readOnly || layer.is_locked}
             />
           ) : null
@@ -126,29 +147,34 @@ export default function ComposerCanvas({
   )
 }
 
-/* ─── TrimLayer ──────────────────────────────────── */
+/* ─── CanvasLayer ──────────────────────────────── */
 
-interface TrimLayerProps {
+interface CanvasLayerProps {
   layer: DesignLayer
   canvasRef: React.RefObject<HTMLDivElement | null>
   canvasBounds: DOMRect | null
   isSelected: boolean
-  onSelect: () => void
+  onSelect: (additive?: boolean) => void
   onUpdate: (changes: Partial<DesignLayer>) => void
+  onGroupDrag: (dx: number, dy: number) => void
+  isMultiSelected: boolean
   readOnly: boolean
 }
 
-function TrimLayer({ layer, canvasRef, canvasBounds, isSelected, onSelect, onUpdate, readOnly }: TrimLayerProps) {
+function CanvasLayer({ layer, canvasRef, canvasBounds, isSelected, onSelect, onUpdate, onGroupDrag, isMultiSelected, readOnly }: CanvasLayerProps) {
+  const isAnnotation = layer.layer_type === 'annotation'
+
   const baseSize = canvasBounds
-    ? Math.min(canvasBounds.width, canvasBounds.height) * 0.15 * layer.scale
+    ? Math.min(canvasBounds.width, canvasBounds.height) * (isAnnotation ? 0.2 : 0.15) * layer.scale
     : 60
 
   const style: React.CSSProperties = {
     position: 'absolute',
     left: `${layer.x * 100}%`,
     top: `${layer.y * 100}%`,
-    width: `${baseSize}px`,
-    height: `${baseSize}px`,
+    width: isAnnotation ? 'auto' : `${baseSize}px`,
+    height: isAnnotation ? 'auto' : `${baseSize}px`,
+    minWidth: isAnnotation ? `${Math.max(80, baseSize * 0.8)}px` : undefined,
     transform: `translate(-50%, -50%) rotate(${layer.rotation}deg) scaleX(${layer.flip_x ? -1 : 1}) scaleY(${layer.flip_y ? -1 : 1})`,
     opacity: layer.opacity,
     cursor: readOnly ? 'default' : isSelected ? 'move' : 'pointer',
@@ -158,8 +184,8 @@ function TrimLayer({ layer, canvasRef, canvasBounds, isSelected, onSelect, onUpd
   /* ── Drag ─────────────────────────── */
   function handlePointerDown(e: React.PointerEvent) {
     e.stopPropagation()
-    if (readOnly) { onSelect(); return }
-    onSelect()
+    if (readOnly) { onSelect(e.shiftKey); return }
+    onSelect(e.shiftKey)
 
     const startX = e.clientX
     const startY = e.clientY
@@ -176,14 +202,37 @@ function TrimLayer({ layer, canvasRef, canvasBounds, isSelected, onSelect, onUpd
         x: Math.max(0, Math.min(1, startLayerX + dx)),
         y: Math.max(0, Math.min(1, startLayerY + dy)),
       })
+      // Move grouped layers
+      if (isMultiSelected) {
+        onGroupDrag(dx === 0 && dy === 0 ? 0 : (ev.clientX - startX) / bounds.width - (startLayerX + dx - layer.x - dx), dx === 0 && dy === 0 ? 0 : 0)
+      }
+    }
+
+    let lastDx = 0
+    let lastDy = 0
+
+    function handlePointerMoveGroup(ev: PointerEvent) {
+      const dx = (ev.clientX - startX) / bounds.width
+      const dy = (ev.clientY - startY) / bounds.height
+      onUpdate({
+        x: Math.max(0, Math.min(1, startLayerX + dx)),
+        y: Math.max(0, Math.min(1, startLayerY + dy)),
+      })
+      if (isMultiSelected) {
+        const deltaDx = dx - lastDx
+        const deltaDy = dy - lastDy
+        lastDx = dx
+        lastDy = dy
+        onGroupDrag(deltaDx, deltaDy)
+      }
     }
 
     function handlePointerUp() {
-      window.removeEventListener('pointermove', handlePointerMove)
+      window.removeEventListener('pointermove', isMultiSelected ? handlePointerMoveGroup : handlePointerMove)
       window.removeEventListener('pointerup', handlePointerUp)
     }
 
-    window.addEventListener('pointermove', handlePointerMove)
+    window.addEventListener('pointermove', isMultiSelected ? handlePointerMoveGroup : handlePointerMove)
     window.addEventListener('pointerup', handlePointerUp)
   }
 
@@ -234,43 +283,73 @@ function TrimLayer({ layer, canvasRef, canvasBounds, isSelected, onSelect, onUpd
     window.addEventListener('pointerup', handlePointerUp)
   }
 
+  const textStyle = layer.text_style ?? {}
+
   return (
     <div style={style} onPointerDown={handlePointerDown}>
-      {/* Layer image */}
-      <img
-        src={layer.image_url}
-        alt={layer.name || 'Trim layer'}
-        draggable={false}
-        className="w-full h-full object-contain pointer-events-none"
-      />
+      {/* Layer content */}
+      {isAnnotation ? (
+        <div
+          className="px-3 py-2 rounded-md pointer-events-none whitespace-pre-wrap break-words"
+          style={{
+            fontSize: `${textStyle.fontSize ?? 14}px`,
+            fontWeight: textStyle.fontWeight ?? 'normal',
+            color: textStyle.color ?? 'hsl(var(--foreground))',
+            backgroundColor: textStyle.backgroundColor ?? 'hsl(var(--background) / 0.85)',
+            textAlign: textStyle.textAlign ?? 'left',
+            border: '1px solid hsl(var(--border))',
+            boxShadow: '0 1px 4px hsl(var(--foreground) / 0.08)',
+            maxWidth: '280px',
+          }}
+        >
+          {layer.text_content || 'Empty note'}
+        </div>
+      ) : (
+        <img
+          src={layer.image_url}
+          alt={layer.name || 'Layer'}
+          draggable={false}
+          className="w-full h-full object-contain pointer-events-none"
+        />
+      )}
 
       {/* Selection outline + handles */}
       {isSelected && !readOnly && (
         <>
-          {/* Selection border */}
-          <div className="absolute inset-0 border-2 border-[hsl(var(--foreground))] pointer-events-none" style={{ outline: '1px solid hsl(var(--background))', outlineOffset: '-1px' }} />
-
-          {/* Rotation handle — above top center */}
           <div
-            onPointerDown={handleRotateStart}
-            className="absolute -top-10 left-1/2 -translate-x-1/2 flex flex-col items-center cursor-grab"
-          >
-            <div className="w-5 h-5 rounded-full bg-[hsl(var(--background))] border-2 border-[hsl(var(--foreground))] flex items-center justify-center shadow-sm">
-              <RotateCw size={10} className="text-[hsl(var(--foreground))]" />
-            </div>
-            <div className="w-px h-4 bg-[hsl(var(--foreground))]" />
-          </div>
-
-          {/* Scale handle — bottom right */}
-          <div
-            onPointerDown={handleScaleStart}
-            className="absolute -bottom-2 -right-2 w-4 h-4 bg-[hsl(var(--background))] border-2 border-[hsl(var(--foreground))] cursor-nwse-resize shadow-sm"
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              border: `2px solid ${isMultiSelected ? 'hsl(var(--primary))' : 'hsl(var(--foreground))'}`,
+              outline: '1px solid hsl(var(--background))',
+              outlineOffset: '-1px',
+            }}
           />
 
-          {/* Corner dots — top-left, top-right, bottom-left */}
-          <div className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-[hsl(var(--background))] border-2 border-[hsl(var(--foreground))] pointer-events-none" />
-          <div className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-[hsl(var(--background))] border-2 border-[hsl(var(--foreground))] pointer-events-none" />
-          <div className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-[hsl(var(--background))] border-2 border-[hsl(var(--foreground))] pointer-events-none" />
+          {!isMultiSelected && (
+            <>
+              {/* Rotation handle */}
+              <div
+                onPointerDown={handleRotateStart}
+                className="absolute -top-10 left-1/2 -translate-x-1/2 flex flex-col items-center cursor-grab"
+              >
+                <div className="w-5 h-5 rounded-full bg-[hsl(var(--background))] border-2 border-[hsl(var(--foreground))] flex items-center justify-center shadow-sm">
+                  <RotateCw size={10} className="text-[hsl(var(--foreground))]" />
+                </div>
+                <div className="w-px h-4 bg-[hsl(var(--foreground))]" />
+              </div>
+
+              {/* Scale handle */}
+              <div
+                onPointerDown={handleScaleStart}
+                className="absolute -bottom-2 -right-2 w-4 h-4 bg-[hsl(var(--background))] border-2 border-[hsl(var(--foreground))] cursor-nwse-resize shadow-sm"
+              />
+
+              {/* Corner dots */}
+              <div className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-[hsl(var(--background))] border-2 border-[hsl(var(--foreground))] pointer-events-none" />
+              <div className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-[hsl(var(--background))] border-2 border-[hsl(var(--foreground))] pointer-events-none" />
+              <div className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-[hsl(var(--background))] border-2 border-[hsl(var(--foreground))] pointer-events-none" />
+            </>
+          )}
 
           {/* Layer name tooltip */}
           {layer.name && (

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
-import { ArrowLeft, Upload, Plus, Download, Cloud, CloudOff, Loader2, Share2, Link2, Check } from 'lucide-react'
+import { ArrowLeft, Upload, Plus, Download, Cloud, CloudOff, Loader2, Share2, Link2, Check, Type } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -21,6 +21,7 @@ interface ComposerToolbarProps {
   onRenameSession: (name: string) => void
   onUploadBackground: (e: React.ChangeEvent<HTMLInputElement>) => void
   onOpenProductPicker: () => void
+  onAddAnnotation?: () => void
   onZoom: (level: number) => void
   onExport: () => void
   onCreateRFQ: () => void
@@ -35,6 +36,7 @@ export default function ComposerToolbar({
   onRenameSession,
   onUploadBackground,
   onOpenProductPicker,
+  onAddAnnotation,
   onZoom,
   onExport,
   onCreateRFQ,
@@ -143,6 +145,13 @@ export default function ComposerToolbar({
           <Plus className="w-3 h-3" />
           <span className="hidden md:inline">Add Component</span>
         </Button>
+
+        {onAddAnnotation && (
+          <Button variant="outline" size="sm" onClick={onAddAnnotation} className="text-xs gap-1.5">
+            <Type className="w-3 h-3" />
+            <span className="hidden md:inline">Annotate</span>
+          </Button>
+        )}
 
         {/* Zoom controls */}
         <div className="flex items-center gap-0.5 ml-2 border border-border rounded-[var(--radius)] overflow-hidden">

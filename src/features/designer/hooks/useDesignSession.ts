@@ -29,6 +29,7 @@ export function useDesignSession(sessionId: string) {
       if (layerData) {
         setLayers(layerData.map((l: any) => ({
           ...l,
+          layer_type: l.layer_type ?? 'image',
           product: l.products ?? undefined,
           products: undefined,
         })) as DesignLayer[])

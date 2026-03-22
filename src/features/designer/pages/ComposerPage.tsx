@@ -30,7 +30,7 @@ export default function ComposerPage() {
   }, [])
   const { items: libraryItems } = useUserLibrary(teamId)
 
-  const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null)
+  const [selectedLayerIds, setSelectedLayerIds] = useState<string[]>([])
   const [pickerOpen, setPickerOpen] = useState(false)
   const [zoom, setZoom] = useState(1)
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('saved')
@@ -38,9 +38,23 @@ export default function ComposerPage() {
 
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
 
+  // Multi-select handler
+  const handleSelectLayer = useCallback((id: string | null, additive?: boolean) => {
+    if (id === null) {
+      setSelectedLayerIds([])
+      return
+    }
+    if (additive) {
+      setSelectedLayerIds(prev =>
+        prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+      )
+    } else {
+      setSelectedLayerIds([id])
+    }
+  }, [])
+
   // ─── Auto-save layer updates ──────────
   const handleUpdateLayer = useCallback(async (id: string, changes: Partial<DesignLayer>) => {
-    // Optimistic local update
     updateLayer(id, changes)
     setSaveStatus('unsaved')
 
@@ -48,9 +62,11 @@ export default function ComposerPage() {
     saveTimeoutRef.current = setTimeout(async () => {
       setSaveStatus('saving')
       try {
+        // Filter to only DB-safe fields
+        const { product, ...dbChanges } = changes as any
         const { error } = await supabase
           .from('design_layers')
-          .update(changes)
+          .update(dbChanges)
           .eq('id', id)
         if (error) throw error
         setSaveStatus('saved')
@@ -62,15 +78,56 @@ export default function ComposerPage() {
   }, [updateLayer])
 
   const handleDeleteLayer = useCallback(async (id: string) => {
-    if (selectedLayerId === id) setSelectedLayerId(null)
+    setSelectedLayerIds(prev => prev.filter(x => x !== id))
     await deleteLayer(id)
     toast.success('Layer deleted')
-  }, [deleteLayer, selectedLayerId])
+  }, [deleteLayer])
 
   const handleAddLayer = useCallback(async (layer: Omit<DesignLayer, 'id' | 'created_at' | 'product'>) => {
     await addLayer(layer)
     toast.success('Component added to canvas')
   }, [addLayer])
+
+  const handleAddAnnotation = useCallback(async () => {
+    if (!session) return
+    const newLayer: Omit<DesignLayer, 'id' | 'created_at' | 'product'> = {
+      session_id: session.id,
+      layer_order: layers.length,
+      name: 'Annotation',
+      image_url: '',
+      x: 0.5,
+      y: 0.5,
+      scale: 1,
+      rotation: 0,
+      opacity: 1,
+      flip_x: false,
+      flip_y: false,
+      is_visible: true,
+      is_locked: false,
+      layer_type: 'annotation',
+      text_content: 'Add your note here',
+      text_style: { fontSize: 14, fontWeight: 'normal', textAlign: 'left' },
+    }
+    await addLayer(newLayer)
+    toast.success('Annotation added')
+  }, [session, layers.length, addLayer])
+
+  // Group / Ungroup
+  const handleGroupSelected = useCallback(() => {
+    if (selectedLayerIds.length < 2) return
+    const groupId = `group-${Date.now()}`
+    selectedLayerIds.forEach(id => {
+      handleUpdateLayer(id, { group_id: groupId })
+    })
+    toast.success('Layers grouped')
+  }, [selectedLayerIds, handleUpdateLayer])
+
+  const handleUngroupSelected = useCallback(() => {
+    selectedLayerIds.forEach(id => {
+      handleUpdateLayer(id, { group_id: undefined })
+    })
+    toast.success('Layers ungrouped')
+  }, [selectedLayerIds, handleUpdateLayer])
 
   const handleRename = useCallback(async (name: string) => {
     if (!session) return
@@ -99,7 +156,6 @@ export default function ComposerPage() {
 
     const { data: { publicUrl } } = supabase.storage.from('design-assets').getPublicUrl(path)
 
-    // Get image dimensions
     const img = new Image()
     img.onload = async () => {
       await supabase.from('design_sessions').update({
@@ -108,7 +164,6 @@ export default function ComposerPage() {
         background_image_height: img.naturalHeight,
       }).eq('id', session.id)
       toast.success('Background uploaded')
-      // Force reload
       window.location.reload()
     }
     img.src = publicUrl
@@ -163,6 +218,7 @@ export default function ComposerPage() {
         onRenameSession={handleRename}
         onUploadBackground={handleUploadBackground}
         onOpenProductPicker={() => setPickerOpen(true)}
+        onAddAnnotation={handleAddAnnotation}
         onZoom={setZoom}
         onExport={handleExport}
         onCreateRFQ={() => toast.info('RFQ creation coming soon')}
@@ -188,8 +244,8 @@ export default function ComposerPage() {
             <ComposerCanvas
               session={session}
               layers={layers}
-              selectedLayerId={selectedLayerId}
-              onSelectLayer={setSelectedLayerId}
+              selectedLayerIds={selectedLayerIds}
+              onSelectLayer={handleSelectLayer}
               onUpdateLayer={handleUpdateLayer}
               onDeleteLayer={handleDeleteLayer}
             />
@@ -199,11 +255,13 @@ export default function ComposerPage() {
         {/* Layer panel */}
         <LayerPanel
           layers={layers}
-          selectedLayerId={selectedLayerId}
-          onSelectLayer={setSelectedLayerId}
+          selectedLayerIds={selectedLayerIds}
+          onSelectLayer={handleSelectLayer}
           onUpdateLayer={handleUpdateLayer}
           onDeleteLayer={handleDeleteLayer}
           onReorderLayers={reorderLayers}
+          onGroupSelected={handleGroupSelected}
+          onUngroupSelected={handleUngroupSelected}
         />
       </div>
 

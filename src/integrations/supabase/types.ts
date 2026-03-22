@@ -98,17 +98,21 @@ export type Database = {
           created_at: string
           flip_x: boolean
           flip_y: boolean
+          group_id: string | null
           id: string
           image_url: string | null
           is_locked: boolean
           is_visible: boolean
           layer_order: number
+          layer_type: string
           name: string | null
           opacity: number
           product_id: string | null
           rotation: number
           scale: number
           session_id: string
+          text_content: string | null
+          text_style: Json | null
           x: number
           y: number
         }
@@ -116,17 +120,21 @@ export type Database = {
           created_at?: string
           flip_x?: boolean
           flip_y?: boolean
+          group_id?: string | null
           id?: string
           image_url?: string | null
           is_locked?: boolean
           is_visible?: boolean
           layer_order: number
+          layer_type?: string
           name?: string | null
           opacity?: number
           product_id?: string | null
           rotation?: number
           scale?: number
           session_id: string
+          text_content?: string | null
+          text_style?: Json | null
           x?: number
           y?: number
         }
@@ -134,17 +142,21 @@ export type Database = {
           created_at?: string
           flip_x?: boolean
           flip_y?: boolean
+          group_id?: string | null
           id?: string
           image_url?: string | null
           is_locked?: boolean
           is_visible?: boolean
           layer_order?: number
+          layer_type?: string
           name?: string | null
           opacity?: number
           product_id?: string | null
           rotation?: number
           scale?: number
           session_id?: string
+          text_content?: string | null
+          text_style?: Json | null
           x?: number
           y?: number
         }
