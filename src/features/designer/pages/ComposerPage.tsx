@@ -151,7 +151,7 @@ export default function ComposerPage() {
         session={session}
         zoom={zoom}
         saveStatus={saveStatus}
-        onBack={() => navigate('/designer-studio/dashboard?tab=composer')}
+        onBack={() => navigate('/designer-studio/dashboard')}
         onRenameSession={handleRename}
         onUploadBackground={handleUploadBackground}
         onOpenProductPicker={() => setPickerOpen(true)}

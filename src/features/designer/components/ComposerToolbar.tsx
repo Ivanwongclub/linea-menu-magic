@@ -1,5 +1,5 @@
-import React from 'react'
-import { ArrowLeft, Upload, Plus, Download, ZoomIn, ZoomOut } from 'lucide-react'
+import React, { useState, useRef, useEffect } from 'react'
+import { ArrowLeft, Upload, Plus, Download, Cloud, CloudOff, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { DesignSession } from '../types'
 
@@ -30,35 +30,77 @@ export default function ComposerToolbar({
   onExport,
   onCreateRFQ,
 }: ComposerToolbarProps) {
+  const [isEditing, setIsEditing] = useState(false)
+  const [editName, setEditName] = useState(session.name)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => { setEditName(session.name) }, [session.name])
+
+  const commitName = () => {
+    const trimmed = editName.trim()
+    if (trimmed && trimmed !== session.name) onRenameSession(trimmed)
+    else setEditName(session.name)
+    setIsEditing(false)
+  }
+
   return (
-    <div className="flex items-center justify-between px-4 py-3 border-b border-[hsl(var(--border))] bg-[hsl(var(--background))]">
-      {/* Left: back + session name + save status */}
-      <div className="flex items-center gap-3 min-w-0">
+    <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-background">
+      {/* Left: back + session identity */}
+      <div className="flex items-center gap-2 min-w-0">
         <button
           onClick={onBack}
-          className="p-1.5 rounded text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] hover:bg-[hsl(var(--secondary))] transition-colors flex-shrink-0"
+          className="p-1.5 rounded text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors flex-shrink-0"
+          title="Back to Studio"
         >
           <ArrowLeft className="w-4 h-4" />
         </button>
 
-        <input
-          type="text"
-          value={session.name}
-          onChange={e => onRenameSession(e.target.value)}
-          className="text-sm font-medium bg-transparent border-none outline-none focus:bg-[hsl(var(--secondary))] px-2 py-1 rounded transition-colors min-w-[200px] text-[hsl(var(--foreground))]"
-          placeholder="Session name..."
-        />
+        <div className="h-4 w-px bg-border flex-shrink-0" />
 
-        <span className="text-xs text-[hsl(var(--muted-foreground))] whitespace-nowrap flex-shrink-0">
-          {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'Saved' : 'Unsaved changes'}
-        </span>
+        {/* Session name — click to edit */}
+        <div className="flex items-center gap-2 min-w-0">
+          {isEditing ? (
+            <input
+              ref={inputRef}
+              type="text"
+              value={editName}
+              onChange={e => setEditName(e.target.value)}
+              onBlur={commitName}
+              onKeyDown={e => { if (e.key === 'Enter') commitName(); if (e.key === 'Escape') { setEditName(session.name); setIsEditing(false) } }}
+              autoFocus
+              className="text-sm font-medium bg-secondary px-2 py-1 rounded outline-none border border-border focus:border-foreground transition-colors min-w-[180px] text-foreground"
+            />
+          ) : (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="text-sm font-medium text-foreground hover:bg-secondary px-2 py-1 rounded transition-colors truncate max-w-[240px]"
+              title="Click to rename"
+            >
+              {session.name}
+            </button>
+          )}
+
+          {/* Save status indicator */}
+          <div className="flex items-center gap-1.5 flex-shrink-0" title={saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'All changes saved' : 'Unsaved changes'}>
+            {saveStatus === 'saving' ? (
+              <Loader2 className="w-3 h-3 text-muted-foreground animate-spin" />
+            ) : saveStatus === 'saved' ? (
+              <Cloud className="w-3 h-3 text-muted-foreground" />
+            ) : (
+              <CloudOff className="w-3 h-3 text-amber-500" />
+            )}
+            <span className="text-[10px] text-muted-foreground hidden sm:inline">
+              {saveStatus === 'saving' ? 'Saving' : saveStatus === 'saved' ? 'Saved' : 'Unsaved'}
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Center: canvas tools */}
       <div className="flex items-center gap-1">
-        <label className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium uppercase tracking-[0.06em] border border-[hsl(var(--border))] rounded-[0.25rem] cursor-pointer hover:border-[hsl(var(--foreground))] transition-colors">
+        <label className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-border rounded-[var(--radius)] cursor-pointer hover:border-foreground transition-colors text-foreground">
           <Upload className="w-3 h-3" />
-          Background
+          <span className="hidden md:inline">Background</span>
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp"
@@ -67,42 +109,40 @@ export default function ComposerToolbar({
           />
         </label>
 
-        <Button variant="outline" size="sm" onClick={onOpenProductPicker} className="text-xs">
-          <Plus className="w-3 h-3 mr-1" />
-          Add Component
+        <Button variant="outline" size="sm" onClick={onOpenProductPicker} className="text-xs gap-1.5">
+          <Plus className="w-3 h-3" />
+          <span className="hidden md:inline">Add Component</span>
         </Button>
 
         {/* Zoom controls */}
-        <div className="flex items-center gap-1 ml-2">
+        <div className="flex items-center gap-0.5 ml-2 border border-border rounded-[var(--radius)] overflow-hidden">
           <button
             onClick={() => onZoom(Math.max(0.25, zoom - 0.1))}
-            className="w-6 h-6 flex items-center justify-center text-xs border border-[hsl(var(--border))] rounded hover:border-[hsl(var(--foreground))] transition-colors"
+            className="w-7 h-7 flex items-center justify-center text-xs hover:bg-secondary transition-colors text-foreground"
           >
             −
           </button>
-          <span className="text-xs font-mono w-12 text-center text-[hsl(var(--foreground))]">
-            {Math.round(zoom * 100)}%
-          </span>
-          <button
-            onClick={() => onZoom(Math.min(3, zoom + 0.1))}
-            className="w-6 h-6 flex items-center justify-center text-xs border border-[hsl(var(--border))] rounded hover:border-[hsl(var(--foreground))] transition-colors"
-          >
-            +
-          </button>
           <button
             onClick={() => onZoom(1)}
-            className="text-[10px] px-2 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] transition-colors"
+            className="text-[10px] font-mono px-2 h-7 flex items-center hover:bg-secondary transition-colors text-muted-foreground"
+            title="Reset zoom"
           >
-            Reset
+            {Math.round(zoom * 100)}%
+          </button>
+          <button
+            onClick={() => onZoom(Math.min(3, zoom + 0.1))}
+            className="w-7 h-7 flex items-center justify-center text-xs hover:bg-secondary transition-colors text-foreground"
+          >
+            +
           </button>
         </div>
       </div>
 
       {/* Right: actions */}
       <div className="flex items-center gap-2">
-        <Button variant="outline" size="sm" onClick={onExport} className="text-xs">
-          <Download className="w-3 h-3 mr-1" />
-          Export
+        <Button variant="outline" size="sm" onClick={onExport} className="text-xs gap-1.5">
+          <Download className="w-3 h-3" />
+          <span className="hidden md:inline">Export</span>
         </Button>
         <Button variant="default" size="sm" onClick={onCreateRFQ} className="text-xs">
           Request Sample
