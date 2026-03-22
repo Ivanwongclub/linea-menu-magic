@@ -167,7 +167,7 @@ export default function ComposerSessionList({ teamId }: ComposerSessionListProps
                         {copiedId === session.id ? <Check className="w-3.5 h-3.5 mr-2" /> : <Link2 className="w-3.5 h-3.5 mr-2" />}
                         {copiedId === session.id ? 'Copied!' : 'Copy presentation link'}
                       </DropdownMenuItem>
-                    )
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
