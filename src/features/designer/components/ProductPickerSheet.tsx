@@ -82,7 +82,7 @@ export default function ProductPickerSheet({
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[hsl(var(--muted-foreground))]" />
             <input
               type="text"
-              placeholder="Search trims..."
+              placeholder="Search components..."
               value={search}
               onChange={e => setSearch(e.target.value)}
               className="w-full h-8 pl-8 pr-3 text-xs border border-[hsl(var(--border))] rounded-[0.25rem] bg-[hsl(var(--background))] focus:outline-none focus:border-[hsl(var(--foreground))] transition-colors text-[hsl(var(--foreground))]"
