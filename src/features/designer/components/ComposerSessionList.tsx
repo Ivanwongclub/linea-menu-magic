@@ -50,6 +50,16 @@ export default function ComposerSessionList({ teamId }: ComposerSessionListProps
     }
   }
 
+  const handleCreateVariant = async (session: DesignSession) => {
+    try {
+      const variant = await duplicateSession(session.id)
+      toast.success('Variant created')
+      navigate(`/designer-studio/compose/${variant.id}`)
+    } catch {
+      toast.error('Failed to create variant')
+    }
+  }
+
   const handleDelete = async (id: string) => {
     try {
       await deleteSession(id)
