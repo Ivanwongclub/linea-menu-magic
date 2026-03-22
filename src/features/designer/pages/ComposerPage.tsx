@@ -77,6 +77,14 @@ export default function ComposerPage() {
     await supabase.from('design_sessions').update({ name }).eq('id', session.id)
   }, [session])
 
+  const handleShareStatusChange = useCallback(async (status: 'draft' | 'shared') => {
+    if (!session) return
+    const { error } = await supabase.from('design_sessions').update({ status }).eq('id', session.id)
+    if (error) { toast.error('Failed to update share status'); return }
+    toast.success(status === 'shared' ? 'Composition marked as shared' : 'Composition set to draft')
+    window.location.reload()
+  }, [session])
+
   const handleUploadBackground = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file || !session) return
@@ -158,6 +166,7 @@ export default function ComposerPage() {
         onZoom={setZoom}
         onExport={handleExport}
         onCreateRFQ={() => toast.info('RFQ creation coming soon')}
+        onShareStatusChange={handleShareStatusChange}
       />
 
       <div className="flex flex-1 overflow-hidden">
