@@ -2,6 +2,58 @@ import React, { useRef, useEffect, useCallback, useState } from 'react'
 import { RotateCw, ImagePlus } from 'lucide-react'
 import type { DesignSession, DesignLayer } from '../types'
 
+/* ─── Snap helpers ─────────────────────────────── */
+const SNAP_THRESHOLD = 0.015 // fractional distance to snap
+type SnapGuide = { axis: 'x' | 'y'; position: number }
+
+function computeSnapGuides(
+  dragX: number,
+  dragY: number,
+  dragId: string,
+  layers: DesignLayer[],
+  selectedIds: string[],
+): { snappedX: number; snappedY: number; guides: SnapGuide[] } {
+  const guides: SnapGuide[] = []
+  let snappedX = dragX
+  let snappedY = dragY
+
+  // Canvas reference points: center + edges
+  const refPointsX = [0, 0.25, 0.5, 0.75, 1]
+  const refPointsY = [0, 0.25, 0.5, 0.75, 1]
+
+  // Add other layers' positions as snap targets
+  layers.forEach(l => {
+    if (selectedIds.includes(l.id) || !l.is_visible) return
+    refPointsX.push(l.x)
+    refPointsY.push(l.y)
+  })
+
+  let bestDx = SNAP_THRESHOLD
+  let bestDy = SNAP_THRESHOLD
+
+  for (const rx of refPointsX) {
+    const d = Math.abs(dragX - rx)
+    if (d < bestDx) {
+      bestDx = d
+      snappedX = rx
+    }
+  }
+  for (const ry of refPointsY) {
+    const d = Math.abs(dragY - ry)
+    if (d < bestDy) {
+      bestDy = d
+      snappedY = ry
+    }
+  }
+
+  if (snappedX !== dragX) guides.push({ axis: 'x', position: snappedX })
+  if (snappedY !== dragY) guides.push({ axis: 'y', position: snappedY })
+
+  return { snappedX, snappedY, guides }
+}
+
+/* ─── Canvas ───────────────────────────────────── */
+
 interface ComposerCanvasProps {
   session: DesignSession
   layers: DesignLayer[]
@@ -9,6 +61,7 @@ interface ComposerCanvasProps {
   onSelectLayer: (id: string | null, additive?: boolean) => void
   onUpdateLayer: (id: string, changes: Partial<DesignLayer>) => void
   onDeleteLayer: (id: string) => void
+  onDuplicateSelected?: () => void
   readOnly?: boolean
 }
 
@@ -19,10 +72,12 @@ export default function ComposerCanvas({
   onSelectLayer,
   onUpdateLayer,
   onDeleteLayer,
+  onDuplicateSelected,
   readOnly = false,
 }: ComposerCanvasProps) {
   const canvasRef = useRef<HTMLDivElement>(null)
   const [canvasBounds, setCanvasBounds] = useState<DOMRect | null>(null)
+  const [activeGuides, setActiveGuides] = useState<SnapGuide[]>([])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -38,8 +93,16 @@ export default function ComposerCanvas({
   // Keyboard shortcuts
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      if (selectedLayerIds.length === 0) return
       if (readOnly) return
+
+      // Ctrl/Cmd+D = duplicate
+      if ((e.ctrlKey || e.metaKey) && e.key === 'd' && selectedLayerIds.length > 0) {
+        e.preventDefault()
+        onDuplicateSelected?.()
+        return
+      }
+
+      if (selectedLayerIds.length === 0) return
 
       const nudge = e.shiftKey ? 0.01 : 0.002
 
@@ -86,13 +149,21 @@ export default function ComposerCanvas({
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [selectedLayerIds, layers, readOnly, onUpdateLayer, onDeleteLayer, onSelectLayer])
+  }, [selectedLayerIds, layers, readOnly, onUpdateLayer, onDeleteLayer, onSelectLayer, onDuplicateSelected])
 
   const handleCanvasClick = useCallback((e: React.MouseEvent) => {
     if (e.target === canvasRef.current || (e.target as HTMLElement).dataset.canvasBg === 'true') {
       onSelectLayer(null)
     }
   }, [onSelectLayer])
+
+  const handleSnapUpdate = useCallback((guides: SnapGuide[]) => {
+    setActiveGuides(guides)
+  }, [])
+
+  const handleDragEnd = useCallback(() => {
+    setActiveGuides([])
+  }, [])
 
   return (
     <div
@@ -114,6 +185,31 @@ export default function ComposerCanvas({
         <EmptyCanvasPlaceholder />
       )}
 
+      {/* Snap guide lines */}
+      {activeGuides.map((g, i) =>
+        g.axis === 'x' ? (
+          <div
+            key={`guide-${i}`}
+            className="absolute top-0 bottom-0 pointer-events-none"
+            style={{
+              left: `${g.position * 100}%`,
+              width: '1px',
+              backgroundColor: 'hsl(var(--primary) / 0.5)',
+            }}
+          />
+        ) : (
+          <div
+            key={`guide-${i}`}
+            className="absolute left-0 right-0 pointer-events-none"
+            style={{
+              top: `${g.position * 100}%`,
+              height: '1px',
+              backgroundColor: 'hsl(var(--primary) / 0.5)',
+            }}
+          />
+        )
+      )}
+
       {[...layers]
         .sort((a, b) => a.layer_order - b.layer_order)
         .map(layer =>
@@ -121,13 +217,14 @@ export default function ComposerCanvas({
             <CanvasLayer
               key={layer.id}
               layer={layer}
+              allLayers={layers}
+              selectedIds={selectedLayerIds}
               canvasRef={canvasRef}
               canvasBounds={canvasBounds}
               isSelected={selectedLayerIds.includes(layer.id)}
               onSelect={(additive) => onSelectLayer(layer.id, additive)}
               onUpdate={(changes) => onUpdateLayer(layer.id, changes)}
               onGroupDrag={(dx, dy) => {
-                // Move all selected layers together
                 selectedLayerIds.forEach(id => {
                   const l = layers.find(ll => ll.id === id)
                   if (l && !l.is_locked && id !== layer.id) {
@@ -138,6 +235,8 @@ export default function ComposerCanvas({
                   }
                 })
               }}
+              onSnapUpdate={handleSnapUpdate}
+              onDragEnd={handleDragEnd}
               isMultiSelected={selectedLayerIds.length > 1 && selectedLayerIds.includes(layer.id)}
               readOnly={readOnly || layer.is_locked}
             />
@@ -151,17 +250,25 @@ export default function ComposerCanvas({
 
 interface CanvasLayerProps {
   layer: DesignLayer
+  allLayers: DesignLayer[]
+  selectedIds: string[]
   canvasRef: React.RefObject<HTMLDivElement | null>
   canvasBounds: DOMRect | null
   isSelected: boolean
   onSelect: (additive?: boolean) => void
   onUpdate: (changes: Partial<DesignLayer>) => void
   onGroupDrag: (dx: number, dy: number) => void
+  onSnapUpdate: (guides: SnapGuide[]) => void
+  onDragEnd: () => void
   isMultiSelected: boolean
   readOnly: boolean
 }
 
-function CanvasLayer({ layer, canvasRef, canvasBounds, isSelected, onSelect, onUpdate, onGroupDrag, isMultiSelected, readOnly }: CanvasLayerProps) {
+function CanvasLayer({
+  layer, allLayers, selectedIds, canvasRef, canvasBounds,
+  isSelected, onSelect, onUpdate, onGroupDrag,
+  onSnapUpdate, onDragEnd, isMultiSelected, readOnly,
+}: CanvasLayerProps) {
   const isAnnotation = layer.layer_type === 'annotation'
 
   const baseSize = canvasBounds
@@ -181,7 +288,7 @@ function CanvasLayer({ layer, canvasRef, canvasBounds, isSelected, onSelect, onU
     zIndex: layer.layer_order + 10,
   }
 
-  /* ── Drag ─────────────────────────── */
+  /* ── Drag with snapping ──────────── */
   function handlePointerDown(e: React.PointerEvent) {
     e.stopPropagation()
     if (readOnly) { onSelect(e.shiftKey); return }
@@ -195,44 +302,40 @@ function CanvasLayer({ layer, canvasRef, canvasBounds, isSelected, onSelect, onU
     if (!canvas) return
     const bounds = canvas.getBoundingClientRect()
 
-    function handlePointerMove(ev: PointerEvent) {
-      const dx = (ev.clientX - startX) / bounds.width
-      const dy = (ev.clientY - startY) / bounds.height
-      onUpdate({
-        x: Math.max(0, Math.min(1, startLayerX + dx)),
-        y: Math.max(0, Math.min(1, startLayerY + dy)),
-      })
-      // Move grouped layers
-      if (isMultiSelected) {
-        onGroupDrag(dx === 0 && dy === 0 ? 0 : (ev.clientX - startX) / bounds.width - (startLayerX + dx - layer.x - dx), dx === 0 && dy === 0 ? 0 : 0)
-      }
-    }
-
     let lastDx = 0
     let lastDy = 0
 
-    function handlePointerMoveGroup(ev: PointerEvent) {
-      const dx = (ev.clientX - startX) / bounds.width
-      const dy = (ev.clientY - startY) / bounds.height
-      onUpdate({
-        x: Math.max(0, Math.min(1, startLayerX + dx)),
-        y: Math.max(0, Math.min(1, startLayerY + dy)),
-      })
+    function handlePointerMove(ev: PointerEvent) {
+      const rawDx = (ev.clientX - startX) / bounds.width
+      const rawDy = (ev.clientY - startY) / bounds.height
+      const rawX = Math.max(0, Math.min(1, startLayerX + rawDx))
+      const rawY = Math.max(0, Math.min(1, startLayerY + rawDy))
+
+      const { snappedX, snappedY, guides } = computeSnapGuides(
+        rawX, rawY, layer.id, allLayers, selectedIds,
+      )
+      onSnapUpdate(guides)
+      onUpdate({ x: snappedX, y: snappedY })
+
       if (isMultiSelected) {
-        const deltaDx = dx - lastDx
-        const deltaDy = dy - lastDy
-        lastDx = dx
-        lastDy = dy
+        const totalDx = snappedX - startLayerX
+        const totalDy = snappedY - startLayerY
+        const deltaDx = totalDx - lastDx
+        const deltaDy = totalDy - lastDy
+        lastDx = totalDx
+        lastDy = totalDy
         onGroupDrag(deltaDx, deltaDy)
       }
     }
 
     function handlePointerUp() {
-      window.removeEventListener('pointermove', isMultiSelected ? handlePointerMoveGroup : handlePointerMove)
+      window.removeEventListener('pointermove', handlePointerMove)
       window.removeEventListener('pointerup', handlePointerUp)
+      onSnapUpdate([])
+      onDragEnd()
     }
 
-    window.addEventListener('pointermove', isMultiSelected ? handlePointerMoveGroup : handlePointerMove)
+    window.addEventListener('pointermove', handlePointerMove)
     window.addEventListener('pointerup', handlePointerUp)
   }
 
@@ -287,7 +390,6 @@ function CanvasLayer({ layer, canvasRef, canvasBounds, isSelected, onSelect, onU
 
   return (
     <div style={style} onPointerDown={handlePointerDown}>
-      {/* Layer content */}
       {isAnnotation ? (
         <div
           className="px-3 py-2 rounded-md pointer-events-none whitespace-pre-wrap break-words"
@@ -313,7 +415,6 @@ function CanvasLayer({ layer, canvasRef, canvasBounds, isSelected, onSelect, onU
         />
       )}
 
-      {/* Selection outline + handles */}
       {isSelected && !readOnly && (
         <>
           <div
@@ -327,7 +428,6 @@ function CanvasLayer({ layer, canvasRef, canvasBounds, isSelected, onSelect, onU
 
           {!isMultiSelected && (
             <>
-              {/* Rotation handle */}
               <div
                 onPointerDown={handleRotateStart}
                 className="absolute -top-10 left-1/2 -translate-x-1/2 flex flex-col items-center cursor-grab"
@@ -338,20 +438,17 @@ function CanvasLayer({ layer, canvasRef, canvasBounds, isSelected, onSelect, onU
                 <div className="w-px h-4 bg-[hsl(var(--foreground))]" />
               </div>
 
-              {/* Scale handle */}
               <div
                 onPointerDown={handleScaleStart}
                 className="absolute -bottom-2 -right-2 w-4 h-4 bg-[hsl(var(--background))] border-2 border-[hsl(var(--foreground))] cursor-nwse-resize shadow-sm"
               />
 
-              {/* Corner dots */}
               <div className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-[hsl(var(--background))] border-2 border-[hsl(var(--foreground))] pointer-events-none" />
               <div className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-[hsl(var(--background))] border-2 border-[hsl(var(--foreground))] pointer-events-none" />
               <div className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-[hsl(var(--background))] border-2 border-[hsl(var(--foreground))] pointer-events-none" />
             </>
           )}
 
-          {/* Layer name tooltip */}
           {layer.name && (
             <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap px-1.5 py-0.5 bg-[hsl(var(--foreground))] text-[hsl(var(--background))] text-[10px] font-medium tracking-wide rounded-sm">
               {layer.name}
