@@ -13,7 +13,7 @@ export type DesignSession = {
   layers?: DesignLayer[]
 }
 
-export type LayerType = 'image' | 'annotation'
+export type LayerType = 'image' | 'annotation' | 'arrow' | 'highlight' | 'legend'
 
 export type TextStyle = {
   fontSize?: number
@@ -21,6 +21,8 @@ export type TextStyle = {
   color?: string
   backgroundColor?: string
   textAlign?: 'left' | 'center' | 'right'
+  borderColor?: string
+  highlightShape?: 'rect' | 'ellipse'
 }
 
 export type DesignLayer = {

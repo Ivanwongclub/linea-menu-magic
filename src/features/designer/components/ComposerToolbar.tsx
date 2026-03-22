@@ -22,6 +22,9 @@ interface ComposerToolbarProps {
   onUploadBackground: (e: React.ChangeEvent<HTMLInputElement>) => void
   onOpenProductPicker: () => void
   onAddAnnotation?: () => void
+  onAddArrow?: () => void
+  onAddHighlight?: () => void
+  onAddLegend?: () => void
   onZoom: (level: number) => void
   onExport: () => void
   onCreateRFQ: () => void
@@ -38,6 +41,9 @@ export default function ComposerToolbar({
   onUploadBackground,
   onOpenProductPicker,
   onAddAnnotation,
+  onAddArrow,
+  onAddHighlight,
+  onAddLegend,
   onZoom,
   onExport,
   onCreateRFQ,
