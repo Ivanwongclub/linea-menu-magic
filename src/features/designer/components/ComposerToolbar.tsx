@@ -1,6 +1,14 @@
-import React, { useState, useRef, useEffect } from 'react'
-import { ArrowLeft, Upload, Plus, Download, Cloud, CloudOff, Loader2 } from 'lucide-react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
+import { ArrowLeft, Upload, Plus, Download, Cloud, CloudOff, Loader2, Share2, Link2, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import type { DesignSession } from '../types'
 
 export type SaveStatus = 'saved' | 'saving' | 'unsaved'
@@ -16,6 +24,7 @@ interface ComposerToolbarProps {
   onZoom: (level: number) => void
   onExport: () => void
   onCreateRFQ: () => void
+  onShareStatusChange?: (status: 'draft' | 'shared') => void
 }
 
 export default function ComposerToolbar({
@@ -29,9 +38,11 @@ export default function ComposerToolbar({
   onZoom,
   onExport,
   onCreateRFQ,
+  onShareStatusChange,
 }: ComposerToolbarProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editName, setEditName] = useState(session.name)
+  const [linkCopied, setLinkCopied] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => { setEditName(session.name) }, [session.name])
@@ -42,6 +53,20 @@ export default function ComposerToolbar({
     else setEditName(session.name)
     setIsEditing(false)
   }
+
+  const isShared = session.status === 'shared'
+
+  const handleCopyLink = useCallback(() => {
+    const url = `${window.location.origin}/designer-studio/compose/${session.id}`
+    navigator.clipboard.writeText(url).then(() => {
+      setLinkCopied(true)
+      setTimeout(() => setLinkCopied(false), 2000)
+    })
+  }, [session.id])
+
+  const handleToggleShare = useCallback(() => {
+    onShareStatusChange?.(isShared ? 'draft' : 'shared')
+  }, [isShared, onShareStatusChange])
 
   return (
     <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-background">
@@ -79,6 +104,11 @@ export default function ComposerToolbar({
               {session.name}
             </button>
           )}
+
+          {/* Status badge */}
+          <Badge variant={isShared ? 'published' : 'draft'} className="text-[9px] px-1.5 py-0 flex-shrink-0">
+            {isShared ? 'Shared' : 'Draft'}
+          </Badge>
 
           {/* Save status indicator */}
           <div className="flex items-center gap-1.5 flex-shrink-0" title={saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'All changes saved' : 'Unsaved changes'}>
@@ -144,6 +174,28 @@ export default function ComposerToolbar({
           <Download className="w-3 h-3" />
           <span className="hidden md:inline">Export</span>
         </Button>
+
+        {/* Share dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant={isShared ? 'default' : 'outline'} size="sm" className="text-xs gap-1.5">
+              <Share2 className="w-3 h-3" />
+              <span className="hidden md:inline">Share</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuItem onClick={handleCopyLink}>
+              {linkCopied ? <Check className="w-3.5 h-3.5 mr-2 text-emerald-600" /> : <Link2 className="w-3.5 h-3.5 mr-2" />}
+              {linkCopied ? 'Link copied!' : 'Copy link'}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleToggleShare}>
+              <Share2 className="w-3.5 h-3.5 mr-2" />
+              {isShared ? 'Set to Draft (private)' : 'Mark as Shared'}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
         <Button variant="default" size="sm" onClick={onCreateRFQ} className="text-xs">
           Request Sample
         </Button>
