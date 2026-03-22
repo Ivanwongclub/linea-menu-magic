@@ -256,6 +256,9 @@ export default function ComposerPage() {
         onUploadBackground={handleUploadBackground}
         onOpenProductPicker={() => setPickerOpen(true)}
         onAddAnnotation={handleAddAnnotation}
+        onAddArrow={handleAddArrow}
+        onAddHighlight={handleAddHighlight}
+        onAddLegend={handleAddLegend}
         onZoom={setZoom}
         onExport={handleExport}
         onCreateRFQ={() => toast.info('RFQ creation coming soon')}
