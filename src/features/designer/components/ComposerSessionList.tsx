@@ -56,8 +56,16 @@ export default function ComposerSessionList({ teamId }: ComposerSessionListProps
     const { error } = await supabase.from('design_sessions').update({ status: newStatus }).eq('id', session.id)
     if (error) { toast.error('Failed to update status'); return }
     toast.success(newStatus === 'shared' ? 'Composition shared' : 'Composition set to draft')
-    // Trigger refetch via updateSession
     await updateSession(session.id, { name: session.name })
+  }
+
+  const handleCopyLink = (session: DesignSession) => {
+    const url = `${window.location.origin}/designer-studio/present/${session.id}`
+    navigator.clipboard.writeText(url).then(() => {
+      setCopiedId(session.id)
+      toast.success('Presentation link copied')
+      setTimeout(() => setCopiedId(null), 2000)
+    }).catch(() => toast.error('Failed to copy link'))
   }
 
   const formatDate = (dateStr: string) => {
