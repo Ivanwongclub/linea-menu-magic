@@ -85,7 +85,7 @@ export default function SearchProductDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Add Product to Library</DialogTitle>
+          <DialogTitle>Add Component to Library</DialogTitle>
         </DialogHeader>
 
         <div className="relative">
