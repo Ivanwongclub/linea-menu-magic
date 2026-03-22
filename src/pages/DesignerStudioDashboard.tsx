@@ -32,7 +32,7 @@ import {
   Heart,
   BookOpen,
   X,
-  ExternalLink,
+  
   ArrowRight,
   Check,
 } from "lucide-react";
