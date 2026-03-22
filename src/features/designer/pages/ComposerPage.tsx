@@ -129,6 +129,31 @@ export default function ComposerPage() {
     toast.success('Layers ungrouped')
   }, [selectedLayerIds, handleUpdateLayer])
 
+  // Duplicate selected layers
+  const handleDuplicateSelected = useCallback(async () => {
+    if (!session || selectedLayerIds.length === 0) return
+    const toDuplicate = layers.filter(l => selectedLayerIds.includes(l.id))
+    const newIds: string[] = []
+    for (const src of toDuplicate) {
+      const { id, created_at, product, ...rest } = src as any
+      const newLayer = {
+        ...rest,
+        layer_order: layers.length + newIds.length,
+        x: Math.min(1, src.x + 0.03),
+        y: Math.min(1, src.y + 0.03),
+        name: src.name ? `${src.name} copy` : 'Copy',
+      }
+      try {
+        const added = await addLayer(newLayer)
+        if (added?.id) newIds.push(added.id)
+      } catch {}
+    }
+    if (newIds.length > 0) {
+      setSelectedLayerIds(newIds)
+      toast.success(`Duplicated ${newIds.length} item${newIds.length > 1 ? 's' : ''}`)
+    }
+  }, [session, selectedLayerIds, layers, addLayer])
+
   const handleRename = useCallback(async (name: string) => {
     if (!session) return
     await supabase.from('design_sessions').update({ name }).eq('id', session.id)
@@ -248,6 +273,7 @@ export default function ComposerPage() {
               onSelectLayer={handleSelectLayer}
               onUpdateLayer={handleUpdateLayer}
               onDeleteLayer={handleDeleteLayer}
+              onDuplicateSelected={handleDuplicateSelected}
             />
           </div>
         </div>
@@ -262,6 +288,7 @@ export default function ComposerPage() {
           onReorderLayers={reorderLayers}
           onGroupSelected={handleGroupSelected}
           onUngroupSelected={handleUngroupSelected}
+          onDuplicateSelected={handleDuplicateSelected}
         />
       </div>
 
