@@ -23,7 +23,7 @@ interface ComposerSessionListProps {
 
 export default function ComposerSessionList({ teamId }: ComposerSessionListProps) {
   const navigate = useNavigate()
-  const { sessions, loading, createSession, deleteSession, updateSession } = useDesignSessions(teamId)
+  const { sessions, loading, createSession, deleteSession, updateSession, duplicateSession } = useDesignSessions(teamId)
   const [renamingId, setRenamingId] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState('')
   const [copiedId, setCopiedId] = useState<string | null>(null)
