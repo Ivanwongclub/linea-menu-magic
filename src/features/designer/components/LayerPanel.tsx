@@ -54,16 +54,21 @@ export default function LayerPanel({
         <p className="text-xs font-medium uppercase tracking-[0.08em] text-[hsl(var(--muted-foreground))]">
           Layers
         </p>
-        {hasMultiSelection && (
+        {(hasMultiSelection || selectedLayerIds.length === 1) && (
           <div className="flex items-center gap-1">
-            {onGroupSelected && (
-              <Button variant="ghost" size="sm" onClick={onGroupSelected} className="h-6 px-1.5 text-[10px] gap-1" title="Group selected">
-                <Group className="w-3 h-3" /> Group
+            {onDuplicateSelected && selectedLayerIds.length > 0 && (
+              <Button variant="ghost" size="sm" onClick={onDuplicateSelected} className="h-6 px-1.5 text-[10px] gap-1" title="Duplicate (Ctrl+D)">
+                <Copy className="w-3 h-3" />
               </Button>
             )}
-            {selectedHaveGroup && onUngroupSelected && (
+            {hasMultiSelection && onGroupSelected && (
+              <Button variant="ghost" size="sm" onClick={onGroupSelected} className="h-6 px-1.5 text-[10px] gap-1" title="Group selected">
+                <Group className="w-3 h-3" />
+              </Button>
+            )}
+            {hasMultiSelection && selectedHaveGroup && onUngroupSelected && (
               <Button variant="ghost" size="sm" onClick={onUngroupSelected} className="h-6 px-1.5 text-[10px] gap-1" title="Ungroup">
-                <Ungroup className="w-3 h-3" /> Ungroup
+                <Ungroup className="w-3 h-3" />
               </Button>
             )}
           </div>
