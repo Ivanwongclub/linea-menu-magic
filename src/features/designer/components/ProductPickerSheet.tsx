@@ -54,7 +54,7 @@ export default function ProductPickerSheet({
       session_id: session.id,
       product_id: item.product_id,
       layer_order: layers.length,
-      name: item.custom_name ?? item.products?.name_en ?? item.products?.name ?? 'Trim',
+      name: item.custom_name ?? item.products?.name_en ?? item.products?.name ?? 'Component',
       image_url: item.products?.thumbnail_url ?? '',
       x: 0.5,
       y: 0.5,
