@@ -73,7 +73,7 @@ export default function ProductPickerSheet({
     <Sheet open={open} onOpenChange={() => onClose()}>
       <SheetContent side="right" className="w-[360px] p-0 flex flex-col overflow-hidden">
         <SheetTitle className="px-4 pt-4 pb-2 text-sm font-medium border-b border-[hsl(var(--border))]">
-          Add Trim to Canvas
+          Add Component to Canvas
         </SheetTitle>
 
         {/* Search */}
@@ -82,7 +82,7 @@ export default function ProductPickerSheet({
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[hsl(var(--muted-foreground))]" />
             <input
               type="text"
-              placeholder="Search trims..."
+              placeholder="Search components..."
               value={search}
               onChange={e => setSearch(e.target.value)}
               className="w-full h-8 pl-8 pr-3 text-xs border border-[hsl(var(--border))] rounded-[0.25rem] bg-[hsl(var(--background))] focus:outline-none focus:border-[hsl(var(--foreground))] transition-colors text-[hsl(var(--foreground))]"
@@ -123,10 +123,10 @@ export default function ProductPickerSheet({
 
           {filteredItems.length === 0 && (
             <div className="text-center py-12 text-xs text-[hsl(var(--muted-foreground))]">
-              No trims in your library.
+              No components in your library.
               <br />
               <button onClick={onGoToLibrary} className="mt-2 underline underline-offset-4 hover:text-[hsl(var(--foreground))] transition-colors">
-                Browse the catalog →
+                Browse the component library →
               </button>
             </div>
           )}

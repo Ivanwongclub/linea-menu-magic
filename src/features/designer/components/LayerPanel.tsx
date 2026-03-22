@@ -37,7 +37,7 @@ export default function LayerPanel({
         {sorted.length === 0 ? (
           <div className="px-3 py-8 text-center">
             <p className="text-xs text-[hsl(var(--muted-foreground))]">No layers yet</p>
-            <p className="text-[10px] text-[hsl(var(--muted-foreground))]/60 mt-1">Add trims from the toolbar</p>
+            <p className="text-[10px] text-[hsl(var(--muted-foreground))]/60 mt-1">Add components from the toolbar</p>
           </div>
         ) : (
           sorted.map(layer => (

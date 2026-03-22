@@ -387,7 +387,7 @@ const DesignerStudioDashboard = () => {
               設計師工作室
             </h1>
             <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1">
-              Material library, visual composer & project management
+              Component library, visual composer & project management
             </p>
           </div>
 
@@ -404,10 +404,10 @@ const DesignerStudioDashboard = () => {
                 <div className="flex items-start justify-between mb-6">
                   <div>
                     <p className="text-xs font-medium uppercase tracking-[0.1em] text-[hsl(var(--muted-foreground))] mb-1">
-                      素材庫 · Material Library
+                      素材庫 · Component Library
                     </p>
                     <p className="text-lg font-medium text-[hsl(var(--foreground))] leading-snug">
-                      Browse & download<br />trim specifications
+                      Browse & download<br />studio components
                     </p>
                   </div>
                   <div className="w-10 h-10 rounded-full bg-[hsl(var(--secondary))] flex items-center justify-center group-hover:bg-[hsl(var(--foreground))] group-hover:text-[hsl(var(--background))] transition-colors">
@@ -442,7 +442,7 @@ const DesignerStudioDashboard = () => {
 
                 {/* Feature bullets */}
                 <div className="flex flex-wrap gap-x-4 gap-y-1.5">
-                  {['3D model preview', 'OBJ file download', 'Spec sheets', 'RFQ request'].map(f => (
+                  {['3D model preview', 'OBJ file download', 'Spec sheets', 'Sample request'].map(f => (
                     <span key={f} className="flex items-center gap-1.5 text-[11px] text-[hsl(var(--muted-foreground))]">
                       <Check className="w-3 h-3" />
                       {f}
@@ -524,7 +524,7 @@ const DesignerStudioDashboard = () => {
 
                 {/* Bottom: feature bullets */}
                 <div className="flex flex-wrap gap-x-4 gap-y-1.5 relative z-10">
-                  {['Upload garment image', 'Place & scale trims', 'Rotate & layer', 'Export to PNG'].map(f => (
+                  {['Upload garment image', 'Place & scale components', 'Rotate & layer', 'Export to PNG'].map(f => (
                     <span key={f} className="flex items-center gap-1.5 text-[11px] opacity-60">
                       <Check className="w-3 h-3" />
                       {f}
@@ -548,9 +548,9 @@ const DesignerStudioDashboard = () => {
                     ← Back
                   </button>
                   <div>
-                    <h2 className="text-lg font-semibold text-foreground">素材庫 · Material Library</h2>
+                    <h2 className="text-lg font-semibold text-foreground">素材庫 · Component Library</h2>
                     <p className="text-xs text-[hsl(var(--muted-foreground))]">
-                      {libraryItems.length} products{libraryItems[0]?.team_name ? ` · ${libraryItems[0].team_name}` : ''}
+                      {libraryItems.length} components{libraryItems[0]?.team_name ? ` · ${libraryItems[0].team_name}` : ''}
                     </p>
                   </div>
                 </div>
@@ -561,7 +561,7 @@ const DesignerStudioDashboard = () => {
                   </Button>
                   <Button size="sm" className="gap-1.5 h-8" onClick={() => setIsSearchDialogOpen(true)}>
                     <Plus className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Add to Library</span>
+                    <span className="hidden sm:inline">Add Component</span>
                   </Button>
                 </div>
               </div>

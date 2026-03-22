@@ -80,7 +80,7 @@ const LibraryItemCard = ({
             className="w-full flex items-center justify-center gap-2 bg-white text-black text-xs font-medium uppercase tracking-[0.06em] px-3 py-2 rounded-[var(--radius)] hover:bg-white/90 transition-colors"
           >
             <Layers className="w-3 h-3" />
-            Add to Canvas
+            Add to Composition
           </button>
           <button
             onClick={(e) => {
