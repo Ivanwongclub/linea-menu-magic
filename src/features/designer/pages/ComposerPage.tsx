@@ -69,7 +69,7 @@ export default function ComposerPage() {
 
   const handleAddLayer = useCallback(async (layer: Omit<DesignLayer, 'id' | 'created_at' | 'product'>) => {
     await addLayer(layer)
-    toast.success('Trim added to canvas')
+    toast.success('Component added to canvas')
   }, [addLayer])
 
   const handleRename = useCallback(async (name: string) => {
