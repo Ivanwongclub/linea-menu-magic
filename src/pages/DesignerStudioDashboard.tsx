@@ -404,10 +404,10 @@ const DesignerStudioDashboard = () => {
                 <div className="flex items-start justify-between mb-6">
                   <div>
                     <p className="text-xs font-medium uppercase tracking-[0.1em] text-[hsl(var(--muted-foreground))] mb-1">
-                      素材庫 · Material Library
+                      素材庫 · Component Library
                     </p>
                     <p className="text-lg font-medium text-[hsl(var(--foreground))] leading-snug">
-                      Browse & download<br />trim specifications
+                      Browse & download<br />studio components
                     </p>
                   </div>
                   <div className="w-10 h-10 rounded-full bg-[hsl(var(--secondary))] flex items-center justify-center group-hover:bg-[hsl(var(--foreground))] group-hover:text-[hsl(var(--background))] transition-colors">
