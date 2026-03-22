@@ -178,6 +178,10 @@ export default function ComposerSessionList({ teamId }: ComposerSessionListProps
                       <Pencil className="w-3.5 h-3.5 mr-2" />
                       Rename
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleCreateVariant(session) }}>
+                      <Copy className="w-3.5 h-3.5 mr-2" />
+                      Create Variant
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => handleDelete(session.id)} className="text-destructive focus:text-destructive">
                       <Trash2 className="w-3.5 h-3.5 mr-2" />
                       Delete
