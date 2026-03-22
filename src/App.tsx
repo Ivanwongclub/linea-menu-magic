@@ -69,6 +69,7 @@ const App = () => (
               <Route path="/designer-studio" element={<DesignerStudio />} />
               <Route path="/designer-studio/dashboard" element={<DesignerStudioDashboard />} />
               <Route path="/designer-studio/compose/:sessionId" element={<ComposerPage />} />
+              <Route path="/designer-studio/present/:sessionId" element={<PresentationPage />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms-of-service" element={<TermsOfService />} />
