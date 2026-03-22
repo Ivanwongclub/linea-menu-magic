@@ -120,7 +120,7 @@ export default function PresentationPage() {
           <ComposerCanvas
             session={session}
             layers={visibleLayers}
-            selectedLayerId={null}
+            selectedLayerIds={[]}
             onSelectLayer={() => {}}
             onUpdateLayer={() => {}}
             onDeleteLayer={() => {}}

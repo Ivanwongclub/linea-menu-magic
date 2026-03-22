@@ -21,6 +21,7 @@ interface ComposerToolbarProps {
   onRenameSession: (name: string) => void
   onUploadBackground: (e: React.ChangeEvent<HTMLInputElement>) => void
   onOpenProductPicker: () => void
+  onAddAnnotation?: () => void
   onZoom: (level: number) => void
   onExport: () => void
   onCreateRFQ: () => void

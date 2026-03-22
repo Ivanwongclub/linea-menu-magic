@@ -58,6 +58,7 @@ export default function ProductPickerSheet({
       image_url: item.products?.thumbnail_url ?? '',
       x: 0.5,
       y: 0.5,
+      layer_type: 'image',
       scale: 1.0,
       rotation: 0,
       opacity: 1.0,
