@@ -22,6 +22,7 @@ const NewsDetail = lazy(() => import("./pages/NewsDetail"));
 const DesignerStudio = lazy(() => import("./pages/DesignerStudio"));
 const DesignerStudioDashboard = lazy(() => import("./pages/DesignerStudioDashboard"));
 const ComposerPage = lazy(() => import("./features/designer/pages/ComposerPage"));
+const PresentationPage = lazy(() => import("./features/designer/pages/PresentationPage"));
 const Brochures = lazy(() => import("./pages/Brochures"));
 const BrochureViewer = lazy(() => import("./pages/BrochureViewer"));
 const Contact = lazy(() => import("./pages/Contact"));
@@ -68,6 +69,7 @@ const App = () => (
               <Route path="/designer-studio" element={<DesignerStudio />} />
               <Route path="/designer-studio/dashboard" element={<DesignerStudioDashboard />} />
               <Route path="/designer-studio/compose/:sessionId" element={<ComposerPage />} />
+              <Route path="/designer-studio/present/:sessionId" element={<PresentationPage />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms-of-service" element={<TermsOfService />} />

@@ -57,7 +57,7 @@ export default function ComposerToolbar({
   const isShared = session.status === 'shared'
 
   const handleCopyLink = useCallback(() => {
-    const url = `${window.location.origin}/designer-studio/compose/${session.id}`
+    const url = `${window.location.origin}/designer-studio/present/${session.id}`
     navigator.clipboard.writeText(url).then(() => {
       setLinkCopied(true)
       setTimeout(() => setLinkCopied(false), 2000)
