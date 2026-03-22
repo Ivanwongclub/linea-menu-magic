@@ -73,7 +73,7 @@ export default function ProductPickerSheet({
     <Sheet open={open} onOpenChange={() => onClose()}>
       <SheetContent side="right" className="w-[360px] p-0 flex flex-col overflow-hidden">
         <SheetTitle className="px-4 pt-4 pb-2 text-sm font-medium border-b border-[hsl(var(--border))]">
-          Add Trim to Canvas
+          Add Component to Canvas
         </SheetTitle>
 
         {/* Search */}
