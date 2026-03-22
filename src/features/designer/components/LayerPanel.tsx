@@ -15,6 +15,7 @@ interface LayerPanelProps {
   onReorderLayers: (orderedIds: string[]) => void
   onGroupSelected?: () => void
   onUngroupSelected?: () => void
+  onDuplicateSelected?: () => void
 }
 
 export default function LayerPanel({
