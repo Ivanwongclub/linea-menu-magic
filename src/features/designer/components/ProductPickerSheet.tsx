@@ -54,7 +54,7 @@ export default function ProductPickerSheet({
       session_id: session.id,
       product_id: item.product_id,
       layer_order: layers.length,
-      name: item.custom_name ?? item.products?.name_en ?? item.products?.name ?? 'Trim',
+      name: item.custom_name ?? item.products?.name_en ?? item.products?.name ?? 'Component',
       image_url: item.products?.thumbnail_url ?? '',
       x: 0.5,
       y: 0.5,
@@ -90,7 +90,7 @@ export default function ProductPickerSheet({
           </div>
         </div>
 
-        {/* Product grid */}
+        {/* Component grid */}
         <div className="flex-1 overflow-y-auto p-3">
           <div className="grid grid-cols-2 gap-2">
             {filteredItems.map(item => (

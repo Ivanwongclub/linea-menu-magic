@@ -32,7 +32,7 @@ import {
   Heart,
   BookOpen,
   X,
-  ExternalLink,
+  
   ArrowRight,
   Check,
 } from "lucide-react";
@@ -479,10 +479,6 @@ const DesignerStudioDashboard = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" className="gap-1.5 h-8" onClick={() => navigate('/products')}>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Browse Catalog</span>
-                  </Button>
                   <Button size="sm" className="gap-1.5 h-8" onClick={() => setIsSearchDialogOpen(true)}>
                     <Plus className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">Add Component</span>
@@ -616,7 +612,6 @@ const DesignerStudioDashboard = () => {
                   </p>
                   {libraryItems.length === 0 ? (
                     <div className="flex gap-2 justify-center">
-                      <Button variant="outline" size="sm" onClick={() => navigate('/products')}>Browse Catalog</Button>
                       <Button size="sm" onClick={() => setIsSearchDialogOpen(true)}>
                         <Plus className="w-3.5 h-3.5 mr-1" />
                         Add Components

@@ -75,7 +75,7 @@ export default function SearchProductDialog({
     if (error) {
       toast.error('Failed to add product');
     } else {
-      toast.success(`${product.name_en || product.name} added to library`);
+      toast.success(`${product.name_en || product.name} added to component library`);
       onAdded();
     }
     setAdding(null);
@@ -85,13 +85,13 @@ export default function SearchProductDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Add Product to Library</DialogTitle>
+          <DialogTitle>Add Component to Library</DialogTitle>
         </DialogHeader>
 
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search by name or code..."
+            placeholder="Search components by name or code..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="pl-9 h-9 text-sm"
@@ -104,7 +104,7 @@ export default function SearchProductDialog({
             <p className="text-xs text-muted-foreground text-center py-4">Searching...</p>
           )}
           {!loading && query && results.length === 0 && (
-            <p className="text-xs text-muted-foreground text-center py-4">No products found</p>
+            <p className="text-xs text-muted-foreground text-center py-4">No components found</p>
           )}
           {results.map((p) => {
             const alreadyAdded = existingProductIds.has(p.id);
