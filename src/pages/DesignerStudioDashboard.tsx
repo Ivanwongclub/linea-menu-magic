@@ -387,7 +387,7 @@ const DesignerStudioDashboard = () => {
               設計師工作室
             </h1>
             <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1">
-              Material library, visual composer & project management
+              Component library, visual composer & project management
             </p>
           </div>
 
