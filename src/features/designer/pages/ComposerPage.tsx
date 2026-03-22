@@ -113,6 +113,58 @@ export default function ComposerPage() {
     toast.success('Annotation added')
   }, [session, layers.length, addLayer])
 
+  const handleAddArrow = useCallback(async () => {
+    if (!session) return
+    await addLayer({
+      session_id: session.id,
+      layer_order: layers.length,
+      name: 'Arrow',
+      image_url: '',
+      x: 0.5, y: 0.5,
+      scale: 1, rotation: 0, opacity: 1,
+      flip_x: false, flip_y: false,
+      is_visible: true, is_locked: false,
+      layer_type: 'arrow',
+      text_style: { color: 'hsl(var(--foreground))' },
+    })
+    toast.success('Arrow added')
+  }, [session, layers.length, addLayer])
+
+  const handleAddHighlight = useCallback(async () => {
+    if (!session) return
+    await addLayer({
+      session_id: session.id,
+      layer_order: layers.length,
+      name: 'Highlight',
+      image_url: '',
+      x: 0.5, y: 0.5,
+      scale: 1.5, rotation: 0, opacity: 0.8,
+      flip_x: false, flip_y: false,
+      is_visible: true, is_locked: false,
+      layer_type: 'highlight',
+      text_style: { backgroundColor: 'hsl(var(--primary) / 0.15)', borderColor: 'hsl(var(--primary) / 0.4)' },
+    })
+    toast.success('Highlight area added')
+  }, [session, layers.length, addLayer])
+
+  const handleAddLegend = useCallback(async () => {
+    if (!session) return
+    await addLayer({
+      session_id: session.id,
+      layer_order: layers.length,
+      name: 'Legend',
+      image_url: '',
+      x: 0.85, y: 0.15,
+      scale: 1, rotation: 0, opacity: 1,
+      flip_x: false, flip_y: false,
+      is_visible: true, is_locked: false,
+      layer_type: 'legend',
+      text_content: 'Item A — Description\nItem B — Description',
+      text_style: { fontSize: 11, fontWeight: 'normal' },
+    })
+    toast.success('Legend added')
+  }, [session, layers.length, addLayer])
+
   // Group / Ungroup
   const handleGroupSelected = useCallback(() => {
     if (selectedLayerIds.length < 2) return
