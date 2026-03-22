@@ -204,6 +204,15 @@ export default function ComposerToolbar({
               <Share2 className="w-3.5 h-3.5 mr-2" />
               {isShared ? 'Set to Draft (private)' : 'Mark as Shared'}
             </DropdownMenuItem>
+            {onCreateVariant && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={onCreateVariant}>
+                  <Copy className="w-3.5 h-3.5 mr-2" />
+                  Create Variant
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
 
