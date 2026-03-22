@@ -11,6 +11,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useDesignSessions } from '../hooks/useDesignSessions'
+import TemplatePickerDialog from './TemplatePickerDialog'
+import type { SessionTemplate } from './TemplatePickerDialog'
 import type { DesignSession } from '../types'
 import { toast } from 'sonner'
 import { supabase } from '@/integrations/supabase/client'
@@ -25,10 +27,23 @@ export default function ComposerSessionList({ teamId }: ComposerSessionListProps
   const [renamingId, setRenamingId] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState('')
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [templatePickerOpen, setTemplatePickerOpen] = useState(false)
 
-  const handleCreate = async () => {
+  const handleCreateFromTemplate = async (template: SessionTemplate) => {
+    setTemplatePickerOpen(false)
     try {
-      const session = await createSession('Untitled Composition')
+      const name = template.id === 'blank' ? 'Untitled Composition' : template.name
+      const session = await createSession(name)
+
+      // Seed template layers
+      if (template.layers.length > 0) {
+        const layerInserts = template.layers.map(l => ({
+          ...l,
+          session_id: session.id,
+        }))
+        await supabase.from('design_layers').insert(layerInserts)
+      }
+
       navigate(`/designer-studio/compose/${session.id}`)
     } catch {
       toast.error('Failed to create session')
@@ -83,7 +98,7 @@ export default function ComposerSessionList({ teamId }: ComposerSessionListProps
             Place and visualise trim products on your garment designs
           </p>
         </div>
-        <Button variant="default" size="sm" onClick={handleCreate}>
+        <Button variant="default" size="sm" onClick={() => setTemplatePickerOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
           New Composition
         </Button>
@@ -181,12 +196,18 @@ export default function ComposerSessionList({ teamId }: ComposerSessionListProps
           <p className="text-xs text-muted-foreground/60 mb-4">
             Create your first composition to start placing trims on garment designs
           </p>
-          <Button variant="default" size="sm" onClick={handleCreate}>
+          <Button variant="default" size="sm" onClick={() => setTemplatePickerOpen(true)}>
             <Plus className="w-4 h-4 mr-2" />
             New Composition
           </Button>
         </div>
       )}
+
+      <TemplatePickerDialog
+        open={templatePickerOpen}
+        onClose={() => setTemplatePickerOpen(false)}
+        onSelect={handleCreateFromTemplate}
+      />
     </div>
   )
 }
