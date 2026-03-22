@@ -36,6 +36,7 @@ export default function ComposerToolbar({
   onRenameSession,
   onUploadBackground,
   onOpenProductPicker,
+  onAddAnnotation,
   onZoom,
   onExport,
   onCreateRFQ,
