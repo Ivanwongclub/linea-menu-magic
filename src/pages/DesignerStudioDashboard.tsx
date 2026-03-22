@@ -561,7 +561,7 @@ const DesignerStudioDashboard = () => {
                   </Button>
                   <Button size="sm" className="gap-1.5 h-8" onClick={() => setIsSearchDialogOpen(true)}>
                     <Plus className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Add to Library</span>
+                    <span className="hidden sm:inline">Add Component</span>
                   </Button>
                 </div>
               </div>

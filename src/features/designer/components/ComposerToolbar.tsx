@@ -69,7 +69,7 @@ export default function ComposerToolbar({
 
         <Button variant="outline" size="sm" onClick={onOpenProductPicker} className="text-xs">
           <Plus className="w-3 h-3 mr-1" />
-          Add Trim
+          Add Component
         </Button>
 
         {/* Zoom controls */}

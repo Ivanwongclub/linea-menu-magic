@@ -123,10 +123,10 @@ export default function ProductPickerSheet({
 
           {filteredItems.length === 0 && (
             <div className="text-center py-12 text-xs text-[hsl(var(--muted-foreground))]">
-              No trims in your library.
+              No components in your library.
               <br />
               <button onClick={onGoToLibrary} className="mt-2 underline underline-offset-4 hover:text-[hsl(var(--foreground))] transition-colors">
-                Browse the catalog →
+                Browse the component library →
               </button>
             </div>
           )}
