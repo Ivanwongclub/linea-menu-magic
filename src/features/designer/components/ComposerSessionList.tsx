@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Layers, MoreHorizontal, Pencil, Trash2, Share2, Lock, Link2, Check } from 'lucide-react'
+import { Plus, Layers, MoreHorizontal, Pencil, Trash2, Share2, Lock, Link2, Check, Copy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
