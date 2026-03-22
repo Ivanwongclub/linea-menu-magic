@@ -167,6 +167,44 @@ export default function ComposerPage() {
     window.location.reload()
   }, [session])
 
+  const handleCreateVariant = useCallback(async () => {
+    if (!session) return
+    try {
+      const user = (await supabase.auth.getUser()).data.user
+      const baseName = session.name.replace(/ — Variant.*$/, '')
+      const { data: newSession, error: createErr } = await supabase
+        .from('design_sessions')
+        .insert({
+          team_id: session.team_id,
+          name: `${baseName} — Variant`,
+          background_image_url: session.background_image_url ?? null,
+          background_image_width: session.background_image_width ?? null,
+          background_image_height: session.background_image_height ?? null,
+          created_by: user?.id ?? null,
+          status: 'draft',
+        })
+        .select()
+        .single()
+      if (createErr || !newSession) throw createErr
+      const { data: srcLayers } = await supabase
+        .from('design_layers')
+        .select('*')
+        .eq('session_id', session.id)
+        .order('layer_order', { ascending: true })
+      if (srcLayers && srcLayers.length > 0) {
+        const inserts = srcLayers.map(({ id, created_at, ...rest }: any) => ({
+          ...rest,
+          session_id: (newSession as any).id,
+        }))
+        await supabase.from('design_layers').insert(inserts)
+      }
+      toast.success('Variant created — opening now')
+      navigate(`/designer-studio/compose/${(newSession as any).id}`)
+    } catch {
+      toast.error('Failed to create variant')
+    }
+  }, [session, navigate])
+
   const handleUploadBackground = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file || !session) return
