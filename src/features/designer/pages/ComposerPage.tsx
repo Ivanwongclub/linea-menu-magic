@@ -248,6 +248,7 @@ export default function ComposerPage() {
         onExport={handleExport}
         onCreateRFQ={() => toast.info('RFQ creation coming soon')}
         onShareStatusChange={handleShareStatusChange}
+        onCreateVariant={handleCreateVariant}
       />
 
       <div className="flex flex-1 overflow-hidden">
