@@ -69,7 +69,7 @@ export default function ComposerPage() {
 
   const handleAddLayer = useCallback(async (layer: Omit<DesignLayer, 'id' | 'created_at' | 'product'>) => {
     await addLayer(layer)
-    toast.success('Trim added to canvas')
+    toast.success('Component added to canvas')
   }, [addLayer])
 
   const handleRename = useCallback(async (name: string) => {
@@ -151,7 +151,7 @@ export default function ComposerPage() {
         session={session}
         zoom={zoom}
         saveStatus={saveStatus}
-        onBack={() => navigate('/designer-studio/dashboard?tab=composer')}
+        onBack={() => navigate('/designer-studio/dashboard')}
         onRenameSession={handleRename}
         onUploadBackground={handleUploadBackground}
         onOpenProductPicker={() => setPickerOpen(true)}

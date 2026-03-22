@@ -292,17 +292,26 @@ function EmptyCanvasPlaceholder() {
       data-canvas-bg="true"
       className="absolute inset-0 flex items-center justify-center"
     >
-      <div className="flex flex-col items-center gap-3 pointer-events-none">
-        <div className="w-16 h-16 rounded-full border-2 border-dashed border-[hsl(var(--muted-foreground))]/40 flex items-center justify-center">
-          <ImagePlus size={24} className="text-[hsl(var(--muted-foreground))]/40" />
+      <div className="flex flex-col items-center gap-4 pointer-events-none max-w-xs text-center">
+        <div className="w-20 h-20 rounded-2xl border-2 border-dashed border-muted-foreground/30 flex items-center justify-center bg-secondary/50">
+          <ImagePlus size={28} className="text-muted-foreground/40" />
         </div>
-        <div className="text-center">
-          <p className="text-sm font-medium text-[hsl(var(--muted-foreground))]">
-            Upload a garment or flat lay image
+        <div>
+          <p className="text-sm font-medium text-foreground">
+            Start your concept board
           </p>
-          <p className="text-xs text-[hsl(var(--muted-foreground))]/60 mt-1">
-            JPG, PNG up to 10MB
+          <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
+            Upload a garment or flat-lay image as your background, then add components from the Studio library.
           </p>
+        </div>
+        <div className="flex items-center gap-4 text-[10px] text-muted-foreground/60 uppercase tracking-widest">
+          <span>JPG</span>
+          <span>·</span>
+          <span>PNG</span>
+          <span>·</span>
+          <span>WEBP</span>
+          <span>·</span>
+          <span>Up to 10 MB</span>
         </div>
       </div>
     </div>
