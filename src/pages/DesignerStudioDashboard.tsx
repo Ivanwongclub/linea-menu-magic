@@ -123,7 +123,7 @@ const DesignerStudioDashboard = () => {
 
   // Main tab state — read from URL ?tab= param
   const tabFromUrl = searchParams.get('tab');
-  const initialTab: TabId = validTabs.includes(tabFromUrl as TabId) ? tabFromUrl as TabId : 'library';
+  const initialTab: TabId = validTabs.includes(tabFromUrl as TabId) ? tabFromUrl as TabId : 'composer';
   const [activeMainTab, setActiveMainTab] = useState<TabId>(initialTab);
 
   // Product editor state
