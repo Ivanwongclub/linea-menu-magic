@@ -288,6 +288,7 @@ export default function ComposerPage() {
           onReorderLayers={reorderLayers}
           onGroupSelected={handleGroupSelected}
           onUngroupSelected={handleUngroupSelected}
+          onDuplicateSelected={handleDuplicateSelected}
         />
       </div>
 
