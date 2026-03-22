@@ -442,7 +442,7 @@ const DesignerStudioDashboard = () => {
 
                 {/* Feature bullets */}
                 <div className="flex flex-wrap gap-x-4 gap-y-1.5">
-                  {['3D model preview', 'OBJ file download', 'Spec sheets', 'RFQ request'].map(f => (
+                  {['3D model preview', 'OBJ file download', 'Spec sheets', 'Sample request'].map(f => (
                     <span key={f} className="flex items-center gap-1.5 text-[11px] text-[hsl(var(--muted-foreground))]">
                       <Check className="w-3 h-3" />
                       {f}
