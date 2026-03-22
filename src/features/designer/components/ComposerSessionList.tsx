@@ -24,6 +24,7 @@ export default function ComposerSessionList({ teamId }: ComposerSessionListProps
   const { sessions, loading, createSession, deleteSession, updateSession } = useDesignSessions(teamId)
   const [renamingId, setRenamingId] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState('')
+  const [copiedId, setCopiedId] = useState<string | null>(null)
 
   const handleCreate = async () => {
     try {
