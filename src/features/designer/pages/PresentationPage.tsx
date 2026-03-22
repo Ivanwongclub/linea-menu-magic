@@ -2,7 +2,7 @@ import { useParams, Link } from 'react-router-dom'
 import { useDesignSession } from '../hooks/useDesignSession'
 import ComposerCanvas from '../components/ComposerCanvas'
 import BrandLogo from '@/components/viewer/BrandLogo'
-import { ArrowLeft, Maximize, Minimize } from 'lucide-react'
+import { Maximize, Minimize, EyeOff, AlertCircle } from 'lucide-react'
 import { useState, useRef, useCallback, useEffect } from 'react'
 
 export default function PresentationPage() {
@@ -33,33 +33,35 @@ export default function PresentationPage() {
     return () => { document.title = 'WIN-CYC Group' }
   }, [session?.name])
 
+  // Loading
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-background">
+      <div className="flex flex-col items-center justify-center h-screen bg-background gap-4">
+        <BrandLogo maxHeight={32} variant="dark" />
         <p className="text-sm text-muted-foreground">Loading presentation…</p>
       </div>
     )
   }
 
+  // Not found
   if (!session) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-background gap-4">
-        <p className="text-sm text-muted-foreground">This composition is not available.</p>
-        <Link to="/" className="text-xs text-primary underline underline-offset-2">
-          Go to homepage
-        </Link>
-      </div>
+      <GatedScreen
+        icon={<AlertCircle size={28} className="text-muted-foreground/50" />}
+        heading="Composition not found"
+        message="This link may have expired or the composition may no longer be available."
+      />
     )
   }
 
+  // Not shared
   if (session.status !== 'shared') {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-background gap-4">
-        <p className="text-sm text-muted-foreground">This composition has not been shared yet.</p>
-        <Link to="/" className="text-xs text-primary underline underline-offset-2">
-          Go to homepage
-        </Link>
-      </div>
+      <GatedScreen
+        icon={<EyeOff size={28} className="text-muted-foreground/50" />}
+        heading="This composition is private"
+        message="The designer has not shared this composition for viewing yet. Please contact them for access."
+      />
     )
   }
 
@@ -120,6 +122,27 @@ export default function PresentationPage() {
           Powered by WIN-CYC Studio
         </p>
       </footer>
+    </div>
+  )
+}
+
+/* ─── Gated screen for error/unavailable states ─── */
+
+function GatedScreen({ icon, heading, message }: { icon: React.ReactNode; heading: string; message: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center h-screen bg-background">
+      <div className="flex flex-col items-center gap-4 max-w-sm text-center px-6">
+        <BrandLogo maxHeight={28} variant="dark" />
+        <div className="mt-4">{icon}</div>
+        <h1 className="text-base font-medium text-foreground">{heading}</h1>
+        <p className="text-sm text-muted-foreground leading-relaxed">{message}</p>
+        <Link
+          to="/"
+          className="mt-2 text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
+        >
+          Visit WIN-CYC Group
+        </Link>
+      </div>
     </div>
   )
 }

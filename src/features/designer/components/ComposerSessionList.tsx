@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Layers, MoreHorizontal, Pencil, Trash2, Share2, Lock } from 'lucide-react'
+import { Plus, Layers, MoreHorizontal, Pencil, Trash2, Share2, Lock, Link2, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -24,6 +24,7 @@ export default function ComposerSessionList({ teamId }: ComposerSessionListProps
   const { sessions, loading, createSession, deleteSession, updateSession } = useDesignSessions(teamId)
   const [renamingId, setRenamingId] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState('')
+  const [copiedId, setCopiedId] = useState<string | null>(null)
 
   const handleCreate = async () => {
     try {
@@ -55,8 +56,16 @@ export default function ComposerSessionList({ teamId }: ComposerSessionListProps
     const { error } = await supabase.from('design_sessions').update({ status: newStatus }).eq('id', session.id)
     if (error) { toast.error('Failed to update status'); return }
     toast.success(newStatus === 'shared' ? 'Composition shared' : 'Composition set to draft')
-    // Trigger refetch via updateSession
     await updateSession(session.id, { name: session.name })
+  }
+
+  const handleCopyLink = (session: DesignSession) => {
+    const url = `${window.location.origin}/designer-studio/present/${session.id}`
+    navigator.clipboard.writeText(url).then(() => {
+      setCopiedId(session.id)
+      toast.success('Presentation link copied')
+      setTimeout(() => setCopiedId(null), 2000)
+    }).catch(() => toast.error('Failed to copy link'))
   }
 
   const formatDate = (dateStr: string) => {
@@ -153,6 +162,12 @@ export default function ComposerSessionList({ teamId }: ComposerSessionListProps
                       {session.status === 'shared' ? <Lock className="w-3.5 h-3.5 mr-2" /> : <Share2 className="w-3.5 h-3.5 mr-2" />}
                       {session.status === 'shared' ? 'Set to Draft' : 'Share'}
                     </DropdownMenuItem>
+                    {session.status === 'shared' && (
+                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleCopyLink(session) }}>
+                        {copiedId === session.id ? <Check className="w-3.5 h-3.5 mr-2" /> : <Link2 className="w-3.5 h-3.5 mr-2" />}
+                        {copiedId === session.id ? 'Copied!' : 'Copy presentation link'}
+                      </DropdownMenuItem>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
