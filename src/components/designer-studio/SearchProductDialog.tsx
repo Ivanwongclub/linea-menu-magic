@@ -75,7 +75,7 @@ export default function SearchProductDialog({
     if (error) {
       toast.error('Failed to add product');
     } else {
-      toast.success(`${product.name_en || product.name} added to library`);
+      toast.success(`${product.name_en || product.name} added to component library`);
       onAdded();
     }
     setAdding(null);
