@@ -27,6 +27,7 @@ export default function LayerPanel({
   onReorderLayers,
   onGroupSelected,
   onUngroupSelected,
+  onDuplicateSelected,
 }: LayerPanelProps) {
   const sorted = [...layers].sort((a, b) => b.layer_order - a.layer_order)
   const selectedLayer = selectedLayerIds.length === 1 ? layers.find(l => l.id === selectedLayerIds[0]) : null
