@@ -62,10 +62,10 @@ const DesignerStudio = () => {
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-3xl font-bold text-foreground mb-6">
-                Built for fast-moving design teams
+                Built for high-stakes design review
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                Designer Studio helps teams turn references, components, and placement ideas into structured concept boards that are easier to review, refine, and share across stakeholders.
+                Designer Studio gives global design teams a more structured way to develop trim direction, align internal stakeholders, and present clearer decisions before sampling.
               </p>
             </div>
 
