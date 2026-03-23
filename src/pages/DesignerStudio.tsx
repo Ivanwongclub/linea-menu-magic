@@ -8,21 +8,21 @@ const DesignerStudio = () => {
   const capabilities = [
     {
       icon: Library,
-      title: "Structured component library",
-      subtitle: "Studio-ready assets",
-      description: "Work from a curated component library designed for concept building, comparison, and presentation.",
+      title: "Controlled component workflow",
+      subtitle: "Better source material, less friction",
+      description: "Build from a structured component library so teams can compare options, place assets consistently, and reduce ad hoc review rounds.",
     },
     {
       icon: Layers,
-      title: "Visual composition workflow",
-      subtitle: "Faster concept development",
-      description: "Build cleaner boards with annotations, markup, variants, and composition tools designed for real design review cycles.",
+      title: "Faster concept alignment",
+      subtitle: "Clearer boards for internal review",
+      description: "Turn placement ideas, annotations, and variants into concept boards that are easier for design, development, and merchandising teams to evaluate together.",
     },
     {
       icon: Share2,
-      title: "Presentation-ready output",
-      subtitle: "Clearer stakeholder communication",
-      description: "Share concept boards that make trim direction, placement intent, and design rationale easier to review before development.",
+      title: "Stronger pre-sample decisions",
+      subtitle: "Present direction with more confidence",
+      description: "Share review-ready boards that clarify trim intent, visual hierarchy, and rationale before the work moves into sampling and execution.",
     },
   ];
 
