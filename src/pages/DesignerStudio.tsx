@@ -33,28 +33,50 @@ const DesignerStudio = () => {
       
       <main>
         {/* Hero */}
-        <section className="py-44 lg:py-56 px-6 lg:px-8 bg-secondary relative">
-          <div className="max-w-3xl mx-auto text-center">
-            <p className="text-[11px] tracking-[0.35em] uppercase text-muted-foreground/60 font-medium mb-10">Designer Studio</p>
-            <div className="w-16 h-px bg-foreground/15 mx-auto mb-12" />
-            <h1 className="text-4xl md:text-5xl lg:text-[3.75rem] font-bold text-foreground mb-10 leading-[1.08] tracking-tight">
-              Build review-ready trim concepts with speed and precision.
-            </h1>
-            <p className="text-base md:text-lg text-muted-foreground/70 leading-relaxed mb-16 max-w-2xl mx-auto">
-              A private concept-board workspace for global design teams to place components, develop visual directions, and present clearer decisions before sampling.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-5 justify-center items-center">
-              <Link to="/designer-studio/dashboard">
-                <Button size="lg" className="tracking-[0.1em] px-14 py-5 h-[3.75rem] text-sm shadow-[0_2px_20px_-4px_hsl(var(--foreground)/0.25)]">
-                  Enter Designer Studio
-                </Button>
-              </Link>
-              <Link to="/contact">
-                <Button variant="outline" size="lg" className="tracking-[0.1em] px-10 h-[3.75rem] text-sm">
-                  Request Access
-                </Button>
-              </Link>
+        <section className="relative overflow-hidden">
+          {/* Art-directed background */}
+          <div className="absolute inset-0 bg-secondary" />
+          <div
+            className="absolute inset-0 opacity-[0.018]"
+            style={{
+              backgroundImage:
+                "linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)",
+              backgroundSize: "80px 80px",
+            }}
+          />
+          <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-secondary to-transparent" />
+
+          <div className="relative max-w-7xl mx-auto px-6 lg:px-10 py-32 lg:py-44">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-center">
+              {/* Left — copy */}
+              <div className="max-w-xl">
+                <p className="text-[11px] tracking-[0.35em] uppercase text-muted-foreground/60 font-medium mb-10">Designer Studio</p>
+                <div className="w-16 h-px bg-foreground/15 mb-12" />
+                <h1 className="text-4xl md:text-5xl lg:text-[3.5rem] font-bold text-foreground mb-10 leading-[1.08] tracking-tight">
+                  Build review-ready trim concepts with speed and precision.
+                </h1>
+                <p className="text-base md:text-lg text-muted-foreground/70 leading-relaxed mb-14 max-w-md">
+                  A private concept-board workspace for global design teams to place components, develop visual directions, and present clearer decisions before sampling.
+                </p>
+                
+                <div className="flex flex-col sm:flex-row gap-5 items-start">
+                  <Link to="/designer-studio/dashboard">
+                    <Button size="lg" className="tracking-[0.1em] px-14 py-5 h-[3.75rem] text-sm shadow-[0_2px_20px_-4px_hsl(var(--foreground)/0.25)]">
+                      Enter Designer Studio
+                    </Button>
+                  </Link>
+                  <Link to="/contact">
+                    <Button variant="outline" size="lg" className="tracking-[0.1em] px-10 h-[3.75rem] text-sm">
+                      Request Access
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+
+              {/* Right — studio preview */}
+              <div className="lg:pl-4">
+                <StudioPreview />
+              </div>
             </div>
           </div>
         </section>
