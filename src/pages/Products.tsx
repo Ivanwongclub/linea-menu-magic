@@ -28,7 +28,7 @@ import { useProductFiltersFromURL } from '@/features/products/hooks/useProductFi
 // ─── Curated Browse Data (seeded, CMS-ready) ────────────
 
 // Seeded featured matching keys — replace with CMS-driven data when ready.
-const FEATURED_SEED = {
+const FEATURED_SEED: { slugs: string[]; itemCodes: string[]; tags: string[] } = {
   slugs: [
     'polo-button-10-8',
     'smooth-snap-15',
@@ -37,7 +37,7 @@ const FEATURED_SEED = {
   ],
   itemCodes: ['btn-1008', 'snap-1500', 'badge-oval-01', 'drawcord-5mm-r'],
   tags: ['new-arrivals', 'best-sellers', 'sustainable-picks', 'logo-ready'],
-} as const;
+};
 const FEATURED_FALLBACK_COUNT = 4;
 
 const COLLECTIONS = [
