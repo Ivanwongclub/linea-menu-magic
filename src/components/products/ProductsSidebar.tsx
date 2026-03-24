@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { Search, X, ChevronDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -15,6 +15,11 @@ import type {
   ProductCertification,
   ProductTag,
 } from '@/features/products/types';
+import {
+  PRODUCT_FAMILIES,
+  PRODUCT_SEGMENTS,
+  getFamilyForCategory,
+} from '@/features/products/taxonomy';
 
 interface Taxonomy {
   categories: ProductCategory[];
