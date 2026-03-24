@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { SlidersHorizontal, X, LayoutGrid, List, PackageOpen } from 'lucide-react';
+import { SlidersHorizontal, X, LayoutGrid, List, PackageOpen, Star, Sparkles } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import PageBreadcrumb from '@/components/ui/PageBreadcrumb';
@@ -24,6 +24,22 @@ import { PRODUCT_FAMILIES, PRODUCT_SEGMENTS } from '@/features/products/taxonomy
 import { useProducts } from '@/features/products/hooks/useProducts';
 import { useProductTaxonomy } from '@/features/products/hooks/useProductTaxonomy';
 import { useProductFiltersFromURL } from '@/features/products/hooks/useProductFiltersFromURL';
+
+// ─── Curated Browse Data (seeded, CMS-ready) ────────────
+
+const FEATURED_ITEMS = [
+  { slug: 'new-arrivals', label: 'New Arrivals' },
+  { slug: 'best-sellers', label: 'Best Sellers' },
+  { slug: 'sustainable-picks', label: 'Sustainable Picks' },
+  { slug: 'logo-ready', label: 'Logo-Ready' },
+];
+
+const COLLECTIONS_ITEMS = [
+  { slug: 'ss-2026', label: 'Spring Summer 2026' },
+  { slug: 'denim-hardware-edit', label: 'Denim Hardware Edit' },
+  { slug: 'beauty-packaging-details', label: 'Beauty Packaging Details' },
+  { slug: 'signature-branding-trims', label: 'Signature Branding Trims' },
+];
 
 // ─── Page ───────────────────────────────────────────────
 
