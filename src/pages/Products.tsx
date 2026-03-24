@@ -407,7 +407,7 @@ export default function Products() {
                             product={product}
                             viewMode={viewMode}
                             index={idx}
-                            featured={viewMode === 'grid' && idx === 0}
+                            isHeroLayout={viewMode === 'grid' && idx === 0}
                             isFeatured={featuredSlugs.has(product.slug)}
                             onQuickView={() => setQuickViewProduct(product)}
                           />
