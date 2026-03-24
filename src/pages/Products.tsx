@@ -27,18 +27,12 @@ import { useProductFiltersFromURL } from '@/features/products/hooks/useProductFi
 
 // ─── Curated Browse Data (seeded, CMS-ready) ────────────
 
-const FEATURED_ITEMS = [
-  { slug: 'new-arrivals', label: 'New Arrivals' },
-  { slug: 'best-sellers', label: 'Best Sellers' },
-  { slug: 'sustainable-picks', label: 'Sustainable Picks' },
-  { slug: 'logo-ready', label: 'Logo-Ready' },
-];
-
-const COLLECTIONS_ITEMS = [
-  { slug: 'ss-2026', label: 'Spring Summer 2026' },
-  { slug: 'denim-hardware-edit', label: 'Denim Hardware Edit' },
-  { slug: 'beauty-packaging-details', label: 'Beauty Packaging Details' },
-  { slug: 'signature-branding-trims', label: 'Signature Branding Trims' },
+const FEATURED_OPTIONS = [
+  { value: 'all', label: 'All Products' },
+  { value: 'new-arrivals', label: 'New Arrivals' },
+  { value: 'best-sellers', label: 'Best Sellers' },
+  { value: 'sustainable-picks', label: 'Sustainable Picks' },
+  { value: 'logo-ready', label: 'Logo-Ready' },
 ];
 
 // ─── Page ───────────────────────────────────────────────
@@ -192,8 +186,6 @@ export default function Products() {
           ]}
         />
 
-        {/* Curated Browse Rail */}
-        <CuratedBrowseRail />
 
         {/* Active Filter Chips */}
         <div className="px-6 lg:px-8 min-h-[44px] flex items-center">
@@ -287,21 +279,16 @@ export default function Products() {
                     </button>
                   </div>
                   <span className="text-border">|</span>
-                  <Select
-                    value={filters.sort ?? 'default'}
-                    onValueChange={(val) =>
-                      setFilters({ sort: val === 'default' ? undefined : (val as any) })
-                    }
-                  >
-                    <SelectTrigger className="h-8 text-xs w-[140px]">
-                      <SelectValue placeholder="Sort" />
+                  <Select defaultValue="all">
+                    <SelectTrigger className="h-8 text-xs w-[140px] border-border">
+                      <SelectValue placeholder="Featured" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="default">Featured</SelectItem>
-                      <SelectItem value="newest">Newest</SelectItem>
-                      <SelectItem value="name_asc">Name A–Z</SelectItem>
-                      <SelectItem value="name_desc">Name Z–A</SelectItem>
-                      <SelectItem value="category">By Category</SelectItem>
+                      {FEATURED_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -400,43 +387,6 @@ export default function Products() {
   );
 }
 
-// ─── Curated Browse Rail ────────────────────────────────
-
-function CuratedBrowseRail() {
-  const [activeSlug, setActiveSlug] = useState<string | null>(null);
-
-  const pill = (item: { slug: string; label: string }) => (
-    <button
-      key={item.slug}
-      onClick={() => setActiveSlug(activeSlug === item.slug ? null : item.slug)}
-      className={`h-9 px-4 text-[11px] font-medium rounded-full border transition-all duration-200 whitespace-nowrap shrink-0 ${
-        activeSlug === item.slug
-          ? 'bg-foreground text-background border-foreground'
-          : 'bg-background text-foreground border-border hover:border-foreground/40'
-      }`}
-    >
-      {item.label}
-    </button>
-  );
-
-  return (
-    <div className="w-full bg-secondary/30 border-b border-border">
-      <div className="flex items-center justify-center gap-3 px-4 py-3.5 overflow-hidden">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-foreground select-none shrink-0">
-          Featured
-        </span>
-        {FEATURED_ITEMS.map(pill)}
-
-        <span className="w-px h-5 bg-border shrink-0 mx-1" />
-
-        <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-foreground select-none shrink-0">
-          Collections
-        </span>
-        {COLLECTIONS_ITEMS.map(pill)}
-      </div>
-    </div>
-  );
-}
 
 // ─── Loading Skeleton ───────────────────────────────────
 
