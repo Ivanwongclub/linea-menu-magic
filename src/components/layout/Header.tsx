@@ -363,7 +363,6 @@ const Header = () => {
                     >
                       View All Products →
                     </Link>
-                    <span className="block text-[9px] text-muted-foreground/35 mt-1 tracking-wide">查看所有產品</span>
                   </div>
                 </div>
               </div>
