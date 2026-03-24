@@ -340,7 +340,6 @@ const Header = () => {
                 <div className="flex-[3] pl-10">
                   <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-6 block">
                     Browse by Segment
-                    <span className="block text-[9px] tracking-[0.08em] text-muted-foreground/40 mt-0.5 normal-case">按市場瀏覽</span>
                   </span>
                   <ul className="space-y-4">
                     {MEGA_SEGMENTS.map((seg) => (
