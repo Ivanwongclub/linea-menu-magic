@@ -214,9 +214,9 @@ function ProductCardFeatured({
   const certs = product.certifications ?? [];
 
   return (
-    <div className="group bg-card border border-border rounded-[var(--radius)] overflow-hidden cursor-pointer transition-[border-color,box-shadow] duration-200 hover:border-foreground hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] flex flex-col md:flex-row">
+    <div className="group bg-card border border-border rounded-[var(--radius)] overflow-hidden cursor-pointer transition-[border-color,box-shadow] duration-200 hover:border-foreground hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] flex flex-col md:flex-row h-full">
       {/* Image (55%) */}
-      <div className="relative overflow-hidden bg-secondary md:w-[55%] aspect-[2/1] md:aspect-auto">
+      <div className="relative overflow-hidden bg-secondary md:w-[55%] aspect-[2/1] md:aspect-auto md:min-h-0 md:flex-1">
         {!imageLoaded && !imageError && (
           <div aria-hidden="true" className="absolute inset-0 bg-secondary animate-pulse" />
         )}

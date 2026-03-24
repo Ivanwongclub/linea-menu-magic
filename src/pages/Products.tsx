@@ -437,16 +437,16 @@ export default function Products() {
                   aria-label="Product catalog"
                   className={
                     viewMode === 'grid'
-                      ? 'grid grid-cols-2 md:grid-cols-4 gap-5'
+                      ? 'grid grid-cols-2 md:grid-cols-4 gap-5 auto-rows-[1fr]'
                       : 'flex flex-col gap-3'
                   }
                 >
                   {products.map((product, idx) => (
                     <div
                       key={product.id}
-                      className={viewMode === 'grid' && idx === 0 ? 'col-span-2 row-span-1' : ''}
+                      className={`${viewMode === 'grid' && idx === 0 ? 'col-span-2 row-span-2' : ''}`}
                     >
-                      <Link to={`/products/${product.slug}`}>
+                      <Link to={`/products/${product.slug}`} className={viewMode === 'grid' && idx === 0 ? 'block h-full' : ''}>
                         <ProductCard
                           product={product}
                           viewMode={viewMode}
