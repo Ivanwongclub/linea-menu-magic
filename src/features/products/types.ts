@@ -102,7 +102,9 @@ export type UserLibraryItem = {
 
 export type ProductFilters = {
   search?: string;
+  family?: string;
   categories?: string[];
+  segments?: string[];
   materials?: string[];
   industries?: string[];
   certifications?: string[];
