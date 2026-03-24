@@ -235,10 +235,12 @@ function ProductCardFeatured({
           onError={onImageError}
           className={`absolute inset-0 w-full h-full object-cover object-center transition-all duration-500 ease-out group-hover:scale-[1.04] ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
         />
-        {/* FEATURED label */}
-        <span className="absolute top-2.5 left-2.5 bg-foreground text-background text-[10px] font-medium uppercase tracking-[0.1em] px-2.5 py-0.5 rounded-[var(--radius)] z-10">
-          Featured
-        </span>
+        {/* FEATURED label — only if product is actually featured */}
+        {isFeatured && (
+          <span className="absolute top-2.5 left-2.5 bg-foreground text-background text-[10px] font-medium uppercase tracking-[0.1em] px-2.5 py-0.5 rounded-[var(--radius)] z-10">
+            Featured
+          </span>
+        )}
 
         {certs.length > 0 && (
           <div className="absolute bottom-2 right-2 z-10">
