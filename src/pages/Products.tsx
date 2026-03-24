@@ -290,9 +290,25 @@ export default function Products() {
 
               {/* Results header */}
               <div className="flex items-center justify-between mb-6">
-                <span className="text-sm text-muted-foreground">
-                  {loading ? '…' : `${totalCount} product${totalCount !== 1 ? 's' : ''}`}
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-muted-foreground">
+                    {loading ? '…' : `${totalCount} product${totalCount !== 1 ? 's' : ''}`}
+                  </span>
+                  <span className="text-border">|</span>
+                  <Select
+                    value={activeFeatured}
+                    onValueChange={setActiveFeatured}
+                  >
+                    <SelectTrigger className="h-7 text-xs w-[140px] border-border">
+                      <SelectValue placeholder="Featured" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {FEATURED_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-1">
@@ -316,7 +332,7 @@ export default function Products() {
                     value={filters.sort ?? ''}
                     onValueChange={(v) => setFilters({ sort: (v || undefined) as ProductFilters['sort'] })}
                   >
-                    <SelectTrigger className="h-8 text-xs w-[120px] border-border">
+                    <SelectTrigger className="h-7 text-xs w-[120px] border-border">
                       <SelectValue placeholder="Sort" />
                     </SelectTrigger>
                     <SelectContent>
