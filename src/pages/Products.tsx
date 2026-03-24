@@ -27,10 +27,15 @@ import { useProductFiltersFromURL } from '@/features/products/hooks/useProductFi
 
 // ─── Curated Browse Data (seeded, CMS-ready) ────────────
 
-// Seeded featured product slugs — replace with CMS-driven data when ready
-const FEATURED_PRODUCT_SLUGS = new Set([
-  // Add real product slugs here once available
-]);
+// Seeded featured product slugs — replace with CMS-driven data when ready.
+// Uses indices as fallback: if none of the slugs match, the first N products are marked featured.
+const FEATURED_PRODUCT_SLUGS_SEED = [
+  'polo-button-10-8',
+  'smooth-snap-15',
+  'oval-logo-badge',
+  'recycled-drawcord-5mm',
+];
+const FEATURED_FALLBACK_COUNT = 4;
 
 const COLLECTIONS = [
   { slug: 'ss-2026', label: 'Spring Summer 2026' },
