@@ -17,7 +17,7 @@ import {
 import ProductsSidebar from '@/components/products/ProductsSidebar';
 import ProductCard from '@/components/products/ProductCard';
 import type { ViewMode } from '@/components/products/ProductCard';
-import type { Product } from '@/features/products/types';
+import type { Product, ProductFilters } from '@/features/products/types';
 import { groupBy } from '@/lib/utils';
 import { PRODUCT_FAMILIES, PRODUCT_SEGMENTS } from '@/features/products/taxonomy';
 
@@ -27,13 +27,10 @@ import { useProductFiltersFromURL } from '@/features/products/hooks/useProductFi
 
 // ─── Curated Browse Data (seeded, CMS-ready) ────────────
 
-const FEATURED_OPTIONS = [
-  { value: 'all', label: 'All Products' },
-  { value: 'new-arrivals', label: 'New Arrivals' },
-  { value: 'best-sellers', label: 'Best Sellers' },
-  { value: 'sustainable-picks', label: 'Sustainable Picks' },
-  { value: 'logo-ready', label: 'Logo-Ready' },
-];
+// Seeded featured product slugs — replace with CMS-driven data when ready
+const FEATURED_PRODUCT_SLUGS = new Set([
+  // Add real product slugs here once available
+]);
 
 const COLLECTIONS = [
   { slug: 'ss-2026', label: 'Spring Summer 2026' },
@@ -311,16 +308,16 @@ export default function Products() {
                     </button>
                   </div>
                   <span className="text-border">|</span>
-                  <Select defaultValue="all">
-                    <SelectTrigger className="h-8 text-xs w-[140px] border-border">
-                      <SelectValue placeholder="Featured" />
+                  <Select
+                    value={filters.sort ?? ''}
+                    onValueChange={(v) => setFilters({ sort: (v || undefined) as ProductFilters['sort'] })}
+                  >
+                    <SelectTrigger className="h-8 text-xs w-[120px] border-border">
+                      <SelectValue placeholder="Sort" />
                     </SelectTrigger>
                     <SelectContent>
-                      {FEATURED_OPTIONS.map((opt) => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </SelectItem>
-                      ))}
+                      <SelectItem value="name_asc">Name A–Z</SelectItem>
+                      <SelectItem value="name_desc">Name Z–A</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -347,10 +344,11 @@ export default function Products() {
                         <div className={viewMode === 'grid' ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5' : 'flex flex-col gap-3'}>
                           {catProducts.map((product, idx) => (
                             <Link key={product.id} to={`/products/${product.slug}`}>
-                              <ProductCard
+                          <ProductCard
                                 product={product}
                                 viewMode={viewMode}
                                 index={idx}
+                                isFeatured={FEATURED_PRODUCT_SLUGS.has(product.slug)}
                                 onQuickView={() => setQuickViewProduct(product)}
                               />
                             </Link>
@@ -380,6 +378,7 @@ export default function Products() {
                             viewMode={viewMode}
                             index={idx}
                             featured={viewMode === 'grid' && idx === 0}
+                            isFeatured={FEATURED_PRODUCT_SLUGS.has(product.slug)}
                             onQuickView={() => setQuickViewProduct(product)}
                           />
                         </Link>
