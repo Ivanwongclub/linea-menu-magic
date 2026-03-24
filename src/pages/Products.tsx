@@ -184,26 +184,13 @@ export default function Products() {
       <Header />
 
       <main>
-        {/* Page Header */}
-        <section className="bg-background border-b border-border pt-8 pb-6">
-          <div className="section-inner">
-            <PageBreadcrumb
-              segments={[
-                { label: 'Home', href: '/' },
-                { label: 'Products' },
-              ]}
-              title=""
-            />
-            <div className="flex items-end justify-between mt-4">
-              <h1 className="text-4xl lg:text-5xl font-semibold tracking-tight leading-none text-foreground">
-                Products
-              </h1>
-              <span className="text-sm text-muted-foreground tabular-nums">
-                {loading ? '…' : `${totalCount} products`}
-              </span>
-            </div>
-          </div>
-        </section>
+        {/* Breadcrumb */}
+        <PageBreadcrumb
+          segments={[
+            { label: 'Home', href: '/' },
+            { label: 'Products' },
+          ]}
+        />
 
         {/* Curated Browse Rail */}
         <CuratedBrowseRail />
