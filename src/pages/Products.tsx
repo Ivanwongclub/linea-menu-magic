@@ -186,8 +186,6 @@ export default function Products() {
           ]}
         />
 
-        {/* Curated Browse Rail */}
-        <CuratedBrowseRail />
 
         {/* Active Filter Chips */}
         <div className="px-6 lg:px-8 min-h-[44px] flex items-center">
