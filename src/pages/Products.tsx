@@ -418,53 +418,34 @@ export default function Products() {
 function CuratedBrowseRail() {
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
 
-  return (
-    <div className="bg-secondary/40 border-b border-border">
-      <div className="max-w-[1200px] mx-auto px-6 lg:px-8 py-4">
-        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
-          {/* Featured group */}
-          <span className="text-xs font-semibold uppercase tracking-[0.08em] text-foreground select-none">
-            Featured
-          </span>
-          <div className="flex flex-wrap items-center gap-2">
-            {FEATURED_ITEMS.map((item) => (
-              <button
-                key={item.slug}
-                onClick={() => setActiveSlug(activeSlug === item.slug ? null : item.slug)}
-                className={`h-10 px-5 text-xs font-medium rounded-full border transition-all duration-200 whitespace-nowrap ${
-                  activeSlug === item.slug
-                    ? 'bg-foreground text-background border-foreground'
-                    : 'bg-background text-foreground border-border hover:border-foreground/40'
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
+  const pill = (item: { slug: string; label: string }) => (
+    <button
+      key={item.slug}
+      onClick={() => setActiveSlug(activeSlug === item.slug ? null : item.slug)}
+      className={`h-9 px-4 text-[11px] font-medium rounded-full border transition-all duration-200 whitespace-nowrap shrink-0 ${
+        activeSlug === item.slug
+          ? 'bg-foreground text-background border-foreground'
+          : 'bg-background text-foreground border-border hover:border-foreground/40'
+      }`}
+    >
+      {item.label}
+    </button>
+  );
 
-          {/* Divider */}
-          <span className="hidden sm:block w-px h-6 bg-border" />
-        
-          {/* Collections group */}
-          <span className="text-xs font-semibold uppercase tracking-[0.08em] text-foreground select-none">
-            Collections
-          </span>
-          <div className="flex flex-wrap items-center gap-2">
-            {COLLECTIONS_ITEMS.map((item) => (
-              <button
-                key={item.slug}
-                onClick={() => setActiveSlug(activeSlug === item.slug ? null : item.slug)}
-                className={`h-10 px-5 text-xs font-medium rounded-full border transition-all duration-200 whitespace-nowrap ${
-                  activeSlug === item.slug
-                    ? 'bg-foreground text-background border-foreground'
-                    : 'bg-background text-foreground border-border hover:border-foreground/40'
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-        </div>
+  return (
+    <div className="w-full bg-secondary/30 border-b border-border">
+      <div className="flex items-center justify-center gap-3 px-4 py-3.5 overflow-hidden">
+        <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-foreground select-none shrink-0">
+          Featured
+        </span>
+        {FEATURED_ITEMS.map(pill)}
+
+        <span className="w-px h-5 bg-border shrink-0 mx-1" />
+
+        <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-foreground select-none shrink-0">
+          Collections
+        </span>
+        {COLLECTIONS_ITEMS.map(pill)}
       </div>
     </div>
   );
