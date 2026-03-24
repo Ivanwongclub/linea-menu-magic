@@ -152,8 +152,8 @@ export default function Products() {
   const activeFilterCount = activeChips.length;
 
   const removeChip = (chip: (typeof activeChips)[0]) => {
-    if (chip.filterKey === 'search') {
-      setFilters({ search: undefined });
+    if (chip.filterKey === 'search' || chip.filterKey === 'family') {
+      setFilters({ [chip.filterKey]: undefined });
       return;
     }
     const key = chip.filterKey as keyof typeof filters;
