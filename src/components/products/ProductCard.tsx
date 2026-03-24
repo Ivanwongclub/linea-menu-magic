@@ -214,9 +214,9 @@ function ProductCardFeatured({
   const certs = product.certifications ?? [];
 
   return (
-    <div className="group bg-card border border-border rounded-[var(--radius)] overflow-hidden cursor-pointer transition-[border-color,box-shadow] duration-200 hover:border-foreground hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] flex flex-col md:flex-row h-full">
-      {/* Image (55%) */}
-      <div className="relative overflow-hidden bg-secondary md:w-[55%] aspect-[2/1] md:aspect-auto md:min-h-0 md:flex-1">
+    <div className="group bg-card border border-border rounded-[var(--radius)] overflow-hidden cursor-pointer transition-[border-color,box-shadow] duration-200 hover:border-foreground hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] flex flex-col h-full">
+      {/* Image (upper) */}
+      <div className="relative overflow-hidden bg-secondary flex-1 min-h-0">
         {!imageLoaded && !imageError && (
           <div aria-hidden="true" className="absolute inset-0 bg-secondary animate-pulse" />
         )}
@@ -224,7 +224,7 @@ function ProductCardFeatured({
           src={imageUrl}
           alt={altText}
           width={800}
-          height={400}
+          height={800}
           loading="eager"
           fetchPriority="high"
           decoding="async"
@@ -245,8 +245,8 @@ function ProductCardFeatured({
         )}
       </div>
 
-      {/* Info (45%) */}
-      <div className="md:w-[45%] p-5 md:p-6 flex flex-col justify-center">
+      {/* Info (bottom) */}
+      <div className="p-5 md:p-6 flex flex-col">
         {product.primary_category && (
           <span className="text-[10px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--muted-foreground))] mb-2 block">
             {product.primary_category.name}
