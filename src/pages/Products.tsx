@@ -27,18 +27,13 @@ import { useProductFiltersFromURL } from '@/features/products/hooks/useProductFi
 
 // ─── Curated Browse Data (seeded, CMS-ready) ────────────
 
-// Seeded featured matching keys — replace with CMS-driven data when ready.
-const FEATURED_SEED: { slugs: string[]; itemCodes: string[]; tags: string[] } = {
-  slugs: [
-    'polo-button-10-8',
-    'smooth-snap-15',
-    'oval-logo-badge',
-    'recycled-drawcord-5mm',
-  ],
-  itemCodes: ['btn-1008', 'snap-1500', 'badge-oval-01', 'drawcord-5mm-r'],
-  tags: ['new-arrivals', 'best-sellers', 'sustainable-picks', 'logo-ready'],
-};
-const FEATURED_FALLBACK_COUNT = 4;
+const FEATURED_OPTIONS = [
+  { value: 'all', label: 'All Products' },
+  { value: 'new-arrivals', label: 'New Arrivals' },
+  { value: 'best-sellers', label: 'Best Sellers' },
+  { value: 'sustainable-picks', label: 'Sustainable Picks' },
+  { value: 'logo-ready', label: 'Logo-Ready' },
+];
 
 const COLLECTIONS = [
   { slug: 'ss-2026', label: 'Spring Summer 2026' },
