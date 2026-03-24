@@ -279,21 +279,16 @@ export default function Products() {
                     </button>
                   </div>
                   <span className="text-border">|</span>
-                  <Select
-                    value={filters.sort ?? 'default'}
-                    onValueChange={(val) =>
-                      setFilters({ sort: val === 'default' ? undefined : (val as any) })
-                    }
-                  >
-                    <SelectTrigger className="h-8 text-xs w-[140px]">
-                      <SelectValue placeholder="Sort" />
+                  <Select defaultValue="all">
+                    <SelectTrigger className="h-8 text-xs w-[140px] border-border">
+                      <SelectValue placeholder="Featured" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="default">Featured</SelectItem>
-                      <SelectItem value="newest">Newest</SelectItem>
-                      <SelectItem value="name_asc">Name A–Z</SelectItem>
-                      <SelectItem value="name_desc">Name Z–A</SelectItem>
-                      <SelectItem value="category">By Category</SelectItem>
+                      {FEATURED_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
