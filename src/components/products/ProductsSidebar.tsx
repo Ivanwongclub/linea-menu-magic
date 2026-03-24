@@ -337,7 +337,7 @@ export default function ProductsSidebar({
       </FilterSection>
 
 
-      <FilterSection label="Sustainability" defaultOpen={false}>
+      <FilterSection label="Certifications" defaultOpen={false}>
         <div className="space-y-2">
           {taxonomy.certifications.map((cert) => (
             <div key={cert.id} className="flex items-center gap-2">

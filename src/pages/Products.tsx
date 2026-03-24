@@ -387,43 +387,6 @@ export default function Products() {
   );
 }
 
-// ─── Curated Browse Rail ────────────────────────────────
-
-function CuratedBrowseRail() {
-  const [activeSlug, setActiveSlug] = useState<string | null>(null);
-
-  const pill = (item: { slug: string; label: string }) => (
-    <button
-      key={item.slug}
-      onClick={() => setActiveSlug(activeSlug === item.slug ? null : item.slug)}
-      className={`h-9 px-4 text-[11px] font-medium rounded-full border transition-all duration-200 whitespace-nowrap shrink-0 ${
-        activeSlug === item.slug
-          ? 'bg-foreground text-background border-foreground'
-          : 'bg-background text-foreground border-border hover:border-foreground/40'
-      }`}
-    >
-      {item.label}
-    </button>
-  );
-
-  return (
-    <div className="w-full bg-secondary/30 border-b border-border">
-      <div className="flex items-center justify-center gap-3 px-4 py-3.5 overflow-hidden">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-foreground select-none shrink-0">
-          Featured
-        </span>
-        {FEATURED_ITEMS.map(pill)}
-
-        <span className="w-px h-5 bg-border shrink-0 mx-1" />
-
-        <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-foreground select-none shrink-0">
-          Collections
-        </span>
-        {COLLECTIONS_ITEMS.map(pill)}
-      </div>
-    </div>
-  );
-}
 
 // ─── Loading Skeleton ───────────────────────────────────
 
