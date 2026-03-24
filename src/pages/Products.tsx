@@ -18,7 +18,6 @@ import ProductsSidebar from '@/components/products/ProductsSidebar';
 import ProductCard from '@/components/products/ProductCard';
 import type { ViewMode } from '@/components/products/ProductCard';
 import type { Product, ProductFilters } from '@/features/products/types';
-import { groupBy } from '@/lib/utils';
 import { PRODUCT_FAMILIES, PRODUCT_SEGMENTS } from '@/features/products/taxonomy';
 
 import { useProducts } from '@/features/products/hooks/useProducts';
@@ -42,16 +41,81 @@ const COLLECTIONS = [
   { slug: 'signature-branding', label: 'Signature Branding Trims' },
 ];
 
+// ─── Featured filtering logic (temporary front-end mapping) ─
+// Maps featured option values to predicates on Product
+function matchesFeatured(product: Product, featured: string): boolean {
+  switch (featured) {
+    case 'all':
+      return true;
+    case 'new-arrivals':
+      return product.tags?.some((t) => t.slug === 'new-item') ?? false;
+    case 'best-sellers':
+      return product.tags?.some((t) => t.slug === 'best-seller') ?? false;
+    case 'sustainable-picks':
+      return product.materials?.some((m) => m.is_sustainable) ?? false;
+    case 'logo-ready':
+      return product.is_customizable === true;
+    default:
+      return true;
+  }
+}
+
+// ─── Collection filtering logic (temporary front-end mapping) ─
+// Maps collection slugs to predicates on Product
+function matchesCollection(product: Product, collection: string): boolean {
+  switch (collection) {
+    case 'ss-2026':
+      // Seasonal tag
+      return product.tags?.some((t) => t.slug === 'seasonal') ?? false;
+    case 'denim-hardware':
+      // Jeans buttons, rivets, eyelets, hook & eyes
+      return product.categories?.some((c) =>
+        ['jeans-buttons', 'rivets', 'eyelets', 'hook-eyes'].includes(c.slug)
+      ) ?? false;
+    case 'beauty-packaging':
+      // Beads, cord ends, cord stoppers, toggles
+      return product.categories?.some((c) =>
+        ['beads', 'cord-ends', 'cord-stoppers', 'toggles'].includes(c.slug)
+      ) ?? false;
+    case 'signature-branding':
+      // Badges, patches, webbing (branding trims)
+      return product.categories?.some((c) =>
+        ['badges', 'patches', 'webbing'].includes(c.slug)
+      ) ?? false;
+    default:
+      return true;
+  }
+}
+
 // ─── Page ───────────────────────────────────────────────
 
 export default function Products() {
   const taxonomy = useProductTaxonomy();
   const { filters, setFilters, clearFilters } = useProductFiltersFromURL();
-  const { products, loading, totalCount } = useProducts(filters);
+  const { products: allProducts, loading, totalCount: rawTotalCount } = useProducts(filters);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [activeCollection, setActiveCollection] = useState<string | null>(null);
   const [activeFeatured, setActiveFeatured] = useState('all');
+
+  // Apply Featured + Collection filtering on top of backend/sidebar results
+  const products = useMemo(() => {
+    let result = allProducts;
+
+    // Featured filter
+    if (activeFeatured !== 'all') {
+      result = result.filter((p) => matchesFeatured(p, activeFeatured));
+    }
+
+    // Collection filter
+    if (activeCollection) {
+      result = result.filter((p) => matchesCollection(p, activeCollection));
+    }
+
+    return result;
+  }, [allProducts, activeFeatured, activeCollection]);
+
+  const totalCount = products.length;
 
   // Count products per category (from current result set)
   const categoryCounts = useMemo(() => {
@@ -63,14 +127,6 @@ export default function Products() {
     });
     return counts;
   }, [products]);
-
-  
-
-  // Grouped products for "By Category" sort
-  const groupedProducts = useMemo(() => {
-    if (filters.sort !== 'category') return null;
-    return groupBy(products, (p) => p.primary_category?.name ?? 'Other');
-  }, [products, filters.sort]);
 
   // Collect all active filter labels for chip display
   const activeChips = useMemo(() => {
@@ -295,7 +351,7 @@ export default function Products() {
                     {loading ? '…' : `${totalCount} product${totalCount !== 1 ? 's' : ''}`}
                   </span>
                   <span className="text-border">|</span>
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide">
                     {FEATURED_OPTIONS.map((opt) => (
                       <button
                         key={opt.value}
@@ -349,69 +405,51 @@ export default function Products() {
               {loading ? (
                 <ProductGridSkeleton viewMode={viewMode} />
               ) : products.length > 0 ? (
-                groupedProducts ? (
-                  // Category-grouped view with dividers
-                  <div className="space-y-0">
-                    {Object.entries(groupedProducts).map(([catName, catProducts]) => (
-                      <div key={catName}>
-                        <div className="flex items-center gap-4 mb-5 mt-8 first:mt-0">
-                          <span className="text-xs font-medium uppercase tracking-[0.12em] text-[hsl(var(--muted-foreground))] whitespace-nowrap">
-                            {catName}
-                          </span>
-                          <div className="flex-1 h-[1px] bg-[hsl(var(--border))]" />
-                          <span className="text-xs text-[hsl(var(--muted-foreground))] tabular-nums">
-                            {catProducts.length}
-                          </span>
-                        </div>
-                        <div className={viewMode === 'grid' ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5' : 'flex flex-col gap-3'}>
-                          {catProducts.map((product, idx) => (
-                            <Link key={product.id} to={`/products/${product.slug}`}>
-                          <ProductCard
-                                product={product}
-                                viewMode={viewMode}
-                                index={idx}
-                                onQuickView={() => setQuickViewProduct(product)}
-                              />
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  // Default flat grid with featured first card
-                  <div
-                    aria-label="Product catalog"
-                    className={
-                      viewMode === 'grid'
-                        ? 'grid grid-cols-2 md:grid-cols-4 gap-5'
-                        : 'flex flex-col gap-3'
-                    }
-                  >
-                    {products.map((product, idx) => (
-                      <div
-                        key={product.id}
-                        className={viewMode === 'grid' && idx === 0 ? 'col-span-2 row-span-1' : ''}
-                      >
-                        <Link to={`/products/${product.slug}`}>
-                          <ProductCard
-                            product={product}
-                            viewMode={viewMode}
-                            index={idx}
-                            isHeroLayout={viewMode === 'grid' && idx === 0}
-                            onQuickView={() => setQuickViewProduct(product)}
-                          />
-                        </Link>
-                      </div>
-                    ))}
-                  </div>
-                )
+                <div
+                  aria-label="Product catalog"
+                  className={
+                    viewMode === 'grid'
+                      ? 'grid grid-cols-2 md:grid-cols-4 gap-5'
+                      : 'flex flex-col gap-3'
+                  }
+                >
+                  {products.map((product, idx) => (
+                    <div
+                      key={product.id}
+                      className={viewMode === 'grid' && idx === 0 ? 'col-span-2 row-span-1' : ''}
+                    >
+                      <Link to={`/products/${product.slug}`}>
+                        <ProductCard
+                          product={product}
+                          viewMode={viewMode}
+                          index={idx}
+                          isHeroLayout={viewMode === 'grid' && idx === 0}
+                          onQuickView={() => setQuickViewProduct(product)}
+                        />
+                      </Link>
+                    </div>
+                  ))}
+                </div>
               ) : (
                 <div role="status" className="flex flex-col items-center justify-center py-24 text-center">
                   <PackageOpen className="h-12 w-12 text-muted-foreground mb-4" />
                   <p className="text-sm font-medium text-foreground mb-1">No products found</p>
-                  <p className="text-sm text-muted-foreground mb-4">Try adjusting your filters.</p>
-                  <Button variant="outline" size="sm" onClick={clearFilters}>Clear filters</Button>
+                  <p className="text-sm text-muted-foreground mb-4">Try adjusting your filters or browse selection.</p>
+                  <div className="flex gap-2">
+                    {(activeFeatured !== 'all' || activeCollection !== null) && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setActiveFeatured('all');
+                          setActiveCollection(null);
+                        }}
+                      >
+                        Reset browse
+                      </Button>
+                    )}
+                    <Button variant="outline" size="sm" onClick={clearFilters}>Clear filters</Button>
+                  </div>
                 </div>
               )}
             </div>
@@ -438,35 +476,27 @@ export default function Products() {
   );
 }
 
-
-// ─── Loading Skeleton ───────────────────────────────────
+// ─── Loading Skeleton ─────────────────────────────────────
 
 function ProductGridSkeleton({ viewMode = 'grid' }: { viewMode?: ViewMode }) {
   if (viewMode === 'list') {
     return (
-      <div className="flex flex-col gap-3" aria-hidden="true">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="flex items-center gap-4 h-20 border border-border rounded-[var(--radius)] px-3">
-            <Skeleton className="h-16 w-16 rounded-[var(--radius)]" />
-            <div className="flex-1">
-              <Skeleton className="h-4 w-1/2 mb-1" />
-              <Skeleton className="h-3 w-1/3" />
-            </div>
-          </div>
+      <div className="flex flex-col gap-3">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Skeleton key={i} className="h-20 w-full" />
         ))}
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5" aria-hidden="true">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
       {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className="border border-border rounded-[var(--radius)] overflow-hidden">
-          <Skeleton className="aspect-square w-full" />
-          <div className="p-3">
-            <Skeleton className="h-3 w-1/3 mb-2" />
-            <Skeleton className="h-4 w-3/4 mb-1" />
-            <Skeleton className="h-3 w-1/2" />
+        <div key={i} className={i === 0 ? 'col-span-2 row-span-1' : ''}>
+          <div className="space-y-3">
+            <Skeleton className={`w-full ${i === 0 ? 'aspect-[2/1]' : 'aspect-square'}`} />
+            <Skeleton className="h-3 w-2/3" />
+            <Skeleton className="h-3 w-1/3" />
           </div>
         </div>
       ))}
