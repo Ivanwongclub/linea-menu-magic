@@ -7,6 +7,52 @@ import { PRODUCT_FAMILIES, PRODUCT_SEGMENTS } from "@/features/products/taxonomy
 
 const SUPABASE_IMG = "https://otkuqwpsgxzlaxbclbfi.supabase.co/storage/v1/object/public/product-assets/images";
 
+/* ---------- About mega-menu data ---------- */
+const ABOUT_GROUPS = [
+  {
+    heading: "Company",
+    links: [
+      { label: "Our Story", href: "/about/our-story", image: "/founders.png" },
+    ],
+  },
+  {
+    heading: "Operations",
+    links: [
+      { label: "Factory", href: "/about/factory", image: `${SUPABASE_IMG}/91013630-38c1-49fc-b21c-f0b052caca09/ai-primary.png` },
+      { label: "Certificates", href: "/about/certificates", image: `${SUPABASE_IMG}/1b856a91-9c8e-494a-b8c2-9e7ccb67e962/ai-primary.png` },
+    ],
+  },
+  {
+    heading: "Responsibility",
+    links: [
+      { label: "Sustainability", href: "/about/sustainability", image: `${SUPABASE_IMG}/40360bf7-eaae-427f-a800-c2a0514d198d/ai-primary.png` },
+    ],
+  },
+];
+
+const ABOUT_DEFAULT_PREVIEW = "/founders.png";
+
+const ABOUT_TRUST_CARDS = [
+  {
+    title: "Heritage",
+    description: "Four decades of craftsmanship excellence",
+    href: "/about/our-story",
+    image: "/founders.png",
+  },
+  {
+    title: "Manufacturing",
+    description: "Precision production at scale",
+    href: "/about/factory",
+    image: `${SUPABASE_IMG}/91013630-38c1-49fc-b21c-f0b052caca09/ai-primary.png`,
+  },
+  {
+    title: "Responsibility",
+    description: "Certified sustainable operations",
+    href: "/about/sustainability",
+    image: `${SUPABASE_IMG}/40360bf7-eaae-427f-a800-c2a0514d198d/ai-primary.png`,
+  },
+];
+
 const MEGA_FAMILIES = [
   {
     name: "Hardware",
@@ -80,9 +126,12 @@ const Header = () => {
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [isProductsOpen, setIsProductsOpen] = useState(false);
   const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
+  const [mobileAboutOpen, setMobileAboutOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [previewImage, setPreviewImage] = useState(DEFAULT_PREVIEW);
   const [previewLabel, setPreviewLabel] = useState("Hardware");
+  const [aboutPreviewImage, setAboutPreviewImage] = useState(ABOUT_DEFAULT_PREVIEW);
+  const [aboutPreviewLabel, setAboutPreviewLabel] = useState("Our Story");
   const { pathname } = useLocation();
   const productsTimeout = useRef<ReturnType<typeof setTimeout>>();
   const aboutTimeout = useRef<ReturnType<typeof setTimeout>>();
@@ -109,20 +158,13 @@ const Header = () => {
     setIsMenuOpen(false);
   }, [pathname]);
 
-  const navLinks = [
-    { href: "/products", label: "Products", hasMegaMenu: true },
-    { href: "/about", label: "About", hasSubmenu: true },
+  const navLinks: Array<{ href: string; label: string; megaMenu?: "products" | "about" }> = [
+    { href: "/products", label: "Products", megaMenu: "products" },
+    { href: "/about", label: "About", megaMenu: "about" },
     { href: "/sustainability", label: "Sustainability" },
     { href: "/news", label: "News" },
     { href: "/brochures", label: "Brochures" },
     { href: "/designer-studio", label: "Designer Studio" },
-  ];
-
-  const aboutSubmenu = [
-    { href: "/about/our-story", label: "Our Story" },
-    { href: "/about/factory", label: "Factory" },
-    { href: "/about/certificates", label: "Certificates" },
-    { href: "/about/sustainability", label: "Sustainability" },
   ];
 
   const isActive = (path: string) =>
@@ -204,7 +246,7 @@ const Header = () => {
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-10">
               {navLinks.map((link) => {
-                if (link.hasMegaMenu) {
+                if (link.megaMenu === "products") {
                   return (
                     <div
                       key={link.href}
@@ -222,7 +264,7 @@ const Header = () => {
                     </div>
                   );
                 }
-                if (link.hasSubmenu) {
+                if (link.megaMenu === "about") {
                   return (
                     <div
                       key={link.href}
@@ -237,25 +279,6 @@ const Header = () => {
                           className={`transition-transform duration-200 ${isAboutOpen ? "rotate-180" : ""}`}
                         />
                       </button>
-                      {isAboutOpen && (
-                        <div className="absolute top-full left-0 pt-2 min-w-[180px] z-50">
-                          <div className="bg-white border border-border shadow-[0_4px_16px_rgba(0,0,0,0.08)] rounded-[var(--radius)] py-2">
-                            {aboutSubmenu.map((sub) => (
-                              <Link
-                                key={sub.href}
-                                to={sub.href}
-                                className={`block px-4 py-2 text-sm transition-colors duration-150 ${
-                                  pathname === sub.href
-                                    ? "text-foreground bg-secondary"
-                                    : "text-foreground hover:bg-secondary"
-                                }`}
-                              >
-                                {sub.label}
-                              </Link>
-                            ))}
-                          </div>
-                        </div>
-                      )}
                     </div>
                   );
                 }
@@ -461,6 +484,117 @@ const Header = () => {
         </div>
       )}
 
+      {/* About Mega Menu — rendered outside header for full-width */}
+      {isAboutOpen && (
+        <div
+          className="hidden lg:block fixed left-0 right-0 z-40"
+          style={{ top: "64px" }}
+          onMouseEnter={handleAboutEnter}
+          onMouseLeave={handleAboutLeave}
+        >
+          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
+            <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
+              <div className="flex gap-0">
+                {/* Left 6: About groups + Preview Image */}
+                <div className="flex-[6] pr-10 flex gap-10">
+                  {/* Grouped navigation */}
+                  <div className="min-w-0">
+                    <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block">
+                      About Us
+                    </span>
+                    {ABOUT_GROUPS.map((group) => (
+                      <div key={group.heading} className="mb-5 last:mb-0">
+                        <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground/60 block mb-2">
+                          {group.heading}
+                        </span>
+                        <ul className="space-y-1.5">
+                          {group.links.map((link) => (
+                            <li key={link.href}>
+                              <Link
+                                to={link.href}
+                                className="text-[13px] text-foreground hover:opacity-70 transition-opacity duration-150 block"
+                                onMouseEnter={() => { setAboutPreviewImage(link.image); setAboutPreviewLabel(link.label); }}
+                              >
+                                {link.label}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Hover preview image */}
+                  <div
+                    className="flex-1 min-w-[280px] flex flex-col"
+                    onMouseEnter={() => { setAboutPreviewImage(ABOUT_DEFAULT_PREVIEW); setAboutPreviewLabel("Our Story"); }}
+                  >
+                    <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block opacity-0 pointer-events-none">
+                      &nbsp;
+                    </span>
+                    <div className="relative flex-1 rounded-[var(--radius)] overflow-hidden">
+                      <img
+                        key={aboutPreviewImage}
+                        src={aboutPreviewImage}
+                        alt={aboutPreviewLabel}
+                        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
+                        style={{ animation: "fadeIn 250ms ease" }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div className="w-px bg-[hsl(var(--border))] self-stretch" />
+
+                {/* Right 4: Trust/Story cards */}
+                <div className="flex-[4] pl-10">
+                  <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block">
+                    Discover
+                  </span>
+                  <div className="space-y-3">
+                    {ABOUT_TRUST_CARDS.map((card) => (
+                      <Link
+                        key={card.title}
+                        to={card.href}
+                        className="group block rounded-[var(--radius)] border border-[hsl(var(--border))] overflow-hidden hover:border-foreground/20 hover:shadow-[0_2px_12px_rgba(0,0,0,0.08)] transition-all duration-200"
+                      >
+                        <div className="flex items-stretch h-20">
+                          <div className="w-20 flex-shrink-0 overflow-hidden">
+                            <img
+                              src={card.image}
+                              alt={card.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0 flex flex-col justify-center px-4">
+                            <span className="text-sm font-semibold text-foreground block">{card.title}</span>
+                            <span className="text-[11px] text-muted-foreground leading-snug block mt-0.5">{card.description}</span>
+                          </div>
+                          <div className="flex items-center pr-3">
+                            <ChevronRight size={14} className="text-muted-foreground/40 group-hover:text-foreground/60 transition-colors flex-shrink-0" />
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+
+                  {/* Utility link */}
+                  <div className="mt-6 pt-4 border-t border-[hsl(var(--border))]">
+                    <Link
+                      to="/about/our-story"
+                      className="text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      Learn More About Us →
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Spacer to compensate for fixed navbar on non-hero pages */}
       {!isHeroPage && <div className="h-16" />}
 
@@ -484,7 +618,7 @@ const Header = () => {
             </div>
             <nav className="flex flex-col">
               {navLinks.map((link) => {
-                if (link.hasMegaMenu) {
+                if (link.megaMenu === "products") {
                   return (
                     <div key={link.href}>
                       <button
@@ -547,31 +681,45 @@ const Header = () => {
                     </div>
                   );
                 }
-                if (link.hasSubmenu) {
+                if (link.megaMenu === "about") {
                   return (
                     <div key={link.href}>
                       <button
-                        onClick={() => setIsAboutOpen(!isAboutOpen)}
+                        onClick={() => setMobileAboutOpen(!mobileAboutOpen)}
                         className="w-full flex items-center justify-between text-2xl font-semibold tracking-tight text-foreground hover:opacity-60 transition-opacity duration-150 py-5 px-6 border-b border-border"
                       >
                         {link.label}
                         <ChevronDown
                           size={18}
-                          className={`transition-transform duration-200 ${isAboutOpen ? "rotate-180" : ""}`}
+                          className={`transition-transform duration-200 ${mobileAboutOpen ? "rotate-180" : ""}`}
                         />
                       </button>
-                      {isAboutOpen && (
+                      {mobileAboutOpen && (
                         <div className="bg-secondary">
-                          {aboutSubmenu.map((sub) => (
-                            <Link
-                              key={sub.href}
-                              to={sub.href}
-                              onClick={() => setIsMenuOpen(false)}
-                              className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-150 block py-3 px-6 border-b border-border"
-                            >
-                              {sub.label}
-                            </Link>
+                          {ABOUT_GROUPS.map((group) => (
+                            <div key={group.heading}>
+                              <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground/60 block pt-3 pb-1 px-6">
+                                {group.heading}
+                              </span>
+                              {group.links.map((sub) => (
+                                <Link
+                                  key={sub.href}
+                                  to={sub.href}
+                                  onClick={() => setIsMenuOpen(false)}
+                                  className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-150 block py-2.5 px-6 border-b border-border/30"
+                                >
+                                  {sub.label}
+                                </Link>
+                              ))}
+                            </div>
                           ))}
+                          <Link
+                            to="/about/our-story"
+                            onClick={() => setIsMenuOpen(false)}
+                            className="text-sm font-medium text-foreground block py-3.5 px-6 border-b border-border"
+                          >
+                            Learn More About Us →
+                          </Link>
                         </div>
                       )}
                     </div>
