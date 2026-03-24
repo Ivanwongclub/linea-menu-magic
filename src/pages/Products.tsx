@@ -27,10 +27,15 @@ import { useProductFiltersFromURL } from '@/features/products/hooks/useProductFi
 
 // ─── Curated Browse Data (seeded, CMS-ready) ────────────
 
-// Seeded featured product slugs — replace with CMS-driven data when ready
-const FEATURED_PRODUCT_SLUGS = new Set([
-  // Add real product slugs here once available
-]);
+// Seeded featured product slugs — replace with CMS-driven data when ready.
+// Uses indices as fallback: if none of the slugs match, the first N products are marked featured.
+const FEATURED_PRODUCT_SLUGS_SEED = [
+  'polo-button-10-8',
+  'smooth-snap-15',
+  'oval-logo-badge',
+  'recycled-drawcord-5mm',
+];
+const FEATURED_FALLBACK_COUNT = 4;
 
 const COLLECTIONS = [
   { slug: 'ss-2026', label: 'Spring Summer 2026' },
@@ -48,6 +53,17 @@ export default function Products() {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [activeCollection, setActiveCollection] = useState<string | null>(null);
+
+  // Resolve featured set: prefer seeded slugs, fallback to first N products
+  const featuredSlugs = useMemo(() => {
+    const seedSet = new Set(FEATURED_PRODUCT_SLUGS_SEED);
+    const matched = products.filter((p) => seedSet.has(p.slug));
+    if (matched.length > 0) {
+      return new Set(matched.map((p) => p.slug));
+    }
+    // Fallback: mark the first N loaded products as featured
+    return new Set(products.slice(0, FEATURED_FALLBACK_COUNT).map((p) => p.slug));
+  }, [products]);
 
   // Count products per category (from current result set)
   const categoryCounts = useMemo(() => {
@@ -348,7 +364,7 @@ export default function Products() {
                                 product={product}
                                 viewMode={viewMode}
                                 index={idx}
-                                isFeatured={FEATURED_PRODUCT_SLUGS.has(product.slug)}
+                                isFeatured={featuredSlugs.has(product.slug)}
                                 onQuickView={() => setQuickViewProduct(product)}
                               />
                             </Link>
@@ -378,7 +394,7 @@ export default function Products() {
                             viewMode={viewMode}
                             index={idx}
                             featured={viewMode === 'grid' && idx === 0}
-                            isFeatured={FEATURED_PRODUCT_SLUGS.has(product.slug)}
+                            isFeatured={featuredSlugs.has(product.slug)}
                             onQuickView={() => setQuickViewProduct(product)}
                           />
                         </Link>

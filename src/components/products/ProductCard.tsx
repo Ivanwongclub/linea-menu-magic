@@ -65,7 +65,7 @@ export default function ProductCard({
 
   // Featured card — horizontal layout
   if (featured) {
-    return <ProductCardFeatured product={product} imageUrl={imageUrl} imageLoaded={imageLoaded} imageError={imageError} onImageLoad={() => setImageLoaded(true)} onImageError={() => setImageError(true)} onQuickView={onQuickView} />;
+    return <ProductCardFeatured product={product} imageUrl={imageUrl} imageLoaded={imageLoaded} imageError={imageError} onImageLoad={() => setImageLoaded(true)} onImageError={() => setImageError(true)} onQuickView={onQuickView} isFeatured={isFeatured} />;
   }
 
   const tags = product.tags ?? [];
@@ -204,6 +204,7 @@ function ProductCardFeatured({
   onImageLoad,
   onImageError,
   onQuickView,
+  isFeatured = false,
 }: {
   product: Product;
   imageUrl: string;
@@ -212,6 +213,7 @@ function ProductCardFeatured({
   onImageLoad: () => void;
   onImageError: () => void;
   onQuickView?: (product: Product) => void;
+  isFeatured?: boolean;
 }) {
   const altText = `${product.name_en ?? product.name}${product.primary_category ? ` — ${product.primary_category.name}` : ''}`;
   const certs = product.certifications ?? [];
@@ -235,10 +237,12 @@ function ProductCardFeatured({
           onError={onImageError}
           className={`absolute inset-0 w-full h-full object-cover object-center transition-all duration-500 ease-out group-hover:scale-[1.04] ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
         />
-        {/* FEATURED label */}
-        <span className="absolute top-2.5 left-2.5 bg-foreground text-background text-[10px] font-medium uppercase tracking-[0.1em] px-2.5 py-0.5 rounded-[var(--radius)] z-10">
-          Featured
-        </span>
+        {/* FEATURED label — only if product is actually featured */}
+        {isFeatured && (
+          <span className="absolute top-2.5 left-2.5 bg-foreground text-background text-[10px] font-medium uppercase tracking-[0.1em] px-2.5 py-0.5 rounded-[var(--radius)] z-10">
+            Featured
+          </span>
+        )}
 
         {certs.length > 0 && (
           <div className="absolute bottom-2 right-2 z-10">
