@@ -41,7 +41,7 @@ export default function ProductCard({
   product,
   viewMode,
   index = 99,
-  featured = false,
+  isHeroLayout = false,
   isFeatured = false,
   onQuickView,
   onAddToLibrary,
