@@ -431,10 +431,9 @@ const Header = () => {
                             </div>
                           ))}
                           <div className="px-6 py-4 border-b border-border">
-                            <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground block mb-1">
+                            <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground block mb-3">
                               Segments
                             </span>
-                            <span className="text-[9px] text-muted-foreground/35 tracking-wide block mb-3">按市場瀏覽</span>
                             {MEGA_SEGMENTS.map((seg) => (
                               <Link
                                 key={seg.slug}
