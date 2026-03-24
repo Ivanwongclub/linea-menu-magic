@@ -204,6 +204,7 @@ function ProductCardFeatured({
   onImageLoad,
   onImageError,
   onQuickView,
+  isFeatured = false,
 }: {
   product: Product;
   imageUrl: string;
@@ -212,6 +213,7 @@ function ProductCardFeatured({
   onImageLoad: () => void;
   onImageError: () => void;
   onQuickView?: (product: Product) => void;
+  isFeatured?: boolean;
 }) {
   const altText = `${product.name_en ?? product.name}${product.primary_category ? ` — ${product.primary_category.name}` : ''}`;
   const certs = product.certifications ?? [];
