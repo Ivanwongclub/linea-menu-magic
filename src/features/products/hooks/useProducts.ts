@@ -113,6 +113,12 @@ export function useProducts(filters: ProductFilters): UseProductsResult {
             ),
             product_tag_map(
               product_tags(id, name, slug, color)
+            ),
+            product_industry_map(
+              product_industries(id, name, slug, sort_order)
+            ),
+            product_certification_map(
+              product_certifications(id, name, abbreviation, logo_url)
             )
           `,
             { count: 'exact' }
