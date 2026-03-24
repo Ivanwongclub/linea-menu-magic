@@ -16,44 +16,44 @@ const ABOUT_GROUPS = [
   {
     heading: "Company",
     links: [
-      { label: "Our Story", href: "/about/our-story", image: "/founders.png" },
+      { label: "Our Story", href: "/about/our-story", image: aboutHeritageImg },
     ],
   },
   {
     heading: "Operations",
     links: [
-      { label: "Factory", href: "/about/factory", image: `${SUPABASE_IMG}/91013630-38c1-49fc-b21c-f0b052caca09/ai-primary.png` },
-      { label: "Certificates", href: "/about/certificates", image: `${SUPABASE_IMG}/1b856a91-9c8e-494a-b8c2-9e7ccb67e962/ai-primary.png` },
+      { label: "Factory", href: "/about/factory", image: heritageCraftImg },
+      { label: "Certificates", href: "/about/certificates", image: aboutShowroomImg },
     ],
   },
   {
     heading: "Responsibility",
     links: [
-      { label: "Sustainability", href: "/about/sustainability", image: `${SUPABASE_IMG}/40360bf7-eaae-427f-a800-c2a0514d198d/ai-primary.png` },
+      { label: "Sustainability", href: "/about/sustainability", image: aboutShowroomImg },
     ],
   },
 ];
 
-const ABOUT_DEFAULT_PREVIEW = "/founders.png";
+const ABOUT_DEFAULT_PREVIEW = aboutHeritageImg;
 
 const ABOUT_TRUST_CARDS = [
   {
     title: "Heritage",
     description: "Four decades of craftsmanship excellence",
     href: "/about/our-story",
-    image: "/founders.png",
+    image: foundersImg,
   },
   {
     title: "Manufacturing",
     description: "Precision production at scale",
     href: "/about/factory",
-    image: `${SUPABASE_IMG}/91013630-38c1-49fc-b21c-f0b052caca09/ai-primary.png`,
+    image: heritageCraftImg,
   },
   {
     title: "Responsibility",
     description: "Certified sustainable operations",
     href: "/about/sustainability",
-    image: `${SUPABASE_IMG}/40360bf7-eaae-427f-a800-c2a0514d198d/ai-primary.png`,
+    image: aboutShowroomImg,
   },
 ];
 
