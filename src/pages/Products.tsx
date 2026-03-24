@@ -184,135 +184,29 @@ export default function Products() {
       <Header />
 
       <main>
-        {/* Editorial Page Header */}
-        <section className="relative overflow-hidden bg-[hsl(var(--background))] border-b border-[hsl(var(--border))] pt-8 pb-0 min-h-[220px]">
-          {/* Background mosaic of product images */}
-          <div
-            className="absolute inset-0 grid grid-cols-8 overflow-hidden pointer-events-none select-none transition-opacity duration-700 ease-out hidden md:grid"
-            style={{ opacity: products.length > 0 ? 1 : 0 }}
-          >
-            {products.slice(0, 8).map((product) => (
-              <div key={product.id} className="relative overflow-hidden">
-                {product.thumbnail_url && (
-                  <img
-                    src={product.thumbnail_url}
-                    alt=""
-                    aria-hidden="true"
-                    className="w-full h-full object-cover scale-110"
-                    style={{ filter: 'grayscale(100%) blur(8px)', opacity: 0.06 }}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* Right side: larger single product accent */}
-          {products[0]?.thumbnail_url && (
-            <div className="absolute right-0 top-0 w-[45%] h-full overflow-hidden pointer-events-none select-none hidden lg:block">
-              <img
-                src={products[0].thumbnail_url}
-                alt=""
-                aria-hidden="true"
-                className="w-full h-full object-cover object-center scale-105"
-                style={{ filter: 'grayscale(100%)', opacity: 0.07 }}
-              />
-              <div
-                className="absolute inset-y-0 left-0 w-[60%]"
-                style={{ background: 'linear-gradient(to right, hsl(var(--background)), transparent)' }}
-              />
-            </div>
-          )}
-
-          {/* Bottom fade */}
-          <div
-            className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none"
-            style={{ background: 'linear-gradient(to bottom, transparent, hsl(var(--background)))' }}
-          />
-
-          {/* Foreground content */}
-          <div className="relative z-10 section-inner">
+        {/* Page Header */}
+        <section className="bg-background border-b border-border pt-8 pb-6">
+          <div className="section-inner">
             <PageBreadcrumb
               segments={[
                 { label: 'Home', href: '/' },
-                { label: 'Trim Library' },
+                { label: 'Products' },
               ]}
               title=""
             />
-            <div className="flex items-end justify-between mt-6 pb-8">
-              <div>
-                <h1 className="text-5xl lg:text-6xl font-semibold tracking-[-0.03em] leading-none text-[hsl(var(--foreground))]">
-                  Trim Library
-                </h1>
-                <p className="text-sm text-[hsl(var(--muted-foreground))] mt-3 max-w-sm leading-relaxed">
-                  Precision-engineered trims and accessories for the world's leading fashion brands.
-                </p>
-              </div>
-              <div className="hidden lg:flex flex-col items-end flex-shrink-0">
-                <span className="text-[96px] font-bold leading-none tracking-tight text-[hsl(var(--foreground))]/[0.07] tabular-nums select-none translate-y-3">
-                  {loading ? '—' : totalCount}
-                </span>
-                <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-[hsl(var(--muted-foreground))] pb-2">
-                  Products
-                </span>
-              </div>
+            <div className="flex items-end justify-between mt-4">
+              <h1 className="text-4xl lg:text-5xl font-semibold tracking-tight leading-none text-foreground">
+                Products
+              </h1>
+              <span className="text-sm text-muted-foreground tabular-nums">
+                {loading ? '…' : `${totalCount} products`}
+              </span>
             </div>
-            <div className="h-[2px] w-12 bg-[hsl(var(--foreground))]" />
           </div>
         </section>
 
-        {/* Family Filter Bar */}
-        <FamilyBar
-          activeFamily={filters.family}
-          onToggle={(slug) => {
-            if (slug === '__clear__') {
-              setFilters({ family: undefined, categories: undefined });
-              return;
-            }
-            setFilters({
-              family: filters.family === slug ? undefined : slug,
-              categories: undefined, // reset sub-categories when switching family
-            });
-          }}
-        />
-
-        {/* Category Hero Banner */}
-        <div
-          className="overflow-hidden transition-all duration-[400ms] ease-out"
-          style={{
-            maxHeight: activeCategory ? '200px' : '0px',
-            opacity: activeCategory ? 1 : 0,
-          }}
-        >
-          <div className="relative w-full h-[200px] overflow-hidden bg-[hsl(var(--secondary))] border-b border-[hsl(var(--border))]">
-            {bannerImageUrl && (
-              <img
-                src={bannerImageUrl}
-                alt=""
-                aria-hidden="true"
-                className="absolute inset-0 w-full h-full object-cover grayscale blur-[1px] scale-105 opacity-30"
-              />
-            )}
-            
-            <div className="relative z-10 section-inner h-full flex items-center gap-8">
-              <div>
-                <span className="section-label">Category</span>
-                <h2 className="text-4xl font-semibold tracking-tight mt-1">
-                  {activeCategory?.name}
-                </h2>
-              </div>
-              <div className="w-[1px] h-12 bg-[hsl(var(--border))]" />
-              <div className="flex flex-col gap-1">
-                <span className="text-3xl font-semibold tabular-nums">
-                  {products.length}
-                </span>
-                <span className="section-label">Products</span>
-              </div>
-              <p className="hidden lg:block text-sm text-[hsl(var(--muted-foreground))] max-w-xs leading-relaxed ml-auto">
-                Precision-engineered {activeCategory?.name.toLowerCase()} for leading fashion and apparel brands worldwide.
-              </p>
-            </div>
-          </div>
-        </div>
+        {/* Curated Browse Bar */}
+        <CuratedBrowseBar activeTab={activeBrowseTab} onTabChange={setActiveBrowseTab} />
 
         {/* Active Filter Chips */}
         <div className="px-6 lg:px-8 min-h-[44px] flex items-center">
