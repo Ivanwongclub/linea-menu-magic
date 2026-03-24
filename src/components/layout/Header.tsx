@@ -413,8 +413,8 @@ const Header = () => {
                 {/* Divider */}
                 <div className="w-px bg-[hsl(var(--border))] self-stretch" />
 
-                {/* Right 3: Segment cards — full-height images */}
-                <div className="flex-[3] pl-10">
+                {/* Right 4: Segment cards — full-height images */}
+                <div className="flex-[4] pl-10">
                   <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block">
                     Browse by Segment
                   </span>
