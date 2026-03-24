@@ -324,24 +324,25 @@ const Header = () => {
             <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
               <div className="flex gap-0">
                 {/* Left 7: Categories + Preview Image */}
-                <div className="flex-[7] pr-10 flex gap-8">
-                  {/* Category navigation */}
-                  <div className="flex-1 min-w-0">
+                <div className="flex-[7] pr-10 flex gap-10">
+                  {/* Hardware column */}
+                  <div className="min-w-0">
                     <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block">
                       Browse by Category
                     </span>
-                    <div className="grid grid-cols-3 gap-x-8 gap-y-6">
-                      {MEGA_FAMILIES.map((family) => (
-                        <div key={family.slug}>
+                    {(() => {
+                      const hardware = MEGA_FAMILIES[0];
+                      return (
+                        <div>
                           <Link
-                            to={`/products?family=${family.slug}`}
+                            to={`/products?family=${hardware.slug}`}
                             className="text-sm font-semibold text-foreground hover:opacity-70 transition-opacity block mb-2.5"
-                            onMouseEnter={() => { setPreviewImage(family.image); setPreviewLabel(family.name); }}
+                            onMouseEnter={() => { setPreviewImage(hardware.image); setPreviewLabel(hardware.name); }}
                           >
-                            {family.name}
+                            {hardware.name}
                           </Link>
                           <ul className="space-y-1.5">
-                            {family.subcategories.map((sub) => (
+                            {hardware.subcategories.map((sub) => (
                               <li key={sub.en}>
                                 <Link
                                   to={`/products?categories=${slugify(sub.en)}`}
@@ -354,37 +355,65 @@ const Header = () => {
                             ))}
                           </ul>
                         </div>
-                      ))}
-                    </div>
+                      );
+                    })()}
                   </div>
 
-                  {/* Hover preview image */}
+                  {/* Soft Trims + Branding Trims stacked column */}
+                  <div className="min-w-0">
+                    <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block opacity-0 pointer-events-none">
+                      &nbsp;
+                    </span>
+                    {MEGA_FAMILIES.slice(1).map((family) => (
+                      <div key={family.slug} className="mb-6 last:mb-0">
+                        <Link
+                          to={`/products?family=${family.slug}`}
+                          className="text-sm font-semibold text-foreground hover:opacity-70 transition-opacity block mb-2.5"
+                          onMouseEnter={() => { setPreviewImage(family.image); setPreviewLabel(family.name); }}
+                        >
+                          {family.name}
+                        </Link>
+                        <ul className="space-y-1.5">
+                          {family.subcategories.map((sub) => (
+                            <li key={sub.en}>
+                              <Link
+                                to={`/products?categories=${slugify(sub.en)}`}
+                                className="text-[13px] text-muted-foreground hover:text-foreground transition-colors duration-150 block"
+                                onMouseEnter={() => { setPreviewImage(sub.image); setPreviewLabel(sub.en); }}
+                              >
+                                {sub.en}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Hover preview image — wider, no label, no border */}
                   <div
-                    className="w-[200px] flex-shrink-0 flex flex-col"
+                    className="flex-1 min-w-[260px] flex flex-col"
                     onMouseEnter={() => { setPreviewImage(DEFAULT_PREVIEW); setPreviewLabel("Hardware"); }}
                   >
-                    <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block">
-                      Preview
+                    <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block opacity-0 pointer-events-none">
+                      &nbsp;
                     </span>
-                    <div className="relative flex-1 rounded-[var(--radius)] border border-[hsl(var(--border))] bg-secondary overflow-hidden">
+                    <div className="relative flex-1 rounded-[var(--radius)] overflow-hidden">
                       <img
                         key={previewImage}
                         src={previewImage}
                         alt={previewLabel}
-                        className="absolute inset-0 w-full h-full object-contain p-4 transition-opacity duration-300"
+                        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
                         style={{ animation: "fadeIn 250ms ease" }}
                       />
                     </div>
-                    <span className="text-[11px] text-muted-foreground mt-2 block text-center truncate">
-                      {previewLabel}
-                    </span>
                   </div>
                 </div>
 
                 {/* Divider */}
                 <div className="w-px bg-[hsl(var(--border))] self-stretch" />
 
-                {/* Right 3: Segment cards */}
+                {/* Right 3: Segment cards — full-height images */}
                 <div className="flex-[3] pl-10">
                   <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block">
                     Browse by Segment
@@ -394,21 +423,23 @@ const Header = () => {
                       <Link
                         key={seg.slug}
                         to={`/products?segments=${seg.slug}`}
-                        className="group block rounded-[var(--radius)] border border-[hsl(var(--border))] overflow-hidden hover:border-foreground/20 transition-all duration-200 hover:shadow-[0_2px_12px_rgba(0,0,0,0.06)]"
+                        className="group block rounded-[var(--radius)] overflow-hidden hover:shadow-[0_2px_12px_rgba(0,0,0,0.08)] transition-all duration-200"
                       >
-                        <div className="flex items-center gap-3 p-2.5">
-                          <div className="w-14 h-14 rounded-[var(--radius)] bg-secondary overflow-hidden flex-shrink-0">
+                        <div className="flex items-stretch h-20">
+                          <div className="w-20 flex-shrink-0 overflow-hidden">
                             <img
                               src={seg.image}
                               alt={seg.name}
-                              className="w-full h-full object-contain p-1.5 group-hover:scale-105 transition-transform duration-300"
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             />
                           </div>
-                          <div className="flex-1 min-w-0">
+                          <div className="flex-1 min-w-0 flex flex-col justify-center px-4">
                             <span className="text-sm font-semibold text-foreground block">{seg.name}</span>
-                            <span className="text-[11px] text-muted-foreground leading-snug block">{seg.description}</span>
+                            <span className="text-[11px] text-muted-foreground leading-snug block mt-0.5">{seg.description}</span>
                           </div>
-                          <ChevronRight size={14} className="text-muted-foreground/40 group-hover:text-foreground/60 transition-colors flex-shrink-0" />
+                          <div className="flex items-center pr-3">
+                            <ChevronRight size={14} className="text-muted-foreground/40 group-hover:text-foreground/60 transition-colors flex-shrink-0" />
+                          </div>
                         </div>
                       </Link>
                     ))}
