@@ -304,27 +304,29 @@ const Header = () => {
               <div className="flex gap-0">
                 {/* Left: Categories — ~68% */}
                 <div className="flex-[7] pr-10">
-                  <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block">
-                    Browse by Category <span className="text-muted-foreground/60 ml-1">· 按類別瀏覽</span>
+                  <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-6 block">
+                    Browse by Category
+                    <span className="block text-[9px] tracking-[0.08em] text-muted-foreground/40 mt-0.5 normal-case">按類別瀏覽</span>
                   </span>
-                  <div className="grid grid-cols-3 gap-x-10 gap-y-6">
+                  <div className="grid grid-cols-3 gap-x-10 gap-y-7">
                     {MEGA_FAMILIES.map((family) => (
                       <div key={family.slug}>
                         <Link
                           to={`/products?family=${family.slug}`}
-                          className="text-sm font-semibold text-foreground hover:opacity-70 transition-opacity block mb-2.5"
+                          className="text-sm font-semibold text-foreground hover:opacity-70 transition-opacity block mb-3"
                         >
                           {family.name}
-                          <span className="block text-[11px] font-normal text-muted-foreground mt-0.5">{family.nameCn}</span>
+                          <span className="block text-[10px] font-normal text-muted-foreground/40 mt-0.5 tracking-wide">{family.nameCn}</span>
                         </Link>
-                        <ul className="space-y-1.5">
+                        <ul className="space-y-2">
                           {family.subcategories.map((sub) => (
                             <li key={sub.en}>
                               <Link
                                 to={`/products?categories=${slugify(sub.en)}`}
-                                className="text-[13px] text-muted-foreground hover:text-foreground transition-colors duration-150"
+                                className="group text-[13px] text-muted-foreground hover:text-foreground transition-colors duration-150 block"
                               >
-                                {sub.en} <span className="text-muted-foreground/50 text-[11px]">{sub.cn}</span>
+                                {sub.en}
+                                <span className="text-[10px] text-muted-foreground/30 ml-1.5 group-hover:text-muted-foreground/50 transition-colors">{sub.cn}</span>
                               </Link>
                             </li>
                           ))}
@@ -339,10 +341,11 @@ const Header = () => {
 
                 {/* Right: Segments — ~32% */}
                 <div className="flex-[3] pl-10">
-                  <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block">
-                    Browse by Segment <span className="text-muted-foreground/60 ml-1">· 按市場瀏覽</span>
+                  <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-6 block">
+                    Browse by Segment
+                    <span className="block text-[9px] tracking-[0.08em] text-muted-foreground/40 mt-0.5 normal-case">按市場瀏覽</span>
                   </span>
-                  <ul className="space-y-3">
+                  <ul className="space-y-4">
                     {MEGA_SEGMENTS.map((seg) => (
                       <li key={seg.slug}>
                         <Link
@@ -350,8 +353,8 @@ const Header = () => {
                           className="group flex items-center gap-2 text-sm font-medium text-foreground hover:opacity-70 transition-opacity"
                         >
                           {seg.name}
-                          <span className="text-[11px] font-normal text-muted-foreground/60">{seg.nameCn}</span>
-                          <ChevronRight size={14} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                          <span className="text-[10px] font-normal text-muted-foreground/35">{seg.nameCn}</span>
+                          <ChevronRight size={14} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity ml-auto" />
                         </Link>
                       </li>
                     ))}
@@ -363,8 +366,9 @@ const Header = () => {
                       to="/products"
                       className="text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
                     >
-                      View All Products · 查看所有產品 →
+                      View All Products →
                     </Link>
+                    <span className="block text-[9px] text-muted-foreground/35 mt-1 tracking-wide">查看所有產品</span>
                   </div>
                 </div>
               </div>
