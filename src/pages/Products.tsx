@@ -258,22 +258,19 @@ export default function Products() {
           </div>
         </section>
 
-        {/* Industry Filter Bar */}
-        <IndustryBar
-          industries={taxonomy.industries}
-          active={filters.industries}
+        {/* Family Filter Bar */}
+        <FamilyBar
+          activeFamily={filters.family}
           onToggle={(slug) => {
             if (slug === '__clear__') {
-              setFilters({ industries: undefined });
+              setFilters({ family: undefined, categories: undefined });
               return;
             }
-            const current = filters.industries ?? [];
-            const next = current.includes(slug)
-              ? current.filter((s) => s !== slug)
-              : [...current, slug];
-            setFilters({ industries: next.length > 0 ? next : undefined });
+            setFilters({
+              family: filters.family === slug ? undefined : slug,
+              categories: undefined, // reset sub-categories when switching family
+            });
           }}
-          loading={taxonomy.loading}
         />
 
         {/* Category Hero Banner */}
