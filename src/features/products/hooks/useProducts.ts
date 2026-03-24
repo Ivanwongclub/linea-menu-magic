@@ -227,6 +227,21 @@ export function useProducts(filters: ProductFilters): UseProductsResult {
           );
         }
 
+        // Segment filtering (temporary front-end mapping via category families)
+        if (filters.segments?.length) {
+          const segmentCategorySlugs = filters.segments.flatMap((seg) => {
+            const familySlugs = SEGMENT_TO_FAMILIES[seg] ?? [];
+            return familySlugs.flatMap((fs) =>
+              PRODUCT_FAMILIES.find((f) => f.slug === fs)?.categorySlugs ?? []
+            );
+          });
+          if (segmentCategorySlugs.length > 0) {
+            transformed = transformed.filter((p) =>
+              p.categories?.some((c) => segmentCategorySlugs.includes(c.slug))
+            );
+          }
+        }
+
         setProducts(transformed);
         setTotalCount(
           filters.categories?.length ||
