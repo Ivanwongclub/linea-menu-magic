@@ -444,9 +444,9 @@ export default function Products() {
                   {products.map((product, idx) => (
                     <div
                       key={product.id}
-                      className={viewMode === 'grid' && idx === 0 ? 'col-span-2 row-span-2' : ''}
+                      className={`${viewMode === 'grid' && idx === 0 ? 'col-span-2 row-span-2' : ''}`}
                     >
-                      <Link to={`/products/${product.slug}`}>
+                      <Link to={`/products/${product.slug}`} className={viewMode === 'grid' && idx === 0 ? 'block h-full' : ''}>
                         <ProductCard
                           product={product}
                           viewMode={viewMode}
