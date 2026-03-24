@@ -61,15 +61,7 @@ export default function Products() {
     return counts;
   }, [products]);
 
-  // Detect single active category for banner
-  const activeCategory = useMemo(() => {
-    if (filters.categories?.length === 1) {
-      return taxonomy.categories.find((c) => c.slug === filters.categories![0]) ?? null;
-    }
-    return null;
-  }, [filters.categories, taxonomy.categories]);
-
-  const featuredProduct = products[0] ?? null;
+  const [activeBrowseTab, setActiveBrowseTab] = useState<'featured' | 'collections'>('featured');
 
   // Grouped products for "By Category" sort
   const groupedProducts = useMemo(() => {
