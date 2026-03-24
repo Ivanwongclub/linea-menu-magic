@@ -110,5 +110,7 @@ export type ProductFilters = {
   certifications?: string[];
   tags?: string[];
   is_customizable?: boolean;
-  sort?: 'newest' | 'name_asc' | 'name_desc' | 'category';
+  sort?: 'name_asc' | 'name_desc';
+  featured?: string;
+  collection?: string;
 };

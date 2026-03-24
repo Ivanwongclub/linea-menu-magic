@@ -12,6 +12,8 @@ const PARAM_KEYS = {
   certifications: 'certification',
   tags: 'tag',
   sort: 'sort',
+  featured: 'featured',
+  collection: 'collection',
 } as const;
 
 function parseList(value: string | null): string[] | undefined {
@@ -49,10 +51,11 @@ export function useProductFiltersFromURL(): UseProductFiltersFromURLResult {
       certifications: parseList(searchParams.get(PARAM_KEYS.certifications)),
       tags: parseList(searchParams.get(PARAM_KEYS.tags)),
       sort:
-        sort &&
-        ['newest', 'name_asc', 'name_desc', 'category'].includes(sort)
+        sort && ['name_asc', 'name_desc'].includes(sort)
           ? sort
           : undefined,
+      featured: searchParams.get(PARAM_KEYS.featured) || undefined,
+      collection: searchParams.get(PARAM_KEYS.collection) || undefined,
     };
   }, [searchParams]);
 
