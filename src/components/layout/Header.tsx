@@ -417,7 +417,6 @@ const Header = () => {
                                 className="flex items-baseline gap-2 text-sm font-semibold text-foreground py-3.5 px-6 border-b border-border"
                               >
                                 {family.name}
-                                <span className="text-[10px] font-normal text-muted-foreground/40 tracking-wide">{family.nameCn}</span>
                               </Link>
                               {family.subcategories.map((sub) => (
                                 <Link
