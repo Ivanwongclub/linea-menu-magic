@@ -65,12 +65,32 @@ export default function Products() {
   const activeChips = useMemo(() => {
     const chips: { key: string; filterKey: string; label: string; value: string }[] = [];
 
+    if (filters.family) {
+      const fam = PRODUCT_FAMILIES.find((f) => f.slug === filters.family);
+      chips.push({
+        key: `fam-${filters.family}`,
+        filterKey: 'family',
+        label: fam?.name ?? filters.family,
+        value: filters.family,
+      });
+    }
+
     filters.categories?.forEach((slug) => {
       const cat = taxonomy.categories.find((c) => c.slug === slug);
       chips.push({
         key: `cat-${slug}`,
         filterKey: 'categories',
         label: cat?.name ?? slug,
+        value: slug,
+      });
+    });
+
+    filters.segments?.forEach((slug) => {
+      const seg = PRODUCT_SEGMENTS.find((s) => s.slug === slug);
+      chips.push({
+        key: `seg-${slug}`,
+        filterKey: 'segments',
+        label: seg?.name ?? slug,
         value: slug,
       });
     });
