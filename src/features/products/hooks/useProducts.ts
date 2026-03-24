@@ -1,7 +1,18 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Product, ProductFilters } from '../types';
-import { getCategorySlugsForFamily } from '../taxonomy';
+import { getCategorySlugsForFamily, PRODUCT_FAMILIES } from '../taxonomy';
+
+/**
+ * Temporary segment → category-family mapping.
+ * Maps approved Segment slugs to product family slugs so that
+ * selecting "Fashion" shows Hardware products, etc.
+ */
+const SEGMENT_TO_FAMILIES: Record<string, string[]> = {
+  fashion: ['hardware'],
+  apparel: ['soft-trims'],
+  beauty: ['branding-trims'],
+};
 
 interface UseProductsResult {
   products: Product[];
@@ -154,11 +165,8 @@ export function useProducts(filters: ProductFilters): UseProductsResult {
           );
         }
 
-        // Sort
+        // Sort (only name_asc / name_desc exposed in UI)
         switch (filters.sort) {
-          case 'newest':
-            query = query.order('sort_order', { ascending: false });
-            break;
           case 'name_asc':
             query = query.order('name', { ascending: true });
             break;
@@ -217,6 +225,21 @@ export function useProducts(filters: ProductFilters): UseProductsResult {
           transformed = transformed.filter(
             (p) => p.is_customizable === filters.is_customizable
           );
+        }
+
+        // Segment filtering (temporary front-end mapping via category families)
+        if (filters.segments?.length) {
+          const segmentCategorySlugs = filters.segments.flatMap((seg) => {
+            const familySlugs = SEGMENT_TO_FAMILIES[seg] ?? [];
+            return familySlugs.flatMap((fs) =>
+              PRODUCT_FAMILIES.find((f) => f.slug === fs)?.categorySlugs ?? []
+            );
+          });
+          if (segmentCategorySlugs.length > 0) {
+            transformed = transformed.filter((p) =>
+              p.categories?.some((c) => segmentCategorySlugs.includes(c.slug))
+            );
+          }
         }
 
         setProducts(transformed);
