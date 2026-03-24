@@ -246,7 +246,7 @@ const Header = () => {
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-10">
               {navLinks.map((link) => {
-                if (link.hasMegaMenu) {
+                if (link.megaMenu === "products") {
                   return (
                     <div
                       key={link.href}
@@ -264,7 +264,7 @@ const Header = () => {
                     </div>
                   );
                 }
-                if (link.hasSubmenu) {
+                if (link.megaMenu === "about") {
                   return (
                     <div
                       key={link.href}
@@ -279,25 +279,6 @@ const Header = () => {
                           className={`transition-transform duration-200 ${isAboutOpen ? "rotate-180" : ""}`}
                         />
                       </button>
-                      {isAboutOpen && (
-                        <div className="absolute top-full left-0 pt-2 min-w-[180px] z-50">
-                          <div className="bg-white border border-border shadow-[0_4px_16px_rgba(0,0,0,0.08)] rounded-[var(--radius)] py-2">
-                            {aboutSubmenu.map((sub) => (
-                              <Link
-                                key={sub.href}
-                                to={sub.href}
-                                className={`block px-4 py-2 text-sm transition-colors duration-150 ${
-                                  pathname === sub.href
-                                    ? "text-foreground bg-secondary"
-                                    : "text-foreground hover:bg-secondary"
-                                }`}
-                              >
-                                {sub.label}
-                              </Link>
-                            ))}
-                          </div>
-                        </div>
-                      )}
                     </div>
                   );
                 }
