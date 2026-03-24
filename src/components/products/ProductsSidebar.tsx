@@ -118,13 +118,31 @@ export default function ProductsSidebar({
     lastPushed.current = '';
     setFilters({
       search: undefined,
+      family: undefined,
       categories: undefined,
+      segments: undefined,
       materials: undefined,
       industries: undefined,
       certifications: undefined,
       tags: undefined,
     });
   }, [setFilters]);
+
+  // Group categories by family for structured display
+  const familyGroups = useMemo(() => {
+    return PRODUCT_FAMILIES.map((family) => ({
+      ...family,
+      categories: taxonomy.categories.filter((cat) =>
+        family.categorySlugs.includes(cat.slug)
+      ),
+    }));
+  }, [taxonomy.categories]);
+
+  // Categories that don't belong to any family
+  const uncategorized = useMemo(() => {
+    const allFamilySlugs = PRODUCT_FAMILIES.flatMap((f) => f.categorySlugs);
+    return taxonomy.categories.filter((cat) => !allFamilySlugs.includes(cat.slug));
+  }, [taxonomy.categories]);
 
   const sustainableMaterials = taxonomy.materials.filter((m) => m.is_sustainable);
   const standardMaterials = taxonomy.materials.filter((m) => !m.is_sustainable);
