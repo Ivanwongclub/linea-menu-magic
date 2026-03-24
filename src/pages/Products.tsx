@@ -57,14 +57,25 @@ export default function Products() {
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [activeCollection, setActiveCollection] = useState<string | null>(null);
 
-  // Resolve featured set: prefer seeded slugs, fallback to first N products
+  // Resolve featured set: explicit seeded matches first, deterministic visible fallback second.
   const featuredSlugs = useMemo(() => {
-    const seedSet = new Set(FEATURED_PRODUCT_SLUGS_SEED);
-    const matched = products.filter((p) => seedSet.has(p.slug));
+    const matched = products.filter((p) => {
+      const normalizedItemCode = p.item_code?.toLowerCase();
+      const hasSeededTag =
+        p.tags?.some((tag) => FEATURED_SEED.tags.includes(tag.slug)) ?? false;
+
+      return (
+        FEATURED_SEED.slugs.includes(p.slug) ||
+        (!!normalizedItemCode && FEATURED_SEED.itemCodes.includes(normalizedItemCode)) ||
+        hasSeededTag
+      );
+    });
+
     if (matched.length > 0) {
       return new Set(matched.map((p) => p.slug));
     }
-    // Fallback: mark the first N loaded products as featured
+
+    // Guaranteed visible fallback: first 4 currently displayed products.
     return new Set(products.slice(0, FEATURED_FALLBACK_COUNT).map((p) => p.slug));
   }, [products]);
 
