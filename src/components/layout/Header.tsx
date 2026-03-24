@@ -1,14 +1,51 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PRODUCT_FAMILIES, PRODUCT_SEGMENTS } from "@/features/products/taxonomy";
+
+const MEGA_FAMILIES = [
+  {
+    name: "Hardware",
+    slug: "hardware",
+    subcategories: [
+      "Buttons", "Snap Buttons", "Jeans Buttons", "Shank Buttons",
+      "Buckles", "Eyelets", "Hook & Eyes", "Rivets",
+      "Zipper Pullers", "Toggles", "Cord Ends", "Cord Stoppers", "Beads",
+    ],
+  },
+  {
+    name: "Soft Trims",
+    slug: "soft-trims",
+    subcategories: ["Drawcords", "Webbing"],
+  },
+  {
+    name: "Branding Trims",
+    slug: "branding-trims",
+    subcategories: ["Badges", "Patches"],
+  },
+];
+
+const MEGA_SEGMENTS = [
+  { name: "Fashion", slug: "fashion" },
+  { name: "Apparel", slug: "apparel" },
+  { name: "Beauty", slug: "beauty" },
+];
+
+function slugify(name: string) {
+  return name.toLowerCase().replace(/\s+&\s+/g, "-").replace(/\s+/g, "-");
+}
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [isProductsOpen, setIsProductsOpen] = useState(false);
+  const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { pathname } = useLocation();
+  const productsTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const aboutTimeout = useRef<ReturnType<typeof setTimeout>>();
 
   const isHeroPage = pathname === "/";
   const isTransparent = isHeroPage && !scrolled;
@@ -25,8 +62,15 @@ const Header = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Close mega menu on route change
+  useEffect(() => {
+    setIsProductsOpen(false);
+    setIsAboutOpen(false);
+    setIsMenuOpen(false);
+  }, [pathname]);
+
   const navLinks = [
-    { href: "/products", label: "Products" },
+    { href: "/products", label: "Products", hasMegaMenu: true },
     { href: "/about", label: "About", hasSubmenu: true },
     { href: "/sustainability", label: "Sustainability" },
     { href: "/news", label: "News" },
@@ -44,7 +88,6 @@ const Header = () => {
   const isActive = (path: string) =>
     pathname === path || pathname.startsWith(path + "/");
 
-  // Dynamic classes based on transparency state
   const linkClass = (active: boolean) =>
     `text-xs font-medium tracking-[0.08em] uppercase transition-colors duration-300 py-5 border-b-2 ${
       active
@@ -61,6 +104,23 @@ const Header = () => {
       ? "text-white/80 hover:text-white"
       : "text-foreground hover:opacity-60"
   }`;
+
+  const handleProductsEnter = () => {
+    clearTimeout(productsTimeout.current);
+    setIsProductsOpen(true);
+    setIsAboutOpen(false);
+  };
+  const handleProductsLeave = () => {
+    productsTimeout.current = setTimeout(() => setIsProductsOpen(false), 150);
+  };
+  const handleAboutEnter = () => {
+    clearTimeout(aboutTimeout.current);
+    setIsAboutOpen(true);
+    setIsProductsOpen(false);
+  };
+  const handleAboutLeave = () => {
+    aboutTimeout.current = setTimeout(() => setIsAboutOpen(false), 150);
+  };
 
   return (
     <>
@@ -103,47 +163,68 @@ const Header = () => {
 
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-10">
-              {navLinks.map((link) =>
-                link.hasSubmenu ? (
-                  <div
-                    key={link.href}
-                    className="relative"
-                    onMouseEnter={() => setIsAboutOpen(true)}
-                    onMouseLeave={() => setIsAboutOpen(false)}
-                  >
-                    <button className={linkClass(isActive(link.href)) + " flex items-center gap-1"}>
-                      {link.label}
-                      <ChevronDown
-                        size={14}
-                        className={`transition-transform duration-200 ${isAboutOpen ? "rotate-180" : ""}`}
-                      />
-                    </button>
-                    {isAboutOpen && (
-                      <div className="absolute top-full left-0 pt-2 min-w-[180px] z-50">
-                        <div className="bg-white border border-border shadow-[0_4px_16px_rgba(0,0,0,0.08)] rounded-[var(--radius)] py-2">
-                          {aboutSubmenu.map((sub) => (
-                            <Link
-                              key={sub.href}
-                              to={sub.href}
-                              className={`block px-4 py-2 text-sm transition-colors duration-150 ${
-                                pathname === sub.href
-                                  ? "text-foreground bg-secondary"
-                                  : "text-foreground hover:bg-secondary"
-                              }`}
-                            >
-                              {sub.label}
-                            </Link>
-                          ))}
+              {navLinks.map((link) => {
+                if (link.hasMegaMenu) {
+                  return (
+                    <div
+                      key={link.href}
+                      className="relative"
+                      onMouseEnter={handleProductsEnter}
+                      onMouseLeave={handleProductsLeave}
+                    >
+                      <button className={linkClass(isActive(link.href)) + " flex items-center gap-1"}>
+                        {link.label}
+                        <ChevronDown
+                          size={14}
+                          className={`transition-transform duration-200 ${isProductsOpen ? "rotate-180" : ""}`}
+                        />
+                      </button>
+                    </div>
+                  );
+                }
+                if (link.hasSubmenu) {
+                  return (
+                    <div
+                      key={link.href}
+                      className="relative"
+                      onMouseEnter={handleAboutEnter}
+                      onMouseLeave={handleAboutLeave}
+                    >
+                      <button className={linkClass(isActive(link.href)) + " flex items-center gap-1"}>
+                        {link.label}
+                        <ChevronDown
+                          size={14}
+                          className={`transition-transform duration-200 ${isAboutOpen ? "rotate-180" : ""}`}
+                        />
+                      </button>
+                      {isAboutOpen && (
+                        <div className="absolute top-full left-0 pt-2 min-w-[180px] z-50">
+                          <div className="bg-white border border-border shadow-[0_4px_16px_rgba(0,0,0,0.08)] rounded-[var(--radius)] py-2">
+                            {aboutSubmenu.map((sub) => (
+                              <Link
+                                key={sub.href}
+                                to={sub.href}
+                                className={`block px-4 py-2 text-sm transition-colors duration-150 ${
+                                  pathname === sub.href
+                                    ? "text-foreground bg-secondary"
+                                    : "text-foreground hover:bg-secondary"
+                                }`}
+                              >
+                                {sub.label}
+                              </Link>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                ) : (
+                      )}
+                    </div>
+                  );
+                }
+                return (
                   <Link key={link.href} to={link.href} className={linkClass(isActive(link.href))}>
                     {link.label}
                   </Link>
-                )
-              )}
+                );
+              })}
             </nav>
 
             {/* Right CTA buttons */}
@@ -191,6 +272,86 @@ const Header = () => {
         </div>
       </header>
 
+      {/* Products Mega Menu — rendered outside header for full-width */}
+      {isProductsOpen && (
+        <div
+          className="hidden lg:block fixed left-0 right-0 z-40"
+          style={{ top: "64px" }}
+          onMouseEnter={handleProductsEnter}
+          onMouseLeave={handleProductsLeave}
+        >
+          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
+            <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
+              <div className="flex gap-0">
+                {/* Left: Categories — ~68% */}
+                <div className="flex-[7] pr-10">
+                  <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block">
+                    Browse by Category
+                  </span>
+                  <div className="grid grid-cols-3 gap-x-10 gap-y-6">
+                    {MEGA_FAMILIES.map((family) => (
+                      <div key={family.slug}>
+                        <Link
+                          to={`/products?family=${family.slug}`}
+                          className="text-sm font-semibold text-foreground hover:opacity-70 transition-opacity block mb-2.5"
+                        >
+                          {family.name}
+                        </Link>
+                        <ul className="space-y-1.5">
+                          {family.subcategories.map((sub) => (
+                            <li key={sub}>
+                              <Link
+                                to={`/products?categories=${slugify(sub)}`}
+                                className="text-[13px] text-muted-foreground hover:text-foreground transition-colors duration-150"
+                              >
+                                {sub}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div className="w-px bg-[hsl(var(--border))] self-stretch" />
+
+                {/* Right: Segments — ~32% */}
+                <div className="flex-[3] pl-10">
+                  <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block">
+                    Browse by Segment
+                  </span>
+                  <ul className="space-y-3">
+                    {MEGA_SEGMENTS.map((seg) => (
+                      <li key={seg.slug}>
+                        <Link
+                          to={`/products?segments=${seg.slug}`}
+                          className="group flex items-center gap-2 text-sm font-medium text-foreground hover:opacity-70 transition-opacity"
+                        >
+                          {seg.name}
+                          <ChevronRight size={14} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* Utility link */}
+                  <div className="mt-8 pt-5 border-t border-[hsl(var(--border))]">
+                    <Link
+                      to="/products"
+                      className="text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      View All Products →
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Spacer to compensate for fixed navbar on non-hero pages */}
       {!isHeroPage && <div className="h-16" />}
 
@@ -198,7 +359,7 @@ const Header = () => {
       {isMenuOpen &&
         createPortal(
           <div
-            className="lg:hidden fixed inset-0 z-[100] bg-white"
+            className="lg:hidden fixed inset-0 z-[100] bg-white overflow-y-auto"
             style={{
               animation: "slideInRight 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards",
             }}
@@ -213,35 +374,101 @@ const Header = () => {
               </button>
             </div>
             <nav className="flex flex-col">
-              {navLinks.map((link) =>
-                link.hasSubmenu ? (
-                  <div key={link.href}>
-                    <button
-                      onClick={() => setIsAboutOpen(!isAboutOpen)}
-                      className="w-full flex items-center justify-between text-2xl font-semibold tracking-tight text-foreground hover:opacity-60 transition-opacity duration-150 py-5 px-6 border-b border-border"
-                    >
-                      {link.label}
-                      <ChevronDown
-                        size={18}
-                        className={`transition-transform duration-200 ${isAboutOpen ? "rotate-180" : ""}`}
-                      />
-                    </button>
-                    {isAboutOpen && (
-                      <div className="bg-secondary">
-                        {aboutSubmenu.map((sub) => (
+              {navLinks.map((link) => {
+                if (link.hasMegaMenu) {
+                  return (
+                    <div key={link.href}>
+                      <button
+                        onClick={() => setMobileProductsOpen(!mobileProductsOpen)}
+                        className="w-full flex items-center justify-between text-2xl font-semibold tracking-tight text-foreground hover:opacity-60 transition-opacity duration-150 py-5 px-6 border-b border-border"
+                      >
+                        {link.label}
+                        <ChevronDown
+                          size={18}
+                          className={`transition-transform duration-200 ${mobileProductsOpen ? "rotate-180" : ""}`}
+                        />
+                      </button>
+                      {mobileProductsOpen && (
+                        <div className="bg-secondary">
+                          {MEGA_FAMILIES.map((family) => (
+                            <div key={family.slug}>
+                              <Link
+                                to={`/products?family=${family.slug}`}
+                                onClick={() => setIsMenuOpen(false)}
+                                className="text-sm font-semibold text-foreground block py-3 px-6 border-b border-border"
+                              >
+                                {family.name}
+                              </Link>
+                              {family.subcategories.map((sub) => (
+                                <Link
+                                  key={sub}
+                                  to={`/products?categories=${slugify(sub)}`}
+                                  onClick={() => setIsMenuOpen(false)}
+                                  className="text-sm text-muted-foreground hover:text-foreground transition-colors block py-2.5 px-10 border-b border-border/50"
+                                >
+                                  {sub}
+                                </Link>
+                              ))}
+                            </div>
+                          ))}
+                          <div className="px-6 py-3 border-b border-border">
+                            <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground block mb-2">
+                              Segments
+                            </span>
+                            {MEGA_SEGMENTS.map((seg) => (
+                              <Link
+                                key={seg.slug}
+                                to={`/products?segments=${seg.slug}`}
+                                onClick={() => setIsMenuOpen(false)}
+                                className="text-sm text-muted-foreground hover:text-foreground transition-colors block py-2"
+                              >
+                                {seg.name}
+                              </Link>
+                            ))}
+                          </div>
                           <Link
-                            key={sub.href}
-                            to={sub.href}
+                            to="/products"
                             onClick={() => setIsMenuOpen(false)}
-                            className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-150 block py-3 px-6 border-b border-border"
+                            className="text-sm font-medium text-foreground block py-3 px-6 border-b border-border"
                           >
-                            {sub.label}
+                            View All Products
                           </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ) : (
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+                if (link.hasSubmenu) {
+                  return (
+                    <div key={link.href}>
+                      <button
+                        onClick={() => setIsAboutOpen(!isAboutOpen)}
+                        className="w-full flex items-center justify-between text-2xl font-semibold tracking-tight text-foreground hover:opacity-60 transition-opacity duration-150 py-5 px-6 border-b border-border"
+                      >
+                        {link.label}
+                        <ChevronDown
+                          size={18}
+                          className={`transition-transform duration-200 ${isAboutOpen ? "rotate-180" : ""}`}
+                        />
+                      </button>
+                      {isAboutOpen && (
+                        <div className="bg-secondary">
+                          {aboutSubmenu.map((sub) => (
+                            <Link
+                              key={sub.href}
+                              to={sub.href}
+                              onClick={() => setIsMenuOpen(false)}
+                              className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-150 block py-3 px-6 border-b border-border"
+                            >
+                              {sub.label}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+                return (
                   <Link
                     key={link.href}
                     to={link.href}
@@ -250,8 +477,8 @@ const Header = () => {
                   >
                     {link.label}
                   </Link>
-                )
-              )}
+                );
+              })}
               <div className="px-6 pb-8 pt-6 space-y-4">
                 <Link to="/contact" onClick={() => setIsMenuOpen(false)}>
                   <Button className="w-full">Contact</Button>
