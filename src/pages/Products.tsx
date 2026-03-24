@@ -418,34 +418,38 @@ export default function Products() {
 function CuratedBrowseRail() {
   return (
     <div className="bg-background border-b border-border">
-      <div className="max-w-[1200px] mx-auto px-6 lg:px-8 flex items-center gap-6 overflow-x-auto no-scrollbar py-2.5">
+      <div className="max-w-[1200px] mx-auto px-6 lg:px-8 flex items-center gap-3 overflow-x-auto no-scrollbar py-2">
         {/* Featured group */}
-        <span className="shrink-0 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+        <span className="shrink-0 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground/60 select-none">
           Featured
         </span>
-        {FEATURED_ITEMS.map((item) => (
-          <span
-            key={item.slug}
-            className="shrink-0 text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer whitespace-nowrap"
-          >
-            {item.label}
-          </span>
-        ))}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {FEATURED_ITEMS.map((item) => (
+            <span
+              key={item.slug}
+              className="shrink-0 px-2.5 py-1 text-[11px] leading-none font-medium rounded-full border border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground transition-colors cursor-pointer whitespace-nowrap"
+            >
+              {item.label}
+            </span>
+          ))}
+        </div>
 
-        <span className="shrink-0 w-px h-4 bg-border" />
+        <span className="shrink-0 w-px h-3.5 bg-border mx-1" />
 
         {/* Collections group */}
-        <span className="shrink-0 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+        <span className="shrink-0 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground/60 select-none">
           Collections
         </span>
-        {COLLECTIONS_ITEMS.map((item) => (
-          <span
-            key={item.slug}
-            className="shrink-0 text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer whitespace-nowrap"
-          >
-            {item.label}
-          </span>
-        ))}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {COLLECTIONS_ITEMS.map((item) => (
+            <span
+              key={item.slug}
+              className="shrink-0 px-2.5 py-1 text-[11px] leading-none font-medium rounded-full border border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground transition-colors cursor-pointer whitespace-nowrap"
+            >
+              {item.label}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );
