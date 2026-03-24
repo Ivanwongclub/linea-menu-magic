@@ -42,7 +42,6 @@ const COLLECTIONS = [
 ];
 
 // ─── Featured filtering logic (temporary front-end mapping) ─
-// Maps featured option values to predicates on Product
 function matchesFeatured(product: Product, featured: string): boolean {
   switch (featured) {
     case 'all':
@@ -61,26 +60,22 @@ function matchesFeatured(product: Product, featured: string): boolean {
 }
 
 // ─── Collection filtering logic (temporary front-end mapping) ─
-// Maps collection slugs to predicates on Product
 function matchesCollection(product: Product, collection: string): boolean {
   switch (collection) {
     case 'ss-2026':
-      // Seasonal tag
       return product.tags?.some((t) => t.slug === 'seasonal') ?? false;
     case 'denim-hardware':
-      // Jeans buttons, rivets, eyelets, hook & eyes
       return product.categories?.some((c) =>
         ['jeans-buttons', 'rivets', 'eyelets', 'hook-eyes'].includes(c.slug)
       ) ?? false;
     case 'beauty-packaging':
-      // Beads, cord ends, cord stoppers, toggles
       return product.categories?.some((c) =>
         ['beads', 'cord-ends', 'cord-stoppers', 'toggles'].includes(c.slug)
       ) ?? false;
     case 'signature-branding':
-      // Badges, patches, webbing (branding trims)
+      // Badges and patches only — webbing removed (it's a soft trim, not branding)
       return product.categories?.some((c) =>
-        ['badges', 'patches', 'webbing'].includes(c.slug)
+        ['badges', 'patches'].includes(c.slug)
       ) ?? false;
     default:
       return true;
@@ -92,26 +87,30 @@ function matchesCollection(product: Product, collection: string): boolean {
 export default function Products() {
   const taxonomy = useProductTaxonomy();
   const { filters, setFilters, clearFilters } = useProductFiltersFromURL();
-  const { products: allProducts, loading, totalCount: rawTotalCount } = useProducts(filters);
+  const { products: allProducts, loading } = useProducts(filters);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
-  const [activeCollection, setActiveCollection] = useState<string | null>(null);
-  const [activeFeatured, setActiveFeatured] = useState('all');
+
+  // Derive featured/collection from URL state
+  const activeFeatured = filters.featured ?? 'all';
+  const activeCollection = filters.collection ?? null;
+
+  const setActiveFeatured = (value: string) => {
+    setFilters({ featured: value === 'all' ? undefined : value });
+  };
+  const setActiveCollection = (slug: string | null) => {
+    setFilters({ collection: slug ?? undefined });
+  };
 
   // Apply Featured + Collection filtering on top of backend/sidebar results
   const products = useMemo(() => {
     let result = allProducts;
-
-    // Featured filter
     if (activeFeatured !== 'all') {
       result = result.filter((p) => matchesFeatured(p, activeFeatured));
     }
-
-    // Collection filter
     if (activeCollection) {
       result = result.filter((p) => matchesCollection(p, activeCollection));
     }
-
     return result;
   }, [allProducts, activeFeatured, activeCollection]);
 
@@ -128,10 +127,32 @@ export default function Products() {
     return counts;
   }, [products]);
 
-  // Collect all active filter labels for chip display
+  // Collect all active filter/browse labels for chip display
   const activeChips = useMemo(() => {
     const chips: { key: string; filterKey: string; label: string; value: string }[] = [];
 
+    // Browse controls as chips
+    if (activeFeatured !== 'all') {
+      const opt = FEATURED_OPTIONS.find((o) => o.value === activeFeatured);
+      chips.push({
+        key: `featured-${activeFeatured}`,
+        filterKey: 'featured',
+        label: opt?.label ?? activeFeatured,
+        value: activeFeatured,
+      });
+    }
+
+    if (activeCollection) {
+      const col = COLLECTIONS.find((c) => c.slug === activeCollection);
+      chips.push({
+        key: `collection-${activeCollection}`,
+        filterKey: 'collection',
+        label: col?.label ?? activeCollection,
+        value: activeCollection,
+      });
+    }
+
+    // Sidebar filters as chips
     if (filters.family) {
       const fam = PRODUCT_FAMILIES.find((f) => f.slug === filters.family);
       chips.push({
@@ -214,11 +235,19 @@ export default function Products() {
     }
 
     return chips;
-  }, [filters, taxonomy]);
+  }, [filters, taxonomy, activeFeatured, activeCollection]);
 
   const activeFilterCount = activeChips.length;
 
   const removeChip = (chip: (typeof activeChips)[0]) => {
+    if (chip.filterKey === 'featured') {
+      setActiveFeatured('all');
+      return;
+    }
+    if (chip.filterKey === 'collection') {
+      setActiveCollection(null);
+      return;
+    }
     if (chip.filterKey === 'search' || chip.filterKey === 'family') {
       setFilters({ [chip.filterKey]: undefined });
       return;
@@ -236,7 +265,6 @@ export default function Products() {
     productCount: totalCount,
     categoryCounts,
   };
-
 
   return (
     <div className="min-h-screen bg-background">
@@ -276,7 +304,7 @@ export default function Products() {
           </div>
         </div>
 
-
+        {/* Active chips */}
         <div className="px-6 lg:px-8 min-h-[44px] flex items-center">
           <div className="max-w-[1200px] mx-auto w-full">
             {activeChips.length > 0 ? (
