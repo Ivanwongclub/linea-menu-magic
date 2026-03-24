@@ -79,7 +79,9 @@ function SectionHeading({
 const hasActiveFilters = (filters: ProductFilters): boolean =>
   !!(
     filters.search ||
+    filters.family ||
     filters.categories?.length ||
+    filters.segments?.length ||
     filters.materials?.length ||
     filters.industries?.length ||
     filters.certifications?.length ||
