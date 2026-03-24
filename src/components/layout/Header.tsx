@@ -324,7 +324,6 @@ const Header = () => {
                                 className="group text-[13px] text-muted-foreground hover:text-foreground transition-colors duration-150 block"
                               >
                                 {sub.en}
-                                <span className="text-[10px] text-muted-foreground/30 ml-1.5 group-hover:text-muted-foreground/50 transition-colors">{sub.cn}</span>
                               </Link>
                             </li>
                           ))}
