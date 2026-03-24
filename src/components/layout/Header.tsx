@@ -5,56 +5,75 @@ import { Menu, X, ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PRODUCT_FAMILIES, PRODUCT_SEGMENTS } from "@/features/products/taxonomy";
 
+const SUPABASE_IMG = "https://otkuqwpsgxzlaxbclbfi.supabase.co/storage/v1/object/public/product-assets/images";
+
 const MEGA_FAMILIES = [
   {
     name: "Hardware",
-    nameCn: "五金配件",
     slug: "hardware",
+    image: `${SUPABASE_IMG}/91013630-38c1-49fc-b21c-f0b052caca09/ai-primary.png`,
     subcategories: [
-      { en: "Buttons", cn: "鈕扣" },
-      { en: "Snap Buttons", cn: "啪鈕" },
-      { en: "Jeans Buttons", cn: "牛仔鈕" },
-      { en: "Shank Buttons", cn: "腳鈕" },
-      { en: "Buckles", cn: "扣環" },
-      { en: "Eyelets", cn: "雞眼" },
-      { en: "Hook & Eyes", cn: "鉤眼" },
-      { en: "Rivets", cn: "鉚釘" },
-      { en: "Zipper Pullers", cn: "拉鏈頭" },
-      { en: "Toggles", cn: "繩扣" },
-      { en: "Cord Ends", cn: "繩尾夾" },
-      { en: "Cord Stoppers", cn: "繩塞" },
-      { en: "Beads", cn: "珠飾" },
+      { en: "Buttons", image: `${SUPABASE_IMG}/91013630-38c1-49fc-b21c-f0b052caca09/ai-primary.png` },
+      { en: "Snap Buttons", image: `${SUPABASE_IMG}/50bff7ed-c214-4b36-9b86-5073db4eccac/ai-primary.png` },
+      { en: "Jeans Buttons", image: `${SUPABASE_IMG}/ed2f489e-41f8-4353-aa71-b8172e544863/ai-primary.png` },
+      { en: "Shank Buttons", image: `${SUPABASE_IMG}/401d7742-6f57-4e6b-ba5e-b1b23d6bf971/ai-primary.png` },
+      { en: "Buckles", image: `${SUPABASE_IMG}/1b856a91-9c8e-494a-b8c2-9e7ccb67e962/ai-primary.png` },
+      { en: "Eyelets", image: `${SUPABASE_IMG}/09257e7e-b145-4e9a-bd0d-4886ca83acdc/ai-primary.png` },
+      { en: "Hook & Eyes", image: `${SUPABASE_IMG}/0f758dff-bca5-4f78-8ca1-7729d2c43064/ai-primary.png` },
+      { en: "Rivets", image: `${SUPABASE_IMG}/3995a056-b671-4d61-9875-a02e89aa1f36/ai-primary.png` },
+      { en: "Zipper Pullers", image: `${SUPABASE_IMG}/91013630-38c1-49fc-b21c-f0b052caca09/ai-primary.png` },
+      { en: "Toggles", image: `${SUPABASE_IMG}/50bff7ed-c214-4b36-9b86-5073db4eccac/ai-primary.png` },
+      { en: "Cord Ends", image: `${SUPABASE_IMG}/ed2f489e-41f8-4353-aa71-b8172e544863/ai-primary.png` },
+      { en: "Cord Stoppers", image: `${SUPABASE_IMG}/401d7742-6f57-4e6b-ba5e-b1b23d6bf971/ai-primary.png` },
+      { en: "Beads", image: `${SUPABASE_IMG}/1edb747d-3fde-472f-a019-2c5dec81e938/ai-primary.png` },
     ],
   },
   {
     name: "Soft Trims",
-    nameCn: "軟質輔料",
     slug: "soft-trims",
+    image: `${SUPABASE_IMG}/40360bf7-eaae-427f-a800-c2a0514d198d/ai-primary.png`,
     subcategories: [
-      { en: "Drawcords", cn: "抽繩" },
-      { en: "Webbing", cn: "織帶" },
+      { en: "Drawcords", image: `${SUPABASE_IMG}/40360bf7-eaae-427f-a800-c2a0514d198d/ai-primary.png` },
+      { en: "Webbing", image: `${SUPABASE_IMG}/ff60f673-8158-4f58-a095-777a8f7b8db6/ai-primary.png` },
     ],
   },
   {
     name: "Branding Trims",
-    nameCn: "品牌標識",
     slug: "branding-trims",
+    image: `${SUPABASE_IMG}/ff60f673-8158-4f58-a095-777a8f7b8db6/ai-primary.png`,
     subcategories: [
-      { en: "Badges", cn: "徽章" },
-      { en: "Patches", cn: "布標" },
+      { en: "Badges", image: `${SUPABASE_IMG}/40360bf7-eaae-427f-a800-c2a0514d198d/ai-primary.png` },
+      { en: "Patches", image: `${SUPABASE_IMG}/ff60f673-8158-4f58-a095-777a8f7b8db6/ai-primary.png` },
     ],
   },
 ];
 
 const MEGA_SEGMENTS = [
-  { name: "Fashion", nameCn: "時裝", slug: "fashion" },
-  { name: "Apparel", nameCn: "成衣", slug: "apparel" },
-  { name: "Beauty", nameCn: "美妝", slug: "beauty" },
+  {
+    name: "Fashion",
+    slug: "fashion",
+    image: `${SUPABASE_IMG}/ed2f489e-41f8-4353-aa71-b8172e544863/ai-primary.png`,
+    description: "Premium trims for luxury & designer brands",
+  },
+  {
+    name: "Apparel",
+    slug: "apparel",
+    image: `${SUPABASE_IMG}/91013630-38c1-49fc-b21c-f0b052caca09/ai-primary.png`,
+    description: "Durable hardware for everyday garments",
+  },
+  {
+    name: "Beauty",
+    slug: "beauty",
+    image: `${SUPABASE_IMG}/50bff7ed-c214-4b36-9b86-5073db4eccac/ai-primary.png`,
+    description: "Refined details for cosmetics & accessories",
+  },
 ];
 
 function slugify(name: string) {
   return name.toLowerCase().replace(/\s+&\s+/g, "-").replace(/\s+/g, "-");
 }
+
+const DEFAULT_PREVIEW = MEGA_FAMILIES[0].image;
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -62,6 +81,8 @@ const Header = () => {
   const [isProductsOpen, setIsProductsOpen] = useState(false);
   const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [previewImage, setPreviewImage] = useState(DEFAULT_PREVIEW);
+  const [previewLabel, setPreviewLabel] = useState("Hardware");
   const { pathname } = useLocation();
   const productsTimeout = useRef<ReturnType<typeof setTimeout>>();
   const aboutTimeout = useRef<ReturnType<typeof setTimeout>>();
@@ -302,61 +323,99 @@ const Header = () => {
           <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
             <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
               <div className="flex gap-0">
-                {/* Left: Categories — ~68% */}
-                <div className="flex-[7] pr-10">
-                  <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-6 block">
-                    Browse by Category
-                  </span>
-                  <div className="grid grid-cols-3 gap-x-10 gap-y-7">
-                    {MEGA_FAMILIES.map((family) => (
-                      <div key={family.slug}>
-                        <Link
-                          to={`/products?family=${family.slug}`}
-                          className="text-sm font-semibold text-foreground hover:opacity-70 transition-opacity block mb-3"
-                        >
-                          {family.name}
-                        </Link>
-                        <ul className="space-y-2">
-                          {family.subcategories.map((sub) => (
-                            <li key={sub.en}>
-                              <Link
-                                to={`/products?categories=${slugify(sub.en)}`}
-                                className="group text-[13px] text-muted-foreground hover:text-foreground transition-colors duration-150 block"
-                              >
-                                {sub.en}
-                              </Link>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
+                {/* Left 7: Categories + Preview Image */}
+                <div className="flex-[7] pr-10 flex gap-8">
+                  {/* Category navigation */}
+                  <div className="flex-1 min-w-0">
+                    <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block">
+                      Browse by Category
+                    </span>
+                    <div className="grid grid-cols-3 gap-x-8 gap-y-6">
+                      {MEGA_FAMILIES.map((family) => (
+                        <div key={family.slug}>
+                          <Link
+                            to={`/products?family=${family.slug}`}
+                            className="text-sm font-semibold text-foreground hover:opacity-70 transition-opacity block mb-2.5"
+                            onMouseEnter={() => { setPreviewImage(family.image); setPreviewLabel(family.name); }}
+                          >
+                            {family.name}
+                          </Link>
+                          <ul className="space-y-1.5">
+                            {family.subcategories.map((sub) => (
+                              <li key={sub.en}>
+                                <Link
+                                  to={`/products?categories=${slugify(sub.en)}`}
+                                  className="text-[13px] text-muted-foreground hover:text-foreground transition-colors duration-150 block"
+                                  onMouseEnter={() => { setPreviewImage(sub.image); setPreviewLabel(sub.en); }}
+                                >
+                                  {sub.en}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Hover preview image */}
+                  <div
+                    className="w-[200px] flex-shrink-0 flex flex-col"
+                    onMouseEnter={() => { setPreviewImage(DEFAULT_PREVIEW); setPreviewLabel("Hardware"); }}
+                  >
+                    <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block">
+                      Preview
+                    </span>
+                    <div className="relative flex-1 rounded-[var(--radius)] border border-[hsl(var(--border))] bg-secondary overflow-hidden">
+                      <img
+                        key={previewImage}
+                        src={previewImage}
+                        alt={previewLabel}
+                        className="absolute inset-0 w-full h-full object-contain p-4 transition-opacity duration-300"
+                        style={{ animation: "fadeIn 250ms ease" }}
+                      />
+                    </div>
+                    <span className="text-[11px] text-muted-foreground mt-2 block text-center truncate">
+                      {previewLabel}
+                    </span>
                   </div>
                 </div>
 
                 {/* Divider */}
                 <div className="w-px bg-[hsl(var(--border))] self-stretch" />
 
-                {/* Right: Segments — ~32% */}
+                {/* Right 3: Segment cards */}
                 <div className="flex-[3] pl-10">
-                  <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-6 block">
+                  <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block">
                     Browse by Segment
                   </span>
-                  <ul className="space-y-4">
+                  <div className="space-y-3">
                     {MEGA_SEGMENTS.map((seg) => (
-                      <li key={seg.slug}>
-                        <Link
-                          to={`/products?segments=${seg.slug}`}
-                          className="group flex items-center gap-2 text-sm font-medium text-foreground hover:opacity-70 transition-opacity"
-                        >
-                          {seg.name}
-                          <ChevronRight size={14} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity ml-auto" />
-                        </Link>
-                      </li>
+                      <Link
+                        key={seg.slug}
+                        to={`/products?segments=${seg.slug}`}
+                        className="group block rounded-[var(--radius)] border border-[hsl(var(--border))] overflow-hidden hover:border-foreground/20 transition-all duration-200 hover:shadow-[0_2px_12px_rgba(0,0,0,0.06)]"
+                      >
+                        <div className="flex items-center gap-3 p-2.5">
+                          <div className="w-14 h-14 rounded-[var(--radius)] bg-secondary overflow-hidden flex-shrink-0">
+                            <img
+                              src={seg.image}
+                              alt={seg.name}
+                              className="w-full h-full object-contain p-1.5 group-hover:scale-105 transition-transform duration-300"
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <span className="text-sm font-semibold text-foreground block">{seg.name}</span>
+                            <span className="text-[11px] text-muted-foreground leading-snug block">{seg.description}</span>
+                          </div>
+                          <ChevronRight size={14} className="text-muted-foreground/40 group-hover:text-foreground/60 transition-colors flex-shrink-0" />
+                        </div>
+                      </Link>
                     ))}
-                  </ul>
+                  </div>
 
                   {/* Utility link */}
-                  <div className="mt-8 pt-5 border-t border-[hsl(var(--border))]">
+                  <div className="mt-6 pt-4 border-t border-[hsl(var(--border))]">
                     <Link
                       to="/products"
                       className="text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
@@ -515,6 +574,10 @@ const Header = () => {
         @keyframes slideInRight {
           from { transform: translateX(100%); }
           to { transform: translateX(0); }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
       `}</style>
     </>
