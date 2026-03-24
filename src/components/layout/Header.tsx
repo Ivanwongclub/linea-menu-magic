@@ -341,10 +341,11 @@ const Header = () => {
 
                 {/* Right: Segments — ~32% */}
                 <div className="flex-[3] pl-10">
-                  <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block">
-                    Browse by Segment <span className="text-muted-foreground/60 ml-1">· 按市場瀏覽</span>
+                  <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-6 block">
+                    Browse by Segment
+                    <span className="block text-[9px] tracking-[0.08em] text-muted-foreground/40 mt-0.5 normal-case">按市場瀏覽</span>
                   </span>
-                  <ul className="space-y-3">
+                  <ul className="space-y-4">
                     {MEGA_SEGMENTS.map((seg) => (
                       <li key={seg.slug}>
                         <Link
@@ -352,8 +353,8 @@ const Header = () => {
                           className="group flex items-center gap-2 text-sm font-medium text-foreground hover:opacity-70 transition-opacity"
                         >
                           {seg.name}
-                          <span className="text-[11px] font-normal text-muted-foreground/60">{seg.nameCn}</span>
-                          <ChevronRight size={14} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                          <span className="text-[10px] font-normal text-muted-foreground/35">{seg.nameCn}</span>
+                          <ChevronRight size={14} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity ml-auto" />
                         </Link>
                       </li>
                     ))}
@@ -365,8 +366,9 @@ const Header = () => {
                       to="/products"
                       className="text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
                     >
-                      View All Products · 查看所有產品 →
+                      View All Products →
                     </Link>
+                    <span className="block text-[9px] text-muted-foreground/35 mt-1 tracking-wide">查看所有產品</span>
                   </div>
                 </div>
               </div>
