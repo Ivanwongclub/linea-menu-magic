@@ -183,31 +183,110 @@ export default function ProductsSidebar({
         )}
       </div>
 
-      <FilterSection label="Category" defaultOpen isFirst>
-        <div className="space-y-2">
-          {taxonomy.categories.map((cat) => {
-            const count = categoryCounts?.[cat.slug] ?? 0;
+      <FilterSection label="Product Family" defaultOpen isFirst>
+        <div className="space-y-4">
+          {familyGroups.map((group) => {
+            if (group.categories.length === 0) return null;
+            const isActiveFamily = filters.family === group.slug;
             return (
-              <div key={cat.id} className="flex items-center gap-2">
-                <Checkbox
-                  id={`cat-${cat.slug}`}
-                  checked={filters.categories?.includes(cat.slug) ?? false}
-                  onCheckedChange={() =>
-                    setFilters({ categories: toggleArrayFilter(filters.categories, cat.slug) })
+              <div key={group.slug}>
+                <button
+                  onClick={() =>
+                    setFilters({
+                      family: isActiveFamily ? undefined : group.slug,
+                      categories: undefined, // reset sub-categories when switching family
+                    })
                   }
-                />
-                <label
-                  htmlFor={`cat-${cat.slug}`}
-                  className="text-sm text-foreground cursor-pointer group-hover:text-foreground/80 flex-1"
+                  className={`text-sm font-medium w-full text-left mb-1.5 transition-colors ${
+                    isActiveFamily
+                      ? 'text-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
                 >
-                  {cat.name}
-                </label>
-                {count > 0 && (
-                  <span className="text-xs text-muted-foreground">{count}</span>
-                )}
+                  {group.name}
+                </button>
+                <div className="space-y-1.5 pl-3 border-l border-border">
+                  {group.categories.map((cat) => {
+                    const count = categoryCounts?.[cat.slug] ?? 0;
+                    return (
+                      <div key={cat.id} className="flex items-center gap-2">
+                        <Checkbox
+                          id={`cat-${cat.slug}`}
+                          checked={filters.categories?.includes(cat.slug) ?? false}
+                          onCheckedChange={() =>
+                            setFilters({ categories: toggleArrayFilter(filters.categories, cat.slug) })
+                          }
+                        />
+                        <label
+                          htmlFor={`cat-${cat.slug}`}
+                          className="text-sm text-foreground cursor-pointer flex-1"
+                        >
+                          {cat.name}
+                        </label>
+                        {count > 0 && (
+                          <span className="text-xs text-muted-foreground">{count}</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             );
           })}
+          {uncategorized.length > 0 && (
+            <div>
+              <span className="text-sm font-medium text-muted-foreground block mb-1.5">
+                Other
+              </span>
+              <div className="space-y-1.5 pl-3 border-l border-border">
+                {uncategorized.map((cat) => {
+                  const count = categoryCounts?.[cat.slug] ?? 0;
+                  return (
+                    <div key={cat.id} className="flex items-center gap-2">
+                      <Checkbox
+                        id={`cat-${cat.slug}`}
+                        checked={filters.categories?.includes(cat.slug) ?? false}
+                        onCheckedChange={() =>
+                          setFilters({ categories: toggleArrayFilter(filters.categories, cat.slug) })
+                        }
+                      />
+                      <label
+                        htmlFor={`cat-${cat.slug}`}
+                        className="text-sm text-foreground cursor-pointer flex-1"
+                      >
+                        {cat.name}
+                      </label>
+                      {count > 0 && (
+                        <span className="text-xs text-muted-foreground">{count}</span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      </FilterSection>
+
+      <FilterSection label="Segment" defaultOpen>
+        <div className="space-y-2">
+          {PRODUCT_SEGMENTS.map((seg) => (
+            <div key={seg.slug} className="flex items-center gap-2">
+              <Checkbox
+                id={`seg-${seg.slug}`}
+                checked={filters.segments?.includes(seg.slug) ?? false}
+                onCheckedChange={() =>
+                  setFilters({ segments: toggleArrayFilter(filters.segments, seg.slug) })
+                }
+              />
+              <label
+                htmlFor={`seg-${seg.slug}`}
+                className="text-sm text-foreground cursor-pointer"
+              >
+                {seg.name}
+              </label>
+            </div>
+          ))}
         </div>
       </FilterSection>
 
