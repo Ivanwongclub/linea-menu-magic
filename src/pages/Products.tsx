@@ -291,23 +291,25 @@ export default function Products() {
               {/* Results header */}
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">
                     {loading ? '…' : `${totalCount} product${totalCount !== 1 ? 's' : ''}`}
                   </span>
                   <span className="text-border">|</span>
-                  <Select
-                    value={activeFeatured}
-                    onValueChange={setActiveFeatured}
-                  >
-                    <SelectTrigger className="h-7 text-xs w-[140px] border-border">
-                      <SelectValue placeholder="Featured" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {FEATURED_OPTIONS.map((opt) => (
-                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="flex items-center gap-1.5">
+                    {FEATURED_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.value}
+                        onClick={() => setActiveFeatured(opt.value)}
+                        className={`whitespace-nowrap text-[11px] px-2.5 py-1 rounded-[0.25rem] border transition-all duration-200 ${
+                          activeFeatured === opt.value
+                            ? 'bg-foreground text-background border-foreground'
+                            : 'bg-background text-foreground border-border hover:border-foreground/40'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-3">
