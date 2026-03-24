@@ -418,23 +418,23 @@ const Header = () => {
                                 onClick={() => setIsMenuOpen(false)}
                                 className="text-sm font-semibold text-foreground block py-3 px-6 border-b border-border"
                               >
-                                {family.name}
+                                {family.name} <span className="text-muted-foreground font-normal text-[12px] ml-1">{family.nameCn}</span>
                               </Link>
                               {family.subcategories.map((sub) => (
                                 <Link
-                                  key={sub}
-                                  to={`/products?categories=${slugify(sub)}`}
+                                  key={sub.en}
+                                  to={`/products?categories=${slugify(sub.en)}`}
                                   onClick={() => setIsMenuOpen(false)}
                                   className="text-sm text-muted-foreground hover:text-foreground transition-colors block py-2.5 px-10 border-b border-border/50"
                                 >
-                                  {sub}
+                                  {sub.en} <span className="text-muted-foreground/50 text-[11px]">{sub.cn}</span>
                                 </Link>
                               ))}
                             </div>
                           ))}
                           <div className="px-6 py-3 border-b border-border">
                             <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground block mb-2">
-                              Segments
+                              Segments · 市場
                             </span>
                             {MEGA_SEGMENTS.map((seg) => (
                               <Link
@@ -443,7 +443,7 @@ const Header = () => {
                                 onClick={() => setIsMenuOpen(false)}
                                 className="text-sm text-muted-foreground hover:text-foreground transition-colors block py-2"
                               >
-                                {seg.name}
+                                {seg.name} <span className="text-muted-foreground/50 text-[11px]">{seg.nameCn}</span>
                               </Link>
                             ))}
                           </div>
@@ -452,7 +452,7 @@ const Header = () => {
                             onClick={() => setIsMenuOpen(false)}
                             className="text-sm font-medium text-foreground block py-3 px-6 border-b border-border"
                           >
-                            View All Products
+                            View All Products · 查看所有產品
                           </Link>
                         </div>
                       )}
