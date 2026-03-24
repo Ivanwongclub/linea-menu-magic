@@ -27,18 +27,13 @@ import { useProductFiltersFromURL } from '@/features/products/hooks/useProductFi
 
 // ─── Curated Browse Data (seeded, CMS-ready) ────────────
 
-// Seeded featured matching keys — replace with CMS-driven data when ready.
-const FEATURED_SEED: { slugs: string[]; itemCodes: string[]; tags: string[] } = {
-  slugs: [
-    'polo-button-10-8',
-    'smooth-snap-15',
-    'oval-logo-badge',
-    'recycled-drawcord-5mm',
-  ],
-  itemCodes: ['btn-1008', 'snap-1500', 'badge-oval-01', 'drawcord-5mm-r'],
-  tags: ['new-arrivals', 'best-sellers', 'sustainable-picks', 'logo-ready'],
-};
-const FEATURED_FALLBACK_COUNT = 4;
+const FEATURED_OPTIONS = [
+  { value: 'all', label: 'All Products' },
+  { value: 'new-arrivals', label: 'New Arrivals' },
+  { value: 'best-sellers', label: 'Best Sellers' },
+  { value: 'sustainable-picks', label: 'Sustainable Picks' },
+  { value: 'logo-ready', label: 'Logo-Ready' },
+];
 
 const COLLECTIONS = [
   { slug: 'ss-2026', label: 'Spring Summer 2026' },
@@ -56,37 +51,7 @@ export default function Products() {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [activeCollection, setActiveCollection] = useState<string | null>(null);
-
-  // Resolve featured set: explicit seeded matches first, deterministic visible fallback second.
-  // Keyed by product.id (UUID, always present) — never slug which can be empty/undefined.
-  const featuredProductIds = useMemo(() => {
-    const ids = new Set<string>();
-
-    products.forEach((p) => {
-      const normalizedSlug = p.slug?.toLowerCase();
-      const normalizedItemCode = p.item_code?.toLowerCase();
-      const hasSeededTag =
-        p.tags?.some((tag) => FEATURED_SEED.tags.includes(tag.slug)) ?? false;
-
-      if (
-        FEATURED_SEED.slugs.includes(normalizedSlug) ||
-        (!!normalizedItemCode && FEATURED_SEED.itemCodes.includes(normalizedItemCode)) ||
-        hasSeededTag
-      ) {
-        ids.add(p.id);
-      }
-    });
-
-    // Guaranteed visible fallback: top up from the final displayed products until we have 4.
-    if (ids.size < FEATURED_FALLBACK_COUNT) {
-      for (const p of products) {
-        if (ids.size >= FEATURED_FALLBACK_COUNT) break;
-        if (!ids.has(p.id)) ids.add(p.id);
-      }
-    }
-
-    return ids;
-  }, [products]);
+  const [activeFeatured, setActiveFeatured] = useState('all');
 
   // Count products per category (from current result set)
   const categoryCounts = useMemo(() => {
@@ -325,9 +290,25 @@ export default function Products() {
 
               {/* Results header */}
               <div className="flex items-center justify-between mb-6">
-                <span className="text-sm text-muted-foreground">
-                  {loading ? '…' : `${totalCount} product${totalCount !== 1 ? 's' : ''}`}
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-muted-foreground">
+                    {loading ? '…' : `${totalCount} product${totalCount !== 1 ? 's' : ''}`}
+                  </span>
+                  <span className="text-border">|</span>
+                  <Select
+                    value={activeFeatured}
+                    onValueChange={setActiveFeatured}
+                  >
+                    <SelectTrigger className="h-7 text-xs w-[140px] border-border">
+                      <SelectValue placeholder="Featured" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {FEATURED_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-1">
@@ -351,7 +332,7 @@ export default function Products() {
                     value={filters.sort ?? ''}
                     onValueChange={(v) => setFilters({ sort: (v || undefined) as ProductFilters['sort'] })}
                   >
-                    <SelectTrigger className="h-8 text-xs w-[120px] border-border">
+                    <SelectTrigger className="h-7 text-xs w-[120px] border-border">
                       <SelectValue placeholder="Sort" />
                     </SelectTrigger>
                     <SelectContent>
@@ -387,7 +368,6 @@ export default function Products() {
                                 product={product}
                                 viewMode={viewMode}
                                 index={idx}
-                                isFeatured={featuredProductIds.has(product.id)}
                                 onQuickView={() => setQuickViewProduct(product)}
                               />
                             </Link>
@@ -417,7 +397,6 @@ export default function Products() {
                             viewMode={viewMode}
                             index={idx}
                             isHeroLayout={viewMode === 'grid' && idx === 0}
-                            isFeatured={featuredProductIds.has(product.id)}
                             onQuickView={() => setQuickViewProduct(product)}
                           />
                         </Link>

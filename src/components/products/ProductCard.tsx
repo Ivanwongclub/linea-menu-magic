@@ -104,14 +104,9 @@ export default function ProductCard({
           className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-out group-hover:scale-[1.04] ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
         />
 
-        {/* Tag badges + Featured badge (top-left) */}
-        {(isFeatured || visibleTags.length > 0) && (
+        {/* Tag badges (top-left) */}
+        {visibleTags.length > 0 && (
           <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-20">
-            {isFeatured && (
-              <span className="bg-foreground text-background text-[10px] font-medium uppercase tracking-[0.06em] px-2 py-0.5 rounded-[var(--radius)]">
-                Featured
-              </span>
-            )}
             {visibleTags.map((tag) => (
               <span key={tag.id} className="bg-foreground text-background text-[10px] font-medium uppercase tracking-[0.06em] px-2 py-0.5 rounded-[var(--radius)]">
                 {tag.name}
@@ -237,12 +232,6 @@ function ProductCardFeatured({
           onError={onImageError}
           className={`absolute inset-0 w-full h-full object-cover object-center transition-all duration-500 ease-out group-hover:scale-[1.04] ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
         />
-        {/* FEATURED label — only if product is actually featured */}
-        {isFeatured && (
-          <span className="absolute top-2.5 left-2.5 bg-foreground text-background text-[10px] font-medium uppercase tracking-[0.1em] px-2.5 py-0.5 rounded-[var(--radius)] z-20">
-            Featured
-          </span>
-        )}
 
         {certs.length > 0 && (
           <div className="absolute bottom-2 right-2 z-10">
@@ -326,11 +315,6 @@ function ProductCardList({
           className="absolute inset-0 h-full w-full object-cover"
           loading="lazy"
         />
-        {isFeatured && (
-          <span className="absolute top-1 left-1 bg-foreground text-background text-[8px] font-medium uppercase tracking-[0.06em] px-1.5 py-0.5 rounded-[var(--radius)] z-20">
-            Featured
-          </span>
-        )}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
