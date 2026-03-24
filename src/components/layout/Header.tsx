@@ -340,7 +340,7 @@ const Header = () => {
                 {/* Right: Segments — ~32% */}
                 <div className="flex-[3] pl-10">
                   <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block">
-                    Browse by Segment
+                    Browse by Segment <span className="text-muted-foreground/60 ml-1">· 按市場瀏覽</span>
                   </span>
                   <ul className="space-y-3">
                     {MEGA_SEGMENTS.map((seg) => (
@@ -350,6 +350,7 @@ const Header = () => {
                           className="group flex items-center gap-2 text-sm font-medium text-foreground hover:opacity-70 transition-opacity"
                         >
                           {seg.name}
+                          <span className="text-[11px] font-normal text-muted-foreground/60">{seg.nameCn}</span>
                           <ChevronRight size={14} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                         </Link>
                       </li>
@@ -362,7 +363,7 @@ const Header = () => {
                       to="/products"
                       className="text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
                     >
-                      View All Products →
+                      View All Products · 查看所有產品 →
                     </Link>
                   </div>
                 </div>
