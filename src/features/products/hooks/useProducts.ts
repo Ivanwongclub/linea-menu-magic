@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Product, ProductFilters } from '../types';
+import { getCategorySlugsForFamily } from '../taxonomy';
 
 interface UseProductsResult {
   products: Product[];
@@ -158,10 +159,19 @@ export function useProducts(filters: ProductFilters): UseProductsResult {
         );
 
         // Client-side junction filtering
-        // (Supabase doesn't support filtering parent rows by child relation values in PostgREST)
-        if (filters.categories?.length) {
+        // Merge family filter into effective category list
+        const effectiveCategories = (() => {
+          const cats = filters.categories ?? [];
+          const familyCats = filters.family
+            ? getCategorySlugsForFamily(filters.family)
+            : [];
+          const merged = [...new Set([...cats, ...familyCats])];
+          return merged.length > 0 ? merged : undefined;
+        })();
+
+        if (effectiveCategories?.length) {
           transformed = transformed.filter((p) =>
-            p.categories?.some((c) => filters.categories!.includes(c.slug))
+            p.categories?.some((c) => effectiveCategories.includes(c.slug))
           );
         }
 
@@ -207,7 +217,9 @@ export function useProducts(filters: ProductFilters): UseProductsResult {
     return () => controller.abort();
   }, [
     filters.search,
+    filters.family,
     filters.categories?.join(','),
+    filters.segments?.join(','),
     filters.materials?.join(','),
     filters.industries?.join(','),
     filters.certifications?.join(','),

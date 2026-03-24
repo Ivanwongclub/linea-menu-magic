@@ -19,6 +19,7 @@ import ProductCard from '@/components/products/ProductCard';
 import type { ViewMode } from '@/components/products/ProductCard';
 import type { Product } from '@/features/products/types';
 import { groupBy } from '@/lib/utils';
+import { PRODUCT_FAMILIES, PRODUCT_SEGMENTS } from '@/features/products/taxonomy';
 
 import { useProducts } from '@/features/products/hooks/useProducts';
 import { useProductTaxonomy } from '@/features/products/hooks/useProductTaxonomy';
@@ -64,12 +65,32 @@ export default function Products() {
   const activeChips = useMemo(() => {
     const chips: { key: string; filterKey: string; label: string; value: string }[] = [];
 
+    if (filters.family) {
+      const fam = PRODUCT_FAMILIES.find((f) => f.slug === filters.family);
+      chips.push({
+        key: `fam-${filters.family}`,
+        filterKey: 'family',
+        label: fam?.name ?? filters.family,
+        value: filters.family,
+      });
+    }
+
     filters.categories?.forEach((slug) => {
       const cat = taxonomy.categories.find((c) => c.slug === slug);
       chips.push({
         key: `cat-${slug}`,
         filterKey: 'categories',
         label: cat?.name ?? slug,
+        value: slug,
+      });
+    });
+
+    filters.segments?.forEach((slug) => {
+      const seg = PRODUCT_SEGMENTS.find((s) => s.slug === slug);
+      chips.push({
+        key: `seg-${slug}`,
+        filterKey: 'segments',
+        label: seg?.name ?? slug,
         value: slug,
       });
     });
@@ -131,8 +152,8 @@ export default function Products() {
   const activeFilterCount = activeChips.length;
 
   const removeChip = (chip: (typeof activeChips)[0]) => {
-    if (chip.filterKey === 'search') {
-      setFilters({ search: undefined });
+    if (chip.filterKey === 'search' || chip.filterKey === 'family') {
+      setFilters({ [chip.filterKey]: undefined });
       return;
     }
     const key = chip.filterKey as keyof typeof filters;
@@ -237,22 +258,19 @@ export default function Products() {
           </div>
         </section>
 
-        {/* Industry Filter Bar */}
-        <IndustryBar
-          industries={taxonomy.industries}
-          active={filters.industries}
+        {/* Family Filter Bar */}
+        <FamilyBar
+          activeFamily={filters.family}
           onToggle={(slug) => {
             if (slug === '__clear__') {
-              setFilters({ industries: undefined });
+              setFilters({ family: undefined, categories: undefined });
               return;
             }
-            const current = filters.industries ?? [];
-            const next = current.includes(slug)
-              ? current.filter((s) => s !== slug)
-              : [...current, slug];
-            setFilters({ industries: next.length > 0 ? next : undefined });
+            setFilters({
+              family: filters.family === slug ? undefined : slug,
+              categories: undefined, // reset sub-categories when switching family
+            });
           }}
-          loading={taxonomy.loading}
         />
 
         {/* Category Hero Banner */}
@@ -499,20 +517,16 @@ export default function Products() {
   );
 }
 
-// ─── Industry Bar ───────────────────────────────────────
+// ─── Family Bar ─────────────────────────────────────────
 
-function IndustryBar({
-  industries,
-  active,
+function FamilyBar({
+  activeFamily,
   onToggle,
-  loading,
 }: {
-  industries: { slug: string; name: string }[];
-  active?: string[];
+  activeFamily?: string;
   onToggle: (slug: string) => void;
-  loading: boolean;
 }) {
-  const noneActive = !active?.length;
+  const noneActive = !activeFamily;
 
   return (
     <div className="bg-[hsl(var(--background))] border-b border-[hsl(var(--border))] py-4">
@@ -526,29 +540,25 @@ function IndustryBar({
                 : 'bg-transparent border-border text-muted-foreground hover:border-foreground hover:text-foreground'
             }`}
           >
-            All
+            All Products
           </button>
-          {loading
-            ? Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-8 w-24 rounded-[var(--radius)]" />
-              ))
-            : industries.map((ind) => {
-                const isActive = active?.includes(ind.slug) ?? false;
-                return (
-                  <button
-                    key={ind.slug}
-                    onClick={() => onToggle(ind.slug)}
-                    aria-pressed={isActive}
-                    className={`shrink-0 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.08em] rounded-[var(--radius)] border transition-all duration-150 ${
-                      isActive
-                        ? 'bg-foreground text-background border-foreground'
-                        : 'bg-transparent border-border text-muted-foreground hover:border-foreground hover:text-foreground'
-                    }`}
-                  >
-                    {ind.name}
-                  </button>
-                );
-              })}
+          {PRODUCT_FAMILIES.map((fam) => {
+            const isActive = activeFamily === fam.slug;
+            return (
+              <button
+                key={fam.slug}
+                onClick={() => onToggle(fam.slug)}
+                aria-pressed={isActive}
+                className={`shrink-0 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.08em] rounded-[var(--radius)] border transition-all duration-150 ${
+                  isActive
+                    ? 'bg-foreground text-background border-foreground'
+                    : 'bg-transparent border-border text-muted-foreground hover:border-foreground hover:text-foreground'
+                }`}
+              >
+                {fam.name}
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>

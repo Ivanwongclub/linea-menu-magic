@@ -4,7 +4,9 @@ import type { ProductFilters } from '../types';
 
 const PARAM_KEYS = {
   search: 'search',
+  family: 'family',
   categories: 'category',
+  segments: 'segment',
   materials: 'material',
   industries: 'industry',
   certifications: 'certification',
@@ -39,7 +41,9 @@ export function useProductFiltersFromURL(): UseProductFiltersFromURLResult {
     const sort = searchParams.get(PARAM_KEYS.sort) as ProductFilters['sort'];
     return {
       search: searchParams.get(PARAM_KEYS.search) || undefined,
+      family: searchParams.get(PARAM_KEYS.family) || undefined,
       categories: parseList(searchParams.get(PARAM_KEYS.categories)),
+      segments: parseList(searchParams.get(PARAM_KEYS.segments)),
       materials: parseList(searchParams.get(PARAM_KEYS.materials)),
       industries: parseList(searchParams.get(PARAM_KEYS.industries)),
       certifications: parseList(searchParams.get(PARAM_KEYS.certifications)),
