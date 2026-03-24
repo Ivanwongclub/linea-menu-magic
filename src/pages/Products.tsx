@@ -61,7 +61,7 @@ export default function Products() {
     return counts;
   }, [products]);
 
-  const [activeBrowseTab, setActiveBrowseTab] = useState<'featured' | 'collections'>('featured');
+  
 
   // Grouped products for "By Category" sort
   const groupedProducts = useMemo(() => {
@@ -205,8 +205,8 @@ export default function Products() {
           </div>
         </section>
 
-        {/* Curated Browse Bar */}
-        <CuratedBrowseBar activeTab={activeBrowseTab} onTabChange={setActiveBrowseTab} />
+        {/* Curated Browse Rail */}
+        <CuratedBrowseRail />
 
         {/* Active Filter Chips */}
         <div className="px-6 lg:px-8 min-h-[44px] flex items-center">
@@ -413,47 +413,39 @@ export default function Products() {
   );
 }
 
-// ─── Curated Browse Bar ─────────────────────────────────
+// ─── Curated Browse Rail ────────────────────────────────
 
-function CuratedBrowseBar({
-  activeTab,
-  onTabChange,
-}: {
-  activeTab: 'featured' | 'collections';
-  onTabChange: (tab: 'featured' | 'collections') => void;
-}) {
-  const items = activeTab === 'featured' ? FEATURED_ITEMS : COLLECTIONS_ITEMS;
-
+function CuratedBrowseRail() {
   return (
     <div className="bg-background border-b border-border">
-      <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
-        {/* Tab headers */}
-        <div className="flex gap-6 pt-3">
-          {(['featured', 'collections'] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => onTabChange(tab)}
-              className={`text-xs font-medium uppercase tracking-[0.1em] pb-3 border-b-2 transition-colors ${
-                activeTab === tab
-                  ? 'border-foreground text-foreground'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {tab === 'featured' ? 'Featured' : 'Collections'}
-            </button>
-          ))}
-        </div>
-        {/* Items row */}
-        <div className="flex gap-2 overflow-x-auto no-scrollbar py-3">
-          {items.map((item) => (
-            <span
-              key={item.slug}
-              className="shrink-0 px-4 py-1.5 text-xs font-medium rounded-[var(--radius)] border border-border text-muted-foreground hover:border-foreground hover:text-foreground transition-colors cursor-pointer"
-            >
-              {item.label}
-            </span>
-          ))}
-        </div>
+      <div className="max-w-[1200px] mx-auto px-6 lg:px-8 flex items-center gap-6 overflow-x-auto no-scrollbar py-2.5">
+        {/* Featured group */}
+        <span className="shrink-0 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+          Featured
+        </span>
+        {FEATURED_ITEMS.map((item) => (
+          <span
+            key={item.slug}
+            className="shrink-0 text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer whitespace-nowrap"
+          >
+            {item.label}
+          </span>
+        ))}
+
+        <span className="shrink-0 w-px h-4 bg-border" />
+
+        {/* Collections group */}
+        <span className="shrink-0 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+          Collections
+        </span>
+        {COLLECTIONS_ITEMS.map((item) => (
+          <span
+            key={item.slug}
+            className="shrink-0 text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer whitespace-nowrap"
+          >
+            {item.label}
+          </span>
+        ))}
       </div>
     </div>
   );
