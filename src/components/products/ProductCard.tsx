@@ -11,6 +11,7 @@ interface ProductCardProps {
   viewMode: ViewMode;
   index?: number;
   featured?: boolean;
+  isFeatured?: boolean;
   onQuickView?: (product: Product) => void;
   onAddToLibrary?: (product: Product) => void;
   isInLibrary?: boolean;
