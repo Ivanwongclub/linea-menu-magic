@@ -323,61 +323,99 @@ const Header = () => {
           <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
             <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
               <div className="flex gap-0">
-                {/* Left: Categories — ~68% */}
-                <div className="flex-[7] pr-10">
-                  <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-6 block">
-                    Browse by Category
-                  </span>
-                  <div className="grid grid-cols-3 gap-x-10 gap-y-7">
-                    {MEGA_FAMILIES.map((family) => (
-                      <div key={family.slug}>
-                        <Link
-                          to={`/products?family=${family.slug}`}
-                          className="text-sm font-semibold text-foreground hover:opacity-70 transition-opacity block mb-3"
-                        >
-                          {family.name}
-                        </Link>
-                        <ul className="space-y-2">
-                          {family.subcategories.map((sub) => (
-                            <li key={sub.en}>
-                              <Link
-                                to={`/products?categories=${slugify(sub.en)}`}
-                                className="group text-[13px] text-muted-foreground hover:text-foreground transition-colors duration-150 block"
-                              >
-                                {sub.en}
-                              </Link>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
+                {/* Left 7: Categories + Preview Image */}
+                <div className="flex-[7] pr-10 flex gap-8">
+                  {/* Category navigation */}
+                  <div className="flex-1 min-w-0">
+                    <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block">
+                      Browse by Category
+                    </span>
+                    <div className="grid grid-cols-3 gap-x-8 gap-y-6">
+                      {MEGA_FAMILIES.map((family) => (
+                        <div key={family.slug}>
+                          <Link
+                            to={`/products?family=${family.slug}`}
+                            className="text-sm font-semibold text-foreground hover:opacity-70 transition-opacity block mb-2.5"
+                            onMouseEnter={() => { setPreviewImage(family.image); setPreviewLabel(family.name); }}
+                          >
+                            {family.name}
+                          </Link>
+                          <ul className="space-y-1.5">
+                            {family.subcategories.map((sub) => (
+                              <li key={sub.en}>
+                                <Link
+                                  to={`/products?categories=${slugify(sub.en)}`}
+                                  className="text-[13px] text-muted-foreground hover:text-foreground transition-colors duration-150 block"
+                                  onMouseEnter={() => { setPreviewImage(sub.image); setPreviewLabel(sub.en); }}
+                                >
+                                  {sub.en}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Hover preview image */}
+                  <div
+                    className="w-[200px] flex-shrink-0 flex flex-col"
+                    onMouseEnter={() => { setPreviewImage(DEFAULT_PREVIEW); setPreviewLabel("Hardware"); }}
+                  >
+                    <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block">
+                      Preview
+                    </span>
+                    <div className="relative flex-1 rounded-[var(--radius)] border border-[hsl(var(--border))] bg-secondary overflow-hidden">
+                      <img
+                        key={previewImage}
+                        src={previewImage}
+                        alt={previewLabel}
+                        className="absolute inset-0 w-full h-full object-contain p-4 transition-opacity duration-300"
+                        style={{ animation: "fadeIn 250ms ease" }}
+                      />
+                    </div>
+                    <span className="text-[11px] text-muted-foreground mt-2 block text-center truncate">
+                      {previewLabel}
+                    </span>
                   </div>
                 </div>
 
                 {/* Divider */}
                 <div className="w-px bg-[hsl(var(--border))] self-stretch" />
 
-                {/* Right: Segments — ~32% */}
+                {/* Right 3: Segment cards */}
                 <div className="flex-[3] pl-10">
-                  <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-6 block">
+                  <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block">
                     Browse by Segment
                   </span>
-                  <ul className="space-y-4">
+                  <div className="space-y-3">
                     {MEGA_SEGMENTS.map((seg) => (
-                      <li key={seg.slug}>
-                        <Link
-                          to={`/products?segments=${seg.slug}`}
-                          className="group flex items-center gap-2 text-sm font-medium text-foreground hover:opacity-70 transition-opacity"
-                        >
-                          {seg.name}
-                          <ChevronRight size={14} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity ml-auto" />
-                        </Link>
-                      </li>
+                      <Link
+                        key={seg.slug}
+                        to={`/products?segments=${seg.slug}`}
+                        className="group block rounded-[var(--radius)] border border-[hsl(var(--border))] overflow-hidden hover:border-foreground/20 transition-all duration-200 hover:shadow-[0_2px_12px_rgba(0,0,0,0.06)]"
+                      >
+                        <div className="flex items-center gap-3 p-2.5">
+                          <div className="w-14 h-14 rounded-[var(--radius)] bg-secondary overflow-hidden flex-shrink-0">
+                            <img
+                              src={seg.image}
+                              alt={seg.name}
+                              className="w-full h-full object-contain p-1.5 group-hover:scale-105 transition-transform duration-300"
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <span className="text-sm font-semibold text-foreground block">{seg.name}</span>
+                            <span className="text-[11px] text-muted-foreground leading-snug block">{seg.description}</span>
+                          </div>
+                          <ChevronRight size={14} className="text-muted-foreground/40 group-hover:text-foreground/60 transition-colors flex-shrink-0" />
+                        </div>
+                      </Link>
                     ))}
-                  </ul>
+                  </div>
 
                   {/* Utility link */}
-                  <div className="mt-8 pt-5 border-t border-[hsl(var(--border))]">
+                  <div className="mt-6 pt-4 border-t border-[hsl(var(--border))]">
                     <Link
                       to="/products"
                       className="text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
