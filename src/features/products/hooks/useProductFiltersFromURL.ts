@@ -4,7 +4,9 @@ import type { ProductFilters } from '../types';
 
 const PARAM_KEYS = {
   search: 'search',
+  family: 'family',
   categories: 'category',
+  segments: 'segment',
   materials: 'material',
   industries: 'industry',
   certifications: 'certification',
