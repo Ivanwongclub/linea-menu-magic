@@ -159,10 +159,19 @@ export function useProducts(filters: ProductFilters): UseProductsResult {
         );
 
         // Client-side junction filtering
-        // (Supabase doesn't support filtering parent rows by child relation values in PostgREST)
-        if (filters.categories?.length) {
+        // Merge family filter into effective category list
+        const effectiveCategories = (() => {
+          const cats = filters.categories ?? [];
+          const familyCats = filters.family
+            ? getCategorySlugsForFamily(filters.family)
+            : [];
+          const merged = [...new Set([...cats, ...familyCats])];
+          return merged.length > 0 ? merged : undefined;
+        })();
+
+        if (effectiveCategories?.length) {
           transformed = transformed.filter((p) =>
-            p.categories?.some((c) => filters.categories!.includes(c.slug))
+            p.categories?.some((c) => effectiveCategories.includes(c.slug))
           );
         }
 
