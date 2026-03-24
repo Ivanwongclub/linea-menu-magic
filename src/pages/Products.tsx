@@ -50,6 +50,7 @@ export default function Products() {
   const { products, loading, totalCount } = useProducts(filters);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+  const [activeCollection, setActiveCollection] = useState<string | null>(null);
 
   // Count products per category (from current result set)
   const categoryCounts = useMemo(() => {
