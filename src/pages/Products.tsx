@@ -369,7 +369,6 @@ export default function Products() {
                                 viewMode={viewMode}
                                 index={idx}
                                 onQuickView={() => setQuickViewProduct(product)}
-                                onQuickView={() => setQuickViewProduct(product)}
                               />
                             </Link>
                           ))}
