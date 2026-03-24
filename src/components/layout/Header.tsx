@@ -442,7 +442,6 @@ const Header = () => {
                                 className="text-sm text-muted-foreground hover:text-foreground transition-colors block py-2"
                               >
                                 {seg.name}
-                                <span className="text-[10px] text-muted-foreground/30 ml-1.5">{seg.nameCn}</span>
                               </Link>
                             ))}
                           </div>
