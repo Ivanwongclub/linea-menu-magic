@@ -17,7 +17,7 @@ import {
 import ProductsSidebar from '@/components/products/ProductsSidebar';
 import ProductCard from '@/components/products/ProductCard';
 import type { ViewMode } from '@/components/products/ProductCard';
-import type { Product } from '@/features/products/types';
+import type { Product, ProductFilters } from '@/features/products/types';
 import { groupBy } from '@/lib/utils';
 import { PRODUCT_FAMILIES, PRODUCT_SEGMENTS } from '@/features/products/taxonomy';
 
