@@ -58,25 +58,34 @@ export default function Products() {
   const [activeCollection, setActiveCollection] = useState<string | null>(null);
 
   // Resolve featured set: explicit seeded matches first, deterministic visible fallback second.
-  const featuredSlugs = useMemo(() => {
-    const matched = products.filter((p) => {
+  // Keyed by product.id (UUID, always present) — never slug which can be empty/undefined.
+  const featuredProductIds = useMemo(() => {
+    const ids = new Set<string>();
+
+    products.forEach((p) => {
+      const normalizedSlug = p.slug?.toLowerCase();
       const normalizedItemCode = p.item_code?.toLowerCase();
       const hasSeededTag =
         p.tags?.some((tag) => FEATURED_SEED.tags.includes(tag.slug)) ?? false;
 
-      return (
-        FEATURED_SEED.slugs.includes(p.slug) ||
+      if (
+        FEATURED_SEED.slugs.includes(normalizedSlug) ||
         (!!normalizedItemCode && FEATURED_SEED.itemCodes.includes(normalizedItemCode)) ||
         hasSeededTag
-      );
+      ) {
+        ids.add(p.id);
+      }
     });
 
-    if (matched.length > 0) {
-      return new Set(matched.map((p) => p.slug));
+    // Guaranteed visible fallback: top up from the final displayed products until we have 4.
+    if (ids.size < FEATURED_FALLBACK_COUNT) {
+      for (const p of products) {
+        if (ids.size >= FEATURED_FALLBACK_COUNT) break;
+        if (!ids.has(p.id)) ids.add(p.id);
+      }
     }
 
-    // Guaranteed visible fallback: first 4 currently displayed products.
-    return new Set(products.slice(0, FEATURED_FALLBACK_COUNT).map((p) => p.slug));
+    return ids;
   }, [products]);
 
   // Count products per category (from current result set)
