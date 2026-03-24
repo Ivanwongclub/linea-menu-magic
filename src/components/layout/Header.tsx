@@ -618,7 +618,7 @@ const Header = () => {
             </div>
             <nav className="flex flex-col">
               {navLinks.map((link) => {
-                if (link.hasMegaMenu) {
+                if (link.megaMenu === "products") {
                   return (
                     <div key={link.href}>
                       <button
@@ -681,31 +681,45 @@ const Header = () => {
                     </div>
                   );
                 }
-                if (link.hasSubmenu) {
+                if (link.megaMenu === "about") {
                   return (
                     <div key={link.href}>
                       <button
-                        onClick={() => setIsAboutOpen(!isAboutOpen)}
+                        onClick={() => setMobileAboutOpen(!mobileAboutOpen)}
                         className="w-full flex items-center justify-between text-2xl font-semibold tracking-tight text-foreground hover:opacity-60 transition-opacity duration-150 py-5 px-6 border-b border-border"
                       >
                         {link.label}
                         <ChevronDown
                           size={18}
-                          className={`transition-transform duration-200 ${isAboutOpen ? "rotate-180" : ""}`}
+                          className={`transition-transform duration-200 ${mobileAboutOpen ? "rotate-180" : ""}`}
                         />
                       </button>
-                      {isAboutOpen && (
+                      {mobileAboutOpen && (
                         <div className="bg-secondary">
-                          {aboutSubmenu.map((sub) => (
-                            <Link
-                              key={sub.href}
-                              to={sub.href}
-                              onClick={() => setIsMenuOpen(false)}
-                              className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-150 block py-3 px-6 border-b border-border"
-                            >
-                              {sub.label}
-                            </Link>
+                          {ABOUT_GROUPS.map((group) => (
+                            <div key={group.heading}>
+                              <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground/60 block pt-3 pb-1 px-6">
+                                {group.heading}
+                              </span>
+                              {group.links.map((sub) => (
+                                <Link
+                                  key={sub.href}
+                                  to={sub.href}
+                                  onClick={() => setIsMenuOpen(false)}
+                                  className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-150 block py-2.5 px-6 border-b border-border/30"
+                                >
+                                  {sub.label}
+                                </Link>
+                              ))}
+                            </div>
                           ))}
+                          <Link
+                            to="/about/our-story"
+                            onClick={() => setIsMenuOpen(false)}
+                            className="text-sm font-medium text-foreground block py-3.5 px-6 border-b border-border"
+                          >
+                            Learn More About Us →
+                          </Link>
                         </div>
                       )}
                     </div>
