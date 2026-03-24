@@ -420,26 +420,29 @@ const Header = () => {
                               <Link
                                 to={`/products?family=${family.slug}`}
                                 onClick={() => setIsMenuOpen(false)}
-                                className="text-sm font-semibold text-foreground block py-3 px-6 border-b border-border"
+                                className="flex items-baseline gap-2 text-sm font-semibold text-foreground py-3.5 px-6 border-b border-border"
                               >
-                                {family.name} <span className="text-muted-foreground font-normal text-[12px] ml-1">{family.nameCn}</span>
+                                {family.name}
+                                <span className="text-[10px] font-normal text-muted-foreground/40 tracking-wide">{family.nameCn}</span>
                               </Link>
                               {family.subcategories.map((sub) => (
                                 <Link
                                   key={sub.en}
                                   to={`/products?categories=${slugify(sub.en)}`}
                                   onClick={() => setIsMenuOpen(false)}
-                                  className="text-sm text-muted-foreground hover:text-foreground transition-colors block py-2.5 px-10 border-b border-border/50"
+                                  className="text-[13px] text-muted-foreground hover:text-foreground transition-colors block py-2 px-10 border-b border-border/30"
                                 >
-                                  {sub.en} <span className="text-muted-foreground/50 text-[11px]">{sub.cn}</span>
+                                  {sub.en}
+                                  <span className="text-[10px] text-muted-foreground/30 ml-1.5">{sub.cn}</span>
                                 </Link>
                               ))}
                             </div>
                           ))}
-                          <div className="px-6 py-3 border-b border-border">
-                            <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground block mb-2">
-                              Segments · 市場
+                          <div className="px-6 py-4 border-b border-border">
+                            <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground block mb-1">
+                              Segments
                             </span>
+                            <span className="text-[9px] text-muted-foreground/35 tracking-wide block mb-3">按市場瀏覽</span>
                             {MEGA_SEGMENTS.map((seg) => (
                               <Link
                                 key={seg.slug}
@@ -447,16 +450,18 @@ const Header = () => {
                                 onClick={() => setIsMenuOpen(false)}
                                 className="text-sm text-muted-foreground hover:text-foreground transition-colors block py-2"
                               >
-                                {seg.name} <span className="text-muted-foreground/50 text-[11px]">{seg.nameCn}</span>
+                                {seg.name}
+                                <span className="text-[10px] text-muted-foreground/30 ml-1.5">{seg.nameCn}</span>
                               </Link>
                             ))}
                           </div>
                           <Link
                             to="/products"
                             onClick={() => setIsMenuOpen(false)}
-                            className="text-sm font-medium text-foreground block py-3 px-6 border-b border-border"
+                            className="text-sm font-medium text-foreground block py-3.5 px-6 border-b border-border"
                           >
-                            View All Products · 查看所有產品
+                            View All Products →
+                            <span className="block text-[9px] text-muted-foreground/35 mt-0.5 tracking-wide font-normal">查看所有產品</span>
                           </Link>
                         </div>
                       )}
