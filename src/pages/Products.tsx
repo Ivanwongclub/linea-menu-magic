@@ -444,7 +444,7 @@ function CuratedBrowseRail() {
 
           {/* Divider */}
           <span className="hidden sm:block w-px h-6 bg-border" />
-        <span className="shrink-0 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground/60 select-none">
+        
           {/* Collections group */}
           <span className="text-xs font-semibold uppercase tracking-[0.08em] text-foreground select-none">
             Collections
