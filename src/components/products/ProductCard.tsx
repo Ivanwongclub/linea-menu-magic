@@ -60,7 +60,7 @@ export default function ProductCard({
   }, [imageUrl]);
 
   if (viewMode === 'list') {
-    return <ProductCardList product={product} onQuickView={onQuickView} />;
+    return <ProductCardList product={product} onQuickView={onQuickView} isFeatured={isFeatured} />;
   }
 
   // Featured card — horizontal layout
