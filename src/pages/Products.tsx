@@ -19,6 +19,7 @@ import ProductCard from '@/components/products/ProductCard';
 import type { ViewMode } from '@/components/products/ProductCard';
 import type { Product } from '@/features/products/types';
 import { groupBy } from '@/lib/utils';
+import { PRODUCT_FAMILIES, PRODUCT_SEGMENTS } from '@/features/products/taxonomy';
 
 import { useProducts } from '@/features/products/hooks/useProducts';
 import { useProductTaxonomy } from '@/features/products/hooks/useProductTaxonomy';
