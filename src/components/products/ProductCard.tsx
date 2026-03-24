@@ -306,9 +306,11 @@ function ProductCardFeatured({
 function ProductCardList({
   product,
   onQuickView,
+  isFeatured = false,
 }: {
   product: Product;
   onQuickView?: (product: Product) => void;
+  isFeatured?: boolean;
 }) {
   const tags = product.tags ?? [];
   const imageUrl = resolveProductImage(product, 'thumb');
