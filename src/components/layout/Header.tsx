@@ -484,6 +484,117 @@ const Header = () => {
         </div>
       )}
 
+      {/* About Mega Menu — rendered outside header for full-width */}
+      {isAboutOpen && (
+        <div
+          className="hidden lg:block fixed left-0 right-0 z-40"
+          style={{ top: "64px" }}
+          onMouseEnter={handleAboutEnter}
+          onMouseLeave={handleAboutLeave}
+        >
+          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
+            <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
+              <div className="flex gap-0">
+                {/* Left 6: About groups + Preview Image */}
+                <div className="flex-[6] pr-10 flex gap-10">
+                  {/* Grouped navigation */}
+                  <div className="min-w-0">
+                    <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block">
+                      About Us
+                    </span>
+                    {ABOUT_GROUPS.map((group) => (
+                      <div key={group.heading} className="mb-5 last:mb-0">
+                        <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground/60 block mb-2">
+                          {group.heading}
+                        </span>
+                        <ul className="space-y-1.5">
+                          {group.links.map((link) => (
+                            <li key={link.href}>
+                              <Link
+                                to={link.href}
+                                className="text-[13px] text-foreground hover:opacity-70 transition-opacity duration-150 block"
+                                onMouseEnter={() => { setAboutPreviewImage(link.image); setAboutPreviewLabel(link.label); }}
+                              >
+                                {link.label}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Hover preview image */}
+                  <div
+                    className="flex-1 min-w-[280px] flex flex-col"
+                    onMouseEnter={() => { setAboutPreviewImage(ABOUT_DEFAULT_PREVIEW); setAboutPreviewLabel("Our Story"); }}
+                  >
+                    <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block opacity-0 pointer-events-none">
+                      &nbsp;
+                    </span>
+                    <div className="relative flex-1 rounded-[var(--radius)] overflow-hidden">
+                      <img
+                        key={aboutPreviewImage}
+                        src={aboutPreviewImage}
+                        alt={aboutPreviewLabel}
+                        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
+                        style={{ animation: "fadeIn 250ms ease" }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div className="w-px bg-[hsl(var(--border))] self-stretch" />
+
+                {/* Right 4: Trust/Story cards */}
+                <div className="flex-[4] pl-10">
+                  <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block">
+                    Discover
+                  </span>
+                  <div className="space-y-3">
+                    {ABOUT_TRUST_CARDS.map((card) => (
+                      <Link
+                        key={card.title}
+                        to={card.href}
+                        className="group block rounded-[var(--radius)] border border-[hsl(var(--border))] overflow-hidden hover:border-foreground/20 hover:shadow-[0_2px_12px_rgba(0,0,0,0.08)] transition-all duration-200"
+                      >
+                        <div className="flex items-stretch h-20">
+                          <div className="w-20 flex-shrink-0 overflow-hidden">
+                            <img
+                              src={card.image}
+                              alt={card.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0 flex flex-col justify-center px-4">
+                            <span className="text-sm font-semibold text-foreground block">{card.title}</span>
+                            <span className="text-[11px] text-muted-foreground leading-snug block mt-0.5">{card.description}</span>
+                          </div>
+                          <div className="flex items-center pr-3">
+                            <ChevronRight size={14} className="text-muted-foreground/40 group-hover:text-foreground/60 transition-colors flex-shrink-0" />
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+
+                  {/* Utility link */}
+                  <div className="mt-6 pt-4 border-t border-[hsl(var(--border))]">
+                    <Link
+                      to="/about/our-story"
+                      className="text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      Learn More About Us →
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Spacer to compensate for fixed navbar on non-hero pages */}
       {!isHeroPage && <div className="h-16" />}
 
