@@ -290,27 +290,6 @@ export default function ProductsSidebar({
         </div>
       </FilterSection>
 
-      <FilterSection label="Collection" defaultOpen>
-        <div className="space-y-2">
-          {taxonomy.tags.map((tag) => (
-            <div key={tag.id} className="flex items-center gap-2">
-              <Checkbox
-                id={`tag-${tag.slug}`}
-                checked={filters.tags?.includes(tag.slug) ?? false}
-                onCheckedChange={() =>
-                  setFilters({ tags: toggleArrayFilter(filters.tags, tag.slug) })
-                }
-              />
-              <label
-                htmlFor={`tag-${tag.slug}`}
-                className="text-sm text-foreground cursor-pointer group-hover:text-foreground/80"
-              >
-                {tag.name}
-              </label>
-            </div>
-          ))}
-        </div>
-      </FilterSection>
 
       <FilterSection label="Material" defaultOpen={false}>
         <div className="space-y-2">
@@ -357,27 +336,6 @@ export default function ProductsSidebar({
         </div>
       </FilterSection>
 
-      <FilterSection label="Application" defaultOpen={false}>
-        <div className="space-y-2">
-          {taxonomy.industries.map((ind) => (
-            <div key={ind.id} className="flex items-center gap-2">
-              <Checkbox
-                id={`ind-${ind.slug}`}
-                checked={filters.industries?.includes(ind.slug) ?? false}
-                onCheckedChange={() =>
-                  setFilters({ industries: toggleArrayFilter(filters.industries, ind.slug) })
-                }
-              />
-              <label
-                htmlFor={`ind-${ind.slug}`}
-                className="text-sm text-foreground cursor-pointer group-hover:text-foreground/80"
-              >
-                {ind.name}
-              </label>
-            </div>
-          ))}
-        </div>
-      </FilterSection>
 
       <FilterSection label="Sustainability" defaultOpen={false}>
         <div className="space-y-2">
