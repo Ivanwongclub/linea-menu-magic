@@ -305,7 +305,7 @@ const Header = () => {
                 {/* Left: Categories — ~68% */}
                 <div className="flex-[7] pr-10">
                   <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block">
-                    Browse by Category
+                    Browse by Category <span className="text-muted-foreground/60 ml-1">· 按類別瀏覽</span>
                   </span>
                   <div className="grid grid-cols-3 gap-x-10 gap-y-6">
                     {MEGA_FAMILIES.map((family) => (
@@ -315,15 +315,16 @@ const Header = () => {
                           className="text-sm font-semibold text-foreground hover:opacity-70 transition-opacity block mb-2.5"
                         >
                           {family.name}
+                          <span className="block text-[11px] font-normal text-muted-foreground mt-0.5">{family.nameCn}</span>
                         </Link>
                         <ul className="space-y-1.5">
                           {family.subcategories.map((sub) => (
-                            <li key={sub}>
+                            <li key={sub.en}>
                               <Link
-                                to={`/products?categories=${slugify(sub)}`}
+                                to={`/products?categories=${slugify(sub.en)}`}
                                 className="text-[13px] text-muted-foreground hover:text-foreground transition-colors duration-150"
                               >
-                                {sub}
+                                {sub.en} <span className="text-muted-foreground/50 text-[11px]">{sub.cn}</span>
                               </Link>
                             </li>
                           ))}
