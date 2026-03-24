@@ -397,7 +397,6 @@ export default function Products() {
                             viewMode={viewMode}
                             index={idx}
                             isHeroLayout={viewMode === 'grid' && idx === 0}
-                            isHeroLayout={viewMode === 'grid' && idx === 0}
                             onQuickView={() => setQuickViewProduct(product)}
                           />
                         </Link>
