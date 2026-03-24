@@ -323,8 +323,8 @@ const Header = () => {
           <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
             <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
               <div className="flex gap-0">
-                {/* Left 7: Categories + Preview Image */}
-                <div className="flex-[7] pr-10 flex gap-10">
+                {/* Left 6: Categories + Preview Image */}
+                <div className="flex-[6] pr-10 flex gap-10">
                   {/* Hardware column */}
                   <div className="min-w-0">
                     <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block">
