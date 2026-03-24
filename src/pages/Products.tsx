@@ -54,6 +54,17 @@ export default function Products() {
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [activeCollection, setActiveCollection] = useState<string | null>(null);
 
+  // Resolve featured set: prefer seeded slugs, fallback to first N products
+  const featuredSlugs = useMemo(() => {
+    const seedSet = new Set(FEATURED_PRODUCT_SLUGS_SEED);
+    const matched = products.filter((p) => seedSet.has(p.slug));
+    if (matched.length > 0) {
+      return new Set(matched.map((p) => p.slug));
+    }
+    // Fallback: mark the first N loaded products as featured
+    return new Set(products.slice(0, FEATURED_FALLBACK_COUNT).map((p) => p.slug));
+  }, [products]);
+
   // Count products per category (from current result set)
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = {};
