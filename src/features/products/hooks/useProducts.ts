@@ -217,7 +217,9 @@ export function useProducts(filters: ProductFilters): UseProductsResult {
     return () => controller.abort();
   }, [
     filters.search,
+    filters.family,
     filters.categories?.join(','),
+    filters.segments?.join(','),
     filters.materials?.join(','),
     filters.industries?.join(','),
     filters.certifications?.join(','),
