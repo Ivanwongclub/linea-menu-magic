@@ -349,7 +349,6 @@ const Header = () => {
                           className="group flex items-center gap-2 text-sm font-medium text-foreground hover:opacity-70 transition-opacity"
                         >
                           {seg.name}
-                          <span className="text-[10px] font-normal text-muted-foreground/35">{seg.nameCn}</span>
                           <ChevronRight size={14} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity ml-auto" />
                         </Link>
                       </li>
