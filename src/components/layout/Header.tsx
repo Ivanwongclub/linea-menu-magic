@@ -5,51 +5,68 @@ import { Menu, X, ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PRODUCT_FAMILIES, PRODUCT_SEGMENTS } from "@/features/products/taxonomy";
 
+const SUPABASE_IMG = "https://otkuqwpsgxzlaxbclbfi.supabase.co/storage/v1/object/public/product-assets/images";
+
 const MEGA_FAMILIES = [
   {
     name: "Hardware",
-    nameCn: "五金配件",
     slug: "hardware",
+    image: `${SUPABASE_IMG}/91013630-38c1-49fc-b21c-f0b052caca09/ai-primary.png`,
     subcategories: [
-      { en: "Buttons", cn: "鈕扣" },
-      { en: "Snap Buttons", cn: "啪鈕" },
-      { en: "Jeans Buttons", cn: "牛仔鈕" },
-      { en: "Shank Buttons", cn: "腳鈕" },
-      { en: "Buckles", cn: "扣環" },
-      { en: "Eyelets", cn: "雞眼" },
-      { en: "Hook & Eyes", cn: "鉤眼" },
-      { en: "Rivets", cn: "鉚釘" },
-      { en: "Zipper Pullers", cn: "拉鏈頭" },
-      { en: "Toggles", cn: "繩扣" },
-      { en: "Cord Ends", cn: "繩尾夾" },
-      { en: "Cord Stoppers", cn: "繩塞" },
-      { en: "Beads", cn: "珠飾" },
+      { en: "Buttons", image: `${SUPABASE_IMG}/91013630-38c1-49fc-b21c-f0b052caca09/ai-primary.png` },
+      { en: "Snap Buttons", image: `${SUPABASE_IMG}/50bff7ed-c214-4b36-9b86-5073db4eccac/ai-primary.png` },
+      { en: "Jeans Buttons", image: `${SUPABASE_IMG}/ed2f489e-41f8-4353-aa71-b8172e544863/ai-primary.png` },
+      { en: "Shank Buttons", image: `${SUPABASE_IMG}/401d7742-6f57-4e6b-ba5e-b1b23d6bf971/ai-primary.png` },
+      { en: "Buckles", image: `${SUPABASE_IMG}/1b856a91-9c8e-494a-b8c2-9e7ccb67e962/ai-primary.png` },
+      { en: "Eyelets", image: `${SUPABASE_IMG}/09257e7e-b145-4e9a-bd0d-4886ca83acdc/ai-primary.png` },
+      { en: "Hook & Eyes", image: `${SUPABASE_IMG}/0f758dff-bca5-4f78-8ca1-7729d2c43064/ai-primary.png` },
+      { en: "Rivets", image: `${SUPABASE_IMG}/3995a056-b671-4d61-9875-a02e89aa1f36/ai-primary.png` },
+      { en: "Zipper Pullers", image: `${SUPABASE_IMG}/91013630-38c1-49fc-b21c-f0b052caca09/ai-primary.png` },
+      { en: "Toggles", image: `${SUPABASE_IMG}/50bff7ed-c214-4b36-9b86-5073db4eccac/ai-primary.png` },
+      { en: "Cord Ends", image: `${SUPABASE_IMG}/ed2f489e-41f8-4353-aa71-b8172e544863/ai-primary.png` },
+      { en: "Cord Stoppers", image: `${SUPABASE_IMG}/401d7742-6f57-4e6b-ba5e-b1b23d6bf971/ai-primary.png` },
+      { en: "Beads", image: `${SUPABASE_IMG}/1edb747d-3fde-472f-a019-2c5dec81e938/ai-primary.png` },
     ],
   },
   {
     name: "Soft Trims",
-    nameCn: "軟質輔料",
     slug: "soft-trims",
+    image: `${SUPABASE_IMG}/40360bf7-eaae-427f-a800-c2a0514d198d/ai-primary.png`,
     subcategories: [
-      { en: "Drawcords", cn: "抽繩" },
-      { en: "Webbing", cn: "織帶" },
+      { en: "Drawcords", image: `${SUPABASE_IMG}/40360bf7-eaae-427f-a800-c2a0514d198d/ai-primary.png` },
+      { en: "Webbing", image: `${SUPABASE_IMG}/ff60f673-8158-4f58-a095-777a8f7b8db6/ai-primary.png` },
     ],
   },
   {
     name: "Branding Trims",
-    nameCn: "品牌標識",
     slug: "branding-trims",
+    image: `${SUPABASE_IMG}/ff60f673-8158-4f58-a095-777a8f7b8db6/ai-primary.png`,
     subcategories: [
-      { en: "Badges", cn: "徽章" },
-      { en: "Patches", cn: "布標" },
+      { en: "Badges", image: `${SUPABASE_IMG}/40360bf7-eaae-427f-a800-c2a0514d198d/ai-primary.png` },
+      { en: "Patches", image: `${SUPABASE_IMG}/ff60f673-8158-4f58-a095-777a8f7b8db6/ai-primary.png` },
     ],
   },
 ];
 
 const MEGA_SEGMENTS = [
-  { name: "Fashion", nameCn: "時裝", slug: "fashion" },
-  { name: "Apparel", nameCn: "成衣", slug: "apparel" },
-  { name: "Beauty", nameCn: "美妝", slug: "beauty" },
+  {
+    name: "Fashion",
+    slug: "fashion",
+    image: `${SUPABASE_IMG}/ed2f489e-41f8-4353-aa71-b8172e544863/ai-primary.png`,
+    description: "Premium trims for luxury & designer brands",
+  },
+  {
+    name: "Apparel",
+    slug: "apparel",
+    image: `${SUPABASE_IMG}/91013630-38c1-49fc-b21c-f0b052caca09/ai-primary.png`,
+    description: "Durable hardware for everyday garments",
+  },
+  {
+    name: "Beauty",
+    slug: "beauty",
+    image: `${SUPABASE_IMG}/50bff7ed-c214-4b36-9b86-5073db4eccac/ai-primary.png`,
+    description: "Refined details for cosmetics & accessories",
+  },
 ];
 
 function slugify(name: string) {
