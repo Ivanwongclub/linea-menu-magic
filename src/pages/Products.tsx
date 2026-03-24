@@ -519,48 +519,46 @@ export default function Products() {
   );
 }
 
-// ─── Family Bar ─────────────────────────────────────────
+// ─── Curated Browse Bar ─────────────────────────────────
 
-function FamilyBar({
-  activeFamily,
-  onToggle,
+function CuratedBrowseBar({
+  activeTab,
+  onTabChange,
 }: {
-  activeFamily?: string;
-  onToggle: (slug: string) => void;
+  activeTab: 'featured' | 'collections';
+  onTabChange: (tab: 'featured' | 'collections') => void;
 }) {
-  const noneActive = !activeFamily;
+  const items = activeTab === 'featured' ? FEATURED_ITEMS : COLLECTIONS_ITEMS;
 
   return (
-    <div className="bg-[hsl(var(--background))] border-b border-[hsl(var(--border))] py-4">
+    <div className="bg-background border-b border-border">
       <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
-        <div className="flex gap-2 overflow-x-auto no-scrollbar">
-          <button
-            onClick={() => { if (!noneActive) onToggle('__clear__'); }}
-            className={`shrink-0 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.08em] rounded-[var(--radius)] border transition-all duration-150 ${
-              noneActive
-                ? 'bg-foreground text-background border-foreground'
-                : 'bg-transparent border-border text-muted-foreground hover:border-foreground hover:text-foreground'
-            }`}
-          >
-            All Products
-          </button>
-          {PRODUCT_FAMILIES.map((fam) => {
-            const isActive = activeFamily === fam.slug;
-            return (
-              <button
-                key={fam.slug}
-                onClick={() => onToggle(fam.slug)}
-                aria-pressed={isActive}
-                className={`shrink-0 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.08em] rounded-[var(--radius)] border transition-all duration-150 ${
-                  isActive
-                    ? 'bg-foreground text-background border-foreground'
-                    : 'bg-transparent border-border text-muted-foreground hover:border-foreground hover:text-foreground'
-                }`}
-              >
-                {fam.name}
-              </button>
-            );
-          })}
+        {/* Tab headers */}
+        <div className="flex gap-6 pt-3">
+          {(['featured', 'collections'] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => onTabChange(tab)}
+              className={`text-xs font-medium uppercase tracking-[0.1em] pb-3 border-b-2 transition-colors ${
+                activeTab === tab
+                  ? 'border-foreground text-foreground'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {tab === 'featured' ? 'Featured' : 'Collections'}
+            </button>
+          ))}
+        </div>
+        {/* Items row */}
+        <div className="flex gap-2 overflow-x-auto no-scrollbar py-3">
+          {items.map((item) => (
+            <span
+              key={item.slug}
+              className="shrink-0 px-4 py-1.5 text-xs font-medium rounded-[var(--radius)] border border-border text-muted-foreground hover:border-foreground hover:text-foreground transition-colors cursor-pointer"
+            >
+              {item.label}
+            </span>
+          ))}
         </div>
       </div>
     </div>

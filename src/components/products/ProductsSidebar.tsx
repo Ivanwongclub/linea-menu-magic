@@ -336,22 +336,22 @@ export default function ProductsSidebar({
         </div>
       </FilterSection>
 
-      <FilterSection label="Application" defaultOpen={false}>
+      <FilterSection label="Segment" defaultOpen>
         <div className="space-y-2">
-          {taxonomy.industries.map((ind) => (
-            <div key={ind.id} className="flex items-center gap-2">
+          {PRODUCT_SEGMENTS.map((seg) => (
+            <div key={seg.slug} className="flex items-center gap-2">
               <Checkbox
-                id={`ind-${ind.slug}`}
-                checked={filters.industries?.includes(ind.slug) ?? false}
+                id={`seg-${seg.slug}`}
+                checked={filters.segments?.includes(seg.slug) ?? false}
                 onCheckedChange={() =>
-                  setFilters({ industries: toggleArrayFilter(filters.industries, ind.slug) })
+                  setFilters({ segments: toggleArrayFilter(filters.segments, seg.slug) })
                 }
               />
               <label
-                htmlFor={`ind-${ind.slug}`}
-                className="text-sm text-foreground cursor-pointer group-hover:text-foreground/80"
+                htmlFor={`seg-${seg.slug}`}
+                className="text-sm text-foreground cursor-pointer"
               >
-                {ind.name}
+                {seg.name}
               </label>
             </div>
           ))}
