@@ -15,13 +15,13 @@ interface BreadcrumbSegment {
 
 interface PageBreadcrumbProps {
   segments: BreadcrumbSegment[];
-  title: string;
+  title?: string;
 }
 
 const PageBreadcrumb = ({ segments, title }: PageBreadcrumbProps) => {
   return (
-    <div className="pt-8 pb-4 px-6 lg:px-8">
-      <div className="max-w-[1200px] mx-auto">
+    <div className={`px-6 lg:px-8 ${title ? 'pt-8 pb-4' : 'pt-6 pb-3'}`}>
+      <div className="max-w-7xl mx-auto">
         <Breadcrumb>
           <BreadcrumbList className="text-xs uppercase tracking-[0.06em] text-muted-foreground">
             {segments.map((segment, index) => {
@@ -43,7 +43,7 @@ const PageBreadcrumb = ({ segments, title }: PageBreadcrumbProps) => {
             })}
           </BreadcrumbList>
         </Breadcrumb>
-        <h1 className="text-2xl font-light text-foreground mt-4">{title}</h1>
+        {title && <h1 className="text-2xl font-light text-foreground mt-4">{title}</h1>}
       </div>
     </div>
   );
