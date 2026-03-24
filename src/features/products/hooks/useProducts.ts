@@ -1,7 +1,18 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Product, ProductFilters } from '../types';
-import { getCategorySlugsForFamily } from '../taxonomy';
+import { getCategorySlugsForFamily, PRODUCT_FAMILIES } from '../taxonomy';
+
+/**
+ * Temporary segment → category-family mapping.
+ * Maps approved Segment slugs to product family slugs so that
+ * selecting "Fashion" shows Hardware products, etc.
+ */
+const SEGMENT_TO_FAMILIES: Record<string, string[]> = {
+  fashion: ['hardware'],
+  apparel: ['soft-trims'],
+  beauty: ['branding-trims'],
+};
 
 interface UseProductsResult {
   products: Product[];
