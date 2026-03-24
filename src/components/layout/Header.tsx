@@ -8,29 +8,48 @@ import { PRODUCT_FAMILIES, PRODUCT_SEGMENTS } from "@/features/products/taxonomy
 const MEGA_FAMILIES = [
   {
     name: "Hardware",
+    nameCn: "五金配件",
     slug: "hardware",
     subcategories: [
-      "Buttons", "Snap Buttons", "Jeans Buttons", "Shank Buttons",
-      "Buckles", "Eyelets", "Hook & Eyes", "Rivets",
-      "Zipper Pullers", "Toggles", "Cord Ends", "Cord Stoppers", "Beads",
+      { en: "Buttons", cn: "鈕扣" },
+      { en: "Snap Buttons", cn: "啪鈕" },
+      { en: "Jeans Buttons", cn: "牛仔鈕" },
+      { en: "Shank Buttons", cn: "腳鈕" },
+      { en: "Buckles", cn: "扣環" },
+      { en: "Eyelets", cn: "雞眼" },
+      { en: "Hook & Eyes", cn: "鉤眼" },
+      { en: "Rivets", cn: "鉚釘" },
+      { en: "Zipper Pullers", cn: "拉鏈頭" },
+      { en: "Toggles", cn: "繩扣" },
+      { en: "Cord Ends", cn: "繩尾夾" },
+      { en: "Cord Stoppers", cn: "繩塞" },
+      { en: "Beads", cn: "珠飾" },
     ],
   },
   {
     name: "Soft Trims",
+    nameCn: "軟質輔料",
     slug: "soft-trims",
-    subcategories: ["Drawcords", "Webbing"],
+    subcategories: [
+      { en: "Drawcords", cn: "抽繩" },
+      { en: "Webbing", cn: "織帶" },
+    ],
   },
   {
     name: "Branding Trims",
+    nameCn: "品牌標識",
     slug: "branding-trims",
-    subcategories: ["Badges", "Patches"],
+    subcategories: [
+      { en: "Badges", cn: "徽章" },
+      { en: "Patches", cn: "布標" },
+    ],
   },
 ];
 
 const MEGA_SEGMENTS = [
-  { name: "Fashion", slug: "fashion" },
-  { name: "Apparel", slug: "apparel" },
-  { name: "Beauty", slug: "beauty" },
+  { name: "Fashion", nameCn: "時裝", slug: "fashion" },
+  { name: "Apparel", nameCn: "成衣", slug: "apparel" },
+  { name: "Beauty", nameCn: "美妝", slug: "beauty" },
 ];
 
 function slugify(name: string) {
