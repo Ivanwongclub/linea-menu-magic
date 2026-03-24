@@ -239,7 +239,7 @@ function ProductCardFeatured({
         />
         {/* FEATURED label — only if product is actually featured */}
         {isFeatured && (
-          <span className="absolute top-2.5 left-2.5 bg-foreground text-background text-[10px] font-medium uppercase tracking-[0.1em] px-2.5 py-0.5 rounded-[var(--radius)] z-10">
+          <span className="absolute top-2.5 left-2.5 bg-foreground text-background text-[10px] font-medium uppercase tracking-[0.1em] px-2.5 py-0.5 rounded-[var(--radius)] z-20">
             Featured
           </span>
         )}
