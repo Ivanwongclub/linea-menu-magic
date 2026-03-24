@@ -104,9 +104,14 @@ export default function ProductCard({
           className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-out group-hover:scale-[1.04] ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
         />
 
-        {/* Tag badges (top-left) */}
-        {visibleTags.length > 0 && (
+        {/* Tag badges + Featured badge (top-left) */}
+        {(isFeatured || visibleTags.length > 0) && (
           <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-10">
+            {isFeatured && (
+              <span className="bg-foreground text-background text-[10px] font-medium uppercase tracking-[0.06em] px-2 py-0.5 rounded-[var(--radius)]">
+                Featured
+              </span>
+            )}
             {visibleTags.map((tag) => (
               <span key={tag.id} className="bg-foreground text-background text-[10px] font-medium uppercase tracking-[0.06em] px-2 py-0.5 rounded-[var(--radius)]">
                 {tag.name}
