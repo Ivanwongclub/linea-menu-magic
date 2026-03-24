@@ -18,6 +18,8 @@ function transformProduct(row: Record<string, unknown>): Product {
   const categoryMaps = (row.product_category_map as Record<string, unknown>[] | null) ?? [];
   const materialMaps = (row.product_material_map as Record<string, unknown>[] | null) ?? [];
   const tagMaps = (row.product_tag_map as Record<string, unknown>[] | null) ?? [];
+  const industryMaps = (row.product_industry_map as Record<string, unknown>[] | null) ?? [];
+  const certificationMaps = (row.product_certification_map as Record<string, unknown>[] | null) ?? [];
 
   const categories = categoryMaps
     .map((m) => m.product_categories as Record<string, unknown> | null)
