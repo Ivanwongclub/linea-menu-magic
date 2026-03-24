@@ -47,7 +47,7 @@ export default function ProductCard({
   onAddToLibrary,
   isInLibrary,
 }: ProductCardProps) {
-  const rawUrl = resolveProductImage(product, featured ? 'full' : 'thumb');
+  const rawUrl = resolveProductImage(product, isHeroLayout ? 'full' : 'thumb');
   const imageUrl = getOptimizedImageUrl(rawUrl, featured ? 800 : 400, featured ? 400 : 400, 80);
   const isAboveFold = index < 8;
 
