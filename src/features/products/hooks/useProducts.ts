@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Product, ProductFilters } from '../types';
+import { getCategorySlugsForFamily } from '../taxonomy';
 
 interface UseProductsResult {
   products: Product[];
