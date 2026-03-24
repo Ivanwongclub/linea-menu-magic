@@ -106,7 +106,7 @@ export default function ProductCard({
 
         {/* Tag badges + Featured badge (top-left) */}
         {(isFeatured || visibleTags.length > 0) && (
-          <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-10">
+          <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-20">
             {isFeatured && (
               <span className="bg-foreground text-background text-[10px] font-medium uppercase tracking-[0.06em] px-2 py-0.5 rounded-[var(--radius)]">
                 Featured
