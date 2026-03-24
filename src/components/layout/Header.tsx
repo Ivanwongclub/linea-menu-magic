@@ -306,7 +306,6 @@ const Header = () => {
                 <div className="flex-[7] pr-10">
                   <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-6 block">
                     Browse by Category
-                    <span className="block text-[9px] tracking-[0.08em] text-muted-foreground/40 mt-0.5 normal-case">按類別瀏覽</span>
                   </span>
                   <div className="grid grid-cols-3 gap-x-10 gap-y-7">
                     {MEGA_FAMILIES.map((family) => (
