@@ -10,7 +10,7 @@ interface ProductCardProps {
   product: Product;
   viewMode: ViewMode;
   index?: number;
-  featured?: boolean;
+  isHeroLayout?: boolean;
   isFeatured?: boolean;
   onQuickView?: (product: Product) => void;
   onAddToLibrary?: (product: Product) => void;
