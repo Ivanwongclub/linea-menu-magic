@@ -517,20 +517,16 @@ export default function Products() {
   );
 }
 
-// ─── Industry Bar ───────────────────────────────────────
+// ─── Family Bar ─────────────────────────────────────────
 
-function IndustryBar({
-  industries,
-  active,
+function FamilyBar({
+  activeFamily,
   onToggle,
-  loading,
 }: {
-  industries: { slug: string; name: string }[];
-  active?: string[];
+  activeFamily?: string;
   onToggle: (slug: string) => void;
-  loading: boolean;
 }) {
-  const noneActive = !active?.length;
+  const noneActive = !activeFamily;
 
   return (
     <div className="bg-[hsl(var(--background))] border-b border-[hsl(var(--border))] py-4">
@@ -544,29 +540,25 @@ function IndustryBar({
                 : 'bg-transparent border-border text-muted-foreground hover:border-foreground hover:text-foreground'
             }`}
           >
-            All
+            All Products
           </button>
-          {loading
-            ? Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-8 w-24 rounded-[var(--radius)]" />
-              ))
-            : industries.map((ind) => {
-                const isActive = active?.includes(ind.slug) ?? false;
-                return (
-                  <button
-                    key={ind.slug}
-                    onClick={() => onToggle(ind.slug)}
-                    aria-pressed={isActive}
-                    className={`shrink-0 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.08em] rounded-[var(--radius)] border transition-all duration-150 ${
-                      isActive
-                        ? 'bg-foreground text-background border-foreground'
-                        : 'bg-transparent border-border text-muted-foreground hover:border-foreground hover:text-foreground'
-                    }`}
-                  >
-                    {ind.name}
-                  </button>
-                );
-              })}
+          {PRODUCT_FAMILIES.map((fam) => {
+            const isActive = activeFamily === fam.slug;
+            return (
+              <button
+                key={fam.slug}
+                onClick={() => onToggle(fam.slug)}
+                aria-pressed={isActive}
+                className={`shrink-0 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.08em] rounded-[var(--radius)] border transition-all duration-150 ${
+                  isActive
+                    ? 'bg-foreground text-background border-foreground'
+                    : 'bg-transparent border-border text-muted-foreground hover:border-foreground hover:text-foreground'
+                }`}
+              >
+                {fam.name}
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
