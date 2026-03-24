@@ -61,7 +61,7 @@ export default function Products() {
     return counts;
   }, [products]);
 
-  const [activeBrowseTab, setActiveBrowseTab] = useState<'featured' | 'collections'>('featured');
+  
 
   // Grouped products for "By Category" sort
   const groupedProducts = useMemo(() => {
