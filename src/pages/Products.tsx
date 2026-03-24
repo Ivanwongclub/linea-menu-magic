@@ -27,13 +27,10 @@ import { useProductFiltersFromURL } from '@/features/products/hooks/useProductFi
 
 // ─── Curated Browse Data (seeded, CMS-ready) ────────────
 
-const FEATURED_OPTIONS = [
-  { value: 'all', label: 'All Products' },
-  { value: 'new-arrivals', label: 'New Arrivals' },
-  { value: 'best-sellers', label: 'Best Sellers' },
-  { value: 'sustainable-picks', label: 'Sustainable Picks' },
-  { value: 'logo-ready', label: 'Logo-Ready' },
-];
+// Seeded featured product slugs — replace with CMS-driven data when ready
+const FEATURED_PRODUCT_SLUGS = new Set([
+  // Add real product slugs here once available
+]);
 
 const COLLECTIONS = [
   { slug: 'ss-2026', label: 'Spring Summer 2026' },
