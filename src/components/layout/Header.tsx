@@ -426,7 +426,6 @@ const Header = () => {
                                   className="text-[13px] text-muted-foreground hover:text-foreground transition-colors block py-2 px-10 border-b border-border/30"
                                 >
                                   {sub.en}
-                                  <span className="text-[10px] text-muted-foreground/30 ml-1.5">{sub.cn}</span>
                                 </Link>
                               ))}
                             </div>
