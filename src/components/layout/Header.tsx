@@ -4,6 +4,10 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, X, ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PRODUCT_FAMILIES, PRODUCT_SEGMENTS } from "@/features/products/taxonomy";
+import aboutHeritageImg from "@/assets/about-heritage.jpg";
+import heritageCraftImg from "@/assets/heritage-craftsmanship.jpg";
+import aboutShowroomImg from "@/assets/about-showroom.jpg";
+import foundersImg from "@/assets/founders.png";
 
 const SUPABASE_IMG = "https://otkuqwpsgxzlaxbclbfi.supabase.co/storage/v1/object/public/product-assets/images";
 
