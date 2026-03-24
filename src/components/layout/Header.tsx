@@ -8,29 +8,48 @@ import { PRODUCT_FAMILIES, PRODUCT_SEGMENTS } from "@/features/products/taxonomy
 const MEGA_FAMILIES = [
   {
     name: "Hardware",
+    nameCn: "五金配件",
     slug: "hardware",
     subcategories: [
-      "Buttons", "Snap Buttons", "Jeans Buttons", "Shank Buttons",
-      "Buckles", "Eyelets", "Hook & Eyes", "Rivets",
-      "Zipper Pullers", "Toggles", "Cord Ends", "Cord Stoppers", "Beads",
+      { en: "Buttons", cn: "鈕扣" },
+      { en: "Snap Buttons", cn: "啪鈕" },
+      { en: "Jeans Buttons", cn: "牛仔鈕" },
+      { en: "Shank Buttons", cn: "腳鈕" },
+      { en: "Buckles", cn: "扣環" },
+      { en: "Eyelets", cn: "雞眼" },
+      { en: "Hook & Eyes", cn: "鉤眼" },
+      { en: "Rivets", cn: "鉚釘" },
+      { en: "Zipper Pullers", cn: "拉鏈頭" },
+      { en: "Toggles", cn: "繩扣" },
+      { en: "Cord Ends", cn: "繩尾夾" },
+      { en: "Cord Stoppers", cn: "繩塞" },
+      { en: "Beads", cn: "珠飾" },
     ],
   },
   {
     name: "Soft Trims",
+    nameCn: "軟質輔料",
     slug: "soft-trims",
-    subcategories: ["Drawcords", "Webbing"],
+    subcategories: [
+      { en: "Drawcords", cn: "抽繩" },
+      { en: "Webbing", cn: "織帶" },
+    ],
   },
   {
     name: "Branding Trims",
+    nameCn: "品牌標識",
     slug: "branding-trims",
-    subcategories: ["Badges", "Patches"],
+    subcategories: [
+      { en: "Badges", cn: "徽章" },
+      { en: "Patches", cn: "布標" },
+    ],
   },
 ];
 
 const MEGA_SEGMENTS = [
-  { name: "Fashion", slug: "fashion" },
-  { name: "Apparel", slug: "apparel" },
-  { name: "Beauty", slug: "beauty" },
+  { name: "Fashion", nameCn: "時裝", slug: "fashion" },
+  { name: "Apparel", nameCn: "成衣", slug: "apparel" },
+  { name: "Beauty", nameCn: "美妝", slug: "beauty" },
 ];
 
 function slugify(name: string) {
@@ -286,7 +305,7 @@ const Header = () => {
                 {/* Left: Categories — ~68% */}
                 <div className="flex-[7] pr-10">
                   <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block">
-                    Browse by Category
+                    Browse by Category <span className="text-muted-foreground/60 ml-1">· 按類別瀏覽</span>
                   </span>
                   <div className="grid grid-cols-3 gap-x-10 gap-y-6">
                     {MEGA_FAMILIES.map((family) => (
@@ -296,15 +315,16 @@ const Header = () => {
                           className="text-sm font-semibold text-foreground hover:opacity-70 transition-opacity block mb-2.5"
                         >
                           {family.name}
+                          <span className="block text-[11px] font-normal text-muted-foreground mt-0.5">{family.nameCn}</span>
                         </Link>
                         <ul className="space-y-1.5">
                           {family.subcategories.map((sub) => (
-                            <li key={sub}>
+                            <li key={sub.en}>
                               <Link
-                                to={`/products?categories=${slugify(sub)}`}
+                                to={`/products?categories=${slugify(sub.en)}`}
                                 className="text-[13px] text-muted-foreground hover:text-foreground transition-colors duration-150"
                               >
-                                {sub}
+                                {sub.en} <span className="text-muted-foreground/50 text-[11px]">{sub.cn}</span>
                               </Link>
                             </li>
                           ))}
@@ -320,7 +340,7 @@ const Header = () => {
                 {/* Right: Segments — ~32% */}
                 <div className="flex-[3] pl-10">
                   <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block">
-                    Browse by Segment
+                    Browse by Segment <span className="text-muted-foreground/60 ml-1">· 按市場瀏覽</span>
                   </span>
                   <ul className="space-y-3">
                     {MEGA_SEGMENTS.map((seg) => (
@@ -330,6 +350,7 @@ const Header = () => {
                           className="group flex items-center gap-2 text-sm font-medium text-foreground hover:opacity-70 transition-opacity"
                         >
                           {seg.name}
+                          <span className="text-[11px] font-normal text-muted-foreground/60">{seg.nameCn}</span>
                           <ChevronRight size={14} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                         </Link>
                       </li>
@@ -342,7 +363,7 @@ const Header = () => {
                       to="/products"
                       className="text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
                     >
-                      View All Products →
+                      View All Products · 查看所有產品 →
                     </Link>
                   </div>
                 </div>
@@ -397,23 +418,23 @@ const Header = () => {
                                 onClick={() => setIsMenuOpen(false)}
                                 className="text-sm font-semibold text-foreground block py-3 px-6 border-b border-border"
                               >
-                                {family.name}
+                                {family.name} <span className="text-muted-foreground font-normal text-[12px] ml-1">{family.nameCn}</span>
                               </Link>
                               {family.subcategories.map((sub) => (
                                 <Link
-                                  key={sub}
-                                  to={`/products?categories=${slugify(sub)}`}
+                                  key={sub.en}
+                                  to={`/products?categories=${slugify(sub.en)}`}
                                   onClick={() => setIsMenuOpen(false)}
                                   className="text-sm text-muted-foreground hover:text-foreground transition-colors block py-2.5 px-10 border-b border-border/50"
                                 >
-                                  {sub}
+                                  {sub.en} <span className="text-muted-foreground/50 text-[11px]">{sub.cn}</span>
                                 </Link>
                               ))}
                             </div>
                           ))}
                           <div className="px-6 py-3 border-b border-border">
                             <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground block mb-2">
-                              Segments
+                              Segments · 市場
                             </span>
                             {MEGA_SEGMENTS.map((seg) => (
                               <Link
@@ -422,7 +443,7 @@ const Header = () => {
                                 onClick={() => setIsMenuOpen(false)}
                                 className="text-sm text-muted-foreground hover:text-foreground transition-colors block py-2"
                               >
-                                {seg.name}
+                                {seg.name} <span className="text-muted-foreground/50 text-[11px]">{seg.nameCn}</span>
                               </Link>
                             ))}
                           </div>
@@ -431,7 +452,7 @@ const Header = () => {
                             onClick={() => setIsMenuOpen(false)}
                             className="text-sm font-medium text-foreground block py-3 px-6 border-b border-border"
                           >
-                            View All Products
+                            View All Products · 查看所有產品
                           </Link>
                         </div>
                       )}
