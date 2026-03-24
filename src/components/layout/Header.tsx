@@ -423,7 +423,7 @@ const Header = () => {
                       <Link
                         key={seg.slug}
                         to={`/products?segments=${seg.slug}`}
-                        className="group block rounded-[var(--radius)] overflow-hidden hover:shadow-[0_2px_12px_rgba(0,0,0,0.08)] transition-all duration-200"
+                        className="group block rounded-[var(--radius)] border border-[hsl(var(--border))] overflow-hidden hover:border-foreground/20 hover:shadow-[0_2px_12px_rgba(0,0,0,0.08)] transition-all duration-200"
                       >
                         <div className="flex items-stretch h-20">
                           <div className="w-20 flex-shrink-0 overflow-hidden">
