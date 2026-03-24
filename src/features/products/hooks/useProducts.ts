@@ -165,11 +165,8 @@ export function useProducts(filters: ProductFilters): UseProductsResult {
           );
         }
 
-        // Sort
+        // Sort (only name_asc / name_desc exposed in UI)
         switch (filters.sort) {
-          case 'newest':
-            query = query.order('sort_order', { ascending: false });
-            break;
           case 'name_asc':
             query = query.order('name', { ascending: true });
             break;
