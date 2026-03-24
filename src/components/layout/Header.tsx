@@ -159,19 +159,12 @@ const Header = () => {
   }, [pathname]);
 
   const navLinks = [
-    { href: "/products", label: "Products", hasMegaMenu: true },
-    { href: "/about", label: "About", hasSubmenu: true },
+    { href: "/products", label: "Products", megaMenu: "products" as const },
+    { href: "/about", label: "About", megaMenu: "about" as const },
     { href: "/sustainability", label: "Sustainability" },
     { href: "/news", label: "News" },
     { href: "/brochures", label: "Brochures" },
     { href: "/designer-studio", label: "Designer Studio" },
-  ];
-
-  const aboutSubmenu = [
-    { href: "/about/our-story", label: "Our Story" },
-    { href: "/about/factory", label: "Factory" },
-    { href: "/about/certificates", label: "Certificates" },
-    { href: "/about/sustainability", label: "Sustainability" },
   ];
 
   const isActive = (path: string) =>
