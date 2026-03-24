@@ -35,6 +35,13 @@ const FEATURED_OPTIONS = [
   { value: 'logo-ready', label: 'Logo-Ready' },
 ];
 
+const COLLECTIONS = [
+  { slug: 'ss-2026', label: 'Spring Summer 2026' },
+  { slug: 'denim-hardware', label: 'Denim Hardware Edit' },
+  { slug: 'beauty-packaging', label: 'Beauty Packaging Details' },
+  { slug: 'signature-branding', label: 'Signature Branding Trims' },
+];
+
 // ─── Page ───────────────────────────────────────────────
 
 export default function Products() {
