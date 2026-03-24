@@ -234,7 +234,14 @@ function ProductCardFeatured({
         />
 
         {certs.length > 0 && (
-...
+          <div className="absolute bottom-2 right-2 z-10">
+            <div className="bg-white/85 backdrop-blur-sm rounded-[var(--radius)] px-1.5 py-0.5 flex items-center gap-1">
+              <Leaf className="w-2.5 h-2.5 text-[hsl(var(--foreground))]" />
+              <span className="text-[9px] font-medium uppercase tracking-[0.06em] text-[hsl(var(--foreground))]">
+                {certs[0].abbreviation}
+              </span>
+            </div>
+          </div>
         )}
       </div>
 
