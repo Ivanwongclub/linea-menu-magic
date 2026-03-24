@@ -315,11 +315,6 @@ function ProductCardList({
           className="absolute inset-0 h-full w-full object-cover"
           loading="lazy"
         />
-        {isFeatured && (
-          <span className="absolute top-1 left-1 bg-foreground text-background text-[8px] font-medium uppercase tracking-[0.06em] px-1.5 py-0.5 rounded-[var(--radius)] z-20">
-            Featured
-          </span>
-        )}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
