@@ -368,7 +368,7 @@ export default function Products() {
                                 product={product}
                                 viewMode={viewMode}
                                 index={idx}
-                                isFeatured={featuredProductIds.has(product.id)}
+                                onQuickView={() => setQuickViewProduct(product)}
                                 onQuickView={() => setQuickViewProduct(product)}
                               />
                             </Link>
