@@ -27,18 +27,12 @@ import { useProductFiltersFromURL } from '@/features/products/hooks/useProductFi
 
 // ─── Curated Browse Data (seeded, CMS-ready) ────────────
 
-const FEATURED_ITEMS = [
-  { slug: 'new-arrivals', label: 'New Arrivals' },
-  { slug: 'best-sellers', label: 'Best Sellers' },
-  { slug: 'sustainable-picks', label: 'Sustainable Picks' },
-  { slug: 'logo-ready', label: 'Logo-Ready' },
-];
-
-const COLLECTIONS_ITEMS = [
-  { slug: 'ss-2026', label: 'Spring Summer 2026' },
-  { slug: 'denim-hardware-edit', label: 'Denim Hardware Edit' },
-  { slug: 'beauty-packaging-details', label: 'Beauty Packaging Details' },
-  { slug: 'signature-branding-trims', label: 'Signature Branding Trims' },
+const FEATURED_OPTIONS = [
+  { value: 'all', label: 'All Products' },
+  { value: 'new-arrivals', label: 'New Arrivals' },
+  { value: 'best-sellers', label: 'Best Sellers' },
+  { value: 'sustainable-picks', label: 'Sustainable Picks' },
+  { value: 'logo-ready', label: 'Logo-Ready' },
 ];
 
 // ─── Page ───────────────────────────────────────────────
