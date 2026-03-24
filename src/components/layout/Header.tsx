@@ -315,7 +315,6 @@ const Header = () => {
                           className="text-sm font-semibold text-foreground hover:opacity-70 transition-opacity block mb-3"
                         >
                           {family.name}
-                          <span className="block text-[10px] font-normal text-muted-foreground/40 mt-0.5 tracking-wide">{family.nameCn}</span>
                         </Link>
                         <ul className="space-y-2">
                           {family.subcategories.map((sub) => (
