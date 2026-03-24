@@ -64,7 +64,7 @@ export default function ProductCard({
   }
 
   // Featured card — horizontal layout
-  if (featured) {
+  if (isHeroLayout) {
     return <ProductCardFeatured product={product} imageUrl={imageUrl} imageLoaded={imageLoaded} imageError={imageError} onImageLoad={() => setImageLoaded(true)} onImageError={() => setImageError(true)} onQuickView={onQuickView} isFeatured={isFeatured} />;
   }
 
