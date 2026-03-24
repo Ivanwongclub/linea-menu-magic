@@ -158,9 +158,9 @@ const Header = () => {
     setIsMenuOpen(false);
   }, [pathname]);
 
-  const navLinks = [
-    { href: "/products", label: "Products", megaMenu: "products" as const },
-    { href: "/about", label: "About", megaMenu: "about" as const },
+  const navLinks: Array<{ href: string; label: string; megaMenu?: "products" | "about" }> = [
+    { href: "/products", label: "Products", megaMenu: "products" },
+    { href: "/about", label: "About", megaMenu: "about" },
     { href: "/sustainability", label: "Sustainability" },
     { href: "/news", label: "News" },
     { href: "/brochures", label: "Brochures" },
