@@ -7,6 +7,52 @@ import { PRODUCT_FAMILIES, PRODUCT_SEGMENTS } from "@/features/products/taxonomy
 
 const SUPABASE_IMG = "https://otkuqwpsgxzlaxbclbfi.supabase.co/storage/v1/object/public/product-assets/images";
 
+/* ---------- About mega-menu data ---------- */
+const ABOUT_GROUPS = [
+  {
+    heading: "Company",
+    links: [
+      { label: "Our Story", href: "/about/our-story", image: "/founders.png" },
+    ],
+  },
+  {
+    heading: "Operations",
+    links: [
+      { label: "Factory", href: "/about/factory", image: `${SUPABASE_IMG}/91013630-38c1-49fc-b21c-f0b052caca09/ai-primary.png` },
+      { label: "Certificates", href: "/about/certificates", image: `${SUPABASE_IMG}/1b856a91-9c8e-494a-b8c2-9e7ccb67e962/ai-primary.png` },
+    ],
+  },
+  {
+    heading: "Responsibility",
+    links: [
+      { label: "Sustainability", href: "/about/sustainability", image: `${SUPABASE_IMG}/40360bf7-eaae-427f-a800-c2a0514d198d/ai-primary.png` },
+    ],
+  },
+];
+
+const ABOUT_DEFAULT_PREVIEW = "/founders.png";
+
+const ABOUT_TRUST_CARDS = [
+  {
+    title: "Heritage",
+    description: "Four decades of craftsmanship excellence",
+    href: "/about/our-story",
+    image: "/founders.png",
+  },
+  {
+    title: "Manufacturing",
+    description: "Precision production at scale",
+    href: "/about/factory",
+    image: `${SUPABASE_IMG}/91013630-38c1-49fc-b21c-f0b052caca09/ai-primary.png`,
+  },
+  {
+    title: "Responsibility",
+    description: "Certified sustainable operations",
+    href: "/about/sustainability",
+    image: `${SUPABASE_IMG}/40360bf7-eaae-427f-a800-c2a0514d198d/ai-primary.png`,
+  },
+];
+
 const MEGA_FAMILIES = [
   {
     name: "Hardware",
