@@ -178,12 +178,6 @@ export default function Products() {
     categoryCounts,
   };
 
-  // Resolve first product image for banner
-  const bannerImageUrl = useMemo(() => {
-    if (!featuredProduct) return null;
-    const primary = featuredProduct.images?.find((img) => img.is_primary) ?? featuredProduct.images?.[0];
-    return primary?.url ?? featuredProduct.thumbnail_url ?? null;
-  }, [featuredProduct]);
 
   return (
     <div className="min-h-screen bg-background">
