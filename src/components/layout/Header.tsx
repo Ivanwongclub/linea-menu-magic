@@ -451,7 +451,6 @@ const Header = () => {
                             className="text-sm font-medium text-foreground block py-3.5 px-6 border-b border-border"
                           >
                             View All Products →
-                            <span className="block text-[9px] text-muted-foreground/35 mt-0.5 tracking-wide font-normal">查看所有產品</span>
                           </Link>
                         </div>
                       )}
