@@ -35,6 +35,13 @@ const FEATURED_OPTIONS = [
   { value: 'logo-ready', label: 'Logo-Ready' },
 ];
 
+const COLLECTIONS = [
+  { slug: 'ss-2026', label: 'Spring Summer 2026' },
+  { slug: 'denim-hardware', label: 'Denim Hardware Edit' },
+  { slug: 'beauty-packaging', label: 'Beauty Packaging Details' },
+  { slug: 'signature-branding', label: 'Signature Branding Trims' },
+];
+
 // ─── Page ───────────────────────────────────────────────
 
 export default function Products() {
@@ -43,6 +50,7 @@ export default function Products() {
   const { products, loading, totalCount } = useProducts(filters);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+  const [activeCollection, setActiveCollection] = useState<string | null>(null);
 
   // Count products per category (from current result set)
   const categoryCounts = useMemo(() => {
@@ -186,8 +194,32 @@ export default function Products() {
           ]}
         />
 
+        {/* Collections Browse Band */}
+        <div className="border-b border-border bg-secondary/30">
+          <div className="max-w-7xl mx-auto px-6 lg:px-8 py-3">
+            <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide">
+              <span className="text-xs font-semibold uppercase tracking-[0.1em] text-foreground whitespace-nowrap">
+                Collections
+              </span>
+              <span className="w-px h-4 bg-border flex-shrink-0" />
+              {COLLECTIONS.map((col) => (
+                <button
+                  key={col.slug}
+                  onClick={() => setActiveCollection(activeCollection === col.slug ? null : col.slug)}
+                  className={`whitespace-nowrap text-xs px-3.5 py-1.5 rounded-full border transition-colors flex-shrink-0 ${
+                    activeCollection === col.slug
+                      ? 'bg-foreground text-background border-foreground'
+                      : 'bg-background text-foreground border-border hover:border-foreground/30'
+                  }`}
+                >
+                  {col.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
 
-        {/* Active Filter Chips */}
+
         <div className="px-6 lg:px-8 min-h-[44px] flex items-center">
           <div className="max-w-[1200px] mx-auto w-full">
             {activeChips.length > 0 ? (
