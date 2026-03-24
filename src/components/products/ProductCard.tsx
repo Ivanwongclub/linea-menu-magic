@@ -10,7 +10,7 @@ interface ProductCardProps {
   product: Product;
   viewMode: ViewMode;
   index?: number;
-  featured?: boolean;
+  isHeroLayout?: boolean;
   isFeatured?: boolean;
   onQuickView?: (product: Product) => void;
   onAddToLibrary?: (product: Product) => void;
@@ -41,14 +41,14 @@ export default function ProductCard({
   product,
   viewMode,
   index = 99,
-  featured = false,
+  isHeroLayout = false,
   isFeatured = false,
   onQuickView,
   onAddToLibrary,
   isInLibrary,
 }: ProductCardProps) {
-  const rawUrl = resolveProductImage(product, featured ? 'full' : 'thumb');
-  const imageUrl = getOptimizedImageUrl(rawUrl, featured ? 800 : 400, featured ? 400 : 400, 80);
+  const rawUrl = resolveProductImage(product, isHeroLayout ? 'full' : 'thumb');
+  const imageUrl = getOptimizedImageUrl(rawUrl, isHeroLayout ? 800 : 400, isHeroLayout ? 400 : 400, 80);
   const isAboveFold = index < 8;
 
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -60,11 +60,11 @@ export default function ProductCard({
   }, [imageUrl]);
 
   if (viewMode === 'list') {
-    return <ProductCardList product={product} onQuickView={onQuickView} />;
+    return <ProductCardList product={product} onQuickView={onQuickView} isFeatured={isFeatured} />;
   }
 
   // Featured card — horizontal layout
-  if (featured) {
+  if (isHeroLayout) {
     return <ProductCardFeatured product={product} imageUrl={imageUrl} imageLoaded={imageLoaded} imageError={imageError} onImageLoad={() => setImageLoaded(true)} onImageError={() => setImageError(true)} onQuickView={onQuickView} isFeatured={isFeatured} />;
   }
 
@@ -106,7 +106,7 @@ export default function ProductCard({
 
         {/* Tag badges + Featured badge (top-left) */}
         {(isFeatured || visibleTags.length > 0) && (
-          <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-10">
+          <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-20">
             {isFeatured && (
               <span className="bg-foreground text-background text-[10px] font-medium uppercase tracking-[0.06em] px-2 py-0.5 rounded-[var(--radius)]">
                 Featured
@@ -239,7 +239,7 @@ function ProductCardFeatured({
         />
         {/* FEATURED label — only if product is actually featured */}
         {isFeatured && (
-          <span className="absolute top-2.5 left-2.5 bg-foreground text-background text-[10px] font-medium uppercase tracking-[0.1em] px-2.5 py-0.5 rounded-[var(--radius)] z-10">
+          <span className="absolute top-2.5 left-2.5 bg-foreground text-background text-[10px] font-medium uppercase tracking-[0.1em] px-2.5 py-0.5 rounded-[var(--radius)] z-20">
             Featured
           </span>
         )}
@@ -306,9 +306,11 @@ function ProductCardFeatured({
 function ProductCardList({
   product,
   onQuickView,
+  isFeatured = false,
 }: {
   product: Product;
   onQuickView?: (product: Product) => void;
+  isFeatured?: boolean;
 }) {
   const tags = product.tags ?? [];
   const imageUrl = resolveProductImage(product, 'thumb');
@@ -324,6 +326,11 @@ function ProductCardList({
           className="absolute inset-0 h-full w-full object-cover"
           loading="lazy"
         />
+        {isFeatured && (
+          <span className="absolute top-1 left-1 bg-foreground text-background text-[8px] font-medium uppercase tracking-[0.06em] px-1.5 py-0.5 rounded-[var(--radius)] z-20">
+            Featured
+          </span>
+        )}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">

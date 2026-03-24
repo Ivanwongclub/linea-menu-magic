@@ -27,14 +27,17 @@ import { useProductFiltersFromURL } from '@/features/products/hooks/useProductFi
 
 // ─── Curated Browse Data (seeded, CMS-ready) ────────────
 
-// Seeded featured product slugs — replace with CMS-driven data when ready.
-// Uses indices as fallback: if none of the slugs match, the first N products are marked featured.
-const FEATURED_PRODUCT_SLUGS_SEED = [
-  'polo-button-10-8',
-  'smooth-snap-15',
-  'oval-logo-badge',
-  'recycled-drawcord-5mm',
-];
+// Seeded featured matching keys — replace with CMS-driven data when ready.
+const FEATURED_SEED: { slugs: string[]; itemCodes: string[]; tags: string[] } = {
+  slugs: [
+    'polo-button-10-8',
+    'smooth-snap-15',
+    'oval-logo-badge',
+    'recycled-drawcord-5mm',
+  ],
+  itemCodes: ['btn-1008', 'snap-1500', 'badge-oval-01', 'drawcord-5mm-r'],
+  tags: ['new-arrivals', 'best-sellers', 'sustainable-picks', 'logo-ready'],
+};
 const FEATURED_FALLBACK_COUNT = 4;
 
 const COLLECTIONS = [
@@ -54,14 +57,25 @@ export default function Products() {
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [activeCollection, setActiveCollection] = useState<string | null>(null);
 
-  // Resolve featured set: prefer seeded slugs, fallback to first N products
+  // Resolve featured set: explicit seeded matches first, deterministic visible fallback second.
   const featuredSlugs = useMemo(() => {
-    const seedSet = new Set(FEATURED_PRODUCT_SLUGS_SEED);
-    const matched = products.filter((p) => seedSet.has(p.slug));
+    const matched = products.filter((p) => {
+      const normalizedItemCode = p.item_code?.toLowerCase();
+      const hasSeededTag =
+        p.tags?.some((tag) => FEATURED_SEED.tags.includes(tag.slug)) ?? false;
+
+      return (
+        FEATURED_SEED.slugs.includes(p.slug) ||
+        (!!normalizedItemCode && FEATURED_SEED.itemCodes.includes(normalizedItemCode)) ||
+        hasSeededTag
+      );
+    });
+
     if (matched.length > 0) {
       return new Set(matched.map((p) => p.slug));
     }
-    // Fallback: mark the first N loaded products as featured
+
+    // Guaranteed visible fallback: first 4 currently displayed products.
     return new Set(products.slice(0, FEATURED_FALLBACK_COUNT).map((p) => p.slug));
   }, [products]);
 
@@ -393,7 +407,7 @@ export default function Products() {
                             product={product}
                             viewMode={viewMode}
                             index={idx}
-                            featured={viewMode === 'grid' && idx === 0}
+                            isHeroLayout={viewMode === 'grid' && idx === 0}
                             isFeatured={featuredSlugs.has(product.slug)}
                             onQuickView={() => setQuickViewProduct(product)}
                           />
