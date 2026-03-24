@@ -83,6 +83,24 @@ function transformProduct(row: Record<string, unknown>): Product {
     primary_category: primaryCategory,
     materials,
     tags,
+    industries: industryMaps
+      .map((m) => m.product_industries as Record<string, unknown> | null)
+      .filter(Boolean)
+      .map((i) => ({
+        id: i!.id as string,
+        name: i!.name as string,
+        slug: i!.slug as string,
+        sort_order: (i!.sort_order as number) ?? 0,
+      })),
+    certifications: certificationMaps
+      .map((m) => m.product_certifications as Record<string, unknown> | null)
+      .filter(Boolean)
+      .map((c) => ({
+        id: c!.id as string,
+        name: c!.name as string,
+        abbreviation: (c!.abbreviation as string) ?? '',
+        logo_url: c!.logo_url as string | undefined,
+      })),
   };
 }
 

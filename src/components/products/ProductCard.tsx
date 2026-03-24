@@ -65,7 +65,7 @@ export default function ProductCard({
 
   // Featured card — horizontal layout
   if (featured) {
-    return <ProductCardFeatured product={product} imageUrl={imageUrl} imageLoaded={imageLoaded} imageError={imageError} onImageLoad={() => setImageLoaded(true)} onImageError={() => setImageError(true)} onQuickView={onQuickView} />;
+    return <ProductCardFeatured product={product} imageUrl={imageUrl} imageLoaded={imageLoaded} imageError={imageError} onImageLoad={() => setImageLoaded(true)} onImageError={() => setImageError(true)} onQuickView={onQuickView} isFeatured={isFeatured} />;
   }
 
   const tags = product.tags ?? [];
