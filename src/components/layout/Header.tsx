@@ -126,9 +126,12 @@ const Header = () => {
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [isProductsOpen, setIsProductsOpen] = useState(false);
   const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
+  const [mobileAboutOpen, setMobileAboutOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [previewImage, setPreviewImage] = useState(DEFAULT_PREVIEW);
   const [previewLabel, setPreviewLabel] = useState("Hardware");
+  const [aboutPreviewImage, setAboutPreviewImage] = useState(ABOUT_DEFAULT_PREVIEW);
+  const [aboutPreviewLabel, setAboutPreviewLabel] = useState("Our Story");
   const { pathname } = useLocation();
   const productsTimeout = useRef<ReturnType<typeof setTimeout>>();
   const aboutTimeout = useRef<ReturnType<typeof setTimeout>>();
