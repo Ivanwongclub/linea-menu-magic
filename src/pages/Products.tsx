@@ -205,8 +205,8 @@ export default function Products() {
           </div>
         </section>
 
-        {/* Curated Browse Bar */}
-        <CuratedBrowseBar activeTab={activeBrowseTab} onTabChange={setActiveBrowseTab} />
+        {/* Curated Browse Rail */}
+        <CuratedBrowseRail />
 
         {/* Active Filter Chips */}
         <div className="px-6 lg:px-8 min-h-[44px] flex items-center">
