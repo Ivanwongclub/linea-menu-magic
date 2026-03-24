@@ -73,12 +73,16 @@ function slugify(name: string) {
   return name.toLowerCase().replace(/\s+&\s+/g, "-").replace(/\s+/g, "-");
 }
 
+const DEFAULT_PREVIEW = MEGA_FAMILIES[0].image;
+
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [isProductsOpen, setIsProductsOpen] = useState(false);
   const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [previewImage, setPreviewImage] = useState(DEFAULT_PREVIEW);
+  const [previewLabel, setPreviewLabel] = useState("Hardware");
   const { pathname } = useLocation();
   const productsTimeout = useRef<ReturnType<typeof setTimeout>>();
   const aboutTimeout = useRef<ReturnType<typeof setTimeout>>();
