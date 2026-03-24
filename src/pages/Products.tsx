@@ -308,16 +308,16 @@ export default function Products() {
                     </button>
                   </div>
                   <span className="text-border">|</span>
-                  <Select defaultValue="all">
-                    <SelectTrigger className="h-8 text-xs w-[140px] border-border">
-                      <SelectValue placeholder="Featured" />
+                  <Select
+                    value={filters.sort ?? ''}
+                    onValueChange={(v) => setFilters({ sort: (v || undefined) as ProductFilters['sort'] })}
+                  >
+                    <SelectTrigger className="h-8 text-xs w-[120px] border-border">
+                      <SelectValue placeholder="Sort" />
                     </SelectTrigger>
                     <SelectContent>
-                      {FEATURED_OPTIONS.map((opt) => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </SelectItem>
-                      ))}
+                      <SelectItem value="name_asc">Name A–Z</SelectItem>
+                      <SelectItem value="name_desc">Name Z–A</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
