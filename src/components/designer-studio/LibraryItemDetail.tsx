@@ -335,7 +335,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                   <div className="flex justify-between items-center">
                     <dt className="text-muted-foreground flex items-center gap-1">
                       <MapPin className="w-3 h-3" />
-                      產地
+                      Origin
                     </dt>
                     <dd className="font-medium">{item.production.origin}</dd>
                   </div>
