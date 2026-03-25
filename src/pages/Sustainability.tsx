@@ -70,6 +70,7 @@ const Sustainability = () => {
                 <span className={`block w-16 h-px mb-6 transition-all duration-700 ${heroVisible ? 'opacity-100' : 'opacity-0'}`} style={{ backgroundColor: "hsl(150 40% 35%)", transitionDelay: "200ms" }} />
                 <div className="text-5xl md:text-6xl lg:text-7xl leading-[0.9] mb-8">
                   <LetterReveal text="Our" as="span" className="font-light block text-foreground" isVisible={heroVisible} startDelay={100} letterDelay={60} />
+                  <LetterReveal text="Promise" as="span" className="font-bold block text-[hsl(150_40%_30%)]" isVisible={heroVisible} startDelay={350} letterDelay={80} />
                   <LetterReveal text="Promise" as="span" className="font-bold block" isVisible={heroVisible} startDelay={350} letterDelay={80} style={{ color: "hsl(150 40% 30%)" }} />
                 </div>
                 <p className={`text-lg leading-relaxed mb-6 transition-all duration-700 ease-out ${heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`} style={{ transitionDelay: "600ms", color: "hsl(150 10% 35%)" }}>
