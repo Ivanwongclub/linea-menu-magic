@@ -53,9 +53,9 @@ export interface LibraryItem {
 }
 
 export const categoryLabels: Record<LibraryItem['category'], string> = {
-  buttons: '鈕扣',
-  zippers: '拉鏈',
-  lace: '蕾絲花邊',
-  hardware: '五金配件',
-  other: '其他',
+  buttons: 'Buttons',
+  zippers: 'Zippers',
+  lace: 'Lace & Trim',
+  hardware: 'Hardware',
+  other: 'Other',
 };
