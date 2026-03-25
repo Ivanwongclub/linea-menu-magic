@@ -374,56 +374,58 @@ export default function ProductDetail() {
             />
 
             {/* RIGHT — Decision panel */}
-            <div className="flex flex-col">
+            <div className="flex flex-col border border-border bg-card">
 
               {/* ── Identity block ── */}
-              <div className="space-y-3 mb-6">
-                {primaryCat && (
-                  <Link
-                    to={`/products?category=${primaryCat.slug}`}
-                    className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {primaryCat.name}
-                    <ChevronRight className="h-3 w-3" />
-                  </Link>
-                )}
-                <h1 className="text-3xl lg:text-4xl font-semibold tracking-tight text-foreground leading-tight">
-                  {product.name_en ?? product.name}
-                </h1>
-                <div className="flex items-center gap-3 flex-wrap">
-                  {product.item_code && (
-                    <span className="text-xs font-mono text-muted-foreground bg-secondary px-2 py-0.5">
-                      {product.item_code}
-                    </span>
+              <div className="px-6 pt-6 pb-5 border-b border-border/50">
+                <div className="space-y-3">
+                  {primaryCat && (
+                    <Link
+                      to={`/products?category=${primaryCat.slug}`}
+                      className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {primaryCat.name}
+                      <ChevronRight className="h-3 w-3" />
+                    </Link>
                   )}
-                  {tags.map((t) => (
-                    <Badge key={t.id} variant="default" className="text-[10px] uppercase tracking-[0.06em]">
-                      {t.name}
-                    </Badge>
-                  ))}
-                  {product.is_customizable && (
-                    <Badge variant="secondary" className="text-[10px] uppercase tracking-[0.06em] gap-1">
-                      <Palette className="h-3 w-3" /> Customizable
-                    </Badge>
-                  )}
+                  <h1 className="text-3xl lg:text-4xl font-semibold tracking-tight text-foreground leading-tight">
+                    {product.name_en ?? product.name}
+                  </h1>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    {product.item_code && (
+                      <span className="text-xs font-mono text-muted-foreground bg-secondary px-2 py-0.5">
+                        {product.item_code}
+                      </span>
+                    )}
+                    {tags.map((t) => (
+                      <Badge key={t.id} variant="default" className="text-[10px] uppercase tracking-[0.06em]">
+                        {t.name}
+                      </Badge>
+                    ))}
+                    {product.is_customizable && (
+                      <Badge variant="secondary" className="text-[10px] uppercase tracking-[0.06em] gap-1">
+                        <Palette className="h-3 w-3" /> Customizable
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </div>
 
               {/* ── Description ── */}
               {(product.description_en ?? product.description) && (
-                <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                  {product.description_en ?? product.description}
-                </p>
+                <div className="px-6 py-4 border-b border-border/50">
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {product.description_en ?? product.description}
+                  </p>
+                </div>
               )}
 
-              {/* ── Key Specs Card ── */}
-              <div className="border border-border bg-card mb-4">
-                <div className="px-4 py-2.5 border-b border-border bg-secondary/40">
-                  <h3 className="text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground">
-                    Key Specifications
-                  </h3>
-                </div>
-                <dl className="px-4 py-1">
+              {/* ── Key Specs ── */}
+              <div className="px-6 py-4 border-b border-border/50">
+                <h3 className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground mb-3">
+                  Key Specifications
+                </h3>
+                <dl className="space-y-0">
                   <SpecLine label="Material" value={materialNames} />
                   <SpecLine label="Finish / Plating" value={finish} />
                   <SpecLine label="Size / Dimensions" value={size} />
@@ -436,15 +438,13 @@ export default function ProductDetail() {
                 </dl>
               </div>
 
-              {/* ── Production Card ── */}
+              {/* ── Production snapshot ── */}
               {(moq || sampleTime || leadTime || origin) && (
-                <div className="border border-border bg-card mb-4">
-                  <div className="px-4 py-2.5 border-b border-border bg-secondary/40">
-                    <h3 className="text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground">
-                      Production & Lead Times
-                    </h3>
-                  </div>
-                  <dl className="px-4 py-1">
+                <div className="px-6 py-4 border-b border-border/50">
+                  <h3 className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground mb-3">
+                    Production & Lead Times
+                  </h3>
+                  <dl className="space-y-0">
                     <SpecLine label="MOQ" value={moq} icon={Package} />
                     <SpecLine label="Sample Time" value={sampleTime} />
                     <SpecLine label="Bulk Lead Time" value={leadTime} />
@@ -456,23 +456,25 @@ export default function ProductDetail() {
 
               {/* ── Compliance inline ── */}
               {certs.length > 0 && (
-                <div className="flex items-center gap-2 mb-6 flex-wrap">
-                  <ShieldCheck className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                  {certs.map((c) => (
-                    <Tooltip key={c.id}>
-                      <TooltipTrigger asChild>
-                        <span className="text-[10px] font-medium uppercase tracking-[0.06em] text-muted-foreground border border-border px-2 py-0.5 cursor-default hover:text-foreground hover:border-foreground transition-colors">
-                          {c.abbreviation || c.name}
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent><p className="text-xs">{c.name}</p></TooltipContent>
-                    </Tooltip>
-                  ))}
+                <div className="px-6 py-4 border-b border-border/50">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <ShieldCheck className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    {certs.map((c) => (
+                      <Tooltip key={c.id}>
+                        <TooltipTrigger asChild>
+                          <span className="text-[10px] font-medium uppercase tracking-[0.06em] text-muted-foreground border border-border px-2 py-0.5 cursor-default hover:text-foreground hover:border-foreground transition-colors">
+                            {c.abbreviation || c.name}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent><p className="text-xs">{c.name}</p></TooltipContent>
+                      </Tooltip>
+                    ))}
+                  </div>
                 </div>
               )}
 
               {/* ── CTA Block ── */}
-              <div className="mt-auto pt-4 space-y-3">
+              <div className="px-6 py-5 mt-auto space-y-3 bg-secondary/20">
                 <Button variant="default" size="lg" className="w-full gap-2 h-12 text-sm font-semibold tracking-wide">
                   <Send className="h-4 w-4" />
                   Request Quote
@@ -485,19 +487,19 @@ export default function ProductDetail() {
                   </Button>
                 )}
 
-                <div className="grid grid-cols-3 gap-2 pt-1">
+                <div className={`grid gap-2 pt-1 ${product.model_url ? 'grid-cols-3' : 'grid-cols-2'}`}>
                   <Button variant="ghost" size="sm" className="gap-1.5 text-[11px] h-9">
                     <BookmarkPlus className="h-3.5 w-3.5" />
-                    Library
+                    Add to My Library
                   </Button>
                   <Button variant="ghost" size="sm" className="gap-1.5 text-[11px] h-9">
                     <FileDown className="h-3.5 w-3.5" />
-                    Spec Sheet
+                    Download Spec Sheet
                   </Button>
                   {product.model_url && (
                     <Button variant="ghost" size="sm" className="gap-1.5 text-[11px] h-9" onClick={() => setShow3D(true)}>
                       <Box className="h-3.5 w-3.5" />
-                      3D Model
+                      View 3D Model
                     </Button>
                   )}
                 </div>
