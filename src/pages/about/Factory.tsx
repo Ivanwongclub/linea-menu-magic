@@ -14,7 +14,7 @@ const offices = [
   {
     city: "Hong Kong",
     label: "Headquarters",
-    image: officeHk,
+    image: locationHongkong,
     description: "Global coordination hub since 1979. Manages export operations, client relationships, product development strategy, and supply-chain orchestration across all locations.",
     tags: ["Coordination", "Export", "Client Service"],
   },
