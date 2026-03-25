@@ -668,12 +668,12 @@ const DesignerStudioDashboard = () => {
 
                 <TabsContent value="rfq" className="mt-6">
                   <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pb-4 mb-4">
-                    <StatCard label="待處理" value={statusCounts.submitted} icon={<FileText className="w-4 h-4" />} color="text-amber-500" compact />
-                    <StatCard label="模型上傳" value={statusCounts.model_uploaded} icon={<Upload className="w-4 h-4" />} color="text-blue-500" compact />
-                    <StatCard label="設計確認" value={statusCounts.design_confirmed} icon={<CheckCircle className="w-4 h-4" />} color="text-green-500" compact />
-                    <StatCard label="列印中" value={statusCounts.printing} icon={<Clock className="w-4 h-4" />} color="text-purple-500" compact />
-                    <StatCard label="樣品審核" value={statusCounts.sample_review} icon={<Eye className="w-4 h-4" />} color="text-orange-500" compact />
-                    <StatCard label="生產中" value={statusCounts.production} icon={<Package className="w-4 h-4" />} color="text-emerald-500" compact />
+                    <StatCard label="Pending" value={statusCounts.submitted} icon={<FileText className="w-4 h-4" />} color="text-amber-500" compact />
+                    <StatCard label="Model Uploaded" value={statusCounts.model_uploaded} icon={<Upload className="w-4 h-4" />} color="text-blue-500" compact />
+                    <StatCard label="Design Confirmed" value={statusCounts.design_confirmed} icon={<CheckCircle className="w-4 h-4" />} color="text-green-500" compact />
+                    <StatCard label="Printing" value={statusCounts.printing} icon={<Clock className="w-4 h-4" />} color="text-purple-500" compact />
+                    <StatCard label="Sample Review" value={statusCounts.sample_review} icon={<Eye className="w-4 h-4" />} color="text-orange-500" compact />
+                    <StatCard label="In Production" value={statusCounts.production} icon={<Package className="w-4 h-4" />} color="text-emerald-500" compact />
                   </div>
 
                   <div className="flex items-center gap-3 mb-4">
