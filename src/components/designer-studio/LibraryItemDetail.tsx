@@ -341,7 +341,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                   </div>
                   <Separator />
                   <div className="flex justify-between">
-                    <dt className="text-muted-foreground">月產能</dt>
+                    <dt className="text-muted-foreground">Monthly Capacity</dt>
                     <dd className="font-medium">{item.production.capacity}</dd>
                   </div>
                 </dl>
