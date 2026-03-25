@@ -374,7 +374,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                         )}
                         {item.specifications.finish && (
                           <div className="text-sm">
-                            <span className="text-muted-foreground">表面處理：</span>
+                            <span className="text-muted-foreground">Finish: </span>
                             <span className="font-medium">{item.specifications.finish}</span>
                           </div>
                         )}
