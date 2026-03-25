@@ -146,10 +146,10 @@ function SpecTile({ label, value }: { label: string; value: string | null | unde
 function SectionHeading({ id, title, icon: Icon }: { id: string; title: string; icon: React.ElementType }) {
   return (
     <div id={id} className="flex items-center gap-3 pt-2 mb-6 scroll-mt-24">
-      <div className="w-8 h-8 bg-foreground/5 flex items-center justify-center">
-        <Icon className="h-4 w-4 text-foreground" />
+      <div className="w-8 h-8 bg-foreground flex items-center justify-center">
+        <Icon className="h-4 w-4 text-background" />
       </div>
-      <h2 className="text-sm font-semibold uppercase tracking-[0.1em] text-foreground">{title}</h2>
+      <h2 className="text-sm font-bold uppercase tracking-[0.1em] text-foreground">{title}</h2>
     </div>
   );
 }
