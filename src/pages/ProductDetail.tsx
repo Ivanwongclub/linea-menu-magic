@@ -1,6 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { FileDown, Box, Send, Palette, BookmarkPlus, Download, ShieldCheck, Factory, ArrowRight } from 'lucide-react';
+import {
+  FileDown, Box, Send, Palette, BookmarkPlus, Download,
+  ShieldCheck, Factory, ArrowRight, Layers, ClipboardList,
+  Package, Cpu, Globe, ChevronRight,
+} from 'lucide-react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import PageBreadcrumb from '@/components/ui/PageBreadcrumb';
@@ -38,40 +42,45 @@ function specValue(v: unknown): string | null {
   return String(v);
 }
 
-/* ─── Image Gallery ──────────────────────────────────── */
+/* ─── Section nav items ─────────────────────────────── */
 
-function ImageGallery({ images }: { images: ProductImage[] }) {
+const SECTION_IDS = {
+  overview: 'pdp-overview',
+  specs: 'pdp-specs',
+  production: 'pdp-production',
+  compliance: 'pdp-compliance',
+  applications: 'pdp-applications',
+  downloads: 'pdp-downloads',
+  related: 'pdp-related',
+} as const;
+
+/* ─── Hero Gallery ───────────────────────────────────── */
+
+function HeroGallery({ images, onOpen3D, has3D }: { images: ProductImage[]; onOpen3D: () => void; has3D: boolean }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const activeImage = images[activeIndex] ?? images[0];
 
   if (!images.length) {
     return (
-      <div className="aspect-square bg-secondary border border-border rounded-lg flex items-center justify-center">
+      <div className="aspect-[4/5] bg-secondary flex items-center justify-center">
         <span className="text-xs text-muted-foreground uppercase tracking-wider font-mono">No image</span>
       </div>
     );
   }
 
   return (
-    <div className="space-y-3">
-      <div className="aspect-square bg-secondary rounded-lg overflow-hidden">
-        <img
-          src={getOptimizedImageUrl(activeImage.url, 800, 800, 85)}
-          alt={activeImage.alt_text ?? 'Product image'}
-          loading="eager"
-          fetchPriority="high"
-          decoding="async"
-          className="w-full h-full object-contain p-6"
-        />
-      </div>
+    <div className="flex gap-3">
+      {/* Thumbnail rail — vertical on desktop */}
       {images.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className="hidden md:flex flex-col gap-2 w-16 shrink-0">
           {images.map((img, i) => (
             <button
               key={img.id}
               onClick={() => setActiveIndex(i)}
-              className={`shrink-0 w-16 h-16 rounded-md overflow-hidden border transition-colors duration-150 ${
-                i === activeIndex ? 'border-foreground' : 'border-border hover:border-muted-foreground'
+              className={`w-16 h-16 overflow-hidden transition-all duration-200 ${
+                i === activeIndex
+                  ? 'ring-2 ring-foreground ring-offset-1 ring-offset-background'
+                  : 'opacity-60 hover:opacity-100'
               }`}
             >
               <img
@@ -82,54 +91,107 @@ function ImageGallery({ images }: { images: ProductImage[] }) {
               />
             </button>
           ))}
+          {has3D && (
+            <button
+              onClick={onOpen3D}
+              className="w-16 h-16 flex flex-col items-center justify-center gap-1 bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Box className="h-4 w-4" />
+              <span className="text-[8px] uppercase tracking-wider font-medium">3D</span>
+            </button>
+          )}
         </div>
       )}
+
+      {/* Main image */}
+      <div className="flex-1">
+        <div className="aspect-[4/5] bg-secondary overflow-hidden relative group">
+          <img
+            src={getOptimizedImageUrl(activeImage.url, 800, 1000, 90)}
+            alt={activeImage.alt_text ?? 'Product image'}
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            className="w-full h-full object-contain p-8 transition-transform duration-500 group-hover:scale-[1.03]"
+          />
+        </div>
+        {/* Horizontal thumbs on mobile */}
+        {images.length > 1 && (
+          <div className="flex md:hidden gap-2 mt-3 overflow-x-auto pb-1">
+            {images.map((img, i) => (
+              <button
+                key={img.id}
+                onClick={() => setActiveIndex(i)}
+                className={`shrink-0 w-14 h-14 overflow-hidden transition-all duration-200 ${
+                  i === activeIndex ? 'ring-2 ring-foreground' : 'opacity-60'
+                }`}
+              >
+                <img
+                  src={getOptimizedImageUrl(img.url, 100, 100, 70)}
+                  alt={img.alt_text ?? `View ${i + 1}`}
+                  className="w-full h-full object-contain bg-secondary"
+                  loading="lazy"
+                />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-/* ─── Quick Spec Row ─────────────────────────────────── */
+/* ─── Spec line ──────────────────────────────────────── */
 
-function QuickSpec({ label, value }: { label: string; value: string | null | undefined }) {
+function SpecLine({ label, value, icon: Icon }: { label: string; value: string | null | undefined; icon?: React.ElementType }) {
   if (!value) return null;
   return (
-    <div className="flex justify-between items-baseline gap-4 py-1.5">
-      <dt className="text-xs text-muted-foreground uppercase tracking-wide shrink-0">{label}</dt>
-      <dd className="text-sm text-foreground text-right">{value}</dd>
-    </div>
-  );
-}
-
-/* ─── Section wrapper ────────────────────────────────── */
-
-function DetailSection({ title, icon: Icon, children }: { title: string; icon?: React.ElementType; children: React.ReactNode }) {
-  return (
-    <section className="py-8 first:pt-0">
-      <div className="flex items-center gap-2 mb-5">
-        {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
-        <h2 className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">{title}</h2>
+    <div className="flex items-start gap-3 py-2.5 border-b border-border/30 last:border-b-0">
+      {Icon && <Icon className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />}
+      <div className="flex-1 flex justify-between items-baseline gap-3 min-w-0">
+        <dt className="text-[11px] text-muted-foreground uppercase tracking-[0.08em] shrink-0">{label}</dt>
+        <dd className="text-[13px] font-medium text-foreground text-right truncate">{value}</dd>
       </div>
-      {children}
-    </section>
+    </div>
   );
 }
 
-/* ─── Spec group grid ────────────────────────────────── */
+/* ─── Section heading ────────────────────────────────── */
 
-function SpecGroup({ label, entries }: { label?: string; entries: [string, string][] }) {
-  if (!entries.length) return null;
+function SectionHeading({ id, title, icon: Icon }: { id: string; title: string; icon: React.ElementType }) {
   return (
-    <div className="space-y-1">
-      {label && <h3 className="text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground/60 mb-2">{label}</h3>}
-      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1.5">
-        {entries.map(([key, val]) => (
-          <div key={key} className="flex justify-between items-baseline gap-3 py-1 border-b border-border/40">
-            <dt className="text-xs text-muted-foreground uppercase tracking-wide">{key.replace(/_/g, ' ')}</dt>
-            <dd className="text-sm text-foreground text-right">{val}</dd>
-          </div>
-        ))}
-      </dl>
+    <div id={id} className="flex items-center gap-3 pt-2 mb-6 scroll-mt-24">
+      <div className="w-8 h-8 bg-foreground/5 flex items-center justify-center">
+        <Icon className="h-4 w-4 text-foreground" />
+      </div>
+      <h2 className="text-sm font-semibold uppercase tracking-[0.1em] text-foreground">{title}</h2>
     </div>
+  );
+}
+
+/* ─── Section nav bar ────────────────────────────────── */
+
+function SectionNav({ sections }: { sections: { id: string; label: string }[] }) {
+  const scrollTo = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  return (
+    <nav className="border-y border-border bg-background sticky top-[72px] z-20">
+      <div className="section-inner">
+        <div className="flex gap-0 overflow-x-auto -mx-1">
+          {sections.map((s) => (
+            <button
+              key={s.id}
+              onClick={() => scrollTo(s.id)}
+              className="px-4 py-3 text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground whitespace-nowrap transition-colors border-b-2 border-transparent hover:border-foreground"
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+      </div>
+    </nav>
   );
 }
 
@@ -142,18 +204,29 @@ function RelatedProducts({ product }: { product: Product }) {
   if (!related.length) return null;
 
   return (
-    <section className="mt-16 lg:mt-24">
+    <section id={SECTION_IDS.related} className="scroll-mt-24 py-16 bg-secondary/30">
       <div className="section-inner">
-        <h2 className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground mb-6">
-          Related Trims
-        </h2>
-        <div className="flex gap-5 overflow-x-auto pb-4 -mx-2 px-2">
-          {related.map((p) => (
-            <div key={p.id} className="shrink-0 w-52">
-              <Link to={`/products/${p.slug}`}>
-                <ProductCard product={p} viewMode="grid" />
-              </Link>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-foreground/5 flex items-center justify-center">
+              <Layers className="h-4 w-4 text-foreground" />
             </div>
+            <h2 className="text-sm font-semibold uppercase tracking-[0.1em] text-foreground">Related Trims</h2>
+          </div>
+          {categorySlug && (
+            <Link
+              to={`/products?category=${categorySlug}`}
+              className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+            >
+              View all <ChevronRight className="h-3 w-3" />
+            </Link>
+          )}
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+          {related.map((p) => (
+            <Link key={p.id} to={`/products/${p.slug}`}>
+              <ProductCard product={p} viewMode="grid" />
+            </Link>
           ))}
         </div>
       </div>
@@ -165,24 +238,27 @@ function RelatedProducts({ product }: { product: Product }) {
 
 function DetailSkeleton() {
   return (
-    <div className="section-inner py-12">
-      <div className="grid grid-cols-1 md:grid-cols-[55%_45%] gap-8 lg:gap-12">
-        <Skeleton className="aspect-square rounded-lg" />
-        <div className="space-y-4">
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-8 w-3/4" />
+    <div className="section-inner py-16">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <Skeleton className="aspect-[4/5]" />
+        <div className="space-y-6">
           <Skeleton className="h-3 w-20" />
+          <Skeleton className="h-8 w-3/4" />
+          <Skeleton className="h-3 w-28" />
           <Skeleton className="h-px w-full" />
-          <Skeleton className="h-20 w-full" />
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-14 w-full" />
+          <Skeleton className="h-14 w-full" />
         </div>
       </div>
     </div>
   );
 }
 
-/* ─── Main page ──────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════
+   MAIN PAGE
+   ═══════════════════════════════════════════════════════ */
 
 export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -228,6 +304,7 @@ export default function ProductDetail() {
     );
   }
 
+  /* ── data extraction ── */
   const tags = product.tags ?? [];
   const certs = product.certifications ?? [];
   const industries = product.industries ?? [];
@@ -236,7 +313,6 @@ export default function ProductDetail() {
   const specs = product.specifications ?? {};
   const production = product.production ?? {};
 
-  // Extract key quick-specs from specs/production objects
   const materialNames = materials.length ? materials.map((m) => m.name).join(', ') : specValue(specs.material) ?? specValue(specs.Material);
   const finish = specValue(specs.finish) ?? specValue(specs.Finish) ?? specValue(specs.plating) ?? specValue(specs.Plating) ?? specValue(specs.surface_treatment);
   const size = specValue(specs.size) ?? specValue(specs.Size) ?? specValue(specs.dimensions) ?? specValue(specs.Dimensions);
@@ -249,7 +325,6 @@ export default function ProductDetail() {
   const origin = specValue(production.origin) ?? specValue(production.Origin);
   const capacity = specValue(production.capacity) ?? specValue(production.Capacity);
 
-  // Build full spec entries for the detailed section
   const allSpecEntries: [string, string][] = Object.entries(specs)
     .map(([k, v]) => [k, specValue(v)] as [string, string | null])
     .filter((e): e is [string, string] => e[1] !== null);
@@ -265,98 +340,128 @@ export default function ProductDetail() {
     { label: product.name_en ?? product.name },
   ];
 
+  const hasDownloads = !!product.model_url;
+
+  /* ── build section nav ── */
+  const navSections = [
+    { id: SECTION_IDS.overview, label: 'Overview' },
+    ...(allSpecEntries.length > 0 ? [{ id: SECTION_IDS.specs, label: 'Specifications' }] : []),
+    ...(allProductionEntries.length > 0 ? [{ id: SECTION_IDS.production, label: 'Production' }] : []),
+    ...(certs.length > 0 ? [{ id: SECTION_IDS.compliance, label: 'Compliance' }] : []),
+    ...(industries.length > 0 ? [{ id: SECTION_IDS.applications, label: 'Applications' }] : []),
+    ...(hasDownloads ? [{ id: SECTION_IDS.downloads, label: 'Downloads' }] : []),
+    { id: SECTION_IDS.related, label: 'Related' },
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="pb-16">
+      <main>
         <PageBreadcrumb segments={breadcrumbSegments} title={product.name_en ?? product.name} />
 
-        {/* ── Above the fold: two-column hero ── */}
-        <div className="section-inner">
-          <div className="grid grid-cols-1 md:grid-cols-[55%_45%] gap-8 lg:gap-12">
-            {/* LEFT — Gallery */}
-            <div>
-              <ImageGallery images={galleryImages} />
-              {product.model_url && (
-                <Button variant="ghost" size="sm" className="mt-3 gap-1.5" onClick={() => setShow3D(true)}>
-                  <Box className="h-4 w-4" />
-                  View 3D Model
-                </Button>
-              )}
-            </div>
+        {/* ════════════════════════════════════════════════
+            HERO — Above the fold
+           ════════════════════════════════════════════════ */}
+        <section className="section-inner py-8 lg:py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
+
+            {/* LEFT — Media */}
+            <HeroGallery
+              images={galleryImages}
+              onOpen3D={() => setShow3D(true)}
+              has3D={!!product.model_url}
+            />
 
             {/* RIGHT — Decision panel */}
-            <div className="space-y-5">
-              {/* Tags */}
-              {tags.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-col">
+
+              {/* ── Identity block ── */}
+              <div className="space-y-3 mb-6">
+                {primaryCat && (
+                  <Link
+                    to={`/products?category=${primaryCat.slug}`}
+                    className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {primaryCat.name}
+                    <ChevronRight className="h-3 w-3" />
+                  </Link>
+                )}
+                <h1 className="text-3xl lg:text-4xl font-semibold tracking-tight text-foreground leading-tight">
+                  {product.name_en ?? product.name}
+                </h1>
+                <div className="flex items-center gap-3 flex-wrap">
+                  {product.item_code && (
+                    <span className="text-xs font-mono text-muted-foreground bg-secondary px-2 py-0.5">
+                      {product.item_code}
+                    </span>
+                  )}
                   {tags.map((t) => (
                     <Badge key={t.id} variant="default" className="text-[10px] uppercase tracking-[0.06em]">
                       {t.name}
                     </Badge>
                   ))}
+                  {product.is_customizable && (
+                    <Badge variant="secondary" className="text-[10px] uppercase tracking-[0.06em] gap-1">
+                      <Palette className="h-3 w-3" /> Customizable
+                    </Badge>
+                  )}
                 </div>
-              )}
+              </div>
 
-              {/* Category */}
-              {primaryCat && (
-                <p className="text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground">{primaryCat.name}</p>
-              )}
-
-              {/* Name */}
-              <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-                {product.name_en ?? product.name}
-              </h1>
-
-              {/* Item code */}
-              {product.item_code && (
-                <p className="text-xs font-mono text-muted-foreground">{product.item_code}</p>
-              )}
-
-              <Separator />
-
-              {/* Description */}
+              {/* ── Description ── */}
               {(product.description_en ?? product.description) && (
-                <p className="text-sm text-muted-foreground leading-relaxed">
+                <p className="text-sm text-muted-foreground leading-relaxed mb-6">
                   {product.description_en ?? product.description}
                 </p>
               )}
 
-              {/* Quick technical snapshot */}
-              <div className="bg-secondary/50 rounded-lg p-4">
-                <h3 className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground mb-3">Key Specifications</h3>
-                <dl>
-                  <QuickSpec label="Material" value={materialNames} />
-                  <QuickSpec label="Finish" value={finish} />
-                  <QuickSpec label="Size" value={size} />
-                  <QuickSpec label="Weight" value={weight} />
-                  <QuickSpec label="Thickness" value={thickness} />
-                  <QuickSpec label="Attachment" value={attachment} />
+              {/* ── Key Specs Card ── */}
+              <div className="border border-border bg-card mb-4">
+                <div className="px-4 py-2.5 border-b border-border bg-secondary/40">
+                  <h3 className="text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground">
+                    Key Specifications
+                  </h3>
+                </div>
+                <dl className="px-4 py-1">
+                  <SpecLine label="Material" value={materialNames} />
+                  <SpecLine label="Finish / Plating" value={finish} />
+                  <SpecLine label="Size / Dimensions" value={size} />
+                  <SpecLine label="Weight" value={weight} />
+                  <SpecLine label="Thickness" value={thickness} />
+                  <SpecLine label="Attachment" value={attachment} />
+                  {industries.length > 0 && (
+                    <SpecLine label="Applications" value={industries.map(i => i.name).join(', ')} />
+                  )}
                 </dl>
               </div>
 
-              {/* Production snapshot */}
-              {(moq || sampleTime || leadTime) && (
-                <div className="bg-secondary/50 rounded-lg p-4">
-                  <h3 className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground mb-3">Production</h3>
-                  <dl>
-                    <QuickSpec label="MOQ" value={moq} />
-                    <QuickSpec label="Sample Lead Time" value={sampleTime} />
-                    <QuickSpec label="Bulk Lead Time" value={leadTime} />
-                    <QuickSpec label="Origin" value={origin} />
+              {/* ── Production Card ── */}
+              {(moq || sampleTime || leadTime || origin) && (
+                <div className="border border-border bg-card mb-4">
+                  <div className="px-4 py-2.5 border-b border-border bg-secondary/40">
+                    <h3 className="text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground">
+                      Production & Lead Times
+                    </h3>
+                  </div>
+                  <dl className="px-4 py-1">
+                    <SpecLine label="MOQ" value={moq} icon={Package} />
+                    <SpecLine label="Sample Time" value={sampleTime} />
+                    <SpecLine label="Bulk Lead Time" value={leadTime} />
+                    <SpecLine label="Origin" value={origin} icon={Globe} />
+                    <SpecLine label="Capacity" value={capacity} />
                   </dl>
                 </div>
               )}
 
-              {/* Certifications inline */}
+              {/* ── Compliance inline ── */}
               {certs.length > 0 && (
-                <div className="flex flex-wrap items-center gap-2">
-                  <ShieldCheck className="h-3.5 w-3.5 text-muted-foreground" />
+                <div className="flex items-center gap-2 mb-6 flex-wrap">
+                  <ShieldCheck className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                   {certs.map((c) => (
                     <Tooltip key={c.id}>
                       <TooltipTrigger asChild>
-                        <span className="bg-secondary border border-border text-[10px] font-medium uppercase tracking-[0.04em] px-2 py-0.5 rounded cursor-default">
+                        <span className="text-[10px] font-medium uppercase tracking-[0.06em] text-muted-foreground border border-border px-2 py-0.5 cursor-default hover:text-foreground hover:border-foreground transition-colors">
                           {c.abbreviation || c.name}
                         </span>
                       </TooltipTrigger>
@@ -366,42 +471,31 @@ export default function ProductDetail() {
                 </div>
               )}
 
-              {/* Customizable indicator */}
-              {product.is_customizable && (
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Palette className="h-3.5 w-3.5" />
-                  <span>Available for customization</span>
-                </div>
-              )}
-
-              {/* ── CTA Section ── */}
-              <div className="border-t border-border pt-6 mt-2 space-y-2">
-                {/* Primary: Request Quote */}
-                <Button variant="default" size="lg" className="w-full gap-2">
+              {/* ── CTA Block ── */}
+              <div className="mt-auto pt-4 space-y-3">
+                <Button variant="default" size="lg" className="w-full gap-2 h-12 text-sm font-semibold tracking-wide">
                   <Send className="h-4 w-4" />
                   Request Quote
                 </Button>
 
-                {/* Secondary: Customize */}
                 {product.is_customizable && (
-                  <Button variant="outline" size="lg" className="w-full gap-2">
+                  <Button variant="outline" size="lg" className="w-full gap-2 h-11 text-sm">
                     <Palette className="h-4 w-4" />
                     Customize This Trim
                   </Button>
                 )}
 
-                {/* Tertiary row */}
-                <div className="flex gap-2 pt-1">
-                  <Button variant="ghost" size="sm" className="flex-1 gap-1.5 text-xs">
+                <div className="grid grid-cols-3 gap-2 pt-1">
+                  <Button variant="ghost" size="sm" className="gap-1.5 text-[11px] h-9">
                     <BookmarkPlus className="h-3.5 w-3.5" />
-                    Add to Library
+                    Library
                   </Button>
-                  <Button variant="ghost" size="sm" className="flex-1 gap-1.5 text-xs">
+                  <Button variant="ghost" size="sm" className="gap-1.5 text-[11px] h-9">
                     <FileDown className="h-3.5 w-3.5" />
                     Spec Sheet
                   </Button>
                   {product.model_url && (
-                    <Button variant="ghost" size="sm" className="flex-1 gap-1.5 text-xs" onClick={() => setShow3D(true)}>
+                    <Button variant="ghost" size="sm" className="gap-1.5 text-[11px] h-9" onClick={() => setShow3D(true)}>
                       <Box className="h-3.5 w-3.5" />
                       3D Model
                     </Button>
@@ -410,132 +504,200 @@ export default function ProductDetail() {
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* ── Below the fold: structured detail sections ── */}
-        <div className="section-inner mt-12 lg:mt-16">
-          <Separator className="mb-8" />
+        {/* ════════════════════════════════════════════════
+            SECTION NAVIGATION
+           ════════════════════════════════════════════════ */}
+        <SectionNav sections={navSections} />
 
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-12 lg:gap-16">
-            {/* Left: detail content */}
-            <div className="divide-y divide-border">
-              {/* Technical Specifications */}
-              {allSpecEntries.length > 0 && (
-                <DetailSection title="Technical Specifications">
-                  <SpecGroup entries={allSpecEntries} />
-                </DetailSection>
-              )}
+        {/* ════════════════════════════════════════════════
+            BELOW THE FOLD — Detailed sections
+           ════════════════════════════════════════════════ */}
+        <div className="section-inner py-12 lg:py-16">
 
-              {/* Production & Ordering */}
-              {allProductionEntries.length > 0 && (
-                <DetailSection title="Production & Ordering" icon={Factory}>
-                  <SpecGroup entries={allProductionEntries} />
-                  {product.is_customizable && (
-                    <p className="text-xs text-muted-foreground mt-4 flex items-center gap-1.5">
-                      <Palette className="h-3.5 w-3.5" />
-                      Custom finishes, sizes, and branding available — request a quote for details.
-                    </p>
-                  )}
-                </DetailSection>
-              )}
-
-              {/* Compliance & Certifications */}
-              {certs.length > 0 && (
-                <DetailSection title="Compliance & Certifications" icon={ShieldCheck}>
-                  <div className="flex flex-wrap gap-3">
-                    {certs.map((c) => (
-                      <div key={c.id} className="flex items-center gap-2 bg-secondary/50 border border-border rounded-lg px-3 py-2">
-                        {c.logo_url && <img src={c.logo_url} alt={c.name} className="h-5 w-5 object-contain" />}
-                        <div>
-                          <p className="text-xs font-medium text-foreground">{c.abbreviation || c.name}</p>
-                          {c.abbreviation && <p className="text-[10px] text-muted-foreground">{c.name}</p>}
-                        </div>
+          {/* ── Overview ── */}
+          <section id={SECTION_IDS.overview} className="scroll-mt-24 mb-16">
+            <SectionHeading id="" title="Overview" icon={ClipboardList} />
+            <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8">
+              <div className="space-y-4">
+                {(product.description_en ?? product.description) && (
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {product.description_en ?? product.description}
+                  </p>
+                )}
+                {/* Overview spec summary table */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-6">
+                  {[
+                    { l: 'Material', v: materialNames },
+                    { l: 'Finish', v: finish },
+                    { l: 'Size', v: size },
+                    { l: 'Weight', v: weight },
+                    { l: 'MOQ', v: moq },
+                    { l: 'Lead Time', v: leadTime },
+                  ].filter(item => item.v).map(item => (
+                    <div key={item.l} className="bg-secondary/50 p-3">
+                      <p className="text-[10px] uppercase tracking-[0.1em] text-muted-foreground mb-1">{item.l}</p>
+                      <p className="text-sm font-medium text-foreground">{item.v}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {/* Materials sidebar */}
+              {materials.length > 0 && (
+                <div className="border border-border p-5">
+                  <h3 className="text-[10px] font-semibold uppercase tracking-[0.12em] text-foreground mb-4">Materials</h3>
+                  <div className="space-y-2.5">
+                    {materials.map((m) => (
+                      <div key={m.id} className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-b-0">
+                        <span className="text-sm text-foreground">{m.name}</span>
+                        {m.is_sustainable && (
+                          <Badge variant="secondary" className="text-[9px]">Eco</Badge>
+                        )}
                       </div>
                     ))}
                   </div>
-                </DetailSection>
-              )}
-
-              {/* Applications */}
-              {industries.length > 0 && (
-                <DetailSection title="Applications & Segments">
-                  <div className="flex flex-wrap gap-2">
-                    {industries.map((ind) => (
-                      <Link
-                        key={ind.id}
-                        to={`/products?segment=${ind.slug}`}
-                        className="group flex items-center gap-1.5 bg-secondary border border-border rounded-lg px-3 py-2 text-sm font-medium text-foreground hover:border-foreground transition-colors"
-                      >
-                        {ind.name}
-                        <ArrowRight className="h-3 w-3 text-muted-foreground group-hover:text-foreground transition-colors" />
-                      </Link>
-                    ))}
-                  </div>
-                </DetailSection>
-              )}
-
-              {/* Downloads */}
-              {product.model_url && (
-                <DetailSection title="Downloads & Resources" icon={Download}>
-                  <div className="space-y-2">
-                    <Button variant="outline" size="sm" className="gap-2 w-full sm:w-auto justify-start">
-                      <FileDown className="h-4 w-4" />
-                      Download Spec Sheet (PDF)
-                    </Button>
-                    {product.model_url && (
-                      <Button variant="outline" size="sm" className="gap-2 w-full sm:w-auto justify-start" onClick={() => setShow3D(true)}>
-                        <Box className="h-4 w-4" />
-                        View / Download 3D Model (OBJ)
-                      </Button>
-                    )}
-                  </div>
-                </DetailSection>
+                </div>
               )}
             </div>
+          </section>
 
-            {/* Right sidebar: sticky action recap */}
-            <aside className="hidden lg:block">
-              <div className="sticky top-24 space-y-6">
-                <div className="bg-secondary/30 border border-border rounded-lg p-5 space-y-4">
-                  <h3 className="text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground">Quick Actions</h3>
-                  <Button variant="default" size="default" className="w-full gap-2">
-                    <Send className="h-4 w-4" />
-                    Request Quote
-                  </Button>
-                  {product.is_customizable && (
-                    <Button variant="outline" size="default" className="w-full gap-2">
-                      <Palette className="h-4 w-4" />
-                      Customize
-                    </Button>
-                  )}
-                  <Button variant="ghost" size="sm" className="w-full gap-1.5">
-                    <BookmarkPlus className="h-3.5 w-3.5" />
-                    Add to Library
-                  </Button>
-                </div>
-
-                {/* Materials sidebar */}
-                {materials.length > 0 && (
-                  <div className="space-y-2">
-                    <h3 className="text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground">Materials</h3>
-                    <div className="space-y-1">
-                      {materials.map((m) => (
-                        <div key={m.id} className="flex items-center justify-between text-sm py-1">
-                          <span className="text-foreground">{m.name}</span>
-                          {m.is_sustainable && (
-                            <Badge variant="secondary" className="text-[9px]">Sustainable</Badge>
-                          )}
-                        </div>
-                      ))}
+          {/* ── Technical Specifications ── */}
+          {allSpecEntries.length > 0 && (
+            <section id={SECTION_IDS.specs} className="scroll-mt-24 mb-16">
+              <SectionHeading id="" title="Technical Specifications" icon={Cpu} />
+              <div className="border border-border">
+                <div className="grid grid-cols-1 sm:grid-cols-2">
+                  {allSpecEntries.map(([key, val], idx) => (
+                    <div
+                      key={key}
+                      className={`flex justify-between items-baseline gap-4 px-4 py-3 ${
+                        idx < allSpecEntries.length - (allSpecEntries.length % 2 === 0 ? 2 : 1) ? 'border-b border-border/40' : ''
+                      } ${idx % 2 === 0 && allSpecEntries.length > 1 ? 'sm:border-r sm:border-border/40' : ''}`}
+                    >
+                      <dt className="text-[11px] text-muted-foreground uppercase tracking-[0.08em]">
+                        {key.replace(/_/g, ' ')}
+                      </dt>
+                      <dd className="text-[13px] font-medium text-foreground text-right">{val}</dd>
                     </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* ── Production & Ordering ── */}
+          {allProductionEntries.length > 0 && (
+            <section id={SECTION_IDS.production} className="scroll-mt-24 mb-16">
+              <SectionHeading id="" title="Production & Ordering" icon={Factory} />
+              <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
+                <div className="border border-border">
+                  <div className="grid grid-cols-1 sm:grid-cols-2">
+                    {allProductionEntries.map(([key, val], idx) => (
+                      <div
+                        key={key}
+                        className={`flex justify-between items-baseline gap-4 px-4 py-3 ${
+                          idx < allProductionEntries.length - (allProductionEntries.length % 2 === 0 ? 2 : 1) ? 'border-b border-border/40' : ''
+                        } ${idx % 2 === 0 && allProductionEntries.length > 1 ? 'sm:border-r sm:border-border/40' : ''}`}
+                      >
+                        <dt className="text-[11px] text-muted-foreground uppercase tracking-[0.08em]">
+                          {key.replace(/_/g, ' ')}
+                        </dt>
+                        <dd className="text-[13px] font-medium text-foreground text-right">{val}</dd>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {product.is_customizable && (
+                  <div className="bg-foreground text-primary-foreground p-6 flex flex-col justify-between">
+                    <div>
+                      <Palette className="h-5 w-5 mb-3 opacity-60" />
+                      <h4 className="text-xs font-semibold uppercase tracking-[0.1em] mb-2">Customization Available</h4>
+                      <p className="text-xs opacity-70 leading-relaxed">
+                        Custom finishes, sizes, colors, and branding options available. Contact us for a tailored specification.
+                      </p>
+                    </div>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="mt-4 gap-1.5 w-full"
+                    >
+                      <Send className="h-3.5 w-3.5" />
+                      Request Custom Quote
+                    </Button>
                   </div>
                 )}
               </div>
-            </aside>
-          </div>
+            </section>
+          )}
+
+          {/* ── Compliance & Certifications ── */}
+          {certs.length > 0 && (
+            <section id={SECTION_IDS.compliance} className="scroll-mt-24 mb-16">
+              <SectionHeading id="" title="Compliance & Certifications" icon={ShieldCheck} />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {certs.map((c) => (
+                  <div key={c.id} className="border border-border p-4 flex items-start gap-3">
+                    {c.logo_url ? (
+                      <img src={c.logo_url} alt={c.name} className="h-8 w-8 object-contain shrink-0 mt-0.5" />
+                    ) : (
+                      <ShieldCheck className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+                    )}
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{c.abbreviation || c.name}</p>
+                      {c.abbreviation && <p className="text-xs text-muted-foreground mt-0.5">{c.name}</p>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* ── Applications & Segments ── */}
+          {industries.length > 0 && (
+            <section id={SECTION_IDS.applications} className="scroll-mt-24 mb-16">
+              <SectionHeading id="" title="Applications & End Uses" icon={Layers} />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {industries.map((ind) => (
+                  <Link
+                    key={ind.id}
+                    to={`/products?segment=${ind.slug}`}
+                    className="group flex items-center justify-between border border-border p-4 hover:border-foreground hover:bg-secondary/30 transition-all duration-200"
+                  >
+                    <span className="text-sm font-medium text-foreground">{ind.name}</span>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* ── Downloads & Resources ── */}
+          {hasDownloads && (
+            <section id={SECTION_IDS.downloads} className="scroll-mt-24 mb-16">
+              <SectionHeading id="" title="Downloads & Resources" icon={Download} />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <button className="border border-border p-5 text-left hover:border-foreground hover:bg-secondary/30 transition-all duration-200 group">
+                  <FileDown className="h-5 w-5 text-muted-foreground group-hover:text-foreground mb-3 transition-colors" />
+                  <p className="text-sm font-medium text-foreground">Spec Sheet</p>
+                  <p className="text-xs text-muted-foreground mt-1">Technical specification PDF</p>
+                </button>
+                {product.model_url && (
+                  <button
+                    onClick={() => setShow3D(true)}
+                    className="border border-border p-5 text-left hover:border-foreground hover:bg-secondary/30 transition-all duration-200 group"
+                  >
+                    <Box className="h-5 w-5 text-muted-foreground group-hover:text-foreground mb-3 transition-colors" />
+                    <p className="text-sm font-medium text-foreground">3D Model</p>
+                    <p className="text-xs text-muted-foreground mt-1">View or download OBJ file</p>
+                  </button>
+                )}
+              </div>
+            </section>
+          )}
         </div>
 
-        {/* Related products */}
+        {/* ── Related Trims ── */}
         <RelatedProducts product={product} />
       </main>
 
