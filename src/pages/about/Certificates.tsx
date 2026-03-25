@@ -153,11 +153,12 @@ const Certificates = () => {
               </div>
             ))}
           </div>
+          </div>
         </section>
 
         {/* Testing & Verification */}
-        <section ref={commitmentRef} className="py-16 px-6 overflow-hidden">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+        <section ref={commitmentRef} className="py-16 px-6 lg:px-8 overflow-hidden">
+          <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
             <div className={`transition-all duration-700 ease-out ${
               commitmentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'
             }`}>
