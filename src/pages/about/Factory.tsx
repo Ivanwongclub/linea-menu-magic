@@ -45,7 +45,7 @@ const factories = [
   {
     city: "Vietnam",
     label: "Manufacturing Hub",
-    image: null,
+    image: locationVietnam,
     description: "Expanding production facility supporting growing regional demand with competitive capacity, modern equipment, and alignment with evolving global sourcing strategies.",
     tags: ["Regional Capacity", "Competitive Production", "Growth"],
   },
