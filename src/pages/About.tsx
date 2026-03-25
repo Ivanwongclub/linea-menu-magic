@@ -14,11 +14,9 @@ const About = () => {
 
   const milestones = [
     { year: "1979", event: "Founded in Hong Kong" },
-    { year: "1995", event: "Expanded to mainland China" },
-    { year: "2005", event: "Achieved ISO 9001 certification" },
-    { year: "2015", event: "Obtained OEKO-TEX certification" },
-    { year: "2020", event: "GRS & RCS certified" },
-    { year: "2024", event: "Continuous innovation, serving global clients" },
+    { year: "2000", event: "ISO 9001 certified manufacturing" },
+    { year: "2010s", event: "Global supply partner across key markets" },
+    { year: "May 2026", event: "New Era: A new WinCYC with Digital Transformation", isHighlight: true },
   ];
 
   const values = [
