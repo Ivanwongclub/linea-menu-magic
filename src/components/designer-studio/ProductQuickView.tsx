@@ -213,7 +213,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                       onClick={() => setShow3D(true)}
                     >
                       <Box className="w-4 h-4" />
-                      查看 3D 模型
+                      View 3D Model
                     </Button>
                   )}
                 </>
