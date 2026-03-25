@@ -98,33 +98,21 @@ const Sustainability = () => {
 
         {/* Vision */}
         <section ref={visionRef} className="py-24 px-6 lg:px-8 overflow-hidden">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="flex items-start justify-center gap-4 mb-8">
-              <span className={`w-1 bg-foreground self-stretch min-h-[3rem] transition-all duration-700 ${visionVisible ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: '200ms' }} />
-              <div className="text-5xl md:text-6xl lg:text-7xl text-foreground leading-[0.9]">
-                <LetterReveal
-                  text="Our"
-                  as="span"
-                  className="font-light block"
-                  isVisible={visionVisible}
-                  startDelay={100}
-                  letterDelay={60}
-                />
-                <LetterReveal
-                  text="Promise"
-                  as="span"
-                  className="font-bold block"
-                  isVisible={visionVisible}
-                  startDelay={350}
-                  letterDelay={80}
-                />
+          <div className="max-w-7xl mx-auto">
+            <div className="max-w-2xl">
+              <div className="flex items-start gap-4 mb-8">
+                <span className={`w-1 bg-foreground self-stretch min-h-[3rem] transition-all duration-700 ${visionVisible ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: '200ms' }} />
+                <div className="text-5xl md:text-6xl lg:text-7xl text-foreground leading-[0.9]">
+                  <LetterReveal text="Our" as="span" className="font-light block" isVisible={visionVisible} startDelay={100} letterDelay={60} />
+                  <LetterReveal text="Promise" as="span" className="font-bold block" isVisible={visionVisible} startDelay={350} letterDelay={80} />
+                </div>
               </div>
+              <p className={`text-muted-foreground leading-relaxed text-lg transition-all duration-700 ease-out ${
+                visionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+              }`} style={{ transitionDelay: '600ms' }}>
+                As a leader in the garment accessories industry, we understand our responsibility to the environment. Through innovative technology and sustainable practices, we are committed to minimising our environmental footprint while maintaining the highest product quality.
+              </p>
             </div>
-            <p className={`text-muted-foreground leading-relaxed text-lg transition-all duration-700 ease-out ${
-              visionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`} style={{ transitionDelay: '600ms' }}>
-              As a leader in the garment accessories industry, we understand our responsibility to the environment. Through innovative technology and sustainable practices, we are committed to minimising our environmental footprint while maintaining the highest product quality.
-            </p>
           </div>
         </section>
 
