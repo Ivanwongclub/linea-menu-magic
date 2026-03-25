@@ -176,11 +176,11 @@ const ViewerToolbar = ({
                 value={pageInput}
                 onChange={(e) => setPageInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") handlePageJump(); }}
-                className="w-16 h-7 rounded bg-white/10 border border-white/20 text-white text-xs text-center outline-none focus:border-white/40"
+                className="w-16 h-7 rounded-none bg-white/10 border border-white/20 text-white text-xs text-center outline-none focus:border-white/40"
               />
               <button
                 onClick={handlePageJump}
-                className="h-7 px-3 rounded bg-white/15 hover:bg-white/25 text-white text-xs font-medium transition-colors"
+                className="h-7 px-3 rounded-none bg-white/15 hover:bg-white/25 text-white text-xs font-medium transition-colors"
               >
                 Go
               </button>

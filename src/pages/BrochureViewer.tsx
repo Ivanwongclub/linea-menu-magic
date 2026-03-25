@@ -107,7 +107,7 @@ export default function BrochureViewer() {
           <p className="text-white/40 text-sm mb-6">The brochure you're looking for doesn't exist or has been removed.</p>
           <Link
             to="/brochures"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-white/10 hover:bg-white/20 text-white text-sm transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-none bg-white/10 hover:bg-white/20 text-white text-sm transition-colors"
           >
             <ArrowLeft size={16} />
             Back to Brochures

@@ -291,7 +291,7 @@ export default function Products() {
                 <button
                   key={col.slug}
                   onClick={() => setActiveCollection(activeCollection === col.slug ? null : col.slug)}
-                  className={`whitespace-nowrap text-xs px-3.5 py-1.5 rounded-full border transition-colors flex-shrink-0 ${
+                  className={`whitespace-nowrap text-xs px-3.5 py-1.5 rounded-none border transition-colors flex-shrink-0 ${
                     activeCollection === col.slug
                       ? 'bg-foreground text-background border-foreground'
                       : 'bg-background text-foreground border-border hover:border-foreground/30'
@@ -384,7 +384,7 @@ export default function Products() {
                       <button
                         key={opt.value}
                         onClick={() => setActiveFeatured(opt.value)}
-                        className={`whitespace-nowrap text-[11px] px-2.5 py-1 rounded-[0.25rem] border transition-all duration-200 ${
+                        className={`whitespace-nowrap text-[11px] px-2.5 py-1 rounded-none border transition-all duration-200 ${
                           activeFeatured === opt.value
                             ? 'bg-foreground text-background border-foreground'
                             : 'bg-background text-foreground border-border hover:border-foreground/40'
@@ -491,7 +491,7 @@ export default function Products() {
             <p className="text-primary-foreground/70 mb-8 max-w-2xl">We offer professional customisation services tailored to your unique requirements.</p>
             <Link
               to="/contact"
-              className="inline-block px-12 py-4 bg-background text-foreground text-xs tracking-[0.06em] uppercase rounded-[var(--radius)] border-2 border-background hover:bg-white/90 transition-all duration-200"
+              className="inline-block px-12 py-4 bg-background text-foreground text-xs tracking-[0.06em] uppercase rounded-none border-2 border-background hover:bg-white/90 transition-all duration-200"
             >
               Contact Us
             </Link>

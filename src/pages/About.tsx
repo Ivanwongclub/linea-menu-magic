@@ -152,7 +152,7 @@ const About = () => {
                   style={getTimelineDelay(index)}
                 >
                   <div className="flex-shrink-0 w-24 text-right">
-                    <span className={`text-2xl font-bold ${(milestone as any).isHighlight ? 'text-background bg-foreground px-2 py-1 rounded-[var(--radius)]' : 'text-foreground'}`}>{milestone.year}</span>
+                    <span className={`text-2xl font-bold ${(milestone as any).isHighlight ? 'text-background bg-foreground px-2 py-1' : 'text-foreground'}`}>{milestone.year}</span>
                   </div>
                   <div className="flex-shrink-0 w-px h-16 bg-border group-last:hidden" />
                   <div className="pt-1">

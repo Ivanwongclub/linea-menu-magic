@@ -148,7 +148,7 @@ const Contact = () => {
                     <textarea name="message" value={formData.message} onChange={handleChange} required rows={6} className="w-full px-4 py-3 border border-border bg-transparent text-foreground text-sm focus:outline-none focus:border-foreground transition-colors resize-none" placeholder="Describe your requirements..." />
                   </div>
 
-                  <button type="submit" className="px-12 py-4 bg-primary text-primary-foreground text-xs tracking-[0.2em] uppercase rounded-full transition-all duration-300 hover:bg-primary-hover">
+                  <button type="submit" className="px-12 py-4 bg-primary text-primary-foreground text-xs tracking-[0.2em] uppercase rounded-none transition-all duration-300 hover:bg-primary-hover">
                     Send Message
                   </button>
                 </form>

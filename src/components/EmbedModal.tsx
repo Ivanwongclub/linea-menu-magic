@@ -56,7 +56,7 @@ const EmbedModal = ({ slug, brochureTitle, isOpen, onClose }: EmbedModalProps) =
               <button
                 key={preset.value}
                 onClick={() => setHeight(preset.value)}
-                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                className={`px-3 py-1.5 rounded-none text-xs font-medium transition-colors ${
                   height === preset.value
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted text-muted-foreground hover:text-foreground"
@@ -89,7 +89,7 @@ const EmbedModal = ({ slug, brochureTitle, isOpen, onClose }: EmbedModalProps) =
             </pre>
             <button
               onClick={handleCopy}
-              className="absolute top-2 right-2 flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-medium transition-colors hover:opacity-90"
+              className="absolute top-2 right-2 flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-primary text-primary-foreground text-xs font-medium transition-colors hover:opacity-90"
             >
               {copied ? <Check size={14} /> : <Copy size={14} />}
               {copied ? "Copied!" : "Copy code"}
