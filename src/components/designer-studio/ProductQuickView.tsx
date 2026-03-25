@@ -362,7 +362,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                       <div className="grid grid-cols-2 gap-2">
                         {item.specifications.material && (
                           <div className="text-sm">
-                            <span className="text-muted-foreground">材質：</span>
+                            <span className="text-muted-foreground">Material: </span>
                             <span className="font-medium">{item.specifications.material}</span>
                           </div>
                         )}
