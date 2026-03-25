@@ -45,6 +45,10 @@ const seedImages: Record<string, string[]> = {
   // Zippers
   'nylon-cord-puller': [nylonZipper, brandedZipper, zippersCategory],
   'metal-zipper-puller': [metalZipper, brandedZipper, zippersCategory],
+  'metal-zipper': [metalZipper, brandedZipper, zippersCategory],
+  'nylon-zipper': [nylonZipper, brandedZipper, zippersCategory],
+  'branded-zipper': [brandedZipper, metalZipper, zippersCategory],
+  'invisible-zipper': [nylonZipper, zippersCategory, brandedZipper],
 
   // Lace & trims
   'eco-lace-trim': [cottonLace, laceCategory],
