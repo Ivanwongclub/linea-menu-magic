@@ -13,18 +13,18 @@ const About = () => {
   const { ref: timelineRef, isVisible: timelineVisible, getDelay: getTimelineDelay } = useStaggeredAnimation(6, 100);
 
   const milestones = [
-    { year: "1979", event: "公司於香港創立", eventEn: "Founded in Hong Kong" },
-    { year: "1995", event: "拓展中國大陸生產基地", eventEn: "Expanded to mainland China" },
-    { year: "2005", event: "獲得ISO 9001認證", eventEn: "Achieved ISO 9001 certification" },
-    { year: "2015", event: "取得OEKO-TEX認證", eventEn: "Obtained OEKO-TEX certification" },
-    { year: "2020", event: "GRS及RCS認證通過", eventEn: "GRS & RCS certified" },
-    { year: "2024", event: "持續創新，服務全球客戶", eventEn: "Continuous innovation" },
+    { year: "1979", event: "Founded in Hong Kong" },
+    { year: "1995", event: "Expanded to mainland China" },
+    { year: "2005", event: "Achieved ISO 9001 certification" },
+    { year: "2015", event: "Obtained OEKO-TEX certification" },
+    { year: "2020", event: "GRS & RCS certified" },
+    { year: "2024", event: "Continuous innovation, serving global clients" },
   ];
 
   const values = [
-    { title: "品質至上", desc: "堅持國際品質標準，每一件產品都經過嚴格檢測" },
-    { title: "創新設計", desc: "緊貼時尚潮流，持續研發創新款式與材料" },
-    { title: "永續發展", desc: "實踐環保責任，推動可持續生產方式" },
+    { title: "Quality First", desc: "Adhering to international quality standards, every product undergoes rigorous testing." },
+    { title: "Innovative Design", desc: "Keeping pace with fashion trends, continuously developing innovative styles and materials." },
+    { title: "Sustainability", desc: "Practising environmental responsibility, driving sustainable production methods." },
   ];
 
   return (
@@ -37,7 +37,7 @@ const About = () => {
             { label: "Home", href: "/" },
             { label: "About" },
           ]}
-          title="關於我們"
+          title="About Us"
         />
 
         {/* Story */}
@@ -50,7 +50,7 @@ const About = () => {
                 </p>
                 <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6">
                   <LetterReveal
-                    text="品牌"
+                    text="Brand"
                     as="span"
                     className="text-outline inline-block mr-2"
                     isVisible={storyVisible}
@@ -58,7 +58,7 @@ const About = () => {
                     letterDelay={80}
                   />
                   <LetterReveal
-                    text="故事"
+                    text="Story"
                     as="span"
                     className="inline-block"
                     isVisible={storyVisible}
@@ -70,16 +70,13 @@ const About = () => {
                   storyVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`} style={{ transitionDelay: '500ms' }}>
                   <p>
-                    WIN-CYC GROUP LIMITED（雲傑震業集團有限公司）自1979年創立以來，
-                    一直專注於服裝輔料的研發、製造與供應。
+                    Since its founding in 1979, WIN-CYC GROUP LIMITED has been dedicated to the research, manufacturing, and supply of premium garment accessories.
                   </p>
                   <p>
-                    從一家香港小型工廠起步，我們憑藉對品質的堅持與對創新的追求，
-                    逐步發展成為服務全球知名品牌的國際供應商。
+                    Starting from a small factory in Hong Kong, we have grown into an international supplier serving globally renowned brands through our commitment to quality and innovation.
                   </p>
                   <p>
-                    我們相信，每一個細節都能成就完美。無論是一顆精緻的鈕扣，
-                    還是一條流暢的拉鏈，都承載著我們對工藝的敬意與對美的追求。
+                    We believe that every detail can achieve perfection. Whether it is a finely crafted button or a smooth zipper, each carries our respect for craftsmanship and pursuit of beauty.
                   </p>
                 </div>
               </div>
@@ -104,9 +101,9 @@ const About = () => {
                 valuesHeaderVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}>Our Values</p>
               <LetterReveal
-                text="核心價值"
+                text="Core Values"
                 as="h2"
-                className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground font-serif-display"
+                className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground"
                 isVisible={valuesHeaderVisible}
                 startDelay={100}
                 letterDelay={80}
@@ -138,9 +135,9 @@ const About = () => {
                 timelineHeaderVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}>Milestones</p>
               <LetterReveal
-                text="發展歷程"
+                text="Our Journey"
                 as="h2"
-                className="text-5xl md:text-6xl lg:text-7xl font-light text-foreground italic font-serif-display"
+                className="text-5xl md:text-6xl lg:text-7xl font-light text-foreground italic"
                 isVisible={timelineHeaderVisible}
                 startDelay={100}
                 letterDelay={80}
@@ -162,7 +159,6 @@ const About = () => {
                   <div className="flex-shrink-0 w-px h-16 bg-border group-last:hidden" />
                   <div className="pt-1">
                     <p className="text-foreground">{milestone.event}</p>
-                    <p className="text-sm text-muted-foreground">{milestone.eventEn}</p>
                   </div>
                 </div>
               ))}

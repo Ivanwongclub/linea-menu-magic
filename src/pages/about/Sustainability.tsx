@@ -22,33 +22,33 @@ const Sustainability = () => {
               { label: "About", href: "/about" },
               { label: "Sustainability" },
             ]}
-            title="可持續發展"
+            title="Sustainability"
           />
         
           <div ref={commitmentRef} className={`transition-all duration-700 ${commitmentVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-            <ContentSection title="環保承諾">
+            <ContentSection title="Environmental Commitment">
               <div className="grid md:grid-cols-2 gap-12 mb-16">
                 <div className="space-y-6">
-                  <h3 className="text-xl font-light text-foreground">環保材料</h3>
+                  <h3 className="text-xl font-light text-foreground">Eco-friendly Materials</h3>
                   <p className="text-muted-foreground leading-relaxed">
-                    我們積極採用再生材料與環保原料，包括再生金屬、有機棉、回收塑料等，減少對環境的影響，同時確保產品品質不受影響。
+                    We actively adopt recycled and eco-friendly raw materials, including recycled metals, organic cotton, and reclaimed plastics, reducing our environmental impact while maintaining uncompromised product quality.
                   </p>
                 </div>
                 <div className="space-y-6">
-                  <h3 className="text-xl font-light text-foreground">綠色生產</h3>
+                  <h3 className="text-xl font-light text-foreground">Green Manufacturing</h3>
                   <p className="text-muted-foreground leading-relaxed">
-                    生產設施採用節能設備與環保工藝，持續優化生產流程，減少能源消耗與廢棄物排放，實現綠色製造目標。
+                    Our production facilities use energy-efficient equipment and eco-friendly processes, continuously optimising production workflows to reduce energy consumption and waste emissions, achieving our green manufacturing goals.
                   </p>
                 </div>
               </div>
 
               <div ref={goalsRef} className="bg-secondary p-8">
-                <h3 className="text-2xl font-light text-foreground mb-6">環保目標</h3>
+                <h3 className="text-2xl font-light text-foreground mb-6">Environmental Goals</h3>
                 <div className="grid md:grid-cols-3 gap-8">
                   {[
-                    { value: "50%", label: "再生材料使用比例（2025年目標）" },
-                    { value: "30%", label: "碳排放減少（2030年目標）" },
-                    { value: "Zero", label: "生產廢棄物填埋政策" },
+                    { value: "50%", label: "Recycled material usage target (2025)" },
+                    { value: "30%", label: "Carbon emission reduction (2030 target)" },
+                    { value: "Zero", label: "Production waste to landfill policy" },
                   ].map((goal, index) => (
                     <div 
                       key={index}
@@ -65,23 +65,23 @@ const Sustainability = () => {
           </div>
 
           <div ref={practicesRef} className={`transition-all duration-700 ${practicesVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-            <ContentSection title="可持續實踐">
+            <ContentSection title="Sustainable Practices">
               <div className="space-y-8">
                 <p className="text-lg text-muted-foreground leading-relaxed">
-                  我們將可持續發展理念融入業務的每個環節，從原材料採購到產品交付，確保整個供應鏈的環保合規。
+                  We embed sustainability into every aspect of our business, from raw material sourcing to product delivery, ensuring environmental compliance throughout the entire supply chain.
                 </p>
                 
                 <div className="grid md:grid-cols-2 gap-8">
                   <div className="space-y-4">
-                    <h3 className="text-lg font-light text-foreground">供應鏈管理</h3>
+                    <h3 className="text-lg font-light text-foreground">Supply Chain Management</h3>
                     <p className="text-muted-foreground">
-                      嚴格篩選供應商，確保原材料來源合法、符合環保標準，建立透明可追溯的供應鏈體系。
+                      Rigorous supplier vetting ensures raw material sources are legitimate and meet environmental standards, building a transparent and traceable supply chain.
                     </p>
                   </div>
                   <div className="space-y-4">
-                    <h3 className="text-lg font-light text-foreground">員工福祉</h3>
+                    <h3 className="text-lg font-light text-foreground">Employee Wellbeing</h3>
                     <p className="text-muted-foreground">
-                      提供安全健康的工作環境，遵守勞動法規，保障員工權益，促進可持續的企業發展。
+                      Providing a safe and healthy working environment, complying with labour regulations, safeguarding employee rights, and promoting sustainable business development.
                     </p>
                   </div>
                 </div>
@@ -89,18 +89,18 @@ const Sustainability = () => {
             </ContentSection>
           </div>
 
-          <ContentSection title="認證與標準">
+          <ContentSection title="Certifications & Standards">
             <div className="space-y-8">
               <p className="text-muted-foreground leading-relaxed">
-                我們通過多項國際認證，證明我們對可持續發展的承諾與實踐成果。
+                We hold multiple international certifications, demonstrating our commitment and achievement in sustainable development.
               </p>
               
               <div ref={certsRef} className="grid md:grid-cols-4 gap-8 items-center">
                 {[
-                  { name: "GRS", desc: "全球回收標準" },
-                  { name: "OEKO-TEX", desc: "生態紡織品認證" },
-                  { name: "ISO 14001", desc: "環境管理體系" },
-                  { name: "BSCI", desc: "商業社會責任" },
+                  { name: "GRS", desc: "Global Recycled Standard" },
+                  { name: "OEKO-TEX", desc: "Eco Textile Certification" },
+                  { name: "ISO 14001", desc: "Environmental Management" },
+                  { name: "BSCI", desc: "Social Compliance" },
                 ].map((cert, index) => (
                   <div 
                     key={cert.name}

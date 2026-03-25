@@ -40,7 +40,7 @@ const News = () => {
             { label: "Home", href: "/" },
             { label: "News" },
           ]}
-          title="最新動態"
+          title="Latest News"
         />
 
         {/* Sticky Category Filter Bar */}
@@ -50,7 +50,7 @@ const News = () => {
               filterVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground mr-2">類型</span>
+                <span className="text-xs text-muted-foreground mr-2">Type</span>
                 {filterOptions.map((filter) => (
                   <button
                     key={filter.key}
@@ -67,7 +67,7 @@ const News = () => {
               </div>
               
               <div className="flex items-center gap-2 sm:ml-6">
-                <span className="text-xs text-muted-foreground mr-2">分類</span>
+                <span className="text-xs text-muted-foreground mr-2">Category</span>
                 <div className="flex flex-wrap gap-2">
                   {categoryOptions.map((category) => (
                     <button
@@ -96,7 +96,7 @@ const News = () => {
                 <h2 className={`text-xs font-medium text-muted-foreground uppercase tracking-widest transition-all duration-700 ease-out ${
                   featuredHeaderVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'
                 }`}>
-                  焦點消息
+                  Featured
                 </h2>
                 <div className={`flex-1 h-px bg-border transition-all duration-700 ease-out ${
                   featuredHeaderVisible ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0'
@@ -124,7 +124,7 @@ const News = () => {
                       <div className="p-6">
                         <div className="flex items-center gap-3 mb-3">
                           <span className="text-xs font-medium uppercase tracking-widest text-foreground/70">
-                            {item.type === "exhibition" ? "展覽" : "新聞"}
+                            {item.type === "exhibition" ? "Exhibition" : "News"}
                           </span>
                           <span className="w-6 h-px bg-border" />
                           <span className="text-xs text-muted-foreground">
@@ -167,7 +167,7 @@ const News = () => {
                 <h2 className={`text-xs font-medium text-muted-foreground uppercase tracking-widest transition-all duration-700 ease-out ${
                   regularHeaderVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'
                 }`}>
-                  更多消息
+                  More News
                 </h2>
                 <div className={`flex-1 h-px bg-border transition-all duration-700 ease-out ${
                   regularHeaderVisible ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0'
@@ -195,7 +195,7 @@ const News = () => {
                       <div className="p-5">
                         <div className="flex items-center gap-2 mb-3">
                           <span className="text-xs font-medium uppercase tracking-widest text-foreground/70">
-                            {item.type === "exhibition" ? "展覽" : "新聞"}
+                            {item.type === "exhibition" ? "Exhibition" : "News"}
                           </span>
                           <span className="w-4 h-px bg-border" />
                           <span className="text-xs text-muted-foreground">
@@ -234,7 +234,7 @@ const News = () => {
         {filteredItems.length === 0 && (
           <section className="py-24 px-6 lg:px-8">
             <div className="max-w-7xl mx-auto text-center">
-              <p className="text-muted-foreground">暫無符合條件的內容</p>
+              <p className="text-muted-foreground">No matching content found</p>
             </div>
           </section>
         )}
@@ -245,12 +245,12 @@ const News = () => {
             <h2 className={`text-xl md:text-2xl font-semibold text-foreground mb-2 transition-all duration-700 ease-out ${
               ctaVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}>
-              訂閱最新資訊
+              Stay Updated
             </h2>
             <p className={`text-sm text-muted-foreground mb-6 font-light transition-all duration-700 ease-out ${
               ctaVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`} style={{ transitionDelay: '100ms' }}>
-              獲取展覽預告、產品發布及行業動態
+              Get exhibition previews, product launches, and industry updates
             </p>
             <Link
               to="/contact"
@@ -259,7 +259,7 @@ const News = () => {
               }`}
               style={{ transitionDelay: '200ms' }}
             >
-              <span>聯絡我們</span>
+              <span>Contact Us</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>

@@ -13,69 +13,69 @@ const Certificates = () => {
     {
       icon: Shield,
       name: "ISO 9001:2015",
-      category: "品質管理系統",
-      description: "國際標準化組織認證的品質管理體系，確保產品及服務持續滿足客戶需求。",
-      validUntil: "2027年",
-      scope: "鈕扣、拉鏈、金屬配件生產",
+      category: "Quality Management System",
+      description: "Internationally recognised quality management system ensuring products and services consistently meet customer requirements.",
+      validUntil: "2027",
+      scope: "Buttons, zippers, and metal accessories production",
     },
     {
       icon: Leaf,
       name: "OEKO-TEX® Standard 100",
-      category: "環保安全認證",
-      description: "證明產品對人體健康無害，不含有害物質，適用於嬰幼兒及敏感肌膚。",
-      validUntil: "2025年",
-      scope: "全系列服裝輔料產品",
+      category: "Eco-safety Certification",
+      description: "Certifies that products are harmless to human health, free from harmful substances, and suitable for infants and sensitive skin.",
+      validUntil: "2025",
+      scope: "Full range of garment accessories",
     },
     {
       icon: Globe,
       name: "GRS (Global Recycled Standard)",
-      category: "全球回收標準",
-      description: "驗證產品含有再生材料的國際標準，確保可追溯性及環保合規性。",
-      validUntil: "2025年",
-      scope: "再生材料產品線",
+      category: "Global Recycled Standard",
+      description: "International standard verifying recycled content in products, ensuring traceability and environmental compliance.",
+      validUntil: "2025",
+      scope: "Recycled material product lines",
     },
     {
       icon: FileCheck,
       name: "ISO 14001:2015",
-      category: "環境管理系統",
-      description: "證明企業在環境保護方面的承諾，包括資源節約及污染防治措施。",
-      validUntil: "2026年",
-      scope: "生產設施及營運流程",
+      category: "Environmental Management System",
+      description: "Demonstrates corporate commitment to environmental protection, including resource conservation and pollution prevention.",
+      validUntil: "2026",
+      scope: "Production facilities and operations",
     },
     {
       icon: Award,
       name: "BSCI (Business Social Compliance Initiative)",
-      category: "社會責任認證",
-      description: "確保供應鏈符合國際勞工標準及社會責任要求。",
-      validUntil: "2025年",
-      scope: "所有生產基地",
+      category: "Social Responsibility Certification",
+      description: "Ensures supply chain compliance with international labour standards and social responsibility requirements.",
+      validUntil: "2025",
+      scope: "All production bases",
     },
     {
       icon: CheckCircle,
       name: "REACH Compliance",
-      category: "歐盟化學品法規",
-      description: "符合歐盟化學品註冊、評估、許可和限制法規的產品合規認證。",
-      validUntil: "持續更新",
-      scope: "出口歐盟市場產品",
+      category: "EU Chemical Regulation",
+      description: "Product compliance certification meeting EU regulations on registration, evaluation, authorisation and restriction of chemicals.",
+      validUntil: "Ongoing",
+      scope: "Products exported to EU markets",
     },
   ];
 
   const standards = [
     {
-      title: "產品安全標準",
-      items: ["無鎳釋放測試", "無鉛成分認證", "色牢度測試", "拉力強度測試"],
+      title: "Product Safety Standards",
+      items: ["Nickel-free release testing", "Lead-free content certification", "Colour fastness testing", "Tensile strength testing"],
     },
     {
-      title: "環保合規標準",
-      items: ["無偶氮染料", "無甲醛認證", "RoHS合規", "低VOC排放"],
+      title: "Environmental Compliance",
+      items: ["AZO-free dyes", "Formaldehyde-free certification", "RoHS compliant", "Low VOC emissions"],
     },
     {
-      title: "品質控制標準",
-      items: ["AQL 1.5抽樣標準", "100%出貨前檢驗", "可追溯性系統", "定期第三方審核"],
+      title: "Quality Control Standards",
+      items: ["AQL 1.5 sampling standard", "100% pre-shipment inspection", "Full traceability system", "Regular third-party audits"],
     },
     {
-      title: "社會責任標準",
-      items: ["公平勞工待遇", "安全工作環境", "禁止童工", "反歧視政策"],
+      title: "Social Responsibility",
+      items: ["Fair labour practices", "Safe working environment", "No child labour", "Anti-discrimination policy"],
     },
   ];
 
@@ -90,14 +90,14 @@ const Certificates = () => {
             { label: "About", href: "/about" },
             { label: "Certificates" },
           ]}
-          title="認證與標準"
+          title="Certifications & Standards"
         />
 
         {/* Certificates Grid */}
         <section className="py-16 px-6 overflow-hidden">
           <div className="mb-10">
-            <h2 className="text-2xl font-light text-foreground mb-2">國際認證</h2>
-            <p className="text-sm text-muted-foreground">我們持有的主要國際認證與合規證書</p>
+            <h2 className="text-2xl font-light text-foreground mb-2">International Certifications</h2>
+            <p className="text-sm text-muted-foreground">Our key international certifications and compliance credentials</p>
           </div>
           <div ref={certsRef} className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {certificates.map((cert, index) => (
@@ -110,13 +110,13 @@ const Certificates = () => {
               >
                 <div className="flex items-start justify-between mb-4">
                   <cert.icon className="w-8 h-8 text-foreground/60 group-hover:text-foreground/80 transition-colors duration-300" strokeWidth={1.5} />
-                  <span className="text-xs text-muted-foreground bg-secondary px-2 py-1">有效至 {cert.validUntil}</span>
+                  <span className="text-xs text-muted-foreground bg-secondary px-2 py-1">Valid until {cert.validUntil}</span>
                 </div>
                 <h3 className="text-lg font-light text-foreground mb-1">{cert.name}</h3>
                 <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3">{cert.category}</p>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-4">{cert.description}</p>
                 <div className="pt-4 border-t border-border">
-                  <span className="text-xs text-muted-foreground">適用範圍：{cert.scope}</span>
+                  <span className="text-xs text-muted-foreground">Scope: {cert.scope}</span>
                 </div>
               </div>
             ))}
@@ -126,8 +126,8 @@ const Certificates = () => {
         {/* Standards Section */}
         <section className="py-16 px-6 bg-secondary overflow-hidden">
           <div className="mb-10">
-            <h2 className="text-2xl font-light text-foreground mb-2">合規標準</h2>
-            <p className="text-sm text-muted-foreground">我們嚴格遵循的品質與合規標準體系</p>
+            <h2 className="text-2xl font-light text-foreground mb-2">Compliance Standards</h2>
+            <p className="text-sm text-muted-foreground">Quality and compliance standards we strictly follow</p>
           </div>
           <div ref={standardsRef} className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {standards.map((standard, index) => (
@@ -158,15 +158,15 @@ const Certificates = () => {
             <div className={`transition-all duration-700 ease-out ${
               commitmentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'
             }`}>
-              <h2 className="text-2xl font-light text-foreground mb-4">第三方測試與驗證</h2>
+              <h2 className="text-2xl font-light text-foreground mb-4">Third-party Testing & Verification</h2>
               <p className="text-muted-foreground leading-relaxed mb-6">
-                我們與多家國際知名測試機構合作，定期對產品進行獨立第三方測試及驗證。這些測試涵蓋物理性能、化學安全、環保合規等多個範疇，確保產品符合全球各市場的監管要求。
+                We partner with multiple internationally renowned testing institutions for regular independent third-party testing and verification. These tests cover physical performance, chemical safety, and environmental compliance, ensuring products meet regulatory requirements across global markets.
               </p>
               <div className="space-y-4">
                 {[
-                  { abbr: "SGS", name: "SGS Testing Services", desc: "全球領先的測試認證機構" },
-                  { abbr: "BV", name: "Bureau Veritas", desc: "國際檢驗認證集團" },
-                  { abbr: "ITS", name: "Intertek", desc: "質量與安全解決方案提供商" },
+                  { abbr: "SGS", name: "SGS Testing Services", desc: "Global leader in testing and certification" },
+                  { abbr: "BV", name: "Bureau Veritas", desc: "International inspection and certification group" },
+                  { abbr: "ITS", name: "Intertek", desc: "Quality and safety solutions provider" },
                 ].map((org) => (
                   <div key={org.abbr} className="flex items-center gap-4 p-4 bg-secondary">
                     <div className="w-12 h-12 flex items-center justify-center bg-background">
@@ -195,9 +195,9 @@ const Certificates = () => {
         {/* Commitment Banner */}
         <section className="py-16 px-6 bg-secondary border-t border-border overflow-hidden">
           <div className="max-w-3xl">
-            <h2 className="text-2xl font-light text-foreground mb-4">我們的承諾</h2>
+            <h2 className="text-2xl font-light text-foreground mb-4">Our Commitment</h2>
             <p className="text-muted-foreground leading-relaxed">
-              WIN-CYC承諾持續投資於品質管理及認證體系的完善。我們相信，嚴格的標準與透明的合規措施是建立客戶信任的基石。未來，我們將繼續擴展認證範圍，以滿足全球客戶及監管機構日益嚴格的要求。
+              WIN-CYC is committed to continuous investment in quality management and certification systems. We believe that rigorous standards and transparent compliance measures are the foundation of client trust. We will continue to expand our certification scope to meet the increasingly stringent requirements of global clients and regulatory bodies.
             </p>
           </div>
         </section>

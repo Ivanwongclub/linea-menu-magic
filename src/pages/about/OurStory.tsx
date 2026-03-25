@@ -22,34 +22,34 @@ const OurStory = () => {
               { label: "About", href: "/about" },
               { label: "Our Story" },
             ]}
-            title="我們的故事"
+            title="Our Story"
           />
           
           <div ref={section1Ref} className={`transition-all duration-700 ${section1Visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <ContentSection>
               <ImageTextBlock
                 image="/founders.png"
-                imageAlt="WIN-CYC 創辦人"
-                title="創業初心"
-                content="WIN-CYC GROUP LIMITED（雲傑震業集團有限公司）於1979年在香港創立。創辦人憑藉對服裝輔料行業的熱忱與專業，從一家小型工廠起步，致力於為服裝品牌提供優質的鈕扣、拉鏈及配件產品。"
+                imageAlt="WIN-CYC Founders"
+                title="The Beginning"
+                content="WIN-CYC GROUP LIMITED was founded in Hong Kong in 1979. Driven by passion and expertise in the garment accessories industry, our founders started from a small factory with the mission to provide premium buttons, zippers, and accessories to fashion brands worldwide."
                 imagePosition="left"
               />
             </ContentSection>
           </div>
 
           <div ref={section2Ref} className={`transition-all duration-700 ${section2Visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`} style={{ transitionDelay: '150ms' }}>
-            <ContentSection title="傳承與發展">
+            <ContentSection title="Heritage & Growth">
               <div className="grid md:grid-cols-2 gap-12">
                 <div className="space-y-6">
-                  <h3 className="text-xl font-light text-foreground">傳統工藝</h3>
+                  <h3 className="text-xl font-light text-foreground">Traditional Craftsmanship</h3>
                   <p className="text-muted-foreground leading-relaxed">
-                    我們堅持傳統工藝與現代技術的結合，每一件產品都經過嚴格的品質控制。從原材料採購到成品出廠，每個環節都體現我們對品質的執著追求。
+                    We insist on combining traditional craftsmanship with modern technology. Every product undergoes strict quality control. From raw material procurement to finished goods, each step reflects our unwavering pursuit of quality.
                   </p>
                 </div>
                 <div className="space-y-6">
-                  <h3 className="text-xl font-light text-foreground">可持續發展</h3>
+                  <h3 className="text-xl font-light text-foreground">Sustainable Development</h3>
                   <p className="text-muted-foreground leading-relaxed">
-                    我們相信企業發展與環境保護可以並行。通過採用環保材料、優化生產流程，我們致力於減少對環境的影響，為可持續時尚產業貢獻力量。
+                    We believe that business growth and environmental protection can go hand in hand. Through the adoption of eco-friendly materials and optimised production processes, we are committed to minimising our environmental impact and contributing to the sustainable fashion industry.
                   </p>
                 </div>
               </div>
@@ -57,24 +57,24 @@ const OurStory = () => {
           </div>
 
           <div ref={section3Ref} className={`transition-all duration-700 ${section3Visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`} style={{ transitionDelay: '300ms' }}>
-            <ContentSection title="核心價值">
+            <ContentSection title="Core Values">
               <div className="grid md:grid-cols-3 gap-8">
                 <div className="space-y-4">
-                  <h3 className="text-lg font-light text-foreground">品質至上</h3>
+                  <h3 className="text-lg font-light text-foreground">Quality First</h3>
                   <p className="text-muted-foreground">
-                    堅持國際品質標準，確保每一件產品都經過嚴格檢測與認證。
+                    Adhering to international quality standards, ensuring every product passes rigorous testing and certification.
                   </p>
                 </div>
                 <div className="space-y-4">
-                  <h3 className="text-lg font-light text-foreground">客戶為本</h3>
+                  <h3 className="text-lg font-light text-foreground">Client Focus</h3>
                   <p className="text-muted-foreground">
-                    深入了解客戶需求，提供專業的產品建議與定制服務。
+                    Understanding client needs in depth, providing expert product recommendations and customisation services.
                   </p>
                 </div>
                 <div className="space-y-4">
-                  <h3 className="text-lg font-light text-foreground">創新精神</h3>
+                  <h3 className="text-lg font-light text-foreground">Innovation</h3>
                   <p className="text-muted-foreground">
-                    持續研發新款式與材料，緊貼時尚潮流與市場需求。
+                    Continuously developing new styles and materials, keeping pace with fashion trends and market demands.
                   </p>
                 </div>
               </div>

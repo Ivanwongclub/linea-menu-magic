@@ -18,27 +18,23 @@ const Sustainability = () => {
   const initiatives = [
     {
       icon: Recycle,
-      titleCn: "再生材料",
-      titleEn: "Recycled Materials",
-      description: "採用GRS認證的再生聚酯和金屬，減少原材料消耗",
+      title: "Recycled Materials",
+      description: "Using GRS-certified recycled polyester and metals to reduce raw material consumption.",
     },
     {
       icon: Factory,
-      titleCn: "環保製程",
-      titleEn: "Eco-friendly Process",
-      description: "引進環保電鍍技術，減少有害化學物質排放",
+      title: "Eco-friendly Process",
+      description: "Adopting eco-friendly plating technology to reduce harmful chemical emissions.",
     },
     {
       icon: Leaf,
-      titleCn: "碳足跡管理",
-      titleEn: "Carbon Footprint",
-      description: "持續監測並降低生產過程中的碳排放",
+      title: "Carbon Footprint",
+      description: "Continuously monitoring and reducing carbon emissions across production processes.",
     },
     {
       icon: Award,
-      titleCn: "國際認證",
-      titleEn: "Certifications",
-      description: "獲得GRS、RCS、OEKO-TEX等國際環保認證",
+      title: "Certifications",
+      description: "Holding GRS, RCS, OEKO-TEX and other international environmental certifications.",
     },
   ];
 
@@ -46,30 +42,30 @@ const Sustainability = () => {
     {
       name: "GRS",
       fullName: "Global Recycled Standard",
-      description: "全球回收標準認證，確保再生材料的可追溯性",
+      description: "Certification ensuring traceability of recycled materials throughout the supply chain.",
     },
     {
       name: "RCS",
       fullName: "Recycled Claim Standard",
-      description: "回收聲明標準，驗證再生成分含量",
+      description: "Verifies recycled content composition in products.",
     },
     {
       name: "OEKO-TEX",
       fullName: "Standard 100",
-      description: "確保產品對人體無害的安全認證",
+      description: "Safety certification ensuring products are harmless to human health.",
     },
     {
       name: "ISO 9001",
       fullName: "Quality Management",
-      description: "國際品質管理系統認證",
+      description: "International quality management system certification.",
     },
   ];
 
   const greenVisionItems = [
-    { icon: TreePine, title: "綠色供應鏈", desc: "建立可追溯的環保供應商網絡" },
-    { icon: Wind, title: "清潔能源", desc: "逐步轉向再生能源供電" },
-    { icon: Droplets, title: "水資源保護", desc: "實施閉環水處理系統" },
-    { icon: Sun, title: "零碳目標", desc: "2030年實現碳中和承諾" },
+    { icon: TreePine, title: "Green Supply Chain", desc: "Building a traceable eco-friendly supplier network" },
+    { icon: Wind, title: "Clean Energy", desc: "Transitioning to renewable energy sources" },
+    { icon: Droplets, title: "Water Conservation", desc: "Implementing closed-loop water treatment systems" },
+    { icon: Sun, title: "Carbon Neutral", desc: "Committed to carbon neutrality by 2030" },
   ];
 
   const greenLifeImages = [
@@ -97,7 +93,7 @@ const Sustainability = () => {
             { label: "Home", href: "/" },
             { label: "Sustainability" },
           ]}
-          title="可持續發展"
+          title="Sustainability"
         />
 
         {/* Vision */}
@@ -107,7 +103,7 @@ const Sustainability = () => {
               <span className={`w-1 bg-foreground self-stretch min-h-[3rem] transition-all duration-700 ${visionVisible ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: '200ms' }} />
               <div className="text-5xl md:text-6xl lg:text-7xl text-foreground leading-[0.9]">
                 <LetterReveal
-                  text="我們的"
+                  text="Our"
                   as="span"
                   className="font-light block"
                   isVisible={visionVisible}
@@ -115,7 +111,7 @@ const Sustainability = () => {
                   letterDelay={60}
                 />
                 <LetterReveal
-                  text="承諾"
+                  text="Promise"
                   as="span"
                   className="font-bold block"
                   isVisible={visionVisible}
@@ -127,9 +123,7 @@ const Sustainability = () => {
             <p className={`text-muted-foreground leading-relaxed text-lg transition-all duration-700 ease-out ${
               visionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`} style={{ transitionDelay: '600ms' }}>
-              作為服裝輔料行業的領導者，我們深知企業對環境的責任。
-              透過創新技術與永續實踐，我們致力於在保持產品品質的同時，
-              將環境影響降至最低。
+              As a leader in the garment accessories industry, we understand our responsibility to the environment. Through innovative technology and sustainable practices, we are committed to minimising our environmental footprint while maintaining the highest product quality.
             </p>
           </div>
         </section>
@@ -142,9 +136,9 @@ const Sustainability = () => {
                 initHeaderVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}>Initiatives</p>
               <LetterReveal
-                text="環保行動"
+                text="Green Action"
                 as="h2"
-                className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground font-serif-display"
+                className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground"
                 isVisible={initHeaderVisible}
                 startDelay={100}
                 letterDelay={80}
@@ -154,19 +148,16 @@ const Sustainability = () => {
             <div ref={initRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {initiatives.map((initiative, index) => (
                 <div 
-                  key={initiative.titleEn} 
+                  key={initiative.title} 
                   className={`p-8 bg-background rounded-lg transition-all duration-500 ease-out hover:shadow-lg hover:-translate-y-1 ${
                     initVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
                   }`}
                   style={getInitDelay(index)}
                 >
                   <initiative.icon className="w-8 h-8 text-foreground mb-6" strokeWidth={1.5} />
-                  <h3 className="text-xl font-semibold text-foreground mb-2">
-                    {initiative.titleCn}
+                  <h3 className="text-xl font-semibold text-foreground mb-4">
+                    {initiative.title}
                   </h3>
-                  <p className="text-xs text-muted-foreground tracking-wide mb-4">
-                    {initiative.titleEn}
-                  </p>
                   <p className="text-sm text-muted-foreground">
                     {initiative.description}
                   </p>
@@ -188,7 +179,7 @@ const Sustainability = () => {
                   <span className="text-xs tracking-[0.2em] uppercase text-muted-foreground">Green Initiative</span>
                 </div>
                 <LetterReveal
-                  text="綠色願景"
+                  text="Green Vision"
                   as="h2"
                   className="text-4xl md:text-5xl font-bold text-foreground mb-4"
                   isVisible={greenVisible}
@@ -196,9 +187,7 @@ const Sustainability = () => {
                   letterDelay={70}
                 />
                 <p className="text-muted-foreground leading-relaxed mb-6">
-                  我們相信，每一個微小的改變都能為地球帶來深遠的影響。
-                  從材料選擇到生產製程，我們不斷探索更環保的方式，
-                  為下一代創造更美好的未來。
+                  We believe that every small change can make a profound impact on our planet. From material selection to production processes, we continuously explore more environmentally responsible methods to create a better future for the next generation.
                 </p>
                 
                 <div className="grid grid-cols-2 gap-4 mb-6">
@@ -216,24 +205,24 @@ const Sustainability = () => {
                 <div className="flex gap-8 mb-6">
                   <div>
                     <p className="text-2xl font-bold text-foreground">30%</p>
-                    <p className="text-xs text-muted-foreground">再生材料使用</p>
+                    <p className="text-xs text-muted-foreground">Recycled materials used</p>
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-foreground">100%</p>
-                    <p className="text-xs text-muted-foreground">合規環保標準</p>
+                    <p className="text-xs text-muted-foreground">Environmental compliance</p>
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-foreground">50+</p>
-                    <p className="text-xs text-muted-foreground">環保產品線</p>
+                    <p className="text-xs text-muted-foreground">Eco product lines</p>
                   </div>
                 </div>
                 
                 <div className="flex gap-3">
                   <Button variant="outline">
-                    了解環保認證
+                    View Certifications
                   </Button>
                   <Button variant="ghost">
-                    可持續發展報告
+                    Sustainability Report
                   </Button>
                 </div>
               </div>
@@ -265,9 +254,9 @@ const Sustainability = () => {
                 certHeaderVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}>Certifications</p>
               <LetterReveal
-                text="國際認證"
+                text="International Standards"
                 as="h2"
-                className="text-5xl md:text-6xl lg:text-7xl font-light text-foreground italic font-serif-display"
+                className="text-5xl md:text-6xl lg:text-7xl font-light text-foreground italic"
                 isVisible={certHeaderVisible}
                 startDelay={100}
                 letterDelay={80}
@@ -307,7 +296,7 @@ const Sustainability = () => {
                   Featured Technology
                 </p>
                 <LetterReveal
-                  text="環保電鍍技術"
+                  text="Eco-Plating"
                   as="h2"
                   className="text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground mb-6 uppercase tracking-[0.05em]"
                   isVisible={ecoVisible}
@@ -319,24 +308,24 @@ const Sustainability = () => {
                 </h3>
                 <div className={`space-y-4 text-primary-foreground/70 transition-all duration-700 ease-out ${ecoVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`} style={{ transitionDelay: '600ms' }}>
                   <p>
-                    我們引進先進的環保電鍍技術，相比傳統電鍍方式：
+                    We have introduced advanced eco-friendly plating technology. Compared to traditional plating methods:
                   </p>
                   <ul className="space-y-2">
                     <li className="flex items-center">
                       <span className="w-1.5 h-1.5 bg-primary-foreground/50 rounded-full mr-3" />
-                      無需電力，減少能源消耗
+                      No electricity required, reducing energy consumption
                     </li>
                     <li className="flex items-center">
                       <span className="w-1.5 h-1.5 bg-primary-foreground/50 rounded-full mr-3" />
-                      減少有害物質使用
+                      Reduced use of harmful substances
                     </li>
                     <li className="flex items-center">
                       <span className="w-1.5 h-1.5 bg-primary-foreground/50 rounded-full mr-3" />
-                      更均勻的塗層效果
+                      More uniform coating finish
                     </li>
                     <li className="flex items-center">
                       <span className="w-1.5 h-1.5 bg-primary-foreground/50 rounded-full mr-3" />
-                      符合國際環保標準
+                      Meets international environmental standards
                     </li>
                   </ul>
                 </div>
