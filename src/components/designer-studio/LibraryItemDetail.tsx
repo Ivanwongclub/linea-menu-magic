@@ -195,7 +195,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                 {/* Applications */}
                 {item.applications && item.applications.length > 0 && (
                   <div className="mt-4">
-                    <p className="text-sm text-muted-foreground mb-2">適用場景</p>
+                    <p className="text-sm text-muted-foreground mb-2">Applications</p>
                     <div className="flex flex-wrap gap-2">
                       {item.applications.map((app) => (
                         <Badge key={app} variant="secondary" className="text-xs">{app}</Badge>
