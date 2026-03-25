@@ -131,9 +131,15 @@
   }
 
   .section-inner {
-    max-width: 1200px;
+    max-width: 80rem; /* 1280px = max-w-7xl, matches header */
     margin: 0 auto;
-    padding: 0 40px;
+    padding: 0 1.5rem; /* px-6 */
+  }
+
+  @media (min-width: 1024px) {
+    .section-inner {
+      padding: 0 2rem; /* lg:px-8 */
+    }
   }
 
   .section-label {

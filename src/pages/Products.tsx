@@ -306,7 +306,7 @@ export default function Products() {
 
         {/* Active chips */}
         <div className="px-6 lg:px-8 min-h-[44px] flex items-center">
-          <div className="max-w-[1200px] mx-auto w-full">
+          <div className="max-w-7xl mx-auto w-full">
             {activeChips.length > 0 ? (
               <div className="flex flex-wrap gap-2 items-center py-2">
                 {activeChips.map((chip) => (
@@ -337,7 +337,7 @@ export default function Products() {
 
         {/* Body: Sidebar + Grid */}
         <section className="px-6 lg:px-8 pb-24">
-          <div className="max-w-[1200px] mx-auto flex items-start gap-10">
+          <div className="max-w-7xl mx-auto flex items-start gap-10">
             {/* Desktop Sidebar */}
             <aside className="hidden lg:flex lg:flex-col w-[240px] flex-shrink-0 sticky top-[80px] self-start max-h-[calc(100vh-96px)] overflow-y-auto overscroll-contain scrollbar-hide pb-8">
               <ProductsSidebar {...sidebarProps} />
