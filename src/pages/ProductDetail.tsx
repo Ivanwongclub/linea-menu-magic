@@ -590,30 +590,34 @@ export default function ProductDetail() {
                 </div>
               </div>
               {(materials.length > 0 || materialNames) && (
-                <div className="bg-foreground text-background p-5 flex flex-col">
-                  <h3 className="text-[10px] font-bold uppercase tracking-[0.12em] text-background/70 mb-4 pb-3 border-b border-background/20">Materials</h3>
-                  {materials.length > 0 ? (
-                    <div className="space-y-2.5 flex-1">
-                      {materials.map((m) => (
-                        <div key={m.id} className="flex items-center justify-between py-1.5 border-b border-background/10 last:border-b-0">
-                          <span className="text-sm font-medium text-background">{m.name}</span>
-                          {m.is_sustainable && (
-                            <Badge className="text-[9px] bg-background/20 text-background border-0">Eco</Badge>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  ) : materialNames ? (
-                    <p className="text-sm font-medium text-background">{materialNames}</p>
-                  ) : null}
-                  {/* Material representative image */}
-                  <div className="mt-4 aspect-[3/2] overflow-hidden opacity-40">
+                <div className="bg-foreground text-background overflow-hidden flex flex-col">
+                  {/* Material surface texture — top half */}
+                  <div className="h-28 relative overflow-hidden">
                     <img
-                      src={galleryImages[0]?.url ?? ''}
-                      alt="Material detail"
-                      className="w-full h-full object-cover grayscale brightness-200 contrast-75"
+                      src={getMaterialSurfaceImage(materialNames)}
+                      alt="Material surface"
+                      className="w-full h-full object-cover"
                       loading="lazy"
                     />
+                    <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 to-transparent" />
+                  </div>
+                  {/* Content */}
+                  <div className="p-5 flex-1 flex flex-col">
+                    <h3 className="text-[10px] font-bold uppercase tracking-[0.12em] text-background/70 mb-4 pb-3 border-b border-background/20">Materials</h3>
+                    {materials.length > 0 ? (
+                      <div className="space-y-2.5 flex-1">
+                        {materials.map((m) => (
+                          <div key={m.id} className="flex items-center justify-between py-1.5 border-b border-background/10 last:border-b-0">
+                            <span className="text-sm font-medium text-background">{m.name}</span>
+                            {m.is_sustainable && (
+                              <Badge className="text-[9px] bg-background/20 text-background border-0">Eco</Badge>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : materialNames ? (
+                      <p className="text-sm font-medium text-background">{materialNames}</p>
+                    ) : null}
                   </div>
                 </div>
               )}
