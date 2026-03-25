@@ -391,7 +391,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
             {/* Metadata */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">其他資訊</CardTitle>
+                <CardTitle className="text-lg">Additional Info</CardTitle>
               </CardHeader>
               <CardContent>
                 <dl className="space-y-3">
