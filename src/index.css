@@ -264,9 +264,9 @@
     color: transparent;
   }
 
-  /* Serif display */
+  /* Display font — unified with site font */
   .font-serif-display {
-    font-family: 'Libre Caslon Text', 'Georgia', serif;
+    font-family: 'Poppins', sans-serif;
   }
 }
 

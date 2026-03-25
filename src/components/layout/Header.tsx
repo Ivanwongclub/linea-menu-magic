@@ -233,7 +233,7 @@ const Header = () => {
                   className={`text-xs lg:text-sm font-semibold transition-colors duration-300 ${
                     isTransparent ? "text-white" : "text-primary-foreground"
                   }`}
-                  style={{ fontFamily: "'Libre Caslon Text', serif" }}
+                  style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 700, letterSpacing: '0.04em' }}
                 >
                   WIN-CYC
                 </span>

@@ -84,7 +84,7 @@ const slides = [
     label: "Since 1979",
     title: "Timeless",
     titleAccent: "craftsmanship",
-    subtitle: "匠心傳承 · 始於1979",
+    subtitle: "Timeless Craftsmanship · Since 1979",
     description:
       "WIN-CYC Group has been crafting precision trims and accessories for the world's leading fashion brands since 1979.",
     ctaText: "Our Story",
