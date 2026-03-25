@@ -300,7 +300,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                         <dd className="space-y-1">
                           {item.pricing.priceBreaks.map((pb, idx) => (
                             <div key={idx} className="flex justify-between text-sm bg-muted/50 rounded px-2 py-1">
-                              <span>≥ {pb.quantity.toLocaleString()} 件</span>
+                              <span>≥ {pb.quantity.toLocaleString()} pcs</span>
                               <span className="font-medium">${pb.price.toFixed(3)}</span>
                             </div>
                           ))}
