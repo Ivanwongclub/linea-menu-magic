@@ -56,7 +56,7 @@ const EmbedModal = ({ slug, brochureTitle, isOpen, onClose }: EmbedModalProps) =
               <button
                 key={preset.value}
                 onClick={() => setHeight(preset.value)}
-                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                className={`px-3 py-1.5 rounded-none text-xs font-medium transition-colors ${
                   height === preset.value
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted text-muted-foreground hover:text-foreground"
