@@ -561,7 +561,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                     className="flex-1"
                     onClick={() => onOpenChange(false)}
                   >
-                    關閉
+                    Close
                   </Button>
                   <Button
                     className="flex-1 gap-2"
