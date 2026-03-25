@@ -33,7 +33,7 @@ const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
 const OurStory = lazy(() => import("./pages/about/OurStory"));
 const Factory = lazy(() => import("./pages/about/Factory"));
 const Certificates = lazy(() => import("./pages/about/Certificates"));
-const AboutSustainability = lazy(() => import("./pages/about/Sustainability"));
+
 
 const queryClient = new QueryClient();
 

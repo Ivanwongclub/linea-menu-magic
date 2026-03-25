@@ -29,7 +29,7 @@ const ABOUT_GROUPS = [
   {
     heading: "Responsibility",
     links: [
-      { label: "Sustainability", href: "/about/sustainability", image: aboutShowroomImg },
+      { label: "Sustainability", href: "/sustainability", image: aboutShowroomImg },
     ],
   },
 ];

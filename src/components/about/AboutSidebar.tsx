@@ -4,7 +4,7 @@ const aboutPages = [
   { name: 'Our Story', path: '/about/our-story' },
   { name: 'Factory', path: '/about/factory' },
   { name: 'Certificates', path: '/about/certificates' },
-  { name: 'Sustainability', path: '/about/sustainability' }
+  { name: 'Sustainability', path: '/sustainability' }
 ];
 
 const AboutSidebar = () => {
