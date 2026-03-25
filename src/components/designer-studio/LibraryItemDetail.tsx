@@ -58,7 +58,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
             className="gap-2 h-8 text-muted-foreground hover:text-foreground shrink-0"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">返回</span>
+            <span className="hidden sm:inline">Back</span>
           </Button>
           
           <div className="h-4 w-px bg-border shrink-0" />
