@@ -392,7 +392,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                         )}
                         {item.specifications.tensileStrength && (
                           <div className="text-sm">
-                            <span className="text-muted-foreground">拉力：</span>
+                            <span className="text-muted-foreground">Tensile: </span>
                             <span className="font-medium">{item.specifications.tensileStrength}</span>
                           </div>
                         )}
