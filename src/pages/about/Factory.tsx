@@ -187,6 +187,7 @@ const Factory = () => {
                 <div className="text-xs text-muted-foreground">On-time Delivery Rate</div>
               </div>
             </div>
+            </div>
           </div>
         </section>
       </main>
