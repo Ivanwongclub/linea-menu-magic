@@ -180,7 +180,7 @@ const ViewerToolbar = ({
               />
               <button
                 onClick={handlePageJump}
-                className="h-7 px-3 rounded bg-white/15 hover:bg-white/25 text-white text-xs font-medium transition-colors"
+                className="h-7 px-3 rounded-none bg-white/15 hover:bg-white/25 text-white text-xs font-medium transition-colors"
               >
                 Go
               </button>

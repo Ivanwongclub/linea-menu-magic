@@ -416,7 +416,7 @@ const HeroSection = () => {
                 >
                   <Link
                     to={slide.ctaUrl}
-                    className="inline-flex items-center gap-3 text-sm font-medium uppercase tracking-[0.1em] border-2 px-6 py-2.5 rounded-[var(--radius)]"
+                    className="inline-flex items-center gap-3 text-sm font-medium uppercase tracking-[0.1em] border-2 px-6 py-2.5"
                     style={{
                       color: slide.textColor,
                       borderColor: slide.textColor,

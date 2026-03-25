@@ -491,7 +491,7 @@ export default function Products() {
             <p className="text-primary-foreground/70 mb-8 max-w-2xl">We offer professional customisation services tailored to your unique requirements.</p>
             <Link
               to="/contact"
-              className="inline-block px-12 py-4 bg-background text-foreground text-xs tracking-[0.06em] uppercase rounded-[var(--radius)] border-2 border-background hover:bg-white/90 transition-all duration-200"
+              className="inline-block px-12 py-4 bg-background text-foreground text-xs tracking-[0.06em] uppercase rounded-none border-2 border-background hover:bg-white/90 transition-all duration-200"
             >
               Contact Us
             </Link>
