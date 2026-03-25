@@ -472,7 +472,7 @@ const DesignerStudioDashboard = () => {
                     ← Back
                   </button>
                   <div>
-                    <h2 className="text-lg font-semibold text-foreground">素材庫 · Component Library</h2>
+                    <h2 className="text-lg font-semibold text-foreground">Component Library</h2>
                     <p className="text-xs text-muted-foreground">
                       {libraryItems.length} components{libraryItems[0]?.team_name ? ` · ${libraryItems[0].team_name}` : ''}
                     </p>
