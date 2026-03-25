@@ -52,7 +52,7 @@ const ABOUT_TRUST_CARDS = [
   {
     title: "Responsibility",
     description: "Certified sustainable operations",
-    href: "/about/sustainability",
+    href: "/sustainability",
     image: aboutShowroomImg,
   },
 ];
