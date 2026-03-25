@@ -284,7 +284,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                       </p>
                     </div>
                     <div className="p-3 bg-muted/50 rounded-lg">
-                      <p className="text-xs text-muted-foreground mb-1">最低起訂量 (MOQ)</p>
+                      <p className="text-xs text-muted-foreground mb-1">MOQ</p>
                       <p className="text-lg font-semibold text-foreground">
                         {item.pricing.moq.toLocaleString()}
                       </p>
