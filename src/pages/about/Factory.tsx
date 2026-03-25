@@ -109,11 +109,12 @@ const Factory = () => {
         </ContentSection>
 
         {/* Production Process */}
-        <section className="py-16 px-6 bg-secondary overflow-hidden">
-          <div className="mb-8">
-            <h2 className="text-2xl font-light text-foreground mb-2">Production Process</h2>
-            <p className="text-sm text-muted-foreground">The perfect blend of advanced equipment and traditional craftsmanship</p>
-          </div>
+        <section className="py-16 px-6 lg:px-8 bg-secondary overflow-hidden">
+          <div className="max-w-7xl mx-auto">
+            <div className="mb-8">
+              <h2 className="text-2xl font-light text-foreground mb-2">Production Process</h2>
+              <p className="text-sm text-muted-foreground">The perfect blend of advanced equipment and traditional craftsmanship</p>
+            </div>
           <div ref={processRef} className="grid grid-cols-2 md:grid-cols-3 gap-6">
             {processes.map((process, index) => (
               <div 
