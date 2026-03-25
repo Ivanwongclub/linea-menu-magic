@@ -321,7 +321,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                     <div className="flex items-start gap-2">
                       <Clock className="w-4 h-4 text-muted-foreground mt-0.5" />
                       <div>
-                        <p className="text-xs text-muted-foreground">大貨交期</p>
+                        <p className="text-xs text-muted-foreground">Lead Time</p>
                         <p className="text-sm font-medium">{item.production.leadTime}</p>
                       </div>
                     </div>
