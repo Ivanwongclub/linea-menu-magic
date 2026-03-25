@@ -280,7 +280,7 @@ export default function ProductDetail() {
     }
 
     // 2. Seeded images
-    const seeded = getPdpSeedImages(product.slug);
+    const seeded = getPdpSeedImages(product.slug, product.primary_category?.slug);
     if (seeded && seeded.length > 0) {
       return seeded.map((url, i) => ({
         id: `seed-img-${product.id}-${i}`,
