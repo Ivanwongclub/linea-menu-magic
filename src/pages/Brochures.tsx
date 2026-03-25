@@ -36,7 +36,7 @@ export default function Brochures() {
         </p>
       </section>
 
-      <main className="flex-1 max-w-[1200px] mx-auto w-full px-6 pb-20">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-6 lg:px-8 pb-20">
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {Array.from({ length: 6 }).map((_, i) => (
