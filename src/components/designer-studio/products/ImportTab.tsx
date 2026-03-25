@@ -19,7 +19,7 @@ const CSV_COLUMNS = [
 ] as const;
 
 const TEMPLATE_ROW = [
-  "BTN-001", "金屬鈕扣", "Metal Button", "A description",
+  "BTN-001", "Metal Button", "Metal Button", "A description",
   "buttons,fasteners", "zinc-alloy", "new-item", "apparel",
   "active", "true", "false",
 ].join(",");

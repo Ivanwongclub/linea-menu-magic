@@ -568,7 +568,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                     onClick={() => setShowRFQDialog(true)}
                   >
                     <FileText className="w-4 h-4" />
-                    建立報價請求
+                    Request Quote
                   </Button>
                 </div>
               </div>

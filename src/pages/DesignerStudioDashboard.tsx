@@ -694,13 +694,13 @@ const DesignerStudioDashboard = () => {
 
                   <Tabs value={activeRFQTab} onValueChange={setActiveRFQTab} className="w-full">
                     <TabsList className="w-full justify-start overflow-x-auto">
-                      <TabsTrigger value="all">全部 ({statusCounts.all})</TabsTrigger>
-                      <TabsTrigger value="submitted">待處理</TabsTrigger>
-                      <TabsTrigger value="model_uploaded">模型已上傳</TabsTrigger>
-                      <TabsTrigger value="design_confirmed">設計確認</TabsTrigger>
-                      <TabsTrigger value="printing">列印中</TabsTrigger>
-                      <TabsTrigger value="sample_review">樣品審核</TabsTrigger>
-                      <TabsTrigger value="production">生產中</TabsTrigger>
+                      <TabsTrigger value="all">All ({statusCounts.all})</TabsTrigger>
+                      <TabsTrigger value="submitted">Pending</TabsTrigger>
+                      <TabsTrigger value="model_uploaded">Model Uploaded</TabsTrigger>
+                      <TabsTrigger value="design_confirmed">Design Confirmed</TabsTrigger>
+                      <TabsTrigger value="printing">Printing</TabsTrigger>
+                      <TabsTrigger value="sample_review">Sample Review</TabsTrigger>
+                      <TabsTrigger value="production">In Production</TabsTrigger>
                     </TabsList>
                     <TabsContent value={activeRFQTab} className="mt-6">
                       <RFQList rfqs={filteredRFQs} onSelect={handleSelectRFQ} />

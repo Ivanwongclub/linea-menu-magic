@@ -191,9 +191,6 @@
     @apply text-sm tracking-[0.15em] uppercase text-muted-foreground font-medium;
   }
 
-  .text-body-cn {
-    font-family: 'Noto Sans TC', sans-serif;
-  }
 }
 
 @layer utilities {
