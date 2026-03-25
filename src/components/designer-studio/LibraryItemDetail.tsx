@@ -289,8 +289,8 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                   </div>
                   <Separator />
                   <div className="flex justify-between">
-                    <dt className="text-muted-foreground">最低訂購量 (MOQ)</dt>
-                    <dd className="font-medium">{item.pricing.moq.toLocaleString()} 件</dd>
+                    <dt className="text-muted-foreground">Minimum Order Qty (MOQ)</dt>
+                    <dd className="font-medium">{item.pricing.moq.toLocaleString()} pcs</dd>
                   </div>
                   {item.pricing.priceBreaks && item.pricing.priceBreaks.length > 0 && (
                     <>
