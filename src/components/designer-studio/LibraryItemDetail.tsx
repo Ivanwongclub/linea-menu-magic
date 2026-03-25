@@ -211,7 +211,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Layers className="w-4 h-4" />
-                  規格參數
+                  Specifications
                 </CardTitle>
               </CardHeader>
               <CardContent>
