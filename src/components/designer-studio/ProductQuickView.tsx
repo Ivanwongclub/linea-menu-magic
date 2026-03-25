@@ -408,7 +408,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                     <div className="space-y-3">
                       <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
                         <Palette className="w-4 h-4 text-muted-foreground" />
-                        可選顏色
+                        Available Colors
                       </h3>
                       <div className="flex flex-wrap gap-2">
                         {item.availableColors.map((color, idx) => (
