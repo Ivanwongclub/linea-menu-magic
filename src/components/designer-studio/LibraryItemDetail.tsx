@@ -253,7 +253,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                     <>
                       <Separator />
                       <div className="flex justify-between">
-                        <dt className="text-muted-foreground">表面處理</dt>
+                        <dt className="text-muted-foreground">Finish</dt>
                         <dd className="font-medium text-right">{item.specifications.finish}</dd>
                       </div>
                     </>
