@@ -317,7 +317,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Clock className="w-4 h-4" />
-                  生產資訊
+                  Production Info
                 </CardTitle>
               </CardHeader>
               <CardContent>
