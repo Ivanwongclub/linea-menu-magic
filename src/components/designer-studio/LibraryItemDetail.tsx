@@ -354,7 +354,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Palette className="w-4 h-4" />
-                    可選顏色
+                    Available Colors
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
