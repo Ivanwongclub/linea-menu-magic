@@ -486,9 +486,9 @@ export default function Products() {
 
         {/* CTA */}
         <section className="py-24 px-6 lg:px-8 bg-foreground text-primary-foreground overflow-hidden">
-          <div className="max-w-4xl mx-auto text-center">
+          <div className="max-w-7xl mx-auto">
             <h2 className="text-4xl md:text-5xl font-bold mb-6">需要定制產品？</h2>
-            <p className="text-primary-foreground/70 mb-8">我們提供專業的定制服務，滿足您的獨特需求</p>
+            <p className="text-primary-foreground/70 mb-8 max-w-2xl">我們提供專業的定制服務，滿足您的獨特需求</p>
             <Link
               to="/contact"
               className="inline-block px-12 py-4 bg-background text-foreground text-xs tracking-[0.06em] uppercase rounded-[var(--radius)] border-2 border-background hover:bg-white/90 transition-all duration-200"
