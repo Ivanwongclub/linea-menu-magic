@@ -266,7 +266,7 @@ const Navigation = () => {
                             ? `/category/${subItem.toLowerCase().replace(/\s+/g, '-')}`
                             : `/news`
                           }
-                          className="text-sm text-foreground hover:bg-secondary transition-colors duration-150 block py-2 px-3 rounded-[var(--radius)]"
+                          className="text-sm text-foreground hover:bg-secondary transition-colors duration-150 block py-2 px-3 rounded-none"
                         >
                           {subItem}
                         </Link>
