@@ -218,7 +218,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                 <dl className="space-y-3">
                   {item.specifications.material && (
                     <div className="flex justify-between">
-                      <dt className="text-muted-foreground">材質</dt>
+                      <dt className="text-muted-foreground">Material</dt>
                       <dd className="font-medium text-right">{item.specifications.material}</dd>
                     </div>
                   )}
