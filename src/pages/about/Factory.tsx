@@ -160,11 +160,13 @@ const Factory = () => {
               />
             </div>
           </div>
+          </div>
         </section>
 
         {/* Quality Commitment */}
-        <section className="py-16 px-6 bg-secondary border-t border-border overflow-hidden">
-          <div className="max-w-3xl">
+        <section className="py-16 px-6 lg:px-8 bg-secondary border-t border-border overflow-hidden">
+          <div className="max-w-7xl mx-auto">
+            <div className="max-w-3xl">
             <h2 className="text-2xl font-light text-foreground mb-4">Quality Commitment</h2>
             <p className="text-muted-foreground leading-relaxed mb-6">
               WIN-CYC has always upheld a "Quality First" business philosophy. From raw material procurement and manufacturing to final inspection, every stage strictly follows ISO 9001 quality management standards. Our quality control team performs multiple inspections on every batch to ensure the highest quality standards.
