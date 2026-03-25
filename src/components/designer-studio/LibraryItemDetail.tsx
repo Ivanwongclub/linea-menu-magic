@@ -115,7 +115,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
             {item.modelUrl ? (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">3D 模型預覽</CardTitle>
+                  <CardTitle className="text-lg">3D Model Preview</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <Model3DViewer hasModel={true} modelType={getModelType(item.category)} modelUrl={item.modelUrl} />
