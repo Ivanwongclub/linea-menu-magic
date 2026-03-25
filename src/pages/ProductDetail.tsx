@@ -576,9 +576,9 @@ export default function ProductDetail() {
             <SectionHeading id="" title="Overview" icon={ClipboardList} />
             <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8">
               <div className="space-y-4">
-                {(product.description_en ?? product.description) && (
+                {description && (
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    {product.description_en ?? product.description}
+                    {description}
                   </p>
                 )}
                 {/* Overview spec summary table */}
