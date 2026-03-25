@@ -334,7 +334,7 @@ const Navigation = () => {
                   {popularSearches.map((search, index) => (
                     <button
                       key={index}
-                      className="text-foreground hover:bg-secondary text-sm font-medium py-2 px-4 border border-border rounded-[var(--radius)] transition-colors duration-150"
+                      className="text-foreground hover:bg-secondary text-sm font-medium py-2 px-4 border border-border rounded-none transition-colors duration-150"
                     >
                       {search}
                     </button>
