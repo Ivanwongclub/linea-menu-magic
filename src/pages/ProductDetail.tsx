@@ -485,6 +485,8 @@ export default function ProductDetail() {
                   <SpecLine label="Weight" value={weight} />
                   <SpecLine label="Thickness" value={thickness} />
                   <SpecLine label="Attachment" value={attachment} />
+                  <SpecLine label="Colors" value={colorOptions} />
+                  <SpecLine label="Tensile Strength" value={tensileStrength} />
                   {industries.length > 0 && (
                     <SpecLine label="Applications" value={industries.map(i => i.name).join(', ')} />
                   )}
