@@ -4,9 +4,11 @@ import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-an
 import { MapPin, Building2, Factory as FactoryIcon, Package, Truck, CheckCircle, ArrowRight } from "lucide-react";
 import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
 import factoryHero from "@/assets/factory-hero.jpg";
-import officeHk from "@/assets/office-hk.jpg";
+import locationHongkong from "@/assets/location-hongkong.jpg";
+import locationShanghai from "@/assets/location-shanghai.jpg";
+import locationNewyork from "@/assets/location-newyork.jpg";
 import factoryProduction from "@/assets/factory-production.jpg";
-import officeShowroom from "@/assets/office-showroom.jpg";
+import locationVietnam from "@/assets/location-vietnam.jpg";
 
 const offices = [
   {
