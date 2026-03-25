@@ -146,10 +146,10 @@ function SpecTile({ label, value }: { label: string; value: string | null | unde
 function SectionHeading({ id, title, icon: Icon }: { id: string; title: string; icon: React.ElementType }) {
   return (
     <div id={id} className="flex items-center gap-3 pt-2 mb-6 scroll-mt-24">
-      <div className="w-8 h-8 bg-foreground/5 flex items-center justify-center">
-        <Icon className="h-4 w-4 text-foreground" />
+      <div className="w-8 h-8 bg-foreground flex items-center justify-center">
+        <Icon className="h-4 w-4 text-background" />
       </div>
-      <h2 className="text-sm font-semibold uppercase tracking-[0.1em] text-foreground">{title}</h2>
+      <h2 className="text-sm font-bold uppercase tracking-[0.1em] text-foreground">{title}</h2>
     </div>
   );
 }
@@ -162,14 +162,16 @@ function SectionNav({ sections }: { sections: { id: string; label: string }[] })
   };
 
   return (
-    <nav className="border-y border-border bg-background/95 backdrop-blur-sm sticky top-[72px] z-20">
+    <nav className="border-y-2 border-foreground bg-background sticky top-[72px] z-20">
       <div className="section-inner">
         <div className="flex gap-0 overflow-x-auto scrollbar-hide">
-          {sections.map((s) => (
+          {sections.map((s, i) => (
             <button
               key={s.id}
               onClick={() => scrollTo(s.id)}
-              className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground whitespace-nowrap transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-foreground after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-200 after:origin-left"
+              className={`px-5 py-4 text-xs font-bold uppercase tracking-[0.12em] whitespace-nowrap transition-colors relative
+                ${i === 0 ? 'text-foreground after:scale-x-100' : 'text-foreground/50 hover:text-foreground after:scale-x-0 hover:after:scale-x-100'}
+                after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-foreground after:transition-transform after:duration-200 after:origin-left`}
             >
               {s.label}
             </button>
@@ -207,12 +209,12 @@ function RelatedProducts({ product }: { product: Product }) {
     <section id={SECTION_IDS.related} className="scroll-mt-24 py-16 bg-secondary/30">
       <div className="section-inner">
         <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-foreground/5 flex items-center justify-center">
-              <Layers className="h-4 w-4 text-foreground" />
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-foreground flex items-center justify-center">
+                <Layers className="h-4 w-4 text-background" />
+              </div>
+              <h2 className="text-sm font-bold uppercase tracking-[0.1em] text-foreground">Related Trims</h2>
             </div>
-            <h2 className="text-sm font-semibold uppercase tracking-[0.1em] text-foreground">Related Trims</h2>
-          </div>
           {categorySlug && (
             <Link
               to={`/products?category=${categorySlug}`}
@@ -566,29 +568,29 @@ export default function ProductDetail() {
                     {description}
                   </p>
                 )}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-6">
                   {[
-                    { l: 'Material', v: materialNames },
-                    { l: 'Finish', v: finish },
-                    { l: 'Size', v: size },
-                    { l: 'Weight', v: weight },
-                    { l: 'MOQ', v: moq },
-                    { l: 'Lead Time', v: leadTime },
+                    { l: 'Material', v: materialNames, accent: false },
+                    { l: 'Finish', v: finish, accent: true },
+                    { l: 'Size', v: size, accent: false },
+                    { l: 'Weight', v: weight, accent: false },
+                    { l: 'MOQ', v: moq, accent: true },
+                    { l: 'Lead Time', v: leadTime, accent: true },
                   ].filter(item => item.v).map(item => (
-                    <div key={item.l} className="bg-secondary/50 p-3">
-                      <p className="text-[10px] uppercase tracking-[0.1em] text-muted-foreground mb-1">{item.l}</p>
-                      <p className="text-sm font-medium text-foreground">{item.v}</p>
+                    <div key={item.l} className={`p-3 border ${item.accent ? 'border-foreground bg-foreground/[0.03]' : 'border-border'}`}>
+                      <p className="text-[10px] uppercase tracking-[0.1em] text-foreground/60 font-medium mb-1">{item.l}</p>
+                      <p className="text-sm font-semibold text-foreground">{item.v}</p>
                     </div>
                   ))}
                 </div>
               </div>
               {materials.length > 0 && (
-                <div className="border border-border p-5">
-                  <h3 className="text-[10px] font-semibold uppercase tracking-[0.12em] text-foreground mb-4">Materials</h3>
+                <div className="border-2 border-foreground p-5">
+                  <h3 className="text-[10px] font-bold uppercase tracking-[0.12em] text-foreground mb-4 pb-3 border-b border-foreground/20">Materials</h3>
                   <div className="space-y-2.5">
                     {materials.map((m) => (
-                      <div key={m.id} className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-b-0">
-                        <span className="text-sm text-foreground">{m.name}</span>
+                      <div key={m.id} className="flex items-center justify-between py-1.5 border-b border-border/50 last:border-b-0">
+                        <span className="text-sm font-medium text-foreground">{m.name}</span>
                         {m.is_sustainable && (
                           <Badge variant="secondary" className="text-[9px]">Eco</Badge>
                         )}
@@ -604,19 +606,19 @@ export default function ProductDetail() {
           {allSpecEntries.length > 0 && (
             <section id={SECTION_IDS.specs} className="scroll-mt-24 mb-16">
               <SectionHeading id="" title="Technical Specifications" icon={Cpu} />
-              <div className="border border-border">
+              <div className="border-2 border-foreground">
                 <div className="grid grid-cols-1 sm:grid-cols-2">
                   {allSpecEntries.map(([key, val], idx) => (
                     <div
                       key={key}
-                      className={`flex justify-between items-baseline gap-4 px-4 py-3 ${
-                        idx < allSpecEntries.length - (allSpecEntries.length % 2 === 0 ? 2 : 1) ? 'border-b border-border/40' : ''
-                      } ${idx % 2 === 0 && allSpecEntries.length > 1 ? 'sm:border-r sm:border-border/40' : ''}`}
+                      className={`flex justify-between items-baseline gap-4 px-4 py-3.5 ${
+                        idx < allSpecEntries.length - (allSpecEntries.length % 2 === 0 ? 2 : 1) ? 'border-b border-foreground/15' : ''
+                      } ${idx % 2 === 0 && allSpecEntries.length > 1 ? 'sm:border-r sm:border-foreground/15' : ''}`}
                     >
-                      <dt className="text-[11px] text-muted-foreground uppercase tracking-[0.08em]">
+                      <dt className="text-[11px] text-foreground/60 font-medium uppercase tracking-[0.08em]">
                         {key.replace(/_/g, ' ')}
                       </dt>
-                      <dd className="text-[13px] font-medium text-foreground text-right">{val}</dd>
+                      <dd className="text-[13px] font-semibold text-foreground text-right">{val}</dd>
                     </div>
                   ))}
                 </div>
@@ -629,19 +631,19 @@ export default function ProductDetail() {
             <section id={SECTION_IDS.production} className="scroll-mt-24 mb-16">
               <SectionHeading id="" title="Production & Ordering" icon={Factory} />
               <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
-                <div className="border border-border">
+                <div className="border-2 border-foreground">
                   <div className="grid grid-cols-1 sm:grid-cols-2">
                     {allProductionEntries.map(([key, val], idx) => (
                       <div
                         key={key}
-                        className={`flex justify-between items-baseline gap-4 px-4 py-3 ${
-                          idx < allProductionEntries.length - (allProductionEntries.length % 2 === 0 ? 2 : 1) ? 'border-b border-border/40' : ''
-                        } ${idx % 2 === 0 && allProductionEntries.length > 1 ? 'sm:border-r sm:border-border/40' : ''}`}
+                        className={`flex justify-between items-baseline gap-4 px-4 py-3.5 ${
+                          idx < allProductionEntries.length - (allProductionEntries.length % 2 === 0 ? 2 : 1) ? 'border-b border-foreground/15' : ''
+                        } ${idx % 2 === 0 && allProductionEntries.length > 1 ? 'sm:border-r sm:border-foreground/15' : ''}`}
                       >
-                        <dt className="text-[11px] text-muted-foreground uppercase tracking-[0.08em]">
+                        <dt className="text-[11px] text-foreground/60 font-medium uppercase tracking-[0.08em]">
                           {key.replace(/_/g, ' ')}
                         </dt>
-                        <dd className="text-[13px] font-medium text-foreground text-right">{val}</dd>
+                        <dd className="text-[13px] font-semibold text-foreground text-right">{val}</dd>
                       </div>
                     ))}
                   </div>
