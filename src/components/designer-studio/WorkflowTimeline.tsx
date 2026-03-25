@@ -6,12 +6,12 @@ interface WorkflowTimelineProps {
 }
 
 const workflowSteps = [
-  { status: 'submitted', label: '提交請求', shortLabel: '提交' },
-  { status: 'model_uploaded', label: '模型上傳', shortLabel: '上傳' },
-  { status: 'design_confirmed', label: '設計確認', shortLabel: '確認' },
-  { status: 'printing', label: '3D列印', shortLabel: '列印' },
-  { status: 'sample_review', label: '樣品審核', shortLabel: '審核' },
-  { status: 'production', label: '生產確認', shortLabel: '生產' },
+  { status: 'submitted', label: 'Submitted', shortLabel: 'Submit' },
+  { status: 'model_uploaded', label: 'Model Uploaded', shortLabel: 'Upload' },
+  { status: 'design_confirmed', label: 'Design Confirmed', shortLabel: 'Confirm' },
+  { status: 'printing', label: '3D Printing', shortLabel: 'Print' },
+  { status: 'sample_review', label: 'Sample Review', shortLabel: 'Review' },
+  { status: 'production', label: 'Production', shortLabel: 'Produce' },
 ];
 
 const statusOrder: RFQStatus[] = [

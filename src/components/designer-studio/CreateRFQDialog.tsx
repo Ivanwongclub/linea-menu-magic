@@ -26,7 +26,7 @@ interface CreateRFQDialogProps {
   onSubmit: (rfq: Omit<RFQ, 'id' | 'createdAt' | 'updatedAt' | 'status' | 'comments' | 'files'>) => void;
 }
 
-const categories = ['鈕扣', '拉鍊', '花邊', '五金', '其他'];
+const categories = ['Buttons', 'Zippers', 'Lace', 'Hardware', 'Other'];
 
 const CreateRFQDialog = ({ open, onOpenChange, onSubmit }: CreateRFQDialogProps) => {
   const [formData, setFormData] = useState({
@@ -70,29 +70,29 @@ const CreateRFQDialog = ({ open, onOpenChange, onSubmit }: CreateRFQDialogProps)
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">新增報價請求</DialogTitle>
+          <DialogTitle className="text-xl font-semibold">New Quote Request</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="itemCode">品項代碼 *</Label>
+              <Label htmlFor="itemCode">Item Code *</Label>
               <Input
                 id="itemCode"
-                placeholder="如: BTN-2024-001"
+                placeholder="e.g. BTN-2024-001"
                 value={formData.itemCode}
                 onChange={(e) => setFormData(prev => ({ ...prev, itemCode: e.target.value }))}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="category">類別 *</Label>
+              <Label htmlFor="category">Category *</Label>
               <Select 
                 value={formData.category} 
                 onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="選擇類別" />
+                  <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((cat) => (
@@ -104,10 +104,10 @@ const CreateRFQDialog = ({ open, onOpenChange, onSubmit }: CreateRFQDialogProps)
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="itemName">品項名稱 *</Label>
+            <Label htmlFor="itemName">Item Name *</Label>
             <Input
               id="itemName"
-              placeholder="如: 金屬四孔鈕扣 18mm"
+              placeholder="e.g. Metal 4-Hole Button 18mm"
               value={formData.itemName}
               onChange={(e) => setFormData(prev => ({ ...prev, itemName: e.target.value }))}
               required
@@ -116,7 +116,7 @@ const CreateRFQDialog = ({ open, onOpenChange, onSubmit }: CreateRFQDialogProps)
 
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="quantity">數量 *</Label>
+              <Label htmlFor="quantity">Quantity *</Label>
               <Input
                 id="quantity"
                 type="number"
@@ -127,7 +127,7 @@ const CreateRFQDialog = ({ open, onOpenChange, onSubmit }: CreateRFQDialogProps)
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="targetPrice">目標單價 (USD) *</Label>
+              <Label htmlFor="targetPrice">Target Price (USD) *</Label>
               <Input
                 id="targetPrice"
                 type="number"
@@ -139,7 +139,7 @@ const CreateRFQDialog = ({ open, onOpenChange, onSubmit }: CreateRFQDialogProps)
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="targetDate">目標交期 *</Label>
+              <Label htmlFor="targetDate">Target Date *</Label>
               <Input
                 id="targetDate"
                 type="date"
@@ -151,10 +151,10 @@ const CreateRFQDialog = ({ open, onOpenChange, onSubmit }: CreateRFQDialogProps)
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="notes">備註說明</Label>
+            <Label htmlFor="notes">Notes</Label>
             <Textarea
               id="notes"
-              placeholder="請描述您的需求，如材質、顏色、特殊處理等..."
+              placeholder="Describe your requirements — material, color, finish, etc."
               value={formData.notes}
               onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
               rows={3}
@@ -162,24 +162,24 @@ const CreateRFQDialog = ({ open, onOpenChange, onSubmit }: CreateRFQDialogProps)
           </div>
 
           <div className="space-y-2">
-            <Label>參考附件</Label>
+            <Label>Reference Files</Label>
             <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary/50 transition-colors cursor-pointer">
               <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
               <p className="text-sm text-muted-foreground">
-                點擊或拖曳上傳參考圖片
+                Click or drag to upload reference images
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                支援 JPG, PNG, PDF (最大 10MB)
+                Supports JPG, PNG, PDF (max 10MB)
               </p>
             </div>
           </div>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              取消
+              Cancel
             </Button>
             <Button type="submit">
-              提交請求
+              Submit Request
             </Button>
           </DialogFooter>
         </form>

@@ -68,15 +68,15 @@ const QuickRFQDialog = ({ open, onOpenChange, item }: QuickRFQDialogProps) => {
   const handleSubmit = () => {
     if (!quantity) {
       toast({
-        title: "請填寫數量",
+        title: "Please enter a quantity",
         variant: "destructive",
       });
       return;
     }
 
     toast({
-      title: "報價請求已提交",
-      description: `品項 ${item?.itemCode} 的報價請求已成功提交。`,
+      title: "Quote request submitted",
+      description: `Quote request for item ${item?.itemCode} has been submitted successfully.`,
     });
 
     // Reset form
@@ -94,9 +94,9 @@ const QuickRFQDialog = ({ open, onOpenChange, item }: QuickRFQDialogProps) => {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">快速報價請求</DialogTitle>
+          <DialogTitle className="text-xl font-semibold">Quick Quote Request</DialogTitle>
           <DialogDescription>
-            為 <span className="font-medium text-foreground">{item.name}</span> 建立報價請求
+            Create a quote request for <span className="font-medium text-foreground">{item.name}</span>
           </DialogDescription>
         </DialogHeader>
 
@@ -108,11 +108,11 @@ const QuickRFQDialog = ({ open, onOpenChange, item }: QuickRFQDialogProps) => {
               {item.modelUrl && <Badge className="bg-primary/90">3D</Badge>}
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">品項代碼</span>
+              <span className="text-sm text-muted-foreground">Item Code</span>
               <span className="font-mono font-medium">{item.itemCode}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">品項名稱</span>
+              <span className="text-sm text-muted-foreground">Item Name</span>
               <span className="font-medium">{item.name}</span>
             </div>
           </div>
@@ -120,12 +120,12 @@ const QuickRFQDialog = ({ open, onOpenChange, item }: QuickRFQDialogProps) => {
           {/* Quantity */}
           <div className="space-y-2">
             <Label htmlFor="quantity">
-              需求數量 <span className="text-destructive">*</span>
+              Quantity <span className="text-destructive">*</span>
             </Label>
             <Input
               id="quantity"
               type="number"
-              placeholder="請輸入數量"
+              placeholder="Enter quantity"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
             />
@@ -133,12 +133,12 @@ const QuickRFQDialog = ({ open, onOpenChange, item }: QuickRFQDialogProps) => {
 
           {/* Target Price */}
           <div className="space-y-2">
-            <Label htmlFor="targetPrice">目標單價 (USD)</Label>
+            <Label htmlFor="targetPrice">Target Unit Price (USD)</Label>
             <Input
               id="targetPrice"
               type="number"
               step="0.01"
-              placeholder="選填"
+              placeholder="Optional"
               value={targetPrice}
               onChange={(e) => setTargetPrice(e.target.value)}
             />
@@ -146,7 +146,7 @@ const QuickRFQDialog = ({ open, onOpenChange, item }: QuickRFQDialogProps) => {
 
           {/* Target Date */}
           <div className="space-y-2">
-            <Label htmlFor="targetDate">目標交期</Label>
+            <Label htmlFor="targetDate">Target Delivery Date</Label>
             <Input
               id="targetDate"
               type="date"
@@ -157,9 +157,9 @@ const QuickRFQDialog = ({ open, onOpenChange, item }: QuickRFQDialogProps) => {
 
           {/* File Upload */}
           <div className="space-y-2">
-            <Label>附件上傳</Label>
+            <Label>File Upload</Label>
             <p className="text-xs text-muted-foreground mb-2">
-              可上傳修改後的 OBJ 檔案或其他相關文件（如規格書、參考圖片等）
+              Upload modified OBJ files or other relevant documents (specs, reference images, etc.)
             </p>
             <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
               <input
@@ -173,10 +173,10 @@ const QuickRFQDialog = ({ open, onOpenChange, item }: QuickRFQDialogProps) => {
               <label htmlFor="file-upload" className="cursor-pointer">
                 <Upload className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
                 <p className="text-sm text-muted-foreground">
-                  點擊或拖曳檔案至此處上傳
+                  Click or drag files to upload
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  支援 OBJ, STL, STEP, PDF, 圖片, Word 文件
+                  Supports OBJ, STL, STEP, PDF, images, Word documents
                 </p>
               </label>
             </div>
@@ -212,10 +212,10 @@ const QuickRFQDialog = ({ open, onOpenChange, item }: QuickRFQDialogProps) => {
 
           {/* Notes */}
           <div className="space-y-2">
-            <Label htmlFor="notes">備註說明</Label>
+            <Label htmlFor="notes">Notes</Label>
             <Textarea
               id="notes"
-              placeholder="請輸入任何額外需求或說明..."
+              placeholder="Enter any additional requirements or details..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
@@ -225,10 +225,10 @@ const QuickRFQDialog = ({ open, onOpenChange, item }: QuickRFQDialogProps) => {
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            取消
+            Cancel
           </Button>
           <Button onClick={handleSubmit}>
-            提交報價請求
+            Submit Quote Request
           </Button>
         </DialogFooter>
       </DialogContent>
