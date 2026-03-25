@@ -244,7 +244,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                     ) : (
                       <Badge variant="outline" className="text-xs gap-1 border-amber-500/50 text-amber-700 dark:text-amber-400">
                         <Lock className="w-3 h-3" />
-                        專屬
+                        Exclusive
                       </Badge>
                     )}
                   </div>
