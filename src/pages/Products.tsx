@@ -291,7 +291,7 @@ export default function Products() {
                 <button
                   key={col.slug}
                   onClick={() => setActiveCollection(activeCollection === col.slug ? null : col.slug)}
-                  className={`whitespace-nowrap text-xs px-3.5 py-1.5 rounded-full border transition-colors flex-shrink-0 ${
+                  className={`whitespace-nowrap text-xs px-3.5 py-1.5 rounded-none border transition-colors flex-shrink-0 ${
                     activeCollection === col.slug
                       ? 'bg-foreground text-background border-foreground'
                       : 'bg-background text-foreground border-border hover:border-foreground/30'
