@@ -585,12 +585,12 @@ export default function ProductDetail() {
                 </div>
               </div>
               {materials.length > 0 && (
-                <div className="border border-border p-5">
-                  <h3 className="text-[10px] font-semibold uppercase tracking-[0.12em] text-foreground mb-4">Materials</h3>
+                <div className="border-2 border-foreground p-5">
+                  <h3 className="text-[10px] font-bold uppercase tracking-[0.12em] text-foreground mb-4 pb-3 border-b border-foreground/20">Materials</h3>
                   <div className="space-y-2.5">
                     {materials.map((m) => (
-                      <div key={m.id} className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-b-0">
-                        <span className="text-sm text-foreground">{m.name}</span>
+                      <div key={m.id} className="flex items-center justify-between py-1.5 border-b border-border/50 last:border-b-0">
+                        <span className="text-sm font-medium text-foreground">{m.name}</span>
                         {m.is_sustainable && (
                           <Badge variant="secondary" className="text-[9px]">Eco</Badge>
                         )}
