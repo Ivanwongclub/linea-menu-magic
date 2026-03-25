@@ -157,21 +157,25 @@ function SectionHeading({ id, title, icon: Icon }: { id: string; title: string; 
 /* ─── Section nav bar ────────────────────────────────── */
 
 function SectionNav({ sections }: { sections: { id: string; label: string }[] }) {
-  const scrollTo = (id: string) => {
+  const [active, setActive] = useState(0);
+  const scrollTo = (id: string, idx: number) => {
+    setActive(idx);
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   return (
-    <nav className="border-y-2 border-foreground bg-background sticky top-[72px] z-20">
+    <nav className="border-y border-border bg-background sticky top-[72px] z-20">
       <div className="section-inner">
-        <div className="flex gap-0 overflow-x-auto scrollbar-hide">
+        <div className="flex gap-1 overflow-x-auto scrollbar-hide py-2">
           {sections.map((s, i) => (
             <button
               key={s.id}
-              onClick={() => scrollTo(s.id)}
-              className={`px-5 py-4 text-xs font-bold uppercase tracking-[0.12em] whitespace-nowrap transition-colors relative
-                ${i === 0 ? 'text-foreground after:scale-x-100' : 'text-foreground/50 hover:text-foreground after:scale-x-0 hover:after:scale-x-100'}
-                after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-foreground after:transition-transform after:duration-200 after:origin-left`}
+              onClick={() => scrollTo(s.id, i)}
+              className={`px-4 py-2 text-[11px] font-bold uppercase tracking-[0.12em] whitespace-nowrap transition-all duration-200
+                ${i === active
+                  ? 'bg-foreground text-background'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+                }`}
             >
               {s.label}
             </button>
