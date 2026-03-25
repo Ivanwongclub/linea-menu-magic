@@ -21,6 +21,7 @@ import { getProductPlaceholderUrl, getOptimizedImageUrl } from '@/features/produ
 import type { Product, ProductImage } from '@/features/products/types';
 import { getPdpSeed } from '@/features/products/pdpSeedData';
 import { getPdpSeedImages } from '@/features/products/pdpSeedImages';
+import { getMaterialSurfaceImage } from '@/features/products/materialSurfaces';
 
 /* ─── helpers ────────────────────────────────────────── */
 
