@@ -63,20 +63,22 @@ const Factory = () => {
         />
 
         {/* Stats Section */}
-        <section className="py-16 px-6 border-b border-border overflow-hidden">
-          <div ref={statsRef} className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <div 
-                key={index}
-                className={`text-center transition-all duration-700 ease-out ${
-                  statsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-                }`}
-                style={getStatsDelay(index)}
-              >
-                <div className="text-3xl md:text-4xl font-light text-foreground mb-2">{stat.value}</div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
-              </div>
-            ))}
+        <section className="py-16 px-6 lg:px-8 border-b border-border overflow-hidden">
+          <div className="max-w-7xl mx-auto">
+            <div ref={statsRef} className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              {stats.map((stat, index) => (
+                <div 
+                  key={index}
+                  className={`transition-all duration-700 ease-out ${
+                    statsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                  }`}
+                  style={getStatsDelay(index)}
+                >
+                  <div className="text-3xl md:text-4xl font-light text-foreground mb-2">{stat.value}</div>
+                  <div className="text-sm text-muted-foreground">{stat.label}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
