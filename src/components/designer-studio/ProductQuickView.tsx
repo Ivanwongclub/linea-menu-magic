@@ -195,7 +195,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                   </div>
                   
                   <div className="absolute top-4 left-4 text-xs text-muted-foreground bg-background/80 backdrop-blur-sm px-2 py-1 rounded">
-                    拖曳旋轉 • 滾輪縮放
+                    Drag to rotate · Scroll to zoom
                   </div>
                 </div>
               ) : (
