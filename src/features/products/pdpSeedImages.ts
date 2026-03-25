@@ -45,6 +45,10 @@ const seedImages: Record<string, string[]> = {
   // Zippers
   'nylon-cord-puller': [nylonZipper, brandedZipper, zippersCategory],
   'metal-zipper-puller': [metalZipper, brandedZipper, zippersCategory],
+  'metal-zipper': [metalZipper, brandedZipper, zippersCategory],
+  'nylon-zipper': [nylonZipper, brandedZipper, zippersCategory],
+  'branded-zipper': [brandedZipper, metalZipper, zippersCategory],
+  'invisible-zipper': [nylonZipper, zippersCategory, brandedZipper],
 
   // Lace & trims
   'eco-lace-trim': [cottonLace, laceCategory],
@@ -54,6 +58,11 @@ const seedImages: Record<string, string[]> = {
 
   // Catch-all category-based fallbacks for any slug containing these keywords
 };
+
+/** Exported fallback for components that need a single real image */
+export function getFallbackImage(): string {
+  return otherCategory;
+}
 
 /** Category-based fallback images when no slug match exists */
 const categoryFallbacks: Record<string, string[]> = {

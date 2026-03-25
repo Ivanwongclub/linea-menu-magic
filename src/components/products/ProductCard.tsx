@@ -90,7 +90,7 @@ export default function ProductCard({
 
         {imageError && (
           <img
-            src={getProductPlaceholderUrl(product.name_en ?? product.name, product.item_code, product.primary_category?.slug, product.primary_category?.name, 400)}
+            src={(getPdpSeedImages(product.slug, product.primary_category?.slug) ?? [])[0] ?? getProductPlaceholderUrl(product.name_en ?? product.name, product.item_code, product.primary_category?.slug, product.primary_category?.name, 400)}
             alt={altText}
             className="absolute inset-0 w-full h-full object-cover"
           />
