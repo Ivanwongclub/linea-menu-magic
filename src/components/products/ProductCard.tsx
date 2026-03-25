@@ -30,7 +30,7 @@ function resolveProductImage(
   if (product.thumbnail_url) return product.thumbnail_url;
 
   // Use seeded images before falling back to placeholder
-  const seeded = getPdpSeedImages(product.slug);
+  const seeded = getPdpSeedImages(product.slug, product.primary_category?.slug);
   if (seeded && seeded.length > 0) return seeded[0];
 
   return getProductPlaceholderUrl(
