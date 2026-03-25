@@ -222,7 +222,7 @@ const Header = () => {
             {/* Logo */}
             <Link
               to="/"
-              className={`inline-flex items-center justify-center px-5 py-1 lg:px-7 lg:py-1 rounded-[var(--radius)] transition-all duration-300 ${
+              className={`inline-flex items-center justify-center px-5 py-1 lg:px-7 lg:py-1 transition-all duration-300 ${
                 isTransparent
                   ? "bg-white/20 backdrop-blur-sm"
                   : "bg-primary"
