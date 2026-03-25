@@ -33,7 +33,7 @@ const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
 const OurStory = lazy(() => import("./pages/about/OurStory"));
 const Factory = lazy(() => import("./pages/about/Factory"));
 const Certificates = lazy(() => import("./pages/about/Certificates"));
-const AboutSustainability = lazy(() => import("./pages/about/Sustainability"));
+
 
 const queryClient = new QueryClient();
 
@@ -58,7 +58,7 @@ const App = () => (
               <Route path="/about/our-story" element={<OurStory />} />
               <Route path="/about/factory" element={<Factory />} />
               <Route path="/about/certificates" element={<Certificates />} />
-              <Route path="/about/sustainability" element={<AboutSustainability />} />
+              <Route path="/about/sustainability" element={<Sustainability />} />
               <Route path="/products" element={<Products />} />
               <Route path="/products/:slug" element={<ProductDetail />} />
               <Route path="/sustainability" element={<Sustainability />} />

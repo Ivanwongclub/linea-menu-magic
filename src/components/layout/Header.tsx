@@ -29,7 +29,7 @@ const ABOUT_GROUPS = [
   {
     heading: "Responsibility",
     links: [
-      { label: "Sustainability", href: "/about/sustainability", image: aboutShowroomImg },
+      { label: "Sustainability", href: "/sustainability", image: aboutShowroomImg },
     ],
   },
 ];
@@ -52,7 +52,7 @@ const ABOUT_TRUST_CARDS = [
   {
     title: "Responsibility",
     description: "Certified sustainable operations",
-    href: "/about/sustainability",
+    href: "/sustainability",
     image: aboutShowroomImg,
   },
 ];
