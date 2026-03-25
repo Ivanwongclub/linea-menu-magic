@@ -465,10 +465,10 @@ export default function ProductDetail() {
               </div>
 
               {/* ── Description ── */}
-              {(product.description_en ?? product.description) && (
+              {description && (
                 <div className="px-6 py-4 border-b border-border/50">
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    {product.description_en ?? product.description}
+                    {description}
                   </p>
                 </div>
               )}
