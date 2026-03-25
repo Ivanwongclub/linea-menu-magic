@@ -239,7 +239,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                     {item.isPublic ? (
                       <Badge variant="secondary" className="text-xs gap-1">
                         <Globe className="w-3 h-3" />
-                        公開
+                        Public
                       </Badge>
                     ) : (
                       <Badge variant="outline" className="text-xs gap-1 border-amber-500/50 text-amber-700 dark:text-amber-400">
