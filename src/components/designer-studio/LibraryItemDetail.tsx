@@ -282,7 +282,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
               <CardContent>
                 <dl className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <dt className="text-muted-foreground">單價</dt>
+                    <dt className="text-muted-foreground">Unit Price</dt>
                     <dd className="font-semibold text-lg text-foreground">
                       {item.pricing.currency} ${item.pricing.unitPrice.toFixed(3)}
                     </dd>
