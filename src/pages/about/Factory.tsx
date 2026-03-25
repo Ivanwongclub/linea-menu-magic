@@ -83,7 +83,7 @@ const Factory = () => {
         </section>
 
         {/* Facilities Section */}
-        <ContentSection title="Production Bases" className="px-6">
+        <ContentSection title="Production Bases" className="px-6 lg:px-8 max-w-7xl mx-auto">
           <div ref={facilitiesRef} className="grid md:grid-cols-3 gap-6">
             {facilities.map((facility, index) => (
               <div 
