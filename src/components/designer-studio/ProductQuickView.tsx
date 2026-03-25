@@ -222,7 +222,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
               {item.modelUrl && !show3D && (
                 <Badge className="absolute top-4 left-4 bg-primary text-primary-foreground">
                   <Box className="w-3.5 h-3.5 mr-1.5" />
-                  3D 模型可用
+                  3D Model Available
                 </Badge>
               )}
             </div>
