@@ -534,7 +534,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <Calendar className="w-3.5 h-3.5" />
-                      建立日期
+                      Created
                     </div>
                     <p className="text-sm font-medium">
                       {format(new Date(item.createdAt), 'yyyy/MM/dd', { locale: zhTW })}
