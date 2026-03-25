@@ -328,7 +328,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                     <div className="flex items-start gap-2">
                       <Package className="w-4 h-4 text-muted-foreground mt-0.5" />
                       <div>
-                        <p className="text-xs text-muted-foreground">樣品交期</p>
+                        <p className="text-xs text-muted-foreground">Sample Time</p>
                         <p className="text-sm font-medium">{item.production.sampleTime}</p>
                       </div>
                     </div>
