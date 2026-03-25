@@ -28,7 +28,7 @@ const offices = [
   {
     city: "New York",
     label: "Sales Office",
-    image: null,
+    image: locationNewyork,
     description: "Serves the Americas market with local business development, trend consultation, and logistics coordination for faster turnaround on Western-hemisphere orders.",
     tags: ["Americas Market", "Business Development", "Logistics"],
   },
