@@ -68,7 +68,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink onClick={onBack} className="cursor-pointer hover:text-foreground text-sm">
-                  素材庫
+                  Component Library
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
