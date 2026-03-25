@@ -96,7 +96,7 @@ const About = () => {
         {/* Values */}
         <section className="py-24 px-6 lg:px-8 bg-secondary overflow-hidden">
           <div className="max-w-7xl mx-auto">
-            <div ref={valuesHeaderRef} className="text-center mb-16">
+            <div ref={valuesHeaderRef} className="mb-16">
               <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${
                 valuesHeaderVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}>Our Values</p>
