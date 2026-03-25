@@ -8,6 +8,9 @@ import bottleImg from "@/assets/sustainability-bottle.jpg";
 import forestImg from "@/assets/sustainability-forest.jpg";
 import recycledMetalImg from "@/assets/sustainability-recycled-metal.jpg";
 import natureImg from "@/assets/sustainability-nature.jpg";
+import ecoProcessImg from "@/assets/sustainability-eco-process.jpg";
+import carbonImg from "@/assets/sustainability-carbon.jpg";
+import zeroWasteImg from "@/assets/sustainability-zero-waste.jpg";
 
 const Sustainability = () => {
   const { ref: heroRef, isVisible: heroVisible } = useScrollAnimation();
