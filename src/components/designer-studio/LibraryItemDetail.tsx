@@ -328,7 +328,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                   </div>
                   <Separator />
                   <div className="flex justify-between">
-                    <dt className="text-muted-foreground">樣品時間</dt>
+                    <dt className="text-muted-foreground">Sample Time</dt>
                     <dd className="font-medium">{item.production.sampleTime}</dd>
                   </div>
                   <Separator />
