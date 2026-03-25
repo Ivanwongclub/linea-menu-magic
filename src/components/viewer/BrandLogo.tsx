@@ -25,7 +25,7 @@ const BrandLogo = ({ maxHeight = 28, variant = "light", className = "" }: BrandL
 
   return (
     <div
-      className={`inline-flex items-center justify-center ${bgColor} ${className}`}
+      className={`inline-flex items-center justify-center ${bgColor} rounded-none ${className}`}
       style={{
         height: `${maxHeight}px`,
         paddingLeft: `${Math.round(12 * scale)}px`,
