@@ -104,7 +104,7 @@ const Footer = () => {
 
       {/* Bottom Bar */}
       <div className="border-t border-white/10 mt-12 pt-8">
-        <div className="max-w-[1200px] mx-auto px-10">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="flex items-center gap-4">
               <p className="text-xs text-white/35">
