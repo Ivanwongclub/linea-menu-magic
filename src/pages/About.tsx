@@ -114,7 +114,7 @@ const About = () => {
               {values.map((value, index) => (
                 <div 
                   key={value.title}
-                  className={`p-8 bg-background rounded-lg text-center transition-all duration-500 ease-out hover:shadow-lg hover:-translate-y-1 ${
+                  className={`p-8 bg-background rounded-lg transition-all duration-500 ease-out hover:shadow-lg hover:-translate-y-1 ${
                     valuesVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
                   }`}
                   style={getValuesDelay(index)}
