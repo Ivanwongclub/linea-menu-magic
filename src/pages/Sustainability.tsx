@@ -31,16 +31,19 @@ const Sustainability = () => {
       icon: Factory,
       title: "Eco-friendly Process",
       description: "Advanced eco-friendly plating technology reduces harmful chemical emissions in production.",
+      image: ecoProcessImg,
     },
     {
       icon: Leaf,
       title: "Carbon Footprint",
       description: "Continuously monitoring and reducing carbon emissions across all production processes.",
+      image: carbonImg,
     },
     {
       icon: TreePine,
       title: "Zero Waste Policy",
       description: "Committed to eliminating production waste to landfill through recycling and material recovery.",
+      image: zeroWasteImg,
     },
   ];
 
