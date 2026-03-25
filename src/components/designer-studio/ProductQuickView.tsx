@@ -274,7 +274,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                 <div className="space-y-3">
                   <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
                     <DollarSign className="w-4 h-4 text-muted-foreground" />
-                    價格與數量
+                    Pricing & Quantity
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-3 bg-muted/50 rounded-lg">
