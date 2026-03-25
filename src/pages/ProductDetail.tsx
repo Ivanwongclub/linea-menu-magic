@@ -455,7 +455,7 @@ export default function ProductDetail() {
                         {t.name}
                       </Badge>
                     ))}
-                    {product.is_customizable && (
+                    {isCustomizable && (
                       <Badge variant="secondary" className="text-[10px] uppercase tracking-[0.06em] gap-1">
                         <Palette className="h-3 w-3" /> Customizable
                       </Badge>
