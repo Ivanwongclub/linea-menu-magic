@@ -37,7 +37,7 @@ const NewsDetail = () => {
   }
   
   const relatedNews = newsItems
-    .filter(item => item.id !== newsItem.id && (item.type === newsItem.type || item.category === newsItem.category))
+    .filter(item => item.id !== newsItem.id && item.category === newsItem.category)
     .slice(0, 3);
   
   const categoryLabel = categoryOptions.find(c => c.key === newsItem.category)?.label;
@@ -97,10 +97,6 @@ const NewsDetail = () => {
                 <div className={`flex items-center gap-3 mb-4 transition-all duration-700 ease-out ${
                   contentVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`} style={{ transitionDelay: '100ms' }}>
-                  <span className="text-xs font-medium uppercase tracking-widest text-foreground/70">
-                    {newsItem.type === "exhibition" ? "Exhibition" : "News"}
-                  </span>
-                  <span className="w-6 h-px bg-border" />
                   <span className="text-xs text-muted-foreground">{categoryLabel}</span>
                 </div>
                 
@@ -187,7 +183,7 @@ const NewsDetail = () => {
                   
                   {relatedNews.length > 0 && (
                     <div ref={relatedRef}>
-                      <h3 className="text-sm font-medium text-foreground uppercase tracking-widest mb-4">Related News</h3>
+                      <h3 className="text-sm font-medium text-foreground uppercase tracking-widest mb-4">Related Articles</h3>
                       <div className="space-y-4">
                         {relatedNews.map((item, index) => (
                           <Link
@@ -208,7 +204,7 @@ const NewsDetail = () => {
                               </div>
                               <div className="flex-1 min-w-0">
                                 <span className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
-                                  {item.type === "exhibition" ? "Exhibition" : "News"}
+                                  {categoryOptions.find(c => c.key === item.category)?.label}
                                 </span>
                                 <h4 className="text-sm font-medium text-foreground group-hover:text-foreground/80 transition-colors line-clamp-2 mt-1">
                                   {item.title}
@@ -224,7 +220,7 @@ const NewsDetail = () => {
                   
                   <div className="p-6 bg-foreground text-background">
                     <h3 className="text-lg font-semibold mb-2">Stay Updated</h3>
-                    <p className="text-sm text-background/70 mb-4">Get exhibition previews and industry updates</p>
+                    <p className="text-sm text-background/70 mb-4">Get product updates and company news</p>
                     <Link to="/contact">
                       <Button variant="outline-inverse" className="w-full">
                         Contact Us

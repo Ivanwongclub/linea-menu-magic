@@ -1,7 +1,7 @@
 export interface NewsItem {
   id: number;
-  type: "exhibition" | "news";
-  category: "industry" | "product" | "certification" | "partnership";
+  type: "news";
+  category: "company" | "product" | "quality" | "operations";
   title: string;
   subtitle: string;
   date: string;
@@ -16,260 +16,170 @@ export interface NewsItem {
 export const newsItems: NewsItem[] = [
   {
     id: 1,
-    type: "exhibition",
-    category: "industry",
-    title: "Première Vision Paris 2025",
-    subtitle: "Global Textile Exhibition",
-    date: "11–13 Feb 2025",
-    location: "Paris, France",
-    image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&auto=format&fit=crop",
-    description: "WIN-CYC will showcase its latest garment accessories collection at Première Vision Paris. Industry professionals are warmly invited.",
+    type: "news",
+    category: "company",
+    title: "Since 1979: Win-CYC's Journey from Hong Kong to Global Supply Partner",
+    subtitle: "Company Heritage",
+    date: "January 2025",
+    location: "Hong Kong",
+    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&auto=format&fit=crop",
+    description: "Founded in Hong Kong in 1979, Win-CYC has evolved from a local garment accessories supplier into a global manufacturing and export partner serving the United States, Europe, and Asia Pacific.",
     featured: true,
     content: [
-      "WIN-CYC Group will participate in the world's most influential textile exhibition — Première Vision Paris — from 11 to 13 February 2025. As a leader in garment accessories, we will present a range of innovative products and eco-friendly solutions.",
-      "Highlights include our eco-friendly button series made from GRS-certified recycled materials, a new line of metal zippers, and bespoke accessories for high-end fashion brands. These products demonstrate WIN-CYC's commitment to both quality and sustainability.",
-      "We sincerely invite designers, sourcing professionals, and industry partners from around the world to visit our booth. Our expert team will introduce each product's features and applications, and provide personalised customisation recommendations.",
-      "During the exhibition, we will also host a seminar on 'The Sustainable Future of Garment Accessories', exploring industry trends and eco-friendly innovations. All industry professionals are welcome to attend."
+      "Win-CYC was established in Hong Kong in 1979, initially focused on supplying garment accessories to the local textile industry. Over four decades, the company has grown into a global supply partner, serving major markets across the United States, Europe, and Asia Pacific.",
+      "The company's growth has been driven by consistent investment in manufacturing capability, quality systems, and supply-chain infrastructure. Today, Win-CYC operates from its Hong Kong headquarters with production facilities in southern China and regional sourcing links across Southeast Asia.",
+      "As an OEM and ODM partner, Win-CYC supports fashion brands and garment manufacturers with comprehensive accessory solutions — from product development and sampling through to volume production and export fulfilment.",
+      "With more than 45 years of accumulated expertise in garment trims, Win-CYC continues to expand its global footprint while maintaining the hands-on service quality that has defined the company since its founding."
     ],
     gallery: [
-      "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1591115765373-5207764f72e7?w=600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=600&auto=format&fit=crop",
     ],
   },
   {
     id: 2,
     type: "news",
     category: "product",
-    title: "WIN-CYC+ Digital Transformation Officially Launched",
-    subtitle: "Leading Industry Innovation",
+    title: "Inside Win-CYC's Product Capability: Buttons, Zippers, and Metal Accessories",
+    subtitle: "Product Range Overview",
     date: "December 2024",
     location: "Hong Kong",
-    image: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&auto=format&fit=crop",
-    description: "The Group announces the launch of WIN-CYC+ digital transformation programme, centred on Speed, Innovation, and Digitalisation.",
+    image: "https://images.unsplash.com/photo-1558171813-4c088753af8f?w=800&auto=format&fit=crop",
+    description: "A comprehensive look at Win-CYC's accessory catalogue — spanning polyester buttons, metal buttons, zippers, D-rings, O-rings, buckles, and bespoke hardware for the global fashion industry.",
     featured: true,
     content: [
-      "WIN-CYC Group today officially announced the launch of the WIN-CYC+ digital transformation programme, marking an important milestone in the Group's journey towards smart, digitalised development. The programme is built on three pillars: Speed, Innovation, and Digitalisation, aiming to comprehensively enhance client experience and operational efficiency.",
-      "Key Phase 1 projects include the launch of the new Designer Studio platform, deployment of smart inventory management systems, and the digital upgrade of our online product catalogue. These initiatives will provide clients with a more convenient and efficient service experience.",
-      "The Group Chairman stated: 'Digital transformation is at the core of WIN-CYC's future strategy. Through WIN-CYC+, we will better serve our global clients while enhancing competitiveness and sustainability.'",
-      "The WIN-CYC+ programme is scheduled for phased implementation over the next two years, covering product R&D, manufacturing, supply chain management, and client services."
+      "Win-CYC's product portfolio covers the full spectrum of garment accessories required by fashion brands and apparel manufacturers worldwide. Core product categories include polyester buttons, metal buttons, snap fasteners, zippers, D-rings, O-rings, buckles, rivets, eyelets, and decorative hardware.",
+      "The company's button range alone encompasses polyester, metal, shell, wood, horn, and corozo — available in a wide variety of sizes, finishes, and custom colour matches. Metal accessories are produced with advanced plating and surface-treatment processes to ensure lasting durability and consistent finish quality.",
+      "As both an OEM and ODM supplier, Win-CYC supports clients from initial concept through to final production. The one-stop development model means brands can source matched button, zipper, and hardware sets from a single partner, simplifying supply chains and reducing lead times.",
+      "Product development is supported by in-house sampling, mould-making, and colour-matching capabilities — enabling rapid prototyping and custom solutions for fashion, sportswear, workwear, and luxury segments."
     ],
     gallery: [
-      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1573164713988-8665fc963095?w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1605000797499-95a51c5269ae?w=600&auto=format&fit=crop",
     ],
   },
   {
     id: 3,
-    type: "exhibition",
-    category: "industry",
-    title: "Intertextile Shanghai 2025",
-    subtitle: "China International Textile Exhibition",
-    date: "March 2025",
-    location: "Shanghai, China",
-    image: "https://images.unsplash.com/photo-1591115765373-5207764f72e7?w=800&auto=format&fit=crop",
-    description: "Showcasing our eco-friendly sustainable product range, embodying the perfect combination of craftsmanship and innovation.",
+    type: "news",
+    category: "quality",
+    title: "Quality Systems at Win-CYC: ISO 9001 and OEKO-TEX-Aligned Standards",
+    subtitle: "Quality & Compliance",
+    date: "November 2024",
+    location: "Hong Kong",
+    image: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=800&auto=format&fit=crop",
+    description: "Win-CYC maintains ISO 9001 quality management and OEKO-TEX-aligned testing protocols across its production lines, ensuring products meet international safety and quality benchmarks.",
     featured: false,
     content: [
-      "WIN-CYC will participate in Intertextile Shanghai in March 2025, Asia's largest textile industry event.",
-      "We will focus on our sustainable product series, including buttons, zippers, and metal accessories made from recycled materials. These products meet international environmental standards while reflecting our unwavering pursuit of craftsmanship and innovation.",
-      "We look forward to connecting with clients across mainland China and the Asia-Pacific region to explore collaboration opportunities."
+      "Quality assurance is central to Win-CYC's operations. The company maintains ISO 9001:2015 quality management certification across its production facilities, ensuring systematic process control, traceability, and continuous improvement.",
+      "In addition to ISO 9001, Win-CYC's products are tested against OEKO-TEX Standard 100 parameters — confirming that garment accessories are free from harmful substances and safe for end consumers. This testing covers metal components, coatings, plating finishes, and dyed materials.",
+      "The company's quality control workflow includes incoming material inspection, in-process monitoring, and final outgoing quality checks. Dedicated QC teams work with standardised protocols to maintain consistency across production runs.",
+      "These quality and compliance systems allow Win-CYC to serve demanding international markets — including the United States and the European Union — where regulatory requirements for garment accessories are particularly stringent."
     ],
   },
   {
     id: 4,
     type: "news",
-    category: "certification",
-    title: "New Environmental Certification Achieved",
-    subtitle: "Sustainability Milestone",
-    date: "November 2024",
+    category: "operations",
+    title: "Serving the United States, Europe, and Asia Pacific: Win-CYC's Market Footprint",
+    subtitle: "Global Operations",
+    date: "October 2024",
     location: "Hong Kong",
-    image: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=800&auto=format&fit=crop",
-    description: "WIN-CYC has been awarded OEKO-TEX environmental certification, further strengthening our leadership in sustainable development.",
+    image: "https://images.unsplash.com/photo-1494412574643-ff11b0a5eb19?w=800&auto=format&fit=crop",
+    description: "Win-CYC exports garment accessories to markets across the United States, Europe, and Asia Pacific — supported by Hong Kong headquarters and production bases in southern China.",
     featured: false,
     content: [
-      "WIN-CYC Group is pleased to announce that its main product lines have successfully passed the OEKO-TEX Standard 100 certification audit. This internationally recognised standard ensures products are harmless to human health and is one of the most credible safety certifications in the textile industry.",
-      "The certification covers our metal buttons, zippers, and various garment accessories. Through rigorous testing and auditing, these products have been confirmed to meet the highest environmental and safety standards.",
-      "Achieving OEKO-TEX certification further strengthens WIN-CYC's leadership in sustainable development and demonstrates our commitment to product quality and consumer safety."
+      "Win-CYC's export business spans three major regions: the United States, Europe, and Asia Pacific. The company's Hong Kong headquarters serves as the commercial and logistics hub, coordinating between production facilities and international buyers.",
+      "Production is anchored in southern China, with manufacturing facilities in the Pearl River Delta region — one of the world's most established garment accessories production clusters. This geographic positioning provides access to skilled labour, raw materials, and efficient port logistics.",
+      "The company's regional reach also extends into Southeast Asia, where sourcing and production links support brands with diversified supply-chain requirements. Vietnam, in particular, has become an increasingly important node in Win-CYC's operational network.",
+      "By maintaining a lean operational structure with deep production expertise, Win-CYC delivers competitive pricing, reliable lead times, and responsive service to its international client base."
     ],
   },
   {
     id: 5,
-    type: "exhibition",
-    category: "industry",
-    title: "Hong Kong Fashion Week 2025",
-    subtitle: "Hong Kong Fashion Week",
-    date: "January 2025",
-    location: "Hong Kong Convention and Exhibition Centre",
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&auto=format&fit=crop",
-    description: "Collaborating with local and international designers to showcase the limitless possibilities of garment accessories in fashion design.",
+    type: "news",
+    category: "operations",
+    title: "Supply Chain Snapshot: Vietnam as a Key Sourcing and Production Link",
+    subtitle: "Regional Expansion",
+    date: "September 2024",
+    location: "Ho Chi Minh City",
+    image: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&auto=format&fit=crop",
+    description: "Win-CYC's supply chain extends into Vietnam, supporting brands that require diversified sourcing across multiple production regions in Asia.",
     featured: false,
     content: [
-      "WIN-CYC will participate in Hong Kong Fashion Week in January 2025, collaborating with local and international designers to showcase the limitless possibilities of garment accessories in fashion design.",
-      "As a Hong Kong-based enterprise, we have always actively supported the development of the local fashion industry. This exhibition will feature a series of designer-collaborative products, including limited-edition button collections and custom metal accessories.",
-      "We look forward to raising awareness about the important role of garment accessories in fashion design, and demonstrating WIN-CYC's expertise in this field."
+      "As global fashion supply chains continue to diversify beyond China, Vietnam has emerged as a critical production hub for garment manufacturing. Win-CYC has established sourcing and production links in the country to support clients seeking multi-origin supply-chain strategies.",
+      "Vietnam's growing textile and garment sector — combined with favourable trade agreements with the United States and European Union — makes it an attractive complement to Win-CYC's established Chinese production base.",
+      "The company's Vietnam operations focus on supporting accessory supply for garment factories in the Ho Chi Minh City and Binh Duong industrial clusters, where many international brands have concentrated their production.",
+      "This multi-region capability allows Win-CYC to offer clients greater flexibility in sourcing, helping to manage lead times, costs, and supply-chain resilience across shifting trade environments."
     ],
   },
   {
     id: 6,
     type: "news",
     category: "product",
-    title: "Designer Studio Platform Launched",
-    subtitle: "Digital Service Upgrade",
-    date: "October 2024",
-    location: "Hong Kong",
-    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&auto=format&fit=crop",
-    description: "The new Designer Studio platform is officially live, offering designers a one-stop digital product browsing and quotation service.",
+    title: "OEM and ODM Development: Win-CYC's One-Stop Accessory Service",
+    subtitle: "Development Capability",
+    date: "August 2024",
+    location: "Dongguan",
+    image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&auto=format&fit=crop",
+    description: "Win-CYC provides full OEM and ODM development services — from concept and sampling through to volume production and export — as a single-source accessories partner.",
     featured: false,
     content: [
-      "WIN-CYC Group today announced the official launch of its new Designer Studio platform. This is a key component of the WIN-CYC+ digital transformation programme, designed to provide designers and brand clients with a more convenient and efficient digital service experience.",
-      "The Designer Studio integrates product browsing, 3D model preview, sample requests, and quote management. Users can browse our complete product catalogue, view detailed specifications and technical parameters, and submit quotation requests directly.",
-      "The 3D model preview feature allows designers to intuitively understand product appearance and details, significantly improving design decision efficiency. The smart quotation system can quickly generate accurate proposals based on client requirements.",
-      "We believe the Designer Studio will become an important bridge for communication and collaboration between designers and WIN-CYC, driving the entire industry towards digitalisation."
-    ],
-    gallery: [
-      "https://images.unsplash.com/photo-1551434678-e076c223a692?w=600&auto=format&fit=crop",
+      "Win-CYC operates as both an OEM and ODM partner, offering end-to-end accessory development for fashion brands and garment manufacturers. This one-stop model covers concept consultation, material selection, sampling, mould creation, production, quality control, and export logistics.",
+      "For OEM clients, Win-CYC manufactures to exact specifications — replicating approved designs with consistent quality across large production volumes. For ODM engagements, the company's in-house development team works with brands to create original accessory designs, from initial sketches through to production-ready tooling.",
+      "The development process is supported by rapid prototyping capabilities, with typical sample turnaround times measured in days rather than weeks. This speed-to-sample is a key competitive advantage for brands working to tight seasonal calendars.",
+      "By consolidating buttons, zippers, metal hardware, and decorative trims under a single supplier, brands can reduce supplier management overhead, improve component consistency, and streamline their sourcing operations."
     ],
   },
   {
     id: 7,
     type: "news",
-    category: "partnership",
-    title: "Strategic Partnership with International Fashion Brands",
-    subtitle: "Global Business Expansion",
-    date: "September 2024",
-    location: "Hong Kong",
-    image: "https://images.unsplash.com/photo-1573164713988-8665fc963095?w=800&auto=format&fit=crop",
-    description: "Establishing long-term strategic partnerships with multiple internationally renowned fashion brands, further expanding our global footprint.",
+    category: "quality",
+    title: "GRS Certification: Supporting Sustainable Material Standards",
+    subtitle: "Environmental Compliance",
+    date: "July 2024",
+    location: "Dongguan",
+    image: "https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?w=800&auto=format&fit=crop",
+    description: "Win-CYC's production base maintains Global Recycled Standard (GRS) certification, supporting the use of verified recycled materials in garment accessories.",
     featured: false,
     content: [
-      "WIN-CYC Group has recently signed strategic partnership agreements with multiple internationally renowned fashion brands. This marks a significant milestone in the Group's global business expansion strategy.",
-      "Under the agreements, WIN-CYC will provide comprehensive garment accessories supply and customisation services, covering buttons, zippers, metal fittings, webbing, and more.",
-      "The Group stated that these strategic partnerships are a strong endorsement of WIN-CYC's product quality and service capabilities. We will continue to serve global clients with outstanding quality and innovative design."
+      "Win-CYC's Dongguan production facility maintains Global Recycled Standard (GRS) certification, ensuring full traceability of recycled materials used in garment accessories. GRS is one of the most widely recognised sustainability certifications in the textile and apparel supply chain.",
+      "The certification covers recycled-content buttons and accessories, confirming that materials meet international standards for recycled-input verification, chain-of-custody tracking, and environmental practices during production.",
+      "For brands with sustainability commitments, GRS-certified accessories provide a verifiable way to demonstrate environmental responsibility across their product lines — from mainline collections through to sustainability-focused capsules.",
+      "Win-CYC continues to invest in expanding its range of recycled and eco-friendly materials, including recycled polyester, recycled metal alloys, and bio-based alternatives."
     ],
   },
   {
     id: 8,
     type: "news",
-    category: "certification",
-    title: "GRS Certification Audit Successfully Passed",
-    subtitle: "Environmental Commitment",
-    date: "August 2024",
-    location: "Dongguan",
-    image: "https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?w=800&auto=format&fit=crop",
-    description: "Our production base has successfully passed the Global Recycled Standard (GRS) annual audit, continuing to drive sustainable development.",
-    featured: false,
-    content: [
-      "WIN-CYC Group's Dongguan production base has successfully passed the Global Recycled Standard (GRS) annual audit. This is the third consecutive year of GRS certification, demonstrating our sustained efforts and commitment to sustainability.",
-      "GRS is one of the world's most authoritative recycled material certification standards, requiring strict traceability management throughout the supply chain. This certification proves that WIN-CYC products meet international environmental standards, providing clients with reliable eco-friendly solutions.",
-      "We will continue to increase investment in eco-material R&D and green production, contributing to a more sustainable fashion industry."
-    ],
-  },
-  {
-    id: 9,
-    type: "exhibition",
-    category: "industry",
-    title: "Munich Fabric Start 2025",
-    subtitle: "European Textile Exhibition",
-    date: "January 2025",
-    location: "Munich, Germany",
-    image: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&auto=format&fit=crop",
-    description: "Showcasing the latest eco-friendly materials and innovative designs, connecting with European buyers.",
-    featured: false,
-    content: [
-      "WIN-CYC will participate in Munich Fabric Start 2025, presenting our latest eco-friendly materials and innovative design series.",
-      "This is one of Europe's most important textile exhibitions, bringing together top global suppliers and buyers."
-    ],
-  },
-  {
-    id: 10,
-    type: "news",
-    category: "product",
-    title: "New Premium Metal Accessories Collection",
-    subtitle: "Craftsmanship Innovation",
-    date: "July 2024",
-    location: "Shenzhen",
-    image: "https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?w=800&auto=format&fit=crop",
-    description: "Launching a new premium metal accessories collection with advanced plating techniques for lasting lustre and durability.",
-    featured: false,
-    content: [
-      "WIN-CYC launches a new premium metal accessories collection, featuring advanced plating processes and eco-friendly surface treatment technologies.",
-      "The new series includes zipper pulls, buttons, buckles, and more, suitable for high-end fashion and sportswear."
-    ],
-  },
-  {
-    id: 11,
-    type: "news",
-    category: "partnership",
-    title: "Partnership with Japanese Textile Group",
-    subtitle: "Asia-Pacific Market Expansion",
+    category: "company",
+    title: "Digital Platform Update: Streamlining Product Discovery and Quotation",
+    subtitle: "Digital Capability",
     date: "June 2024",
-    location: "Tokyo",
-    image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&auto=format&fit=crop",
-    description: "Signed a memorandum of understanding with a leading Japanese textile group to jointly develop the Asia-Pacific market.",
-    featured: false,
-    content: [
-      "WIN-CYC has signed a strategic MOU with a renowned Japanese textile group to jointly develop the Asia-Pacific market.",
-      "The collaboration covers product R&D, technology exchange, and market promotion."
-    ],
-  },
-  {
-    id: 12,
-    type: "exhibition",
-    category: "industry",
-    title: "Canton Fair Spring 2025",
-    subtitle: "China Import and Export Fair",
-    date: "April 2025",
-    location: "Guangzhou, China",
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&auto=format&fit=crop",
-    description: "Exhibiting the complete product range at China's largest trade fair, welcoming global buyers.",
-    featured: false,
-    content: [
-      "WIN-CYC will showcase its complete product range at Canton Fair Spring 2025. Global buyers are welcome to visit."
-    ],
-  },
-  {
-    id: 13,
-    type: "news",
-    category: "certification",
-    title: "ISO 9001:2015 Certification Renewed",
-    subtitle: "Quality Management System",
-    date: "May 2024",
     location: "Hong Kong",
-    image: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=800&auto=format&fit=crop",
-    description: "Successfully passed the ISO 9001:2015 Quality Management System annual audit.",
+    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&auto=format&fit=crop",
+    description: "Win-CYC is investing in digital tools for product browsing, specification sharing, and quotation management to improve the client experience.",
     featured: false,
     content: [
-      "WIN-CYC has successfully passed the ISO 9001:2015 Quality Management System annual audit, ensuring quality management meets international standards."
+      "Win-CYC is investing in digital tools to modernise how clients discover products, review specifications, and manage quotation requests. The company's online platform aims to provide a faster, more transparent service experience for international buyers.",
+      "Key features include a digital product catalogue with detailed specifications, high-resolution imagery, and downloadable technical data sheets. The platform also supports direct quotation requests, reducing the back-and-forth typically required in accessory sourcing.",
+      "These digital initiatives complement Win-CYC's traditional relationship-based service model, giving clients the flexibility to browse and shortlist products independently before engaging with the sales team for detailed discussions.",
+      "The platform is part of a broader operational modernisation effort that includes inventory visibility improvements and order-tracking capabilities."
     ],
-  },
-  {
-    id: 14,
-    type: "news",
-    category: "product",
-    title: "Eco-Friendly Recycled Button Series Launched",
-    subtitle: "Green Product Line",
-    date: "April 2024",
-    location: "Dongguan",
-    image: "https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?w=800&auto=format&fit=crop",
-    description: "An eco-friendly button series made from 100% recycled materials is now officially available.",
-    featured: false,
-    content: [
-      "WIN-CYC launches an eco-friendly button series made from 100% recycled materials, offering an ideal choice for sustainable fashion."
+    gallery: [
+      "https://images.unsplash.com/photo-1551434678-e076c223a692?w=600&auto=format&fit=crop",
     ],
   },
 ];
 
 export const categoryOptions = [
-  { key: "all" as const, label: "All Categories" },
-  { key: "industry" as const, label: "Industry" },
-  { key: "product" as const, label: "Product Launches" },
-  { key: "certification" as const, label: "Certifications" },
-  { key: "partnership" as const, label: "Partnerships" },
+  { key: "all" as const, label: "All" },
+  { key: "company" as const, label: "Company" },
+  { key: "product" as const, label: "Products" },
+  { key: "quality" as const, label: "Quality" },
+  { key: "operations" as const, label: "Operations" },
 ];
 
 export const filterOptions = [
   { key: "all" as const, label: "All" },
-  { key: "exhibition" as const, label: "Exhibitions" },
-  { key: "news" as const, label: "News" },
 ];

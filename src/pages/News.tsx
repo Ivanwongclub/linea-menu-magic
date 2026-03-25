@@ -4,14 +4,12 @@ import { ArrowRight, Calendar, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
-import { newsItems, categoryOptions, filterOptions } from "@/data/newsData";
+import { newsItems, categoryOptions } from "@/data/newsData";
 import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
 
-type FilterType = "all" | "exhibition" | "news";
-type CategoryType = "all" | "industry" | "product" | "certification" | "partnership";
+type CategoryType = "all" | "company" | "product" | "quality" | "operations";
 
 const News = () => {
-  const [activeFilter, setActiveFilter] = useState<FilterType>("all");
   const [activeCategory, setActiveCategory] = useState<CategoryType>("all");
   
   const { ref: filterRef, isVisible: filterVisible } = useScrollAnimation();
@@ -22,9 +20,7 @@ const News = () => {
   const { ref: ctaRef, isVisible: ctaVisible } = useScrollAnimation();
 
   const filteredItems = newsItems.filter((item) => {
-    const typeMatch = activeFilter === "all" || item.type === activeFilter;
-    const categoryMatch = activeCategory === "all" || item.category === activeCategory;
-    return typeMatch && categoryMatch;
+    return activeCategory === "all" || item.category === activeCategory;
   });
 
   const filteredFeaturedItems = filteredItems.filter((item) => item.featured);
@@ -46,44 +42,23 @@ const News = () => {
         {/* Sticky Category Filter Bar */}
         <div ref={filterRef} className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
           <div className="max-w-7xl mx-auto px-6 py-4">
-            <div className={`flex flex-col sm:flex-row sm:items-center gap-4 transition-all duration-700 ease-out ${
+            <div className={`flex items-center gap-2 transition-all duration-700 ease-out ${
               filterVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground mr-2">Type</span>
-                {filterOptions.map((filter) => (
-                  <button
-                    key={filter.key}
-                    onClick={() => setActiveFilter(filter.key)}
-                    className={`px-3 py-1.5 text-sm transition-all duration-300 ${
-                      activeFilter === filter.key
-                        ? "bg-foreground text-background"
-                        : "bg-transparent text-foreground hover:bg-secondary border border-border"
-                    }`}
-                  >
-                    {filter.label}
-                  </button>
-                ))}
-              </div>
-              
-              <div className="flex items-center gap-2 sm:ml-6">
-                <span className="text-xs text-muted-foreground mr-2">Category</span>
-                <div className="flex flex-wrap gap-2">
-                  {categoryOptions.map((category) => (
-                    <button
-                      key={category.key}
-                      onClick={() => setActiveCategory(category.key)}
-                      className={`px-3 py-1.5 text-sm transition-all duration-300 ${
-                        activeCategory === category.key
-                          ? "bg-foreground text-background"
-                          : "bg-transparent text-foreground hover:bg-secondary border border-border"
-                      }`}
-                    >
-                      {category.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <span className="text-xs text-muted-foreground mr-2">Category</span>
+              {categoryOptions.map((category) => (
+                <button
+                  key={category.key}
+                  onClick={() => setActiveCategory(category.key as CategoryType)}
+                  className={`px-3 py-1.5 text-sm transition-all duration-300 ${
+                    activeCategory === category.key
+                      ? "bg-foreground text-background"
+                      : "bg-transparent text-foreground hover:bg-secondary border border-border"
+                  }`}
+                >
+                  {category.label}
+                </button>
+              ))}
             </div>
           </div>
         </div>
@@ -123,10 +98,6 @@ const News = () => {
                       </div>
                       <div className="p-6">
                         <div className="flex items-center gap-3 mb-3">
-                          <span className="text-xs font-medium uppercase tracking-widest text-foreground/70">
-                            {item.type === "exhibition" ? "Exhibition" : "News"}
-                          </span>
-                          <span className="w-6 h-px bg-border" />
                           <span className="text-xs text-muted-foreground">
                             {categoryOptions.find(c => c.key === item.category)?.label}
                           </span>
@@ -194,10 +165,6 @@ const News = () => {
                       </div>
                       <div className="p-5">
                         <div className="flex items-center gap-2 mb-3">
-                          <span className="text-xs font-medium uppercase tracking-widest text-foreground/70">
-                            {item.type === "exhibition" ? "Exhibition" : "News"}
-                          </span>
-                          <span className="w-4 h-px bg-border" />
                           <span className="text-xs text-muted-foreground">
                             {categoryOptions.find(c => c.key === item.category)?.label}
                           </span>
@@ -234,7 +201,7 @@ const News = () => {
         {filteredItems.length === 0 && (
           <section className="py-24 px-6 lg:px-8">
             <div className="max-w-7xl mx-auto text-center">
-              <p className="text-muted-foreground">No matching content found</p>
+              <p className="text-muted-foreground">No matching articles found</p>
             </div>
           </section>
         )}
@@ -250,7 +217,7 @@ const News = () => {
             <p className={`text-sm text-muted-foreground mb-6 font-light max-w-lg transition-all duration-700 ease-out ${
               ctaVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`} style={{ transitionDelay: '100ms' }}>
-              Get exhibition previews, product launches, and industry updates
+              Get product launches, industry updates, and company news
             </p>
             <Link
               to="/contact"
