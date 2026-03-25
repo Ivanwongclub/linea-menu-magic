@@ -305,34 +305,86 @@ export default function ProductDetail() {
     );
   }
 
-  /* ── data extraction ── */
+  /* ── data extraction with seed fallback ── */
+  const seed = getPdpSeed(product.slug);
   const tags = product.tags ?? [];
-  const certs = product.certifications ?? [];
-  const industries = product.industries ?? [];
-  const materials = product.materials ?? [];
   const primaryCat = product.primary_category ?? product.categories?.[0];
-  const specs = product.specifications ?? {};
-  const production = product.production ?? {};
+  const rawSpecs = product.specifications ?? {};
+  const rawProd = product.production ?? {};
 
-  const materialNames = materials.length ? materials.map((m) => m.name).join(', ') : specValue(specs.material) ?? specValue(specs.Material);
-  const finish = specValue(specs.finish) ?? specValue(specs.Finish) ?? specValue(specs.plating) ?? specValue(specs.Plating) ?? specValue(specs.surface_treatment);
-  const size = specValue(specs.size) ?? specValue(specs.Size) ?? specValue(specs.dimensions) ?? specValue(specs.Dimensions);
-  const weight = specValue(specs.weight) ?? specValue(specs.Weight);
-  const thickness = specValue(specs.thickness) ?? specValue(specs.Thickness);
-  const attachment = specValue(specs.attachment) ?? specValue(specs.construction) ?? specValue(specs.Construction) ?? specValue(specs.type);
-  const moq = specValue(production.moq) ?? specValue(production.MOQ) ?? specValue(production.minimum_order);
-  const sampleTime = specValue(production.sampleTime) ?? specValue(production.sample_time) ?? specValue(production.sample_lead_time);
-  const leadTime = specValue(production.leadTime) ?? specValue(production.lead_time) ?? specValue(production.bulk_lead_time);
-  const origin = specValue(production.origin) ?? specValue(production.Origin);
-  const capacity = specValue(production.capacity) ?? specValue(production.Capacity);
+  // Merge: backend specs → seed specs
+  const seedSpecs = seed?.specifications ?? {};
+  const specs: Record<string, unknown> = { ...rawSpecs };
+  const seedProd = seed?.production ?? {};
+  const production: Record<string, unknown> = { ...rawProd };
 
-  const allSpecEntries: [string, string][] = Object.entries(specs)
-    .map(([k, v]) => [k, specValue(v)] as [string, string | null])
-    .filter((e): e is [string, string] => e[1] !== null);
+  // Resolved display values: real first, seed second
+  const materials = product.materials ?? [];
+  const materialNames = materials.length
+    ? materials.map((m) => m.name).join(', ')
+    : specValue(specs.material) ?? specValue(specs.Material) ?? seedSpecs.material ?? null;
+  const finish = specValue(specs.finish) ?? specValue(specs.Finish) ?? specValue(specs.plating) ?? seedSpecs.finish ?? null;
+  const size = specValue(specs.size) ?? specValue(specs.Size) ?? specValue(specs.dimensions) ?? seedSpecs.size ?? null;
+  const weight = specValue(specs.weight) ?? specValue(specs.Weight) ?? seedSpecs.weight ?? null;
+  const thickness = specValue(specs.thickness) ?? specValue(specs.Thickness) ?? seedSpecs.thickness ?? null;
+  const attachment = specValue(specs.attachment) ?? specValue(specs.construction) ?? seedSpecs.attachment ?? null;
+  const colorOptions = specValue(specs.color_options) ?? (seedSpecs.color_options ? seedSpecs.color_options.join(', ') : null);
+  const tensileStrength = specValue(specs.tensileStrength) ?? seedSpecs.tensileStrength ?? null;
 
-  const allProductionEntries: [string, string][] = Object.entries(production)
-    .map(([k, v]) => [k, specValue(v)] as [string, string | null])
-    .filter((e): e is [string, string] => e[1] !== null);
+  const moq = specValue(production.moq) ?? specValue(production.MOQ) ?? specValue(production.minimum_order) ?? seedProd.moq ?? null;
+  const sampleTime = specValue(production.sampleTime) ?? specValue(production.sample_time) ?? seedProd.sample_time ?? null;
+  const leadTime = specValue(production.leadTime) ?? specValue(production.lead_time) ?? seedProd.lead_time ?? null;
+  const origin = specValue(production.origin) ?? specValue(production.Origin) ?? seedProd.origin ?? null;
+  const capacity = specValue(production.capacity) ?? specValue(production.Capacity) ?? seedProd.capacity ?? null;
+
+  // Merged certifications: real relations first, then seed
+  const realCerts = product.certifications ?? [];
+  const seedCerts = (seed?.certifications ?? [])
+    .filter((sc) => !realCerts.some((rc) => rc.abbreviation === sc.abbreviation))
+    .map((sc, i) => ({ id: `seed-cert-${i}`, name: sc.name, abbreviation: sc.abbreviation, logo_url: undefined }));
+  const certs = [...realCerts, ...seedCerts];
+
+  // Merged industries/applications
+  const realIndustries = product.industries ?? [];
+  const seedIndustries = (seed?.applications?.industries ?? [])
+    .filter((si) => !realIndustries.some((ri) => ri.name.toLowerCase() === si.toLowerCase()))
+    .map((si, i) => ({ id: `seed-ind-${i}`, name: si, slug: si.toLowerCase().replace(/\s+/g, '-'), sort_order: 100 + i }));
+  const industries = [...realIndustries, ...seedIndustries];
+
+  // Description fallback
+  const description = product.description_en ?? product.description ?? seed?.description ?? null;
+
+  // Customizable fallback
+  const isCustomizable = product.is_customizable || (seed?.is_customizable ?? false);
+
+  // Build merged spec/production entries for detailed sections
+  const mergedSpecObj: Record<string, string> = {};
+  if (materialNames) mergedSpecObj['material'] = materialNames;
+  if (finish) mergedSpecObj['finish'] = finish;
+  if (size) mergedSpecObj['size'] = size;
+  if (weight) mergedSpecObj['weight'] = weight;
+  if (thickness) mergedSpecObj['thickness'] = thickness;
+  if (attachment) mergedSpecObj['attachment'] = attachment;
+  if (colorOptions) mergedSpecObj['color_options'] = colorOptions;
+  if (tensileStrength) mergedSpecObj['tensile_strength'] = tensileStrength;
+  // Also include any other raw spec keys not already covered
+  for (const [k, v] of Object.entries(rawSpecs)) {
+    const sv = specValue(v);
+    if (sv && !mergedSpecObj[k]) mergedSpecObj[k] = sv;
+  }
+  const allSpecEntries = Object.entries(mergedSpecObj);
+
+  const mergedProdObj: Record<string, string> = {};
+  if (moq) mergedProdObj['moq'] = moq;
+  if (sampleTime) mergedProdObj['sample_time'] = sampleTime;
+  if (leadTime) mergedProdObj['lead_time'] = leadTime;
+  if (origin) mergedProdObj['origin'] = origin;
+  if (capacity) mergedProdObj['capacity'] = capacity;
+  for (const [k, v] of Object.entries(rawProd)) {
+    const sv = specValue(v);
+    if (sv && !mergedProdObj[k]) mergedProdObj[k] = sv;
+  }
+  const allProductionEntries = Object.entries(mergedProdObj);
 
   const breadcrumbSegments = [
     { label: 'Home', href: '/' },
@@ -343,7 +395,7 @@ export default function ProductDetail() {
 
   const hasDownloads = !!product.model_url;
 
-  /* ── build section nav ── */
+  /* ── build section nav — always show key sections now ── */
   const navSections = [
     { id: SECTION_IDS.overview, label: 'Overview' },
     ...(allSpecEntries.length > 0 ? [{ id: SECTION_IDS.specs, label: 'Specifications' }] : []),
