@@ -4,7 +4,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Calendar, Package, DollarSign, MessageSquare, FileText, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { format } from "date-fns";
-import { zhTW } from "date-fns/locale";
 import { useState, useMemo } from "react";
 
 type SortField = "id" | "itemName" | "status" | "quantity" | "targetDate" | "updatedAt";
@@ -66,7 +65,7 @@ const RFQList = ({ rfqs, onSelect }: RFQListProps) => {
     return (
       <div className="text-center py-12">
         <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-        <p className="text-muted-foreground">目前沒有符合條件的報價請求</p>
+        <p className="text-muted-foreground">No matching quote requests found</p>
       </div>
     );
   }
@@ -82,48 +81,48 @@ const RFQList = ({ rfqs, onSelect }: RFQListProps) => {
                   onClick={() => handleSort("id")}
                   className="flex items-center gap-1 hover:text-foreground transition-colors font-medium"
                 >
-                  RFQ編號
+                  RFQ ID
                   <SortIcon field="id" currentField={sortField} order={sortOrder} />
                 </button>
               </TableHead>
-              <TableHead className="w-24">狀態</TableHead>
+              <TableHead className="w-24">Status</TableHead>
               <TableHead className="min-w-[180px]">
                 <button 
                   onClick={() => handleSort("itemName")}
                   className="flex items-center gap-1 hover:text-foreground transition-colors font-medium"
                 >
-                  品項名稱
+                  Item Name
                   <SortIcon field="itemName" currentField={sortField} order={sortOrder} />
                 </button>
               </TableHead>
-              <TableHead className="w-28">品項代碼</TableHead>
+              <TableHead className="w-28">Item Code</TableHead>
               <TableHead className="w-24">
                 <button 
                   onClick={() => handleSort("quantity")}
                   className="flex items-center gap-1 hover:text-foreground transition-colors font-medium"
                 >
-                  數量
+                  Qty
                   <SortIcon field="quantity" currentField={sortField} order={sortOrder} />
                 </button>
               </TableHead>
-              <TableHead className="w-24">目標價格</TableHead>
+              <TableHead className="w-24">Target Price</TableHead>
               <TableHead className="w-28">
                 <button 
                   onClick={() => handleSort("targetDate")}
                   className="flex items-center gap-1 hover:text-foreground transition-colors font-medium"
                 >
-                  目標日期
+                  Target Date
                   <SortIcon field="targetDate" currentField={sortField} order={sortOrder} />
                 </button>
               </TableHead>
-              <TableHead className="w-16">留言</TableHead>
-              <TableHead className="w-24">團隊</TableHead>
+              <TableHead className="w-16">Comments</TableHead>
+              <TableHead className="w-24">Team</TableHead>
               <TableHead className="w-32">
                 <button 
                   onClick={() => handleSort("updatedAt")}
                   className="flex items-center gap-1 hover:text-foreground transition-colors font-medium"
                 >
-                  更新時間
+                  Updated
                   <SortIcon field="updatedAt" currentField={sortField} order={sortOrder} />
                 </button>
               </TableHead>
@@ -165,7 +164,7 @@ const RFQList = ({ rfqs, onSelect }: RFQListProps) => {
                 <TableCell>
                   <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                     <Calendar className="w-3.5 h-3.5" />
-                    <span>{format(new Date(rfq.targetDate), 'MM/dd', { locale: zhTW })}</span>
+                    <span>{format(new Date(rfq.targetDate), 'MM/dd')}</span>
                   </div>
                 </TableCell>
                 <TableCell>
@@ -183,7 +182,7 @@ const RFQList = ({ rfqs, onSelect }: RFQListProps) => {
                 </TableCell>
                 <TableCell>
                   <span className="text-sm text-muted-foreground whitespace-nowrap">
-                    {format(new Date(rfq.updatedAt), 'MM/dd HH:mm', { locale: zhTW })}
+                    {format(new Date(rfq.updatedAt), 'MM/dd HH:mm')}
                   </span>
                 </TableCell>
               </TableRow>
