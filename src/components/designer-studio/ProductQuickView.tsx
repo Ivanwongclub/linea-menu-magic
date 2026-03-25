@@ -146,7 +146,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
               className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               <X className="w-4 h-4" />
-              <span>關閉</span>
+              <span>Close</span>
             </button>
             <span className="text-sm font-medium text-foreground truncate">{item.name}</span>
           </div>
