@@ -574,16 +574,16 @@ export default function ProductDetail() {
                 )}
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-6">
                   {[
-                    { l: 'Material', v: materialNames, accent: false },
-                    { l: 'Finish', v: finish, accent: true },
-                    { l: 'Size', v: size, accent: false },
-                    { l: 'Weight', v: weight, accent: false },
-                    { l: 'MOQ', v: moq, accent: true },
-                    { l: 'Lead Time', v: leadTime, accent: true },
+                    { l: 'Material', v: materialNames },
+                    { l: 'Finish', v: finish },
+                    { l: 'Size', v: size },
+                    { l: 'Weight', v: weight },
+                    { l: 'MOQ', v: moq },
+                    { l: 'Lead Time', v: leadTime },
                   ].filter(item => item.v).map(item => (
-                    <div key={item.l} className={`p-3 border ${item.accent ? 'border-foreground bg-foreground/[0.03]' : 'border-border'}`}>
-                      <p className="text-[10px] uppercase tracking-[0.1em] text-foreground/60 font-medium mb-1">{item.l}</p>
-                      <p className="text-sm font-semibold text-foreground">{item.v}</p>
+                    <div key={item.l} className="bg-background border border-border p-3">
+                      <p className="text-[10px] uppercase tracking-[0.1em] text-muted-foreground font-medium mb-1">{item.l}</p>
+                      <p className="text-sm font-bold text-foreground">{item.v}</p>
                     </div>
                   ))}
                 </div>
