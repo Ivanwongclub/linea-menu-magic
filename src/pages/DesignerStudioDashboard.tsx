@@ -680,7 +680,7 @@ const DesignerStudioDashboard = () => {
                     <div className="relative flex-1 max-w-xs">
                       <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                       <Input
-                        placeholder="搜尋 RFQ..."
+                        placeholder="Search RFQ..."
                         value={rfqSearchQuery}
                         onChange={(e) => setRfqSearchQuery(e.target.value)}
                         className="pl-8 h-8 text-sm"
