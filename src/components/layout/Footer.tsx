@@ -13,7 +13,7 @@ const Footer = () => {
             <div className="mb-6">
               <div className="inline-flex items-center justify-center bg-background px-5 py-1 lg:px-7 lg:py-1">
                 <div className="flex flex-col items-center justify-center leading-none">
-                  <span className="text-xs lg:text-sm text-foreground font-semibold" style={{ fontFamily: "'Libre Caslon Text', serif" }}>
+                  <span className="text-xs lg:text-sm text-foreground font-bold tracking-[0.04em]">
                     WIN-CYC
                   </span>
                   <span className="text-[6px] lg:text-[8px] tracking-[0.12em] text-foreground uppercase">

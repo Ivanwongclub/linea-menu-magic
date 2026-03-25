@@ -23,8 +23,8 @@ const Contact = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     toast({
-      title: "訊息已發送",
-      description: "感謝您的來信，我們將盡快回覆。",
+      title: "Message Sent",
+      description: "Thank you for your enquiry. We will respond as soon as possible.",
     });
     setFormData({ name: "", company: "", email: "", phone: "", subject: "", message: "" });
   };
@@ -36,9 +36,9 @@ const Contact = () => {
   const contactItems = [
     { icon: Mail, title: "Email", content: "info@wincyc.com", href: "mailto:info@wincyc.com", detail: null },
     { icon: Phone, title: "Phone", content: "+852 1234 5678", href: "tel:+85212345678", detail: null },
-    { icon: MapPin, title: "Hong Kong Office", content: "香港九龍", detail: "觀塘區", href: null },
-    { icon: MapPin, title: "China Factory", content: "中國廣東省", detail: "東莞市", href: null },
-    { icon: Clock, title: "Business Hours", content: "週一至週五 Mon-Fri", detail: "9:00 AM - 6:00 PM (HKT)", href: null },
+    { icon: MapPin, title: "Hong Kong Office", content: "Kowloon, Hong Kong", detail: "Kwun Tong District", href: null },
+    { icon: MapPin, title: "China Factory", content: "Guangdong, China", detail: "Dongguan", href: null },
+    { icon: Clock, title: "Business Hours", content: "Mon–Fri", detail: "9:00 AM – 6:00 PM (HKT)", href: null },
   ];
 
   return (
@@ -51,7 +51,7 @@ const Contact = () => {
             { label: "Home", href: "/" },
             { label: "Contact" },
           ]}
-          title="聯絡我們"
+          title="Contact Us"
         />
 
         {/* Contact Info & Form */}
@@ -63,7 +63,7 @@ const Contact = () => {
                 <h2 className={`text-2xl font-semibold text-foreground mb-8 transition-all duration-700 ease-out ${
                   infoVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}>
-                  聯絡資訊
+                  Contact Information
                 </h2>
                 
                 <div ref={infoRef} className="space-y-8">
@@ -99,7 +99,7 @@ const Contact = () => {
                 <h2 className={`text-2xl font-semibold text-foreground mb-8 transition-all duration-700 ease-out ${
                   formVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}>
-                  獲取報價
+                  Get a Quote
                 </h2>
                 
                 <form 
@@ -111,45 +111,45 @@ const Contact = () => {
                 >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm text-foreground mb-2">姓名 Name *</label>
+                      <label className="block text-sm text-foreground mb-2">Name *</label>
                       <input type="text" name="name" value={formData.name} onChange={handleChange} required className="w-full px-4 py-3 border border-border bg-transparent text-foreground text-sm focus:outline-none focus:border-foreground transition-colors" />
                     </div>
                     <div>
-                      <label className="block text-sm text-foreground mb-2">公司 Company</label>
+                      <label className="block text-sm text-foreground mb-2">Company</label>
                       <input type="text" name="company" value={formData.company} onChange={handleChange} className="w-full px-4 py-3 border border-border bg-transparent text-foreground text-sm focus:outline-none focus:border-foreground transition-colors" />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm text-foreground mb-2">電郵 Email *</label>
+                      <label className="block text-sm text-foreground mb-2">Email *</label>
                       <input type="email" name="email" value={formData.email} onChange={handleChange} required className="w-full px-4 py-3 border border-border bg-transparent text-foreground text-sm focus:outline-none focus:border-foreground transition-colors" />
                     </div>
                     <div>
-                      <label className="block text-sm text-foreground mb-2">電話 Phone</label>
+                      <label className="block text-sm text-foreground mb-2">Phone</label>
                       <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className="w-full px-4 py-3 border border-border bg-transparent text-foreground text-sm focus:outline-none focus:border-foreground transition-colors" />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm text-foreground mb-2">查詢主題 Subject *</label>
+                    <label className="block text-sm text-foreground mb-2">Subject *</label>
                     <select name="subject" value={formData.subject} onChange={handleChange} required className="w-full px-4 py-3 border border-border bg-transparent text-foreground text-sm focus:outline-none focus:border-foreground transition-colors">
-                      <option value="">請選擇 Please select</option>
-                      <option value="quote">產品報價 Product Quote</option>
-                      <option value="sample">樣品申請 Sample Request</option>
-                      <option value="custom">定制查詢 Custom Inquiry</option>
-                      <option value="partnership">合作洽談 Partnership</option>
-                      <option value="other">其他 Other</option>
+                      <option value="">Please select</option>
+                      <option value="quote">Product Quote</option>
+                      <option value="sample">Sample Request</option>
+                      <option value="custom">Custom Inquiry</option>
+                      <option value="partnership">Partnership</option>
+                      <option value="other">Other</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-sm text-foreground mb-2">訊息 Message *</label>
-                    <textarea name="message" value={formData.message} onChange={handleChange} required rows={6} className="w-full px-4 py-3 border border-border bg-transparent text-foreground text-sm focus:outline-none focus:border-foreground transition-colors resize-none" placeholder="請描述您的需求..." />
+                    <label className="block text-sm text-foreground mb-2">Message *</label>
+                    <textarea name="message" value={formData.message} onChange={handleChange} required rows={6} className="w-full px-4 py-3 border border-border bg-transparent text-foreground text-sm focus:outline-none focus:border-foreground transition-colors resize-none" placeholder="Describe your requirements..." />
                   </div>
 
                   <button type="submit" className="px-12 py-4 bg-primary text-primary-foreground text-xs tracking-[0.2em] uppercase rounded-full transition-all duration-300 hover:bg-primary-hover">
-                    發送訊息 Send Message
+                    Send Message
                   </button>
                 </form>
               </div>

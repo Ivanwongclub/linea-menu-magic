@@ -1,10 +1,10 @@
 import { NavLink } from 'react-router-dom';
 
 const aboutPages = [
-  { name: '我們的故事', path: '/about/our-story' },
-  { name: '工廠', path: '/about/factory' },
-  { name: '認證', path: '/about/certificates' },
-  { name: '可持續發展', path: '/about/sustainability' }
+  { name: 'Our Story', path: '/about/our-story' },
+  { name: 'Factory', path: '/about/factory' },
+  { name: 'Certificates', path: '/about/certificates' },
+  { name: 'Sustainability', path: '/about/sustainability' }
 ];
 
 const AboutSidebar = () => {

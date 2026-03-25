@@ -36,7 +36,7 @@ const BrandLogo = ({ maxHeight = 28, variant = "light", className = "" }: BrandL
         <span
           className={`${mainColor} font-semibold`}
           style={{
-            fontFamily: "'Libre Caslon Text', serif",
+            fontFamily: "'Poppins', sans-serif", fontWeight: 700, letterSpacing: '0.04em',
             fontSize: `${mainSize}px`,
           }}
         >
