@@ -278,7 +278,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-3 bg-muted/50 rounded-lg">
-                      <p className="text-xs text-muted-foreground mb-1">單價</p>
+                      <p className="text-xs text-muted-foreground mb-1">Unit Price</p>
                       <p className="text-lg font-semibold text-foreground">
                         {item.pricing.currency} ${item.pricing.unitPrice.toFixed(2)}
                       </p>
