@@ -300,7 +300,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                       <div className="flex flex-wrap gap-2">
                         {item.pricing.priceBreaks.map((pb, idx) => (
                           <div key={idx} className="px-3 py-1.5 bg-primary/5 border border-primary/20 rounded-md text-xs">
-                            <span className="text-muted-foreground">≥{pb.quantity.toLocaleString()} 件：</span>
+                            <span className="text-muted-foreground">≥{pb.quantity.toLocaleString()} pcs:</span>
                             <span className="font-medium text-foreground ml-1">${pb.price.toFixed(2)}</span>
                           </div>
                         ))}
