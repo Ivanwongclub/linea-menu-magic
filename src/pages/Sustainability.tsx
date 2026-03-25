@@ -99,13 +99,14 @@ const Sustainability = () => {
         {/* Vision */}
         <section ref={visionRef} className="py-24 px-6 lg:px-8 overflow-hidden">
           <div className="max-w-7xl mx-auto">
-            <div className="max-w-2xl">
-              <div className="flex items-start gap-4 mb-8">
-                <span className={`w-1 bg-foreground self-stretch min-h-[3rem] transition-all duration-700 ${visionVisible ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: '200ms' }} />
-                <div className="text-5xl md:text-6xl lg:text-7xl text-foreground leading-[0.9]">
-                  <LetterReveal text="Our" as="span" className="font-light block" isVisible={visionVisible} startDelay={100} letterDelay={60} />
-                  <LetterReveal text="Promise" as="span" className="font-bold block" isVisible={visionVisible} startDelay={350} letterDelay={80} />
-                </div>
+            <div className="max-w-3xl">
+              <span
+                className={`block w-16 h-px bg-foreground mb-6 transition-all duration-700 ${visionVisible ? 'opacity-100' : 'opacity-0'}`}
+                style={{ transitionDelay: '200ms' }}
+              />
+              <div className="text-5xl md:text-6xl lg:text-7xl text-foreground leading-[0.9] mb-8">
+                <LetterReveal text="Our" as="span" className="font-light block" isVisible={visionVisible} startDelay={100} letterDelay={60} />
+                <LetterReveal text="Promise" as="span" className="font-bold block" isVisible={visionVisible} startDelay={350} letterDelay={80} />
               </div>
               <p className={`text-muted-foreground leading-relaxed text-lg transition-all duration-700 ease-out ${
                 visionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'

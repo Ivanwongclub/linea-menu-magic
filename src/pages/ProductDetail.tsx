@@ -146,8 +146,8 @@ function SpecTile({ label, value }: { label: string; value: string | null | unde
 
 function SectionHeading({ id, title, icon: Icon }: { id: string; title: string; icon: React.ElementType }) {
   return (
-    <div id={id} className="flex items-center gap-3 pt-2 mb-6 scroll-mt-24">
-      <div className="w-8 h-8 bg-foreground flex items-center justify-center">
+    <div id={id} className="pt-2 mb-6 scroll-mt-24">
+      <div className="w-8 h-8 bg-foreground flex items-center justify-center mb-3">
         <Icon className="h-4 w-4 text-background" />
       </div>
       <h2 className="text-sm font-bold uppercase tracking-[0.1em] text-foreground">{title}</h2>
@@ -213,9 +213,9 @@ function RelatedProducts({ product }: { product: Product }) {
   return (
     <section id={SECTION_IDS.related} className="scroll-mt-24 py-16 bg-secondary/30">
       <div className="section-inner">
-        <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-foreground flex items-center justify-center">
+        <div className="flex items-end justify-between mb-8 gap-4">
+            <div>
+              <div className="w-8 h-8 bg-foreground flex items-center justify-center mb-3">
                 <Layers className="h-4 w-4 text-background" />
               </div>
               <h2 className="text-sm font-bold uppercase tracking-[0.1em] text-foreground">Related Trims</h2>
