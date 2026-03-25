@@ -1,150 +1,148 @@
-import Header from "../../components/header/Header";
-import Footer from "../../components/footer/Footer";
-import PageHeader from "../../components/about/PageHeader";
+import Header from "../../components/layout/Header";
+import Footer from "../../components/layout/Footer";
 import ContentSection from "../../components/about/ContentSection";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Textarea } from "../../components/ui/textarea";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../components/ui/accordion";
-import AboutSidebar from "../../components/about/AboutSidebar";
+import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
 
 const CustomerCare = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
-      <div className="flex">
-        <div className="hidden lg:block">
-          <AboutSidebar />
-        </div>
-        
-        <main className="w-full lg:w-[70vw] lg:ml-auto px-6">
-        <PageHeader 
-          title="Customer Care" 
-          subtitle="We're here to help you with all your jewelry needs"
-        />
-        
-        <ContentSection title="Contact Information">
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="space-y-4">
-              <h3 className="text-lg font-light text-foreground">Phone</h3>
-              <p className="text-muted-foreground">+1 (555) 123-4567</p>
-              <p className="text-sm text-muted-foreground">Mon-Fri: 9AM-6PM EST<br />Sat: 10AM-4PM EST</p>
+
+      <PageBreadcrumb
+        segments={[
+          { label: "Home", href: "/" },
+          { label: "About", href: "/about" },
+          { label: "Customer Care" },
+        ]}
+        title="Customer Care"
+      />
+
+      <main className="py-8 px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+
+          <ContentSection title="Contact Information">
+            <div className="grid md:grid-cols-3 gap-8">
+              <div className="space-y-4">
+                <h3 className="text-lg font-light text-foreground">Phone</h3>
+                <p className="text-muted-foreground">+852 1234 5678</p>
+                <p className="text-sm text-muted-foreground">Mon–Fri: 9AM–6PM HKT</p>
+              </div>
+              <div className="space-y-4">
+                <h3 className="text-lg font-light text-foreground">Email</h3>
+                <p className="text-muted-foreground">info@wincyc.com</p>
+                <p className="text-sm text-muted-foreground">Response within 24 hours</p>
+              </div>
+              <div className="space-y-4">
+                <h3 className="text-lg font-light text-foreground">Live Chat</h3>
+                <Button variant="outline">
+                  Start Chat
+                </Button>
+                <p className="text-sm text-muted-foreground">Available during business hours</p>
+              </div>
             </div>
-            <div className="space-y-4">
-              <h3 className="text-lg font-light text-foreground">Email</h3>
-              <p className="text-muted-foreground">care@lineajewelry.com</p>
-              <p className="text-sm text-muted-foreground">Response within 24 hours</p>
-            </div>
-            <div className="space-y-4">
-              <h3 className="text-lg font-light text-foreground">Live Chat</h3>
-              <Button variant="outline" className="rounded-none">
-                Start Chat
-              </Button>
-              <p className="text-sm text-muted-foreground">Available during business hours</p>
-            </div>
-          </div>
-        </ContentSection>
+          </ContentSection>
 
-        <ContentSection title="Frequently Asked Questions">
-          <Accordion type="single" collapsible className="space-y-4">
-            <AccordionItem value="shipping" className="border border-border rounded-lg px-6">
-              <AccordionTrigger className="text-left hover:no-underline">
-                What are your shipping options and timeframes?
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground">
-                We offer free standard shipping (3-5 business days) on orders over $500. Express shipping (1-2 business days) is available for $25. All orders are fully insured and require signature confirmation.
-              </AccordionContent>
-            </AccordionItem>
+          <ContentSection title="Frequently Asked Questions">
+            <Accordion type="single" collapsible className="space-y-4">
+              <AccordionItem value="sampling" className="border border-border px-6">
+                <AccordionTrigger className="text-left hover:no-underline">
+                  What are your sampling options and lead times?
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                  We offer standard sampling (5–7 business days) and express sampling (2–3 business days). Sample fees depend on the product type and customisation level. Contact us for a quote.
+                </AccordionContent>
+              </AccordionItem>
 
-            <AccordionItem value="returns" className="border border-border rounded-lg px-6">
-              <AccordionTrigger className="text-left hover:no-underline">
-                What is your return and exchange policy?
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground">
-                We offer a 30-day return policy for unworn items in original condition. Custom and engraved pieces are final sale. Returns are free with our prepaid return label.
-              </AccordionContent>
-            </AccordionItem>
+              <AccordionItem value="moq" className="border border-border px-6">
+                <AccordionTrigger className="text-left hover:no-underline">
+                  What are your minimum order quantities?
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                  MOQs vary by product type. Standard trims typically start from 500–1,000 pieces. Custom items may have higher minimums. We can discuss flexible arrangements for new clients.
+                </AccordionContent>
+              </AccordionItem>
 
-            <AccordionItem value="warranty" className="border border-border rounded-lg px-6">
-              <AccordionTrigger className="text-left hover:no-underline">
-                What warranty do you offer on your jewelry?
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground">
-                All LINEA jewelry comes with a lifetime warranty against manufacturing defects. This includes free repairs for normal wear and tear, stone tightening, and professional cleaning.
-              </AccordionContent>
-            </AccordionItem>
+              <AccordionItem value="customisation" className="border border-border px-6">
+                <AccordionTrigger className="text-left hover:no-underline">
+                  Can I customise colours, finishes, and sizes?
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                  Yes, we offer full customisation including custom finishes, plating colours, sizes, logo engraving, and bespoke designs. Our team will guide you through the process.
+                </AccordionContent>
+              </AccordionItem>
 
-            <AccordionItem value="sizing" className="border border-border rounded-lg px-6">
-              <AccordionTrigger className="text-left hover:no-underline">
-                Can I resize my jewelry after purchase?
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground">
-                Yes, we offer free ring resizing within 60 days of purchase (up to 2 sizes). Additional resizing is available for a service fee. Some designs cannot be resized due to their construction.
-              </AccordionContent>
-            </AccordionItem>
+              <AccordionItem value="certifications" className="border border-border px-6">
+                <AccordionTrigger className="text-left hover:no-underline">
+                  What certifications do your products hold?
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                  Our products are certified under GRS, OEKO-TEX Standard 100, ISO 9001, and REACH compliance. We can provide certification documentation upon request.
+                </AccordionContent>
+              </AccordionItem>
 
-            <AccordionItem value="care" className="border border-border rounded-lg px-6">
-              <AccordionTrigger className="text-left hover:no-underline">
-                How should I care for my LINEA jewelry?
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground">
-                Store pieces separately in soft pouches, avoid contact with chemicals and cosmetics, and clean gently with a soft cloth. We recommend professional cleaning every 6-12 months.
-              </AccordionContent>
-            </AccordionItem>
+              <AccordionItem value="shipping" className="border border-border px-6">
+                <AccordionTrigger className="text-left hover:no-underline">
+                  What shipping options are available?
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                  We ship worldwide via major carriers including DHL, FedEx, and sea freight for bulk orders. Shipping terms are typically FOB or CIF depending on the order.
+                </AccordionContent>
+              </AccordionItem>
 
-            <AccordionItem value="authentication" className="border border-border rounded-lg px-6">
-              <AccordionTrigger className="text-left hover:no-underline">
-                How can I verify the authenticity of my jewelry?
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground">
-                Every LINEA piece comes with a certificate of authenticity and is hallmarked. You can verify authenticity on our website using your unique piece number or contact our customer care team.
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </ContentSection>
+              <AccordionItem value="quality" className="border border-border px-6">
+                <AccordionTrigger className="text-left hover:no-underline">
+                  How do you ensure product quality?
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                  Every batch undergoes multi-stage quality inspection following AQL 1.5 sampling standards. We also support third-party testing through SGS, Bureau Veritas, and Intertek.
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </ContentSection>
 
-        <ContentSection title="Contact Form">
-          <div>
+          <ContentSection title="Contact Form">
             <form className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-light text-foreground">First Name</label>
-                  <Input className="rounded-none" placeholder="Enter your first name" />
+                  <label className="text-sm font-light text-foreground">Name</label>
+                  <Input placeholder="Enter your name" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-light text-foreground">Last Name</label>
-                  <Input className="rounded-none" placeholder="Enter your last name" />
+                  <label className="text-sm font-light text-foreground">Company</label>
+                  <Input placeholder="Enter your company name" />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <label className="text-sm font-light text-foreground">Email</label>
-                <Input type="email" className="rounded-none" placeholder="Enter your email" />
+                <Input type="email" placeholder="Enter your email" />
               </div>
-              
+
               <div className="space-y-2">
-                <label className="text-sm font-light text-foreground">Order Number (Optional)</label>
-                <Input className="rounded-none" placeholder="Enter your order number if applicable" />
+                <label className="text-sm font-light text-foreground">Subject</label>
+                <Input placeholder="e.g. Sample request, Custom enquiry" />
               </div>
-              
+
               <div className="space-y-2">
-                <label className="text-sm font-light text-foreground">How can we help you?</label>
-                <Textarea 
-                  className="rounded-none min-h-[120px]" 
-                  placeholder="Please describe your inquiry in detail"
+                <label className="text-sm font-light text-foreground">Message</label>
+                <Textarea
+                  className="min-h-[120px]"
+                  placeholder="Please describe your enquiry in detail"
                 />
               </div>
-              
-              <Button type="submit" className="w-full rounded-none">
+
+              <Button type="submit" className="w-full sm:w-auto px-12">
                 Send Message
               </Button>
             </form>
-          </div>
-        </ContentSection>
-        </main>
-      </div>
-      
+          </ContentSection>
+        </div>
+      </main>
+
       <Footer />
     </div>
   );
