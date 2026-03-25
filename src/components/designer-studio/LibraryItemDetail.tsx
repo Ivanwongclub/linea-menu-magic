@@ -122,7 +122,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                   <div className="mt-4 flex gap-2">
                     <Button variant="outline" className="gap-2 flex-1">
                       <Download className="w-4 h-4" />
-                      下載 OBJ 檔案
+                      Download OBJ
                     </Button>
                   </div>
                 </CardContent>
