@@ -14,16 +14,16 @@ const OurStory = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="py-16 px-6 lg:px-8">
+      <PageBreadcrumb
+        segments={[
+          { label: "Home", href: "/" },
+          { label: "About", href: "/about" },
+          { label: "Our Story" },
+        ]}
+      />
+
+      <main className="py-8 px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <PageBreadcrumb
-            segments={[
-              { label: "Home", href: "/" },
-              { label: "About", href: "/about" },
-              { label: "Our Story" },
-            ]}
-            title="Our Story"
-          />
           
           <div ref={section1Ref} className={`transition-all duration-700 ${section1Visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <ContentSection>

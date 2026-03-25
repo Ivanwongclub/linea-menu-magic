@@ -94,11 +94,12 @@ const Certificates = () => {
         />
 
         {/* Certificates Grid */}
-        <section className="py-16 px-6 overflow-hidden">
-          <div className="mb-10">
-            <h2 className="text-2xl font-light text-foreground mb-2">International Certifications</h2>
-            <p className="text-sm text-muted-foreground">Our key international certifications and compliance credentials</p>
-          </div>
+        <section className="py-16 px-6 lg:px-8 overflow-hidden">
+          <div className="max-w-7xl mx-auto">
+            <div className="mb-10">
+              <h2 className="text-2xl font-light text-foreground mb-2">International Certifications</h2>
+              <p className="text-sm text-muted-foreground">Our key international certifications and compliance credentials</p>
+            </div>
           <div ref={certsRef} className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {certificates.map((cert, index) => (
               <div 
@@ -121,14 +122,16 @@ const Certificates = () => {
               </div>
             ))}
           </div>
+          </div>
         </section>
 
         {/* Standards Section */}
-        <section className="py-16 px-6 bg-secondary overflow-hidden">
-          <div className="mb-10">
-            <h2 className="text-2xl font-light text-foreground mb-2">Compliance Standards</h2>
-            <p className="text-sm text-muted-foreground">Quality and compliance standards we strictly follow</p>
-          </div>
+        <section className="py-16 px-6 lg:px-8 bg-secondary overflow-hidden">
+          <div className="max-w-7xl mx-auto">
+            <div className="mb-10">
+              <h2 className="text-2xl font-light text-foreground mb-2">Compliance Standards</h2>
+              <p className="text-sm text-muted-foreground">Quality and compliance standards we strictly follow</p>
+            </div>
           <div ref={standardsRef} className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {standards.map((standard, index) => (
               <div 
@@ -150,11 +153,12 @@ const Certificates = () => {
               </div>
             ))}
           </div>
+          </div>
         </section>
 
         {/* Testing & Verification */}
-        <section ref={commitmentRef} className="py-16 px-6 overflow-hidden">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+        <section ref={commitmentRef} className="py-16 px-6 lg:px-8 overflow-hidden">
+          <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
             <div className={`transition-all duration-700 ease-out ${
               commitmentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'
             }`}>
@@ -193,12 +197,14 @@ const Certificates = () => {
         </section>
 
         {/* Commitment Banner */}
-        <section className="py-16 px-6 bg-secondary border-t border-border overflow-hidden">
-          <div className="max-w-3xl">
-            <h2 className="text-2xl font-light text-foreground mb-4">Our Commitment</h2>
-            <p className="text-muted-foreground leading-relaxed">
-              WIN-CYC is committed to continuous investment in quality management and certification systems. We believe that rigorous standards and transparent compliance measures are the foundation of client trust. We will continue to expand our certification scope to meet the increasingly stringent requirements of global clients and regulatory bodies.
-            </p>
+        <section className="py-16 px-6 lg:px-8 bg-secondary border-t border-border overflow-hidden">
+          <div className="max-w-7xl mx-auto">
+            <div className="max-w-3xl">
+              <h2 className="text-2xl font-light text-foreground mb-4">Our Commitment</h2>
+              <p className="text-muted-foreground leading-relaxed">
+                WIN-CYC is committed to continuous investment in quality management and certification systems. We believe that rigorous standards and transparent compliance measures are the foundation of client trust. We will continue to expand our certification scope to meet the increasingly stringent requirements of global clients and regulatory bodies.
+              </p>
+            </div>
           </div>
         </section>
       </main>

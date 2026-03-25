@@ -96,7 +96,7 @@ const About = () => {
         {/* Values */}
         <section className="py-24 px-6 lg:px-8 bg-secondary overflow-hidden">
           <div className="max-w-7xl mx-auto">
-            <div ref={valuesHeaderRef} className="text-center mb-16">
+            <div ref={valuesHeaderRef} className="mb-16">
               <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${
                 valuesHeaderVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}>Our Values</p>
@@ -114,7 +114,7 @@ const About = () => {
               {values.map((value, index) => (
                 <div 
                   key={value.title}
-                  className={`p-8 bg-background rounded-lg text-center transition-all duration-500 ease-out hover:shadow-lg hover:-translate-y-1 ${
+                  className={`p-8 bg-background rounded-lg transition-all duration-500 ease-out hover:shadow-lg hover:-translate-y-1 ${
                     valuesVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
                   }`}
                   style={getValuesDelay(index)}
@@ -129,8 +129,8 @@ const About = () => {
 
         {/* Timeline */}
         <section className="py-24 px-6 lg:px-8 overflow-hidden">
-          <div className="max-w-4xl mx-auto">
-            <div ref={timelineHeaderRef} className="text-center mb-16">
+          <div className="max-w-7xl mx-auto">
+            <div ref={timelineHeaderRef} className="mb-16">
               <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${
                 timelineHeaderVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}>Milestones</p>

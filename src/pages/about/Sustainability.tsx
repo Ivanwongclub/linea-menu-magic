@@ -14,16 +14,16 @@ const Sustainability = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="py-16 px-6 lg:px-8">
+      <PageBreadcrumb
+        segments={[
+          { label: "Home", href: "/" },
+          { label: "About", href: "/about" },
+          { label: "Sustainability" },
+        ]}
+      />
+
+      <main className="py-8 px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <PageBreadcrumb
-            segments={[
-              { label: "Home", href: "/" },
-              { label: "About", href: "/about" },
-              { label: "Sustainability" },
-            ]}
-            title="Sustainability"
-          />
         
           <div ref={commitmentRef} className={`transition-all duration-700 ${commitmentVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <ContentSection title="Environmental Commitment">

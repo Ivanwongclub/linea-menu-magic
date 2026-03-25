@@ -63,25 +63,27 @@ const Factory = () => {
         />
 
         {/* Stats Section */}
-        <section className="py-16 px-6 border-b border-border overflow-hidden">
-          <div ref={statsRef} className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <div 
-                key={index}
-                className={`text-center transition-all duration-700 ease-out ${
-                  statsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-                }`}
-                style={getStatsDelay(index)}
-              >
-                <div className="text-3xl md:text-4xl font-light text-foreground mb-2">{stat.value}</div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
-              </div>
-            ))}
+        <section className="py-16 px-6 lg:px-8 border-b border-border overflow-hidden">
+          <div className="max-w-7xl mx-auto">
+            <div ref={statsRef} className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              {stats.map((stat, index) => (
+                <div 
+                  key={index}
+                  className={`transition-all duration-700 ease-out ${
+                    statsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                  }`}
+                  style={getStatsDelay(index)}
+                >
+                  <div className="text-3xl md:text-4xl font-light text-foreground mb-2">{stat.value}</div>
+                  <div className="text-sm text-muted-foreground">{stat.label}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
         {/* Facilities Section */}
-        <ContentSection title="Production Bases" className="px-6">
+        <ContentSection title="Production Bases" className="px-6 lg:px-8 max-w-7xl mx-auto">
           <div ref={facilitiesRef} className="grid md:grid-cols-3 gap-6">
             {facilities.map((facility, index) => (
               <div 
@@ -107,11 +109,12 @@ const Factory = () => {
         </ContentSection>
 
         {/* Production Process */}
-        <section className="py-16 px-6 bg-secondary overflow-hidden">
-          <div className="mb-8">
-            <h2 className="text-2xl font-light text-foreground mb-2">Production Process</h2>
-            <p className="text-sm text-muted-foreground">The perfect blend of advanced equipment and traditional craftsmanship</p>
-          </div>
+        <section className="py-16 px-6 lg:px-8 bg-secondary overflow-hidden">
+          <div className="max-w-7xl mx-auto">
+            <div className="mb-8">
+              <h2 className="text-2xl font-light text-foreground mb-2">Production Process</h2>
+              <p className="text-sm text-muted-foreground">The perfect blend of advanced equipment and traditional craftsmanship</p>
+            </div>
           <div ref={processRef} className="grid grid-cols-2 md:grid-cols-3 gap-6">
             {processes.map((process, index) => (
               <div 
@@ -127,11 +130,12 @@ const Factory = () => {
               </div>
             ))}
           </div>
+          </div>
         </section>
 
         {/* Equipment Section */}
-        <section ref={equipmentRef} className="py-16 px-6 overflow-hidden">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+        <section ref={equipmentRef} className="py-16 px-6 lg:px-8 overflow-hidden">
+          <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
             <div className={`transition-all duration-700 ease-out ${
               equipmentVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'
             }`}>
@@ -159,8 +163,9 @@ const Factory = () => {
         </section>
 
         {/* Quality Commitment */}
-        <section className="py-16 px-6 bg-secondary border-t border-border overflow-hidden">
-          <div className="max-w-3xl">
+        <section className="py-16 px-6 lg:px-8 bg-secondary border-t border-border overflow-hidden">
+          <div className="max-w-7xl mx-auto">
+            <div className="max-w-3xl">
             <h2 className="text-2xl font-light text-foreground mb-4">Quality Commitment</h2>
             <p className="text-muted-foreground leading-relaxed mb-6">
               WIN-CYC has always upheld a "Quality First" business philosophy. From raw material procurement and manufacturing to final inspection, every stage strictly follows ISO 9001 quality management standards. Our quality control team performs multiple inspections on every batch to ensure the highest quality standards.
@@ -180,6 +185,7 @@ const Factory = () => {
                 <div className="text-2xl font-light text-foreground">100%</div>
                 <div className="text-xs text-muted-foreground">On-time Delivery Rate</div>
               </div>
+            </div>
             </div>
           </div>
         </section>
