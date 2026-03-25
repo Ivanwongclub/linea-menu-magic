@@ -97,7 +97,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                 ) : (
                   <Badge variant="outline" className="gap-1 border-amber-500/50 text-amber-700 dark:text-amber-400">
                     <Lock className="w-3 h-3" />
-                    {item.teamName || '團隊專屬'}
+                    {item.teamName || 'Team Exclusive'}
                   </Badge>
                 )}
               </div>
