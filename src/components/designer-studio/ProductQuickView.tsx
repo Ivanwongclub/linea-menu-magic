@@ -545,7 +545,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <Globe className="w-3.5 h-3.5" />
-                        所屬團隊
+                        Team
                       </div>
                       <p className="text-sm font-medium">{item.teamName}</p>
                     </div>
