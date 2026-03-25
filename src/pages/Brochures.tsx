@@ -27,7 +27,7 @@ export default function Brochures() {
         title="Brochures"
       />
 
-      <section className="max-w-[1200px] mx-auto w-full px-6 mb-12">
+      <section className="max-w-7xl mx-auto w-full px-6 lg:px-8 mb-12">
         <h1 className="text-3xl md:text-4xl font-semibold text-foreground tracking-tight mb-3">
           Our Brochures
         </h1>
