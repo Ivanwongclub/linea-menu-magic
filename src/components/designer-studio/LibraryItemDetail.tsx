@@ -170,7 +170,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                         >
                           <img
                             src={image}
-                            alt={`縮圖 ${index + 1}`}
+                            alt={`Thumbnail ${index + 1}`}
                             className="w-full h-full object-cover"
                           />
                         </button>
