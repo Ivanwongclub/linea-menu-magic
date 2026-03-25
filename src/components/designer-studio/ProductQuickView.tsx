@@ -468,7 +468,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                     <div className="space-y-3">
                       <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
                         <Download className="w-4 h-4 text-muted-foreground" />
-                        可下載檔案
+                        Downloads
                       </h3>
                       <div className="space-y-2">
                         {item.downloadableFiles.map((file) => {
