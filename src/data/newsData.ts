@@ -85,7 +85,7 @@ export const newsItems: NewsItem[] = [
     subtitle: "Global Operations",
     date: "October 2024",
     location: "Hong Kong",
-    image: "https://images.unsplash.com/photo-1494412574643-ff11b0a5eb19?w=800&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=800&auto=format&fit=crop",
     description: "Win-CYC exports garment accessories to markets across the United States, Europe, and Asia Pacific — supported by Hong Kong headquarters and production bases in southern China.",
     featured: false,
     content: [
