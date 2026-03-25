@@ -235,7 +235,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                     <>
                       <Separator />
                       <div className="flex justify-between">
-                        <dt className="text-muted-foreground">重量</dt>
+                        <dt className="text-muted-foreground">Weight</dt>
                         <dd className="font-medium text-right">{item.specifications.weight}</dd>
                       </div>
                     </>
