@@ -17,6 +17,7 @@ const Index = () => {
         <HeroSection />
         <ProductCategories />
         <HeritageSection />
+        <MilestoneTeaser />
         <Separator className="opacity-50" />
         <SustainabilitySection />
         <DesignerCTA />
