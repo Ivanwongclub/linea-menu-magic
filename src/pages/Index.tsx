@@ -3,6 +3,7 @@ import Footer from "@/components/layout/Footer";
 import HeroSection from "@/components/home/HeroSection";
 import ProductCategories from "@/components/home/ProductCategories";
 import HeritageSection from "@/components/home/HeritageSection";
+import MilestoneTeaser from "@/components/home/MilestoneTeaser";
 import DesignerCTA from "@/components/home/DesignerCTA";
 import SustainabilitySection from "@/components/home/SustainabilitySection";
 import ContactSection from "@/components/home/ContactSection";
