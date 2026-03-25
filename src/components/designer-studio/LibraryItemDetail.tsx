@@ -139,7 +139,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                             <div className="aspect-square bg-muted relative group">
                               <img
                                 src={image}
-                                alt={`${item.name} - 圖片 ${index + 1}`}
+                                alt={`${item.name} - Image ${index + 1}`}
                                 className="w-full h-full object-cover"
                               />
                               <button className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors">
