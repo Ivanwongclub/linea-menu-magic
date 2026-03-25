@@ -386,7 +386,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                         )}
                         {item.specifications.thickness && (
                           <div className="text-sm">
-                            <span className="text-muted-foreground">厚度：</span>
+                            <span className="text-muted-foreground">Thickness: </span>
                             <span className="font-medium">{item.specifications.thickness}</span>
                           </div>
                         )}
