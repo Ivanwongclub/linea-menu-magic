@@ -306,7 +306,7 @@ export default function Products() {
 
         {/* Active chips */}
         <div className="px-6 lg:px-8 min-h-[44px] flex items-center">
-          <div className="max-w-[1200px] mx-auto w-full">
+          <div className="max-w-7xl mx-auto w-full">
             {activeChips.length > 0 ? (
               <div className="flex flex-wrap gap-2 items-center py-2">
                 {activeChips.map((chip) => (
