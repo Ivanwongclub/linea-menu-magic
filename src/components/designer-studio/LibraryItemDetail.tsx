@@ -373,7 +373,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Award className="w-4 h-4" />
-                    認證與標準
+                    Certifications
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
