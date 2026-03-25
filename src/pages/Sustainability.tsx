@@ -136,28 +136,20 @@ const Sustainability = () => {
               {initiatives.map((initiative, index) => (
                 <div
                   key={initiative.title}
-                  className={`group relative overflow-hidden rounded-xl transition-all duration-500 ease-out ${
+                  className={`group relative overflow-hidden transition-all duration-500 ease-out ${
                     initVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
                   }`}
                   style={getInitDelay(index)}
                 >
-                  {initiative.image ? (
-                    <div className="relative h-72">
-                      <img src={initiative.image} alt={initiative.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-                      <div className="absolute inset-0" style={{ background: "linear-gradient(to top, hsl(150 30% 15% / 0.85), hsl(150 30% 15% / 0.3))" }} />
-                      <div className="relative z-10 h-full flex flex-col justify-end p-8">
-                        <initiative.icon className="w-7 h-7 text-white/80 mb-3" strokeWidth={1.5} />
-                        <h3 className="text-xl font-semibold text-white mb-2">{initiative.title}</h3>
-                        <p className="text-sm text-white/75">{initiative.description}</p>
-                      </div>
+                  <div className="relative h-72">
+                    <img src={initiative.image} alt={initiative.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
+                    <div className="absolute inset-0" style={{ background: "linear-gradient(to top, hsl(150 30% 15% / 0.85), hsl(150 30% 15% / 0.3))" }} />
+                    <div className="relative z-10 h-full flex flex-col justify-end p-8">
+                      <initiative.icon className="w-7 h-7 text-white/80 mb-3" strokeWidth={1.5} />
+                      <h3 className="text-xl font-semibold text-white mb-2">{initiative.title}</h3>
+                      <p className="text-sm text-white/75">{initiative.description}</p>
                     </div>
-                  ) : (
-                    <div className="h-72 p-8 flex flex-col justify-end border border-border rounded-xl bg-background hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-                      <initiative.icon className="w-7 h-7 mb-3" strokeWidth={1.5} style={{ color: "hsl(150 40% 35%)" }} />
-                      <h3 className="text-xl font-semibold text-foreground mb-2">{initiative.title}</h3>
-                      <p className="text-sm text-muted-foreground">{initiative.description}</p>
-                    </div>
-                  )}
+                  </div>
                 </div>
               ))}
             </div>
