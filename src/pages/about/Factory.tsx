@@ -21,7 +21,7 @@ const offices = [
   {
     city: "Shanghai",
     label: "Sales Office",
-    image: officeShowroom,
+    image: locationShanghai,
     description: "Supports domestic and regional market development with dedicated account management, sample showrooms, and rapid customer-response capability.",
     tags: ["Market Development", "Showroom", "Account Management"],
   },
