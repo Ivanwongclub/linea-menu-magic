@@ -380,7 +380,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                         )}
                         {item.specifications.weight && (
                           <div className="text-sm">
-                            <span className="text-muted-foreground">重量：</span>
+                            <span className="text-muted-foreground">Weight: </span>
                             <span className="font-medium">{item.specifications.weight}</span>
                           </div>
                         )}
