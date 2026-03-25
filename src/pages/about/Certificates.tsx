@@ -122,14 +122,16 @@ const Certificates = () => {
               </div>
             ))}
           </div>
+          </div>
         </section>
 
         {/* Standards Section */}
-        <section className="py-16 px-6 bg-secondary overflow-hidden">
-          <div className="mb-10">
-            <h2 className="text-2xl font-light text-foreground mb-2">Compliance Standards</h2>
-            <p className="text-sm text-muted-foreground">Quality and compliance standards we strictly follow</p>
-          </div>
+        <section className="py-16 px-6 lg:px-8 bg-secondary overflow-hidden">
+          <div className="max-w-7xl mx-auto">
+            <div className="mb-10">
+              <h2 className="text-2xl font-light text-foreground mb-2">Compliance Standards</h2>
+              <p className="text-sm text-muted-foreground">Quality and compliance standards we strictly follow</p>
+            </div>
           <div ref={standardsRef} className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {standards.map((standard, index) => (
               <div 
