@@ -357,7 +357,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                     <div className="space-y-3">
                       <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
                         <Tag className="w-4 h-4 text-muted-foreground" />
-                        產品規格
+                        Product Specifications
                       </h3>
                       <div className="grid grid-cols-2 gap-2">
                         {item.specifications.material && (
