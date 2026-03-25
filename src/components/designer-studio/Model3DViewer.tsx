@@ -234,7 +234,7 @@ const Loader = () => {
       <div className="flex flex-col items-center gap-2 text-center">
         <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         <p className="text-sm text-muted-foreground whitespace-nowrap">
-          載入模型中... {progress.toFixed(0)}%
+          Loading model... {progress.toFixed(0)}%
         </p>
       </div>
     </Html>
@@ -250,7 +250,7 @@ const Model3DViewer = ({ hasModel, modelType = 'button', modelUrl }: Model3DView
     return (
       <div className="aspect-video bg-muted/50 rounded-lg flex flex-col items-center justify-center border-2 border-dashed border-border">
         <Box className="w-12 h-12 text-muted-foreground mb-3" />
-        <p className="text-muted-foreground text-sm">等待製造商上傳 3D 模型</p>
+        <p className="text-muted-foreground text-sm">Awaiting 3D model upload</p>
       </div>
     );
   }
@@ -279,7 +279,7 @@ const Model3DViewer = ({ hasModel, modelType = 'button', modelUrl }: Model3DView
             size="icon" 
             className="h-8 w-8"
             onClick={() => setAutoRotate(!autoRotate)}
-            title={autoRotate ? "停止旋轉" : "自動旋轉"}
+            title={autoRotate ? "Stop rotation" : "Auto-rotate"}
           >
             <RotateCcw className={`w-4 h-4 ${autoRotate ? 'text-primary' : ''}`} />
           </Button>
@@ -288,7 +288,7 @@ const Model3DViewer = ({ hasModel, modelType = 'button', modelUrl }: Model3DView
             size="icon" 
             className="h-8 w-8"
             onClick={() => setLightMode(!lightMode)}
-            title={lightMode ? "暗色環境" : "亮色環境"}
+            title={lightMode ? "Dark environment" : "Light environment"}
           >
             {lightMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </Button>
@@ -297,7 +297,7 @@ const Model3DViewer = ({ hasModel, modelType = 'button', modelUrl }: Model3DView
             size="icon" 
             className="h-8 w-8"
             onClick={() => setIsFullscreen(!isFullscreen)}
-            title="全螢幕"
+            title="Fullscreen"
           >
             <Maximize2 className="w-4 h-4" />
           </Button>
@@ -305,7 +305,7 @@ const Model3DViewer = ({ hasModel, modelType = 'button', modelUrl }: Model3DView
 
         {/* Instructions */}
         <div className="absolute top-4 left-4 text-xs text-muted-foreground bg-background/80 backdrop-blur-sm px-2 py-1 rounded">
-          拖曳旋轉 • 滾輪縮放 • 右鍵平移
+          Drag to rotate · Scroll to zoom · Right-click to pan
         </div>
 
         {/* Close fullscreen button */}
@@ -315,15 +315,15 @@ const Model3DViewer = ({ hasModel, modelType = 'button', modelUrl }: Model3DView
             className="absolute top-4 right-4 z-10"
             onClick={() => setIsFullscreen(false)}
           >
-            關閉全螢幕
+            Exit Fullscreen
           </Button>
         )}
       </div>
 
       {/* Model Info */}
       <div className="flex items-center justify-between text-sm">
-        <span className="text-muted-foreground">模型格式: OBJ</span>
-        <span className="text-muted-foreground">檔案大小: 2.4 MB</span>
+        <span className="text-muted-foreground">Format: OBJ</span>
+        <span className="text-muted-foreground">File size: 2.4 MB</span>
       </div>
     </div>
   );

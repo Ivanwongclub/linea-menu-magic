@@ -385,10 +385,10 @@ const DesignerStudioDashboard = () => {
           <div className="py-6 pb-2 flex items-end justify-between">
             <div>
               <h1 className="text-2xl font-semibold text-foreground tracking-tight">
-                設計師工作室
+                Designer Studio
               </h1>
               <p className="text-sm text-muted-foreground mt-1">
-                Designer Studio
+                Design & Production Management
               </p>
             </div>
             <Button size="sm" className="gap-2" onClick={handleCreateComposition}>
@@ -472,7 +472,7 @@ const DesignerStudioDashboard = () => {
                     ← Back
                   </button>
                   <div>
-                    <h2 className="text-lg font-semibold text-foreground">素材庫 · Component Library</h2>
+                    <h2 className="text-lg font-semibold text-foreground">Component Library</h2>
                     <p className="text-xs text-muted-foreground">
                       {libraryItems.length} components{libraryItems[0]?.team_name ? ` · ${libraryItems[0].team_name}` : ''}
                     </p>
@@ -668,19 +668,19 @@ const DesignerStudioDashboard = () => {
 
                 <TabsContent value="rfq" className="mt-6">
                   <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pb-4 mb-4">
-                    <StatCard label="待處理" value={statusCounts.submitted} icon={<FileText className="w-4 h-4" />} color="text-amber-500" compact />
-                    <StatCard label="模型上傳" value={statusCounts.model_uploaded} icon={<Upload className="w-4 h-4" />} color="text-blue-500" compact />
-                    <StatCard label="設計確認" value={statusCounts.design_confirmed} icon={<CheckCircle className="w-4 h-4" />} color="text-green-500" compact />
-                    <StatCard label="列印中" value={statusCounts.printing} icon={<Clock className="w-4 h-4" />} color="text-purple-500" compact />
-                    <StatCard label="樣品審核" value={statusCounts.sample_review} icon={<Eye className="w-4 h-4" />} color="text-orange-500" compact />
-                    <StatCard label="生產中" value={statusCounts.production} icon={<Package className="w-4 h-4" />} color="text-emerald-500" compact />
+                    <StatCard label="Pending" value={statusCounts.submitted} icon={<FileText className="w-4 h-4" />} color="text-amber-500" compact />
+                    <StatCard label="Model Uploaded" value={statusCounts.model_uploaded} icon={<Upload className="w-4 h-4" />} color="text-blue-500" compact />
+                    <StatCard label="Design Confirmed" value={statusCounts.design_confirmed} icon={<CheckCircle className="w-4 h-4" />} color="text-green-500" compact />
+                    <StatCard label="Printing" value={statusCounts.printing} icon={<Clock className="w-4 h-4" />} color="text-purple-500" compact />
+                    <StatCard label="Sample Review" value={statusCounts.sample_review} icon={<Eye className="w-4 h-4" />} color="text-orange-500" compact />
+                    <StatCard label="In Production" value={statusCounts.production} icon={<Package className="w-4 h-4" />} color="text-emerald-500" compact />
                   </div>
 
                   <div className="flex items-center gap-3 mb-4">
                     <div className="relative flex-1 max-w-xs">
                       <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                       <Input
-                        placeholder="搜尋 RFQ..."
+                        placeholder="Search RFQ..."
                         value={rfqSearchQuery}
                         onChange={(e) => setRfqSearchQuery(e.target.value)}
                         className="pl-8 h-8 text-sm"
@@ -688,19 +688,19 @@ const DesignerStudioDashboard = () => {
                     </div>
                     <Button variant="outline" size="sm" className="gap-1.5 h-8">
                       <Filter className="w-3.5 h-3.5" />
-                      篩選
+                      Filter
                     </Button>
                   </div>
 
                   <Tabs value={activeRFQTab} onValueChange={setActiveRFQTab} className="w-full">
                     <TabsList className="w-full justify-start overflow-x-auto">
-                      <TabsTrigger value="all">全部 ({statusCounts.all})</TabsTrigger>
-                      <TabsTrigger value="submitted">待處理</TabsTrigger>
-                      <TabsTrigger value="model_uploaded">模型已上傳</TabsTrigger>
-                      <TabsTrigger value="design_confirmed">設計確認</TabsTrigger>
-                      <TabsTrigger value="printing">列印中</TabsTrigger>
-                      <TabsTrigger value="sample_review">樣品審核</TabsTrigger>
-                      <TabsTrigger value="production">生產中</TabsTrigger>
+                      <TabsTrigger value="all">All ({statusCounts.all})</TabsTrigger>
+                      <TabsTrigger value="submitted">Pending</TabsTrigger>
+                      <TabsTrigger value="model_uploaded">Model Uploaded</TabsTrigger>
+                      <TabsTrigger value="design_confirmed">Design Confirmed</TabsTrigger>
+                      <TabsTrigger value="printing">Printing</TabsTrigger>
+                      <TabsTrigger value="sample_review">Sample Review</TabsTrigger>
+                      <TabsTrigger value="production">In Production</TabsTrigger>
                     </TabsList>
                     <TabsContent value={activeRFQTab} className="mt-6">
                       <RFQList rfqs={filteredRFQs} onSelect={handleSelectRFQ} />

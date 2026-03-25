@@ -146,7 +146,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
               className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               <X className="w-4 h-4" />
-              <span>關閉</span>
+              <span>Close</span>
             </button>
             <span className="text-sm font-medium text-foreground truncate">{item.name}</span>
           </div>
@@ -195,7 +195,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                   </div>
                   
                   <div className="absolute top-4 left-4 text-xs text-muted-foreground bg-background/80 backdrop-blur-sm px-2 py-1 rounded">
-                    拖曳旋轉 • 滾輪縮放
+                    Drag to rotate · Scroll to zoom
                   </div>
                 </div>
               ) : (
@@ -213,7 +213,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                       onClick={() => setShow3D(true)}
                     >
                       <Box className="w-4 h-4" />
-                      查看 3D 模型
+                      View 3D Model
                     </Button>
                   )}
                 </>
@@ -222,7 +222,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
               {item.modelUrl && !show3D && (
                 <Badge className="absolute top-4 left-4 bg-primary text-primary-foreground">
                   <Box className="w-3.5 h-3.5 mr-1.5" />
-                  3D 模型可用
+                  3D Model Available
                 </Badge>
               )}
             </div>
@@ -239,12 +239,12 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                     {item.isPublic ? (
                       <Badge variant="secondary" className="text-xs gap-1">
                         <Globe className="w-3 h-3" />
-                        公開
+                        Public
                       </Badge>
                     ) : (
                       <Badge variant="outline" className="text-xs gap-1 border-amber-500/50 text-amber-700 dark:text-amber-400">
                         <Lock className="w-3 h-3" />
-                        專屬
+                        Exclusive
                       </Badge>
                     )}
                   </div>
@@ -261,7 +261,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                 <div className="space-y-2">
                   <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
                     <Layers className="w-4 h-4 text-muted-foreground" />
-                    產品描述
+                    Product Description
                   </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     {item.description}
@@ -274,17 +274,17 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                 <div className="space-y-3">
                   <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
                     <DollarSign className="w-4 h-4 text-muted-foreground" />
-                    價格與數量
+                    Pricing & Quantity
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-3 bg-muted/50 rounded-lg">
-                      <p className="text-xs text-muted-foreground mb-1">單價</p>
+                      <p className="text-xs text-muted-foreground mb-1">Unit Price</p>
                       <p className="text-lg font-semibold text-foreground">
                         {item.pricing.currency} ${item.pricing.unitPrice.toFixed(2)}
                       </p>
                     </div>
                     <div className="p-3 bg-muted/50 rounded-lg">
-                      <p className="text-xs text-muted-foreground mb-1">最低起訂量 (MOQ)</p>
+                      <p className="text-xs text-muted-foreground mb-1">MOQ</p>
                       <p className="text-lg font-semibold text-foreground">
                         {item.pricing.moq.toLocaleString()}
                       </p>
@@ -295,12 +295,12 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                     <div className="space-y-2">
                       <p className="text-xs text-muted-foreground flex items-center gap-1">
                         <TrendingDown className="w-3 h-3" />
-                        階梯價格
+                        Volume Pricing
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {item.pricing.priceBreaks.map((pb, idx) => (
                           <div key={idx} className="px-3 py-1.5 bg-primary/5 border border-primary/20 rounded-md text-xs">
-                            <span className="text-muted-foreground">≥{pb.quantity.toLocaleString()} 件：</span>
+                            <span className="text-muted-foreground">≥{pb.quantity.toLocaleString()} pcs:</span>
                             <span className="font-medium text-foreground ml-1">${pb.price.toFixed(2)}</span>
                           </div>
                         ))}
@@ -315,34 +315,34 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                 <div className="space-y-3">
                   <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
                     <Factory className="w-4 h-4 text-muted-foreground" />
-                    生產資訊
+                    Production Info
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="flex items-start gap-2">
                       <Clock className="w-4 h-4 text-muted-foreground mt-0.5" />
                       <div>
-                        <p className="text-xs text-muted-foreground">大貨交期</p>
+                        <p className="text-xs text-muted-foreground">Lead Time</p>
                         <p className="text-sm font-medium">{item.production.leadTime}</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-2">
                       <Package className="w-4 h-4 text-muted-foreground mt-0.5" />
                       <div>
-                        <p className="text-xs text-muted-foreground">樣品交期</p>
+                        <p className="text-xs text-muted-foreground">Sample Time</p>
                         <p className="text-sm font-medium">{item.production.sampleTime}</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-2">
                       <MapPin className="w-4 h-4 text-muted-foreground mt-0.5" />
                       <div>
-                        <p className="text-xs text-muted-foreground">產地</p>
+                        <p className="text-xs text-muted-foreground">Origin</p>
                         <p className="text-sm font-medium">{item.production.origin}</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-2">
                       <Factory className="w-4 h-4 text-muted-foreground mt-0.5" />
                       <div>
-                        <p className="text-xs text-muted-foreground">月產能</p>
+                        <p className="text-xs text-muted-foreground">Monthly Capacity</p>
                         <p className="text-sm font-medium">{item.production.capacity}</p>
                       </div>
                     </div>
@@ -357,42 +357,42 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                     <div className="space-y-3">
                       <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
                         <Tag className="w-4 h-4 text-muted-foreground" />
-                        產品規格
+                        Product Specifications
                       </h3>
                       <div className="grid grid-cols-2 gap-2">
                         {item.specifications.material && (
                           <div className="text-sm">
-                            <span className="text-muted-foreground">材質：</span>
+                            <span className="text-muted-foreground">Material: </span>
                             <span className="font-medium">{item.specifications.material}</span>
                           </div>
                         )}
                         {item.specifications.size && (
                           <div className="text-sm">
-                            <span className="text-muted-foreground">尺寸：</span>
+                            <span className="text-muted-foreground">Size: </span>
                             <span className="font-medium">{item.specifications.size}</span>
                           </div>
                         )}
                         {item.specifications.finish && (
                           <div className="text-sm">
-                            <span className="text-muted-foreground">表面處理：</span>
+                            <span className="text-muted-foreground">Finish: </span>
                             <span className="font-medium">{item.specifications.finish}</span>
                           </div>
                         )}
                         {item.specifications.weight && (
                           <div className="text-sm">
-                            <span className="text-muted-foreground">重量：</span>
+                            <span className="text-muted-foreground">Weight: </span>
                             <span className="font-medium">{item.specifications.weight}</span>
                           </div>
                         )}
                         {item.specifications.thickness && (
                           <div className="text-sm">
-                            <span className="text-muted-foreground">厚度：</span>
+                            <span className="text-muted-foreground">Thickness: </span>
                             <span className="font-medium">{item.specifications.thickness}</span>
                           </div>
                         )}
                         {item.specifications.tensileStrength && (
                           <div className="text-sm">
-                            <span className="text-muted-foreground">拉力：</span>
+                            <span className="text-muted-foreground">Tensile: </span>
                             <span className="font-medium">{item.specifications.tensileStrength}</span>
                           </div>
                         )}
@@ -408,7 +408,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                     <div className="space-y-3">
                       <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
                         <Palette className="w-4 h-4 text-muted-foreground" />
-                        可選顏色
+                        Available Colors
                       </h3>
                       <div className="flex flex-wrap gap-2">
                         {item.availableColors.map((color, idx) => (
@@ -428,7 +428,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                     <div className="space-y-3">
                       <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
                         <Shirt className="w-4 h-4 text-muted-foreground" />
-                        適用範圍
+                        Applications
                       </h3>
                       <div className="flex flex-wrap gap-2">
                         {item.applications.map((app, idx) => (
@@ -448,7 +448,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                     <div className="space-y-3">
                       <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
                         <Award className="w-4 h-4 text-muted-foreground" />
-                        認證標準
+                        Certifications
                       </h3>
                       <div className="flex flex-wrap gap-2">
                         {item.certifications.map((cert, idx) => (
@@ -468,7 +468,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                     <div className="space-y-3">
                       <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
                         <Download className="w-4 h-4 text-muted-foreground" />
-                        可下載檔案
+                        Downloads
                       </h3>
                       <div className="space-y-2">
                         {item.downloadableFiles.map((file) => {
@@ -534,10 +534,10 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <Calendar className="w-3.5 h-3.5" />
-                      建立日期
+                      Created
                     </div>
                     <p className="text-sm font-medium">
-                      {format(new Date(item.createdAt), 'yyyy/MM/dd', { locale: zhTW })}
+                      {format(new Date(item.createdAt), 'yyyy/MM/dd')}
                     </p>
                   </div>
 
@@ -545,7 +545,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <Globe className="w-3.5 h-3.5" />
-                        所屬團隊
+                        Team
                       </div>
                       <p className="text-sm font-medium">{item.teamName}</p>
                     </div>
@@ -561,14 +561,14 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                     className="flex-1"
                     onClick={() => onOpenChange(false)}
                   >
-                    關閉
+                    Close
                   </Button>
                   <Button
                     className="flex-1 gap-2"
                     onClick={() => setShowRFQDialog(true)}
                   >
                     <FileText className="w-4 h-4" />
-                    建立報價請求
+                    Request Quote
                   </Button>
                 </div>
               </div>

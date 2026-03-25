@@ -58,7 +58,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
             className="gap-2 h-8 text-muted-foreground hover:text-foreground shrink-0"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">返回</span>
+            <span className="hidden sm:inline">Back</span>
           </Button>
           
           <div className="h-4 w-px bg-border shrink-0" />
@@ -68,7 +68,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink onClick={onBack} className="cursor-pointer hover:text-foreground text-sm">
-                  素材庫
+                  Component Library
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -92,12 +92,12 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                 {item.isPublic ? (
                   <Badge variant="secondary" className="gap-1">
                     <Globe className="w-3 h-3" />
-                    公開
+                    Public
                   </Badge>
                 ) : (
                   <Badge variant="outline" className="gap-1 border-amber-500/50 text-amber-700 dark:text-amber-400">
                     <Lock className="w-3 h-3" />
-                    {item.teamName || '團隊專屬'}
+                    {item.teamName || 'Team Exclusive'}
                   </Badge>
                 )}
               </div>
@@ -115,14 +115,14 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
             {item.modelUrl ? (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">3D 模型預覽</CardTitle>
+                  <CardTitle className="text-lg">3D Model Preview</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <Model3DViewer hasModel={true} modelType={getModelType(item.category)} modelUrl={item.modelUrl} />
                   <div className="mt-4 flex gap-2">
                     <Button variant="outline" className="gap-2 flex-1">
                       <Download className="w-4 h-4" />
-                      下載 OBJ 檔案
+                      Download OBJ
                     </Button>
                   </div>
                 </CardContent>
@@ -139,7 +139,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                             <div className="aspect-square bg-muted relative group">
                               <img
                                 src={image}
-                                alt={`${item.name} - 圖片 ${index + 1}`}
+                                alt={`${item.name} - Image ${index + 1}`}
                                 className="w-full h-full object-cover"
                               />
                               <button className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors">
@@ -170,7 +170,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                         >
                           <img
                             src={image}
-                            alt={`縮圖 ${index + 1}`}
+                            alt={`Thumbnail ${index + 1}`}
                             className="w-full h-full object-cover"
                           />
                         </button>
@@ -187,7 +187,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
             {/* Description */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">產品描述</CardTitle>
+                <CardTitle className="text-lg">Product Description</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground leading-relaxed">{item.description}</p>
@@ -195,7 +195,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                 {/* Applications */}
                 {item.applications && item.applications.length > 0 && (
                   <div className="mt-4">
-                    <p className="text-sm text-muted-foreground mb-2">適用場景</p>
+                    <p className="text-sm text-muted-foreground mb-2">Applications</p>
                     <div className="flex flex-wrap gap-2">
                       {item.applications.map((app) => (
                         <Badge key={app} variant="secondary" className="text-xs">{app}</Badge>
@@ -211,14 +211,14 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Layers className="w-4 h-4" />
-                  規格參數
+                  Specifications
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <dl className="space-y-3">
                   {item.specifications.material && (
                     <div className="flex justify-between">
-                      <dt className="text-muted-foreground">材質</dt>
+                      <dt className="text-muted-foreground">Material</dt>
                       <dd className="font-medium text-right">{item.specifications.material}</dd>
                     </div>
                   )}
@@ -226,7 +226,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                     <>
                       <Separator />
                       <div className="flex justify-between">
-                        <dt className="text-muted-foreground">尺寸</dt>
+                        <dt className="text-muted-foreground">Size</dt>
                         <dd className="font-medium text-right">{item.specifications.size}</dd>
                       </div>
                     </>
@@ -235,7 +235,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                     <>
                       <Separator />
                       <div className="flex justify-between">
-                        <dt className="text-muted-foreground">重量</dt>
+                        <dt className="text-muted-foreground">Weight</dt>
                         <dd className="font-medium text-right">{item.specifications.weight}</dd>
                       </div>
                     </>
@@ -244,7 +244,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                     <>
                       <Separator />
                       <div className="flex justify-between">
-                        <dt className="text-muted-foreground">厚度</dt>
+                        <dt className="text-muted-foreground">Thickness</dt>
                         <dd className="font-medium text-right">{item.specifications.thickness}</dd>
                       </div>
                     </>
@@ -253,7 +253,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                     <>
                       <Separator />
                       <div className="flex justify-between">
-                        <dt className="text-muted-foreground">表面處理</dt>
+                        <dt className="text-muted-foreground">Finish</dt>
                         <dd className="font-medium text-right">{item.specifications.finish}</dd>
                       </div>
                     </>
@@ -262,7 +262,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                     <>
                       <Separator />
                       <div className="flex justify-between">
-                        <dt className="text-muted-foreground">拉力強度</dt>
+                        <dt className="text-muted-foreground">Tensile Strength</dt>
                         <dd className="font-medium text-right">{item.specifications.tensileStrength}</dd>
                       </div>
                     </>
@@ -276,31 +276,31 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Package className="w-4 h-4" />
-                  價格與訂購
+                  Pricing & Orders
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <dl className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <dt className="text-muted-foreground">單價</dt>
+                    <dt className="text-muted-foreground">Unit Price</dt>
                     <dd className="font-semibold text-lg text-foreground">
                       {item.pricing.currency} ${item.pricing.unitPrice.toFixed(3)}
                     </dd>
                   </div>
                   <Separator />
                   <div className="flex justify-between">
-                    <dt className="text-muted-foreground">最低訂購量 (MOQ)</dt>
-                    <dd className="font-medium">{item.pricing.moq.toLocaleString()} 件</dd>
+                    <dt className="text-muted-foreground">Minimum Order Qty (MOQ)</dt>
+                    <dd className="font-medium">{item.pricing.moq.toLocaleString()} pcs</dd>
                   </div>
                   {item.pricing.priceBreaks && item.pricing.priceBreaks.length > 0 && (
                     <>
                       <Separator />
                       <div>
-                        <dt className="text-muted-foreground mb-2">量價階梯</dt>
+                        <dt className="text-muted-foreground mb-2">Volume Pricing</dt>
                         <dd className="space-y-1">
                           {item.pricing.priceBreaks.map((pb, idx) => (
                             <div key={idx} className="flex justify-between text-sm bg-muted/50 rounded px-2 py-1">
-                              <span>≥ {pb.quantity.toLocaleString()} 件</span>
+                              <span>≥ {pb.quantity.toLocaleString()} pcs</span>
                               <span className="font-medium">${pb.price.toFixed(3)}</span>
                             </div>
                           ))}
@@ -317,31 +317,31 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Clock className="w-4 h-4" />
-                  生產資訊
+                  Production Info
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <dl className="space-y-3">
                   <div className="flex justify-between">
-                    <dt className="text-muted-foreground">交貨時間</dt>
+                    <dt className="text-muted-foreground">Lead Time</dt>
                     <dd className="font-medium">{item.production.leadTime}</dd>
                   </div>
                   <Separator />
                   <div className="flex justify-between">
-                    <dt className="text-muted-foreground">樣品時間</dt>
+                    <dt className="text-muted-foreground">Sample Time</dt>
                     <dd className="font-medium">{item.production.sampleTime}</dd>
                   </div>
                   <Separator />
                   <div className="flex justify-between items-center">
                     <dt className="text-muted-foreground flex items-center gap-1">
                       <MapPin className="w-3 h-3" />
-                      產地
+                      Origin
                     </dt>
                     <dd className="font-medium">{item.production.origin}</dd>
                   </div>
                   <Separator />
                   <div className="flex justify-between">
-                    <dt className="text-muted-foreground">月產能</dt>
+                    <dt className="text-muted-foreground">Monthly Capacity</dt>
                     <dd className="font-medium">{item.production.capacity}</dd>
                   </div>
                 </dl>
@@ -354,7 +354,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Palette className="w-4 h-4" />
-                    可選顏色
+                    Available Colors
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -373,7 +373,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Award className="w-4 h-4" />
-                    認證與標準
+                    Certifications
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -391,21 +391,21 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
             {/* Metadata */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">其他資訊</CardTitle>
+                <CardTitle className="text-lg">Additional Info</CardTitle>
               </CardHeader>
               <CardContent>
                 <dl className="space-y-3">
                   <div className="flex justify-between">
-                    <dt className="text-muted-foreground">建立日期</dt>
+                    <dt className="text-muted-foreground">Created</dt>
                     <dd className="font-medium">
-                      {new Date(item.createdAt).toLocaleDateString('zh-TW')}
+                      {new Date(item.createdAt).toLocaleDateString('en-US')}
                     </dd>
                   </div>
                   <Separator />
                   <div className="flex justify-between">
-                    <dt className="text-muted-foreground">最後更新</dt>
+                    <dt className="text-muted-foreground">Last Updated</dt>
                     <dd className="font-medium">
-                      {new Date(item.updatedAt).toLocaleDateString('zh-TW')}
+                      {new Date(item.updatedAt).toLocaleDateString('en-US')}
                     </dd>
                   </div>
                 </dl>

@@ -29,7 +29,7 @@ const FilterSortBar = ({ filtersOpen, setFiltersOpen, itemCount }: FilterSortBar
   const [sortBy, setSortBy] = useState("featured");
 
   const categories = ["Buttons", "Zippers", "Lace", "Hardware", "Other Products"];
-  const priceRanges = ["詢價", "標準", "高端", "訂製"];
+  const priceRanges = ["Inquiry", "Standard", "Premium", "Custom"];
   const materials = ["Metal", "Resin", "Cotton", "Nylon", "Brass"];
 
   return (
