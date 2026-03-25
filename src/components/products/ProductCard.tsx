@@ -3,6 +3,7 @@ import { Sparkles, Heart, Eye, Leaf } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { Product } from '@/features/products/types';
 import { getProductPlaceholderUrl, getOptimizedImageUrl } from '@/features/products/utils/productImagePlaceholder';
+import { getPdpSeedImages } from '@/features/products/pdpSeedImages';
 
 type ViewMode = 'grid' | 'list';
 
