@@ -448,7 +448,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                     <div className="space-y-3">
                       <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
                         <Award className="w-4 h-4 text-muted-foreground" />
-                        認證標準
+                        Certifications
                       </h3>
                       <div className="flex flex-wrap gap-2">
                         {item.certifications.map((cert, idx) => (
