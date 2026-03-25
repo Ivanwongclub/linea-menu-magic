@@ -533,7 +533,7 @@ export default function ProductDetail() {
                   Request Quote
                 </Button>
 
-                {product.is_customizable && (
+                {isCustomizable && (
                   <Button variant="outline" size="lg" className="w-full gap-2 h-11 text-sm">
                     <Palette className="h-4 w-4" />
                     Customize This Trim
