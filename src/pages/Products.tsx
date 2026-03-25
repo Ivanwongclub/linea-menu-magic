@@ -384,7 +384,7 @@ export default function Products() {
                       <button
                         key={opt.value}
                         onClick={() => setActiveFeatured(opt.value)}
-                        className={`whitespace-nowrap text-[11px] px-2.5 py-1 rounded-[0.25rem] border transition-all duration-200 ${
+                        className={`whitespace-nowrap text-[11px] px-2.5 py-1 rounded-none border transition-all duration-200 ${
                           activeFeatured === opt.value
                             ? 'bg-foreground text-background border-foreground'
                             : 'bg-background text-foreground border-border hover:border-foreground/40'
