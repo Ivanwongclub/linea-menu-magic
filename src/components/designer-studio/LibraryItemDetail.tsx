@@ -323,7 +323,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
               <CardContent>
                 <dl className="space-y-3">
                   <div className="flex justify-between">
-                    <dt className="text-muted-foreground">交貨時間</dt>
+                    <dt className="text-muted-foreground">Lead Time</dt>
                     <dd className="font-medium">{item.production.leadTime}</dd>
                   </div>
                   <Separator />
