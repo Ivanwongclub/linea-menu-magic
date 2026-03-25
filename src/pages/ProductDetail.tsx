@@ -631,19 +631,19 @@ export default function ProductDetail() {
             <section id={SECTION_IDS.production} className="scroll-mt-24 mb-16">
               <SectionHeading id="" title="Production & Ordering" icon={Factory} />
               <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
-                <div className="border border-border">
+                <div className="border-2 border-foreground">
                   <div className="grid grid-cols-1 sm:grid-cols-2">
                     {allProductionEntries.map(([key, val], idx) => (
                       <div
                         key={key}
-                        className={`flex justify-between items-baseline gap-4 px-4 py-3 ${
-                          idx < allProductionEntries.length - (allProductionEntries.length % 2 === 0 ? 2 : 1) ? 'border-b border-border/40' : ''
-                        } ${idx % 2 === 0 && allProductionEntries.length > 1 ? 'sm:border-r sm:border-border/40' : ''}`}
+                        className={`flex justify-between items-baseline gap-4 px-4 py-3.5 ${
+                          idx < allProductionEntries.length - (allProductionEntries.length % 2 === 0 ? 2 : 1) ? 'border-b border-foreground/15' : ''
+                        } ${idx % 2 === 0 && allProductionEntries.length > 1 ? 'sm:border-r sm:border-foreground/15' : ''}`}
                       >
-                        <dt className="text-[11px] text-muted-foreground uppercase tracking-[0.08em]">
+                        <dt className="text-[11px] text-foreground/60 font-medium uppercase tracking-[0.08em]">
                           {key.replace(/_/g, ' ')}
                         </dt>
-                        <dd className="text-[13px] font-medium text-foreground text-right">{val}</dd>
+                        <dd className="text-[13px] font-semibold text-foreground text-right">{val}</dd>
                       </div>
                     ))}
                   </div>
