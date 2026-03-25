@@ -428,7 +428,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                     <div className="space-y-3">
                       <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
                         <Shirt className="w-4 h-4 text-muted-foreground" />
-                        適用範圍
+                        Applications
                       </h3>
                       <div className="flex flex-wrap gap-2">
                         {item.applications.map((app, idx) => (
