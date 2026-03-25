@@ -295,7 +295,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                     <div className="space-y-2">
                       <p className="text-xs text-muted-foreground flex items-center gap-1">
                         <TrendingDown className="w-3 h-3" />
-                        階梯價格
+                        Volume Pricing
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {item.pricing.priceBreaks.map((pb, idx) => (
