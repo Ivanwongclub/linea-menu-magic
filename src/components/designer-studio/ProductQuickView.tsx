@@ -537,7 +537,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                       Created
                     </div>
                     <p className="text-sm font-medium">
-                      {format(new Date(item.createdAt), 'yyyy/MM/dd', { locale: zhTW })}
+                      {format(new Date(item.createdAt), 'yyyy/MM/dd')}
                     </p>
                   </div>
 
