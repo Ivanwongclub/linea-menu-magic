@@ -187,7 +187,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
             {/* Description */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">產品描述</CardTitle>
+                <CardTitle className="text-lg">Product Description</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground leading-relaxed">{item.description}</p>
