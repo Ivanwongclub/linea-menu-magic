@@ -385,10 +385,10 @@ const DesignerStudioDashboard = () => {
           <div className="py-6 pb-2 flex items-end justify-between">
             <div>
               <h1 className="text-2xl font-semibold text-foreground tracking-tight">
-                設計師工作室
+                Designer Studio
               </h1>
               <p className="text-sm text-muted-foreground mt-1">
-                Designer Studio
+                Design & Production Management
               </p>
             </div>
             <Button size="sm" className="gap-2" onClick={handleCreateComposition}>
