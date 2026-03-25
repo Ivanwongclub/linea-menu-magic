@@ -688,7 +688,7 @@ const DesignerStudioDashboard = () => {
                     </div>
                     <Button variant="outline" size="sm" className="gap-1.5 h-8">
                       <Filter className="w-3.5 h-3.5" />
-                      篩選
+                      Filter
                     </Button>
                   </div>
 
