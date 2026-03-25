@@ -403,9 +403,9 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                   </div>
                   <Separator />
                   <div className="flex justify-between">
-                    <dt className="text-muted-foreground">最後更新</dt>
+                    <dt className="text-muted-foreground">Last Updated</dt>
                     <dd className="font-medium">
-                      {new Date(item.updatedAt).toLocaleDateString('zh-TW')}
+                      {new Date(item.updatedAt).toLocaleDateString('en-US')}
                     </dd>
                   </div>
                 </dl>
