@@ -197,12 +197,14 @@ const Certificates = () => {
         </section>
 
         {/* Commitment Banner */}
-        <section className="py-16 px-6 bg-secondary border-t border-border overflow-hidden">
-          <div className="max-w-3xl">
-            <h2 className="text-2xl font-light text-foreground mb-4">Our Commitment</h2>
-            <p className="text-muted-foreground leading-relaxed">
-              WIN-CYC is committed to continuous investment in quality management and certification systems. We believe that rigorous standards and transparent compliance measures are the foundation of client trust. We will continue to expand our certification scope to meet the increasingly stringent requirements of global clients and regulatory bodies.
-            </p>
+        <section className="py-16 px-6 lg:px-8 bg-secondary border-t border-border overflow-hidden">
+          <div className="max-w-7xl mx-auto">
+            <div className="max-w-3xl">
+              <h2 className="text-2xl font-light text-foreground mb-4">Our Commitment</h2>
+              <p className="text-muted-foreground leading-relaxed">
+                WIN-CYC is committed to continuous investment in quality management and certification systems. We believe that rigorous standards and transparent compliance measures are the foundation of client trust. We will continue to expand our certification scope to meet the increasingly stringent requirements of global clients and regulatory bodies.
+              </p>
+            </div>
           </div>
         </section>
       </main>

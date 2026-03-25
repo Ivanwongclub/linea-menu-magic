@@ -22,7 +22,6 @@ const Sustainability = () => {
               { label: "About", href: "/about" },
               { label: "Sustainability" },
             ]}
-            title="Sustainability"
           />
         
           <div ref={commitmentRef} className={`transition-all duration-700 ${commitmentVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>

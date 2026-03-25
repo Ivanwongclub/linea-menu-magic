@@ -22,7 +22,6 @@ const OurStory = () => {
               { label: "About", href: "/about" },
               { label: "Our Story" },
             ]}
-            title="Our Story"
           />
           
           <div ref={section1Ref} className={`transition-all duration-700 ${section1Visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
