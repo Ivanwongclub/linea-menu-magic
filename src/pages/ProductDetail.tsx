@@ -20,6 +20,7 @@ import { useProduct } from '@/features/products/hooks/useProduct';
 import { useProducts } from '@/features/products/hooks/useProducts';
 import { getProductPlaceholderUrl, getOptimizedImageUrl } from '@/features/products/utils/productImagePlaceholder';
 import type { Product, ProductImage } from '@/features/products/types';
+import { getPdpSeed } from '@/features/products/pdpSeedData';
 
 /* ─── helpers ────────────────────────────────────────── */
 
