@@ -20,7 +20,7 @@ import { useProducts } from '@/features/products/hooks/useProducts';
 import { getProductPlaceholderUrl, getOptimizedImageUrl } from '@/features/products/utils/productImagePlaceholder';
 import type { Product, ProductImage } from '@/features/products/types';
 import { getPdpSeed } from '@/features/products/pdpSeedData';
-import { getPdpSeedImages } from '@/features/products/pdpSeedImages';
+import { getPdpSeedImages, getFallbackImage } from '@/features/products/pdpSeedImages';
 import { getMaterialSurfaceImage } from '@/features/products/materialSurfaces';
 
 /* ─── helpers ────────────────────────────────────────── */
