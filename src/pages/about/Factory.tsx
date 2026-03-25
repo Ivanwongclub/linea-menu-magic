@@ -4,29 +4,31 @@ import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-an
 import { MapPin, Building2, Factory as FactoryIcon, Package, Truck, CheckCircle, ArrowRight } from "lucide-react";
 import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
 import factoryHero from "@/assets/factory-hero.jpg";
-import officeHk from "@/assets/office-hk.jpg";
+import locationHongkong from "@/assets/location-hongkong.jpg";
+import locationShanghai from "@/assets/location-shanghai.jpg";
+import locationNewyork from "@/assets/location-newyork.jpg";
 import factoryProduction from "@/assets/factory-production.jpg";
-import officeShowroom from "@/assets/office-showroom.jpg";
+import locationVietnam from "@/assets/location-vietnam.jpg";
 
 const offices = [
   {
     city: "Hong Kong",
     label: "Headquarters",
-    image: officeHk,
+    image: locationHongkong,
     description: "Global coordination hub since 1979. Manages export operations, client relationships, product development strategy, and supply-chain orchestration across all locations.",
     tags: ["Coordination", "Export", "Client Service"],
   },
   {
     city: "Shanghai",
     label: "Sales Office",
-    image: officeShowroom,
+    image: locationShanghai,
     description: "Supports domestic and regional market development with dedicated account management, sample showrooms, and rapid customer-response capability.",
     tags: ["Market Development", "Showroom", "Account Management"],
   },
   {
     city: "New York",
     label: "Sales Office",
-    image: null,
+    image: locationNewyork,
     description: "Serves the Americas market with local business development, trend consultation, and logistics coordination for faster turnaround on Western-hemisphere orders.",
     tags: ["Americas Market", "Business Development", "Logistics"],
   },
@@ -43,7 +45,7 @@ const factories = [
   {
     city: "Vietnam",
     label: "Manufacturing Hub",
-    image: null,
+    image: locationVietnam,
     description: "Expanding production facility supporting growing regional demand with competitive capacity, modern equipment, and alignment with evolving global sourcing strategies.",
     tags: ["Regional Capacity", "Competitive Production", "Growth"],
   },
