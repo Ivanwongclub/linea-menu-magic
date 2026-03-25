@@ -306,7 +306,7 @@ export default function ProductDetail() {
 
     return [{
       id: `fallback-${product.id}`,
-      url: otherCategory,
+      url: getFallbackImage(),
       sort_order: 0,
       is_primary: true,
       alt_text: product.name_en ?? product.name,

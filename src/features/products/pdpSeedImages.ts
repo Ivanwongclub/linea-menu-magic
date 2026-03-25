@@ -55,6 +55,11 @@ const seedImages: Record<string, string[]> = {
   // Catch-all category-based fallbacks for any slug containing these keywords
 };
 
+/** Exported fallback for components that need a single real image */
+export function getFallbackImage(): string {
+  return otherCategory;
+}
+
 /** Category-based fallback images when no slug match exists */
 const categoryFallbacks: Record<string, string[]> = {
   buttons: [buttonsCategory, metalButton, resinButtons],
