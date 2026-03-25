@@ -209,12 +209,12 @@ function RelatedProducts({ product }: { product: Product }) {
     <section id={SECTION_IDS.related} className="scroll-mt-24 py-16 bg-secondary/30">
       <div className="section-inner">
         <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-foreground/5 flex items-center justify-center">
-              <Layers className="h-4 w-4 text-foreground" />
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-foreground flex items-center justify-center">
+                <Layers className="h-4 w-4 text-background" />
+              </div>
+              <h2 className="text-sm font-bold uppercase tracking-[0.1em] text-foreground">Related Trims</h2>
             </div>
-            <h2 className="text-sm font-semibold uppercase tracking-[0.1em] text-foreground">Related Trims</h2>
-          </div>
           {categorySlug && (
             <Link
               to={`/products?category=${categorySlug}`}
