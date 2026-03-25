@@ -1,21 +1,36 @@
 import Header from "../../components/layout/Header";
 import Footer from "../../components/layout/Footer";
 import ContentSection from "../../components/about/ContentSection";
-import ImageTextBlock from "../../components/about/ImageTextBlock";
 import { useScrollAnimation } from "@/hooks/use-scroll-animation";
 import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
 import LetterReveal from "@/components/ui/LetterReveal";
+import milestoneFoundingImg from "@/assets/milestone-founding.jpg";
+import milestoneCraftImg from "@/assets/milestone-craftsmanship.jpg";
+import milestoneGlobalImg from "@/assets/milestone-global.jpg";
+import milestoneDigitalImg from "@/assets/milestone-digital.jpg";
+import heritageImg from "@/assets/heritage-craftsmanship.jpg";
+import aboutHeritageImg from "@/assets/about-heritage.jpg";
 
-const milestones = [
+interface Milestone {
+  year: string;
+  title: string;
+  body: string;
+  image?: string;
+  isHighlight?: boolean;
+}
+
+const milestones: Milestone[] = [
   {
     year: "1979",
     title: "Founded in Hong Kong",
     body: "WIN-CYC GROUP LIMITED was established in Hong Kong, beginning as a specialist workshop dedicated to the production of premium garment trims, buttons, and fastening accessories.",
+    image: milestoneFoundingImg,
   },
   {
     year: "1990s",
     title: "Building Craft & Manufacturing Depth",
     body: "A decade of refining production techniques, investing in tooling capabilities, and building the deep manufacturing expertise that would become the foundation of our global reputation.",
+    image: milestoneCraftImg,
   },
   {
     year: "2000",
@@ -26,6 +41,7 @@ const milestones = [
     year: "2000s–2010s",
     title: "Expanding Across Global Markets",
     body: "Extended our reach to serve leading brands across Europe, the Americas, Japan, and Asia Pacific — becoming a trusted supply partner for the world's most demanding fashion and apparel companies.",
+    image: milestoneGlobalImg,
   },
   {
     year: "2020s",
@@ -37,6 +53,7 @@ const milestones = [
     title: "New Era: A New WinCYC with Digital Transformation",
     body: "Launching a new chapter — integrating digital tools, online cataloguing, and real-time collaboration to serve the next generation of global brands with speed, transparency, and precision.",
     isHighlight: true,
+    image: milestoneDigitalImg,
   },
 ];
 
@@ -60,7 +77,7 @@ const OurStory = () => {
 
       <main className="py-8 px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          {/* Intro */}
+          {/* Intro — The Beginning */}
           <div
             ref={introRef}
             className={`transition-all duration-700 ${
@@ -68,13 +85,23 @@ const OurStory = () => {
             }`}
           >
             <ContentSection>
-              <ImageTextBlock
-                image="/founders.png"
-                imageAlt="WIN-CYC Founders"
-                title="The Beginning"
-                content="WIN-CYC GROUP LIMITED was founded in Hong Kong in 1979. Driven by passion and expertise in the garment accessories industry, our founders started from a small factory with the mission to provide premium buttons, zippers, and accessories to fashion brands worldwide."
-                imagePosition="left"
-              />
+              <div className="grid md:grid-cols-2 gap-12 items-center">
+                <div className="aspect-[3/2] rounded-lg overflow-hidden">
+                  <img
+                    src={milestoneFoundingImg}
+                    alt="WinCYC founding workshop and early production"
+                    width={800}
+                    height={544}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div>
+                  <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">The Beginning</h2>
+                  <p className="text-muted-foreground leading-relaxed">
+                    WIN-CYC GROUP LIMITED was founded in Hong Kong in 1979. Driven by passion and expertise in the garment accessories industry, our founders started from a small factory with the mission to provide premium buttons, zippers, and accessories to fashion brands worldwide.
+                  </p>
+                </div>
+              </div>
             </ContentSection>
           </div>
 
@@ -88,22 +115,45 @@ const OurStory = () => {
           >
             <ContentSection title="Heritage & Growth">
               <div className="grid md:grid-cols-2 gap-12">
-                <div className="space-y-6">
-                  <h3 className="text-xl font-light text-foreground">Traditional Craftsmanship</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    We insist on combining traditional craftsmanship with modern technology. Every
-                    product undergoes strict quality control. From raw material procurement to
-                    finished goods, each step reflects our unwavering pursuit of quality.
-                  </p>
+                <div className="space-y-8">
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-light text-foreground">Traditional Craftsmanship</h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      We insist on combining traditional craftsmanship with modern technology. Every
+                      product undergoes strict quality control. From raw material procurement to
+                      finished goods, each step reflects our unwavering pursuit of quality.
+                    </p>
+                  </div>
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-light text-foreground">Sustainable Development</h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      We believe that business growth and environmental protection can go hand in hand.
+                      Through the adoption of eco-friendly materials and optimised production processes,
+                      we are committed to minimising our environmental impact.
+                    </p>
+                  </div>
                 </div>
-                <div className="space-y-6">
-                  <h3 className="text-xl font-light text-foreground">Sustainable Development</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    We believe that business growth and environmental protection can go hand in hand.
-                    Through the adoption of eco-friendly materials and optimised production processes,
-                    we are committed to minimising our environmental impact and contributing to the
-                    sustainable fashion industry.
-                  </p>
+                <div className="grid grid-rows-2 gap-4">
+                  <div className="rounded-lg overflow-hidden">
+                    <img
+                      src={heritageImg}
+                      alt="Heritage craftsmanship and precision manufacturing"
+                      width={800}
+                      height={544}
+                      loading="lazy"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="rounded-lg overflow-hidden">
+                    <img
+                      src={aboutHeritageImg}
+                      alt="WinCYC production facility and team"
+                      width={800}
+                      height={544}
+                      loading="lazy"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                 </div>
               </div>
             </ContentSection>
@@ -165,9 +215,9 @@ const OurStory = () => {
             </div>
 
             {/* Vertical timeline */}
-            <div className="relative pl-8 md:pl-12">
-              {/* Vertical line */}
-              <div className="absolute left-[11px] md:left-[19px] top-0 bottom-0 w-px bg-border" />
+            <div className="relative ml-4 md:ml-6">
+              {/* Vertical line — positioned at center of dots (left offset = dot center) */}
+              <div className="absolute left-0 top-0 bottom-0 w-px bg-border -translate-x-1/2" />
 
               {milestones.map((m, i) => (
                 <MilestoneItem key={m.year} milestone={m} index={i} />
@@ -184,51 +234,84 @@ const OurStory = () => {
 
 /* ── Individual milestone row ── */
 
-interface Milestone {
-  year: string;
-  title: string;
-  body: string;
-  isHighlight?: boolean;
-}
-
 const MilestoneItem = ({ milestone: m, index }: { milestone: Milestone; index: number }) => {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.3 });
+
+  const dotSize = m.isHighlight ? 18 : 12;
 
   return (
     <div
       ref={ref}
-      className={`relative pb-14 last:pb-0 transition-all duration-700 ease-out ${
+      className={`relative pb-14 last:pb-0 pl-10 md:pl-14 transition-all duration-700 ease-out ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
       }`}
       style={{ transitionDelay: `${index * 120}ms` }}
     >
-      {/* Dot on the line */}
+      {/* Dot — centered exactly on the vertical line */}
       <div
-        className={`absolute -left-8 md:-left-12 top-1 flex items-center justify-center transition-all duration-500 ${
+        className={`absolute left-0 top-1.5 -translate-x-1/2 transition-all duration-500 ${
           isVisible ? "scale-100" : "scale-0"
         }`}
-        style={{ transitionDelay: `${index * 120 + 200}ms` }}
+        style={{
+          transitionDelay: `${index * 120 + 200}ms`,
+          marginLeft: '-4px',
+          left: '4px',
+        }}
       >
         <div
           className={`rounded-full border-2 ${
             m.isHighlight
-              ? "w-5 h-5 bg-foreground border-foreground"
-              : "w-3 h-3 bg-background border-foreground"
+              ? "bg-foreground border-foreground"
+              : "bg-background border-foreground"
           }`}
+          style={{ width: dotSize, height: dotSize }}
         />
       </div>
 
       {m.isHighlight ? (
         /* ── Highlighted "New Era" card ── */
-        <div className="bg-foreground text-background rounded-lg p-6 md:p-8 max-w-2xl">
-          <span className="text-xs font-mono tracking-[0.15em] uppercase opacity-60">
-            {m.year} · New Era
-          </span>
-          <h3 className="text-xl md:text-2xl font-semibold mt-2">{m.title}</h3>
-          <p className="text-sm md:text-base opacity-80 mt-3 leading-relaxed">{m.body}</p>
+        <div className="bg-foreground text-background rounded-lg overflow-hidden max-w-2xl">
+          {m.image && (
+            <img
+              src={m.image}
+              alt={m.title}
+              width={800}
+              height={544}
+              loading="lazy"
+              className="w-full h-48 md:h-56 object-cover"
+            />
+          )}
+          <div className="p-6 md:p-8">
+            <span className="text-[10px] font-mono tracking-[0.15em] uppercase opacity-60">
+              {m.year} · New Era
+            </span>
+            <h3 className="text-xl md:text-2xl font-semibold mt-2">{m.title}</h3>
+            <p className="text-sm md:text-base opacity-80 mt-3 leading-relaxed">{m.body}</p>
+          </div>
+        </div>
+      ) : m.image ? (
+        /* ── Milestone with image ── */
+        <div className="max-w-2xl">
+          <div className="grid md:grid-cols-[1fr_1.2fr] gap-5 items-start">
+            <div>
+              <span className="text-xs font-mono tracking-[0.12em] text-muted-foreground">{m.year}</span>
+              <h3 className="text-lg md:text-xl font-semibold text-foreground mt-1">{m.title}</h3>
+              <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{m.body}</p>
+            </div>
+            <div className="rounded-lg overflow-hidden aspect-[3/2]">
+              <img
+                src={m.image}
+                alt={m.title}
+                width={800}
+                height={544}
+                loading="lazy"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
         </div>
       ) : (
-        /* ── Standard milestone ── */
+        /* ── Standard text-only milestone ── */
         <div className="max-w-2xl">
           <span className="text-xs font-mono tracking-[0.12em] text-muted-foreground">{m.year}</span>
           <h3 className="text-lg md:text-xl font-semibold text-foreground mt-1">{m.title}</h3>
