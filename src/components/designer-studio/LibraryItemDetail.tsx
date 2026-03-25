@@ -396,9 +396,9 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
               <CardContent>
                 <dl className="space-y-3">
                   <div className="flex justify-between">
-                    <dt className="text-muted-foreground">建立日期</dt>
+                    <dt className="text-muted-foreground">Created</dt>
                     <dd className="font-medium">
-                      {new Date(item.createdAt).toLocaleDateString('zh-TW')}
+                      {new Date(item.createdAt).toLocaleDateString('en-US')}
                     </dd>
                   </div>
                   <Separator />
