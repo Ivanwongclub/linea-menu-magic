@@ -663,7 +663,7 @@ export default function ProductDetail() {
                     ))}
                   </div>
                 </div>
-                {product.is_customizable && (
+                {isCustomizable && (
                   <div className="bg-foreground text-primary-foreground p-6 flex flex-col justify-between">
                     <div>
                       <Palette className="h-5 w-5 mb-3 opacity-60" />
