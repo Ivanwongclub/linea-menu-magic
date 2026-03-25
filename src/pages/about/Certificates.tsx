@@ -94,11 +94,12 @@ const Certificates = () => {
         />
 
         {/* Certificates Grid */}
-        <section className="py-16 px-6 overflow-hidden">
-          <div className="mb-10">
-            <h2 className="text-2xl font-light text-foreground mb-2">International Certifications</h2>
-            <p className="text-sm text-muted-foreground">Our key international certifications and compliance credentials</p>
-          </div>
+        <section className="py-16 px-6 lg:px-8 overflow-hidden">
+          <div className="max-w-7xl mx-auto">
+            <div className="mb-10">
+              <h2 className="text-2xl font-light text-foreground mb-2">International Certifications</h2>
+              <p className="text-sm text-muted-foreground">Our key international certifications and compliance credentials</p>
+            </div>
           <div ref={certsRef} className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {certificates.map((cert, index) => (
               <div 
