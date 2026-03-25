@@ -296,7 +296,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
                     <>
                       <Separator />
                       <div>
-                        <dt className="text-muted-foreground mb-2">量價階梯</dt>
+                        <dt className="text-muted-foreground mb-2">Volume Pricing</dt>
                         <dd className="space-y-1">
                           {item.pricing.priceBreaks.map((pb, idx) => (
                             <div key={idx} className="flex justify-between text-sm bg-muted/50 rounded px-2 py-1">
