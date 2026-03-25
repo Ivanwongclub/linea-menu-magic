@@ -292,16 +292,21 @@ export default function ProductDetail() {
       }));
     }
 
-    // 3. Single placeholder
+    // 3. Absolute last resort — use category images, never SVG placeholder
+    const fallbackSeeded = getPdpSeedImages(product.slug, product.primary_category?.slug);
+    if (fallbackSeeded && fallbackSeeded.length > 0) {
+      return fallbackSeeded.map((url, i) => ({
+        id: `fallback-img-${product.id}-${i}`,
+        url,
+        sort_order: i,
+        is_primary: i === 0,
+        alt_text: `${product.name_en ?? product.name} — view ${i + 1}`,
+      }));
+    }
+
     return [{
-      id: `placeholder-${product.id}`,
-      url: getProductPlaceholderUrl(
-        product.name_en ?? product.name,
-        product.item_code ?? product.slug,
-        product.primary_category?.slug,
-        product.primary_category?.name,
-        800,
-      ),
+      id: `fallback-${product.id}`,
+      url: otherCategory,
       sort_order: 0,
       is_primary: true,
       alt_text: product.name_en ?? product.name,
