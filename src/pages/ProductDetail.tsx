@@ -162,14 +162,16 @@ function SectionNav({ sections }: { sections: { id: string; label: string }[] })
   };
 
   return (
-    <nav className="border-y border-border bg-background/95 backdrop-blur-sm sticky top-[72px] z-20">
+    <nav className="border-y-2 border-foreground bg-background sticky top-[72px] z-20">
       <div className="section-inner">
         <div className="flex gap-0 overflow-x-auto scrollbar-hide">
-          {sections.map((s) => (
+          {sections.map((s, i) => (
             <button
               key={s.id}
               onClick={() => scrollTo(s.id)}
-              className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground whitespace-nowrap transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-foreground after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-200 after:origin-left"
+              className={`px-5 py-4 text-xs font-bold uppercase tracking-[0.12em] whitespace-nowrap transition-colors relative
+                ${i === 0 ? 'text-foreground after:scale-x-100' : 'text-foreground/50 hover:text-foreground after:scale-x-0 hover:after:scale-x-100'}
+                after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-foreground after:transition-transform after:duration-200 after:origin-left`}
             >
               {s.label}
             </button>
