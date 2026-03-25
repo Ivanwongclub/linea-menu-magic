@@ -276,7 +276,7 @@ const LibraryItemDetail = ({ item, onBack }: LibraryItemDetailProps) => {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Package className="w-4 h-4" />
-                  價格與訂購
+                  Pricing & Orders
                 </CardTitle>
               </CardHeader>
               <CardContent>
