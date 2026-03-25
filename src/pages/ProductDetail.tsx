@@ -157,21 +157,25 @@ function SectionHeading({ id, title, icon: Icon }: { id: string; title: string; 
 /* ─── Section nav bar ────────────────────────────────── */
 
 function SectionNav({ sections }: { sections: { id: string; label: string }[] }) {
-  const scrollTo = (id: string) => {
+  const [active, setActive] = useState(0);
+  const scrollTo = (id: string, idx: number) => {
+    setActive(idx);
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   return (
-    <nav className="border-y-2 border-foreground bg-background sticky top-[72px] z-20">
+    <nav className="border-y border-border bg-background sticky top-[72px] z-20">
       <div className="section-inner">
-        <div className="flex gap-0 overflow-x-auto scrollbar-hide">
+        <div className="flex gap-1 overflow-x-auto scrollbar-hide py-2">
           {sections.map((s, i) => (
             <button
               key={s.id}
-              onClick={() => scrollTo(s.id)}
-              className={`px-5 py-4 text-xs font-bold uppercase tracking-[0.12em] whitespace-nowrap transition-colors relative
-                ${i === 0 ? 'text-foreground after:scale-x-100' : 'text-foreground/50 hover:text-foreground after:scale-x-0 hover:after:scale-x-100'}
-                after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-foreground after:transition-transform after:duration-200 after:origin-left`}
+              onClick={() => scrollTo(s.id, i)}
+              className={`px-4 py-2 text-[11px] font-bold uppercase tracking-[0.12em] whitespace-nowrap transition-all duration-200
+                ${i === active
+                  ? 'bg-foreground text-background'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+                }`}
             >
               {s.label}
             </button>
@@ -276,7 +280,7 @@ export default function ProductDetail() {
     }
 
     // 2. Seeded images
-    const seeded = getPdpSeedImages(product.slug);
+    const seeded = getPdpSeedImages(product.slug, product.primary_category?.slug);
     if (seeded && seeded.length > 0) {
       return seeded.map((url, i) => ({
         id: `seed-img-${product.id}-${i}`,
@@ -570,32 +574,45 @@ export default function ProductDetail() {
                 )}
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-6">
                   {[
-                    { l: 'Material', v: materialNames, accent: false },
-                    { l: 'Finish', v: finish, accent: true },
-                    { l: 'Size', v: size, accent: false },
-                    { l: 'Weight', v: weight, accent: false },
-                    { l: 'MOQ', v: moq, accent: true },
-                    { l: 'Lead Time', v: leadTime, accent: true },
+                    { l: 'Material', v: materialNames },
+                    { l: 'Finish', v: finish },
+                    { l: 'Size', v: size },
+                    { l: 'Weight', v: weight },
+                    { l: 'MOQ', v: moq },
+                    { l: 'Lead Time', v: leadTime },
                   ].filter(item => item.v).map(item => (
-                    <div key={item.l} className={`p-3 border ${item.accent ? 'border-foreground bg-foreground/[0.03]' : 'border-border'}`}>
-                      <p className="text-[10px] uppercase tracking-[0.1em] text-foreground/60 font-medium mb-1">{item.l}</p>
-                      <p className="text-sm font-semibold text-foreground">{item.v}</p>
+                    <div key={item.l} className="bg-background border border-border p-3">
+                      <p className="text-[10px] uppercase tracking-[0.1em] text-muted-foreground font-medium mb-1">{item.l}</p>
+                      <p className="text-sm font-bold text-foreground">{item.v}</p>
                     </div>
                   ))}
                 </div>
               </div>
-              {materials.length > 0 && (
-                <div className="border-2 border-foreground p-5">
-                  <h3 className="text-[10px] font-bold uppercase tracking-[0.12em] text-foreground mb-4 pb-3 border-b border-foreground/20">Materials</h3>
-                  <div className="space-y-2.5">
-                    {materials.map((m) => (
-                      <div key={m.id} className="flex items-center justify-between py-1.5 border-b border-border/50 last:border-b-0">
-                        <span className="text-sm font-medium text-foreground">{m.name}</span>
-                        {m.is_sustainable && (
-                          <Badge variant="secondary" className="text-[9px]">Eco</Badge>
-                        )}
-                      </div>
-                    ))}
+              {(materials.length > 0 || materialNames) && (
+                <div className="bg-foreground text-background p-5 flex flex-col">
+                  <h3 className="text-[10px] font-bold uppercase tracking-[0.12em] text-background/70 mb-4 pb-3 border-b border-background/20">Materials</h3>
+                  {materials.length > 0 ? (
+                    <div className="space-y-2.5 flex-1">
+                      {materials.map((m) => (
+                        <div key={m.id} className="flex items-center justify-between py-1.5 border-b border-background/10 last:border-b-0">
+                          <span className="text-sm font-medium text-background">{m.name}</span>
+                          {m.is_sustainable && (
+                            <Badge className="text-[9px] bg-background/20 text-background border-0">Eco</Badge>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : materialNames ? (
+                    <p className="text-sm font-medium text-background">{materialNames}</p>
+                  ) : null}
+                  {/* Material representative image */}
+                  <div className="mt-4 aspect-[3/2] overflow-hidden opacity-40">
+                    <img
+                      src={galleryImages[0]?.url ?? ''}
+                      alt="Material detail"
+                      className="w-full h-full object-cover grayscale brightness-200 contrast-75"
+                      loading="lazy"
+                    />
                   </div>
                 </div>
               )}

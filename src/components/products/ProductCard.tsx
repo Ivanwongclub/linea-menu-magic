@@ -3,6 +3,7 @@ import { Sparkles, Heart, Eye, Leaf } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { Product } from '@/features/products/types';
 import { getProductPlaceholderUrl, getOptimizedImageUrl } from '@/features/products/utils/productImagePlaceholder';
+import { getPdpSeedImages } from '@/features/products/pdpSeedImages';
 
 type ViewMode = 'grid' | 'list';
 
@@ -27,6 +28,10 @@ function resolveProductImage(
   }
 
   if (product.thumbnail_url) return product.thumbnail_url;
+
+  // Use seeded images before falling back to placeholder
+  const seeded = getPdpSeedImages(product.slug, product.primary_category?.slug);
+  if (seeded && seeded.length > 0) return seeded[0];
 
   return getProductPlaceholderUrl(
     product.name_en ?? product.name,
