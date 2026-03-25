@@ -160,7 +160,6 @@ const Factory = () => {
               />
             </div>
           </div>
-          </div>
         </section>
 
         {/* Quality Commitment */}
