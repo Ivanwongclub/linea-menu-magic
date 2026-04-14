@@ -152,7 +152,7 @@ const Header = () => {
           ? "text-white"
           : "text-foreground"
         : isTransparent
-          ? "text-white/80 hover:text-white"
+? "text-white hover:text-white/50"
           : "text-foreground hover:text-foreground/50"
     }`;
 
