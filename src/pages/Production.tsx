@@ -7,15 +7,16 @@ import ObjGallery from "@/components/production/ObjGallery";
 import PrintGallery from "@/components/production/PrintGallery";
 import factoryProductionImg from "@/assets/factory-production.jpg";
 import productionHeroImg from "@/assets/production-hero.jpg";
-import heritageImg from "@/assets/heritage-craftsmanship.jpg";
-import valueQualityImg from "@/assets/value-quality.jpg";
 import valueInnovationImg from "@/assets/value-innovation.jpg";
 import valuePartnershipImg from "@/assets/value-partnership.jpg";
-import milestoneIsoImg from "@/assets/milestone-iso-quality.jpg";
 import brassSurface from "@/assets/materials/brass-surface.jpg";
 import metalSurface from "@/assets/materials/metal-surface.jpg";
 import resinSurface from "@/assets/materials/resin-surface.jpg";
 import cottonSurface from "@/assets/materials/cotton-surface.jpg";
+import sustainabilityForestImg from "@/assets/sustainability-forest.jpg";
+import sustainabilityRecycledImg from "@/assets/sustainability-recycled-metal.jpg";
+import sustainabilityEcoImg from "@/assets/sustainability-eco-process.jpg";
+import sustainabilityNatureImg from "@/assets/sustainability-nature.jpg";
 
 // ─── Data ───────────────────────────────────────────────────────────────────
 
@@ -111,22 +112,13 @@ const MATERIALS: Material[] = [
   },
 ];
 
-const capabilities = [
-  { title: "Buttons & Fasteners", desc: "Metal, polyester, corozo, and combination buttons across all garment categories." },
-  { title: "Zippers & Pulls", desc: "Metal and nylon zippers with custom puller design and branded tape options." },
-  { title: "Metal Trims & Hardware", desc: "Rivets, eyelets, snaps, hooks, buckles, and decorative hardware for apparel and leather goods." },
-  { title: "Branding Trims", desc: "Custom logo plates, labels, hangtags, and branded finishing details." },
-  { title: "Soft Trims", desc: "Cotton drawcords, woven webbing, cord ends and toggles for sportswear and outerwear." },
-  { title: "Sustainable Options", desc: "GRS-certified recycled metal, OEKO-TEX cotton, and bio-based resin alternatives." },
-];
 
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function Production() {
   const { ref: workflowRef, isVisible: workflowVisible, getDelay: getWfDelay } = useStaggeredAnimation(3, 150);
   const { ref: materialsRef, isVisible: materialsVisible } = useScrollAnimation({ threshold: 0.1 });
-  const { ref: capRef, isVisible: capVisible, getDelay: getCapDelay } = useStaggeredAnimation(6, 80);
-  const { ref: qualRef, isVisible: qualVisible } = useScrollAnimation({ threshold: 0.2 });
+  const { ref: sustainRef, isVisible: sustainVisible } = useScrollAnimation({ threshold: 0.1 });
   const [activeTab, setActiveTab] = useState<MaterialCategory>("All");
   const [matIndex, setMatIndex] = useState(0);
   const [galleryOpen, setGalleryOpen] = useState(false);
@@ -350,65 +342,56 @@ export default function Production() {
           </div>
         </section>
 
-        {/* ── SECTION 4: Quality & Certifications ──────────────────────── */}
+        {/* ── SECTION 4: Sustainability & Social Responsibility ─────────── */}
         <section className="section-off-white">
           <div className="section-inner">
             <div
-              ref={qualRef}
-               className={`flex flex-col lg:flex-row gap-12 lg:gap-16 items-center transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${
-                 qualVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-              }`}
+              ref={sustainRef}
+              className={`transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${sustainVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
             >
-              <div className="lg:w-1/2">
-                <span className="section-label block mb-4">Quality</span>
-                <h2 className="text-[clamp(2rem,4vw,3rem)] font-bold text-foreground leading-tight">
-                  ISO 9001<br />Certified
-                </h2>
-                <p className="mt-6 text-[15px] text-muted-foreground leading-relaxed">
-                  Every WIN-CYC facility operates under ISO 9001-certified quality management. From incoming raw-material inspection through in-process controls to final outgoing QC, each production batch follows a documented, auditable workflow.
-                </p>
-                <p className="mt-4 text-[15px] text-muted-foreground leading-relaxed">
-                  Our in-house testing laboratories verify plating adhesion, colour fastness, mechanical durability, and chemical compliance — including restricted-substance declarations for EU and US regulated markets.
-                </p>
-                <div className="flex flex-wrap gap-2 mt-6">
-                  {["ISO 9001", "OEKO-TEX", "GRS", "REACH"].map((cert) => (
-                    <span key={cert} className="px-4 py-2 text-[12px] font-medium tracking-wide uppercase border border-foreground/20 text-foreground/70">
-                      {cert}
-                    </span>
-                  ))}
+              <div className="flex flex-col lg:flex-row gap-10 lg:gap-16 items-center mb-14">
+                <div className="lg:w-1/2 w-full">
+                  <span className="section-label block mb-4">Sustainability</span>
+                  <h2 className="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-foreground leading-tight">
+                    Sustainability &<br />Social Responsibility
+                  </h2>
+                  <p className="mt-6 text-[15px] text-muted-foreground leading-relaxed">
+                    We take responsible production seriously. We're continuously working to find sustainable manufacturing solutions in order to minimise our impact on the environment — along with the innovative and sophisticated processes involved in the production of recycled materials.
+                  </p>
+                  <div className="flex flex-wrap gap-2 mt-6">
+                    {["GRS", "OEKO-TEX", "ISO 9001", "REACH"].map((cert) => (
+                      <span key={cert} className="px-4 py-2 text-[12px] font-medium tracking-wide uppercase border border-foreground/20 text-foreground/70">
+                        {cert}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div className="lg:w-1/2 w-full">
+                  <div className="aspect-[4/3] overflow-hidden rounded-[var(--radius)]">
+                    <img src={sustainabilityForestImg} alt="Sustainable manufacturing" className="w-full h-full object-cover" loading="lazy" />
+                  </div>
                 </div>
               </div>
-              <div className="lg:w-1/2">
-                <div className="aspect-[4/3] overflow-hidden rounded-[var(--radius)]">
-                  <img src={milestoneIsoImg} alt="ISO 9001 Quality Management" className="w-full h-full object-cover" loading="lazy" />
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {[
+                  { image: sustainabilityEcoImg, title: "Sustainability", body: "We take responsible production seriously. We're continuously working to find sustainable manufacturing solutions to minimise our environmental impact.", href: "/sustainability" },
+                  { image: sustainabilityRecycledImg, title: "Materials", body: "From idea to finished trim — we combine stylish trimming solutions with eco-conscious material choices and certified sustainable production.", href: "/production" },
+                  { image: sustainabilityNatureImg, title: "Our Commitment", body: "Functionality and product performance is of upmost importance — ensuring all products go through quality control procedures aligned with environmental standards.", href: "/about" },
+                ].map((card) => (
+                  <Link key={card.title} to={card.href} className="group relative aspect-[3/4] overflow-hidden rounded-[var(--radius)] block">
+                    <img src={card.image} alt={card.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-6">
+                      <h3 className="text-[18px] font-semibold text-white mb-2">{card.title}</h3>
+                      <p className="text-[13px] text-white/70 leading-relaxed line-clamp-3">{card.body}</p>
+                      <span className="inline-flex items-center gap-1 mt-4 text-[13px] font-medium text-white/80 group-hover:text-white transition-colors">
+                        Learn more
+                        <ArrowRight size={14} className="transition-transform duration-300 group-hover:translate-x-1" />
+                      </span>
+                    </div>
+                  </Link>
+                ))}
               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── SECTION 5: Product capabilities grid ─────────────────────── */}
-        <section className="section-inverse">
-          <div className="section-inner">
-            <span className="section-label block mb-4 text-white/50">Capabilities</span>
-            <h2 className="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-white leading-tight mb-12">
-              What We Produce
-            </h2>
-            <div ref={capRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {capabilities.map((cap, i) => (
-                <div
-                  key={cap.title}
-                  className={`border border-white/10 p-6 rounded-[var(--radius)] hover:border-white/25 transition-all duration-300 ${
-                    capVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
-                  }`}
-                  style={getCapDelay(i)}
-                >
-                  <h3 className="text-[16px] font-semibold text-white mb-2">
-                    {cap.title}
-                  </h3>
-                  <p className="text-[14px] text-white/60 leading-relaxed">{cap.desc}</p>
-                </div>
-              ))}
             </div>
           </div>
         </section>
