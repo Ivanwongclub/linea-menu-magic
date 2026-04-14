@@ -145,7 +145,6 @@ const Navigation = () => {
         "Our Story",
         "Factory",
         "Certificates",
-        "Sustainability",
         "Store Locator"
       ],
       images: [

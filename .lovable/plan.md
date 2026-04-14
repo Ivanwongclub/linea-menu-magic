@@ -1,84 +1,45 @@
 
 
-## Plan: Align Designer Studio Product Library with Public Catalog
+## Plan: Redesign Designer Studio Landing Page
 
-### Problem
+### New Layout
 
-The Designer Studio's "Component Library" (tab `library` in the dashboard) uses its own card component (`LibraryItemCard`) and data pipeline (`useUserLibrary` → `user_library_items` table), which is disconnected from the public `/products` catalog. The user wants:
-
-1. The library in Designer Studio to show **the same products** as `/products` (using the same images, card style, and data source)
-2. Every product to indicate it contains **OBJ files** (3D model availability)
-3. A cohesive UX between the two views
-
-### Current Architecture
+The page becomes product-library-first with a minimal header bar instead of a heavy hero. Three sections total:
 
 ```text
-/products page                          Designer Studio Library
-─────────────                           ──────────────────────
-useProducts() hook                      useUserLibrary(teamId) hook
-  → products table                        → user_library_items table
-  → ProductCard component                 → LibraryItemCard component
-  → resolveProductImage()                 → raw thumbnail_url only
-  → ProductsSidebar filters               → category dropdown + favourites
+┌─────────────────────────────────────┐
+│  Minimal header bar                 │
+│  "Designer Studio" label + tagline  │
+│  [Enter Studio]  [Request Access]   │
+│  (single row, py-12, no bg art)     │
+├─────────────────────────────────────┤
+│  Product Library Grid               │
+│  Search bar + category filter chips │
+│  ProductCard grid (same as /products│
+│  with 3D badges, read-only)         │
+├─────────────────────────────────────┤
+│  Compact CTA + onboarding steps     │
+│  Dark band, one heading, one button │
+│  3 steps inline (01, 02, 03)        │
+└─────────────────────────────────────┘
 ```
-
-**Key gaps:**
-- `LibraryItemCard` doesn't use `resolveProductImage()` or `getProductImageUrl()` — so regenerated product images don't appear
-- Library only shows items manually added to `user_library_items`, not the full catalog
-- Card design differs (no tags, no cert badges, no hover info panel matching `/products`)
-- No OBJ/3D file indicator in the public catalog cards
-
-### Design & UX
-
-The Designer Studio library will become a **browsable catalog view** (like `/products`) with additional studio actions (Add to Composition, Favourite, Request). The card will reuse the same image resolution pipeline so regenerated images appear consistently.
-
-**Card layout (unified):**
-- Square image area with same `resolveProductImage()` fallback chain
-- Tag badges top-left (New, Best Seller, etc.)
-- 3D/OBJ badge top-right when `model_url` exists
-- Category + item code row below image
-- Product name
-- Studio actions bar: Add to Composition | Download Files | Favourite
 
 ### Changes
 
-#### 1. `src/components/designer-studio/LibraryItemCard.tsx` (lines 44-49)
-- Import and use `resolveProductImage` + `getProductImageUrl` from the same pipeline as `ProductCard`
-- Replace raw `item.product.thumbnail_url` with `resolveProductImage(item.product)` 
-- Add tag badges (top-left) matching `ProductCard` style
-- Keep studio-specific hover overlay (Add to Composition, View Details)
+**`src/pages/DesignerStudio.tsx`** — Full rewrite
 
-#### 2. `src/pages/DesignerStudioDashboard.tsx` (lines 459-620, Library section)
-- Replace the library data source: instead of only `useUserLibrary(teamId)` items, **also fetch all products** via `useProducts({})` to show the full catalog
-- Add a toggle/tab: "All Products" vs "My Library" (favourited/saved items)
-- Reuse `ProductsSidebar` or its filter logic (category families: Hardware, Soft Trims, Branding Trims) for consistency with `/products`
+- **Section 1 — Minimal bar** (replaces the heavy hero): White background, no grid pattern, no StudioPreview. Just a `py-12` section with "Designer Studio" label, a short one-line tagline, and two small CTAs side by side. Clean and understated.
 
-#### 3. `src/components/products/ProductCard.tsx` (lines 77-85)
-- Add a 3D/OBJ badge (top-right) when `product.model_url` exists — same style as `LibraryItemCard`'s existing "3D" badge
-- This makes the public catalog also indicate OBJ availability
+- **Section 2 — Product library**: Import `useProducts`, `useProductTaxonomy`, `ProductCard`. Add a search `Input`, category family chips (from taxonomy), and a `grid-cols-2 sm:grid-cols-3 lg:grid-cols-4` grid of `ProductCard` components. Cards link to `/products/:slug`. This is the main content of the page.
 
-#### 4. `src/components/designer-studio/LibraryItemCard.tsx` (lines 37-70, image + badges)
-- Use `resolveProductImage(item.product as Product)` for the image `src`
-- Show `product.tags` as badge chips (matching ProductCard)
-- Show cert badge if certifications exist
+- **Section 3 — Bottom CTA**: Keep the dark band with "Request Access" CTA and the 3-step onboarding, but combine into one compact section. Remove the login form and capabilities grid entirely.
 
-#### 5. `src/pages/DesignerStudioDashboard.tsx` (lines 580)
-- Update grid columns to match `/products` grid: `grid-cols-2 sm:grid-cols-3 lg:grid-cols-4` (currently goes up to `6xl:grid-cols-6` which is too dense)
+**`src/components/products/ProductCard.tsx`** — Add optional `linkTo` prop so cards can navigate to product detail from this page.
 
-### Files to Edit
+### Files
 
-| File | What changes |
-|------|-------------|
-| `src/components/designer-studio/LibraryItemCard.tsx` | Use shared image resolver; add tag/cert/3D badges matching ProductCard |
-| `src/components/products/ProductCard.tsx` | Add 3D/OBJ badge when `model_url` present |
-| `src/pages/DesignerStudioDashboard.tsx` | Add full catalog browsing (useProducts), "All Products / My Library" toggle, align grid density |
-| `src/lib/productImage.ts` | No changes needed (already shared) |
-
-### Summary
-
-- **5 files touched**, 3 with significant edits
-- Library becomes a full catalog browser with studio actions layered on top
-- Image pipeline unified so regenerated images appear everywhere
-- 3D/OBJ badge added to both public and studio cards
-- Grid density and filter UX aligned between the two views
+| File | Change |
+|------|--------|
+| `src/pages/DesignerStudio.tsx` | Full rewrite: minimal bar + product grid + compact CTA |
+| `src/components/products/ProductCard.tsx` | Add `linkTo` prop |
 

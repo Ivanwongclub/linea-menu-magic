@@ -222,30 +222,30 @@ const Header = () => {
                 if (link.megaMenu === "segments") {
                   return (
                     <div key={link.href} className="relative" ref={segmentsRef} onMouseEnter={handleSegmentsEnter} onMouseLeave={handleSegmentsLeave}>
-                      <button className={linkClass(false) + " flex items-center gap-1"}>
+                      <Link to="/products?segment=apparel" onClick={closeAllMenus} className={linkClass(false) + " flex items-center gap-1"}>
                         {link.label}
                         <ChevronDown size={14} className={`transition-transform duration-200 ${isSegmentsOpen ? "rotate-180" : ""}`} />
-                      </button>
+                      </Link>
                     </div>
                   );
                 }
                 if (link.megaMenu === "products") {
                   return (
                     <div key={link.href} className="relative" onMouseEnter={handleProductsEnter} onMouseLeave={handleProductsLeave}>
-                      <button className={linkClass(isActive(link.href)) + " flex items-center gap-1"}>
+                      <Link to="/products" onClick={closeAllMenus} className={linkClass(isActive(link.href)) + " flex items-center gap-1"}>
                         {link.label}
                         <ChevronDown size={14} className={`transition-transform duration-200 ${isProductsOpen ? "rotate-180" : ""}`} />
-                      </button>
+                      </Link>
                     </div>
                   );
                 }
                 if (link.megaMenu === "about") {
                   return (
                     <div key={link.href} className="relative" onMouseEnter={handleAboutEnter} onMouseLeave={handleAboutLeave}>
-                      <button className={linkClass(isActive(link.href)) + " flex items-center gap-1"}>
+                      <Link to="/about" onClick={closeAllMenus} className={linkClass(isActive(link.href)) + " flex items-center gap-1"}>
                         {link.label}
                         <ChevronDown size={14} className={`transition-transform duration-200 ${isAboutOpen ? "rotate-180" : ""}`} />
-                      </button>
+                      </Link>
                     </div>
                   );
                 }
@@ -259,13 +259,13 @@ const Header = () => {
 
             {/* CTA buttons */}
             <div className="hidden lg:flex items-center space-x-3 ml-auto">
-              <Link to="/contact">
+              <Link to="/contact" onClick={closeAllMenus}>
                 <Button
                   size="sm"
                   className={
                     isTransparent
-                      ? "border border-white/60 bg-white/10 text-white hover:bg-white hover:text-foreground transition-all duration-200"
-                      : "border border-border bg-transparent text-foreground/70 hover:bg-foreground hover:text-background hover:border-foreground transition-all duration-200"
+                      ? "border border-white/60 bg-white/10 text-white hover:bg-white hover:text-foreground hover:border-white transition-all duration-200"
+                      : "border border-border bg-transparent text-foreground hover:bg-foreground hover:text-background hover:border-foreground transition-all duration-200"
                   }
                 >
                   Contact
