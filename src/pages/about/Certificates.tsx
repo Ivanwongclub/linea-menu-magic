@@ -1,60 +1,76 @@
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
-import { Award, Shield, Leaf, CheckCircle, FileCheck, Globe } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
+import certIso9001 from "@/assets/certs/iso-9001.png";
+import certIso14001 from "@/assets/certs/iso-14001.png";
+import certOekoTex from "@/assets/certs/oeko-tex.png";
+import certGrs from "@/assets/certs/grs.png";
+import certBsci from "@/assets/certs/bsci.png";
+import certReach from "@/assets/certs/reach.png";
+import certSmeta from "@/assets/certs/smeta.png";
+import certHigg from "@/assets/certs/higg-index.png";
 
 const Certificates = () => {
-  const { ref: certsRef, isVisible: certsVisible, getDelay: getCertsDelay } = useStaggeredAnimation(6, 100);
+  const { ref: certsRef, isVisible: certsVisible, getDelay: getCertsDelay } = useStaggeredAnimation(8, 100);
   const { ref: standardsRef, isVisible: standardsVisible, getDelay: getStandardsDelay } = useStaggeredAnimation(4, 150);
   const { ref: commitmentRef, isVisible: commitmentVisible } = useScrollAnimation();
 
   const certificates = [
     {
-      icon: Shield,
+      logo: certIso9001,
       name: "ISO 9001:2015",
       category: "Quality Management System",
       description: "Internationally recognised quality management system ensuring products and services consistently meet customer requirements.",
-      validUntil: "2027",
       scope: "Buttons, zippers, and metal accessories production",
     },
     {
-      icon: Leaf,
+      logo: certOekoTex,
       name: "OEKO-TEX® Standard 100",
       category: "Eco-safety Certification",
       description: "Certifies that products are harmless to human health, free from harmful substances, and suitable for infants and sensitive skin.",
-      validUntil: "2025",
       scope: "Full range of garment accessories",
     },
     {
-      icon: Globe,
+      logo: certGrs,
       name: "GRS (Global Recycled Standard)",
       category: "Global Recycled Standard",
       description: "International standard verifying recycled content in products, ensuring traceability and environmental compliance.",
-      validUntil: "2025",
       scope: "Recycled material product lines",
     },
     {
-      icon: FileCheck,
+      logo: certIso14001,
       name: "ISO 14001:2015",
       category: "Environmental Management System",
       description: "Demonstrates corporate commitment to environmental protection, including resource conservation and pollution prevention.",
-      validUntil: "2026",
       scope: "Production facilities and operations",
     },
     {
-      icon: Award,
+      logo: certBsci,
       name: "BSCI (Business Social Compliance Initiative)",
       category: "Social Responsibility Certification",
       description: "Ensures supply chain compliance with international labour standards and social responsibility requirements.",
-      validUntil: "2025",
       scope: "All production bases",
     },
     {
-      icon: CheckCircle,
+      logo: certReach,
       name: "REACH Compliance",
       category: "EU Chemical Regulation",
       description: "Product compliance certification meeting EU regulations on registration, evaluation, authorisation and restriction of chemicals.",
-      validUntil: "Ongoing",
       scope: "Products exported to EU markets",
+    },
+    {
+      logo: certSmeta,
+      name: "SMETA (Sedex Members Ethical Trade Audit)",
+      category: "Ethical Trade Audit",
+      description: "A comprehensive social audit methodology covering labour standards, health & safety, environment, and business ethics across our supply chain.",
+      scope: "All manufacturing facilities",
+    },
+    {
+      logo: certHigg,
+      name: "Higg Index",
+      category: "Sustainability Assessment",
+      description: "Industry-standard suite of tools measuring environmental, social and labour impacts across the value chain for continuous improvement.",
+      scope: "Production operations and supply chain",
     },
   ];
 
@@ -95,7 +111,7 @@ const Certificates = () => {
               <h2 className="text-2xl font-light text-foreground mb-2">International Certifications</h2>
               <p className="text-sm text-muted-foreground">Our key international certifications and compliance credentials</p>
             </div>
-          <div ref={certsRef} className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div ref={certsRef} className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {certificates.map((cert, index) => (
               <div 
                 key={index}
@@ -104,9 +120,8 @@ const Certificates = () => {
                 }`}
                 style={getCertsDelay(index)}
               >
-                <div className="flex items-start justify-between mb-4">
-                  <cert.icon className="w-8 h-8 text-foreground/60 group-hover:text-foreground/80 transition-colors duration-300" strokeWidth={1.5} />
-                  <span className="text-xs text-muted-foreground bg-secondary px-2 py-1">Valid until {cert.validUntil}</span>
+                <div className="flex items-center justify-center h-20 mb-5">
+                  <img src={cert.logo} alt={cert.name} className="h-16 w-auto object-contain" />
                 </div>
                 <h3 className="text-lg font-light text-foreground mb-1">{cert.name}</h3>
                 <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3">{cert.category}</p>
