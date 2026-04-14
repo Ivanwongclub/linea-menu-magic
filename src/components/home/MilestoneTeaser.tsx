@@ -228,7 +228,7 @@ const MilestoneCard = ({
               width={800}
               height={608}
               loading="lazy"
-              className="w-full h-20 object-cover"
+              className="w-full h-32 object-cover"
             />
           </div>
         )}
@@ -242,7 +242,7 @@ const MilestoneCard = ({
             {m.year}
           </span>
           <h3 className="text-sm font-semibold text-foreground mt-1 leading-snug">{m.title}</h3>
-          <p className="text-xs text-foreground/45 mt-1 leading-relaxed">{m.desc}</p>
+          <p className="text-xs text-foreground/45 mt-1 leading-relaxed text-justify">{m.desc}</p>
         </div>
       </div>
     );
@@ -263,7 +263,7 @@ const MilestoneCard = ({
             width={800}
             height={608}
             loading="lazy"
-            className="w-full h-16 object-cover"
+            className="w-full h-28 object-cover"
           />
         </div>
       )}
@@ -271,7 +271,7 @@ const MilestoneCard = ({
         {m.year}
       </span>
       <h3 className="text-sm font-semibold text-foreground mt-1 leading-snug">{m.title}</h3>
-      <p className="text-xs text-foreground/45 mt-1 leading-relaxed">{m.desc}</p>
+      <p className="text-xs text-foreground/45 mt-1 leading-relaxed text-justify">{m.desc}</p>
     </div>
   );
 };
