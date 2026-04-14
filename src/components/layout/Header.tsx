@@ -206,7 +206,7 @@ const Header = () => {
                 <span className={`text-[28px] font-extrabold tracking-[0.06em] transition-colors duration-300 ${isTransparent ? "text-white" : "text-foreground"}`}>
                   WIN-CYC
                 </span>
-                <span className={`text-[11px] font-normal uppercase tracking-[0.28em] transition-colors duration-300 ${isTransparent ? "text-white/70" : "text-foreground/50"}`}>
+                <span className={`text-[12px] lg:text-[16px] tracking-[0.12em] uppercase transition-colors duration-300 ${isTransparent ? "text-white/70" : "text-foreground"}`}>
                   Group Limited
                 </span>
               </div>
