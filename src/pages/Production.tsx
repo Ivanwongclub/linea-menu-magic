@@ -2,7 +2,7 @@ import { useState, useMemo, Suspense } from "react";
 import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
 import { Link } from "react-router-dom";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
-import { ArrowRight, CheckCircle, Box, Images, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight, CheckCircle, Box, Images } from "lucide-react";
 import ObjGallery from "@/components/production/ObjGallery";
 import PrintGallery from "@/components/production/PrintGallery";
 import factoryProductionImg from "@/assets/factory-production.jpg";
@@ -278,34 +278,6 @@ export default function Production() {
                 const isLast = matIndex >= filtered.length - 1;
                 return (
                   <div className="relative">
-                    {/* Prev / Next */}
-                    <div className="flex items-center justify-between mb-6">
-                      <span className="text-[13px] text-muted-foreground">
-                        {matIndex + 1} / {filtered.length}
-                      </span>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => setMatIndex((i) => Math.max(0, i - 1))}
-                          disabled={isFirst}
-                          className={`w-10 h-10 flex items-center justify-center border transition-colors duration-150 ${
-                            isFirst ? "border-border text-muted-foreground/30 cursor-not-allowed" : "border-foreground/20 text-foreground hover:bg-foreground hover:text-background"
-                          }`}
-                        >
-                          <ChevronLeft size={18} />
-                        </button>
-                        <button
-                          onClick={() => setMatIndex((i) => Math.min(filtered.length - 1, i + 1))}
-                          disabled={isLast}
-                          className={`w-10 h-10 flex items-center justify-center border transition-colors duration-150 ${
-                            isLast ? "border-border text-muted-foreground/30 cursor-not-allowed" : "border-foreground/20 text-foreground hover:bg-foreground hover:text-background"
-                          }`}
-                        >
-                          <ChevronRight size={18} />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Active material row */}
                     <div
                       key={mat.id}
                       className={`flex flex-col ${matIndex % 2 === 1 ? "lg:flex-row-reverse" : "lg:flex-row"} gap-8 lg:gap-14 items-center transition-opacity duration-300`}
