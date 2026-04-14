@@ -89,6 +89,7 @@ export default function Production() {
   const { ref: capRef, isVisible: capVisible, getDelay: getCapDelay } = useStaggeredAnimation(6, 80);
   const { ref: qualRef, isVisible: qualVisible } = useScrollAnimation({ threshold: 0.2 });
   const [activeCategory, setActiveCategory] = useState(0);
+  const [galleryOpen, setGalleryOpen] = useState(false);
 
   return (
     <>
@@ -155,6 +156,20 @@ export default function Production() {
                         </li>
                       ))}
                     </ul>
+
+                    {/* 3D Gallery trigger — only on Design & Development step */}
+                    {(step as any).showGallery && (
+                      <button
+                        onClick={() => setGalleryOpen(true)}
+                        className="group mt-6 inline-flex items-center gap-3 px-5 py-3 border border-foreground/20 hover:border-foreground hover:bg-foreground hover:text-background transition-all duration-300 text-[13px] font-medium tracking-wide"
+                      >
+                        <Box size={16} />
+                        View 3D Prototypes
+                        <span className="text-[11px] opacity-50 ml-1">
+                          4 models
+                        </span>
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
