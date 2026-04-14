@@ -228,7 +228,8 @@ const Header = () => {
                       </Link>
                     </div>
                   );
-                }
+                if (link.megaMenu === "about") {
+                  return (
                     <div key={link.href} className="relative" onMouseEnter={handleAboutEnter} onMouseLeave={handleAboutLeave}>
                       <Link to="/about" onClick={closeAllMenus} className={linkClass(isActive(link.href)) + " flex items-center gap-1"}>
                         {link.label}
