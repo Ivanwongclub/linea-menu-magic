@@ -349,7 +349,7 @@ const Header = () => {
                       <div className="flex flex-col gap-6">
                         {active.categories.map((group) => (
                           <div key={group.family}>
-                            <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground block mb-3">
+                            <span className="text-[14px] font-semibold uppercase tracking-[0.10em] text-foreground block mb-3">
                               {group.family}
                             </span>
                             <div className="grid gap-[6px]" style={{ gridTemplateColumns: "repeat(5, 140px)" }}>
