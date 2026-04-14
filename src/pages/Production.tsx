@@ -23,9 +23,10 @@ const workflowSteps = [
   {
     number: "01",
     title: "Design & Development",
-    body: "From initial concept to production-ready specification. Our development team works directly with clients on mould design, 3D prototyping, finish selection, and material sourcing — turning ideas into trim-ready samples.",
-    bullets: ["3D Artwork & Prototyping", "Custom Mould Design", "Finish & Colour Matching"],
+    body: "From initial concept to production-ready specification. Our development team works directly with clients on 3D prototyping, finish selection, and material sourcing — turning ideas into trim-ready samples.",
+    bullets: ["3D Artwork & Prototyping"],
     image: valueInnovationImg,
+    showGallery: true,
   },
   {
     number: "02",
