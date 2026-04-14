@@ -501,7 +501,7 @@ const DesignerStudioDashboard = () => {
                   <div>
                     <h2 className="text-lg font-semibold text-foreground">Component Library</h2>
                     <p className="text-xs text-muted-foreground">
-                      {libraryItems.length} components{libraryItems[0]?.team_name ? ` · ${libraryItems[0].team_name}` : ''}
+                      {filteredLibraryItems.length} components
                     </p>
                   </div>
                 </div>
@@ -511,6 +511,30 @@ const DesignerStudioDashboard = () => {
                     <span className="hidden sm:inline">Add Component</span>
                   </Button>
                 </div>
+              </div>
+
+              {/* All Products / My Library toggle */}
+              <div className="flex items-center gap-1 mb-4 bg-[hsl(var(--muted))] rounded-[var(--radius)] p-0.5 w-fit">
+                <button
+                  onClick={() => setLibrarySource('all')}
+                  className={`px-3 py-1.5 text-xs font-medium uppercase tracking-[0.06em] rounded-[calc(var(--radius)-2px)] transition-colors ${
+                    librarySource === 'all'
+                      ? 'bg-[hsl(var(--background))] text-[hsl(var(--foreground))] shadow-sm'
+                      : 'text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]'
+                  }`}
+                >
+                  All Products ({catalogProducts.length})
+                </button>
+                <button
+                  onClick={() => setLibrarySource('my')}
+                  className={`px-3 py-1.5 text-xs font-medium uppercase tracking-[0.06em] rounded-[calc(var(--radius)-2px)] transition-colors ${
+                    librarySource === 'my'
+                      ? 'bg-[hsl(var(--background))] text-[hsl(var(--foreground))] shadow-sm'
+                      : 'text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]'
+                  }`}
+                >
+                  My Library ({libraryItems.length})
+                </button>
               </div>
 
               {/* Library Filters */}
