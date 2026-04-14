@@ -159,7 +159,6 @@ export default function Production() {
                       ))}
                     </ul>
 
-                    {/* 3D Gallery trigger — only on Design & Development step */}
                     {(step as any).showGallery && (
                       <button
                         onClick={() => setGalleryOpen(true)}
@@ -167,13 +166,9 @@ export default function Production() {
                       >
                         <Box size={16} />
                         View 3D Prototypes
-                        <span className="text-[11px] opacity-50 ml-1">
-                          4 models
-                        </span>
                       </button>
                     )}
 
-                    {/* Print Gallery trigger — only on Production step */}
                     {(step as any).showPrintGallery && (
                       <button
                         onClick={() => setPrintGalleryOpen(true)}
@@ -181,9 +176,6 @@ export default function Production() {
                       >
                         <Images size={16} />
                         View Prototype Gallery
-                        <span className="text-[11px] opacity-50 ml-1">
-                          4 samples
-                        </span>
                       </button>
                     )}
                   </div>
