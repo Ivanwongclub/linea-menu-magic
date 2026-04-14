@@ -17,7 +17,6 @@ import type {
 } from '@/features/products/types';
 import {
   PRODUCT_FAMILIES,
-  PRODUCT_SEGMENTS,
   getFamilyForCategory,
 } from '@/features/products/taxonomy';
 
@@ -29,12 +28,20 @@ interface Taxonomy {
   tags: ProductTag[];
 }
 
+interface Collection {
+  slug: string;
+  label: string;
+}
+
 interface ProductsSidebarProps {
   filters: ProductFilters;
   setFilters: (updates: Partial<ProductFilters>) => void;
   taxonomy: Taxonomy;
   productCount: number;
   categoryCounts?: Record<string, number>;
+  collections?: Collection[];
+  activeCollection?: string | null;
+  setActiveCollection?: (slug: string | null) => void;
 }
 
 function toggleArrayFilter(
@@ -94,6 +101,9 @@ export default function ProductsSidebar({
   taxonomy,
   productCount,
   categoryCounts,
+  collections,
+  activeCollection,
+  setActiveCollection,
 }: ProductsSidebarProps) {
   const [localSearch, setLocalSearch] = useState(filters.search ?? '');
   const debouncedSearch = useDebouncedValue(localSearch, 300);
@@ -126,7 +136,8 @@ export default function ProductsSidebar({
       certifications: undefined,
       tags: undefined,
     });
-  }, [setFilters]);
+    setActiveCollection?.(null);
+  }, [setFilters, setActiveCollection]);
 
   // Group categories by family for structured display
   const familyGroups = useMemo(() => {
@@ -149,38 +160,72 @@ export default function ProductsSidebar({
 
   return (
     <div className="space-y-0">
-      <div className="flex items-center justify-between mb-4">
-        <span className="text-sm font-semibold text-foreground">Filters</span>
-        {hasActiveFilters(filters) && (
-          <button
-            onClick={clearAll}
-            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Clear
-          </button>
-        )}
-      </div>
 
-      <div className="relative mb-5">
-        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          value={localSearch}
-          onChange={(e) => setLocalSearch(e.target.value)}
-          placeholder="Search by name or code..."
-          className="h-9 text-sm pl-8 pr-8"
-        />
-        {localSearch && (
-          <button
-            onClick={() => {
-              setLocalSearch('');
-              lastPushed.current = '';
-              setFilters({ search: undefined });
-            }}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2"
-          >
-            <X className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
-          </button>
-        )}
+      {/* Collections section — top of sidebar */}
+      {collections && collections.length > 0 && (
+        <div className="mb-1">
+          <SectionHeading isFirst>Collections</SectionHeading>
+          <div className="space-y-1 pb-4">
+            {collections.map((col) => (
+              <button
+                key={col.slug}
+                onClick={() =>
+                  setActiveCollection?.(activeCollection === col.slug ? null : col.slug)
+                }
+                className={`w-full text-left text-sm px-0 py-1.5 transition-colors duration-150 flex items-center gap-2 ${
+                  activeCollection === col.slug
+                    ? 'text-foreground font-medium'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <span
+                  className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                    activeCollection === col.slug ? 'bg-foreground' : 'bg-transparent border border-border'
+                  }`}
+                />
+                {col.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Search with Clear all inline */}
+      <div className="border-t border-border pt-4 mb-5">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-[10px] font-medium uppercase tracking-[0.1em] text-muted-foreground">
+            Search
+          </span>
+          {hasActiveFilters(filters) && (
+            <button
+              onClick={clearAll}
+              className="text-[10px] text-muted-foreground hover:text-foreground transition-colors uppercase tracking-[0.08em]"
+            >
+              Clear all
+            </button>
+          )}
+        </div>
+        <div className="relative">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            value={localSearch}
+            onChange={(e) => setLocalSearch(e.target.value)}
+            placeholder="Search by name or code..."
+            className="h-9 text-sm pl-8 pr-8"
+          />
+          {localSearch && (
+            <button
+              onClick={() => {
+                setLocalSearch('');
+                lastPushed.current = '';
+                setFilters({ search: undefined });
+              }}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2"
+            >
+              <X className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
+            </button>
+          )}
+        </div>
       </div>
 
       <FilterSection label="Product Family" defaultOpen isFirst>
@@ -268,27 +313,8 @@ export default function ProductsSidebar({
         </div>
       </FilterSection>
 
-      <FilterSection label="Segment" defaultOpen>
-        <div className="space-y-2">
-          {PRODUCT_SEGMENTS.map((seg) => (
-            <div key={seg.slug} className="flex items-center gap-2">
-              <Checkbox
-                id={`seg-${seg.slug}`}
-                checked={filters.segments?.includes(seg.slug) ?? false}
-                onCheckedChange={() =>
-                  setFilters({ segments: toggleArrayFilter(filters.segments, seg.slug) })
-                }
-              />
-              <label
-                htmlFor={`seg-${seg.slug}`}
-                className="text-sm text-foreground cursor-pointer"
-              >
-                {seg.name}
-              </label>
-            </div>
-          ))}
-        </div>
-      </FilterSection>
+
+
 
 
       <FilterSection label="Material" defaultOpen={false}>

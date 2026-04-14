@@ -264,6 +264,9 @@ export default function Products() {
     taxonomy,
     productCount: totalCount,
     categoryCounts,
+    collections: COLLECTIONS,
+    activeCollection,
+    setActiveCollection,
   };
 
   return (
@@ -279,30 +282,8 @@ export default function Products() {
           ]}
         />
 
-        {/* Collections Browse Band */}
-        <div className="border-b border-border bg-secondary/30">
-          <div className="max-w-7xl mx-auto px-6 lg:px-8 py-3">
-            <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide">
-              <span className="text-xs font-semibold uppercase tracking-[0.1em] text-foreground whitespace-nowrap">
-                Collections
-              </span>
-              <span className="w-px h-4 bg-border flex-shrink-0" />
-              {COLLECTIONS.map((col) => (
-                <button
-                  key={col.slug}
-                  onClick={() => setActiveCollection(activeCollection === col.slug ? null : col.slug)}
-                  className={`whitespace-nowrap text-xs px-3.5 py-1.5 rounded-none border transition-colors flex-shrink-0 ${
-                    activeCollection === col.slug
-                      ? 'bg-foreground text-background border-foreground'
-                      : 'bg-background text-foreground border-border hover:border-foreground/30'
-                  }`}
-                >
-                  {col.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+
+
 
         {/* Active chips */}
         <div className="px-6 lg:px-8 min-h-[44px] flex items-center">
