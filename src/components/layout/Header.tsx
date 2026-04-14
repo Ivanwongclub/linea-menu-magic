@@ -212,10 +212,10 @@ const Header = () => {
                 if (link.megaMenu === "segments") {
                   return (
                     <div key={link.href} className="relative" ref={segmentsRef} onMouseEnter={handleSegmentsEnter} onMouseLeave={handleSegmentsLeave}>
-                      <button className={linkClass(false) + " flex items-center gap-1"}>
+                      <Link to="/products?segment=apparel" onClick={closeAllMenus} className={linkClass(false) + " flex items-center gap-1"}>
                         {link.label}
                         <ChevronDown size={14} className={`transition-transform duration-200 ${isSegmentsOpen ? "rotate-180" : ""}`} />
-                      </button>
+                      </Link>
                     </div>
                   );
                 }
