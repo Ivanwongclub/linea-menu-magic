@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Menu, X, ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PRODUCT_FAMILIES, PRODUCT_SEGMENTS, PRODUCT_SEGMENT_DETAILS } from "@/features/products/taxonomy";
+import { PRODUCT_FAMILIES, PRODUCT_SEGMENT_DETAILS } from "@/features/products/taxonomy";
 import aboutHeritageImg from "@/assets/about-heritage.jpg";
 import heritageCraftImg from "@/assets/heritage-craftsmanship.jpg";
 import aboutShowroomImg from "@/assets/about-showroom.jpg";
@@ -11,83 +11,61 @@ import foundersImg from "@/assets/founders.png";
 
 const SUPABASE_IMG = "https://otkuqwpsgxzlaxbclbfi.supabase.co/storage/v1/object/public/product-assets/images";
 
-/* ---------- About mega-menu data ---------- */
-interface AboutLink {
-  label?: string;
-  href?: string;
-  image?: string;
-  divider?: true;
-}
+// ─── About flat link list ──────────────────────────────────────────────────────
+interface AboutLink { label?: string; href?: string; image?: string; divider?: true; }
 
 const ABOUT_LINKS: AboutLink[] = [
-  { label: "About WIN-CYC", href: "/about", image: aboutHeritageImg },
-  { label: "Our Story", href: "/about/our-story", image: aboutHeritageImg },
-  { label: "Factory", href: "/about/factory", image: heritageCraftImg },
-  { label: "Certificates", href: "/about/certificates", image: aboutShowroomImg },
-  { label: "Sustainability", href: "/sustainability", image: aboutShowroomImg },
+  { label: "About WIN-CYC",  href: "/about",              image: aboutHeritageImg  },
+  { label: "Our Story",      href: "/about/our-story",    image: aboutHeritageImg  },
+  { label: "Factory",        href: "/about/factory",      image: heritageCraftImg  },
+  { label: "Certificates",   href: "/about/certificates", image: aboutShowroomImg  },
+  { label: "Sustainability", href: "/sustainability",      image: aboutShowroomImg  },
   { divider: true },
-  { label: "News", href: "/news", image: aboutHeritageImg },
+  { label: "News",           href: "/news",               image: aboutHeritageImg  },
 ];
 
 const ABOUT_DEFAULT_PREVIEW = aboutHeritageImg;
 
 const ABOUT_TRUST_CARDS = [
-  {
-    title: "Heritage",
-    description: "Four decades of craftsmanship excellence",
-    href: "/about/our-story",
-    image: foundersImg,
-  },
-  {
-    title: "Manufacturing",
-    description: "Precision production at scale",
-    href: "/about/factory",
-    image: heritageCraftImg,
-  },
-  {
-    title: "Responsibility",
-    description: "Certified sustainable operations",
-    href: "/sustainability",
-    image: aboutShowroomImg,
-  },
+  { title: "Heritage",       description: "Four decades of craftsmanship excellence", href: "/about/our-story", image: foundersImg      },
+  { title: "Manufacturing",  description: "Precision production at scale",            href: "/about/factory",   image: heritageCraftImg },
+  { title: "Responsibility", description: "Certified sustainable operations",         href: "/sustainability",  image: aboutShowroomImg },
 ];
 
+// ─── Products families ─────────────────────────────────────────────────────────
 const MEGA_FAMILIES = [
   {
-    name: "Hardware",
-    slug: "hardware",
+    name: "Hardware", slug: "hardware",
     image: `${SUPABASE_IMG}/91013630-38c1-49fc-b21c-f0b052caca09/ai-primary.png`,
     subcategories: [
-      { en: "Buttons", image: `${SUPABASE_IMG}/91013630-38c1-49fc-b21c-f0b052caca09/ai-primary.png` },
-      { en: "Snap Buttons", image: `${SUPABASE_IMG}/50bff7ed-c214-4b36-9b86-5073db4eccac/ai-primary.png` },
-      { en: "Jeans Buttons", image: `${SUPABASE_IMG}/ed2f489e-41f8-4353-aa71-b8172e544863/ai-primary.png` },
-      { en: "Shank Buttons", image: `${SUPABASE_IMG}/401d7742-6f57-4e6b-ba5e-b1b23d6bf971/ai-primary.png` },
-      { en: "Buckles", image: `${SUPABASE_IMG}/1b856a91-9c8e-494a-b8c2-9e7ccb67e962/ai-primary.png` },
-      { en: "Eyelets", image: `${SUPABASE_IMG}/09257e7e-b145-4e9a-bd0d-4886ca83acdc/ai-primary.png` },
-      { en: "Hook & Eyes", image: `${SUPABASE_IMG}/0f758dff-bca5-4f78-8ca1-7729d2c43064/ai-primary.png` },
-      { en: "Rivets", image: `${SUPABASE_IMG}/3995a056-b671-4d61-9875-a02e89aa1f36/ai-primary.png` },
+      { en: "Buttons",        image: `${SUPABASE_IMG}/91013630-38c1-49fc-b21c-f0b052caca09/ai-primary.png` },
+      { en: "Snap Buttons",   image: `${SUPABASE_IMG}/50bff7ed-c214-4b36-9b86-5073db4eccac/ai-primary.png` },
+      { en: "Jeans Buttons",  image: `${SUPABASE_IMG}/ed2f489e-41f8-4353-aa71-b8172e544863/ai-primary.png` },
+      { en: "Shank Buttons",  image: `${SUPABASE_IMG}/401d7742-6f57-4e6b-ba5e-b1b23d6bf971/ai-primary.png` },
+      { en: "Buckles",        image: `${SUPABASE_IMG}/1b856a91-9c8e-494a-b8c2-9e7ccb67e962/ai-primary.png` },
+      { en: "Eyelets",        image: `${SUPABASE_IMG}/09257e7e-b145-4e9a-bd0d-4886ca83acdc/ai-primary.png` },
+      { en: "Hook & Eyes",    image: `${SUPABASE_IMG}/0f758dff-bca5-4f78-8ca1-7729d2c43064/ai-primary.png` },
+      { en: "Rivets",         image: `${SUPABASE_IMG}/3995a056-b671-4d61-9875-a02e89aa1f36/ai-primary.png` },
       { en: "Zipper Pullers", image: `${SUPABASE_IMG}/91013630-38c1-49fc-b21c-f0b052caca09/ai-primary.png` },
-      { en: "Toggles", image: `${SUPABASE_IMG}/50bff7ed-c214-4b36-9b86-5073db4eccac/ai-primary.png` },
-      { en: "Cord Ends", image: `${SUPABASE_IMG}/ed2f489e-41f8-4353-aa71-b8172e544863/ai-primary.png` },
-      { en: "Cord Stoppers", image: `${SUPABASE_IMG}/401d7742-6f57-4e6b-ba5e-b1b23d6bf971/ai-primary.png` },
-      { en: "Beads", image: `${SUPABASE_IMG}/1edb747d-3fde-472f-a019-2c5dec81e938/ai-primary.png` },
+      { en: "Toggles",        image: `${SUPABASE_IMG}/50bff7ed-c214-4b36-9b86-5073db4eccac/ai-primary.png` },
+      { en: "Cord Ends",      image: `${SUPABASE_IMG}/ed2f489e-41f8-4353-aa71-b8172e544863/ai-primary.png` },
+      { en: "Cord Stoppers",  image: `${SUPABASE_IMG}/401d7742-6f57-4e6b-ba5e-b1b23d6bf971/ai-primary.png` },
+      { en: "Beads",          image: `${SUPABASE_IMG}/1edb747d-3fde-472f-a019-2c5dec81e938/ai-primary.png` },
     ],
   },
   {
-    name: "Soft Trims",
-    slug: "soft-trims",
+    name: "Soft Trims", slug: "soft-trims",
     image: `${SUPABASE_IMG}/40360bf7-eaae-427f-a800-c2a0514d198d/ai-primary.png`,
     subcategories: [
       { en: "Drawcords", image: `${SUPABASE_IMG}/40360bf7-eaae-427f-a800-c2a0514d198d/ai-primary.png` },
-      { en: "Webbing", image: `${SUPABASE_IMG}/ff60f673-8158-4f58-a095-777a8f7b8db6/ai-primary.png` },
+      { en: "Webbing",   image: `${SUPABASE_IMG}/ff60f673-8158-4f58-a095-777a8f7b8db6/ai-primary.png` },
     ],
   },
   {
-    name: "Branding Trims",
-    slug: "branding-trims",
+    name: "Branding Trims", slug: "branding-trims",
     image: `${SUPABASE_IMG}/ff60f673-8158-4f58-a095-777a8f7b8db6/ai-primary.png`,
     subcategories: [
-      { en: "Badges", image: `${SUPABASE_IMG}/40360bf7-eaae-427f-a800-c2a0514d198d/ai-primary.png` },
+      { en: "Badges",  image: `${SUPABASE_IMG}/40360bf7-eaae-427f-a800-c2a0514d198d/ai-primary.png` },
       { en: "Patches", image: `${SUPABASE_IMG}/ff60f673-8158-4f58-a095-777a8f7b8db6/ai-primary.png` },
     ],
   },
@@ -99,27 +77,28 @@ function slugify(name: string) {
 
 const DEFAULT_PREVIEW = MEGA_FAMILIES[0].image;
 
+// ─── Component ─────────────────────────────────────────────────────────────────
 const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isSegmentsOpen, setIsSegmentsOpen] = useState(false);
-  const [isAboutOpen, setIsAboutOpen] = useState(false);
-  const [isProductsOpen, setIsProductsOpen] = useState(false);
-  const [mobileSegmentsOpen, setMobileSegmentsOpen] = useState(false);
+  const [isMenuOpen,         setIsMenuOpen]         = useState(false);
+  const [isAboutOpen,        setIsAboutOpen]        = useState(false);
+  const [isProductsOpen,     setIsProductsOpen]     = useState(false);
+  const [isSegmentsOpen,     setIsSegmentsOpen]     = useState(false);
   const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
-  const [mobileAboutOpen, setMobileAboutOpen] = useState(false);
-  const [activeSegmentSlug, setActiveSegmentSlug] = useState<string>(PRODUCT_SEGMENTS[0]?.slug ?? "apparel");
-  const [scrolled, setScrolled] = useState(false);
-  const [previewImage, setPreviewImage] = useState(DEFAULT_PREVIEW);
-  const [previewLabel, setPreviewLabel] = useState("Hardware");
-  const [aboutPreviewImage, setAboutPreviewImage] = useState(ABOUT_DEFAULT_PREVIEW);
-  const [aboutPreviewLabel, setAboutPreviewLabel] = useState("Our Story");
-  const { pathname } = useLocation();
-  const navigate = useNavigate();
-  const segmentsTimeout = useRef<ReturnType<typeof setTimeout>>();
-  const productsTimeout = useRef<ReturnType<typeof setTimeout>>();
-  const aboutTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const [mobileAboutOpen,    setMobileAboutOpen]    = useState(false);
+  const [mobileSegmentsOpen, setMobileSegmentsOpen] = useState(false);
+  const [scrolled,           setScrolled]           = useState(false);
+  const [previewImage,       setPreviewImage]       = useState(DEFAULT_PREVIEW);
+  const [previewLabel,       setPreviewLabel]       = useState("Hardware");
+  const [aboutPreviewImage,  setAboutPreviewImage]  = useState(ABOUT_DEFAULT_PREVIEW);
+  const [aboutPreviewLabel,  setAboutPreviewLabel]  = useState("Our Story");
+  const [activeSegmentSlug,  setActiveSegmentSlug]  = useState("apparel");
 
-  const isHeroPage = pathname === "/";
+  const { pathname } = useLocation();
+  const productsTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const aboutTimeout    = useRef<ReturnType<typeof setTimeout>>();
+  const segmentsTimeout = useRef<ReturnType<typeof setTimeout>>();
+
+  const isHeroPage    = pathname === "/";
   const isTransparent = isHeroPage && !scrolled;
 
   useEffect(() => {
@@ -134,76 +113,46 @@ const Header = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mega menu on route change
   useEffect(() => {
-    setIsSegmentsOpen(false);
     setIsProductsOpen(false);
     setIsAboutOpen(false);
+    setIsSegmentsOpen(false);
     setIsMenuOpen(false);
-    setMobileSegmentsOpen(false);
-    setMobileProductsOpen(false);
-    setMobileAboutOpen(false);
   }, [pathname]);
 
   const navLinks: Array<{ href: string; label: string; megaMenu?: "products" | "about" | "segments" }> = [
-    { href: "/segments", label: "Segments", megaMenu: "segments" },
-    { href: "/products", label: "Products", megaMenu: "products" },
-    { href: "/about", label: "About", megaMenu: "about" },
-    { href: "/sustainability", label: "Sustainability" },
-    { href: "/brochures", label: "E-Collections" },
+    { href: "/segments",        label: "Segments",        megaMenu: "segments" },
+    { href: "/products",        label: "Products",        megaMenu: "products" },
+    { href: "/about",           label: "About",           megaMenu: "about"    },
+    { href: "/sustainability",  label: "Sustainability"  },
+    { href: "/brochures",       label: "E-Collections"  },
     { href: "/designer-studio", label: "Designer Studio" },
   ];
 
-  const isActive = (path: string) =>
-    pathname === path || pathname.startsWith(path + "/");
+  const isActive = (path: string) => pathname === path || pathname.startsWith(path + "/");
 
+  // Nav links: always white text, black pill on active/hover
   const linkClass = (active: boolean) =>
-    `text-[13px] font-medium tracking-[0.04em] uppercase transition-colors duration-300 py-6 border-b-2 ${
+    `text-[14px] font-medium tracking-[0.04em] uppercase transition-all duration-200 px-3 py-1.5 rounded-sm ${
       active
-        ? isTransparent
-          ? "text-white border-white/60"
-          : "text-foreground border-foreground"
-        : isTransparent
-          ? "text-white/70 border-transparent hover:text-white"
-          : "text-muted-foreground border-transparent hover:text-foreground"
+        ? "bg-foreground text-background"
+        : "text-white hover:bg-foreground hover:text-background"
     }`;
 
   const iconClass = `p-2 transition-all duration-300 ${
-    isTransparent
-      ? "text-white/80 hover:text-white"
-      : "text-foreground hover:opacity-60"
+    isTransparent ? "text-white/80 hover:text-white" : "text-foreground hover:opacity-60"
   }`;
 
-  const handleSegmentsEnter = () => {
-    clearTimeout(segmentsTimeout.current);
-    setIsSegmentsOpen(true);
-    setIsProductsOpen(false);
-    setIsAboutOpen(false);
-  };
-  const handleSegmentsLeave = () => {
-    segmentsTimeout.current = setTimeout(() => setIsSegmentsOpen(false), 150);
-  };
-  const handleProductsEnter = () => {
-    clearTimeout(productsTimeout.current);
-    setIsProductsOpen(true);
-    setIsSegmentsOpen(false);
-    setIsAboutOpen(false);
-  };
-  const handleProductsLeave = () => {
-    productsTimeout.current = setTimeout(() => setIsProductsOpen(false), 150);
-  };
-  const handleAboutEnter = () => {
-    clearTimeout(aboutTimeout.current);
-    setIsAboutOpen(true);
-    setIsProductsOpen(false);
-    setIsSegmentsOpen(false);
-  };
-  const handleAboutLeave = () => {
-    aboutTimeout.current = setTimeout(() => setIsAboutOpen(false), 150);
-  };
+  const handleProductsEnter = () => { clearTimeout(productsTimeout.current); setIsProductsOpen(true);  setIsAboutOpen(false);    setIsSegmentsOpen(false); };
+  const handleProductsLeave = () => { productsTimeout.current = setTimeout(() => setIsProductsOpen(false), 150); };
+  const handleAboutEnter    = () => { clearTimeout(aboutTimeout.current);    setIsAboutOpen(true);     setIsProductsOpen(false); setIsSegmentsOpen(false); };
+  const handleAboutLeave    = () => { aboutTimeout.current    = setTimeout(() => setIsAboutOpen(false), 150); };
+  const handleSegmentsEnter = () => { clearTimeout(segmentsTimeout.current); setIsSegmentsOpen(true);  setIsProductsOpen(false); setIsAboutOpen(false);    };
+  const handleSegmentsLeave = () => { segmentsTimeout.current = setTimeout(() => setIsSegmentsOpen(false), 150); };
 
   return (
     <>
+      {/* ── Header bar ─────────────────────────────────────────────────────── */}
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out ${
           isTransparent
@@ -213,81 +162,51 @@ const Header = () => {
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
-            {/* Logo */}
-            <Link
-              to="/"
-              className="inline-flex items-center justify-center px-2 py-1 transition-all duration-300"
-            >
+
+            {/* Logo: transparent bg, always black, 40% larger */}
+            <Link to="/" className="inline-flex items-center justify-center px-2 py-1 transition-all duration-300">
               <div className="flex flex-col items-center justify-center leading-none">
                 <span
-                  className="text-sm lg:text-base font-bold transition-colors duration-300 text-foreground"
-                  style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 700, letterSpacing: '0.04em' }}
+                  className="text-sm lg:text-base font-bold text-foreground transition-colors duration-300"
+                  style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 700, letterSpacing: "0.04em" }}
                 >
                   WIN-CYC
                 </span>
-                <span className="text-[8px] lg:text-[11px] tracking-[0.12em] uppercase transition-colors duration-300 text-foreground">
+                <span className="text-[8px] lg:text-[11px] tracking-[0.12em] uppercase text-foreground transition-colors duration-300">
                   Group Limited
                 </span>
               </div>
             </Link>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-7">
+            {/* Desktop nav */}
+            <nav className="hidden lg:flex items-center gap-6">
               {navLinks.map((link) => {
                 if (link.megaMenu === "segments") {
                   return (
-                    <div
-                      key={link.href}
-                      className="relative"
-                      onMouseEnter={handleSegmentsEnter}
-                      onMouseLeave={handleSegmentsLeave}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => navigate("/products")}
-                        className={linkClass(isActive("/products") && false) + " flex items-center gap-1"}
-                      >
+                    <div key={link.href} className="relative" onMouseEnter={handleSegmentsEnter} onMouseLeave={handleSegmentsLeave}>
+                      <button className={linkClass(false) + " flex items-center gap-1"}>
                         {link.label}
-                        <ChevronDown
-                          size={14}
-                          className={`transition-transform duration-200 ${isSegmentsOpen ? "rotate-180" : ""}`}
-                        />
+                        <ChevronDown size={14} className={`transition-transform duration-200 ${isSegmentsOpen ? "rotate-180" : ""}`} />
                       </button>
                     </div>
                   );
                 }
                 if (link.megaMenu === "products") {
                   return (
-                    <div
-                      key={link.href}
-                      className="relative"
-                      onMouseEnter={handleProductsEnter}
-                      onMouseLeave={handleProductsLeave}
-                    >
+                    <div key={link.href} className="relative" onMouseEnter={handleProductsEnter} onMouseLeave={handleProductsLeave}>
                       <button className={linkClass(isActive(link.href)) + " flex items-center gap-1"}>
                         {link.label}
-                        <ChevronDown
-                          size={14}
-                          className={`transition-transform duration-200 ${isProductsOpen ? "rotate-180" : ""}`}
-                        />
+                        <ChevronDown size={14} className={`transition-transform duration-200 ${isProductsOpen ? "rotate-180" : ""}`} />
                       </button>
                     </div>
                   );
                 }
                 if (link.megaMenu === "about") {
                   return (
-                    <div
-                      key={link.href}
-                      className="relative"
-                      onMouseEnter={handleAboutEnter}
-                      onMouseLeave={handleAboutLeave}
-                    >
+                    <div key={link.href} className="relative" onMouseEnter={handleAboutEnter} onMouseLeave={handleAboutLeave}>
                       <button className={linkClass(isActive(link.href)) + " flex items-center gap-1"}>
                         {link.label}
-                        <ChevronDown
-                          size={14}
-                          className={`transition-transform duration-200 ${isAboutOpen ? "rotate-180" : ""}`}
-                        />
+                        <ChevronDown size={14} className={`transition-transform duration-200 ${isAboutOpen ? "rotate-180" : ""}`} />
                       </button>
                     </div>
                   );
@@ -300,52 +219,142 @@ const Header = () => {
               })}
             </nav>
 
-            {/* Right CTA buttons */}
+            {/* CTA buttons */}
             <div className="hidden lg:flex items-center space-x-3">
-              {isTransparent ? (
-                <>
-                  <Link to="/contact">
-                    <Button
-                      size="sm"
-                      className="bg-white/20 text-white border border-white/40 hover:bg-white/30 hover:text-white"
-                    >
-                      Contact
-                    </Button>
-                  </Link>
-                  <Link to="/designer-studio">
-                    <Button
-                      size="sm"
-                      className="bg-transparent text-white border border-white/60 hover:bg-white hover:text-black"
-                    >
-                      B2B Login
-                    </Button>
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link to="/contact">
-                    <Button size="sm">Contact</Button>
-                  </Link>
-                  <Link to="/designer-studio">
-                    <Button variant="outline" size="sm">B2B Login</Button>
-                  </Link>
-                </>
-              )}
+              <Link to="/contact">
+                <Button size="sm" className="border border-white/60 bg-white/10 text-white hover:bg-white hover:text-foreground transition-all duration-200">
+                  Contact
+                </Button>
+              </Link>
+              <Link to="/designer-studio">
+                <Button size="sm" className="bg-white text-foreground border border-white/80 hover:bg-foreground hover:text-background transition-all duration-200">
+                  B2B Login
+                </Button>
+              </Link>
             </div>
 
             {/* Mobile toggle */}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className={`lg:hidden ${iconClass}`}
-              aria-label="Toggle menu"
-            >
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className={`lg:hidden ${iconClass}`} aria-label="Toggle menu">
               {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           </div>
         </div>
       </header>
 
-      {/* Products Mega Menu — rendered outside header for full-width */}
+      {/* ── Segments Mega Menu ───────────────────────────────────────────────── */}
+      {isSegmentsOpen && (
+        <div
+          className="hidden lg:block fixed left-0 right-0 z-40"
+          style={{ top: "80px" }}
+          onMouseEnter={handleSegmentsEnter}
+          onMouseLeave={handleSegmentsLeave}
+        >
+          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] min-h-[380px]">
+            <div className="max-w-7xl mx-auto px-6 lg:px-8 py-10">
+              <div className="flex gap-0">
+
+                {/* Left: segment selector list */}
+                <div className="w-[220px] flex-shrink-0 border-r border-[hsl(var(--border))] flex flex-col">
+                  <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-6 block">
+                    Segments
+                  </span>
+                  <div className="flex flex-col gap-1">
+                    {PRODUCT_SEGMENT_DETAILS.map((seg) => (
+                      <button
+                        key={seg.slug}
+                        onMouseEnter={() => setActiveSegmentSlug(seg.slug)}
+                        className={`text-left pl-3 pr-2 py-3.5 border-l-2 transition-all duration-150 ${
+                          activeSegmentSlug === seg.slug
+                            ? "border-foreground bg-secondary"
+                            : "border-transparent hover:bg-secondary hover:border-foreground/30"
+                        }`}
+                      >
+                        <span className="text-[15px] font-semibold text-foreground block leading-snug">{seg.name}</span>
+                        <span className="text-[12px] text-muted-foreground block mt-0.5 leading-snug">
+                          {seg.slug === "apparel"  && "Garments & fashion"}
+                          {seg.slug === "beauty"   && "Cosmetics & packaging"}
+                          {seg.slug === "material" && "By finish & composition"}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                  {/* Designer Studio CTA */}
+                  <div className="mt-auto pt-5 border-t border-[hsl(var(--border))]" style={{ marginTop: "auto" }}>
+                    <Link to="/designer-studio" className="text-[12px] text-muted-foreground hover:text-foreground transition-colors leading-snug block">
+                      Custom via our<br />
+                      <span className="font-semibold text-foreground">Designer Studio →</span>
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Centre: active segment detail */}
+                {(() => {
+                  const active = PRODUCT_SEGMENT_DETAILS.find((s) => s.slug === activeSegmentSlug) ?? PRODUCT_SEGMENT_DETAILS[0];
+                  return (
+                    <div className="flex-1 px-8 flex flex-col gap-5 min-w-0">
+                      <div>
+                        <p className="text-[18px] font-semibold text-foreground">{active.name}</p>
+                        <p className="text-[13px] text-muted-foreground mt-2 leading-relaxed">{active.tagline}</p>
+                      </div>
+                      <div className="flex flex-col gap-5">
+                        {active.categories.map((group) => (
+                          <div key={group.family}>
+                            <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground block mb-3">
+                              {group.family}
+                            </span>
+                            <div className="grid gap-[5px]" style={{ gridTemplateColumns: "repeat(4, 130px)" }}>
+                              {group.items.map((item) => (
+                                <Link
+                                  key={item}
+                                  to={`/products?categories=${slugify(item)}&segments=${active.slug}`}
+                                  className="w-[130px] py-2.5 text-[12px] text-center border border-[hsl(var(--border))] text-muted-foreground hover:bg-foreground hover:text-background hover:border-foreground transition-colors duration-150 block"
+                                >
+                                  {item}
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="pt-3 border-t border-[hsl(var(--border))] mt-auto">
+                        <Link
+                          to={`/products?segments=${active.slug}`}
+                          className="text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          View all {active.name} products →
+                        </Link>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Right: featured image placeholder */}
+                <div className="flex-shrink-0 w-[260px] border-l border-[hsl(var(--border))] pl-6 flex flex-col">
+                  <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground mb-4 block">
+                    Featured
+                  </span>
+                  <div className="flex-1 relative overflow-hidden bg-secondary min-h-[200px]">
+                    <div className="absolute inset-0 flex items-end p-4">
+                      <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+                        Product image coming soon
+                      </span>
+                    </div>
+                  </div>
+                  <Link
+                    to={`/products?segments=${activeSegmentSlug}`}
+                    className="mt-4 text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Browse all →
+                  </Link>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Products Mega Menu ───────────────────────────────────────────────── */}
       {isProductsOpen && (
         <div
           className="hidden lg:block fixed left-0 right-0 z-40"
@@ -353,14 +362,13 @@ const Header = () => {
           onMouseEnter={handleProductsEnter}
           onMouseLeave={handleProductsLeave}
         >
-          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] min-h-[340px]">
+          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] min-h-[380px]">
             <div className="max-w-7xl mx-auto px-6 lg:px-8 py-10">
               <div className="flex">
-                {/* Left 6: Categories + Preview Image */}
                 <div className="flex-1 flex gap-10">
                   {/* Hardware column */}
                   <div className="min-w-0">
-                    <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block">
+                    <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-6 block">
                       Browse by Category
                     </span>
                     {(() => {
@@ -369,17 +377,17 @@ const Header = () => {
                         <div>
                           <Link
                             to={`/products?family=${hardware.slug}`}
-                            className="text-sm font-semibold text-foreground hover:opacity-70 transition-opacity block mb-2.5"
+                            className="text-[15px] font-semibold text-foreground hover:opacity-70 transition-opacity block mb-3"
                             onMouseEnter={() => { setPreviewImage(hardware.image); setPreviewLabel(hardware.name); }}
                           >
                             {hardware.name}
                           </Link>
-                          <ul className="space-y-1.5">
+                          <ul className="space-y-2">
                             {hardware.subcategories.map((sub) => (
                               <li key={sub.en}>
                                 <Link
                                   to={`/products?categories=${slugify(sub.en)}`}
-                                  className="text-[13px] text-muted-foreground hover:text-foreground transition-colors duration-150 block"
+                                  className="text-[14px] text-muted-foreground hover:text-foreground transition-colors duration-150 block"
                                   onMouseEnter={() => { setPreviewImage(sub.image); setPreviewLabel(sub.en); }}
                                 >
                                   {sub.en}
@@ -392,26 +400,26 @@ const Header = () => {
                     })()}
                   </div>
 
-                  {/* Soft Trims + Branding Trims stacked column */}
+                  {/* Soft Trims + Branding Trims */}
                   <div className="min-w-0">
-                    <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block opacity-0 pointer-events-none">
+                    <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-6 block opacity-0 pointer-events-none">
                       &nbsp;
                     </span>
                     {MEGA_FAMILIES.slice(1).map((family) => (
                       <div key={family.slug} className="mb-6 last:mb-0">
                         <Link
                           to={`/products?family=${family.slug}`}
-                          className="text-sm font-semibold text-foreground hover:opacity-70 transition-opacity block mb-2.5"
+                          className="text-[15px] font-semibold text-foreground hover:opacity-70 transition-opacity block mb-3"
                           onMouseEnter={() => { setPreviewImage(family.image); setPreviewLabel(family.name); }}
                         >
                           {family.name}
                         </Link>
-                        <ul className="space-y-1.5">
+                        <ul className="space-y-2">
                           {family.subcategories.map((sub) => (
                             <li key={sub.en}>
                               <Link
                                 to={`/products?categories=${slugify(sub.en)}`}
-                                className="text-[13px] text-muted-foreground hover:text-foreground transition-colors duration-150 block"
+                                className="text-[14px] text-muted-foreground hover:text-foreground transition-colors duration-150 block"
                                 onMouseEnter={() => { setPreviewImage(sub.image); setPreviewLabel(sub.en); }}
                               >
                                 {sub.en}
@@ -423,11 +431,14 @@ const Header = () => {
                     ))}
                   </div>
 
-                  {/* Hover preview image — wider, no label, no border */}
+                  {/* Expanded preview image */}
                   <div
                     className="flex-1 relative flex flex-col"
                     onMouseEnter={() => { setPreviewImage(DEFAULT_PREVIEW); setPreviewLabel("Hardware"); }}
                   >
+                    <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-6 block opacity-0 pointer-events-none">
+                      &nbsp;
+                    </span>
                     <div className="relative flex-1 overflow-hidden">
                       <img
                         key={previewImage}
@@ -436,15 +447,14 @@ const Header = () => {
                         className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
                         style={{ animation: "fadeIn 250ms ease" }}
                       />
-                    </div>
-                    {/* Footer bar — pinned to bottom of image panel */}
-                    <div className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-[hsl(var(--border))] px-5 py-3">
-                      <Link
-                        to="/products"
-                        className="text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        View All Products →
-                      </Link>
+                      <div className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-[hsl(var(--border))] px-5 py-3">
+                        <Link
+                          to="/products"
+                          className="text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          View All Products →
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -454,7 +464,7 @@ const Header = () => {
         </div>
       )}
 
-      {/* About Mega Menu — rendered outside header for full-width */}
+      {/* ── About Mega Menu ──────────────────────────────────────────────────── */}
       {isAboutOpen && (
         <div
           className="hidden lg:block fixed left-0 right-0 z-40"
@@ -462,14 +472,12 @@ const Header = () => {
           onMouseEnter={handleAboutEnter}
           onMouseLeave={handleAboutLeave}
         >
-          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] min-h-[340px]">
+          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] min-h-[380px]">
             <div className="max-w-7xl mx-auto px-6 lg:px-8 py-10">
               <div className="flex gap-0">
-                {/* Left 6: About groups + Preview Image */}
                 <div className="flex-[6] pr-10 flex gap-10">
-                  {/* Flat About link list */}
                   <div className="min-w-0">
-                    <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block">
+                    <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-6 block">
                       About Us
                     </span>
                     <ul className="space-y-0">
@@ -481,11 +489,8 @@ const Header = () => {
                           <li key={item.href}>
                             <Link
                               to={item.href!}
-                              className="text-[13px] text-muted-foreground hover:text-foreground transition-colors duration-150 block py-[5px]"
-                              onMouseEnter={() => {
-                                setAboutPreviewImage(item.image!);
-                                setAboutPreviewLabel(item.label!);
-                              }}
+                              className="text-[14px] text-muted-foreground hover:text-foreground transition-colors duration-150 block py-[7px]"
+                              onMouseEnter={() => { setAboutPreviewImage(item.image!); setAboutPreviewLabel(item.label!); }}
                             >
                               {item.label}
                             </Link>
@@ -494,13 +499,11 @@ const Header = () => {
                       })}
                     </ul>
                   </div>
-
-                  {/* Hover preview image */}
                   <div
                     className="flex-1 min-w-[280px] flex flex-col"
                     onMouseEnter={() => { setAboutPreviewImage(ABOUT_DEFAULT_PREVIEW); setAboutPreviewLabel("Our Story"); }}
                   >
-                    <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block opacity-0 pointer-events-none">
+                    <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-6 block opacity-0 pointer-events-none">
                       &nbsp;
                     </span>
                     <div className="relative flex-1 rounded-[var(--radius)] overflow-hidden">
@@ -515,12 +518,10 @@ const Header = () => {
                   </div>
                 </div>
 
-                {/* Divider */}
                 <div className="w-px bg-[hsl(var(--border))] self-stretch" />
 
-                {/* Right 4: Trust/Story cards */}
                 <div className="flex-[4] pl-10">
-                  <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block">
+                  <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-6 block">
                     Discover
                   </span>
                   <div className="space-y-3">
@@ -530,17 +531,13 @@ const Header = () => {
                         to={card.href}
                         className="group block rounded-[var(--radius)] border border-[hsl(var(--border))] overflow-hidden hover:border-foreground/20 hover:shadow-[0_2px_12px_rgba(0,0,0,0.08)] transition-all duration-200"
                       >
-                        <div className="flex items-stretch h-20">
+                        <div className="flex items-stretch h-[88px]">
                           <div className="w-20 flex-shrink-0 overflow-hidden">
-                            <img
-                              src={card.image}
-                              alt={card.title}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            />
+                            <img src={card.image} alt={card.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                           </div>
                           <div className="flex-1 min-w-0 flex flex-col justify-center px-4">
-                            <span className="text-sm font-semibold text-foreground block">{card.title}</span>
-                            <span className="text-[11px] text-muted-foreground leading-snug block mt-0.5">{card.description}</span>
+                            <span className="text-[15px] font-semibold text-foreground block">{card.title}</span>
+                            <span className="text-[12px] text-muted-foreground leading-snug block mt-0.5">{card.description}</span>
                           </div>
                           <div className="flex items-center pr-3">
                             <ChevronRight size={14} className="text-muted-foreground/40 group-hover:text-foreground/60 transition-colors flex-shrink-0" />
@@ -549,13 +546,8 @@ const Header = () => {
                       </Link>
                     ))}
                   </div>
-
-                  {/* Utility link */}
                   <div className="mt-6 pt-4 border-t border-[hsl(var(--border))]">
-                    <Link
-                      to="/about/our-story"
-                      className="text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
-                    >
+                    <Link to="/about/our-story" className="text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors">
                       Learn More About Us →
                     </Link>
                   </div>
@@ -566,273 +558,83 @@ const Header = () => {
         </div>
       )}
 
-      {/* Segments Mega Menu */}
-      {isSegmentsOpen && (
-        <div
-          className="hidden lg:block fixed left-0 right-0 z-40"
-          style={{ top: "80px" }}
-          onMouseEnter={handleSegmentsEnter}
-          onMouseLeave={handleSegmentsLeave}
-        >
-          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] min-h-[340px]">
-            <div className="max-w-7xl mx-auto px-6 lg:px-8 py-10">
-              <div className="flex">
-                {/* Left: Segment selector list */}
-                <div className="w-[200px] flex-shrink-0 border-r border-[hsl(var(--border))] pr-0 flex flex-col">
-                  <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-4 block">
-                    Segments
-                  </span>
-                  <div className="flex flex-col">
-                    {PRODUCT_SEGMENT_DETAILS.map((seg) => (
-                      <button
-                        key={seg.slug}
-                        type="button"
-                        onMouseEnter={() => setActiveSegmentSlug(seg.slug)}
-                        className={`text-left px-0 py-2.5 border-l-2 pl-3 transition-all duration-150 ${
-                          activeSegmentSlug === seg.slug
-                            ? "border-foreground bg-secondary"
-                            : "border-transparent hover:bg-secondary"
-                        }`}
-                      >
-                        <span className="text-[13px] font-medium text-foreground block leading-snug">
-                          {seg.name}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground block mt-0.5 leading-snug">
-                          {seg.slug === "apparel" && "Garments & fashion"}
-                          {seg.slug === "beauty" && "Cosmetics & packaging"}
-                          {seg.slug === "material" && "By finish & composition"}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Designer Studio CTA */}
-                  <div className="mt-auto pt-5 border-t border-[hsl(var(--border))] mt-6">
-                    <Link
-                      to="/designer-studio"
-                      className="text-[11px] text-muted-foreground hover:text-foreground transition-colors leading-snug block"
-                    >
-                      Custom via our
-                      <br />
-                      <span className="font-medium text-foreground">Designer Studio →</span>
-                    </Link>
-                  </div>
-                </div>
-
-                {/* Right: Active segment detail */}
-                {(() => {
-                  const active = PRODUCT_SEGMENT_DETAILS.find((s) => s.slug === activeSegmentSlug)
-                    ?? PRODUCT_SEGMENT_DETAILS[0];
-                  return (
-                    <div className="flex-1 pl-8 flex flex-col gap-5">
-                      {/* Title + tagline */}
-                      <div>
-                        <p className="text-sm font-semibold text-foreground">{active.name}</p>
-                        <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">{active.tagline}</p>
-                      </div>
-
-                      {/* Category badge groups */}
-                      <div className="flex flex-col gap-4">
-                        {active.categories.map((group) => (
-                          <div key={group.family}>
-                            <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground block mb-2">
-                              {group.family}
-                            </span>
-                            <div className="grid gap-[5px]" style={{ gridTemplateColumns: "repeat(4, 110px)" }}>
-                              {group.items.map((item) => (
-                                <Link
-                                  key={item}
-                                  to={`/products?categories=${slugify(item)}&segments=${active.slug}`}
-                                  className="w-[110px] py-1.5 text-[10px] text-center border border-[hsl(var(--border))] text-muted-foreground hover:bg-foreground hover:text-background hover:border-foreground transition-colors duration-150 block"
-                                >
-                                  {item}
-                                </Link>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* View all link */}
-                      <div className="pt-3 border-t border-[hsl(var(--border))] mt-auto">
-                        <Link
-                          to={`/products?segments=${active.slug}`}
-                          className="text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          View all {active.name} products →
-                        </Link>
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Spacer to compensate for fixed navbar on non-hero pages */}
+      {/* Spacer */}
       {!isHeroPage && <div className="h-20" />}
 
-      {/* Mobile Navigation */}
+      {/* ── Mobile Navigation ────────────────────────────────────────────────── */}
       {isMenuOpen &&
         createPortal(
-          <div
-            className="lg:hidden fixed inset-0 z-[100] bg-white overflow-y-auto"
-            style={{
-              animation: "slideInRight 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards",
-            }}
-          >
+          <div className="lg:hidden fixed inset-0 z-[100] bg-white overflow-y-auto" style={{ animation: "slideInRight 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards" }}>
             <div className="flex items-center justify-end h-20 px-6">
-              <button
-                onClick={() => setIsMenuOpen(false)}
-                className="p-2 text-foreground hover:opacity-60 transition-opacity duration-150"
-                aria-label="Close menu"
-              >
+              <button onClick={() => setIsMenuOpen(false)} className="p-2 text-foreground hover:opacity-60 transition-opacity duration-150" aria-label="Close menu">
                 <X size={22} />
               </button>
             </div>
             <nav className="flex flex-col">
               {navLinks.map((link) => {
+
                 if (link.megaMenu === "segments") {
                   return (
                     <div key={link.href}>
-                      <button
-                        onClick={() => {
-                          setMobileSegmentsOpen(!mobileSegmentsOpen);
-                          setMobileProductsOpen(false);
-                          setMobileAboutOpen(false);
-                        }}
-                        className="w-full flex items-center justify-between text-2xl font-semibold tracking-tight text-foreground hover:opacity-60 transition-opacity duration-150 py-5 px-6 border-b border-border"
-                      >
+                      <button onClick={() => setMobileSegmentsOpen(!mobileSegmentsOpen)} className="w-full flex items-center justify-between text-2xl font-semibold tracking-tight text-foreground hover:opacity-60 transition-opacity duration-150 py-5 px-6 border-b border-border">
                         {link.label}
-                        <ChevronDown
-                          size={18}
-                          className={`transition-transform duration-200 ${mobileSegmentsOpen ? "rotate-180" : ""}`}
-                        />
+                        <ChevronDown size={18} className={`transition-transform duration-200 ${mobileSegmentsOpen ? "rotate-180" : ""}`} />
                       </button>
                       {mobileSegmentsOpen && (
                         <div className="bg-secondary">
                           {PRODUCT_SEGMENT_DETAILS.map((seg) => (
                             <div key={seg.slug}>
-                              <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground block pt-4 pb-1 px-6">
-                                {seg.name}
-                              </span>
+                              <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground block pt-4 pb-1 px-6">{seg.name}</span>
                               {seg.categories.flatMap((g) => g.items).slice(0, 6).map((item) => (
-                                <Link
-                                  key={item}
-                                  to={`/products?categories=${slugify(item)}&segments=${seg.slug}`}
-                                  onClick={() => setIsMenuOpen(false)}
-                                  className="text-[13px] text-muted-foreground hover:text-foreground transition-colors block py-2 px-8 border-b border-border/30"
-                                >
-                                  {item}
-                                </Link>
+                                <Link key={item} to={`/products?categories=${slugify(item)}&segments=${seg.slug}`} onClick={() => setIsMenuOpen(false)} className="text-[13px] text-muted-foreground hover:text-foreground transition-colors block py-2 px-8 border-b border-border/30">{item}</Link>
                               ))}
-                              <Link
-                                to={`/products?segments=${seg.slug}`}
-                                onClick={() => setIsMenuOpen(false)}
-                                className="text-[13px] font-medium text-foreground block py-2 px-8 border-b border-border/50"
-                              >
-                                All {seg.name} →
-                              </Link>
+                              <Link to={`/products?segments=${seg.slug}`} onClick={() => setIsMenuOpen(false)} className="text-[13px] font-medium text-foreground block py-2 px-8 border-b border-border/50">All {seg.name} →</Link>
                             </div>
                           ))}
-                          <Link
-                            to="/designer-studio"
-                            onClick={() => setIsMenuOpen(false)}
-                            className="text-sm text-muted-foreground hover:text-foreground block py-3.5 px-6 border-b border-border"
-                          >
-                            Custom via our Designer Studio →
-                          </Link>
+                          <Link to="/designer-studio" onClick={() => setIsMenuOpen(false)} className="text-sm text-muted-foreground hover:text-foreground block py-3.5 px-6 border-b border-border">Custom via our Designer Studio →</Link>
                         </div>
                       )}
                     </div>
                   );
                 }
+
                 if (link.megaMenu === "products") {
                   return (
                     <div key={link.href}>
-                      <button
-                        onClick={() => {
-                          setMobileProductsOpen(!mobileProductsOpen);
-                          setMobileSegmentsOpen(false);
-                          setMobileAboutOpen(false);
-                        }}
-                        className="w-full flex items-center justify-between text-2xl font-semibold tracking-tight text-foreground hover:opacity-60 transition-opacity duration-150 py-5 px-6 border-b border-border"
-                      >
+                      <button onClick={() => setMobileProductsOpen(!mobileProductsOpen)} className="w-full flex items-center justify-between text-2xl font-semibold tracking-tight text-foreground hover:opacity-60 transition-opacity duration-150 py-5 px-6 border-b border-border">
                         {link.label}
-                        <ChevronDown
-                          size={18}
-                          className={`transition-transform duration-200 ${mobileProductsOpen ? "rotate-180" : ""}`}
-                        />
+                        <ChevronDown size={18} className={`transition-transform duration-200 ${mobileProductsOpen ? "rotate-180" : ""}`} />
                       </button>
                       {mobileProductsOpen && (
                         <div className="bg-secondary">
                           {MEGA_FAMILIES.map((family) => (
                             <div key={family.slug}>
-                              <Link
-                                to={`/products?family=${family.slug}`}
-                                onClick={() => setIsMenuOpen(false)}
-                                className="flex items-baseline gap-2 text-sm font-semibold text-foreground py-3.5 px-6 border-b border-border"
-                              >
-                                {family.name}
-                              </Link>
+                              <Link to={`/products?family=${family.slug}`} onClick={() => setIsMenuOpen(false)} className="flex items-baseline gap-2 text-sm font-semibold text-foreground py-3.5 px-6 border-b border-border">{family.name}</Link>
                               {family.subcategories.map((sub) => (
-                                <Link
-                                  key={sub.en}
-                                  to={`/products?categories=${slugify(sub.en)}`}
-                                  onClick={() => setIsMenuOpen(false)}
-                                  className="text-[13px] text-muted-foreground hover:text-foreground transition-colors block py-2 px-10 border-b border-border/30"
-                                >
-                                  {sub.en}
-                                </Link>
+                                <Link key={sub.en} to={`/products?categories=${slugify(sub.en)}`} onClick={() => setIsMenuOpen(false)} className="text-[13px] text-muted-foreground hover:text-foreground transition-colors block py-2 px-10 border-b border-border/30">{sub.en}</Link>
                               ))}
                             </div>
                           ))}
-                          <Link
-                            to="/products"
-                            onClick={() => setIsMenuOpen(false)}
-                            className="text-sm font-medium text-foreground block py-3.5 px-6 border-b border-border"
-                          >
-                            View All Products →
-                          </Link>
+                          <Link to="/products" onClick={() => setIsMenuOpen(false)} className="text-sm font-medium text-foreground block py-3.5 px-6 border-b border-border">View All Products →</Link>
                         </div>
                       )}
                     </div>
                   );
                 }
+
                 if (link.megaMenu === "about") {
                   return (
                     <div key={link.href}>
-                      <button
-                        onClick={() => {
-                          setMobileAboutOpen(!mobileAboutOpen);
-                          setMobileSegmentsOpen(false);
-                          setMobileProductsOpen(false);
-                        }}
-                        className="w-full flex items-center justify-between text-2xl font-semibold tracking-tight text-foreground hover:opacity-60 transition-opacity duration-150 py-5 px-6 border-b border-border"
-                      >
+                      <button onClick={() => setMobileAboutOpen(!mobileAboutOpen)} className="w-full flex items-center justify-between text-2xl font-semibold tracking-tight text-foreground hover:opacity-60 transition-opacity duration-150 py-5 px-6 border-b border-border">
                         {link.label}
-                        <ChevronDown
-                          size={18}
-                          className={`transition-transform duration-200 ${mobileAboutOpen ? "rotate-180" : ""}`}
-                        />
+                        <ChevronDown size={18} className={`transition-transform duration-200 ${mobileAboutOpen ? "rotate-180" : ""}`} />
                       </button>
                       {mobileAboutOpen && (
                         <div className="bg-secondary">
                           {ABOUT_LINKS.map((item, i) => {
-                            if (item.divider) {
-                              return <hr key={`mob-div-${i}`} className="border-border mx-6" />;
-                            }
+                            if (item.divider) return <hr key={`mob-div-${i}`} className="border-border mx-6" />;
                             return (
-                              <Link
-                                key={item.href}
-                                to={item.href!}
-                                onClick={() => setIsMenuOpen(false)}
-                                className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-150 block py-2.5 px-6 border-b border-border/30"
-                              >
-                                {item.label}
-                              </Link>
+                              <Link key={item.href} to={item.href!} onClick={() => setIsMenuOpen(false)} className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-150 block py-2.5 px-6 border-b border-border/30">{item.label}</Link>
                             );
                           })}
                         </div>
@@ -840,24 +642,17 @@ const Header = () => {
                     </div>
                   );
                 }
+
                 return (
-                  <Link
-                    key={link.href}
-                    to={link.href}
-                    onClick={() => setIsMenuOpen(false)}
-                    className="text-2xl font-semibold tracking-tight text-foreground hover:opacity-60 transition-opacity duration-150 py-5 px-6 border-b border-border"
-                  >
+                  <Link key={link.href} to={link.href} onClick={() => setIsMenuOpen(false)} className="text-2xl font-semibold tracking-tight text-foreground hover:opacity-60 transition-opacity duration-150 py-5 px-6 border-b border-border">
                     {link.label}
                   </Link>
                 );
               })}
+
               <div className="px-6 pb-8 pt-6 space-y-4">
-                <Link to="/contact" onClick={() => setIsMenuOpen(false)}>
-                  <Button className="w-full">Contact</Button>
-                </Link>
-                <Link to="/designer-studio" onClick={() => setIsMenuOpen(false)}>
-                  <Button variant="outline" className="w-full">B2B Login</Button>
-                </Link>
+                <Link to="/contact" onClick={() => setIsMenuOpen(false)}><Button className="w-full">Contact</Button></Link>
+                <Link to="/designer-studio" onClick={() => setIsMenuOpen(false)}><Button variant="outline" className="w-full">B2B Login</Button></Link>
               </div>
             </nav>
           </div>,
@@ -865,14 +660,8 @@ const Header = () => {
         )}
 
       <style>{`
-        @keyframes slideInRight {
-          from { transform: translateX(100%); }
-          to { transform: translateX(0); }
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
+        @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
       `}</style>
     </>
   );
