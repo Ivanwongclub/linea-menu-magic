@@ -162,11 +162,11 @@ const Header = () => {
     `text-[15px] font-medium tracking-[0.04em] uppercase whitespace-nowrap transition-colors duration-200 py-1 ${
       isTransparent
         ? "text-white hover:text-white/50"
-        : "text-foreground hover:text-foreground/50"
+        : "text-foreground hover:text-muted-foreground"
     }`;
 
   const iconClass = `p-2 transition-all duration-300 ${
-    isTransparent ? "text-white/80 hover:text-white" : "text-foreground hover:opacity-60"
+    isTransparent ? "text-white/80 hover:text-white" : "text-foreground hover:text-muted-foreground"
   }`;
 
   const handleProductsEnter = () => { clearTimeout(productsTimeout.current); setIsProductsOpen(true);  setIsAboutOpen(false);    setIsSegmentsOpen(false); };
@@ -400,7 +400,7 @@ const Header = () => {
                         <Link
                           to={`/products?family=${hardware.slug}`}
                           onClick={closeAllMenus}
-                          className="text-[15px] font-semibold text-foreground hover:opacity-70 transition-opacity block mb-3"
+                          className="text-[15px] font-semibold text-foreground hover:text-muted-foreground transition-colors block mb-3"
                         >
                           {hardware.name}
                         </Link>
@@ -429,7 +429,7 @@ const Header = () => {
                       <Link
                         to={`/products?family=${family.slug}`}
                         onClick={closeAllMenus}
-                        className="text-[15px] font-semibold text-foreground hover:opacity-70 transition-opacity block mb-3"
+                        className="text-[15px] font-semibold text-foreground hover:text-muted-foreground transition-colors block mb-3"
                       >
                         {family.name}
                       </Link>
@@ -571,7 +571,7 @@ const Header = () => {
         createPortal(
           <div className="lg:hidden fixed inset-0 z-[100] bg-white overflow-y-auto" style={{ animation: "slideInRight 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards" }}>
             <div className="flex items-center justify-end h-20 px-6">
-              <button onClick={() => setIsMenuOpen(false)} className="p-2 text-foreground hover:opacity-60 transition-opacity duration-150" aria-label="Close menu">
+              <button onClick={() => setIsMenuOpen(false)} className="p-2 text-foreground hover:text-muted-foreground transition-colors duration-150" aria-label="Close menu">
                 <X size={22} />
               </button>
             </div>
@@ -581,7 +581,7 @@ const Header = () => {
                 if (link.megaMenu === "segments") {
                   return (
                     <div key={link.href}>
-                      <button onClick={() => setMobileSegmentsOpen(!mobileSegmentsOpen)} className="w-full flex items-center justify-between text-2xl font-semibold tracking-tight text-foreground hover:opacity-60 transition-opacity duration-150 py-5 px-6 border-b border-border">
+                      <button onClick={() => setMobileSegmentsOpen(!mobileSegmentsOpen)} className="w-full flex items-center justify-between text-2xl font-semibold tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 py-5 px-6 border-b border-border">
                         {link.label}
                         <ChevronDown size={18} className={`transition-transform duration-200 ${mobileSegmentsOpen ? "rotate-180" : ""}`} />
                       </button>
@@ -606,7 +606,7 @@ const Header = () => {
                 if (link.megaMenu === "products") {
                   return (
                     <div key={link.href}>
-                      <button onClick={() => setMobileProductsOpen(!mobileProductsOpen)} className="w-full flex items-center justify-between text-2xl font-semibold tracking-tight text-foreground hover:opacity-60 transition-opacity duration-150 py-5 px-6 border-b border-border">
+                      <button onClick={() => setMobileProductsOpen(!mobileProductsOpen)} className="w-full flex items-center justify-between text-2xl font-semibold tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 py-5 px-6 border-b border-border">
                         {link.label}
                         <ChevronDown size={18} className={`transition-transform duration-200 ${mobileProductsOpen ? "rotate-180" : ""}`} />
                       </button>
@@ -630,7 +630,7 @@ const Header = () => {
                 if (link.megaMenu === "about") {
                   return (
                     <div key={link.href}>
-                      <button onClick={() => setMobileAboutOpen(!mobileAboutOpen)} className="w-full flex items-center justify-between text-2xl font-semibold tracking-tight text-foreground hover:opacity-60 transition-opacity duration-150 py-5 px-6 border-b border-border">
+                      <button onClick={() => setMobileAboutOpen(!mobileAboutOpen)} className="w-full flex items-center justify-between text-2xl font-semibold tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 py-5 px-6 border-b border-border">
                         {link.label}
                         <ChevronDown size={18} className={`transition-transform duration-200 ${mobileAboutOpen ? "rotate-180" : ""}`} />
                       </button>
@@ -649,7 +649,7 @@ const Header = () => {
                 }
 
                 return (
-                  <Link key={link.href} to={link.href} onClick={() => setIsMenuOpen(false)} className="text-2xl font-semibold tracking-tight text-foreground hover:opacity-60 transition-opacity duration-150 py-5 px-6 border-b border-border">
+                  <Link key={link.href} to={link.href} onClick={() => setIsMenuOpen(false)} className="text-2xl font-semibold tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 py-5 px-6 border-b border-border">
                     {link.label}
                   </Link>
                 );
