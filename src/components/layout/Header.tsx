@@ -249,13 +249,13 @@ const Header = () => {
 
             {/* CTA buttons */}
             <div className="hidden lg:flex items-center space-x-3 ml-auto">
-              <Link to="/contact">
+              <Link to="/contact" onClick={closeAllMenus}>
                 <Button
                   size="sm"
                   className={
                     isTransparent
-                      ? "border border-white/60 bg-white/10 text-white hover:bg-white hover:text-foreground transition-all duration-200"
-                      : "border border-border bg-transparent text-foreground/70 hover:bg-foreground hover:text-background hover:border-foreground transition-all duration-200"
+                      ? "border border-white/60 bg-white/10 text-white hover:bg-white hover:text-foreground hover:border-white transition-all duration-200"
+                      : "border border-border bg-transparent text-foreground hover:bg-foreground hover:text-background hover:border-foreground transition-all duration-200"
                   }
                 >
                   Contact
