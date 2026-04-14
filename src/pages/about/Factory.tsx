@@ -77,7 +77,6 @@ const Factory = () => {
             { label: "About", href: "/about" },
             { label: "Factory & Offices" },
           ]}
-          title="Global Operations"
         />
 
         {/* Hero */}

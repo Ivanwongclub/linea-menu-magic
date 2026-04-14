@@ -31,7 +31,6 @@ const News = () => {
             { label: "Home", href: "/" },
             { label: "News" },
           ]}
-          title="Latest News"
         />
 
         {/* Sticky Category Filter Bar */}
