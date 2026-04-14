@@ -10,13 +10,18 @@ const About = () => {
   const { ref: valuesHeaderRef, isVisible: valuesHeaderVisible } = useScrollAnimation();
   const { ref: valuesRef, isVisible: valuesVisible, getDelay: getValuesDelay } = useStaggeredAnimation(3, 150);
   const { ref: timelineHeaderRef, isVisible: timelineHeaderVisible } = useScrollAnimation();
-  const { ref: timelineRef, isVisible: timelineVisible, getDelay: getTimelineDelay } = useStaggeredAnimation(6, 100);
+  const { ref: timelineRef, isVisible: timelineVisible, getDelay: getTimelineDelay } = useStaggeredAnimation(9, 100);
 
   const milestones = [
-    { year: "1979", event: "Founded in Hong Kong" },
-    { year: "2000", event: "ISO 9001 certified manufacturing" },
-    { year: "2010s", event: "Global supply partner across key markets" },
-    { year: "May 2026", event: "New Era: A new WinCYC with Digital Transformation", isHighlight: true },
+    { year: "1979",        event: "Founded in Hong Kong — a small workshop with a vision for world-class garment trims.",             isVintage: true  },
+    { year: "1990s",       event: "Manufacturing depth — a decade refining tooling, production techniques, and craft expertise.",     isVintage: true  },
+    { year: "2000",        event: "ISO 9001 certified — international quality management systems formalised across all operations."               },
+    { year: "2000s–2010s", event: "Global supply partner — serving leading brands across Europe, Americas & Asia Pacific."                       },
+    { year: "2010s",       event: "OEM & ODM capability — concept-to-production: sampling, mould-making, volume manufacturing."                  },
+    { year: "2015",        event: "Multi-location operations — Hong Kong HQ, Dongguan production, regional offices worldwide."                   },
+    { year: "2020s",       event: "Integrated solutions partner — full-service design, compliance, and trim programme management."               },
+    { year: "45+ Years",   event: "Sustainability commitment — recycled and eco-conscious accessories for responsible brands."                    },
+    { year: "May 2026",    event: "New Era — digital transformation: catalogue, collaboration & speed.", isHighlight: true                       },
   ];
 
   const values = [
@@ -126,7 +131,7 @@ const About = () => {
         </section>
 
         {/* Timeline */}
-        <section className="py-24 px-6 lg:px-8 overflow-hidden">
+        <section className="py-24 px-6 lg:px-8 overflow-hidden bg-[#F7F5F2]">
           <div className="max-w-7xl mx-auto">
             <div ref={timelineHeaderRef} className="mb-16">
               <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${
@@ -142,24 +147,62 @@ const About = () => {
               />
             </div>
 
-            <div ref={timelineRef} className="space-y-8">
-              {milestones.map((milestone, index) => (
-                <div 
-                  key={index} 
-                  className={`flex items-start space-x-8 group transition-all duration-500 ease-out ${
-                    timelineVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'
-                  }`}
-                  style={getTimelineDelay(index)}
-                >
-                  <div className="flex-shrink-0 w-24 text-right">
-                    <span className={`text-2xl font-bold ${(milestone as any).isHighlight ? 'text-background bg-foreground px-2 py-1' : 'text-foreground'}`}>{milestone.year}</span>
+            <div ref={timelineRef} className="relative">
+              {/* Vertical spine line */}
+              <div className="absolute left-[88px] top-0 bottom-0 w-[2px] bg-foreground/15" />
+
+              <div className="space-y-10">
+                {milestones.map((milestone, index) => (
+                  <div
+                    key={index}
+                    className={`relative flex items-start gap-8 transition-all duration-700 ease-out ${
+                      timelineVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"
+                    }`}
+                    style={getTimelineDelay(index)}
+                  >
+                    {/* Year — fixed width, right-aligned, large */}
+                    <div className="w-[80px] flex-shrink-0 text-right pt-0.5">
+                      <span
+                        className={`font-bold leading-none tracking-tight block ${
+                          (milestone as any).isHighlight
+                            ? "text-[22px] lg:text-[26px] text-foreground"
+                            : "text-[22px] lg:text-[26px] text-foreground/75"
+                        } ${
+                          (milestone as any).isVintage ? "text-foreground/50" : ""
+                        }`}
+                      >
+                        {milestone.year}
+                      </span>
+                    </div>
+
+                    {/* Dot — sits on the spine line */}
+                    <div className="flex-shrink-0 relative" style={{ marginLeft: "-5px", marginTop: "6px" }}>
+                      <div
+                        className={`rounded-full border-2 ${
+                          (milestone as any).isHighlight
+                            ? "w-[14px] h-[14px] bg-foreground border-foreground"
+                            : "w-[12px] h-[12px] bg-[#F7F5F2] border-foreground/50"
+                        }`}
+                      />
+                    </div>
+
+                    {/* Event text */}
+                    <div className="flex-1 pb-2">
+                      <p
+                        className={`leading-relaxed ${
+                          (milestone as any).isHighlight
+                            ? "text-foreground font-semibold text-[15px]"
+                            : "text-foreground/70 text-[14px]"
+                        } ${
+                          (milestone as any).isVintage ? "text-foreground/50" : ""
+                        }`}
+                      >
+                        {milestone.event}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex-shrink-0 w-px h-16 bg-border group-last:hidden" />
-                  <div className="pt-1">
-                    <p className={`${(milestone as any).isHighlight ? 'text-foreground font-semibold' : 'text-foreground'}`}>{milestone.event}</p>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </section>
