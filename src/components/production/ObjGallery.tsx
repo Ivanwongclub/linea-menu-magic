@@ -223,7 +223,7 @@ export default function ObjGallery({ open, onClose, initialIndex = 0 }: ObjGalle
 
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center"
       onKeyDown={handleKey}
@@ -346,5 +346,5 @@ export default function ObjGallery({ open, onClose, initialIndex = 0 }: ObjGalle
         </div>
       </div>
     </div>
-  );
+  , document.body);
 }
