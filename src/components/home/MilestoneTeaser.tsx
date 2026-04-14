@@ -138,13 +138,13 @@ const MilestoneTeaser = () => {
           className="overflow-x-auto scrollbar-hide pb-2"
           style={{ scrollSnapType: "x proximity" }}
         >
-          <div ref={timelineRef} style={{ minWidth: `${COLS * 260}px` }}>
+          <div ref={timelineRef}>
             <div
               className="grid"
               style={{
-                gridTemplateColumns: `repeat(${COLS}, minmax(240px, 1fr))`,
+                gridTemplateColumns: `repeat(${COLS}, 1fr)`,
                 gridTemplateRows: "1fr auto 1fr",
-                columnGap: "16px",
+                columnGap: "8px",
               }}
             >
               {/* ROW 1: ABOVE-LINE CONTENT (even indices: 0,2,4,6,8) */}
