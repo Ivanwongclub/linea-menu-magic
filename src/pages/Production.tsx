@@ -17,6 +17,10 @@ import sustainabilityForestImg from "@/assets/sustainability-forest.jpg";
 import sustainabilityRecycledImg from "@/assets/sustainability-recycled-metal.jpg";
 import sustainabilityEcoImg from "@/assets/sustainability-eco-process.jpg";
 import sustainabilityNatureImg from "@/assets/sustainability-nature.jpg";
+import certGrs from "@/assets/certs/grs.png";
+import certOekoTex from "@/assets/certs/oeko-tex.png";
+import certHigg from "@/assets/certs/higg-index.png";
+import certSmeta from "@/assets/certs/smeta.png";
 
 // ─── Data ───────────────────────────────────────────────────────────────────
 
@@ -358,11 +362,14 @@ export default function Production() {
                   <p className="mt-6 text-[15px] text-muted-foreground leading-relaxed">
                     We take responsible production seriously. We're continuously working to find sustainable manufacturing solutions in order to minimise our impact on the environment — along with the innovative and sophisticated processes involved in the production of recycled materials.
                   </p>
-                  <div className="flex flex-wrap gap-2 mt-6">
-                    {["GRS", "OEKO-TEX", "ISO 9001", "REACH"].map((cert) => (
-                      <span key={cert} className="px-4 py-2 text-[12px] font-medium tracking-wide uppercase border border-foreground/20 text-foreground/70">
-                        {cert}
-                      </span>
+                  <div className="flex flex-wrap items-center gap-6 mt-8">
+                    {[
+                      { src: certGrs, alt: "Global Recycled Standard" },
+                      { src: certOekoTex, alt: "OEKO-TEX Standard 100" },
+                      { src: certHigg, alt: "Higg Index" },
+                      { src: certSmeta, alt: "SMETA" },
+                    ].map((cert) => (
+                      <img key={cert.alt} src={cert.src} alt={cert.alt} className="h-12 w-auto object-contain" loading="lazy" />
                     ))}
                   </div>
                 </div>
