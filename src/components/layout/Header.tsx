@@ -102,8 +102,6 @@ const Header = () => {
   const [mobileAboutOpen,    setMobileAboutOpen]    = useState(false);
   const [mobileSegmentsOpen, setMobileSegmentsOpen] = useState(false);
   const [scrolled,           setScrolled]           = useState(false);
-  const [previewImage,       setPreviewImage]       = useState(DEFAULT_PREVIEW);
-  const [previewLabel,       setPreviewLabel]       = useState("Hardware");
   const [aboutPreviewImage,  setAboutPreviewImage]  = useState(ABOUT_DEFAULT_PREVIEW);
   const [aboutPreviewLabel,  setAboutPreviewLabel]  = useState("Our Story");
   const [activeSegmentSlug,  setActiveSegmentSlug]  = useState("apparel");
@@ -400,65 +398,30 @@ const Header = () => {
           onMouseEnter={handleProductsEnter}
           onMouseLeave={handleProductsLeave}
         >
-          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] h-[560px]">
-            <div className="w-full px-10 lg:px-16 xl:px-24 py-10 h-full">
-              <div className="flex h-full">
-                <div className="flex-1 flex gap-10">
-                  {/* Hardware column */}
-                  <div className="min-w-0">
-                    <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-6 block">
-                      Browse by Category
-                    </span>
-                    {(() => {
-                      const hardware = MEGA_FAMILIES[0];
-                      return (
-                        <div>
-                          <Link
-                            to={`/products?family=${hardware.slug}`}
-                            className="text-[15px] font-semibold text-foreground hover:opacity-70 transition-opacity block mb-3"
-                            onMouseEnter={() => { setPreviewImage(hardware.image); setPreviewLabel(hardware.name); }}
-                          >
-                            {hardware.name}
-                          </Link>
-                          <ul className="space-y-2">
-                            {hardware.subcategories.map((sub) => (
-                              <li key={sub.en}>
-                                <Link
-                                  to={`/products?categories=${slugify(sub.en)}`}
-                                  className="text-[14px] text-muted-foreground hover:text-foreground transition-colors duration-150 block"
-                                  onMouseEnter={() => { setPreviewImage(sub.image); setPreviewLabel(sub.en); }}
-                                >
-                                  {sub.en}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      );
-                    })()}
-                  </div>
-
-                  {/* Soft Trims + Branding Trims */}
-                  <div className="min-w-0">
-                    <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-6 block opacity-0 pointer-events-none">
-                      &nbsp;
-                    </span>
-                    {MEGA_FAMILIES.slice(1).map((family) => (
-                      <div key={family.slug} className="mb-6 last:mb-0">
+          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
+            <div className="w-full px-10 lg:px-16 xl:px-24 py-10">
+              <div className="flex items-start gap-10">
+                {/* Hardware column */}
+                <div className="min-w-0">
+                  <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-6 block">
+                    Browse by Category
+                  </span>
+                  {(() => {
+                    const hardware = MEGA_FAMILIES[0];
+                    return (
+                      <div>
                         <Link
-                          to={`/products?family=${family.slug}`}
+                          to={`/products?family=${hardware.slug}`}
                           className="text-[15px] font-semibold text-foreground hover:opacity-70 transition-opacity block mb-3"
-                          onMouseEnter={() => { setPreviewImage(family.image); setPreviewLabel(family.name); }}
                         >
-                          {family.name}
+                          {hardware.name}
                         </Link>
                         <ul className="space-y-2">
-                          {family.subcategories.map((sub) => (
+                          {hardware.subcategories.map((sub) => (
                             <li key={sub.en}>
                               <Link
                                 to={`/products?categories=${slugify(sub.en)}`}
                                 className="text-[14px] text-muted-foreground hover:text-foreground transition-colors duration-150 block"
-                                onMouseEnter={() => { setPreviewImage(sub.image); setPreviewLabel(sub.en); }}
                               >
                                 {sub.en}
                               </Link>
@@ -466,35 +429,55 @@ const Header = () => {
                           ))}
                         </ul>
                       </div>
-                    ))}
-                  </div>
+                    );
+                  })()}
+                </div>
 
-                  {/* Expanded preview image */}
-                  <div
-                    className="flex-1 relative flex flex-col"
-                    onMouseEnter={() => { setPreviewImage(DEFAULT_PREVIEW); setPreviewLabel("Hardware"); }}
-                  >
-                    <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-6 block opacity-0 pointer-events-none">
-                      &nbsp;
-                    </span>
-                    <div className="relative flex-1 overflow-hidden">
-                      <img
-                        key={previewImage}
-                        src={previewImage}
-                        alt={previewLabel}
-                        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
-                        style={{ animation: "fadeIn 250ms ease" }}
-                      />
-                      <div className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-[hsl(var(--border))] px-5 py-3">
-                        <Link
-                          to="/products"
-                          className="text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          View All Products →
-                        </Link>
-                      </div>
+                {/* Soft Trims + Branding Trims */}
+                <div className="min-w-0">
+                  <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-6 block opacity-0 pointer-events-none">
+                    &nbsp;
+                  </span>
+                  {MEGA_FAMILIES.slice(1).map((family) => (
+                    <div key={family.slug} className="mb-6 last:mb-0">
+                      <Link
+                        to={`/products?family=${family.slug}`}
+                        className="text-[15px] font-semibold text-foreground hover:opacity-70 transition-opacity block mb-3"
+                      >
+                        {family.name}
+                      </Link>
+                      <ul className="space-y-2">
+                        {family.subcategories.map((sub) => (
+                          <li key={sub.en}>
+                            <Link
+                              to={`/products?categories=${slugify(sub.en)}`}
+                              className="text-[14px] text-muted-foreground hover:text-foreground transition-colors duration-150 block"
+                            >
+                              {sub.en}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
+                  ))}
+                </div>
+
+                {/* Product grid image — square panel */}
+                <div className="flex-shrink-0 w-[420px] flex flex-col ml-auto">
+                  <div className="relative aspect-square overflow-hidden bg-secondary">
+                    <img
+                      src={megaProductsGrid}
+                      alt="Product categories overview"
+                      className="absolute inset-0 w-full h-full object-cover"
+                      loading="lazy"
+                    />
                   </div>
+                  <Link
+                    to="/products"
+                    className="mt-4 text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    View All Products →
+                  </Link>
                 </div>
               </div>
             </div>
