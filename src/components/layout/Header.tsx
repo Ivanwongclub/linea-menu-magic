@@ -311,7 +311,7 @@ const Header = () => {
                       <button
                         key={seg.slug}
                         onMouseEnter={() => setActiveSegmentSlug(seg.slug)}
-                        className={`text-left pl-3 pr-2 py-3.5 border-l-2 transition-all duration-150 ${
+                        className={`group text-left pl-3 pr-2 py-3.5 border-l-2 transition-all duration-150 ${
                           activeSegmentSlug === seg.slug
                             ? "border-foreground bg-foreground text-white"
                             : "border-transparent hover:bg-foreground hover:text-white hover:border-foreground"
