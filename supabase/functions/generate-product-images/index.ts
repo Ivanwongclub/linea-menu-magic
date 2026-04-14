@@ -8,23 +8,23 @@ const corsHeaders = {
 };
 
 const CATEGORY_EXTRAS: Record<string, string> = {
-  "Buttons": "Show the button face clearly. If shank-style, angle slightly to show the shank loop underneath.",
-  "Snap Buttons": "Show all 4 components of the snap set — cap, socket, stud, post — slightly separated.",
-  "Jeans Buttons": "Show the domed cap and the rivet post side by side. Antique brass or gunmetal finish.",
-  "Shank Buttons": "Show the button face clearly, angle slightly to show the shank loop underneath.",
-  "Eyelets": "Show 4–6 eyelets scattered naturally. Include at least one angled view showing the barrel depth.",
-  "Buckles": "Angle the buckle to show frame depth and internal bar. Do not shoot flat-on.",
-  "Zipper Pullers": "Show the tab hanging down. Angle 20° to show the engraved or cast face surface.",
-  "Cord Ends": "Show 3 pieces in a natural cluster. Each piece showing the cord hole opening.",
-  "Cord Stoppers": "Show 3 pieces in a natural cluster. Each piece showing the cord hole opening.",
-  "Toggles": "Show 3 pieces in a natural cluster. Each piece showing the cord hole opening.",
-  "Drawcords": "Show a short length loosely coiled or folded. Textile weave or braid texture must be clearly visible.",
-  "Webbing": "Show a short length loosely coiled or folded. Textile weave or braid texture must be clearly visible.",
-  "Badges": "Straight-on overhead view. Show the woven texture or embossed surface detail clearly.",
-  "Patches": "Straight-on overhead view. Show the woven texture or embossed surface detail clearly.",
-  "Rivets": "Show 5–6 rivets scattered. Include both cap-side and post-side views.",
-  "Beads": "Show 8–10 beads in a natural loose pile. Render the material finish — glass, metal, or resin.",
-  "Hook & Eyes": "Show the hook and the eye bar side by side as a matched pair. Nickel or brass finish.",
+  "Buttons": "Scatter 5–6 shank buttons at varied angles. Show ornate engraved crest faces on most, flip 1–2 to reveal the shank loop underneath. Mix of sizes if possible.",
+  "Snap Buttons": "Show all 4 components of 2 snap sets — caps, sockets, studs, posts — scattered naturally with small gaps. Silver/nickel finish.",
+  "Jeans Buttons": "Scatter 4–5 jeans tack buttons — domed caps with geometric patterns and rivet posts shown separated. Antique brass and gunmetal finishes mixed.",
+  "Shank Buttons": "Scatter 5–6 shank buttons at varied angles. Show ornate engraved faces on most, flip 1–2 to reveal the shank loop underneath.",
+  "Eyelets": "Scatter 15–20 eyelets and grommets in assorted sizes and colors (include painted colors like red, blue, teal, pink alongside metal finishes). Show both round and oval/oblong shapes. Some face-up, some showing barrel depth.",
+  "Buckles": "Show 3–4 buckles of different styles (rectangular frame, D-ring, slide). Angle each to show frame depth and internal bar. Mix of brass and nickel finishes.",
+  "Zipper Pullers": "Show 5–6 different zipper pullers scattered naturally. Mix of ornate castings and minimalist rectangles. Tabs hanging down, varied angles showing engraved faces.",
+  "Cord Ends": "Show 8–10 cord ends in different shapes and finishes (gold, gunmetal, silver). Scatter naturally with varied angles showing the cord hole openings.",
+  "Cord Stoppers": "Show 8–10 cord stoppers/locks in different shapes (barrel, cube, sphere, flat disc) and finishes (gold, gunmetal, silver, one colored). Scatter naturally with varied angles.",
+  "Toggles": "Show 6–8 toggles in different shapes and finishes. Scatter naturally showing cord hole openings and varied surface textures.",
+  "Drawcords": "Show 2–3 short lengths of drawcord loosely coiled or folded. Mix of braided cotton and woven nylon. Textile weave and braid texture must be clearly visible.",
+  "Webbing": "Show 2–3 short lengths of webbing in different widths, loosely folded. Textile weave pattern clearly visible. Mix of black and natural colors.",
+  "Badges": "Show 4–5 woven badges scattered at varied angles. Straight-on and tilted views. Show the woven texture and embossed surface detail clearly.",
+  "Patches": "Show 4–5 patches at varied angles. Mix of woven and embroidered styles. Show texture detail clearly.",
+  "Rivets": "Show 10–12 rivets scattered naturally. Include both cap-side and post-side views. Mix of brass, nickel, and gunmetal finishes.",
+  "Beads": "Show 15–20 beads in a natural loose pile. Mix of shapes (round, faceted, barrel) and finishes (metal, glass, resin). Varied sizes.",
+  "Hook & Eyes": "Show 3–4 matched pairs of hooks and eye bars scattered naturally. Mix of nickel and brass finishes. Show both components clearly.",
 };
 
 function buildImagePrompt(
@@ -33,15 +33,19 @@ function buildImagePrompt(
   materials: string[],
 ): string {
   const matStr = materials.length > 0 ? materials.join(", ") : "metal";
-  const subjectLine = `${productName} — a ${categoryName} fashion hardware trim made of ${matStr}. Single product or small cluster of 2–3 identical pieces`;
+  const subjectLine = `${productName} — a ${categoryName} fashion hardware trim made of ${matStr}`;
   const extra = CATEGORY_EXTRAS[categoryName] ?? "";
-  return `Professional B2B product photography. ${subjectLine}. ${extra}
-Pure white background, no props, no garments, no hands, no text overlays.
-Soft diffused studio lighting from slightly above. Very faint drop shadow directly beneath the product.
-Camera angle 15–20° above horizontal — not flat overhead, not pure side profile.
-Product fills 65–75% of frame. Sharp focus on material surface texture.
-Render metal finishes with accurate specular highlights: brass = warm golden sheen, nickel/silver = cool blue-white highlights, gunmetal = matte diffused highlights.
-Square 1:1 format. Fashion hardware B2B catalogue style matching richbuttoncorp.com product photography.`;
+  return `Professional product photography for a fashion hardware B2B catalogue.
+${subjectLine}. ${extra}
+Off-white studio background with a very slight warm tone.
+Show 5–8 pieces of the same product scattered naturally across the frame at varied angles — some face-up showing the engraved or textured face, some tilted at 20–40° to show depth and side profile, and at least one flipped to show the back or shank/post.
+Soft diffused overhead studio lighting creating gentle gradients across curved metal surfaces.
+Each piece casts its own soft individual drop shadow.
+Camera angle approximately 25–30° above the surface — elevated enough to show depth but not a flat overhead lay.
+Products fill 70–80% of frame with natural spacing between pieces.
+Extremely sharp focus on surface detail: engraving lines, casting texture, knurled edges, enamel fills, plating finish.
+Metal rendering: polished gold = mirror-bright warm reflections, antique brass = warm matte with subtle patina, gunmetal = dark cool reflective, nickel/silver = bright cool specular, rose gold = warm pink-tinted reflections.
+Square 1:1 format. Photorealistic. No text, no hands, no garments, no props.`;
 }
 
 serve(async (req) => {
@@ -138,7 +142,7 @@ serve(async (req) => {
 
         // Call Lovable AI image generation with timeout
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 30000);
+        const timeout = setTimeout(() => controller.abort(), 60000);
 
         const aiResponse = await fetch(
           "https://ai.gateway.lovable.dev/v1/chat/completions",
@@ -149,7 +153,7 @@ serve(async (req) => {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              model: "google/gemini-2.5-flash-image",
+              model: "google/gemini-3-pro-image-preview",
               messages: [{ role: "user", content: prompt }],
               modalities: ["image", "text"],
             }),
@@ -180,10 +184,9 @@ serve(async (req) => {
           bytes[i] = binaryString.charCodeAt(i);
         }
 
-        // Force JPEG content type for all uploads
         const contentType = "image/jpeg";
 
-        // Upload primary image as ai-primary.jpg
+        // Upload primary image
         const primaryPath = `images/${pid}/ai-primary.jpg`;
         const { error: uploadError } = await supabase.storage
           .from("product-assets")
@@ -197,7 +200,7 @@ serve(async (req) => {
           throw new Error(`Upload error: ${uploadError.message}`);
         }
 
-        // Upload same image as ai-thumb.jpg (Supabase transform API will serve it at correct size)
+        // Upload same image as thumb
         const thumbPath = `images/${pid}/ai-thumb.jpg`;
         await supabase.storage
           .from("product-assets")
@@ -218,13 +221,13 @@ serve(async (req) => {
           .getPublicUrl(thumbPath);
         const thumbUrl = thumbUrlData.publicUrl;
 
-        // Update thumbnail_url on product to point to the thumb version
+        // Update thumbnail_url on product
         await supabase
           .from("products")
           .update({ thumbnail_url: thumbUrl })
           .eq("id", pid);
 
-        // Insert/update product_images with primary (full-size) URL
+        // Insert/update product_images
         const { error: imgError } = await supabase.from("product_images").insert({
           product_id: pid,
           url: primaryUrl,
@@ -245,7 +248,7 @@ serve(async (req) => {
         failed++;
       }
 
-      // Delay between products to avoid rate limiting
+      // Delay between products
       if (products.length > 1) {
         await new Promise((r) => setTimeout(r, 1500));
       }
