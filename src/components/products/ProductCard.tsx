@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Sparkles, Heart, Eye, Leaf } from 'lucide-react';
+import { Sparkles, Heart, Eye, Leaf, Box } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { Product } from '@/features/products/types';
 import { getProductPlaceholderUrl } from '@/features/products/utils/productImagePlaceholder';
