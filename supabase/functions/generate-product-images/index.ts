@@ -7,13 +7,41 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const CATEGORY_EXTRAS: Record<string, string> = {
+  "Buttons": "Show the button face clearly. If shank-style, angle slightly to show the shank loop underneath.",
+  "Snap Buttons": "Show all 4 components of the snap set — cap, socket, stud, post — slightly separated.",
+  "Jeans Buttons": "Show the domed cap and the rivet post side by side. Antique brass or gunmetal finish.",
+  "Shank Buttons": "Show the button face clearly, angle slightly to show the shank loop underneath.",
+  "Eyelets": "Show 4–6 eyelets scattered naturally. Include at least one angled view showing the barrel depth.",
+  "Buckles": "Angle the buckle to show frame depth and internal bar. Do not shoot flat-on.",
+  "Zipper Pullers": "Show the tab hanging down. Angle 20° to show the engraved or cast face surface.",
+  "Cord Ends": "Show 3 pieces in a natural cluster. Each piece showing the cord hole opening.",
+  "Cord Stoppers": "Show 3 pieces in a natural cluster. Each piece showing the cord hole opening.",
+  "Toggles": "Show 3 pieces in a natural cluster. Each piece showing the cord hole opening.",
+  "Drawcords": "Show a short length loosely coiled or folded. Textile weave or braid texture must be clearly visible.",
+  "Webbing": "Show a short length loosely coiled or folded. Textile weave or braid texture must be clearly visible.",
+  "Badges": "Straight-on overhead view. Show the woven texture or embossed surface detail clearly.",
+  "Patches": "Straight-on overhead view. Show the woven texture or embossed surface detail clearly.",
+  "Rivets": "Show 5–6 rivets scattered. Include both cap-side and post-side views.",
+  "Beads": "Show 8–10 beads in a natural loose pile. Render the material finish — glass, metal, or resin.",
+  "Hook & Eyes": "Show the hook and the eye bar side by side as a matched pair. Nickel or brass finish.",
+};
+
 function buildImagePrompt(
   productName: string,
   categoryName: string,
   materials: string[],
 ): string {
   const matStr = materials.length > 0 ? materials.join(", ") : "metal";
-  return `Professional product photography of ${productName}, a ${categoryName} fashion trim accessory made of ${matStr}. Close-up shot on pure white background, studio lighting, high detail, fashion industry catalog style, no text, no people, product centered, sharp focus`;
+  const subjectLine = `${productName} — a ${categoryName} fashion hardware trim made of ${matStr}. Single product or small cluster of 2–3 identical pieces`;
+  const extra = CATEGORY_EXTRAS[categoryName] ?? "";
+  return `Professional B2B product photography. ${subjectLine}. ${extra}
+Pure white background, no props, no garments, no hands, no text overlays.
+Soft diffused studio lighting from slightly above. Very faint drop shadow directly beneath the product.
+Camera angle 15–20° above horizontal — not flat overhead, not pure side profile.
+Product fills 65–75% of frame. Sharp focus on material surface texture.
+Render metal finishes with accurate specular highlights: brass = warm golden sheen, nickel/silver = cool blue-white highlights, gunmetal = matte diffused highlights.
+Square 1:1 format. Fashion hardware B2B catalogue style matching richbuttoncorp.com product photography.`;
 }
 
 serve(async (req) => {
