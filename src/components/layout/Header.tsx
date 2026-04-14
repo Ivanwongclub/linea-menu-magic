@@ -9,7 +9,20 @@ import heritageCraftImg from "@/assets/heritage-craftsmanship.jpg";
 import aboutShowroomImg from "@/assets/about-showroom.jpg";
 import foundersImg from "@/assets/founders.png";
 
-const SUPABASE_IMG = "https://otkuqwpsgxzlaxbclbfi.supabase.co/storage/v1/object/public/product-assets/images";
+import buttonsCategoryImg from "@/assets/products/buttons-category.jpg";
+import hardwareCategoryImg from "@/assets/products/hardware-category.jpg";
+import laceImg from "@/assets/products/lace-category.jpg";
+import zippersCategoryImg from "@/assets/products/zippers-category.jpg";
+import metalButtonImg from "@/assets/products/metal-button.jpg";
+import resinButtonsImg from "@/assets/products/resin-buttons.jpg";
+import snapButtonImg from "@/assets/products/snap-button.jpg";
+import engravedButtonImg from "@/assets/products/engraved-button.jpg";
+import beltBuckleImg from "@/assets/products/belt-buckle.jpg";
+import metalClaspImg from "@/assets/products/metal-clasp.jpg";
+import metalZipperImg from "@/assets/products/metal-zipper.jpg";
+import cottonLaceImg from "@/assets/products/cotton-lace.jpg";
+import wovenLabelImg from "@/assets/products/woven-label.jpg";
+import otherCategoryImg from "@/assets/products/other-category.jpg";
 
 // ─── About flat link list ──────────────────────────────────────────────────────
 interface AboutLink { label?: string; href?: string; image?: string; divider?: true; }
@@ -36,37 +49,37 @@ const ABOUT_TRUST_CARDS = [
 const MEGA_FAMILIES = [
   {
     name: "Hardware", slug: "hardware",
-    image: `${SUPABASE_IMG}/91013630-38c1-49fc-b21c-f0b052caca09/ai-primary.png`,
+    image: hardwareCategoryImg,
     subcategories: [
-      { en: "Buttons",        image: `${SUPABASE_IMG}/91013630-38c1-49fc-b21c-f0b052caca09/ai-primary.png` },
-      { en: "Snap Buttons",   image: `${SUPABASE_IMG}/50bff7ed-c214-4b36-9b86-5073db4eccac/ai-primary.png` },
-      { en: "Jeans Buttons",  image: `${SUPABASE_IMG}/ed2f489e-41f8-4353-aa71-b8172e544863/ai-primary.png` },
-      { en: "Shank Buttons",  image: `${SUPABASE_IMG}/401d7742-6f57-4e6b-ba5e-b1b23d6bf971/ai-primary.png` },
-      { en: "Buckles",        image: `${SUPABASE_IMG}/1b856a91-9c8e-494a-b8c2-9e7ccb67e962/ai-primary.png` },
-      { en: "Eyelets",        image: `${SUPABASE_IMG}/09257e7e-b145-4e9a-bd0d-4886ca83acdc/ai-primary.png` },
-      { en: "Hook & Eyes",    image: `${SUPABASE_IMG}/0f758dff-bca5-4f78-8ca1-7729d2c43064/ai-primary.png` },
-      { en: "Rivets",         image: `${SUPABASE_IMG}/3995a056-b671-4d61-9875-a02e89aa1f36/ai-primary.png` },
-      { en: "Zipper Pullers", image: `${SUPABASE_IMG}/91013630-38c1-49fc-b21c-f0b052caca09/ai-primary.png` },
-      { en: "Toggles",        image: `${SUPABASE_IMG}/50bff7ed-c214-4b36-9b86-5073db4eccac/ai-primary.png` },
-      { en: "Cord Ends",      image: `${SUPABASE_IMG}/ed2f489e-41f8-4353-aa71-b8172e544863/ai-primary.png` },
-      { en: "Cord Stoppers",  image: `${SUPABASE_IMG}/401d7742-6f57-4e6b-ba5e-b1b23d6bf971/ai-primary.png` },
-      { en: "Beads",          image: `${SUPABASE_IMG}/1edb747d-3fde-472f-a019-2c5dec81e938/ai-primary.png` },
+      { en: "Buttons",        image: metalButtonImg       },
+      { en: "Snap Buttons",   image: snapButtonImg        },
+      { en: "Jeans Buttons",  image: engravedButtonImg    },
+      { en: "Shank Buttons",  image: metalButtonImg       },
+      { en: "Buckles",        image: beltBuckleImg        },
+      { en: "Eyelets",        image: otherCategoryImg     },
+      { en: "Hook & Eyes",    image: metalClaspImg        },
+      { en: "Rivets",         image: otherCategoryImg     },
+      { en: "Zipper Pullers", image: metalZipperImg       },
+      { en: "Toggles",        image: otherCategoryImg     },
+      { en: "Cord Ends",      image: cottonLaceImg        },
+      { en: "Cord Stoppers",  image: cottonLaceImg        },
+      { en: "Beads",          image: resinButtonsImg      },
     ],
   },
   {
     name: "Soft Trims", slug: "soft-trims",
-    image: `${SUPABASE_IMG}/40360bf7-eaae-427f-a800-c2a0514d198d/ai-primary.png`,
+    image: laceImg,
     subcategories: [
-      { en: "Drawcords", image: `${SUPABASE_IMG}/40360bf7-eaae-427f-a800-c2a0514d198d/ai-primary.png` },
-      { en: "Webbing",   image: `${SUPABASE_IMG}/ff60f673-8158-4f58-a095-777a8f7b8db6/ai-primary.png` },
+      { en: "Drawcords", image: cottonLaceImg },
+      { en: "Webbing",   image: laceImg       },
     ],
   },
   {
     name: "Branding Trims", slug: "branding-trims",
-    image: `${SUPABASE_IMG}/ff60f673-8158-4f58-a095-777a8f7b8db6/ai-primary.png`,
+    image: wovenLabelImg,
     subcategories: [
-      { en: "Badges",  image: `${SUPABASE_IMG}/40360bf7-eaae-427f-a800-c2a0514d198d/ai-primary.png` },
-      { en: "Patches", image: `${SUPABASE_IMG}/ff60f673-8158-4f58-a095-777a8f7b8db6/ai-primary.png` },
+      { en: "Badges",  image: wovenLabelImg },
+      { en: "Patches", image: wovenLabelImg },
     ],
   },
 ];
