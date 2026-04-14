@@ -4,10 +4,10 @@ const SUPABASE_STORAGE =
 export type ImageSize = 'thumb' | 'card' | 'pdp' | 'menu';
 
 const SIZE_PARAMS: Record<ImageSize, string> = {
-  thumb: 'width=400&height=400&quality=80&resize=cover',
-  card: 'width=400&height=400&quality=80&resize=cover',
+  thumb: 'width=400&height=400&quality=80&resize=contain',
+  card: 'width=400&height=400&quality=80&resize=contain',
   pdp: 'width=800&height=800&quality=85&resize=contain',
-  menu: 'width=320&height=320&quality=75&resize=cover',
+  menu: 'width=320&height=320&quality=75&resize=contain',
 };
 
 /**

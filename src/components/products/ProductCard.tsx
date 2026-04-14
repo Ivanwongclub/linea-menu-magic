@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { Sparkles, Heart, Eye, Leaf } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { Product } from '@/features/products/types';
-import { getProductPlaceholderUrl, getOptimizedImageUrl } from '@/features/products/utils/productImagePlaceholder';
+import { getProductPlaceholderUrl } from '@/features/products/utils/productImagePlaceholder';
+import { getProductImageUrl } from '@/lib/productImage';
 import { getPdpSeedImages } from '@/features/products/pdpSeedImages';
 
 type ViewMode = 'grid' | 'list';
@@ -53,7 +54,7 @@ export default function ProductCard({
   isInLibrary,
 }: ProductCardProps) {
   const rawUrl = resolveProductImage(product, isHeroLayout ? 'full' : 'thumb');
-  const imageUrl = getOptimizedImageUrl(rawUrl, isHeroLayout ? 800 : 400, isHeroLayout ? 400 : 400, 80);
+  const imageUrl = getProductImageUrl(rawUrl, isHeroLayout ? 'pdp' : 'card');
   const isAboveFold = index < 8;
 
   const [imageLoaded, setImageLoaded] = useState(false);
