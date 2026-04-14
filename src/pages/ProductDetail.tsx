@@ -124,7 +124,7 @@ function HeroGallery({ images, onOpen3D, has3D }: { images: ProductImage[]; onOp
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 }
 
@@ -136,7 +136,7 @@ function SpecTile({ label, value }: { label: string; value: string | null | unde
     <div className="py-2">
       <p className="text-[10px] text-muted-foreground uppercase tracking-[0.1em] mb-0.5">{label}</p>
       <p className="text-[13px] font-medium text-foreground leading-snug">{value}</p>
-    </>
+    </div>
   );
 }
 
@@ -149,7 +149,7 @@ function SectionHeading({ id, title, icon: Icon }: { id: string; title: string; 
         <Icon className="h-4 w-4 text-background" />
       </div>
       <h2 className="text-sm font-bold uppercase tracking-[0.1em] text-foreground">{title}</h2>
-    </>
+    </div>
   );
 }
 
@@ -196,7 +196,7 @@ function SpecLine({ label, value, icon: Icon }: { label: string; value: string |
         <dt className="text-[11px] text-muted-foreground uppercase tracking-[0.08em] shrink-0">{label}</dt>
         <dd className="text-[13px] font-medium text-foreground text-right truncate">{value}</dd>
       </div>
-    </>
+    </div>
   );
 }
 
@@ -255,7 +255,7 @@ function DetailSkeleton() {
           <Skeleton className="h-14 w-full" />
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
@@ -460,7 +460,7 @@ export default function ProductDetail() {
                     <>
                       <span className="text-muted-foreground/40">·</span>
                       <span className="text-[11px] font-mono text-muted-foreground">{product.item_code}</span>
-                    </>
+                    </div>
                   )}
                 </div>
                 <h1 className="text-2xl lg:text-3xl font-semibold tracking-tight text-foreground leading-tight mb-2">
