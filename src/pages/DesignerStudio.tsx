@@ -113,7 +113,7 @@ const DesignerStudio = () => {
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {products.map((product, i) => (
-                <Link key={product.id} to={`/products/${product.slug}`}>
+                <Link key={product.id} to={`/designer-studio/products/${product.slug}`}>
                   <ProductCard
                     product={product}
                     viewMode="grid"

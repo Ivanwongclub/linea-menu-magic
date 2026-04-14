@@ -113,6 +113,7 @@ const App = () => (
                 <Route path="/ecollections" element={<Brochures />} />
                 <Route path="/ecollections/:slug" element={<BrochureViewer />} />
                 <Route path="/designer-studio" element={<DesignerStudio />} />
+                <Route path="/designer-studio/products/:slug" element={<ProductDetail />} />
                 <Route path="/designer-studio/dashboard" element={<DesignerStudioDashboard />} />
                 <Route path="/designer-studio/compose/:sessionId" element={<ComposerPage />} />
                 <Route path="/designer-studio/present/:sessionId" element={<PresentationPage />} />
