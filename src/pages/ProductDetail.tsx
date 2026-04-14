@@ -403,10 +403,15 @@ export default function ProductDetail() {
   }
   const allProductionEntries = Object.entries(mergedProdObj);
 
+  const location = useLocation();
+  const isStudioContext = location.pathname.startsWith('/designer-studio');
+  const libraryHref = isStudioContext ? '/designer-studio' : '/products';
+  const libraryLabel = isStudioContext ? 'Designer Studio' : 'Trim Library';
+
   const breadcrumbSegments = [
     { label: 'Home', href: '/' },
-    { label: 'Trim Library', href: '/products' },
-    ...(primaryCat ? [{ label: primaryCat.name, href: `/products?category=${primaryCat.slug}` }] : []),
+    { label: libraryLabel, href: libraryHref },
+    ...(primaryCat ? [{ label: primaryCat.name, href: `${libraryHref}${isStudioContext ? '' : `?category=${primaryCat.slug}`}` }] : []),
     { label: product.name_en ?? product.name },
   ];
 
