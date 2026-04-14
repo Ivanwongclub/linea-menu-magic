@@ -187,9 +187,36 @@ const DesignerStudioDashboard = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Convert catalog Product → UserLibraryItem shape for card rendering
+  const catalogAsLibraryItems: UserLibraryItem[] = useMemo(() => {
+    return catalogProducts.map((p): UserLibraryItem => ({
+      id: `catalog-${p.id}`,
+      product_id: p.id,
+      team_id: teamId,
+      is_favourite: false,
+      is_admin_default: false,
+      downloadable_files: [],
+      added_at: p.created_at,
+      section: 'All Products',
+      product: p,
+    }));
+  }, [catalogProducts, teamId]);
+
+  // Merge favourite state from actual library items onto catalog items
+  const mergedCatalogItems: UserLibraryItem[] = useMemo(() => {
+    const favSet = new Set(libraryItems.filter(i => i.is_favourite).map(i => i.product_id));
+    return catalogAsLibraryItems.map(item => ({
+      ...item,
+      is_favourite: favSet.has(item.product_id),
+    }));
+  }, [catalogAsLibraryItems, libraryItems]);
+
+  // Choose source
+  const sourceItems = librarySource === 'all' ? mergedCatalogItems : libraryItems;
+
   // Library filtering & sorting
   const filteredLibraryItems = useMemo(() => {
-    const filtered = libraryItems.filter((item) => {
+    const filtered = sourceItems.filter((item) => {
       const p = item.product;
       const name = item.custom_name || p?.name_en || p?.name || '';
       const code = p?.item_code || '';
@@ -229,7 +256,7 @@ const DesignerStudioDashboard = () => {
       }
       return sortOrder === 'asc' ? comparison : -comparison;
     });
-  }, [libraryItems, searchQuery, categoryFilter, showFavoritesOnly, sortField, sortOrder]);
+  }, [sourceItems, searchQuery, categoryFilter, showFavoritesOnly, sortField, sortOrder]);
 
   const favouriteCount = useMemo(() => libraryItems.filter(i => i.is_favourite).length, [libraryItems]);
 
