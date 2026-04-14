@@ -17,6 +17,7 @@ interface ProductCardProps {
   onQuickView?: (product: Product) => void;
   onAddToLibrary?: (product: Product) => void;
   isInLibrary?: boolean;
+  linkTo?: string;
 }
 
 function resolveProductImage(
