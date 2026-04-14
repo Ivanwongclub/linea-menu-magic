@@ -255,7 +255,7 @@ const Header = () => {
                   className={
                     isTransparent
                       ? "border border-white/60 bg-white/10 text-white hover:bg-white hover:text-foreground transition-all duration-200"
-                      : "border border-border bg-transparent text-foreground/70 hover:text-foreground hover:border-foreground transition-all duration-200"
+                      : "border border-border bg-transparent text-foreground/70 hover:bg-foreground hover:text-background hover:border-foreground transition-all duration-200"
                   }
                 >
                   Contact
