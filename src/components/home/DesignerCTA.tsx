@@ -16,8 +16,8 @@ const DesignerCTA = () => {
       {/* Content */}
       <div className="relative z-10 section-inner text-center">
         <span
-          className={`section-label !text-white/50 transition-all duration-700 ease-out ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+           className={`section-label !text-white/50 transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${
+             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
           Exclusive
@@ -43,8 +43,8 @@ const DesignerCTA = () => {
         </div>
 
         <p
-          className={`text-white/60 leading-relaxed max-w-2xl mx-auto mb-12 transition-all duration-700 ease-out ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+           className={`text-white/60 leading-relaxed max-w-2xl mx-auto mb-12 transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${
+             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
           style={{ transitionDelay: "900ms" }}
         >
@@ -52,8 +52,8 @@ const DesignerCTA = () => {
         </p>
 
         <div
-          className={`flex flex-col sm:flex-row items-center justify-center gap-4 transition-all duration-700 ease-out ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+           className={`flex flex-col sm:flex-row items-center justify-center gap-4 transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${
+             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
           style={{ transitionDelay: "1000ms" }}
         >

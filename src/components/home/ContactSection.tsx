@@ -25,8 +25,8 @@ const ContactSection = () => {
       {/* Editorial header with location grid */}
       <div
         ref={headerRef}
-        className={`section-inner mb-16 flex flex-col lg:flex-row items-start gap-12 transition-all duration-700 ease-out ${
-          headerVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
+         className={`section-inner mb-16 flex flex-col lg:flex-row items-start gap-12 transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${
+           headerVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
         }`}
       >
         <div className="lg:w-1/2">
@@ -62,8 +62,8 @@ const ContactSection = () => {
           {contactItems.map((item, index) => (
             <div
               key={item.title}
-              className={`group p-8 bg-secondary border border-border hover:border-foreground rounded-[var(--radius)] transition-all duration-500 ease-out hover:-translate-y-1 ${
-                cardsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
+               className={`group p-8 bg-secondary border border-border hover:border-foreground rounded-[var(--radius)] hover-card transition-[border-color] duration-200 ${
+                 cardsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
               }`}
               style={getDelay(index)}
             >

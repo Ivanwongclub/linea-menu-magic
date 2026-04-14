@@ -17,8 +17,8 @@ const HeritageSection = () => {
 
             {/* Primary image */}
             <div
-              className={`aspect-[3/4] overflow-hidden rounded-[var(--radius)] transition-all duration-1000 ease-out ${
-                imageVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
+               className={`aspect-[3/4] overflow-hidden rounded-[var(--radius)] transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${
+                 imageVisible ? "opacity-100 scale-100" : "opacity-0 scale-[0.96]"
               }`}
             >
               <img
@@ -32,8 +32,8 @@ const HeritageSection = () => {
 
             {/* Floating stat card — bottom-right overlapping */}
             <div
-              className={`absolute -bottom-5 -right-5 bg-white border border-[hsl(var(--border))] rounded-[var(--radius)] p-5 shadow-card transition-all duration-700 ease-out ${
-                imageVisible ? "opacity-100 translate-x-0 translate-y-0" : "opacity-0 translate-x-4 translate-y-4"
+               className={`absolute -bottom-5 -right-5 bg-white border border-[hsl(var(--border))] rounded-[var(--radius)] p-5 shadow-card hover-card transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${
+                 imageVisible ? "opacity-100 translate-x-0 translate-y-0" : "opacity-0 translate-x-4 translate-y-4"
               }`}
               style={{ transitionDelay: "400ms" }}
             >
@@ -47,8 +47,8 @@ const HeritageSection = () => {
           {/* RIGHT: Text column */}
           <div ref={contentRef} className="order-1 lg:order-2">
             <span
-              className={`section-label transition-all duration-700 ease-out ${
-                contentVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"
+               className={`section-label transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${
+                 contentVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"
               }`}
             >
               Heritage
@@ -73,16 +73,16 @@ const HeritageSection = () => {
             </h2>
             <div className="space-y-6 text-muted-foreground leading-relaxed">
               <p
-                className={`transition-all duration-700 ease-out ${
-                  contentVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"
+                 className={`transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${
+                   contentVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"
                 }`}
                 style={{ transitionDelay: "200ms" }}
               >
                 Since our founding in 1979, WIN-CYC GROUP has been dedicated to the research and manufacturing of premium garment accessories.
               </p>
               <p
-                className={`transition-all duration-700 ease-out ${
-                  contentVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"
+                 className={`transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${
+                   contentVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"
                 }`}
                 style={{ transitionDelay: "300ms" }}
               >
@@ -90,8 +90,8 @@ const HeritageSection = () => {
               </p>
             </div>
             <div
-              className={`mt-8 transition-all duration-700 ease-out ${
-                contentVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"
+               className={`mt-8 transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${
+                 contentVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"
               }`}
               style={{ transitionDelay: "400ms" }}
             >
@@ -113,8 +113,8 @@ const HeritageSection = () => {
 
             {/* Second image below text */}
             <div
-              className={`mt-8 aspect-[16/9] overflow-hidden rounded-[var(--radius)] transition-all duration-1000 ease-out ${
-                contentVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
+               className={`mt-8 aspect-[16/9] overflow-hidden rounded-[var(--radius)] transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${
+                 contentVisible ? "opacity-100 scale-100" : "opacity-0 scale-[0.96]"
               }`}
               style={{ transitionDelay: "500ms" }}
             >

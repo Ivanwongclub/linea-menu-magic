@@ -38,8 +38,8 @@ const CategoryCard = ({
 }) => (
   <Link
     to={`/products#${category.id}`}
-    className={`group relative overflow-hidden rounded-[var(--radius)] transition-all duration-700 ease-out ${
-      gridVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-16"
+    className={`group relative overflow-hidden rounded-[var(--radius)] hover-img-zoom transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${
+      gridVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
     } ${className}`}
     style={{ ...delay, minHeight }}
   >
@@ -49,7 +49,7 @@ const CategoryCard = ({
         alt={category.titleEn}
         loading="lazy"
         decoding="async"
-        className="w-full h-full object-cover transition-transform duration-[400ms] ease-out group-hover:scale-[1.04]"
+        className="w-full h-full object-cover"
       />
     </div>
     <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
@@ -57,8 +57,8 @@ const CategoryCard = ({
       <h3 className="text-lg font-semibold tracking-tight text-white">
         {category.titleEn}
       </h3>
-      <span className="text-xs uppercase tracking-[0.1em] text-white/60 mt-1 inline-flex items-center gap-1 transition-all duration-300 group-hover:gap-2">
-        Explore <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+      <span className="text-xs uppercase tracking-[0.1em] text-white/60 mt-1 inline-flex items-center gap-1 transition-all duration-[420ms] ease-[cubic-bezier(0.19,1,0.22,1)] group-hover:gap-2">
+        Explore <span className="transition-transform duration-[420ms] ease-[cubic-bezier(0.19,1,0.22,1)] group-hover:translate-x-1">→</span>
       </span>
     </div>
   </Link>
@@ -73,7 +73,7 @@ const ProductCategories = () => {
       <div className="section-inner">
         <div
           ref={headerRef}
-          className={`mb-16 max-w-[560px] transition-all duration-700 ease-out ${
+          className={`mb-16 max-w-[560px] transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${
             headerVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
           }`}
         >

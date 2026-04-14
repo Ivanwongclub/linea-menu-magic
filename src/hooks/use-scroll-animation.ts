@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 interface UseScrollAnimationOptions {
   threshold?: number;
@@ -7,7 +7,12 @@ interface UseScrollAnimationOptions {
 }
 
 export const useScrollAnimation = (options: UseScrollAnimationOptions = {}) => {
-  const { threshold = 0.1, rootMargin = "0px", triggerOnce = true } = options;
+  const {
+    threshold = 0.12,
+    rootMargin = "0px 0px -40px 0px",
+    triggerOnce = true,
+  } = options;
+
   const ref = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -15,13 +20,17 @@ export const useScrollAnimation = (options: UseScrollAnimationOptions = {}) => {
     const element = ref.current;
     if (!element) return;
 
+    // Respect prefers-reduced-motion — show immediately
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setIsVisible(true);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true);
-          if (triggerOnce) {
-            observer.unobserve(element);
-          }
+          if (triggerOnce) observer.unobserve(element);
         } else if (!triggerOnce) {
           setIsVisible(false);
         }
@@ -30,19 +39,27 @@ export const useScrollAnimation = (options: UseScrollAnimationOptions = {}) => {
     );
 
     observer.observe(element);
-
     return () => observer.disconnect();
   }, [threshold, rootMargin, triggerOnce]);
 
   return { ref, isVisible };
 };
 
-export const useStaggeredAnimation = (itemCount: number, baseDelay: number = 100) => {
+// Stagger hook — pre-computes delay map, no new objects per render
+export const useStaggeredAnimation = (itemCount: number, baseDelay = 80) => {
   const { ref, isVisible } = useScrollAnimation();
-  
-  const getDelay = (index: number) => ({
-    transitionDelay: `${index * baseDelay}ms`,
-  });
+
+  // Static delay map — computed once, never reallocated
+  const delays = useRef(
+    Array.from({ length: Math.max(itemCount, 20) }, (_, i) => ({
+      transitionDelay: `${i * baseDelay}ms`,
+    }))
+  );
+
+  const getDelay = useCallback(
+    (index: number) => delays.current[index] ?? delays.current[0],
+    []
+  );
 
   return { ref, isVisible, getDelay };
 };

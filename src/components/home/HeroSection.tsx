@@ -173,7 +173,7 @@ const HeroSection = () => {
     >
       {/* Background color layer */}
       <div
-        className="absolute inset-0 transition-colors duration-700 ease-in-out"
+        className="absolute inset-0 transition-colors duration-[420ms] ease-[cubic-bezier(0.19,1,0.22,1)]"
         style={{ backgroundColor: slides[safeCurrent].bgColor }}
       />
       {prev !== null && (
@@ -199,7 +199,7 @@ const HeroSection = () => {
         return (
           <div
             key={slide.id}
-            className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+            className="absolute inset-0 transition-opacity duration-[420ms] ease-[cubic-bezier(0.19,1,0.22,1)]"
             style={{
               opacity: isActive ? 1 : 0,
               pointerEvents: isActive ? "auto" : "none",
