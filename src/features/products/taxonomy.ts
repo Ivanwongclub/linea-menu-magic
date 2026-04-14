@@ -64,7 +64,83 @@ export interface ProductSegment {
 }
 
 export const PRODUCT_SEGMENTS: ProductSegment[] = [
-  { slug: 'fashion', name: 'Fashion' },
   { slug: 'apparel', name: 'Apparel' },
   { slug: 'beauty', name: 'Beauty' },
+  { slug: 'material', name: 'Material' },
+];
+
+export interface SegmentCategory {
+  family: string;
+  items: string[];
+}
+
+export interface ProductSegmentDetail {
+  slug: string;
+  name: string;
+  tagline: string;
+  categories: SegmentCategory[];
+}
+
+export const PRODUCT_SEGMENT_DETAILS: ProductSegmentDetail[] = [
+  {
+    slug: 'apparel',
+    name: 'Apparel',
+    tagline: 'Buttons, hardware & trims for garments, denim, outerwear & sportswear',
+    categories: [
+      {
+        family: 'Hardware',
+        items: [
+          'Buttons', 'Snap Buttons', 'Jeans Buttons', 'Shank Buttons',
+          'Buckles', 'Eyelets', 'Hook & Eyes', 'Rivets',
+          'Zipper Pullers', 'Toggles', 'Cord Ends', 'Cord Stoppers', 'Beads',
+        ],
+      },
+      {
+        family: 'Soft Trims',
+        items: ['Drawcords', 'Webbing'],
+      },
+      {
+        family: 'Branding Trims',
+        items: ['Badges', 'Patches'],
+      },
+    ],
+  },
+  {
+    slug: 'beauty',
+    name: 'Beauty',
+    tagline: 'Closures, decorative details & branded trims for cosmetics & accessories',
+    categories: [
+      {
+        family: 'Hardware',
+        items: ['Snap Buttons', 'Zipper Pullers', 'Beads', 'Buckles'],
+      },
+      {
+        family: 'Branding Trims',
+        items: ['Badges', 'Patches'],
+      },
+    ],
+  },
+  {
+    slug: 'material',
+    name: 'Material',
+    tagline: 'Shop by finish & composition: brass, zinc alloy, resin, cotton & recycled',
+    categories: [
+      {
+        family: 'Brass & Bronze',
+        items: ['Buttons', 'Buckles', 'Rivets', 'Eyelets', 'Hook & Eyes'],
+      },
+      {
+        family: 'Zinc Alloy',
+        items: ['Snap Buttons', 'Jeans Buttons', 'Zipper Pullers', 'Toggles', 'Cord Ends'],
+      },
+      {
+        family: 'Resin & Plastic',
+        items: ['Shank Buttons', 'Cord Stoppers', 'Beads'],
+      },
+      {
+        family: 'Cotton & Textile',
+        items: ['Drawcords', 'Webbing', 'Badges', 'Patches'],
+      },
+    ],
+  },
 ];

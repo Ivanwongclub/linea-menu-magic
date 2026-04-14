@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PRODUCT_FAMILIES, PRODUCT_SEGMENTS } from "@/features/products/taxonomy";
+import { PRODUCT_FAMILIES, PRODUCT_SEGMENTS, PRODUCT_SEGMENT_DETAILS } from "@/features/products/taxonomy";
 import aboutHeritageImg from "@/assets/about-heritage.jpg";
 import heritageCraftImg from "@/assets/heritage-craftsmanship.jpg";
 import aboutShowroomImg from "@/assets/about-showroom.jpg";
@@ -12,26 +12,21 @@ import foundersImg from "@/assets/founders.png";
 const SUPABASE_IMG = "https://otkuqwpsgxzlaxbclbfi.supabase.co/storage/v1/object/public/product-assets/images";
 
 /* ---------- About mega-menu data ---------- */
-const ABOUT_GROUPS = [
-  {
-    heading: "Company",
-    links: [
-      { label: "Our Story", href: "/about/our-story", image: aboutHeritageImg },
-    ],
-  },
-  {
-    heading: "Operations",
-    links: [
-      { label: "Factory", href: "/about/factory", image: heritageCraftImg },
-      { label: "Certificates", href: "/about/certificates", image: aboutShowroomImg },
-    ],
-  },
-  {
-    heading: "Responsibility",
-    links: [
-      { label: "Sustainability", href: "/sustainability", image: aboutShowroomImg },
-    ],
-  },
+interface AboutLink {
+  label?: string;
+  href?: string;
+  image?: string;
+  divider?: true;
+}
+
+const ABOUT_LINKS: AboutLink[] = [
+  { label: "About WIN-CYC", href: "/about", image: aboutHeritageImg },
+  { label: "Our Story", href: "/about/our-story", image: aboutHeritageImg },
+  { label: "Factory", href: "/about/factory", image: heritageCraftImg },
+  { label: "Certificates", href: "/about/certificates", image: aboutShowroomImg },
+  { label: "Sustainability", href: "/sustainability", image: aboutShowroomImg },
+  { divider: true },
+  { label: "News", href: "/news", image: aboutHeritageImg },
 ];
 
 const ABOUT_DEFAULT_PREVIEW = aboutHeritageImg;
@@ -98,27 +93,6 @@ const MEGA_FAMILIES = [
   },
 ];
 
-const MEGA_SEGMENTS = [
-  {
-    name: "Fashion",
-    slug: "fashion",
-    image: `${SUPABASE_IMG}/ed2f489e-41f8-4353-aa71-b8172e544863/ai-primary.png`,
-    description: "Premium trims for luxury & designer brands",
-  },
-  {
-    name: "Apparel",
-    slug: "apparel",
-    image: `${SUPABASE_IMG}/91013630-38c1-49fc-b21c-f0b052caca09/ai-primary.png`,
-    description: "Durable hardware for everyday garments",
-  },
-  {
-    name: "Beauty",
-    slug: "beauty",
-    image: `${SUPABASE_IMG}/50bff7ed-c214-4b36-9b86-5073db4eccac/ai-primary.png`,
-    description: "Refined details for cosmetics & accessories",
-  },
-];
-
 function slugify(name: string) {
   return name.toLowerCase().replace(/\s+&\s+/g, "-").replace(/\s+/g, "-");
 }
@@ -127,16 +101,21 @@ const DEFAULT_PREVIEW = MEGA_FAMILIES[0].image;
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSegmentsOpen, setIsSegmentsOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [isProductsOpen, setIsProductsOpen] = useState(false);
+  const [mobileSegmentsOpen, setMobileSegmentsOpen] = useState(false);
   const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
   const [mobileAboutOpen, setMobileAboutOpen] = useState(false);
+  const [activeSegmentSlug, setActiveSegmentSlug] = useState<string>(PRODUCT_SEGMENTS[0]?.slug ?? "apparel");
   const [scrolled, setScrolled] = useState(false);
   const [previewImage, setPreviewImage] = useState(DEFAULT_PREVIEW);
   const [previewLabel, setPreviewLabel] = useState("Hardware");
   const [aboutPreviewImage, setAboutPreviewImage] = useState(ABOUT_DEFAULT_PREVIEW);
   const [aboutPreviewLabel, setAboutPreviewLabel] = useState("Our Story");
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const segmentsTimeout = useRef<ReturnType<typeof setTimeout>>();
   const productsTimeout = useRef<ReturnType<typeof setTimeout>>();
   const aboutTimeout = useRef<ReturnType<typeof setTimeout>>();
 
@@ -157,17 +136,21 @@ const Header = () => {
 
   // Close mega menu on route change
   useEffect(() => {
+    setIsSegmentsOpen(false);
     setIsProductsOpen(false);
     setIsAboutOpen(false);
     setIsMenuOpen(false);
+    setMobileSegmentsOpen(false);
+    setMobileProductsOpen(false);
+    setMobileAboutOpen(false);
   }, [pathname]);
 
-  const navLinks: Array<{ href: string; label: string; megaMenu?: "products" | "about" }> = [
+  const navLinks: Array<{ href: string; label: string; megaMenu?: "products" | "about" | "segments" }> = [
+    { href: "/segments", label: "Segments", megaMenu: "segments" },
     { href: "/products", label: "Products", megaMenu: "products" },
     { href: "/about", label: "About", megaMenu: "about" },
     { href: "/sustainability", label: "Sustainability" },
-    { href: "/news", label: "News" },
-    { href: "/brochures", label: "Brochures" },
+    { href: "/brochures", label: "E-Collections" },
     { href: "/designer-studio", label: "Designer Studio" },
   ];
 
@@ -191,9 +174,19 @@ const Header = () => {
       : "text-foreground hover:opacity-60"
   }`;
 
+  const handleSegmentsEnter = () => {
+    clearTimeout(segmentsTimeout.current);
+    setIsSegmentsOpen(true);
+    setIsProductsOpen(false);
+    setIsAboutOpen(false);
+  };
+  const handleSegmentsLeave = () => {
+    segmentsTimeout.current = setTimeout(() => setIsSegmentsOpen(false), 150);
+  };
   const handleProductsEnter = () => {
     clearTimeout(productsTimeout.current);
     setIsProductsOpen(true);
+    setIsSegmentsOpen(false);
     setIsAboutOpen(false);
   };
   const handleProductsLeave = () => {
@@ -203,6 +196,7 @@ const Header = () => {
     clearTimeout(aboutTimeout.current);
     setIsAboutOpen(true);
     setIsProductsOpen(false);
+    setIsSegmentsOpen(false);
   };
   const handleAboutLeave = () => {
     aboutTimeout.current = setTimeout(() => setIsAboutOpen(false), 150);
@@ -248,8 +242,30 @@ const Header = () => {
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-10">
+            <nav className="hidden lg:flex items-center gap-7">
               {navLinks.map((link) => {
+                if (link.megaMenu === "segments") {
+                  return (
+                    <div
+                      key={link.href}
+                      className="relative"
+                      onMouseEnter={handleSegmentsEnter}
+                      onMouseLeave={handleSegmentsLeave}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => navigate("/products")}
+                        className={linkClass(isActive("/products") && false) + " flex items-center gap-1"}
+                      >
+                        {link.label}
+                        <ChevronDown
+                          size={14}
+                          className={`transition-transform duration-200 ${isSegmentsOpen ? "rotate-180" : ""}`}
+                        />
+                      </button>
+                    </div>
+                  );
+                }
                 if (link.megaMenu === "products") {
                   return (
                     <div
@@ -349,9 +365,9 @@ const Header = () => {
         >
           <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
             <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
-              <div className="flex gap-0">
+              <div className="flex">
                 {/* Left 6: Categories + Preview Image */}
-                <div className="flex-[6] pr-10 flex gap-10">
+                <div className="flex-1 flex gap-10">
                   {/* Hardware column */}
                   <div className="min-w-0">
                     <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block">
@@ -419,13 +435,10 @@ const Header = () => {
 
                   {/* Hover preview image — wider, no label, no border */}
                   <div
-                    className="flex-1 min-w-[260px] flex flex-col"
+                    className="flex-1 relative flex flex-col"
                     onMouseEnter={() => { setPreviewImage(DEFAULT_PREVIEW); setPreviewLabel("Hardware"); }}
                   >
-                    <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block opacity-0 pointer-events-none">
-                      &nbsp;
-                    </span>
-                    <div className="relative flex-1 rounded-[var(--radius)] overflow-hidden">
+                    <div className="relative flex-1 overflow-hidden">
                       <img
                         key={previewImage}
                         src={previewImage}
@@ -434,52 +447,15 @@ const Header = () => {
                         style={{ animation: "fadeIn 250ms ease" }}
                       />
                     </div>
-                  </div>
-                </div>
-
-                {/* Divider */}
-                <div className="w-px bg-[hsl(var(--border))] self-stretch" />
-
-                {/* Right 4: Segment cards — full-height images */}
-                <div className="flex-[4] pl-10">
-                  <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block">
-                    Browse by Segment
-                  </span>
-                  <div className="space-y-3">
-                    {MEGA_SEGMENTS.map((seg) => (
+                    {/* Footer bar — pinned to bottom of image panel */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-[hsl(var(--border))] px-5 py-3">
                       <Link
-                        key={seg.slug}
-                        to={`/products?segments=${seg.slug}`}
-                        className="group block rounded-[var(--radius)] border border-[hsl(var(--border))] overflow-hidden hover:border-foreground/20 hover:shadow-[0_2px_12px_rgba(0,0,0,0.08)] transition-all duration-200"
+                        to="/products"
+                        className="text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
                       >
-                        <div className="flex items-stretch h-20">
-                          <div className="w-20 flex-shrink-0 overflow-hidden">
-                            <img
-                              src={seg.image}
-                              alt={seg.name}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            />
-                          </div>
-                          <div className="flex-1 min-w-0 flex flex-col justify-center px-4">
-                            <span className="text-sm font-semibold text-foreground block">{seg.name}</span>
-                            <span className="text-[11px] text-muted-foreground leading-snug block mt-0.5">{seg.description}</span>
-                          </div>
-                          <div className="flex items-center pr-3">
-                            <ChevronRight size={14} className="text-muted-foreground/40 group-hover:text-foreground/60 transition-colors flex-shrink-0" />
-                          </div>
-                        </div>
+                        View All Products →
                       </Link>
-                    ))}
-                  </div>
-
-                  {/* Utility link */}
-                  <div className="mt-6 pt-4 border-t border-[hsl(var(--border))]">
-                    <Link
-                      to="/products"
-                      className="text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      View All Products →
-                    </Link>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -501,31 +477,32 @@ const Header = () => {
               <div className="flex gap-0">
                 {/* Left 6: About groups + Preview Image */}
                 <div className="flex-[6] pr-10 flex gap-10">
-                  {/* Grouped navigation */}
+                  {/* Flat About link list */}
                   <div className="min-w-0">
                     <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-5 block">
                       About Us
                     </span>
-                    {ABOUT_GROUPS.map((group) => (
-                      <div key={group.heading} className="mb-5 last:mb-0">
-                        <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground/60 block mb-2">
-                          {group.heading}
-                        </span>
-                        <ul className="space-y-1.5">
-                          {group.links.map((link) => (
-                            <li key={link.href}>
-                              <Link
-                                to={link.href}
-                                className="text-[13px] text-foreground hover:opacity-70 transition-opacity duration-150 block"
-                                onMouseEnter={() => { setAboutPreviewImage(link.image); setAboutPreviewLabel(link.label); }}
-                              >
-                                {link.label}
-                              </Link>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
+                    <ul className="space-y-0">
+                      {ABOUT_LINKS.map((item, i) => {
+                        if (item.divider) {
+                          return <li key={`divider-${i}`}><hr className="my-2 border-border" /></li>;
+                        }
+                        return (
+                          <li key={item.href}>
+                            <Link
+                              to={item.href!}
+                              className="text-[13px] text-muted-foreground hover:text-foreground transition-colors duration-150 block py-[5px]"
+                              onMouseEnter={() => {
+                                setAboutPreviewImage(item.image!);
+                                setAboutPreviewLabel(item.label!);
+                              }}
+                            >
+                              {item.label}
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
                   </div>
 
                   {/* Hover preview image */}
@@ -599,6 +576,111 @@ const Header = () => {
         </div>
       )}
 
+      {/* Segments Mega Menu */}
+      {isSegmentsOpen && (
+        <div
+          className="hidden lg:block fixed left-0 right-0 z-40"
+          style={{ top: "64px" }}
+          onMouseEnter={handleSegmentsEnter}
+          onMouseLeave={handleSegmentsLeave}
+        >
+          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
+            <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
+              <div className="flex">
+                {/* Left: Segment selector list */}
+                <div className="w-[176px] flex-shrink-0 border-r border-[hsl(var(--border))] pr-0 flex flex-col">
+                  <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-4 block">
+                    Segments
+                  </span>
+                  <div className="flex flex-col">
+                    {PRODUCT_SEGMENT_DETAILS.map((seg) => (
+                      <button
+                        key={seg.slug}
+                        type="button"
+                        onMouseEnter={() => setActiveSegmentSlug(seg.slug)}
+                        className={`text-left px-0 py-2.5 border-l-2 pl-3 transition-all duration-150 ${
+                          activeSegmentSlug === seg.slug
+                            ? "border-foreground bg-secondary"
+                            : "border-transparent hover:bg-secondary"
+                        }`}
+                      >
+                        <span className="text-[13px] font-medium text-foreground block leading-snug">
+                          {seg.name}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground block mt-0.5 leading-snug">
+                          {seg.slug === "apparel" && "Garments & fashion"}
+                          {seg.slug === "beauty" && "Cosmetics & packaging"}
+                          {seg.slug === "material" && "By finish & composition"}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Designer Studio CTA */}
+                  <div className="mt-auto pt-5 border-t border-[hsl(var(--border))] mt-6">
+                    <Link
+                      to="/designer-studio"
+                      className="text-[11px] text-muted-foreground hover:text-foreground transition-colors leading-snug block"
+                    >
+                      Custom via our
+                      <br />
+                      <span className="font-medium text-foreground">Designer Studio →</span>
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Right: Active segment detail */}
+                {(() => {
+                  const active = PRODUCT_SEGMENT_DETAILS.find((s) => s.slug === activeSegmentSlug)
+                    ?? PRODUCT_SEGMENT_DETAILS[0];
+                  return (
+                    <div className="flex-1 pl-8 flex flex-col gap-5">
+                      {/* Title + tagline */}
+                      <div>
+                        <p className="text-sm font-semibold text-foreground">{active.name}</p>
+                        <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">{active.tagline}</p>
+                      </div>
+
+                      {/* Category badge groups */}
+                      <div className="flex flex-col gap-4">
+                        {active.categories.map((group) => (
+                          <div key={group.family}>
+                            <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground block mb-2">
+                              {group.family}
+                            </span>
+                            <div className="grid gap-[5px]" style={{ gridTemplateColumns: "repeat(4, 100px)" }}>
+                              {group.items.map((item) => (
+                                <Link
+                                  key={item}
+                                  to={`/products?categories=${slugify(item)}&segments=${active.slug}`}
+                                  className="w-[100px] py-1.5 text-[10px] text-center border border-[hsl(var(--border))] text-muted-foreground hover:bg-foreground hover:text-background hover:border-foreground transition-colors duration-150 block"
+                                >
+                                  {item}
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* View all link */}
+                      <div className="pt-3 border-t border-[hsl(var(--border))] mt-auto">
+                        <Link
+                          to={`/products?segments=${active.slug}`}
+                          className="text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          View all {active.name} products →
+                        </Link>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Spacer to compensate for fixed navbar on non-hero pages */}
       {!isHeroPage && <div className="h-16" />}
 
@@ -622,11 +704,70 @@ const Header = () => {
             </div>
             <nav className="flex flex-col">
               {navLinks.map((link) => {
+                if (link.megaMenu === "segments") {
+                  return (
+                    <div key={link.href}>
+                      <button
+                        onClick={() => {
+                          setMobileSegmentsOpen(!mobileSegmentsOpen);
+                          setMobileProductsOpen(false);
+                          setMobileAboutOpen(false);
+                        }}
+                        className="w-full flex items-center justify-between text-2xl font-semibold tracking-tight text-foreground hover:opacity-60 transition-opacity duration-150 py-5 px-6 border-b border-border"
+                      >
+                        {link.label}
+                        <ChevronDown
+                          size={18}
+                          className={`transition-transform duration-200 ${mobileSegmentsOpen ? "rotate-180" : ""}`}
+                        />
+                      </button>
+                      {mobileSegmentsOpen && (
+                        <div className="bg-secondary">
+                          {PRODUCT_SEGMENT_DETAILS.map((seg) => (
+                            <div key={seg.slug}>
+                              <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground block pt-4 pb-1 px-6">
+                                {seg.name}
+                              </span>
+                              {seg.categories.flatMap((g) => g.items).slice(0, 6).map((item) => (
+                                <Link
+                                  key={item}
+                                  to={`/products?categories=${slugify(item)}&segments=${seg.slug}`}
+                                  onClick={() => setIsMenuOpen(false)}
+                                  className="text-[13px] text-muted-foreground hover:text-foreground transition-colors block py-2 px-8 border-b border-border/30"
+                                >
+                                  {item}
+                                </Link>
+                              ))}
+                              <Link
+                                to={`/products?segments=${seg.slug}`}
+                                onClick={() => setIsMenuOpen(false)}
+                                className="text-[13px] font-medium text-foreground block py-2 px-8 border-b border-border/50"
+                              >
+                                All {seg.name} →
+                              </Link>
+                            </div>
+                          ))}
+                          <Link
+                            to="/designer-studio"
+                            onClick={() => setIsMenuOpen(false)}
+                            className="text-sm text-muted-foreground hover:text-foreground block py-3.5 px-6 border-b border-border"
+                          >
+                            Custom via our Designer Studio →
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
                 if (link.megaMenu === "products") {
                   return (
                     <div key={link.href}>
                       <button
-                        onClick={() => setMobileProductsOpen(!mobileProductsOpen)}
+                        onClick={() => {
+                          setMobileProductsOpen(!mobileProductsOpen);
+                          setMobileSegmentsOpen(false);
+                          setMobileAboutOpen(false);
+                        }}
                         className="w-full flex items-center justify-between text-2xl font-semibold tracking-tight text-foreground hover:opacity-60 transition-opacity duration-150 py-5 px-6 border-b border-border"
                       >
                         {link.label}
@@ -658,21 +799,6 @@ const Header = () => {
                               ))}
                             </div>
                           ))}
-                          <div className="px-6 py-4 border-b border-border">
-                            <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground block mb-3">
-                              Segments
-                            </span>
-                            {MEGA_SEGMENTS.map((seg) => (
-                              <Link
-                                key={seg.slug}
-                                to={`/products?segments=${seg.slug}`}
-                                onClick={() => setIsMenuOpen(false)}
-                                className="text-sm text-muted-foreground hover:text-foreground transition-colors block py-2"
-                              >
-                                {seg.name}
-                              </Link>
-                            ))}
-                          </div>
                           <Link
                             to="/products"
                             onClick={() => setIsMenuOpen(false)}
@@ -689,7 +815,11 @@ const Header = () => {
                   return (
                     <div key={link.href}>
                       <button
-                        onClick={() => setMobileAboutOpen(!mobileAboutOpen)}
+                        onClick={() => {
+                          setMobileAboutOpen(!mobileAboutOpen);
+                          setMobileSegmentsOpen(false);
+                          setMobileProductsOpen(false);
+                        }}
                         className="w-full flex items-center justify-between text-2xl font-semibold tracking-tight text-foreground hover:opacity-60 transition-opacity duration-150 py-5 px-6 border-b border-border"
                       >
                         {link.label}
@@ -700,30 +830,21 @@ const Header = () => {
                       </button>
                       {mobileAboutOpen && (
                         <div className="bg-secondary">
-                          {ABOUT_GROUPS.map((group) => (
-                            <div key={group.heading}>
-                              <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground/60 block pt-3 pb-1 px-6">
-                                {group.heading}
-                              </span>
-                              {group.links.map((sub) => (
-                                <Link
-                                  key={sub.href}
-                                  to={sub.href}
-                                  onClick={() => setIsMenuOpen(false)}
-                                  className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-150 block py-2.5 px-6 border-b border-border/30"
-                                >
-                                  {sub.label}
-                                </Link>
-                              ))}
-                            </div>
-                          ))}
-                          <Link
-                            to="/about/our-story"
-                            onClick={() => setIsMenuOpen(false)}
-                            className="text-sm font-medium text-foreground block py-3.5 px-6 border-b border-border"
-                          >
-                            Learn More About Us →
-                          </Link>
+                          {ABOUT_LINKS.map((item, i) => {
+                            if (item.divider) {
+                              return <hr key={`mob-div-${i}`} className="border-border mx-6" />;
+                            }
+                            return (
+                              <Link
+                                key={item.href}
+                                to={item.href!}
+                                onClick={() => setIsMenuOpen(false)}
+                                className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-150 block py-2.5 px-6 border-b border-border/30"
+                              >
+                                {item.label}
+                              </Link>
+                            );
+                          })}
                         </div>
                       )}
                     </div>
