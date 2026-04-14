@@ -266,9 +266,9 @@ const Navigation = () => {
                      ?.submenuItems.map((subItem, index) => (
                       <li key={index}>
                         <Link 
-                          to={activeDropdown === "關於我們" 
+                          to={activeDropdown === "About" 
                             ? `/about/${subItem.toLowerCase().replace(/\s+/g, '-')}` 
-                            : activeDropdown === "產品"
+                            : activeDropdown === "Products"
                             ? `/category/${subItem.toLowerCase().replace(/\s+/g, '-')}`
                             : `/news`
                           }
@@ -287,7 +287,7 @@ const Navigation = () => {
                   .find(item => item.name === activeDropdown)
                   ?.images.map((image, index) => {
                     let linkTo = "/";
-                    if (activeDropdown === "關於我們") {
+                    if (activeDropdown === "About") {
                       linkTo = "/about/our-story";
                     }
                     
