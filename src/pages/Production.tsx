@@ -46,31 +46,68 @@ const workflowSteps = [
   },
 ];
 
-const materials = [
+// ── Material categories for tab filtering ────────────────────────────────────
+type MaterialCategory = "All" | "Organic" | "Synthetic" | "Metal";
+
+interface Material {
+  id: string;
+  name: string;
+  subtitle: string;
+  body: string;
+  image: string;
+  category: MaterialCategory;
+}
+
+const MATERIAL_TABS: MaterialCategory[] = ["All", "Organic", "Synthetic", "Metal"];
+
+const MATERIALS: Material[] = [
   {
+    id: "brass",
+    name: "Brass & Zinc Alloy",
+    subtitle: "Metal · Die-cast & stamped",
+    body: "Zinc alloy and sheet brass are our essential metal materials. With state-of-the-art tool design we realise an incredible variety of trims with specific shapes and extraordinary surfaces. From high-gloss finishes to vintage effects — we offer a wide range of electroplating colours and custom metal finishes.",
+    image: brassSurface,
     category: "Metal",
-    items: [
-      { name: "Brass & Bronze", image: brassSurface, desc: "Premium brass alloy — warm golden tone, high corrosion resistance, ideal for decorative hardware." },
-      { name: "Zinc Alloy", image: metalSurface, desc: "Versatile die-cast zinc — precise detail reproduction, suitable for snap buttons and zipper pullers." },
-      { name: "Stainless Steel", image: metalSurface, desc: "High-strength stainless — polished or brushed finish, maximum durability for buckles and rivets." },
-      { name: "Gunmetal", image: metalSurface, desc: "Dark oxidised finish — matte or semi-gloss, popular in contemporary fashion hardware." },
-    ],
   },
   {
-    category: "Resin & Plastic",
-    items: [
-      { name: "Polyester Resin", image: resinSurface, desc: "Semi-translucent resin buttons — rich surface depth, wide colour range, lightweight." },
-      { name: "Corozo (NUT)", image: resinSurface, desc: "Natural vegetable ivory — sustainable, biodegradable, unique grain pattern on each piece." },
-      { name: "Nylon / TPE", image: resinSurface, desc: "Engineering-grade nylon cord ends and toggles — flexible, durable, available in stock colours." },
-    ],
+    id: "cotton",
+    name: "Cotton & Woven Trims",
+    subtitle: "Organic · OEKO-TEX certified",
+    body: "Natural braided cotton drawcords, woven webbing, and textile labels. Soft hand-feel, naturally dyeable, and certified under OEKO-TEX Standard 100. Our cotton trims are particularly popular for responsible fashion brands seeking natural-fibre alternatives to synthetic cords and straps.",
+    image: cottonSurface,
+    category: "Organic",
   },
   {
-    category: "Cotton & Textile",
-    items: [
-      { name: "Cotton Cord", image: cottonSurface, desc: "Natural braided cotton drawcords — soft hand-feel, OEKO-TEX certified, custom dyeable." },
-      { name: "Nylon Webbing", image: cottonSurface, desc: "High-tensile woven nylon webbing — abrasion resistant, ideal for straps and belts." },
-      { name: "Woven Labels", image: cottonSurface, desc: "Custom woven brand labels — tight weave, logo detail to 0.5mm, heat-seal or sew-in." },
-    ],
+    id: "resin",
+    name: "Polyester Resin",
+    subtitle: "Synthetic · Wide colour range",
+    body: "Characterised by a very fine and elegant pattern with harmonious colour appearance. With a wide range of solid colours you can find your desired style. There is a natural gloss in every button which makes this material unique — and unlike many plastics, polyester resin can be dye-matched with precision.",
+    image: resinSurface,
+    category: "Synthetic",
+  },
+  {
+    id: "metal",
+    name: "Stainless & Gunmetal",
+    subtitle: "Metal · Polished & oxidised",
+    body: "High-strength stainless steel and gunmetal alloy for buckles, rivets, and heavy-duty hardware. Polished, brushed, or matte oxidised finishes available. Maximum durability with a sophisticated appearance — widely used across outerwear, workwear, and premium denim.",
+    image: metalSurface,
+    category: "Metal",
+  },
+  {
+    id: "nylon",
+    name: "Nylon / TPE / Silicone",
+    subtitle: "Synthetic · Technical & durable",
+    body: "Nylon (Polyamide) and thermoplastic elastomers (TPE) are commonly used in the trim industry for their durability and strength. Soft silicone is used as a branding element for labels in single or multi colours. Particularly popular among outdoor, sports, and performance brands — we combine these with metal for a sophisticated and technical appearance.",
+    image: cottonSurface,
+    category: "Synthetic",
+  },
+  {
+    id: "recycled",
+    name: "Recycled & GRS Materials",
+    subtitle: "Organic · GRS certified",
+    body: "GRS-certified recycled metal content, recycled polyester cord, and bio-based resin alternatives. We continuously develop our sustainable material range to help brands meet their environmental commitments without compromising on quality, finish, or performance. Every recycled trim is tested to the same standards as virgin-material equivalents.",
+    image: brassSurface,
+    category: "Organic",
   },
 ];
 
@@ -90,7 +127,7 @@ export default function Production() {
   const { ref: materialsRef, isVisible: materialsVisible } = useScrollAnimation({ threshold: 0.1 });
   const { ref: capRef, isVisible: capVisible, getDelay: getCapDelay } = useStaggeredAnimation(6, 80);
   const { ref: qualRef, isVisible: qualVisible } = useScrollAnimation({ threshold: 0.2 });
-  const [activeCategory, setActiveCategory] = useState(0);
+  const [activeTab, setActiveTab] = useState<MaterialCategory>("All");
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [printGalleryOpen, setPrintGalleryOpen] = useState(false);
 
@@ -203,45 +240,73 @@ export default function Production() {
               ref={materialsRef}
               className={`transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${materialsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
             >
-              <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-10">
-                <div>
-                  <span className="section-label block mb-4">Materials</span>
-                  <h2 className="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-foreground leading-tight">
-                    Our Materials
-                  </h2>
-                </div>
-                <p className="text-[15px] text-muted-foreground max-w-md leading-relaxed">
-                  Every material is selected for functionality, aesthetic quality, and compliance with international standards — including GRS, OEKO-TEX, and REACH.
+              {/* Section header */}
+              <div className="text-center mb-12">
+                <span className="section-label block mb-4">Materials</span>
+                <h2 className="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-foreground leading-tight">
+                  Our Materials
+                </h2>
+                <p className="mt-4 text-[15px] text-muted-foreground max-w-lg mx-auto leading-relaxed">
+                  Functionality and product performance is of upmost importance to us — ensuring all products go through necessary quality control procedures.
                 </p>
+
+                {/* Centred tabs */}
+                <div className="flex justify-center border-b border-border mt-10">
+                  {MATERIAL_TABS.map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      className={`px-7 py-3 text-[13px] font-medium tracking-wide transition-colors duration-150 border-b-2 -mb-px ${
+                        activeTab === tab
+                          ? "border-foreground text-foreground"
+                          : "border-transparent text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {tab}
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              {/* Category tabs */}
-              <div className="flex border-b border-border mb-8">
-                {materials.map((cat, i) => (
-                  <button
-                    key={cat.category}
-                    onClick={() => setActiveCategory(i)}
-                    className={`px-6 py-3 text-sm font-medium tracking-wide transition-colors duration-150 border-b-2 -mb-px ${
-                      activeCategory === i
-                        ? "border-foreground text-foreground"
-                        : "border-transparent text-muted-foreground hover:text-foreground"
-                    }`}
+              {/* Material rows — alternating layout */}
+              <div className="space-y-16 lg:space-y-20">
+                {MATERIALS.filter((m) => activeTab === "All" || m.category === activeTab).map((mat, i) => (
+                  <div
+                    key={mat.id}
+                    className={`flex flex-col ${i % 2 === 1 ? "lg:flex-row-reverse" : "lg:flex-row"} gap-8 lg:gap-14 items-center`}
                   >
-                    {cat.category}
-                  </button>
-                ))}
-              </div>
-
-              {/* Material cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {materials[activeCategory].items.map((mat) => (
-                  <div key={mat.name} className="group border border-border rounded-[var(--radius)] overflow-hidden hover-card hover-img-zoom hover:border-foreground/20 transition-[border-color] duration-200">
-                    <div className="aspect-[4/3] overflow-hidden">
-                      <img src={mat.image} alt={mat.name} className="w-full h-full object-cover" loading="lazy" />
+                    {/* Image — half width */}
+                    <div className="lg:w-1/2 w-full">
+                      <div className="aspect-[4/3] overflow-hidden rounded-[var(--radius)]">
+                        <img src={mat.image} alt={mat.name} className="w-full h-full object-cover" loading="lazy" />
+                      </div>
                     </div>
-                    <div className="p-4">
-                      <h3 className="text-[15px] font-semibold text-foreground">{mat.name}</h3>
-                      <p className="mt-1 text-[13px] text-muted-foreground leading-relaxed">{mat.desc}</p>
+
+                    {/* Content — half width */}
+                    <div className="lg:w-1/2 w-full">
+                      <div className="max-w-md">
+                        {/* Category tag */}
+                        <span className="text-[11px] font-medium tracking-[0.12em] uppercase text-muted-foreground">
+                          {mat.category}
+                        </span>
+                        {/* Title */}
+                        <h3 className="text-[22px] lg:text-[26px] font-semibold text-foreground mt-2 leading-tight">
+                          {mat.name}
+                        </h3>
+                        {/* Subtitle */}
+                        <p className="text-[13px] text-muted-foreground mt-1">
+                          {mat.subtitle}
+                        </p>
+                        {/* Body */}
+                        <p className="text-[15px] text-muted-foreground leading-relaxed mt-4">
+                          {mat.body}
+                        </p>
+                        {/* CTA */}
+                        <Link to="/ecollections" className="group inline-flex items-center gap-2 mt-6 text-[13px] font-medium text-foreground hover:text-foreground/70 transition-colors">
+                          View in E-Collections
+                          <ArrowRight size={14} className="transition-transform duration-300 group-hover:translate-x-1" />
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 ))}
