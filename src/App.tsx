@@ -68,8 +68,8 @@ const App = () => (
                 <Route path="/production" element={<Production />} />
                 <Route path="/news" element={<News />} />
                 <Route path="/news/:id" element={<NewsDetail />} />
-                <Route path="/brochures" element={<Brochures />} />
-                <Route path="/brochures/:slug" element={<BrochureViewer />} />
+                <Route path="/ecollections" element={<Brochures />} />
+                <Route path="/ecollections/:slug" element={<BrochureViewer />} />
                 <Route path="/designer-studio" element={<DesignerStudio />} />
                 <Route path="/designer-studio/dashboard" element={<DesignerStudioDashboard />} />
                 <Route path="/designer-studio/compose/:sessionId" element={<ComposerPage />} />

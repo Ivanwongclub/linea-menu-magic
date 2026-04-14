@@ -12,7 +12,7 @@ export default function Brochures() {
 
   const handleCopyLink = (slug: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    const url = `${window.location.origin}/brochures/${slug}`;
+    const url = `${window.location.origin}/ecollections/${slug}`;
     navigator.clipboard.writeText(url).then(() => toast.success("Link copied!"));
   };
 
@@ -121,7 +121,7 @@ function BrochureCard({
       }}
     >
       {/* Cover area */}
-      <Link to={`/brochures/${brochure.slug}`} className="block relative cursor-pointer">
+      <Link to={`/ecollections/${brochure.slug}`} className="block relative cursor-pointer">
         <div className="aspect-[3/4] overflow-hidden relative">
           {coverSrc ? (
             <img
@@ -164,7 +164,7 @@ function BrochureCard({
 
       {/* Info area */}
       <div className="p-4 bg-card border-t border-border">
-        <Link to={`/brochures/${brochure.slug}`}>
+        <Link to={`/ecollections/${brochure.slug}`}>
           <h2 className="text-sm font-semibold tracking-tight text-foreground truncate leading-snug hover:opacity-70 transition-opacity">
             {brochure.title}
           </h2>
@@ -177,7 +177,7 @@ function BrochureCard({
 
         <div className="flex items-center justify-between mt-3">
           <Link
-            to={`/brochures/${brochure.slug}`}
+            to={`/ecollections/${brochure.slug}`}
             className="text-xs font-medium uppercase tracking-[0.06em] text-foreground underline-offset-4 hover:underline inline-flex items-center gap-1"
           >
             Read now
