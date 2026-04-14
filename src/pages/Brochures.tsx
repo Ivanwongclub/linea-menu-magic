@@ -23,14 +23,11 @@ export default function Brochures() {
         title="E-Collections"
       />
 
-      <section className="max-w-7xl mx-auto w-full px-6 lg:px-8 mb-12">
-        <h1 className="text-3xl md:text-4xl font-semibold text-foreground tracking-tight mb-3">
-          E-Collections
-        </h1>
-        <p className="text-muted-foreground text-sm md:text-base max-w-xl leading-relaxed">
+      <div className="max-w-7xl mx-auto w-full px-6 lg:px-8 mb-8">
+        <p className="text-muted-foreground text-sm max-w-xl leading-relaxed">
           Browse and download our latest product collections
         </p>
-      </section>
+      </div>
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {Array.from({ length: 6 }).map((_, i) => (

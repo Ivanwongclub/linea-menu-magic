@@ -7,11 +7,12 @@ const TermsOfService = () => {
 
   return (
     <>
+        <PageBreadcrumb
+          segments={[{ label: "Home", href: "/" }, { label: "Terms of Service" }]}
+          title="Terms of Service"
+        />
         <div className="max-w-4xl mx-auto px-6 py-12">
-          <header className="mb-12 text-center">
-            <h1 className="text-4xl font-light text-foreground mb-4">Terms of Service</h1>
-            <p className="text-muted-foreground">Last updated: January 15, 2024</p>
-          </header>
+          <p className="text-sm text-muted-foreground mb-12">Last updated: January 15, 2024</p>
 
           <div className="prose prose-lg max-w-none space-y-8">
             <section>
