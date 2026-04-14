@@ -177,7 +177,7 @@ const Header = () => {
             : "bg-white/95 backdrop-blur-sm border-b border-[hsl(var(--border))] shadow-[0_1px_8px_rgba(0,0,0,0.06)]"
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="w-full px-10 lg:px-16 xl:px-24">
           <div className="flex items-center justify-between h-20">
 
             {/* Logo: state-aware for hero transparency vs scrolled white bar */}
@@ -200,7 +200,7 @@ const Header = () => {
             </Link>
 
             {/* Desktop nav */}
-            <nav className="hidden lg:flex items-center gap-8">
+            <nav className="hidden lg:flex items-center gap-8 ml-16 xl:ml-24">
               {navLinks.map((link) => {
                 if (link.megaMenu === "segments") {
                   return (
@@ -284,8 +284,8 @@ const Header = () => {
           onMouseEnter={handleSegmentsEnter}
           onMouseLeave={handleSegmentsLeave}
         >
-          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] h-[460px]">
-            <div className="max-w-7xl mx-auto px-6 lg:px-8 py-10 h-full">
+          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] h-[540px]">
+            <div className="w-full px-10 lg:px-16 xl:px-24 py-10 h-full">
               <div className="flex gap-0 h-full">
 
                 {/* Left: segment selector list */}
@@ -397,8 +397,8 @@ const Header = () => {
           onMouseEnter={handleProductsEnter}
           onMouseLeave={handleProductsLeave}
         >
-          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] h-[460px]">
-            <div className="max-w-7xl mx-auto px-6 lg:px-8 py-10 h-full">
+          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] h-[540px]">
+            <div className="w-full px-10 lg:px-16 xl:px-24 py-10 h-full">
               <div className="flex h-full">
                 <div className="flex-1 flex gap-10">
                   {/* Hardware column */}
@@ -507,8 +507,8 @@ const Header = () => {
           onMouseEnter={handleAboutEnter}
           onMouseLeave={handleAboutLeave}
         >
-          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] h-[460px]">
-            <div className="max-w-7xl mx-auto px-6 lg:px-8 py-10 h-full">
+          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] h-[540px]">
+            <div className="w-full px-10 lg:px-16 xl:px-24 py-10 h-full">
               <div className="flex gap-0 h-full">
                 <div className="flex-[6] pr-10 flex gap-10">
                   <div className="min-w-0">
