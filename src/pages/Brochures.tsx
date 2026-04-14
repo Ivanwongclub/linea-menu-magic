@@ -209,6 +209,6 @@ function BrochureCard({
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
