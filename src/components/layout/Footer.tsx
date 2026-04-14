@@ -11,12 +11,13 @@ const Footer = () => {
           {/* Brand */}
           <div className="lg:col-span-1">
             <div className="mb-6">
-              <div className="inline-flex items-center justify-center bg-background px-5 py-1 lg:px-7 lg:py-1">
+              <div className="inline-flex items-center justify-center px-0 py-1">
                 <div className="flex flex-col items-center justify-center leading-none">
-                  <span className="text-xs lg:text-sm text-foreground font-bold tracking-[0.04em]">
+                  <span className="text-sm lg:text-base text-white font-bold tracking-[0.04em]"
+                    style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 700 }}>
                     WIN-CYC
                   </span>
-                  <span className="text-[6px] lg:text-[8px] tracking-[0.12em] text-foreground uppercase">
+                  <span className="text-[8px] lg:text-[11px] tracking-[0.12em] text-white/70 uppercase">
                     Group Limited
                   </span>
                 </div>

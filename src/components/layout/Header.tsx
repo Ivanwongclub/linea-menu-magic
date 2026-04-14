@@ -158,7 +158,7 @@ const Header = () => {
     pathname === path || pathname.startsWith(path + "/");
 
   const linkClass = (active: boolean) =>
-    `text-xs font-medium tracking-[0.08em] uppercase transition-colors duration-300 py-5 border-b-2 ${
+    `text-[13px] font-medium tracking-[0.04em] uppercase transition-colors duration-300 py-6 border-b-2 ${
       active
         ? isTransparent
           ? "text-white border-white/60"
@@ -212,30 +212,20 @@ const Header = () => {
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <Link
               to="/"
-              className={`inline-flex items-center justify-center px-5 py-1 lg:px-7 lg:py-1 transition-all duration-300 ${
-                isTransparent
-                  ? "bg-white/20 backdrop-blur-sm"
-                  : "bg-primary"
-              }`}
+              className="inline-flex items-center justify-center px-2 py-1 transition-all duration-300"
             >
               <div className="flex flex-col items-center justify-center leading-none">
                 <span
-                  className={`text-xs lg:text-sm font-semibold transition-colors duration-300 ${
-                    isTransparent ? "text-white" : "text-primary-foreground"
-                  }`}
+                  className="text-sm lg:text-base font-bold transition-colors duration-300 text-foreground"
                   style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 700, letterSpacing: '0.04em' }}
                 >
                   WIN-CYC
                 </span>
-                <span
-                  className={`text-[6px] lg:text-[8px] tracking-[0.12em] uppercase transition-colors duration-300 ${
-                    isTransparent ? "text-white/80" : "text-primary-foreground"
-                  }`}
-                >
+                <span className="text-[8px] lg:text-[11px] tracking-[0.12em] uppercase transition-colors duration-300 text-foreground">
                   Group Limited
                 </span>
               </div>
@@ -359,12 +349,12 @@ const Header = () => {
       {isProductsOpen && (
         <div
           className="hidden lg:block fixed left-0 right-0 z-40"
-          style={{ top: "64px" }}
+          style={{ top: "80px" }}
           onMouseEnter={handleProductsEnter}
           onMouseLeave={handleProductsLeave}
         >
-          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
-            <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
+          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] min-h-[340px]">
+            <div className="max-w-7xl mx-auto px-6 lg:px-8 py-10">
               <div className="flex">
                 {/* Left 6: Categories + Preview Image */}
                 <div className="flex-1 flex gap-10">
@@ -468,12 +458,12 @@ const Header = () => {
       {isAboutOpen && (
         <div
           className="hidden lg:block fixed left-0 right-0 z-40"
-          style={{ top: "64px" }}
+          style={{ top: "80px" }}
           onMouseEnter={handleAboutEnter}
           onMouseLeave={handleAboutLeave}
         >
-          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
-            <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
+          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] min-h-[340px]">
+            <div className="max-w-7xl mx-auto px-6 lg:px-8 py-10">
               <div className="flex gap-0">
                 {/* Left 6: About groups + Preview Image */}
                 <div className="flex-[6] pr-10 flex gap-10">
@@ -580,15 +570,15 @@ const Header = () => {
       {isSegmentsOpen && (
         <div
           className="hidden lg:block fixed left-0 right-0 z-40"
-          style={{ top: "64px" }}
+          style={{ top: "80px" }}
           onMouseEnter={handleSegmentsEnter}
           onMouseLeave={handleSegmentsLeave}
         >
-          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
-            <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
+          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] min-h-[340px]">
+            <div className="max-w-7xl mx-auto px-6 lg:px-8 py-10">
               <div className="flex">
                 {/* Left: Segment selector list */}
-                <div className="w-[176px] flex-shrink-0 border-r border-[hsl(var(--border))] pr-0 flex flex-col">
+                <div className="w-[200px] flex-shrink-0 border-r border-[hsl(var(--border))] pr-0 flex flex-col">
                   <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-4 block">
                     Segments
                   </span>
@@ -648,12 +638,12 @@ const Header = () => {
                             <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground block mb-2">
                               {group.family}
                             </span>
-                            <div className="grid gap-[5px]" style={{ gridTemplateColumns: "repeat(4, 100px)" }}>
+                            <div className="grid gap-[5px]" style={{ gridTemplateColumns: "repeat(4, 110px)" }}>
                               {group.items.map((item) => (
                                 <Link
                                   key={item}
                                   to={`/products?categories=${slugify(item)}&segments=${active.slug}`}
-                                  className="w-[100px] py-1.5 text-[10px] text-center border border-[hsl(var(--border))] text-muted-foreground hover:bg-foreground hover:text-background hover:border-foreground transition-colors duration-150 block"
+                                  className="w-[110px] py-1.5 text-[10px] text-center border border-[hsl(var(--border))] text-muted-foreground hover:bg-foreground hover:text-background hover:border-foreground transition-colors duration-150 block"
                                 >
                                   {item}
                                 </Link>
@@ -682,7 +672,7 @@ const Header = () => {
       )}
 
       {/* Spacer to compensate for fixed navbar on non-hero pages */}
-      {!isHeroPage && <div className="h-16" />}
+      {!isHeroPage && <div className="h-20" />}
 
       {/* Mobile Navigation */}
       {isMenuOpen &&
@@ -693,7 +683,7 @@ const Header = () => {
               animation: "slideInRight 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards",
             }}
           >
-            <div className="flex items-center justify-end h-16 px-6">
+            <div className="flex items-center justify-end h-20 px-6">
               <button
                 onClick={() => setIsMenuOpen(false)}
                 className="p-2 text-foreground hover:opacity-60 transition-opacity duration-150"
