@@ -229,13 +229,11 @@ const Header = () => {
                     </div>
                   );
                 }
-                if (link.megaMenu === "about") {
-                  return (
                     <div key={link.href} className="relative" onMouseEnter={handleAboutEnter} onMouseLeave={handleAboutLeave}>
-                      <button className={linkClass(isActive(link.href)) + " flex items-center gap-1"}>
+                      <Link to="/about" onClick={closeAllMenus} className={linkClass(isActive(link.href)) + " flex items-center gap-1"}>
                         {link.label}
                         <ChevronDown size={14} className={`transition-transform duration-200 ${isAboutOpen ? "rotate-180" : ""}`} />
-                      </button>
+                      </Link>
                     </div>
                   );
                 }
