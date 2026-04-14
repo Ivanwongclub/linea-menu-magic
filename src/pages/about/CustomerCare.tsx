@@ -1,5 +1,3 @@
-import Header from "../../components/layout/Header";
-import Footer from "../../components/layout/Footer";
 import ContentSection from "../../components/about/ContentSection";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -9,9 +7,7 @@ import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
 
 const CustomerCare = () => {
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-
+    <>
       <PageBreadcrumb
         segments={[
           { label: "Home", href: "/" },
@@ -20,8 +16,6 @@ const CustomerCare = () => {
         ]}
         title="Customer Care"
       />
-
-      <main className="py-8 px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
 
           <ContentSection title="Contact Information">
@@ -141,10 +135,7 @@ const CustomerCare = () => {
             </form>
           </ContentSection>
         </div>
-      </main>
-
-      <Footer />
-    </div>
+    </>
   );
 };
 

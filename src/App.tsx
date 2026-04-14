@@ -8,6 +8,7 @@ import CookieBanner from "@/features/cookies/CookieBanner";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ScrollToTop from "./components/ScrollToTop";
 import BackToTop from "./components/ui/BackToTop";
+import Layout from "./components/layout/Layout";
 
 // Homepage loaded eagerly — it's the landing route
 import Index from "./pages/Index";
@@ -54,28 +55,30 @@ const App = () => (
           <BackToTop />
           <Suspense fallback={null}>
             <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/about/our-story" element={<OurStory />} />
-              <Route path="/about/factory" element={<Factory />} />
-              <Route path="/about/certificates" element={<Certificates />} />
-              <Route path="/about/sustainability" element={<Sustainability />} />
-              <Route path="/products" element={<Products />} />
-              <Route path="/products/:slug" element={<ProductDetail />} />
-              <Route path="/sustainability" element={<Sustainability />} />
-              <Route path="/production" element={<Production />} />
-              <Route path="/news" element={<News />} />
-              <Route path="/news/:id" element={<NewsDetail />} />
-              <Route path="/brochures" element={<Brochures />} />
-              <Route path="/brochures/:slug" element={<BrochureViewer />} />
-              <Route path="/designer-studio" element={<DesignerStudio />} />
-              <Route path="/designer-studio/dashboard" element={<DesignerStudioDashboard />} />
-              <Route path="/designer-studio/compose/:sessionId" element={<ComposerPage />} />
-              <Route path="/designer-studio/present/:sessionId" element={<PresentationPage />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-              <Route path="/terms-of-service" element={<TermsOfService />} />
-              <Route path="/cookie-policy" element={<CookiePolicy />} />
+              <Route element={<Layout />}>
+                <Route path="/" element={<Index />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/about/our-story" element={<OurStory />} />
+                <Route path="/about/factory" element={<Factory />} />
+                <Route path="/about/certificates" element={<Certificates />} />
+                <Route path="/about/sustainability" element={<Sustainability />} />
+                <Route path="/products" element={<Products />} />
+                <Route path="/products/:slug" element={<ProductDetail />} />
+                <Route path="/sustainability" element={<Sustainability />} />
+                <Route path="/production" element={<Production />} />
+                <Route path="/news" element={<News />} />
+                <Route path="/news/:id" element={<NewsDetail />} />
+                <Route path="/brochures" element={<Brochures />} />
+                <Route path="/brochures/:slug" element={<BrochureViewer />} />
+                <Route path="/designer-studio" element={<DesignerStudio />} />
+                <Route path="/designer-studio/dashboard" element={<DesignerStudioDashboard />} />
+                <Route path="/designer-studio/compose/:sessionId" element={<ComposerPage />} />
+                <Route path="/designer-studio/present/:sessionId" element={<PresentationPage />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/terms-of-service" element={<TermsOfService />} />
+                <Route path="/cookie-policy" element={<CookiePolicy />} />
+              </Route>
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

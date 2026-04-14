@@ -1,5 +1,3 @@
-import Header from "@/components/layout/Header";
-import Footer from "@/components/footer/Footer";
 import { ArrowRight, Calendar, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
@@ -27,10 +25,7 @@ const News = () => {
   const filteredRegularItems = filteredItems.filter((item) => !item.featured);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
-      <main>
+    <>
         <PageBreadcrumb
           segments={[
             { label: "Home", href: "/" },
@@ -231,10 +226,7 @@ const News = () => {
             </Link>
           </div>
         </section>
-      </main>
-
-      <Footer />
-    </div>
+    </>
   );
 };
 

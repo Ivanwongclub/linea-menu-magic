@@ -1,6 +1,4 @@
 import { useState } from "react";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
 import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
 import { Link } from "react-router-dom";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
@@ -89,9 +87,7 @@ export default function Production() {
   const [activeCategory, setActiveCategory] = useState(0);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-
+    <>
       <PageBreadcrumb
         segments={[
           { label: "Home", href: "/" },
@@ -99,8 +95,6 @@ export default function Production() {
         ]}
         title="Production"
       />
-
-      <main>
         {/* ── SECTION 1: Page intro ──────────────────────────────────────── */}
         <section className="section-light">
           <div className="section-inner">
@@ -308,9 +302,6 @@ export default function Production() {
             </div>
           </div>
         </section>
-      </main>
-
-      <Footer />
-    </div>
+    </>
   );
 }

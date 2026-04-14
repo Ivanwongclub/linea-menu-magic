@@ -1,6 +1,4 @@
 import { useEffect } from "react";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
 import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
 import { Button } from "@/components/ui/button";
 import {
@@ -55,10 +53,7 @@ const CookiePolicy = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-
-      <main className="pt-6">
+    <>
         <PageBreadcrumb
           segments={[{ label: "Home", href: "/" }, { label: "Cookie Policy" }]}
           title="Cookie Policy"
@@ -193,10 +188,7 @@ const CookiePolicy = () => {
             </section>
           </div>
         </div>
-      </main>
-
-      <Footer />
-    </div>
+    </>
   );
 };
 

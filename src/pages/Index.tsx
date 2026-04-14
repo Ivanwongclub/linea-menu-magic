@@ -1,5 +1,3 @@
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
 import HeroSection from "@/components/home/HeroSection";
 import ProductCategories from "@/components/home/ProductCategories";
 import HeritageSection from "@/components/home/HeritageSection";
@@ -11,10 +9,7 @@ import { Separator } from "@/components/ui/separator";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
-      <main>
+    <>
         <HeroSection />
         <ProductCategories />
         <HeritageSection />
@@ -24,10 +19,7 @@ const Index = () => {
         <DesignerCTA />
         <Separator className="opacity-50" />
         <ContactSection />
-      </main>
-      
-      <Footer />
-    </div>
+    </>
   );
 };
 

@@ -5,8 +5,6 @@ import {
   ShieldCheck, Factory, ArrowRight, Layers, ClipboardList,
   Package, Cpu, Globe, ChevronRight,
 } from 'lucide-react';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
 import PageBreadcrumb from '@/components/ui/PageBreadcrumb';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -315,28 +313,20 @@ export default function ProductDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <DetailSkeleton />
-        <Footer />
-      </div>
+      <DetailSkeleton />
     );
   }
 
   if (error || !product) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="section-inner py-24 text-center">
-          <h1 className="text-xl font-semibold mb-2">Product not found</h1>
-          <p className="text-sm text-muted-foreground mb-6">
-            The product you're looking for doesn't exist or has been removed.
-          </p>
-          <Button variant="outline" asChild>
-            <Link to="/products">Back to Trim Library</Link>
-          </Button>
-        </div>
-        <Footer />
+      <div className="section-inner py-24 text-center">
+        <h1 className="text-xl font-semibold mb-2">Product not found</h1>
+        <p className="text-sm text-muted-foreground mb-6">
+          The product you're looking for doesn't exist or has been removed.
+        </p>
+        <Button variant="outline" asChild>
+          <Link to="/products">Back to Trim Library</Link>
+        </Button>
       </div>
     );
   }
@@ -432,10 +422,7 @@ export default function ProductDetail() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-
-      <main>
+    <>
         <PageBreadcrumb segments={breadcrumbSegments} title={product.name_en ?? product.name} />
 
         {/* ════════════════════════════════════════════════
@@ -762,10 +749,6 @@ export default function ProductDetail() {
 
         {/* ── Related Trims ── */}
         <RelatedProducts product={product} />
-      </main>
-
-      <Footer />
-
       {/* 3D Model Dialog */}
       {product.model_url && (
         <Dialog open={show3D} onOpenChange={setShow3D}>
@@ -777,6 +760,6 @@ export default function ProductDetail() {
           </DialogContent>
         </Dialog>
       )}
-    </div>
+    </>
   );
 }

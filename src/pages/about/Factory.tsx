@@ -1,5 +1,3 @@
-import Header from "../../components/layout/Header";
-import Footer from "../../components/layout/Footer";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 import { MapPin, Building2, Factory as FactoryIcon, Package, Truck, CheckCircle, ArrowRight } from "lucide-react";
 import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
@@ -72,10 +70,7 @@ const Factory = () => {
   const { ref: qualRef, isVisible: qualVisible } = useScrollAnimation();
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-
-      <main className="w-full">
+    <>
         <PageBreadcrumb
           segments={[
             { label: "Home", href: "/" },
@@ -260,10 +255,7 @@ const Factory = () => {
             </div>
           </div>
         </section>
-      </main>
-
-      <Footer />
-    </div>
+    </>
   );
 };
 

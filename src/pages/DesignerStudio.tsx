@@ -1,5 +1,3 @@
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
 import StudioPreview from "@/components/designer-studio/StudioPreview";
 import { Shield, Library, Layers, Share2 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -28,10 +26,7 @@ const DesignerStudio = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
-      <main>
+    <>
         {/* Hero */}
         <section className="relative overflow-hidden">
           {/* Art-directed background */}
@@ -177,10 +172,7 @@ const DesignerStudio = () => {
             </div>
           </div>
         </section>
-      </main>
-      
-      <Footer />
-    </div>
+    </>
   );
 };
 
