@@ -296,13 +296,15 @@ const Header = () => {
       </header>
 
       {/* ── Segments Mega Menu ───────────────────────────────────────────────── */}
-      {isSegmentsOpen && (
-        <div
-          className="hidden lg:block fixed left-0 right-0 z-40"
-          style={{ top: "80px" }}
-          onMouseEnter={handleSegmentsEnter}
-          onMouseLeave={handleSegmentsLeave}
-        >
+      <div
+        className="hidden lg:block fixed left-0 right-0 z-40"
+        style={{ top: "80px", pointerEvents: isSegmentsOpen ? "auto" : "none" }}
+        onMouseEnter={handleSegmentsEnter}
+        onMouseLeave={handleSegmentsLeave}
+      >
+        <div className={`transition-all duration-200 ease-out ${
+          isSegmentsOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-1 pointer-events-none"
+        }`}>
           <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] h-[660px]">
             <div className="w-full pr-10 lg:pr-16 xl:pr-24 py-10 h-full" style={{ paddingLeft: navLeftOffset }}>
               <div className="flex gap-0 h-full">
@@ -334,7 +336,7 @@ const Header = () => {
                   </div>
                   {/* Designer Studio CTA */}
                   <div className="mt-auto pt-5 border-t border-[hsl(var(--border))]" style={{ marginTop: "auto" }}>
-                    <Link to="/designer-studio" className="text-[12px] text-muted-foreground hover:text-foreground transition-colors leading-snug block">
+                    <Link to="/designer-studio" onClick={closeAllMenus} className="text-[12px] text-muted-foreground hover:text-foreground transition-colors leading-snug block">
                       Custom via our<br />
                       <span className="font-semibold text-foreground">Designer Studio →</span>
                     </Link>
@@ -361,6 +363,7 @@ const Header = () => {
                                 <Link
                                   key={item}
                                   to={`/products?category=${slugify(item)}&segment=${active.slug}`}
+                                  onClick={closeAllMenus}
                                   className="w-[140px] py-3 text-[13px] text-center border border-[hsl(var(--border))] text-muted-foreground hover:bg-foreground hover:text-background hover:border-foreground transition-colors duration-150 block"
                                 >
                                   {item}
@@ -373,6 +376,7 @@ const Header = () => {
                       <div className="pt-3 border-t border-[hsl(var(--border))] mt-auto">
                         <Link
                           to={`/products?segment=${active.slug}`}
+                          onClick={closeAllMenus}
                           className="text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
                         >
                           View all {active.name} products →
@@ -386,16 +390,18 @@ const Header = () => {
             </div>
           </div>
         </div>
-      )}
+      </div>
 
       {/* ── Products Mega Menu ───────────────────────────────────────────────── */}
-      {isProductsOpen && (
-        <div
-          className="hidden lg:block fixed left-0 right-0 z-40"
-          style={{ top: "80px" }}
-          onMouseEnter={handleProductsEnter}
-          onMouseLeave={handleProductsLeave}
-        >
+      <div
+        className="hidden lg:block fixed left-0 right-0 z-40"
+        style={{ top: "80px", pointerEvents: isProductsOpen ? "auto" : "none" }}
+        onMouseEnter={handleProductsEnter}
+        onMouseLeave={handleProductsLeave}
+      >
+        <div className={`transition-all duration-200 ease-out ${
+          isProductsOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-1 pointer-events-none"
+        }`}>
           <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
             <div className="w-full pr-10 lg:pr-16 xl:pr-24 py-10" style={{ paddingLeft: navLeftOffset }}>
               <div className="flex items-start gap-10">
@@ -410,6 +416,7 @@ const Header = () => {
                       <div>
                         <Link
                           to={`/products?family=${hardware.slug}`}
+                          onClick={closeAllMenus}
                           className="text-[15px] font-semibold text-foreground hover:opacity-70 transition-opacity block mb-3"
                         >
                           {hardware.name}
@@ -419,6 +426,7 @@ const Header = () => {
                             <li key={sub.en}>
                               <Link
                                 to={`/products?category=${slugify(sub.en)}`}
+                                onClick={closeAllMenus}
                                 className="text-[14px] text-muted-foreground hover:text-foreground transition-colors duration-150 block"
                               >
                                 {sub.en}
@@ -440,6 +448,7 @@ const Header = () => {
                     <div key={family.slug} className="mb-6 last:mb-0">
                       <Link
                         to={`/products?family=${family.slug}`}
+                        onClick={closeAllMenus}
                         className="text-[15px] font-semibold text-foreground hover:opacity-70 transition-opacity block mb-3"
                       >
                         {family.name}
@@ -449,6 +458,7 @@ const Header = () => {
                           <li key={sub.en}>
                             <Link
                               to={`/products?category=${slugify(sub.en)}`}
+                              onClick={closeAllMenus}
                               className="text-[14px] text-muted-foreground hover:text-foreground transition-colors duration-150 block"
                             >
                               {sub.en}
@@ -472,6 +482,7 @@ const Header = () => {
                   </div>
                   <Link
                     to="/products"
+                    onClick={closeAllMenus}
                     className="mt-4 text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
                   >
                     View All Products →
@@ -481,16 +492,18 @@ const Header = () => {
             </div>
           </div>
         </div>
-      )}
+      </div>
 
       {/* ── About Mega Menu ──────────────────────────────────────────────────── */}
-      {isAboutOpen && (
-        <div
-          className="hidden lg:block fixed left-0 right-0 z-40"
-          style={{ top: "80px" }}
-          onMouseEnter={handleAboutEnter}
-          onMouseLeave={handleAboutLeave}
-        >
+      <div
+        className="hidden lg:block fixed left-0 right-0 z-40"
+        style={{ top: "80px", pointerEvents: isAboutOpen ? "auto" : "none" }}
+        onMouseEnter={handleAboutEnter}
+        onMouseLeave={handleAboutLeave}
+      >
+        <div className={`transition-all duration-200 ease-out ${
+          isAboutOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-1 pointer-events-none"
+        }`}>
           <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] h-[560px]">
             <div className="w-full pr-10 lg:pr-16 xl:pr-24 py-10 h-full" style={{ paddingLeft: navLeftOffset }}>
               <div className="flex gap-0 h-full">
@@ -508,6 +521,7 @@ const Header = () => {
                           <li key={item.href}>
                             <Link
                               to={item.href!}
+                              onClick={closeAllMenus}
                               className="text-[14px] text-muted-foreground hover:text-foreground transition-colors duration-150 block py-[7px]"
                               onMouseEnter={() => { setAboutPreviewImage(item.image!); setAboutPreviewLabel(item.label!); }}
                             >
@@ -548,6 +562,7 @@ const Header = () => {
                       <Link
                         key={card.title}
                         to={card.href}
+                        onClick={closeAllMenus}
                         className="group block rounded-[var(--radius)] border border-[hsl(var(--border))] overflow-hidden hover:border-foreground/20 hover:shadow-[0_2px_12px_rgba(0,0,0,0.08)] transition-all duration-200"
                       >
                         <div className="flex items-stretch h-[88px]">
@@ -566,7 +581,7 @@ const Header = () => {
                     ))}
                   </div>
                   <div className="mt-6 pt-4 border-t border-[hsl(var(--border))]">
-                    <Link to="/about/our-story" className="text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors">
+                    <Link to="/about/our-story" onClick={closeAllMenus} className="text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors">
                       Learn More About Us →
                     </Link>
                   </div>
@@ -575,7 +590,7 @@ const Header = () => {
             </div>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Spacer */}
       {!isHeroPage && <div className="h-20" />}
