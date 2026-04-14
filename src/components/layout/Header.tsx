@@ -354,7 +354,7 @@ const Header = () => {
                               {group.items.map((item) => (
                                 <Link
                                   key={item}
-                                  to={`/products?categories=${slugify(item)}&segments=${active.slug}`}
+                                  to={`/products?category=${slugify(item)}&segment=${active.slug}`}
                                   className="w-[140px] py-3 text-[13px] text-center border border-[hsl(var(--border))] text-muted-foreground hover:bg-foreground hover:text-background hover:border-foreground transition-colors duration-150 block"
                                 >
                                   {item}
@@ -366,7 +366,7 @@ const Header = () => {
                       </div>
                       <div className="pt-3 border-t border-[hsl(var(--border))] mt-auto">
                         <Link
-                          to={`/products?segments=${active.slug}`}
+                          to={`/products?segment=${active.slug}`}
                           className="text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
                         >
                           View all {active.name} products →
@@ -412,7 +412,7 @@ const Header = () => {
                           {hardware.subcategories.map((sub) => (
                             <li key={sub.en}>
                               <Link
-                                to={`/products?categories=${slugify(sub.en)}`}
+                                to={`/products?category=${slugify(sub.en)}`}
                                 className="text-[14px] text-muted-foreground hover:text-foreground transition-colors duration-150 block"
                               >
                                 {sub.en}
@@ -442,7 +442,7 @@ const Header = () => {
                         {family.subcategories.map((sub) => (
                           <li key={sub.en}>
                             <Link
-                              to={`/products?categories=${slugify(sub.en)}`}
+                              to={`/products?category=${slugify(sub.en)}`}
                               className="text-[14px] text-muted-foreground hover:text-foreground transition-colors duration-150 block"
                             >
                               {sub.en}
@@ -599,9 +599,9 @@ const Header = () => {
                             <div key={seg.slug}>
                               <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground block pt-4 pb-1 px-6">{seg.name}</span>
                               {seg.categories.flatMap((g) => g.items).slice(0, 6).map((item) => (
-                                <Link key={item} to={`/products?categories=${slugify(item)}&segments=${seg.slug}`} onClick={() => setIsMenuOpen(false)} className="text-[13px] text-muted-foreground hover:text-foreground transition-colors block py-2 px-8 border-b border-border/30">{item}</Link>
+                                <Link key={item} to={`/products?category=${slugify(item)}&segment=${seg.slug}`} onClick={() => setIsMenuOpen(false)} className="text-[13px] text-muted-foreground hover:text-foreground transition-colors block py-2 px-8 border-b border-border/30">{item}</Link>
                               ))}
-                              <Link to={`/products?segments=${seg.slug}`} onClick={() => setIsMenuOpen(false)} className="text-[13px] font-medium text-foreground block py-2 px-8 border-b border-border/50">All {seg.name} →</Link>
+                              <Link to={`/products?segment=${seg.slug}`} onClick={() => setIsMenuOpen(false)} className="text-[13px] font-medium text-foreground block py-2 px-8 border-b border-border/50">All {seg.name} →</Link>
                             </div>
                           ))}
                           <Link to="/designer-studio" onClick={() => setIsMenuOpen(false)} className="text-sm text-muted-foreground hover:text-foreground block py-3.5 px-6 border-b border-border">Custom via our Designer Studio →</Link>
@@ -624,7 +624,7 @@ const Header = () => {
                             <div key={family.slug}>
                               <Link to={`/products?family=${family.slug}`} onClick={() => setIsMenuOpen(false)} className="flex items-baseline gap-2 text-sm font-semibold text-foreground py-3.5 px-6 border-b border-border">{family.name}</Link>
                               {family.subcategories.map((sub) => (
-                                <Link key={sub.en} to={`/products?categories=${slugify(sub.en)}`} onClick={() => setIsMenuOpen(false)} className="text-[13px] text-muted-foreground hover:text-foreground transition-colors block py-2 px-10 border-b border-border/30">{sub.en}</Link>
+                                <Link key={sub.en} to={`/products?category=${slugify(sub.en)}`} onClick={() => setIsMenuOpen(false)} className="text-[13px] text-muted-foreground hover:text-foreground transition-colors block py-2 px-10 border-b border-border/30">{sub.en}</Link>
                               ))}
                             </div>
                           ))}
