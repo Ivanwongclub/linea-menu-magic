@@ -124,15 +124,15 @@ const LoadingOverlay = () => {
   return (
     <Html center>
       <div className="flex flex-col items-center gap-3 select-none">
-        <div className="w-6 h-6 border-2 border-white/20 border-t-white/80 rounded-full animate-spin" />
-        <span className="text-white/60 text-xs tracking-wide">Loading 3D model</span>
-        <div className="w-32 h-1 bg-white/10 rounded-full overflow-hidden">
+        <div className="w-6 h-6 border-2 border-foreground/20 border-t-foreground/80 rounded-full animate-spin" />
+        <span className="text-foreground/60 text-xs tracking-wide">Loading 3D model</span>
+        <div className="w-32 h-1 bg-foreground/10 rounded-full overflow-hidden">
           <div
-            className="h-full bg-white/70 rounded-full transition-all duration-300"
+            className="h-full bg-foreground/70 rounded-full transition-all duration-300"
             style={{ width: `${progress}%` }}
           />
         </div>
-        <span className="text-white/40 text-[10px]">{Math.round(progress)}%</span>
+        <span className="text-foreground/40 text-[10px]">{Math.round(progress)}%</span>
       </div>
     </Html>
   );
@@ -232,38 +232,38 @@ export default function ObjGallery({ open, onClose, initialIndex = 0 }: ObjGalle
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/90 backdrop-blur-sm"
+        className="absolute inset-0 bg-white/80 backdrop-blur-sm"
         onClick={onClose}
       />
 
       {/* Modal */}
       <div
-        className={`relative z-10 flex flex-col bg-[#111] border border-white/10 rounded-lg shadow-2xl overflow-hidden transition-all duration-300 ${
+        className={`relative z-10 flex flex-col bg-background border border-border shadow-2xl overflow-hidden transition-all duration-300 ${
           isFullscreen
-            ? "w-screen h-screen rounded-none"
+            ? "w-screen h-screen"
             : "w-[90vw] max-w-5xl h-[85vh]"
         }`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header bar */}
-        <div className="flex items-start justify-between px-5 py-4 border-b border-white/10">
+        <div className="flex items-start justify-between px-5 py-4 border-b border-border">
           <div className="min-w-0">
-            <span className="text-[11px] text-white/40 tracking-widest uppercase">
+            <span className="text-[11px] text-muted-foreground tracking-widest uppercase">
               3D Prototype · {activeIndex + 1} / {MODELS.length}
             </span>
-            <h3 className="text-[17px] font-semibold text-white mt-0.5 truncate">
+            <h3 className="text-[17px] font-semibold text-foreground mt-0.5 truncate">
               {model.title}
             </h3>
-            <p className="text-[12px] text-white/50 mt-0.5">{model.subtitle}</p>
+            <p className="text-[12px] text-muted-foreground mt-0.5">{model.subtitle}</p>
           </div>
           <div className="flex items-center gap-2 ml-4 flex-shrink-0">
             <button
               onClick={() => setAutoRotate((v) => !v)}
               title={autoRotate ? "Pause rotation" : "Resume rotation"}
-              className={`w-8 h-8 flex items-center justify-center rounded-sm border transition-colors duration-150 ${
+              className={`w-8 h-8 flex items-center justify-center border transition-colors duration-150 ${
                 autoRotate
-                  ? "border-white/30 text-white bg-white/10"
-                  : "border-white/10 text-white/40 hover:border-white/20"
+                  ? "border-foreground text-foreground bg-foreground/5"
+                  : "border-border text-muted-foreground hover:border-foreground/40"
               }`}
             >
               <RotateCcw size={14} />
@@ -271,13 +271,13 @@ export default function ObjGallery({ open, onClose, initialIndex = 0 }: ObjGalle
             <button
               onClick={() => setIsFullscreen((v) => !v)}
               title="Toggle fullscreen"
-              className="w-8 h-8 flex items-center justify-center rounded-sm border border-white/10 text-white/40 hover:border-white/20 hover:text-white/70 transition-colors duration-150"
+              className="w-8 h-8 flex items-center justify-center border border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground transition-colors duration-150"
             >
               <Maximize2 size={14} />
             </button>
             <button
               onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center rounded-sm border border-white/10 text-white/40 hover:border-white/20 hover:text-white/70 transition-colors duration-150"
+              className="w-8 h-8 flex items-center justify-center border border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground transition-colors duration-150"
             >
               <X size={14} />
             </button>
@@ -285,7 +285,7 @@ export default function ObjGallery({ open, onClose, initialIndex = 0 }: ObjGalle
         </div>
 
         {/* Main 3D viewport */}
-        <div className="flex-1 relative min-h-0">
+        <div className="flex-1 relative min-h-0 bg-secondary">
           <Canvas
             camera={{ position: model.camera, fov: 40 }}
             shadows
@@ -300,48 +300,48 @@ export default function ObjGallery({ open, onClose, initialIndex = 0 }: ObjGalle
           {/* Navigation arrows */}
           <button
             onClick={prev}
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-black/50 border border-white/10 text-white/60 hover:bg-black/70 hover:text-white transition-colors"
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-background border border-border text-foreground/60 hover:bg-foreground hover:text-background transition-colors"
           >
             <ChevronLeft size={20} />
           </button>
           <button
             onClick={next}
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-black/50 border border-white/10 text-white/60 hover:bg-black/70 hover:text-white transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-background border border-border text-foreground/60 hover:bg-foreground hover:text-background transition-colors"
           >
             <ChevronRight size={20} />
           </button>
 
           {/* Interaction hint */}
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-[11px] text-white/30 pointer-events-none select-none">
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-[11px] text-muted-foreground pointer-events-none select-none">
             Drag to rotate · Scroll to zoom
           </div>
         </div>
 
         {/* Thumbnail strip */}
-        <div className="flex items-center gap-3 px-5 py-3 border-t border-white/10 bg-black/40 overflow-x-auto">
+        <div className="flex items-center gap-3 px-5 py-3 border-t border-border bg-secondary overflow-x-auto">
           {MODELS.map((m, idx) => (
             <button
               key={m.id}
               onClick={() => { setActiveIndex(idx); setAutoRotate(true); }}
-              className={`relative flex-shrink-0 w-[88px] h-[66px] rounded-sm overflow-hidden border-2 transition-all duration-200 ${
+              className={`relative flex-shrink-0 w-[88px] h-[66px] overflow-hidden border-2 transition-all duration-200 ${
                 idx === activeIndex
-                  ? "border-white/70 scale-105"
-                  : "border-white/10 hover:border-white/30 opacity-60 hover:opacity-90"
+                  ? "border-foreground scale-105"
+                  : "border-border hover:border-foreground/40 opacity-60 hover:opacity-90"
               }`}
             >
-              <div className="w-full h-full bg-[#1a1a1a]">
+              <div className="w-full h-full bg-secondary">
                 <ThumbCanvas model={m} />
               </div>
-              <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent px-1 py-0.5">
-                <span className="text-[9px] text-white/70 leading-none truncate block">
+              <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-background/80 to-transparent px-1 py-0.5">
+                <span className="text-[9px] text-foreground/70 leading-none truncate block">
                   {m.title}
                 </span>
               </div>
             </button>
           ))}
           <div className="flex flex-col gap-0.5 ml-auto flex-shrink-0 pl-4">
-            <span className="text-[10px] text-white/25">← → to navigate</span>
-            <span className="text-[10px] text-white/25">Esc to close</span>
+            <span className="text-[10px] text-muted-foreground/50">← → to navigate</span>
+            <span className="text-[10px] text-muted-foreground/50">Esc to close</span>
           </div>
         </div>
       </div>
