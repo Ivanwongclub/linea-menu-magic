@@ -172,10 +172,10 @@ export default function ProductsSidebar({
                 onClick={() =>
                   setActiveCollection?.(activeCollection === col.slug ? null : col.slug)
                 }
-                className={`w-full text-left text-sm px-0 py-1.5 transition-colors duration-150 flex items-center gap-2 ${
+                className={`w-full text-left text-sm px-0 py-1.5 transition-colors duration-200 flex items-center gap-2 ${
                   activeCollection === col.slug
                     ? 'text-foreground font-medium'
-                    : 'text-muted-foreground hover:text-foreground'
+                    : 'text-foreground hover:text-muted-foreground'
                 }`}
               >
                 <span
