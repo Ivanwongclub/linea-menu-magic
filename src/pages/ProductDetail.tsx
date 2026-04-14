@@ -313,24 +313,20 @@ export default function ProductDetail() {
 
   if (loading) {
     return (
-      <>
-        <DetailSkeleton />
-      </div>
+      <DetailSkeleton />
     );
   }
 
   if (error || !product) {
     return (
-      <>
-        <div className="section-inner py-24 text-center">
-          <h1 className="text-xl font-semibold mb-2">Product not found</h1>
-          <p className="text-sm text-muted-foreground mb-6">
-            The product you're looking for doesn't exist or has been removed.
-          </p>
-          <Button variant="outline" asChild>
-            <Link to="/products">Back to Trim Library</Link>
-          </Button>
-        </div>
+      <div className="section-inner py-24 text-center">
+        <h1 className="text-xl font-semibold mb-2">Product not found</h1>
+        <p className="text-sm text-muted-foreground mb-6">
+          The product you're looking for doesn't exist or has been removed.
+        </p>
+        <Button variant="outline" asChild>
+          <Link to="/products">Back to Trim Library</Link>
+        </Button>
       </div>
     );
   }
