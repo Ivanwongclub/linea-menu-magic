@@ -89,7 +89,15 @@ function slugify(name: string) {
   return name.toLowerCase().replace(/\s+&\s+/g, "-").replace(/\s+/g, "-");
 }
 
-
+const NAV_LINKS: Array<{ href: string; label: string; megaMenu?: "products" | "about" | "segments" }> = [
+  { href: "/segments",        label: "Segments",        megaMenu: "segments" },
+  { href: "/products",        label: "Products",        megaMenu: "products" },
+  { href: "/about",           label: "About",           megaMenu: "about"    },
+  { href: "/production",      label: "Production"      },
+  { href: "/sustainability",  label: "Sustainability"  },
+  { href: "/ecollections",    label: "E-Collections"  },
+  { href: "/designer-studio", label: "Designer Studio" },
+];
 
 // ─── Component ─────────────────────────────────────────────────────────────────
 const Header = () => {
