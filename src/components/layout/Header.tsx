@@ -160,13 +160,9 @@ const Header = () => {
   // ─── Nav link class: white on transparent, black on scrolled/non-hero ──────
   const linkClass = (active: boolean) =>
     `text-[15px] font-medium tracking-[0.04em] uppercase whitespace-nowrap transition-colors duration-200 py-1 ${
-      active
-        ? isTransparent
-          ? "text-white"
-          : "text-foreground"
-        : isTransparent
-? "text-white hover:text-white/50"
-          : "text-foreground hover:text-foreground/50"
+      isTransparent
+        ? "text-white hover:text-white/50"
+        : "text-foreground hover:text-foreground/50"
     }`;
 
   const iconClass = `p-2 transition-all duration-300 ${
