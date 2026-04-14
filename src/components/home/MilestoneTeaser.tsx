@@ -92,18 +92,18 @@ const MilestoneTeaser = () => {
   }, []);
 
   return (
-    <section className="py-24 overflow-hidden bg-[#0f0f0f] text-white">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+    <section className="py-24 overflow-hidden bg-background">
+      <div className="max-w-7xl mx-auto px-14 lg:px-20 xl:px-28">
         {/* Header */}
         <div ref={headerRef} className="mb-6">
           <span
-            className={`text-[11px] font-medium tracking-[0.12em] uppercase text-white/45 block mb-3 transition-all duration-700 ease-out ${
+            className={`text-[11px] font-medium tracking-[0.12em] uppercase text-muted-foreground block mb-3 transition-all duration-700 ease-out ${
               headerVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"
             }`}
           >
             About WIN-CYC
           </span>
-          <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-4">
+          <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-4">
             <span className="inline-block mr-4">Our</span>
             <span className="inline-block font-serif-display">Journey</span>
           </h2>
@@ -114,25 +114,27 @@ const MilestoneTeaser = () => {
           {/* Left arrow */}
           <button
             onClick={scrollLeft}
-            aria-label="Scroll timeline left"
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center w-12 h-12 text-white/50 hover:text-white transition-colors duration-200 bg-gradient-to-r from-[#0f0f0f] to-transparent"
+            aria-label="Scroll left"
+            className="absolute z-20 text-foreground/30 hover:text-foreground transition-colors duration-200"
+            style={{ left: "-44px", top: "50%", transform: "translateY(-50%)" }}
           >
-            <ChevronLeft size={32} strokeWidth={1.5} />
+            <ChevronLeft size={32} strokeWidth={1} />
           </button>
 
           {/* Right arrow */}
           <button
             onClick={scrollRight}
-            aria-label="Scroll timeline right"
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center w-12 h-12 text-white/50 hover:text-white transition-colors duration-200 bg-gradient-to-l from-[#0f0f0f] to-transparent"
+            aria-label="Scroll right"
+            className="absolute z-20 text-foreground/30 hover:text-foreground transition-colors duration-200"
+            style={{ right: "-44px", top: "50%", transform: "translateY(-50%)" }}
           >
-            <ChevronRight size={32} strokeWidth={1.5} />
+            <ChevronRight size={32} strokeWidth={1} />
           </button>
 
           {/* Scrollable track */}
           <div
             ref={scrollRef}
-            className="overflow-x-auto scrollbar-hide pb-2 px-12"
+            className="overflow-x-auto scrollbar-hide pb-2"
             style={{ scrollSnapType: "x proximity" }}
           >
             <div ref={timelineRef} style={{ minWidth: "max-content" }}>
@@ -140,7 +142,7 @@ const MilestoneTeaser = () => {
                 className="grid"
                 style={{
                   gridTemplateColumns: `repeat(${COLS}, minmax(120px, 160px))`,
-                  gridTemplateRows: "auto 1px 28px auto",
+                  gridTemplateRows: "1fr auto 1fr",
                   columnGap: "16px",
                 }}
               >
@@ -157,60 +159,46 @@ const MilestoneTeaser = () => {
                   </div>
                 ))}
 
-                {/* ROW 2: SPINE LINE */}
-                {milestones.map((_, i) => (
+                {/* ROW 2: SPINE LINE + DOT (dot centred absolutely on line) */}
+                {milestones.map((m, i) => (
                   <div
                     key={`line-${i}`}
                     className="relative"
-                    style={{ gridRow: 2, gridColumn: i + 1 }}
+                    style={{ gridRow: 2, gridColumn: i + 1, height: "1px" }}
                   >
-                    {/* Static dim line */}
-                    <div className="absolute inset-0 bg-white/15" />
-                    {/* Animated fill — only on first column, spans full width */}
+                    {/* Spine segment */}
+                    <div className="absolute inset-0 bg-foreground/15" />
+                    {/* Animated fill — first column only, spans full width */}
                     {i === 0 && (
                       <div
-                        className={`absolute top-0 left-0 h-full bg-white/60 transform-gpu origin-left ${
-                          timelineVisible ? "animate-[ms-line-grow_2s_ease-out_forwards]" : "scale-x-0"
-                        }`}
+                        className="absolute top-0 left-0 h-full bg-foreground/70"
                         style={{
-                          width: `calc(${COLS} * 100% + ${(COLS - 1) * 16}px)`,
-                          animationDelay: "300ms",
+                          width: timelineVisible ? `calc(${COLS} * 100% + ${(COLS - 1) * 16}px)` : "0%",
+                          transition: "width 2s cubic-bezier(0.4,0,0.2,1)",
+                          transitionDelay: "200ms",
                         }}
                       />
                     )}
-                  </div>
-                ))}
-
-                {/* ROW 3: DOTS */}
-                {milestones.map((m, i) => (
-                  <div
-                    key={`dot-${i}`}
-                    className="flex justify-start items-start pt-2"
-                    style={{ gridRow: 3, gridColumn: i + 1 }}
-                  >
+                    {/* Dot — absolutely centred on this 1px line */}
                     <div
-                      className={`rounded-full border-2 w-[12px] h-[12px] ${
+                      className={`absolute left-0 top-1/2 -translate-y-1/2 rounded-full border-2 transition-all duration-500 ${
                         m.isHighlight
-                          ? "bg-white border-white"
-                          : "bg-[#0f0f0f] border-white/60"
-                      } ${
-                        timelineVisible
-                          ? "animate-[ms-dot-pop_0.5s_cubic-bezier(0.34,1.56,0.64,1)_forwards]"
-                          : "scale-0 opacity-0"
-                      }`}
-                      style={{ animationDelay: `${500 + i * 150}ms` }}
+                          ? "w-[14px] h-[14px] bg-foreground border-foreground"
+                          : "w-[12px] h-[12px] bg-background border-foreground/50"
+                      } ${timelineVisible ? "scale-100 opacity-100" : "scale-0 opacity-0"}`}
+                      style={{ transitionDelay: `${300 + i * 80}ms` }}
                     />
                   </div>
                 ))}
 
-                {/* ROW 4: BELOW-LINE CONTENT (odd indices: 1,3,5,7) */}
+                {/* ROW 3: BELOW-LINE CONTENT (odd indices: 1,3,5,7) */}
                 {milestones.map((m, i) => (
                   <div
                     key={`below-${i}`}
                     className={`flex items-start pt-4 transition-all duration-700 ease-out ${
                       timelineVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
                     }`}
-                    style={{ gridRow: 4, gridColumn: i + 1, transitionDelay: `${i * 80 + 100}ms` }}
+                    style={{ gridRow: 3, gridColumn: i + 1, transitionDelay: `${i * 80 + 100}ms` }}
                   >
                     {i % 2 === 1 && <MilestoneCard m={m} isVisible={timelineVisible} delay={i * 80 + 100} />}
                   </div>
@@ -229,7 +217,7 @@ const MilestoneTeaser = () => {
         >
           <Link
             to="/about/our-story"
-            className="group inline-flex items-center text-sm tracking-wider text-white link-elegant"
+            className="group inline-flex items-center text-sm tracking-wider text-foreground link-elegant"
           >
             Read Our Full Story
             <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300 group-hover:translate-x-2" />
@@ -253,7 +241,7 @@ const MilestoneCard = ({
   if (m.isHighlight) {
     return (
       <div
-        className={`bg-white text-[#0f0f0f] rounded-lg overflow-hidden transition-all duration-700 ease-out ${
+        className={`border border-foreground/15 bg-foreground/5 rounded-lg overflow-hidden transition-all duration-700 ease-out ${
           isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
         }`}
         style={{ transitionDelay: `${delay}ms` }}
@@ -272,15 +260,15 @@ const MilestoneCard = ({
         )}
         <div className="p-3">
           {m.badge && (
-            <span className="text-[9px] font-mono tracking-[0.15em] uppercase text-[#0f0f0f]/50 block">
+            <span className="text-[9px] font-mono tracking-[0.15em] uppercase text-foreground/40 block">
               {m.badge}
             </span>
           )}
-          <span className="text-[10px] font-mono tracking-[0.12em] text-[#0f0f0f]/40 block mt-0.5">
+          <span className="text-[10px] font-mono tracking-[0.12em] text-foreground/40 block mt-0.5">
             {m.year}
           </span>
-          <h3 className="text-sm font-semibold mt-1 leading-snug">{m.title}</h3>
-          <p className="text-xs text-[#0f0f0f]/70 mt-1 leading-relaxed">{m.desc}</p>
+          <h3 className="text-sm font-semibold text-foreground mt-1 leading-snug">{m.title}</h3>
+          <p className="text-xs text-foreground/50 mt-1 leading-relaxed">{m.desc}</p>
         </div>
       </div>
     );
@@ -305,11 +293,11 @@ const MilestoneCard = ({
           />
         </div>
       )}
-      <span className="text-[10px] font-mono tracking-[0.12em] text-white/40 block">
+      <span className="text-[10px] font-mono tracking-[0.12em] text-foreground/40 block">
         {m.year}
       </span>
-      <h3 className="text-sm font-semibold text-white mt-1 leading-snug">{m.title}</h3>
-      <p className="text-xs text-white/60 mt-1 leading-relaxed">{m.desc}</p>
+      <h3 className="text-sm font-semibold text-foreground mt-1 leading-snug">{m.title}</h3>
+      <p className="text-xs text-foreground/50 mt-1 leading-relaxed">{m.desc}</p>
     </div>
   );
 };
