@@ -486,6 +486,6 @@ function ProductGridSkeleton({ viewMode = 'grid' }: { viewMode?: ViewMode }) {
           </div>
         </div>
       ))}
-    </>
+    </div>
   );
 }
