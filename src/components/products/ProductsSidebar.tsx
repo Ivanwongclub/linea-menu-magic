@@ -161,11 +161,35 @@ export default function ProductsSidebar({
   return (
     <div className="space-y-0">
 
-      {/* Collections section — top of sidebar */}
+      {/* Search bar — top of sidebar */}
+      <div className="mb-4">
+        <div className="relative">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            value={localSearch}
+            onChange={(e) => setLocalSearch(e.target.value)}
+            placeholder="Search by name or code..."
+            className="h-9 text-sm pl-8 pr-8"
+          />
+          {localSearch && (
+            <button
+              onClick={() => {
+                setLocalSearch('');
+                lastPushed.current = '';
+                setFilters({ search: undefined });
+              }}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2"
+            >
+              <X className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Collections — no header */}
       {collections && collections.length > 0 && (
-        <div className="mb-1">
-          <SectionHeading isFirst>Collections</SectionHeading>
-          <div className="space-y-1 pb-4">
+        <div className="mb-1 pb-4">
+          <div className="space-y-1">
             {collections.map((col) => (
               <button
                 key={col.slug}
@@ -189,44 +213,6 @@ export default function ProductsSidebar({
           </div>
         </div>
       )}
-
-      {/* Search with Clear all inline */}
-      <div className="border-t border-border pt-4 mb-5">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-[10px] font-medium uppercase tracking-[0.1em] text-muted-foreground">
-            Search
-          </span>
-          {hasActiveFilters(filters) && (
-            <button
-              onClick={clearAll}
-              className="text-[10px] text-muted-foreground hover:text-foreground transition-colors uppercase tracking-[0.08em]"
-            >
-              Clear all
-            </button>
-          )}
-        </div>
-        <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            value={localSearch}
-            onChange={(e) => setLocalSearch(e.target.value)}
-            placeholder="Search by name or code..."
-            className="h-9 text-sm pl-8 pr-8"
-          />
-          {localSearch && (
-            <button
-              onClick={() => {
-                setLocalSearch('');
-                lastPushed.current = '';
-                setFilters({ search: undefined });
-              }}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2"
-            >
-              <X className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
-            </button>
-          )}
-        </div>
-      </div>
 
       <FilterSection label="Product Family" defaultOpen isFirst>
         <div className="space-y-4">
