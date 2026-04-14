@@ -154,7 +154,7 @@ const Header = () => {
           : "text-foreground"
         : isTransparent
           ? "text-white/80 hover:text-white"
-          : "text-foreground/60 hover:text-foreground"
+          : "text-foreground hover:text-foreground/50"
     }`;
 
   const iconClass = `p-2 transition-all duration-300 ${
