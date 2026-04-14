@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import React, { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -37,7 +37,48 @@ const Certificates = lazy(() => import("./pages/about/Certificates"));
 const Production = lazy(() => import("./pages/Production"));
 
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-8 text-center">
+          <h1 className="text-lg font-light tracking-wide text-foreground">Something went wrong.</h1>
+          <p className="text-sm text-muted-foreground max-w-md">
+            Please refresh the page. If the problem persists, contact support.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="text-xs px-6 py-2 border border-foreground text-foreground hover:bg-foreground hover:text-background transition-colors"
+          >
+            Reload page
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 // ANALYTICS PLACEHOLDER
 // Wire tracking scripts here once consent is granted.
@@ -53,8 +94,9 @@ const App = () => (
         <BrowserRouter>
           <ScrollToTop />
           <BackToTop />
-          <Suspense fallback={null}>
-            <Routes>
+          <ErrorBoundary>
+            <Suspense fallback={null}>
+              <Routes>
               <Route element={<Layout />}>
                 <Route path="/" element={<Index />} />
                 <Route path="/about" element={<About />} />
@@ -83,6 +125,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
+          </ErrorBoundary>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

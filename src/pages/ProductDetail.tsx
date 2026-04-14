@@ -15,7 +15,8 @@ import ProductCard from '@/components/products/ProductCard';
 import Model3DViewer from '@/components/designer-studio/Model3DViewer';
 import { useProduct } from '@/features/products/hooks/useProduct';
 import { useProducts } from '@/features/products/hooks/useProducts';
-import { getProductPlaceholderUrl, getOptimizedImageUrl } from '@/features/products/utils/productImagePlaceholder';
+import { getProductPlaceholderUrl } from '@/features/products/utils/productImagePlaceholder';
+import { getProductImageUrl } from '@/lib/productImage';
 import type { Product, ProductImage } from '@/features/products/types';
 import { getPdpSeed } from '@/features/products/pdpSeedData';
 import { getPdpSeedImages, getFallbackImage } from '@/features/products/pdpSeedImages';
@@ -71,7 +72,7 @@ function HeroGallery({ images, onOpen3D, has3D }: { images: ProductImage[]; onOp
               }`}
             >
               <img
-                src={getOptimizedImageUrl(img.url, 120, 120, 75)}
+                src={getProductImageUrl(img.url, 'thumb')}
                 alt={img.alt_text ?? `View ${i + 1}`}
                 className="w-full h-full object-cover"
                 loading="lazy"
@@ -94,7 +95,7 @@ function HeroGallery({ images, onOpen3D, has3D }: { images: ProductImage[]; onOp
       <div className="flex-1">
         <div className="aspect-square overflow-hidden relative group bg-secondary/30">
           <img
-            src={getOptimizedImageUrl(activeImage.url, 800, 1000, 90)}
+            src={getProductImageUrl(activeImage.url, 'pdp')}
             alt={activeImage.alt_text ?? 'Product image'}
             loading="eager"
             fetchPriority="high"
@@ -114,7 +115,7 @@ function HeroGallery({ images, onOpen3D, has3D }: { images: ProductImage[]; onOp
                 }`}
               >
                 <img
-                  src={getOptimizedImageUrl(img.url, 100, 100, 70)}
+                  src={getProductImageUrl(img.url, 'thumb')}
                   alt={img.alt_text ?? `View ${i + 1}`}
                   className="w-full h-full object-cover"
                   loading="lazy"
