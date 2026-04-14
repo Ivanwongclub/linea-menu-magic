@@ -358,7 +358,7 @@ const Header = () => {
                                   key={item}
                                   to={`/products?category=${slugify(item)}&segment=${active.slug}`}
                                   onClick={closeAllMenus}
-                                  className="w-[140px] py-3 text-[13px] text-center border border-[hsl(var(--border))] text-muted-foreground hover:bg-foreground hover:text-background hover:border-foreground transition-colors duration-150 block"
+                                  className="w-[140px] py-3 text-[13px] text-center border border-foreground/40 text-muted-foreground hover:bg-foreground hover:text-background hover:border-foreground transition-colors duration-150 block"
                                 >
                                   {item}
                                 </Link>
