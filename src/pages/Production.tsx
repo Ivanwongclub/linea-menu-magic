@@ -179,6 +179,16 @@ export default function Production() {
                         View Prototype Gallery
                       </button>
                     )}
+
+                    {(step as any).showStudioLink && (
+                      <Link
+                        to="/designer-studio"
+                        className="group mt-6 inline-flex items-center gap-3 px-5 py-3 border border-foreground/20 hover:border-foreground hover:bg-foreground hover:text-background transition-all duration-300 text-[13px] font-medium tracking-wide"
+                      >
+                        <span>Custom via Designer Studio</span>
+                        <ArrowRight size={15} className="transition-transform duration-300 group-hover:translate-x-1 flex-shrink-0" />
+                      </Link>
+                    )}
                   </div>
                 </div>
               ))}
