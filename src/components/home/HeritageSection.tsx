@@ -14,18 +14,6 @@ const HeritageSection = () => {
         <div className="grid grid-cols-1 lg:grid-cols-[55%_45%] gap-16 items-center">
           {/* LEFT: Image column */}
           <div ref={imageRef} className="order-2 lg:order-1 relative">
-            {/* Est. 1979 accent — top-left outside image */}
-            <div
-              className={`absolute -top-2 -left-5 flex items-start gap-3 transition-all duration-700 ease-out ${
-                imageVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
-              }`}
-              style={{ transitionDelay: "600ms" }}
-            >
-              <div className="w-[2px] h-10 bg-foreground" />
-              <span className="text-xs font-mono tracking-[0.1em] text-muted-foreground mt-1">
-                Est. 1979
-              </span>
-            </div>
 
             {/* Primary image */}
             <div
