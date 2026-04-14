@@ -281,7 +281,7 @@ export default function BrochureEditor({ brochureId, onBack }: BrochureEditorPro
             <div className="flex items-center gap-2">
               {form.status === "published" && form.slug && (
                 <a
-                  href={`/brochures/${form.slug}`}
+                  href={`/ecollections/${form.slug}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"

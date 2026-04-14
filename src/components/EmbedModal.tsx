@@ -25,7 +25,7 @@ const EmbedModal = ({ slug, brochureTitle, isOpen, onClose }: EmbedModalProps) =
   const [copied, setCopied] = useState(false);
   const [height, setHeight] = useState(700);
 
-  const embedUrl = `${window.location.origin}/brochures/${slug}?embed=true`;
+  const embedUrl = `${window.location.origin}/ecollections/${slug}?embed=true`;
   const embedCode = `<iframe src="${embedUrl}" width="100%" height="${height}" frameborder="0" allowfullscreen></iframe>`;
 
   const handleCopy = useCallback(() => {

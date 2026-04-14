@@ -152,7 +152,7 @@ const Header = () => {
     { href: "/about",           label: "About",           megaMenu: "about"    },
     { href: "/production",      label: "Production"      },
     { href: "/sustainability",  label: "Sustainability"  },
-    { href: "/brochures",       label: "E-Collections"  },
+    { href: "/ecollections",    label: "E-Collections"  },
     { href: "/designer-studio", label: "Designer Studio" },
   ];
 
