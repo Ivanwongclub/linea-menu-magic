@@ -305,9 +305,6 @@ const Header = () => {
 
                 {/* Left: segment selector list */}
                 <div className="w-[220px] flex-shrink-0 border-r border-[hsl(var(--border))] flex flex-col">
-                  <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-6 block">
-                    Segments
-                  </span>
                   <div className="flex flex-col gap-1">
                     {PRODUCT_SEGMENT_DETAILS.map((seg) => (
                       <button
@@ -401,9 +398,6 @@ const Header = () => {
               <div className="flex items-start gap-10">
                 {/* Hardware column */}
                 <div className="flex-shrink-0 min-w-0">
-                  <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-6 block">
-                    Browse by Category
-                  </span>
                   {(() => {
                     const hardware = MEGA_FAMILIES[0];
                     return (
@@ -435,9 +429,6 @@ const Header = () => {
 
                 {/* Soft Trims + Branding Trims */}
                 <div className="flex-shrink-0 min-w-0">
-                  <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-6 block opacity-0 pointer-events-none">
-                    &nbsp;
-                  </span>
                   {MEGA_FAMILIES.slice(1).map((family) => (
                     <div key={family.slug} className="mb-6 last:mb-0">
                       <Link
@@ -503,9 +494,6 @@ const Header = () => {
               <div className="flex gap-0 h-full">
                 <div className="flex-[6] pr-10 flex gap-10">
                   <div className="min-w-0">
-                    <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-6 block">
-                      About Us
-                    </span>
                     <ul className="space-y-0">
                       {ABOUT_LINKS.map((item, i) => {
                         if (item.divider) {
@@ -530,9 +518,6 @@ const Header = () => {
                     className="flex-1 min-w-[280px] flex flex-col"
                     onMouseEnter={() => { setAboutPreviewImage(ABOUT_DEFAULT_PREVIEW); setAboutPreviewLabel("Our Story"); }}
                   >
-                    <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-6 block opacity-0 pointer-events-none">
-                      &nbsp;
-                    </span>
                     <div className="relative flex-1 rounded-[var(--radius)] overflow-hidden">
                       <img
                         key={aboutPreviewImage}
@@ -548,9 +533,6 @@ const Header = () => {
                 <div className="w-px bg-[hsl(var(--border))] self-stretch" />
 
                 <div className="flex-[4] pl-10">
-                  <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-6 block">
-                    Discover
-                  </span>
                   <div className="space-y-3">
                     {ABOUT_TRUST_CARDS.map((card) => (
                       <Link
