@@ -110,34 +110,9 @@ const MilestoneTeaser = () => {
         </div>
       </div>
 
-      {/* Timeline — full viewport width, small gutter */}
-      <div className="w-full px-6 lg:px-8 relative mt-16">
-        {/* Left arrow */}
-        <button
-          onClick={scrollLeft}
-          aria-label="Scroll left"
-          className="absolute z-20 text-foreground/30 hover:text-foreground transition-colors duration-200"
-          style={{ left: "8px", top: "50%", transform: "translateY(-50%)" }}
-        >
-          <ChevronLeft size={32} strokeWidth={1} />
-        </button>
-
-        {/* Right arrow */}
-        <button
-          onClick={scrollRight}
-          aria-label="Scroll right"
-          className="absolute z-20 text-foreground/30 hover:text-foreground transition-colors duration-200"
-          style={{ right: "8px", top: "50%", transform: "translateY(-50%)" }}
-        >
-          <ChevronRight size={32} strokeWidth={1} />
-        </button>
-
-        {/* Scrollable track */}
-        <div
-          ref={scrollRef}
-          className="overflow-x-auto scrollbar-hide pb-2"
-          style={{ scrollSnapType: "x proximity" }}
-        >
+      {/* Timeline — full width, no scroll */}
+      <div className="w-full px-6 lg:px-8 relative mt-12">
+        <div ref={scrollRef} className="pb-2">
           <div ref={timelineRef}>
             <div
               className="grid"
@@ -253,17 +228,17 @@ const MilestoneCard = ({
               width={800}
               height={608}
               loading="lazy"
-              className="w-full h-28 object-cover"
+              className="w-full h-20 object-cover"
             />
           </div>
         )}
-        <div className="p-3">
+        <div className="p-2">
           {m.badge && (
             <span className="text-[9px] font-mono tracking-[0.15em] uppercase text-foreground/40 block">
               {m.badge}
             </span>
           )}
-          <span className="text-[36px] lg:text-[44px] font-bold text-foreground leading-none block mb-2 tracking-tight">
+          <span className="text-[20px] lg:text-[24px] font-bold text-foreground leading-none block mb-1 tracking-tight">
             {m.year}
           </span>
           <h3 className="text-sm font-semibold text-foreground mt-1 leading-snug">{m.title}</h3>
@@ -288,11 +263,11 @@ const MilestoneCard = ({
             width={800}
             height={608}
             loading="lazy"
-            className="w-full h-24 object-cover"
+            className="w-full h-16 object-cover"
           />
         </div>
       )}
-      <span className="text-[36px] lg:text-[44px] font-bold text-foreground leading-none block mb-2 tracking-tight">
+      <span className="text-[20px] lg:text-[24px] font-bold text-foreground leading-none block mb-1 tracking-tight">
         {m.year}
       </span>
       <h3 className="text-sm font-semibold text-foreground mt-1 leading-snug">{m.title}</h3>
