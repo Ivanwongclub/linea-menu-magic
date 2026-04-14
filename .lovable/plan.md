@@ -1,22 +1,28 @@
 
 
-## Plan: Reverse Nav Menu Text Colors
+## Plan: Tighten Products Mega Menu Layout
 
-Swap the normal and hover colors for the desktop nav links when scrolled (non-transparent state). Currently: normal is muted (`text-foreground/60`), hover is full (`text-foreground`). Reverse so normal is dark and hover is lighter.
+### Problem
+The screenshot shows a large blank gap between the text columns (Hardware, Soft Trims, Branding Trims) and the image panel on the right. The `gap-16` (4rem) between columns plus `ml-auto` on the image pushes it to the far right, leaving dead space in the middle.
 
-### Change
+### Recommended Layout
+- Remove `ml-auto` from the image panel so it sits right next to the text columns
+- Reduce `gap-16` to `gap-10` between the flex children
+- Reduce image from `w-[480px]` to `w-[400px]` for better proportion
+- Keep `items-start` alignment
 
-In `src/components/layout/Header.tsx` line 157, change the non-transparent inactive state from:
-```
-text-foreground/60 hover:text-foreground
-```
-to:
-```
-text-foreground hover:text-foreground/50
-```
+### Changes — `src/components/layout/Header.tsx`
 
-This makes menu text dark by default and lighter on hover — a reversed effect.
+1. **Line 403** — Change `gap-16` to `gap-10`:
+   ```
+   flex items-start gap-10
+   ```
+
+2. **Line 466** — Remove `ml-auto`, reduce width from `480px` to `400px`:
+   ```
+   flex-shrink-0 w-[400px] flex flex-col
+   ```
 
 ### Files modified
-- `src/components/layout/Header.tsx` — one line change in `linkClass` function (line 157)
+- `src/components/layout/Header.tsx` — two small class changes
 
