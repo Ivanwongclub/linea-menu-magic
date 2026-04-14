@@ -205,7 +205,8 @@ const Header = () => {
               <img
                 src={isTransparent ? "/wincyc-white.svg" : "/wincyc.svg"}
                 alt="WIN-CYC Group Limited"
-                className="h-10 w-auto transition-opacity duration-300"
+                className="transition-opacity duration-300"
+                style={{ height: 40, width: 176 }}
               />
             </Link>
 
