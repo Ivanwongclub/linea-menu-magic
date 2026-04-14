@@ -208,7 +208,7 @@ const Header = () => {
 
             {/* Desktop nav */}
             <nav className="hidden lg:flex items-center justify-center gap-8 flex-1">
-              {navLinks.map((link) => {
+              {NAV_LINKS.map((link) => {
                 if (link.megaMenu === "segments") {
                   return (
                     <div key={link.href} className="relative" ref={segmentsRef} onMouseEnter={handleSegmentsEnter} onMouseLeave={handleSegmentsLeave}>
@@ -575,7 +575,7 @@ const Header = () => {
               </button>
             </div>
             <nav className="flex flex-col">
-              {navLinks.map((link) => {
+              {NAV_LINKS.map((link) => {
 
                 if (link.megaMenu === "segments") {
                   return (
