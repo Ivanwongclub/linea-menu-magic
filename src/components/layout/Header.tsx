@@ -89,7 +89,15 @@ function slugify(name: string) {
   return name.toLowerCase().replace(/\s+&\s+/g, "-").replace(/\s+/g, "-");
 }
 
-
+const NAV_LINKS: Array<{ href: string; label: string; megaMenu?: "products" | "about" | "segments" }> = [
+  { href: "/segments",        label: "Segments",        megaMenu: "segments" },
+  { href: "/products",        label: "Products",        megaMenu: "products" },
+  { href: "/about",           label: "About",           megaMenu: "about"    },
+  { href: "/production",      label: "Production"      },
+  { href: "/sustainability",  label: "Sustainability"  },
+  { href: "/ecollections",    label: "E-Collections"  },
+  { href: "/designer-studio", label: "Designer Studio" },
+];
 
 // ─── Component ─────────────────────────────────────────────────────────────────
 const Header = () => {
@@ -145,17 +153,8 @@ const Header = () => {
     setIsMenuOpen(false);
   }, [pathname]);
 
-  const navLinks: Array<{ href: string; label: string; megaMenu?: "products" | "about" | "segments" }> = [
-    { href: "/segments",        label: "Segments",        megaMenu: "segments" },
-    { href: "/products",        label: "Products",        megaMenu: "products" },
-    { href: "/about",           label: "About",           megaMenu: "about"    },
-    { href: "/production",      label: "Production"      },
-    { href: "/sustainability",  label: "Sustainability"  },
-    { href: "/ecollections",    label: "E-Collections"  },
-    { href: "/designer-studio", label: "Designer Studio" },
-  ];
-
-  const isActive = (path: string) => pathname === path || pathname.startsWith(path + "/");
+  const isActive = (path: string) =>
+    path === "/" ? pathname === "/" : pathname === path || pathname.startsWith(path + "/");
 
   // ─── Nav link class: white on transparent, black on scrolled/non-hero ──────
   const linkClass = (active: boolean) =>
@@ -209,7 +208,7 @@ const Header = () => {
 
             {/* Desktop nav */}
             <nav className="hidden lg:flex items-center justify-center gap-8 flex-1">
-              {navLinks.map((link) => {
+              {NAV_LINKS.map((link) => {
                 if (link.megaMenu === "segments") {
                   return (
                     <div key={link.href} className="relative" ref={segmentsRef} onMouseEnter={handleSegmentsEnter} onMouseLeave={handleSegmentsLeave}>
@@ -576,7 +575,7 @@ const Header = () => {
               </button>
             </div>
             <nav className="flex flex-col">
-              {navLinks.map((link) => {
+              {NAV_LINKS.map((link) => {
 
                 if (link.megaMenu === "segments") {
                   return (
