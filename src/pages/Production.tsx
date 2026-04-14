@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 import { ArrowRight, CheckCircle } from "lucide-react";
 import factoryProductionImg from "@/assets/factory-production.jpg";
+import productionHeroImg from "@/assets/production-hero.jpg";
 import heritageImg from "@/assets/heritage-craftsmanship.jpg";
 import valueQualityImg from "@/assets/value-quality.jpg";
 import valueInnovationImg from "@/assets/value-innovation.jpg";
@@ -94,19 +95,20 @@ export default function Production() {
           { label: "Production" },
         ]}
       />
-        {/* ── SECTION 1: Page intro ──────────────────────────────────────── */}
-        <section className="section-light">
-          <div className="section-inner">
-            <div className="max-w-3xl">
-              <span className="section-label block mb-4">
-                How We Work
-              </span>
-              <h1 className="text-[clamp(2rem,4vw,3.5rem)] font-bold leading-[1.1] tracking-tight text-foreground">
-                From Idea to<br />
-                Finished Trim
+        {/* ── SECTION 1: Full-bleed hero ──────────────────────────────── */}
+        <section className="relative overflow-hidden">
+          <div className="aspect-[21/9] md:aspect-[3/1] w-full overflow-hidden">
+            <img src={productionHeroImg} alt="Precision garment hardware — brass buttons, snap fasteners, buckles" className="w-full h-full object-cover" width={1920} height={640} fetchPriority="high" />
+            <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
+          </div>
+          <div className="absolute inset-0 flex items-end">
+            <div className="max-w-7xl mx-auto px-6 lg:px-8 w-full pb-10 md:pb-14">
+              <p className="text-xs uppercase tracking-[0.2em] text-background/70 mb-3">How We Work</p>
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-background mb-4 max-w-2xl leading-tight">
+                From Idea to<br />Finished Trim
               </h1>
-              <p className="mt-6 text-[16px] leading-relaxed text-muted-foreground max-w-2xl">
-                WIN-CYC combines in-house design capabilities, vertically integrated manufacturing, and a global service network — delivering precision garment trims from first concept through to final shipment.
+              <p className="text-sm md:text-base text-background/80 max-w-xl leading-relaxed">
+                In-house design · precision manufacturing · global delivery — since 1979.
               </p>
             </div>
           </div>
