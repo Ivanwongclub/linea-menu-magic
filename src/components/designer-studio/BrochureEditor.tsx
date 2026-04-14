@@ -336,7 +336,7 @@ export default function BrochureEditor({ brochureId, onBack }: BrochureEditorPro
                 Slug
               </Label>
               <div className="flex items-center gap-1.5">
-                <span className="text-xs text-muted-foreground whitespace-nowrap">/brochures/</span>
+                <span className="text-xs text-muted-foreground whitespace-nowrap">/ecollections/</span>
                 <Input
                   id="slug"
                   value={form.slug}

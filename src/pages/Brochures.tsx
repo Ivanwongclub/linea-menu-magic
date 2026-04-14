@@ -164,7 +164,7 @@ function BrochureCard({
 
       {/* Info area */}
       <div className="p-4 bg-card border-t border-border">
-        <Link to={`/brochures/${brochure.slug}`}>
+        <Link to={`/ecollections/${brochure.slug}`}>
           <h2 className="text-sm font-semibold tracking-tight text-foreground truncate leading-snug hover:opacity-70 transition-opacity">
             {brochure.title}
           </h2>
