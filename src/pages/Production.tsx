@@ -2,7 +2,7 @@ import { useState, useMemo, Suspense } from "react";
 import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
 import { Link } from "react-router-dom";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
-import { ArrowRight, CheckCircle, Box, Images } from "lucide-react";
+import { ArrowRight, CheckCircle, Box, Images, ChevronLeft, ChevronRight } from "lucide-react";
 import ObjGallery from "@/components/production/ObjGallery";
 import PrintGallery from "@/components/production/PrintGallery";
 import factoryProductionImg from "@/assets/factory-production.jpg";
@@ -278,6 +278,25 @@ export default function Production() {
                 const isLast = matIndex >= filtered.length - 1;
                 return (
                   <div className="relative">
+                    {/* Left arrow */}
+                    {!isFirst && (
+                      <button
+                        onClick={() => setMatIndex((i) => i - 1)}
+                        className="hidden lg:flex absolute -left-14 top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center border border-foreground/20 text-foreground hover:bg-foreground hover:text-background transition-colors duration-150"
+                      >
+                        <ChevronLeft size={18} />
+                      </button>
+                    )}
+                    {/* Right arrow */}
+                    {!isLast && (
+                      <button
+                        onClick={() => setMatIndex((i) => i + 1)}
+                        className="hidden lg:flex absolute -right-14 top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center border border-foreground/20 text-foreground hover:bg-foreground hover:text-background transition-colors duration-150"
+                      >
+                        <ChevronRight size={18} />
+                      </button>
+                    )}
+
                     <div
                       key={mat.id}
                       className={`flex flex-col ${matIndex % 2 === 1 ? "lg:flex-row-reverse" : "lg:flex-row"} gap-8 lg:gap-14 items-center transition-opacity duration-300`}
