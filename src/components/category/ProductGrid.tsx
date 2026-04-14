@@ -207,12 +207,12 @@ const ProductGrid = () => {
                     <img
                       src={product.image}
                       alt={product.name}
-                      className="w-full h-full object-cover transition-all duration-300 group-hover:opacity-0"
+                      className="w-full h-full object-contain p-4 transition-all duration-300 group-hover:opacity-0"
                     />
                     <img
                       src={product.category === "Earrings" ? organicEarring : linkBracelet}
                       alt={`${product.name} lifestyle`}
-                      className="absolute inset-0 w-full h-full object-cover transition-all duration-300 opacity-0 group-hover:opacity-100"
+                      className="absolute inset-0 w-full h-full object-contain p-4 transition-all duration-300 opacity-0 group-hover:opacity-100"
                     />
                     <div className="absolute inset-0 bg-black/[0.03]"></div>
                     {product.isNew && (

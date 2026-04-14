@@ -92,7 +92,7 @@ export default function ProductCard({
           <img
             src={(getPdpSeedImages(product.slug, product.primary_category?.slug) ?? [])[0] ?? getProductPlaceholderUrl(product.name_en ?? product.name, product.item_code, product.primary_category?.slug, product.primary_category?.name, 400)}
             alt={altText}
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-contain p-3"
           />
         )}
 
@@ -106,7 +106,7 @@ export default function ProductCard({
           decoding="async"
           onLoad={() => setImageLoaded(true)}
           onError={() => setImageError(true)}
-          className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-out group-hover:scale-[1.04] ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+          className={`absolute inset-0 w-full h-full object-contain p-3 transition-all duration-500 ease-out group-hover:scale-[1.04] ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
         />
 
         {/* Tag badges (top-left) */}

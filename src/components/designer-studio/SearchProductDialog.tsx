@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { getProductImageUrl } from '@/lib/productImage';
 import type { Product } from '@/features/products/types';
 import { toast } from 'sonner';
 
@@ -115,7 +116,7 @@ export default function SearchProductDialog({
               >
                 <div className="w-10 h-10 shrink-0 rounded bg-secondary overflow-hidden">
                   {p.thumbnail_url ? (
-                    <img src={p.thumbnail_url} alt="" className="w-full h-full object-contain" />
+                    <img src={getProductImageUrl(p.thumbnail_url, 'thumb')} alt="" className="w-full h-full object-contain" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-[7px] text-muted-foreground font-mono">
                       {p.item_code?.slice(0, 6)}

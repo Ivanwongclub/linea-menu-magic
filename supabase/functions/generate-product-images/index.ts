@@ -83,7 +83,7 @@ serve(async (req) => {
       );
     }
 
-    const results: Array<{ productId: string; productName: string; url?: string; status: string; error?: string }> = [];
+    const results: Array<{ productId: string; productName: string; url?: string; thumbUrl?: string; status: string; error?: string }> = [];
     let processed = 0;
     let failed = 0;
 
@@ -152,16 +152,14 @@ serve(async (req) => {
           bytes[i] = binaryString.charCodeAt(i);
         }
 
-        // Determine content type from data URL
-        const mimeMatch = imageDataUrl.match(/^data:(image\/\w+);/);
-        const contentType = mimeMatch?.[1] ?? "image/png";
-        const ext = contentType === "image/jpeg" ? "jpg" : "png";
+        // Force JPEG content type for all uploads
+        const contentType = "image/jpeg";
 
-        // Upload to Supabase Storage
-        const storagePath = `images/${pid}/ai-primary.${ext}`;
+        // Upload primary image as ai-primary.jpg
+        const primaryPath = `images/${pid}/ai-primary.jpg`;
         const { error: uploadError } = await supabase.storage
           .from("product-assets")
-          .upload(storagePath, bytes, {
+          .upload(primaryPath, bytes, {
             contentType,
             cacheControl: "31536000",
             upsert: true,
@@ -171,22 +169,37 @@ serve(async (req) => {
           throw new Error(`Upload error: ${uploadError.message}`);
         }
 
-        // Get public URL
-        const { data: urlData } = supabase.storage
+        // Upload same image as ai-thumb.jpg (Supabase transform API will serve it at correct size)
+        const thumbPath = `images/${pid}/ai-thumb.jpg`;
+        await supabase.storage
           .from("product-assets")
-          .getPublicUrl(storagePath);
-        const publicUrl = urlData.publicUrl;
+          .upload(thumbPath, bytes, {
+            contentType,
+            cacheControl: "31536000",
+            upsert: true,
+          });
 
-        // Update thumbnail_url on product
+        // Get public URLs
+        const { data: primaryUrlData } = supabase.storage
+          .from("product-assets")
+          .getPublicUrl(primaryPath);
+        const primaryUrl = primaryUrlData.publicUrl;
+
+        const { data: thumbUrlData } = supabase.storage
+          .from("product-assets")
+          .getPublicUrl(thumbPath);
+        const thumbUrl = thumbUrlData.publicUrl;
+
+        // Update thumbnail_url on product to point to the thumb version
         await supabase
           .from("products")
-          .update({ thumbnail_url: publicUrl })
+          .update({ thumbnail_url: thumbUrl })
           .eq("id", pid);
 
-        // Insert into product_images
+        // Insert/update product_images with primary (full-size) URL
         const { error: imgError } = await supabase.from("product_images").insert({
           product_id: pid,
-          url: publicUrl,
+          url: primaryUrl,
           sort_order: 0,
           is_primary: true,
           alt_text: `${productName} — product image`,
@@ -195,7 +208,7 @@ serve(async (req) => {
           console.warn(`product_images insert warning for ${pid}:`, imgError.message);
         }
 
-        results.push({ productId: pid, productName, url: publicUrl, status: "success" });
+        results.push({ productId: pid, productName, url: primaryUrl, thumbUrl, status: "success" });
         processed++;
       } catch (err) {
         const errMsg = err instanceof Error ? err.message : String(err);

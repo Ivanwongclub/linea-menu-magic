@@ -51,7 +51,7 @@ function HeroGallery({ images, onOpen3D, has3D }: { images: ProductImage[]; onOp
 
   if (!images.length) {
     return (
-      <div className="aspect-[4/5] bg-secondary flex items-center justify-center">
+      <div className="aspect-square bg-secondary flex items-center justify-center">
         <span className="text-xs text-muted-foreground uppercase tracking-wider font-mono">No image</span>
       </div>
     );
@@ -94,14 +94,14 @@ function HeroGallery({ images, onOpen3D, has3D }: { images: ProductImage[]; onOp
 
       {/* Main image */}
       <div className="flex-1">
-        <div className="aspect-[4/5] overflow-hidden relative group bg-secondary/30">
+        <div className="aspect-square overflow-hidden relative group bg-secondary/30">
           <img
             src={getOptimizedImageUrl(activeImage.url, 800, 1000, 90)}
             alt={activeImage.alt_text ?? 'Product image'}
             loading="eager"
             fetchPriority="high"
             decoding="async"
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+            className="w-full h-full object-contain p-6 transition-transform duration-500 group-hover:scale-[1.03]"
           />
         </div>
         {/* Horizontal thumbs on mobile */}
