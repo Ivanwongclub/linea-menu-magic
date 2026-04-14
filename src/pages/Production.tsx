@@ -7,15 +7,16 @@ import ObjGallery from "@/components/production/ObjGallery";
 import PrintGallery from "@/components/production/PrintGallery";
 import factoryProductionImg from "@/assets/factory-production.jpg";
 import productionHeroImg from "@/assets/production-hero.jpg";
-import heritageImg from "@/assets/heritage-craftsmanship.jpg";
-import valueQualityImg from "@/assets/value-quality.jpg";
 import valueInnovationImg from "@/assets/value-innovation.jpg";
 import valuePartnershipImg from "@/assets/value-partnership.jpg";
-import milestoneIsoImg from "@/assets/milestone-iso-quality.jpg";
 import brassSurface from "@/assets/materials/brass-surface.jpg";
 import metalSurface from "@/assets/materials/metal-surface.jpg";
 import resinSurface from "@/assets/materials/resin-surface.jpg";
 import cottonSurface from "@/assets/materials/cotton-surface.jpg";
+import sustainabilityForestImg from "@/assets/sustainability-forest.jpg";
+import sustainabilityRecycledImg from "@/assets/sustainability-recycled-metal.jpg";
+import sustainabilityEcoImg from "@/assets/sustainability-eco-process.jpg";
+import sustainabilityNatureImg from "@/assets/sustainability-nature.jpg";
 
 // ─── Data ───────────────────────────────────────────────────────────────────
 
@@ -111,22 +112,13 @@ const MATERIALS: Material[] = [
   },
 ];
 
-const capabilities = [
-  { title: "Buttons & Fasteners", desc: "Metal, polyester, corozo, and combination buttons across all garment categories." },
-  { title: "Zippers & Pulls", desc: "Metal and nylon zippers with custom puller design and branded tape options." },
-  { title: "Metal Trims & Hardware", desc: "Rivets, eyelets, snaps, hooks, buckles, and decorative hardware for apparel and leather goods." },
-  { title: "Branding Trims", desc: "Custom logo plates, labels, hangtags, and branded finishing details." },
-  { title: "Soft Trims", desc: "Cotton drawcords, woven webbing, cord ends and toggles for sportswear and outerwear." },
-  { title: "Sustainable Options", desc: "GRS-certified recycled metal, OEKO-TEX cotton, and bio-based resin alternatives." },
-];
 
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function Production() {
   const { ref: workflowRef, isVisible: workflowVisible, getDelay: getWfDelay } = useStaggeredAnimation(3, 150);
   const { ref: materialsRef, isVisible: materialsVisible } = useScrollAnimation({ threshold: 0.1 });
-  const { ref: capRef, isVisible: capVisible, getDelay: getCapDelay } = useStaggeredAnimation(6, 80);
-  const { ref: qualRef, isVisible: qualVisible } = useScrollAnimation({ threshold: 0.2 });
+  const { ref: sustainRef, isVisible: sustainVisible } = useScrollAnimation({ threshold: 0.1 });
   const [activeTab, setActiveTab] = useState<MaterialCategory>("All");
   const [matIndex, setMatIndex] = useState(0);
   const [galleryOpen, setGalleryOpen] = useState(false);
