@@ -72,7 +72,7 @@ function HeroGallery({ images, onOpen3D, has3D }: { images: ProductImage[]; onOp
               }`}
             >
               <img
-                src={getOptimizedImageUrl(img.url, 120, 120, 75)}
+                src={getProductImageUrl(img.url, 'thumb')}
                 alt={img.alt_text ?? `View ${i + 1}`}
                 className="w-full h-full object-cover"
                 loading="lazy"
@@ -95,7 +95,7 @@ function HeroGallery({ images, onOpen3D, has3D }: { images: ProductImage[]; onOp
       <div className="flex-1">
         <div className="aspect-square overflow-hidden relative group bg-secondary/30">
           <img
-            src={getOptimizedImageUrl(activeImage.url, 800, 1000, 90)}
+            src={getProductImageUrl(activeImage.url, 'pdp')}
             alt={activeImage.alt_text ?? 'Product image'}
             loading="eager"
             fetchPriority="high"
@@ -115,7 +115,7 @@ function HeroGallery({ images, onOpen3D, has3D }: { images: ProductImage[]; onOp
                 }`}
               >
                 <img
-                  src={getOptimizedImageUrl(img.url, 100, 100, 70)}
+                  src={getProductImageUrl(img.url, 'thumb')}
                   alt={img.alt_text ?? `View ${i + 1}`}
                   className="w-full h-full object-cover"
                   loading="lazy"
