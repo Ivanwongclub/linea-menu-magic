@@ -128,6 +128,7 @@ export default function Production() {
   const { ref: capRef, isVisible: capVisible, getDelay: getCapDelay } = useStaggeredAnimation(6, 80);
   const { ref: qualRef, isVisible: qualVisible } = useScrollAnimation({ threshold: 0.2 });
   const [activeTab, setActiveTab] = useState<MaterialCategory>("All");
+  const [matIndex, setMatIndex] = useState(0);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [printGalleryOpen, setPrintGalleryOpen] = useState(false);
 
