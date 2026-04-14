@@ -1,4 +1,5 @@
 import { Suspense, useState, useRef, useCallback, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { Canvas, useFrame, useLoader } from "@react-three/fiber";
 import {
   OrbitControls,
