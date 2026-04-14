@@ -20,6 +20,7 @@ interface Milestone {
   body: string;
   image?: string;
   isHighlight?: boolean;
+  isVintage?: boolean;
 }
 
 const milestones: Milestone[] = [
@@ -28,12 +29,14 @@ const milestones: Milestone[] = [
     title: "Founded in Hong Kong",
     body: "WIN-CYC GROUP LIMITED was established in Hong Kong, beginning as a specialist workshop dedicated to the production of premium garment trims, buttons, and fastening accessories.",
     image: milestoneFoundingImg,
+    isVintage: true,
   },
   {
     year: "1990s",
     title: "Building Craft & Manufacturing Depth",
     body: "A decade of refining production techniques, investing in tooling capabilities, and building the deep manufacturing expertise that would become the foundation of our global reputation.",
     image: milestoneCraftImg,
+    isVintage: true,
   },
   {
     year: "2000",
@@ -211,7 +214,7 @@ const OurStory = () => {
           </div>
 
           {/* ─── Milestone Timeline — centered ─── */}
-          <div className="mt-16 mb-8">
+          <div className="mt-16 mb-8 bg-[#F7F5F2] rounded-lg px-8 py-12">
             <div ref={timelineHeaderRef} className="mb-12 text-center">
               <span
                 className={`section-label inline-block transition-all duration-700 ease-out ${
@@ -233,7 +236,7 @@ const OurStory = () => {
             {/* Centered vertical timeline */}
             <div className="max-w-3xl mx-auto relative">
               {/* Center vertical line */}
-              <div className="absolute left-1/2 top-0 bottom-0 w-px bg-border -translate-x-1/2" />
+              <div className="absolute left-1/2 top-0 bottom-0 w-[2px] bg-foreground/20 -translate-x-1/2" />
 
               {milestones.map((m, i) => (
                 <CenteredMilestoneItem key={m.year} milestone={m} index={i} isLeft={i % 2 === 0} />
@@ -261,7 +264,7 @@ const CenteredMilestoneItem = ({
 }) => {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.3 });
 
-  const dotSize = m.isHighlight ? 16 : 10;
+  // dot sizes now inline
 
   return (
     <div
@@ -282,9 +285,9 @@ const CenteredMilestoneItem = ({
           className={`rounded-full border-2 ${
             m.isHighlight
               ? "bg-foreground border-foreground"
-              : "bg-background border-foreground"
+              : "bg-[#F7F5F2] border-foreground/60"
           }`}
-          style={{ width: dotSize, height: dotSize }}
+          style={{ width: m.isHighlight ? 16 : 14, height: m.isHighlight ? 16 : 14 }}
         />
       </div>
 
@@ -326,7 +329,7 @@ const MilestoneContent = ({
   align: "left" | "right";
 }) => (
   <div>
-    <span className="text-xs font-mono tracking-[0.12em] text-muted-foreground">{m.year}</span>
+    <span className="text-[32px] lg:text-[38px] font-bold text-foreground/70 leading-none tracking-tight block mb-2">{m.year}</span>
     <h3 className="text-lg font-semibold text-foreground mt-1">{m.title}</h3>
     <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{m.body}</p>
     {m.image && (
@@ -337,7 +340,7 @@ const MilestoneContent = ({
           width={400}
           height={267}
           loading="lazy"
-          className="w-full h-full object-cover"
+          className={`w-full h-full object-cover ${m.isVintage ? "grayscale sepia-[0.2] brightness-95" : ""}`}
         />
       </div>
     )}
