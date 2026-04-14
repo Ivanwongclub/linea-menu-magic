@@ -24,6 +24,7 @@ import cottonLaceImg from "@/assets/products/cotton-lace.jpg";
 import wovenLabelImg from "@/assets/products/woven-label.jpg";
 import otherCategoryImg from "@/assets/products/other-category.jpg";
 import featuredSegmentImg from "@/assets/products/featured-segment.jpg";
+import megaProductsGrid from "@/assets/products/mega-products-grid.png";
 
 // ─── About flat link list ──────────────────────────────────────────────────────
 interface AboutLink { label?: string; href?: string; image?: string; divider?: true; }
