@@ -313,12 +313,12 @@ const Header = () => {
                         onMouseEnter={() => setActiveSegmentSlug(seg.slug)}
                         className={`text-left pl-3 pr-2 py-3.5 border-l-2 transition-all duration-150 ${
                           activeSegmentSlug === seg.slug
-                            ? "border-foreground bg-secondary"
-                            : "border-transparent hover:bg-secondary hover:border-foreground/30"
+                            ? "border-foreground bg-foreground text-white"
+                            : "border-transparent hover:bg-foreground hover:text-white hover:border-foreground"
                         }`}
                       >
-                        <span className="text-[15px] font-semibold text-foreground block leading-snug">{seg.name}</span>
-                        <span className="text-[12px] text-muted-foreground block mt-0.5 leading-snug">
+                        <span className="text-[15px] font-semibold block leading-snug">{seg.name}</span>
+                        <span className={`text-[12px] block mt-0.5 leading-snug ${activeSegmentSlug === seg.slug ? "text-white/70" : "text-muted-foreground group-hover:text-white/70"}`}>
                           {seg.slug === "apparel"  && "Garments & fashion"}
                           {seg.slug === "beauty"   && "Cosmetics & packaging"}
                           {seg.slug === "material" && "By finish & composition"}
