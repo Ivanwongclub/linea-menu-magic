@@ -103,7 +103,7 @@ const MilestoneTeaser = () => {
           >
             About WIN-CYC
           </span>
-          <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-4">
+          <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-8">
             <span className="inline-block mr-4">Our</span>
             <span className="inline-block font-serif-display">Journey</span>
           </h2>
