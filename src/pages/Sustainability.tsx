@@ -17,6 +17,7 @@ const Sustainability = () => {
   const { ref: greenRef, isVisible: greenVisible } = useScrollAnimation();
   const { ref: circularRef, isVisible: circularVisible } = useScrollAnimation();
   const { ref: ecoRef, isVisible: ecoVisible } = useScrollAnimation();
+  const { ref: sustainProductsRef, isVisible: sustainProductsVisible } = useScrollAnimation({ threshold: 0.1 });
 
   const initiatives = [
     {
@@ -312,6 +313,72 @@ const Sustainability = () => {
                   className="w-full h-auto object-cover"
                   loading="lazy"
                 />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Related Sustainable Products ──────────────────────────── */}
+        <section className="py-24 px-6 lg:px-8 bg-background overflow-hidden">
+          <div className="max-w-7xl mx-auto">
+            <div
+              ref={sustainProductsRef}
+              className={`transition-all duration-700 ease-out ${
+                sustainProductsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+              }`}
+            >
+              <div className="mb-10">
+                <h2 className="text-[clamp(1.6rem,3vw,2.4rem)] font-bold text-foreground mb-6 leading-tight">
+                  Here are some related sustainable products:
+                </h2>
+                <ul className="space-y-1.5">
+                  {[
+                    "Recycled metal (zinc alloy, copper), TPE, PP, PE, ABS and polyamide (certified according to Global Recycled Standard)",
+                    "Sustainable Metal Colours (entirely made without electroplating — audited and certified by SGS)",
+                    "Biodegradable plastic (a self-degrading biopolymer)",
+                    "Natural materials such as Real Horn and Corozo (renewable resource)",
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-[15px] text-muted-foreground leading-relaxed">
+                      <span className="text-foreground/40 mt-0.5 flex-shrink-0">—</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                {[
+                  { name: "Recycled Zinc\nAlloy/Copper", img: "/images/sustainable/sustainable-zinc-alloy.jpg" },
+                  { name: "Recycled Polyester", img: "/images/sustainable/sustainable-polyester.jpg" },
+                  { name: "Recycled Nylon", img: "/images/sustainable/sustainable-nylon.jpg" },
+                  { name: "Recycled TPE", img: "/images/sustainable/sustainable-tpe.jpg" },
+                  { name: "Sustainable\nMetal Colours", img: "/images/sustainable/sustainable-metal-colours.jpg" },
+                  { name: "Biodegradable\nPlastic", img: "/images/sustainable/sustainable-biodegradable.jpg" },
+                  { name: "Real Horn", img: "/images/sustainable/sustainable-real-horn.jpg" },
+                  { name: "Corozo", img: "/images/sustainable/sustainable-corozo.jpg" },
+                ].map((product, i) => (
+                  <div
+                    key={product.name}
+                    className={`flex flex-col items-center text-center transition-all duration-500 ease-out ${
+                      sustainProductsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+                    }`}
+                    style={{ transitionDelay: `${i * 60}ms` }}
+                  >
+                    <div className="w-full aspect-square overflow-hidden rounded-[16px] mb-3 bg-secondary">
+                      <img
+                        src={product.img}
+                        alt={product.name.replace("\n", " ")}
+                        className="w-full h-full object-cover hover:scale-[1.04] transition-transform duration-500"
+                        loading="lazy"
+                        width={400}
+                        height={400}
+                      />
+                    </div>
+                    <p className="text-[13px] font-semibold text-foreground leading-snug whitespace-pre-line">
+                      {product.name}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
