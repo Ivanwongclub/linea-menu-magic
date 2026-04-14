@@ -101,7 +101,6 @@ const Certificates = () => {
             { label: "About", href: "/about" },
             { label: "Certificates" },
           ]}
-          title="Certifications & Standards"
         />
 
         {/* Certificates Grid */}

@@ -41,7 +41,6 @@ const About = () => {
             { label: "Home", href: "/" },
             { label: "About" },
           ]}
-          title="About Us"
         />
 
         {/* Story */}
