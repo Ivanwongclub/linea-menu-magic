@@ -126,6 +126,14 @@ export default function ProductCard({
           </div>
         )}
 
+        {/* 3D / OBJ badge (top-right) */}
+        {product.model_url && (
+          <div className="absolute top-2.5 right-2.5 bg-white/90 backdrop-blur-sm text-[hsl(var(--foreground))] text-[9px] font-medium uppercase tracking-[0.08em] px-2 py-0.5 rounded-[var(--radius)] border border-[hsl(var(--border))] flex items-center gap-1 z-20">
+            <Box className="w-2.5 h-2.5" />
+            3D
+          </div>
+        )}
+
         {/* Sustainability leaf badge (bottom-right) */}
         {certs.length > 0 && (
           <div className="absolute bottom-2 right-2 z-10">

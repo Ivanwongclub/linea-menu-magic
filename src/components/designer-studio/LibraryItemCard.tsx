@@ -1,6 +1,10 @@
 import { useState } from "react";
-import { Box, Layers, Eye, Download, FileDown, Heart } from "lucide-react";
+import { Box, Layers, Eye, Download, FileDown, Heart, Leaf } from "lucide-react";
 import type { UserLibraryItem } from "@/features/products/types";
+import type { Product } from "@/features/products/types";
+import { getProductImageUrl } from "@/lib/productImage";
+import { getPdpSeedImages } from "@/features/products/pdpSeedImages";
+import { getProductPlaceholderUrl } from "@/features/products/utils/productImagePlaceholder";
 
 interface LibraryItemCardProps {
   item: UserLibraryItem;
@@ -8,6 +12,29 @@ interface LibraryItemCardProps {
   onToggleFavourite: (id: string) => void;
   onAddToComposition: (item: UserLibraryItem) => void;
   onRequestSample: (item: UserLibraryItem) => void;
+}
+
+/** Shared image resolver — same fallback chain as ProductCard */
+function resolveLibraryImage(product: Product | undefined): string {
+  if (!product) return '';
+
+  if (product.images?.length) {
+    const primary = product.images.find((img) => img.is_primary) ?? product.images[0];
+    if (primary?.url) return primary.url;
+  }
+
+  if (product.thumbnail_url) return product.thumbnail_url;
+
+  const seeded = getPdpSeedImages(product.slug, product.primary_category?.slug);
+  if (seeded && seeded.length > 0) return seeded[0];
+
+  return getProductPlaceholderUrl(
+    product.name_en ?? product.name,
+    product.item_code,
+    product.primary_category?.slug,
+    product.primary_category?.name,
+    400,
+  );
 }
 
 const LibraryItemCard = ({
@@ -34,6 +61,15 @@ const LibraryItemCard = ({
   const hasDownloads = downloads.length > 0;
   const downloadCount = downloads.length;
 
+  // Shared image pipeline
+  const rawImageUrl = resolveLibraryImage(item.product);
+  const imageUrl = getProductImageUrl(rawImageUrl, 'card');
+
+  // Tags & certifications from product (matching ProductCard)
+  const tags = item.product?.tags ?? [];
+  const visibleTags = tags.slice(0, 2);
+  const certs = item.product?.certifications ?? [];
+
   return (
     <div
       className="group relative flex flex-col bg-[hsl(var(--background))] border border-[hsl(var(--border))] rounded-[calc(var(--radius)*2)] overflow-hidden transition-all duration-200 hover:border-[hsl(var(--foreground))] hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] cursor-pointer"
@@ -41,9 +77,9 @@ const LibraryItemCard = ({
     >
       {/* Image area */}
       <div className="relative aspect-square bg-[hsl(var(--secondary))] overflow-hidden">
-        {item.product?.thumbnail_url ? (
+        {imageUrl ? (
           <img
-            src={item.product.thumbnail_url}
+            src={imageUrl}
             alt={displayName}
             className="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-105"
           />
@@ -55,18 +91,41 @@ const LibraryItemCard = ({
           </div>
         )}
 
+        {/* Tag badges (top-left) — matching ProductCard */}
+        {visibleTags.length > 0 && (
+          <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-20">
+            {visibleTags.map((tag) => (
+              <span key={tag.id} className="bg-[hsl(var(--foreground))] text-[hsl(var(--background))] text-[10px] font-medium uppercase tracking-[0.06em] px-2 py-0.5 rounded-[var(--radius)]">
+                {tag.name}
+              </span>
+            ))}
+          </div>
+        )}
+
         {/* Admin default badge */}
-        {item.is_admin_default && (
+        {item.is_admin_default && !visibleTags.length && (
           <div className="absolute top-2 left-2 bg-[hsl(var(--foreground))] text-[hsl(var(--background))] text-[9px] font-medium uppercase tracking-[0.08em] px-2 py-0.5 rounded-[var(--radius)]">
             Collection
           </div>
         )}
 
-        {/* 3D model badge */}
+        {/* 3D / OBJ badge (top-right) */}
         {item.product?.model_url && (
           <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm text-[hsl(var(--foreground))] text-[9px] font-medium uppercase tracking-[0.08em] px-2 py-0.5 rounded-[var(--radius)] border border-[hsl(var(--border))] flex items-center gap-1">
             <Box className="w-2.5 h-2.5" />
             3D
+          </div>
+        )}
+
+        {/* Sustainability cert badge (bottom-right) — matching ProductCard */}
+        {certs.length > 0 && (
+          <div className="absolute bottom-2 right-2 z-10">
+            <div className="bg-white/85 backdrop-blur-sm rounded-[var(--radius)] px-1.5 py-0.5 flex items-center gap-1">
+              <Leaf className="w-2.5 h-2.5 text-[hsl(var(--foreground))]" />
+              <span className="text-[9px] font-medium uppercase tracking-[0.06em] text-[hsl(var(--foreground))]">
+                {certs[0].abbreviation}
+              </span>
+            </div>
           </div>
         )}
 
