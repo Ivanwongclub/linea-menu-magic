@@ -21,44 +21,12 @@ interface Milestone {
 
 const milestones: Milestone[] = [
   {
-    year: "1979",
-    title: "Founded in Hong Kong",
-    desc: "A small workshop with a vision for world-class garment trims.",
-    image: milestoneFoundingImg,
-  },
-  {
-    year: "1990s",
-    title: "Manufacturing Depth",
-    desc: "Refining tooling, production techniques, and craft expertise.",
-    image: milestoneCraftImg,
-  },
-  {
-    year: "2000",
-    title: "ISO 9001 Certified",
-    desc: "International quality management systems formalised.",
-  },
-  {
-    year: "2000s–2010s",
-    title: "Global Supply Partner",
-    desc: "Leading brands across Europe, Americas & Asia Pacific.",
-    image: milestoneGlobalImg,
-  },
-  {
-    year: "2010s",
-    title: "OEM & ODM Capability",
-    desc: "Concept-to-production — sampling, mould-making, volume manufacturing.",
-    image: factoryHeroImg,
-  },
-  {
-    year: "2015",
-    title: "Multi-Location Operations",
-    desc: "Hong Kong HQ, Dongguan production, regional offices worldwide.",
-    image: factoryProductionImg,
-  },
-  {
-    year: "2020s",
-    title: "Integrated Solutions",
-    desc: "Full-service partner — design, compliance, trim programmes.",
+    year: "2026",
+    title: "New Era",
+    desc: "Digital transformation — catalogue, collaboration & speed.",
+    image: milestoneDigitalImg,
+    isHighlight: true,
+    badge: "May 2026 · New Era",
   },
   {
     year: "45+ Years",
@@ -67,12 +35,44 @@ const milestones: Milestone[] = [
     image: sustainabilityImg,
   },
   {
-    year: "2026",
-    title: "New Era",
-    desc: "Digital transformation — catalogue, collaboration & speed.",
-    image: milestoneDigitalImg,
-    isHighlight: true,
-    badge: "May 2026 · New Era",
+    year: "2020s",
+    title: "Integrated Solutions",
+    desc: "Full-service partner — design, compliance, trim programmes.",
+  },
+  {
+    year: "2015",
+    title: "Multi-Location Operations",
+    desc: "Hong Kong HQ, Dongguan production, regional offices worldwide.",
+    image: factoryProductionImg,
+  },
+  {
+    year: "2010s",
+    title: "OEM & ODM Capability",
+    desc: "Concept-to-production — sampling, mould-making, volume manufacturing.",
+    image: factoryHeroImg,
+  },
+  {
+    year: "2000s–2010s",
+    title: "Global Supply Partner",
+    desc: "Leading brands across Europe, Americas & Asia Pacific.",
+    image: milestoneGlobalImg,
+  },
+  {
+    year: "2000",
+    title: "ISO 9001 Certified",
+    desc: "International quality management systems formalised.",
+  },
+  {
+    year: "1990s",
+    title: "Manufacturing Depth",
+    desc: "Refining tooling, production techniques, and craft expertise.",
+    image: milestoneCraftImg,
+  },
+  {
+    year: "1979",
+    title: "Founded in Hong Kong",
+    desc: "A small workshop with a vision for world-class garment trims.",
+    image: milestoneFoundingImg,
   },
 ];
 
@@ -92,18 +92,18 @@ const MilestoneTeaser = () => {
   }, []);
 
   return (
-    <section className="py-24 overflow-hidden bg-background">
+    <section className="py-24 overflow-hidden bg-[#080808]">
       <div className="max-w-7xl mx-auto px-14 lg:px-20 xl:px-28">
         {/* Header */}
         <div ref={headerRef} className="mb-6">
           <span
-            className={`text-[11px] font-medium tracking-[0.12em] uppercase text-muted-foreground block mb-3 transition-all duration-700 ease-out ${
+            className={`text-[11px] font-medium tracking-[0.12em] uppercase text-white/40 block mb-3 transition-all duration-700 ease-out ${
               headerVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"
             }`}
           >
             About WIN-CYC
           </span>
-          <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-4">
+          <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-4">
             <span className="inline-block mr-4">Our</span>
             <span className="inline-block font-serif-display">Journey</span>
           </h2>
@@ -115,7 +115,7 @@ const MilestoneTeaser = () => {
           <button
             onClick={scrollLeft}
             aria-label="Scroll left"
-            className="absolute z-20 text-foreground/30 hover:text-foreground transition-colors duration-200"
+            className="absolute z-20 text-white/40 hover:text-white transition-colors duration-200"
             style={{ left: "-44px", top: "50%", transform: "translateY(-50%)" }}
           >
             <ChevronLeft size={32} strokeWidth={1} />
@@ -125,7 +125,7 @@ const MilestoneTeaser = () => {
           <button
             onClick={scrollRight}
             aria-label="Scroll right"
-            className="absolute z-20 text-foreground/30 hover:text-foreground transition-colors duration-200"
+            className="absolute z-20 text-white/40 hover:text-white transition-colors duration-200"
             style={{ right: "-44px", top: "50%", transform: "translateY(-50%)" }}
           >
             <ChevronRight size={32} strokeWidth={1} />
@@ -167,11 +167,11 @@ const MilestoneTeaser = () => {
                     style={{ gridRow: 2, gridColumn: i + 1, height: "1px" }}
                   >
                     {/* Spine segment */}
-                    <div className="absolute inset-0 bg-foreground/15" />
+                    <div className="absolute inset-0 bg-white/20" />
                     {/* Animated fill — first column only, spans full width */}
                     {i === 0 && (
                       <div
-                        className="absolute top-0 left-0 h-full bg-foreground/70"
+                        className="absolute top-0 left-0 h-full bg-white/60"
                         style={{
                           width: timelineVisible ? `calc(${COLS} * 100% + ${(COLS - 1) * 16}px)` : "0%",
                           transition: "width 2s cubic-bezier(0.4,0,0.2,1)",
@@ -183,8 +183,8 @@ const MilestoneTeaser = () => {
                     <div
                       className={`absolute left-0 top-1/2 -translate-y-1/2 rounded-full border-2 transition-all duration-500 ${
                         m.isHighlight
-                          ? "w-[14px] h-[14px] bg-foreground border-foreground"
-                          : "w-[12px] h-[12px] bg-background border-foreground/50"
+                          ? "w-[14px] h-[14px] bg-white border-white"
+                          : "w-[12px] h-[12px] bg-[#080808] border-white/50"
                       } ${timelineVisible ? "scale-100 opacity-100" : "scale-0 opacity-0"}`}
                       style={{ transitionDelay: `${300 + i * 80}ms` }}
                     />
@@ -217,7 +217,7 @@ const MilestoneTeaser = () => {
         >
           <Link
             to="/about/our-story"
-            className="group inline-flex items-center text-sm tracking-wider text-foreground link-elegant"
+            className="group inline-flex items-center text-sm tracking-wider text-white/50 hover:text-white transition-colors duration-200 link-elegant"
           >
             Read Our Full Story
             <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300 group-hover:translate-x-2" />
@@ -241,7 +241,7 @@ const MilestoneCard = ({
   if (m.isHighlight) {
     return (
       <div
-        className={`border border-foreground/15 bg-foreground/5 rounded-lg overflow-hidden transition-all duration-700 ease-out ${
+        className={`border border-white/20 bg-white/5 rounded-lg overflow-hidden transition-all duration-700 ease-out ${
           isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
         }`}
         style={{ transitionDelay: `${delay}ms` }}
@@ -260,15 +260,15 @@ const MilestoneCard = ({
         )}
         <div className="p-3">
           {m.badge && (
-            <span className="text-[9px] font-mono tracking-[0.15em] uppercase text-foreground/40 block">
+            <span className="text-[9px] font-mono tracking-[0.15em] uppercase text-white/40 block">
               {m.badge}
             </span>
           )}
-          <span className="text-[10px] font-mono tracking-[0.12em] text-foreground/40 block mt-0.5">
+          <span className="text-[52px] lg:text-[64px] font-bold text-white leading-none block mb-2 tracking-tight">
             {m.year}
           </span>
-          <h3 className="text-sm font-semibold text-foreground mt-1 leading-snug">{m.title}</h3>
-          <p className="text-xs text-foreground/50 mt-1 leading-relaxed">{m.desc}</p>
+          <h3 className="text-sm font-semibold text-white mt-1 leading-snug">{m.title}</h3>
+          <p className="text-xs text-white/45 mt-1 leading-relaxed">{m.desc}</p>
         </div>
       </div>
     );
@@ -293,11 +293,11 @@ const MilestoneCard = ({
           />
         </div>
       )}
-      <span className="text-[10px] font-mono tracking-[0.12em] text-foreground/40 block">
+      <span className="text-[52px] lg:text-[64px] font-bold text-white leading-none block mb-2 tracking-tight">
         {m.year}
       </span>
-      <h3 className="text-sm font-semibold text-foreground mt-1 leading-snug">{m.title}</h3>
-      <p className="text-xs text-foreground/50 mt-1 leading-relaxed">{m.desc}</p>
+      <h3 className="text-sm font-semibold text-white mt-1 leading-snug">{m.title}</h3>
+      <p className="text-xs text-white/45 mt-1 leading-relaxed">{m.desc}</p>
     </div>
   );
 };
