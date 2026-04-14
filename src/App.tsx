@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from "react";
+import React, { lazy, Suspense, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,32 +9,78 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ScrollToTop from "./components/ScrollToTop";
 import BackToTop from "./components/ui/BackToTop";
 import Layout from "./components/layout/Layout";
+import { ENV } from "./config/env";
 
 // Homepage loaded eagerly — it's the landing route
 import Index from "./pages/Index";
 
 // All other routes lazy-loaded to reduce initial JS bundle
-const About = lazy(() => import("./pages/About"));
-const Products = lazy(() => import("./pages/Products"));
-const ProductDetail = lazy(() => import("./pages/ProductDetail"));
-const Sustainability = lazy(() => import("./pages/Sustainability"));
-const News = lazy(() => import("./pages/News"));
-const NewsDetail = lazy(() => import("./pages/NewsDetail"));
-const DesignerStudio = lazy(() => import("./pages/DesignerStudio"));
-const DesignerStudioDashboard = lazy(() => import("./pages/DesignerStudioDashboard"));
-const ComposerPage = lazy(() => import("./features/designer/pages/ComposerPage"));
-const PresentationPage = lazy(() => import("./features/designer/pages/PresentationPage"));
-const Brochures = lazy(() => import("./pages/Brochures"));
-const BrochureViewer = lazy(() => import("./pages/BrochureViewer"));
-const Contact = lazy(() => import("./pages/Contact"));
-const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
-const TermsOfService = lazy(() => import("./pages/TermsOfService"));
-const NotFound = lazy(() => import("./pages/NotFound"));
-const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
-const OurStory = lazy(() => import("./pages/about/OurStory"));
-const Factory = lazy(() => import("./pages/about/Factory"));
-const Certificates = lazy(() => import("./pages/about/Certificates"));
-const Production = lazy(() => import("./pages/Production"));
+const loadAbout = () => import("./pages/About");
+const loadProducts = () => import("./pages/Products");
+const loadProductDetail = () => import("./pages/ProductDetail");
+const loadSustainability = () => import("./pages/Sustainability");
+const loadNews = () => import("./pages/News");
+const loadNewsDetail = () => import("./pages/NewsDetail");
+const loadDesignerStudio = () => import("./pages/DesignerStudio");
+const loadDesignerStudioDashboard = () => import("./pages/DesignerStudioDashboard");
+const loadComposerPage = () => import("./features/designer/pages/ComposerPage");
+const loadPresentationPage = () => import("./features/designer/pages/PresentationPage");
+const loadBrochures = () => import("./pages/Brochures");
+const loadBrochureViewer = () => import("./pages/BrochureViewer");
+const loadContact = () => import("./pages/Contact");
+const loadPrivacyPolicy = () => import("./pages/PrivacyPolicy");
+const loadTermsOfService = () => import("./pages/TermsOfService");
+const loadNotFound = () => import("./pages/NotFound");
+const loadCookiePolicy = () => import("./pages/CookiePolicy");
+const loadOurStory = () => import("./pages/about/OurStory");
+const loadFactory = () => import("./pages/about/Factory");
+const loadCertificates = () => import("./pages/about/Certificates");
+const loadProduction = () => import("./pages/Production");
+
+const About = lazy(loadAbout);
+const Products = lazy(loadProducts);
+const ProductDetail = lazy(loadProductDetail);
+const Sustainability = lazy(loadSustainability);
+const News = lazy(loadNews);
+const NewsDetail = lazy(loadNewsDetail);
+const DesignerStudio = lazy(loadDesignerStudio);
+const DesignerStudioDashboard = lazy(loadDesignerStudioDashboard);
+const ComposerPage = lazy(loadComposerPage);
+const PresentationPage = lazy(loadPresentationPage);
+const Brochures = lazy(loadBrochures);
+const BrochureViewer = lazy(loadBrochureViewer);
+const Contact = lazy(loadContact);
+const PrivacyPolicy = lazy(loadPrivacyPolicy);
+const TermsOfService = lazy(loadTermsOfService);
+const NotFound = lazy(loadNotFound);
+const CookiePolicy = lazy(loadCookiePolicy);
+const OurStory = lazy(loadOurStory);
+const Factory = lazy(loadFactory);
+const Certificates = lazy(loadCertificates);
+const Production = lazy(loadProduction);
+
+const routePreloaders: Array<() => Promise<unknown>> = [
+  loadAbout,
+  loadProducts,
+  loadProductDetail,
+  loadSustainability,
+  loadNews,
+  loadNewsDetail,
+  loadDesignerStudio,
+  loadDesignerStudioDashboard,
+  loadComposerPage,
+  loadPresentationPage,
+  loadBrochures,
+  loadBrochureViewer,
+  loadContact,
+  loadPrivacyPolicy,
+  loadTermsOfService,
+  loadCookiePolicy,
+  loadOurStory,
+  loadFactory,
+  loadCertificates,
+  loadProduction,
+];
 
 
 const queryClient = new QueryClient({
@@ -80,6 +126,76 @@ class ErrorBoundary extends React.Component<
   }
 }
 
+function RouteTransitionFallback() {
+  return (
+    <div className="min-h-[45vh] px-6 lg:px-8 py-16">
+      <div className="max-w-7xl mx-auto">
+        <div className="h-3 w-40 bg-secondary animate-pulse rounded mb-6" />
+        <div className="h-24 w-full bg-secondary animate-pulse rounded mb-4" />
+        <div className="h-24 w-full bg-secondary animate-pulse rounded mb-4" />
+        <div className="h-24 w-3/4 bg-secondary animate-pulse rounded" />
+      </div>
+    </div>
+  );
+}
+
+function withRouteSuspense(element: React.ReactElement) {
+  return <Suspense fallback={<RouteTransitionFallback />}>{element}</Suspense>;
+}
+
+function RouteAndNetworkWarmup() {
+  useEffect(() => {
+    const href = new URL(ENV.SUPABASE_URL).origin;
+    const linkTags: HTMLLinkElement[] = [];
+
+    const addLink = (rel: "preconnect" | "dns-prefetch") => {
+      const link = document.createElement("link");
+      link.rel = rel;
+      link.href = href;
+      if (rel === "preconnect") {
+        link.crossOrigin = "anonymous";
+      }
+      document.head.appendChild(link);
+      linkTags.push(link);
+    };
+
+    addLink("preconnect");
+    addLink("dns-prefetch");
+
+    return () => {
+      linkTags.forEach((link) => link.remove());
+    };
+  }, []);
+
+  useEffect(() => {
+    const preloadRoutes = () => {
+      routePreloaders.forEach((loader, index) => {
+        window.setTimeout(() => {
+          void loader().catch(() => undefined);
+        }, index * 120);
+      });
+    };
+
+    let timeoutId: number | undefined;
+    let idleId: number | undefined;
+
+    if ("requestIdleCallback" in window) {
+      idleId = window.requestIdleCallback(preloadRoutes, { timeout: 2500 });
+    } else {
+      timeoutId = window.setTimeout(preloadRoutes, 1200);
+    }
+
+    return () => {
+      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+      if (idleId !== undefined && "cancelIdleCallback" in window) {
+        window.cancelIdleCallback(idleId);
+      }
+    };
+  }, []);
+
+  return null;
+}
+
 // ANALYTICS PLACEHOLDER
 // Wire tracking scripts here once consent is granted.
 // Use consent.analytics for GA4, consent.marketing for Meta/LinkedIn.
@@ -92,40 +208,39 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <RouteAndNetworkWarmup />
           <ScrollToTop />
           <BackToTop />
           <ErrorBoundary>
-            <Suspense fallback={null}>
-              <Routes>
+            <Routes>
               <Route element={<Layout />}>
                 <Route path="/" element={<Index />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/about/our-story" element={<OurStory />} />
-                <Route path="/about/factory" element={<Factory />} />
-                <Route path="/about/certificates" element={<Certificates />} />
+                <Route path="/about" element={withRouteSuspense(<About />)} />
+                <Route path="/about/our-story" element={withRouteSuspense(<OurStory />)} />
+                <Route path="/about/factory" element={withRouteSuspense(<Factory />)} />
+                <Route path="/about/certificates" element={withRouteSuspense(<Certificates />)} />
                 <Route path="/about/sustainability" element={<Navigate to="/sustainability" replace />} />
-                <Route path="/products" element={<Products />} />
-                <Route path="/products/:slug" element={<ProductDetail />} />
-                <Route path="/sustainability" element={<Sustainability />} />
-                <Route path="/production" element={<Production />} />
-                <Route path="/news" element={<News />} />
-                <Route path="/news/:id" element={<NewsDetail />} />
-                <Route path="/ecollections" element={<Brochures />} />
-                <Route path="/ecollections/:slug" element={<BrochureViewer />} />
-                <Route path="/designer-studio" element={<DesignerStudio />} />
-                <Route path="/designer-studio/products/:slug" element={<ProductDetail />} />
-                <Route path="/designer-studio/dashboard" element={<DesignerStudioDashboard />} />
-                <Route path="/designer-studio/compose/:sessionId" element={<ComposerPage />} />
-                <Route path="/designer-studio/present/:sessionId" element={<PresentationPage />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                <Route path="/terms-of-service" element={<TermsOfService />} />
-                <Route path="/cookie-policy" element={<CookiePolicy />} />
+                <Route path="/products" element={withRouteSuspense(<Products />)} />
+                <Route path="/products/:slug" element={withRouteSuspense(<ProductDetail />)} />
+                <Route path="/sustainability" element={withRouteSuspense(<Sustainability />)} />
+                <Route path="/production" element={withRouteSuspense(<Production />)} />
+                <Route path="/news" element={withRouteSuspense(<News />)} />
+                <Route path="/news/:id" element={withRouteSuspense(<NewsDetail />)} />
+                <Route path="/ecollections" element={withRouteSuspense(<Brochures />)} />
+                <Route path="/ecollections/:slug" element={withRouteSuspense(<BrochureViewer />)} />
+                <Route path="/designer-studio" element={withRouteSuspense(<DesignerStudio />)} />
+                <Route path="/designer-studio/products/:slug" element={withRouteSuspense(<ProductDetail />)} />
+                <Route path="/designer-studio/dashboard" element={withRouteSuspense(<DesignerStudioDashboard />)} />
+                <Route path="/designer-studio/compose/:sessionId" element={withRouteSuspense(<ComposerPage />)} />
+                <Route path="/designer-studio/present/:sessionId" element={withRouteSuspense(<PresentationPage />)} />
+                <Route path="/contact" element={withRouteSuspense(<Contact />)} />
+                <Route path="/privacy-policy" element={withRouteSuspense(<PrivacyPolicy />)} />
+                <Route path="/terms-of-service" element={withRouteSuspense(<TermsOfService />)} />
+                <Route path="/cookie-policy" element={withRouteSuspense(<CookiePolicy />)} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
+                <Route path="*" element={withRouteSuspense(<NotFound />)} />
               </Route>
             </Routes>
-          </Suspense>
           </ErrorBoundary>
         </BrowserRouter>
       </TooltipProvider>

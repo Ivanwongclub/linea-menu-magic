@@ -155,14 +155,6 @@ const Header = () => {
     setIsMenuOpen(false);
   }, [pathname]);
 
-  useEffect(() => {
-    if (isProductsOpen) setProductsMegaHydrated(true);
-  }, [isProductsOpen]);
-
-  useEffect(() => {
-    if (isAboutOpen) setAboutMegaHydrated(true);
-  }, [isAboutOpen]);
-
   const isActive = (path: string) =>
     path === "/" ? pathname === "/" : pathname === path || pathname.startsWith(path + "/");
 
@@ -178,9 +170,21 @@ const Header = () => {
     isTransparent ? "text-white/80 hover:text-white" : "text-foreground hover:text-muted-foreground"
   }`;
 
-  const handleProductsEnter = () => { clearTimeout(productsTimeout.current); setIsProductsOpen(true);  setIsAboutOpen(false);    setIsSegmentsOpen(false); };
+  const handleProductsEnter = () => {
+    clearTimeout(productsTimeout.current);
+    setProductsMegaHydrated(true);
+    setIsProductsOpen(true);
+    setIsAboutOpen(false);
+    setIsSegmentsOpen(false);
+  };
   const handleProductsLeave = () => { productsTimeout.current = setTimeout(() => setIsProductsOpen(false), 150); };
-  const handleAboutEnter    = () => { clearTimeout(aboutTimeout.current);    setIsAboutOpen(true);     setIsProductsOpen(false); setIsSegmentsOpen(false); };
+  const handleAboutEnter    = () => {
+    clearTimeout(aboutTimeout.current);
+    setAboutMegaHydrated(true);
+    setIsAboutOpen(true);
+    setIsProductsOpen(false);
+    setIsSegmentsOpen(false);
+  };
   const handleAboutLeave    = () => { aboutTimeout.current    = setTimeout(() => setIsAboutOpen(false), 150); };
   const handleSegmentsEnter = () => { clearTimeout(segmentsTimeout.current); setIsSegmentsOpen(true);  setIsProductsOpen(false); setIsAboutOpen(false);    };
   const handleSegmentsLeave = () => { segmentsTimeout.current = setTimeout(() => setIsSegmentsOpen(false), 150); };

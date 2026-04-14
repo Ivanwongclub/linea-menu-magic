@@ -5,6 +5,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Eye, Box, Heart, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import type { UserLibraryItem } from "@/features/products/types";
 import { format } from "date-fns";
+import { getProductImageUrl } from "@/lib/productImage";
 
 export type SortField = "name" | "itemCode" | "category" | "addedAt";
 type SortOrder = "asc" | "desc";
@@ -89,7 +90,7 @@ const LibraryTable = ({
               const product = item.product;
               const displayName = item.custom_name || product?.name_en || product?.name || 'Untitled';
               const itemCode = product?.item_code ?? '';
-              const thumbnailUrl = product?.thumbnail_url;
+              const thumbnailUrl = getProductImageUrl(product?.thumbnail_url, "thumb");
               const categoryName = product?.primary_category?.name ?? product?.categories?.[0]?.name;
 
               return (
@@ -121,6 +122,8 @@ const LibraryTable = ({
                           src={thumbnailUrl}
                           alt={displayName}
                           className="w-full h-full object-contain"
+                          loading="lazy"
+                          decoding="async"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-[8px] text-muted-foreground font-mono">

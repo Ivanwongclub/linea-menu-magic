@@ -16,6 +16,7 @@ import type { SessionTemplate } from './TemplatePickerDialog'
 import type { DesignSession } from '../types'
 import { toast } from 'sonner'
 import { supabase } from '@/integrations/supabase/client'
+import { getProductImageUrl } from '@/lib/productImage'
 
 interface ComposerSessionListProps {
   teamId: string
@@ -130,9 +131,21 @@ export default function ComposerSessionList({ teamId }: ComposerSessionListProps
               {/* Thumbnail */}
               <div className="aspect-[4/3] bg-secondary overflow-hidden">
                 {session.thumbnail_url ? (
-                  <img src={session.thumbnail_url} alt={session.name} className="w-full h-full object-cover" />
+                  <img
+                    src={getProductImageUrl(session.thumbnail_url, 'thumb')}
+                    alt={session.name}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                    decoding="async"
+                  />
                 ) : session.background_image_url ? (
-                  <img src={session.background_image_url} alt={session.name} className="w-full h-full object-contain p-2" />
+                  <img
+                    src={getProductImageUrl(session.background_image_url, 'thumb')}
+                    alt={session.name}
+                    className="w-full h-full object-contain p-2"
+                    loading="lazy"
+                    decoding="async"
+                  />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <Layers className="w-8 h-8 text-muted-foreground/30" />

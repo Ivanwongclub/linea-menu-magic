@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 
 import { useProductTaxonomy } from "@/features/products/hooks/useProductTaxonomy";
+import { getProductImageUrl } from "@/lib/productImage";
 
 /* ── Key-value editor ────────────────────────────────────── */
 
@@ -486,7 +487,13 @@ export default function ProductEditor({ productId, onBack }: ProductEditorProps)
               <Label className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground mb-2 block">Thumbnail</Label>
               <div className="aspect-square bg-secondary border border-border rounded-[var(--radius)] overflow-hidden relative">
                 {thumbnailUrl ? (
-                  <img src={thumbnailUrl} alt="Thumbnail" className="w-full h-full object-contain p-2" />
+                  <img
+                    src={getProductImageUrl(thumbnailUrl, "thumb")}
+                    alt="Thumbnail"
+                    className="w-full h-full object-contain p-2"
+                    loading="lazy"
+                    decoding="async"
+                  />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                     <ImagePlus className="w-8 h-8" />
@@ -525,7 +532,13 @@ export default function ProductEditor({ productId, onBack }: ProductEditorProps)
                     }`}
                   >
                     <div className="w-12 h-12 bg-secondary rounded overflow-hidden shrink-0">
-                      <img src={img.url} alt="" className="w-full h-full object-contain" />
+                      <img
+                        src={getProductImageUrl(img.url, "thumb")}
+                        alt=""
+                        className="w-full h-full object-contain"
+                        loading="lazy"
+                        decoding="async"
+                      />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs truncate text-muted-foreground">{img.url.split("/").pop()}</p>
