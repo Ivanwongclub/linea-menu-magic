@@ -13,6 +13,50 @@ import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 import * as THREE from "three";
 import { X, RotateCcw, Maximize2, ChevronLeft, ChevronRight } from "lucide-react";
 
+// ── Colour palette ──────────────────────────────────────────────────────────
+
+interface HardwareColour {
+  id: string;
+  label: string;
+  hex: string;
+  materialHex: string;
+}
+
+const COLOURS: HardwareColour[] = [
+  { id: "brass",    label: "Brass",      hex: "#C8A84B", materialHex: "#C8A84B" },
+  { id: "silver",   label: "Silver",     hex: "#C2C2C2", materialHex: "#C2C2C2" },
+  { id: "gunmetal", label: "Gunmetal",   hex: "#4A4A52", materialHex: "#4A4A52" },
+  { id: "rosegold", label: "Rose Gold",  hex: "#C4836A", materialHex: "#C4836A" },
+  { id: "black",    label: "Black",      hex: "#1C1C1E", materialHex: "#1C1C1E" },
+  { id: "bronze",   label: "Bronze",     hex: "#8B5E3C", materialHex: "#8B5E3C" },
+  { id: "ivory",    label: "Ivory",      hex: "#E8E0D0", materialHex: "#E8E0D0" },
+  { id: "navy",     label: "Navy",       hex: "#1A2A3A", materialHex: "#1A2A3A" },
+];
+
+// ── Finish / surface treatment ───────────────────────────────────────────────
+
+interface HardwareFinish {
+  id: string;
+  label: string;
+  desc: string;
+  metalness: number;
+  roughness: number;
+  clearcoat: number;
+  clearcoatRoughness: number;
+  envMapIntensity: number;
+}
+
+const FINISHES: HardwareFinish[] = [
+  { id: "polished", label: "Polished", desc: "Mirror finish",       metalness: 0.95, roughness: 0.04, clearcoat: 1.0,  clearcoatRoughness: 0.02, envMapIntensity: 1.8 },
+  { id: "brushed",  label: "Brushed",  desc: "Directional grain",   metalness: 0.88, roughness: 0.38, clearcoat: 0.15, clearcoatRoughness: 0.3,  envMapIntensity: 1.0 },
+  { id: "satin",    label: "Satin",    desc: "Soft sheen",          metalness: 0.82, roughness: 0.22, clearcoat: 0.4,  clearcoatRoughness: 0.15, envMapIntensity: 1.2 },
+  { id: "matte",    label: "Matte",    desc: "No reflection",       metalness: 0.55, roughness: 0.82, clearcoat: 0.0,  clearcoatRoughness: 0.0,  envMapIntensity: 0.4 },
+  { id: "antique",  label: "Antique",  desc: "Aged patina",         metalness: 0.65, roughness: 0.62, clearcoat: 0.05, clearcoatRoughness: 0.5,  envMapIntensity: 0.6 },
+];
+
+const DEFAULT_COLOUR = COLOURS[0];
+const DEFAULT_FINISH = FINISHES[0];
+
 // ── Model catalogue ──────────────────────────────────────────────────────────
 
 interface ObjModel {
@@ -20,62 +64,28 @@ interface ObjModel {
   title: string;
   subtitle: string;
   file: string;
-  material: {
-    color: string;
-    metalness: number;
-    roughness: number;
-  };
+  material: { color: string; metalness: number; roughness: number };
   camera: [number, number, number];
 }
 
 const MODELS: ObjModel[] = [
-  {
-    id: "button",
-    title: "4-Hole Metal Button",
-    subtitle: "Brass alloy · Die-cast · Custom engraving available",
-    file: "/models/button-4hole.obj",
-    material: { color: "#C8A84B", metalness: 0.85, roughness: 0.18 },
-    camera: [0, 2, 3.5],
-  },
-  {
-    id: "snap",
-    title: "Snap Button",
-    subtitle: "Zinc alloy · Polished finish · 15–25mm diameter range",
-    file: "/models/snap-button.obj",
-    material: { color: "#B0B0B0", metalness: 0.9, roughness: 0.12 },
-    camera: [0, 1.5, 3.5],
-  },
-  {
-    id: "buckle",
-    title: "D-Ring Buckle",
-    subtitle: "Cast zinc · Antique brass or nickel finish",
-    file: "/models/d-ring-buckle.obj",
-    material: { color: "#A08030", metalness: 0.8, roughness: 0.25 },
-    camera: [0, 1.8, 4],
-  },
-  {
-    id: "eyelet",
-    title: "Eyelet / Grommet",
-    subtitle: "Brass or steel · Various diameters · Setter-ready",
-    file: "/models/eyelet-grommet.obj",
-    material: { color: "#D4AF70", metalness: 0.88, roughness: 0.15 },
-    camera: [0, 2.5, 4],
-  },
+  { id: "button",  title: "4-Hole Metal Button", subtitle: "Brass alloy · Die-cast · Custom engraving available",   file: "/models/button-4hole.obj",    material: { color: "#C8A84B", metalness: 0.85, roughness: 0.18 }, camera: [0, 2, 3.5] },
+  { id: "snap",    title: "Snap Button",         subtitle: "Zinc alloy · Polished finish · 15–25mm diameter range", file: "/models/snap-button.obj",     material: { color: "#B0B0B0", metalness: 0.9,  roughness: 0.12 }, camera: [0, 1.5, 3.5] },
+  { id: "buckle",  title: "D-Ring Buckle",        subtitle: "Cast zinc · Antique brass or nickel finish",            file: "/models/d-ring-buckle.obj",   material: { color: "#A08030", metalness: 0.8,  roughness: 0.25 }, camera: [0, 1.8, 4] },
+  { id: "eyelet",  title: "Eyelet / Grommet",     subtitle: "Brass or steel · Various diameters · Setter-ready",     file: "/models/eyelet-grommet.obj",  material: { color: "#D4AF70", metalness: 0.88, roughness: 0.15 }, camera: [0, 2.5, 4] },
 ];
 
-// ── Inner OBJ mesh ───────────────────────────────────────────────────────────
+// ── Main OBJ mesh (MeshPhysicalMaterial) ─────────────────────────────────────
 
 const ObjMesh = ({
   url,
-  color,
-  metalness,
-  roughness,
+  colour,
+  finish,
   autoRotate,
 }: {
   url: string;
-  color: string;
-  metalness: number;
-  roughness: number;
+  colour: HardwareColour;
+  finish: HardwareFinish;
   autoRotate: boolean;
 }) => {
   const obj = useLoader(OBJLoader, url);
@@ -83,7 +93,14 @@ const ObjMesh = ({
 
   const scene = useMemo(() => {
     const clone = obj.clone(true);
-    const mat = new THREE.MeshStandardMaterial({ color, metalness, roughness });
+    const mat = new THREE.MeshPhysicalMaterial({
+      color: new THREE.Color(colour.materialHex),
+      metalness: finish.metalness,
+      roughness: finish.roughness,
+      clearcoat: finish.clearcoat,
+      clearcoatRoughness: finish.clearcoatRoughness,
+      envMapIntensity: finish.envMapIntensity,
+    });
     clone.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
         (child as THREE.Mesh).material = mat;
@@ -95,16 +112,51 @@ const ObjMesh = ({
     const size = box.getSize(new THREE.Vector3());
     const maxDim = Math.max(size.x, size.y, size.z);
     if (maxDim > 0) clone.scale.setScalar(1.8 / maxDim);
-    box.setFromObject(clone);
-    const centre = box.getCenter(new THREE.Vector3());
-    clone.position.sub(centre);
+    const box2 = new THREE.Box3().setFromObject(clone);
+    clone.position.sub(box2.getCenter(new THREE.Vector3()));
     return clone;
-  }, [obj, color, metalness, roughness]);
+  }, [obj, colour.materialHex, finish.id]);
 
   useFrame((_, delta) => {
     if (groupRef.current && autoRotate) {
       groupRef.current.rotation.y += delta * 0.4;
     }
+  });
+
+  return (
+    <group ref={groupRef}>
+      <Center>
+        <primitive object={scene} />
+      </Center>
+    </group>
+  );
+};
+
+// ── Thumbnail mesh (lightweight MeshStandardMaterial) ────────────────────────
+
+const ThumbMesh = ({ url, color, metalness, roughness }: {
+  url: string; color: string; metalness: number; roughness: number;
+}) => {
+  const obj = useLoader(OBJLoader, url);
+  const groupRef = useRef<THREE.Group>(null);
+
+  const scene = useMemo(() => {
+    const clone = obj.clone(true);
+    const mat = new THREE.MeshStandardMaterial({ color, metalness, roughness });
+    clone.traverse((child) => {
+      if ((child as THREE.Mesh).isMesh) (child as THREE.Mesh).material = mat;
+    });
+    const box = new THREE.Box3().setFromObject(clone);
+    const size = box.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    if (maxDim > 0) clone.scale.setScalar(1.8 / maxDim);
+    const box2 = new THREE.Box3().setFromObject(clone);
+    clone.position.sub(box2.getCenter(new THREE.Vector3()));
+    return clone;
+  }, [obj, color, metalness, roughness]);
+
+  useFrame((_, delta) => {
+    if (groupRef.current) groupRef.current.rotation.y += delta * 0.4;
   });
 
   return (
@@ -142,25 +194,29 @@ const LoadingOverlay = () => {
 
 const ModelScene = ({
   model,
+  colour,
+  finish,
   autoRotate,
 }: {
   model: ObjModel;
+  colour: HardwareColour;
+  finish: HardwareFinish;
   autoRotate: boolean;
 }) => (
   <>
-    <ambientLight intensity={0.4} />
-    <directionalLight position={[5, 8, 4]} intensity={1.2} castShadow />
-    <directionalLight position={[-3, 4, -2]} intensity={0.4} />
+    <ambientLight intensity={0.3} />
+    <directionalLight position={[4, 6, 4]} intensity={1.4} castShadow />
+    <directionalLight position={[-4, 2, -4]} intensity={0.5} />
+    <pointLight position={[0, 4, 0]} intensity={0.5} />
     <Environment preset="studio" />
-    <ContactShadows position={[0, -1, 0]} opacity={0.35} blur={2} far={4} />
     <ObjMesh
       url={model.file}
-      color={model.material.color}
-      metalness={model.material.metalness}
-      roughness={model.material.roughness}
+      colour={colour}
+      finish={finish}
       autoRotate={autoRotate}
     />
-    <OrbitControls enablePan={false} minDistance={2} maxDistance={8} />
+    <ContactShadows position={[0, -1.2, 0]} opacity={0.35} scale={4} blur={2.5} far={2} />
+    <OrbitControls enablePan={false} minDistance={1.5} maxDistance={8} makeDefault />
   </>
 );
 
@@ -168,20 +224,19 @@ const ModelScene = ({
 
 const ThumbCanvas = ({ model }: { model: ObjModel }) => (
   <Canvas
-    camera={{ position: [0, 1.5, 3], fov: 40 }}
+    camera={{ position: model.camera, fov: 40 }}
+    gl={{ antialias: true, alpha: true, powerPreference: "low-power" }}
     style={{ width: "100%", height: "100%" }}
-    gl={{ antialias: true, alpha: true }}
   >
-    <ambientLight intensity={0.6} />
-    <directionalLight position={[3, 5, 3]} intensity={0.8} />
-    <Environment preset="studio" />
+    <ambientLight intensity={0.5} />
+    <directionalLight position={[3, 5, 3]} intensity={1} />
+    <Environment preset="city" />
     <Suspense fallback={null}>
-      <ObjMesh
+      <ThumbMesh
         url={model.file}
         color={model.material.color}
         metalness={model.material.metalness}
         roughness={model.material.roughness}
-        autoRotate
       />
     </Suspense>
   </Canvas>
@@ -199,17 +254,23 @@ export default function ObjGallery({ open, onClose, initialIndex = 0 }: ObjGalle
   const [activeIndex, setActiveIndex] = useState(initialIndex);
   const [autoRotate, setAutoRotate] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [activeColour, setActiveColour] = useState<HardwareColour>(DEFAULT_COLOUR);
+  const [activeFinish, setActiveFinish] = useState<HardwareFinish>(DEFAULT_FINISH);
 
   const model = MODELS[activeIndex];
 
   const prev = useCallback(() => {
     setActiveIndex((i) => (i - 1 + MODELS.length) % MODELS.length);
     setAutoRotate(true);
+    setActiveColour(DEFAULT_COLOUR);
+    setActiveFinish(DEFAULT_FINISH);
   }, []);
 
   const next = useCallback(() => {
     setActiveIndex((i) => (i + 1) % MODELS.length);
     setAutoRotate(true);
+    setActiveColour(DEFAULT_COLOUR);
+    setActiveFinish(DEFAULT_FINISH);
   }, []);
 
   const handleKey = useCallback(
@@ -293,7 +354,12 @@ export default function ObjGallery({ open, onClose, initialIndex = 0 }: ObjGalle
             className="!absolute inset-0"
           >
             <Suspense fallback={<LoadingOverlay />}>
-              <ModelScene model={model} autoRotate={autoRotate} />
+              <ModelScene
+                model={model}
+                colour={activeColour}
+                finish={activeFinish}
+                autoRotate={autoRotate}
+              />
             </Suspense>
           </Canvas>
 
@@ -317,12 +383,77 @@ export default function ObjGallery({ open, onClose, initialIndex = 0 }: ObjGalle
           </div>
         </div>
 
+        {/* ── Colour & Finish panel ─────────────────────────────────── */}
+        <div className="flex-shrink-0 border-t border-border bg-background">
+          <div className="flex flex-col sm:flex-row gap-0 divide-y sm:divide-y-0 sm:divide-x divide-border">
+
+            {/* Colour picker */}
+            <div className="flex-1 px-5 py-4">
+              <p className="text-[9px] font-medium uppercase tracking-[0.18em] text-muted-foreground mb-3">
+                Colour
+              </p>
+              <div className="flex items-center gap-2 flex-wrap">
+                {COLOURS.map((col) => (
+                  <button
+                    key={col.id}
+                    title={col.label}
+                    onClick={() => setActiveColour(col)}
+                    className={`relative w-6 h-6 rounded-full transition-all duration-150 ${
+                      activeColour.id === col.id
+                        ? "ring-2 ring-foreground ring-offset-2 ring-offset-background scale-110"
+                        : "hover:scale-110 ring-1 ring-border"
+                    }`}
+                    style={{ backgroundColor: col.hex }}
+                  >
+                    <span className="sr-only">{col.label}</span>
+                  </button>
+                ))}
+                <span className="ml-1 text-[11px] text-muted-foreground font-medium">
+                  {activeColour.label}
+                </span>
+              </div>
+            </div>
+
+            {/* Finish picker */}
+            <div className="flex-1 px-5 py-4">
+              <p className="text-[9px] font-medium uppercase tracking-[0.18em] text-muted-foreground mb-3">
+                Finish
+              </p>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {FINISHES.map((fin) => (
+                  <button
+                    key={fin.id}
+                    onClick={() => setActiveFinish(fin)}
+                    title={fin.desc}
+                    className={`px-3 py-1.5 text-[10px] font-medium tracking-wide border transition-all duration-150 ${
+                      activeFinish.id === fin.id
+                        ? "bg-foreground text-background border-foreground"
+                        : "bg-transparent text-muted-foreground border-border hover:border-foreground/40 hover:text-foreground"
+                    }`}
+                  >
+                    {fin.label}
+                  </button>
+                ))}
+              </div>
+              <p className="text-[10px] text-muted-foreground/60 mt-2">
+                {activeFinish.desc}
+              </p>
+            </div>
+
+          </div>
+        </div>
+
         {/* Thumbnail strip */}
-        <div className="flex items-center gap-3 px-5 py-3 border-t border-border bg-secondary overflow-x-auto">
+        <div className="flex-shrink-0 flex items-center gap-3 px-5 py-3 border-t border-border bg-secondary overflow-x-auto">
           {MODELS.map((m, idx) => (
             <button
               key={m.id}
-              onClick={() => { setActiveIndex(idx); setAutoRotate(true); }}
+              onClick={() => {
+                setActiveIndex(idx);
+                setAutoRotate(true);
+                setActiveColour(DEFAULT_COLOUR);
+                setActiveFinish(DEFAULT_FINISH);
+              }}
               className={`relative flex-shrink-0 w-[88px] h-[66px] overflow-hidden border-2 transition-all duration-200 ${
                 idx === activeIndex
                   ? "border-foreground scale-105"
