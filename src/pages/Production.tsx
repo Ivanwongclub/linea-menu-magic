@@ -2,8 +2,9 @@ import { useState, Suspense } from "react";
 import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
 import { Link } from "react-router-dom";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
-import { ArrowRight, CheckCircle, Box } from "lucide-react";
+import { ArrowRight, CheckCircle, Box, Images } from "lucide-react";
 import ObjGallery from "@/components/production/ObjGallery";
+import PrintGallery from "@/components/production/PrintGallery";
 import factoryProductionImg from "@/assets/factory-production.jpg";
 import productionHeroImg from "@/assets/production-hero.jpg";
 import heritageImg from "@/assets/heritage-craftsmanship.jpg";
@@ -30,9 +31,10 @@ const workflowSteps = [
   {
     number: "02",
     title: "Production",
-    body: "Vertically integrated manufacturing across die-casting, stamping, plating, painting, and assembly. ISO 9001-certified quality control at every stage ensures consistency from first sample to full production run.",
-    bullets: ["Die-casting & Stamping", "Plating & Surface Treatment", "ISO 9001 Quality Control"],
+    body: "From rapid 3D-printed prototypes to full production runs — our facility combines digital fabrication with vertically integrated manufacturing to move from concept to finished trim faster than traditional methods.",
+    bullets: ["3D Printing"],
     image: factoryProductionImg,
+    showPrintGallery: true,
   },
   {
     number: "03",
@@ -89,6 +91,7 @@ export default function Production() {
   const { ref: qualRef, isVisible: qualVisible } = useScrollAnimation({ threshold: 0.2 });
   const [activeCategory, setActiveCategory] = useState(0);
   const [galleryOpen, setGalleryOpen] = useState(false);
+  const [printGalleryOpen, setPrintGalleryOpen] = useState(false);
 
   return (
     <>
@@ -166,6 +169,20 @@ export default function Production() {
                         View 3D Prototypes
                         <span className="text-[11px] opacity-50 ml-1">
                           4 models
+                        </span>
+                      </button>
+                    )}
+
+                    {/* Print Gallery trigger — only on Production step */}
+                    {(step as any).showPrintGallery && (
+                      <button
+                        onClick={() => setPrintGalleryOpen(true)}
+                        className="group mt-6 inline-flex items-center gap-3 px-5 py-3 border border-foreground/20 hover:border-foreground hover:bg-foreground hover:text-background transition-all duration-300 text-[13px] font-medium tracking-wide"
+                      >
+                        <Images size={16} />
+                        View Prototype Gallery
+                        <span className="text-[11px] opacity-50 ml-1">
+                          4 samples
                         </span>
                       </button>
                     )}
@@ -326,6 +343,14 @@ export default function Production() {
           <ObjGallery
             open={galleryOpen}
             onClose={() => setGalleryOpen(false)}
+          />
+        )}
+
+        {/* Print Gallery popup */}
+        {printGalleryOpen && (
+          <PrintGallery
+            open={printGalleryOpen}
+            onClose={() => setPrintGalleryOpen(false)}
           />
         )}
     </>
