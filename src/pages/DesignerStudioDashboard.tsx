@@ -627,13 +627,13 @@ const DesignerStudioDashboard = () => {
                 </p>
               </div>
 
-              {libraryLoading ? (
+              {(libraryLoading || catalogLoading) ? (
                 <div className="text-center py-16">
                   <p className="text-sm text-muted-foreground">Loading library...</p>
                 </div>
               ) : filteredLibraryItems.length > 0 ? (
                 libraryViewMode === "grid" ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 lg:gap-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
                     {filteredLibraryItems.map((item) => (
                       <LibraryItemCard
                         key={item.id}
