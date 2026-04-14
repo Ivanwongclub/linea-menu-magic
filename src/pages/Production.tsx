@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
 import { Link } from "react-router-dom";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
-import { ArrowRight, CheckCircle } from "lucide-react";
+import { ArrowRight, CheckCircle, Box } from "lucide-react";
+
+const ObjGallery = lazy(() => import("@/components/production/ObjGallery"));
 import factoryProductionImg from "@/assets/factory-production.jpg";
 import productionHeroImg from "@/assets/production-hero.jpg";
 import heritageImg from "@/assets/heritage-craftsmanship.jpg";
@@ -21,9 +23,10 @@ const workflowSteps = [
   {
     number: "01",
     title: "Design & Development",
-    body: "From initial concept to production-ready specification. Our development team works directly with clients on mould design, 3D prototyping, finish selection, and material sourcing — turning ideas into trim-ready samples.",
-    bullets: ["3D Artwork & Prototyping", "Custom Mould Design", "Finish & Colour Matching"],
+    body: "From initial concept to production-ready specification. Our development team works directly with clients on 3D prototyping, finish selection, and material sourcing — turning ideas into trim-ready samples.",
+    bullets: ["3D Artwork & Prototyping"],
     image: valueInnovationImg,
+    showGallery: true,
   },
   {
     number: "02",
@@ -86,6 +89,7 @@ export default function Production() {
   const { ref: capRef, isVisible: capVisible, getDelay: getCapDelay } = useStaggeredAnimation(6, 80);
   const { ref: qualRef, isVisible: qualVisible } = useScrollAnimation({ threshold: 0.2 });
   const [activeCategory, setActiveCategory] = useState(0);
+  const [galleryOpen, setGalleryOpen] = useState(false);
 
   return (
     <>
@@ -152,6 +156,20 @@ export default function Production() {
                         </li>
                       ))}
                     </ul>
+
+                    {/* 3D Gallery trigger — only on Design & Development step */}
+                    {(step as any).showGallery && (
+                      <button
+                        onClick={() => setGalleryOpen(true)}
+                        className="group mt-6 inline-flex items-center gap-3 px-5 py-3 border border-foreground/20 hover:border-foreground hover:bg-foreground hover:text-background transition-all duration-300 text-[13px] font-medium tracking-wide"
+                      >
+                        <Box size={16} />
+                        View 3D Prototypes
+                        <span className="text-[11px] opacity-50 ml-1">
+                          4 models
+                        </span>
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -303,6 +321,14 @@ export default function Production() {
             </div>
           </div>
         </section>
+
+        {/* 3D Gallery popup */}
+        <Suspense fallback={null}>
+          <ObjGallery
+            open={galleryOpen}
+            onClose={() => setGalleryOpen(false)}
+          />
+        </Suspense>
     </>
   );
 }
