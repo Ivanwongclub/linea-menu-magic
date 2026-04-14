@@ -91,6 +91,7 @@ const About = () => {
                 <img 
                   src={aboutHeritageImage} 
                   alt="WIN-CYC heritage craftsmanship" 
+                  loading="lazy"
                   className="w-full h-full object-cover"
                 />
               </div>
