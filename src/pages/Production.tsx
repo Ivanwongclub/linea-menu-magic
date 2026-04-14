@@ -99,15 +99,15 @@ export default function Production() {
         <section className="relative overflow-hidden">
           <div className="aspect-[21/9] md:aspect-[3/1] w-full overflow-hidden">
             <img src={productionHeroImg} alt="Precision garment hardware — brass buttons, snap fasteners, buckles" className="w-full h-full object-cover" width={1920} height={640} fetchPriority="high" />
-            <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/10" />
           </div>
           <div className="absolute inset-0 flex items-end">
             <div className="max-w-7xl mx-auto px-6 lg:px-8 w-full pb-10 md:pb-14">
-              <p className="text-xs uppercase tracking-[0.2em] text-background/70 mb-3">How We Work</p>
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-background mb-4 max-w-2xl leading-tight">
+              <p className="text-xs uppercase tracking-[0.2em] text-white/80 mb-3 drop-shadow-sm">How We Work</p>
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-white mb-4 max-w-2xl leading-tight drop-shadow-md">
                 From Idea to<br />Finished Trim
               </h1>
-              <p className="text-sm md:text-base text-background/80 max-w-xl leading-relaxed">
+              <p className="text-sm md:text-base text-white/90 max-w-xl leading-relaxed drop-shadow-sm">
                 In-house design · precision manufacturing · global delivery — since 1979.
               </p>
             </div>
