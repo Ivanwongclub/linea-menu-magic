@@ -261,10 +261,10 @@
     @apply inline-block transition-transform duration-700 ease-out;
   }
 
-  /* Outlined / stroke text */
+  /* Solid text (was outlined/stroke) */
   .text-outline {
-    -webkit-text-stroke: 2px hsl(var(--foreground));
-    color: transparent;
+    -webkit-text-stroke: 0;
+    color: hsl(var(--foreground));
   }
 
   /* Display font — unified with site font */
