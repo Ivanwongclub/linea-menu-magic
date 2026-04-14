@@ -145,17 +145,8 @@ const Header = () => {
     setIsMenuOpen(false);
   }, [pathname]);
 
-  const navLinks: Array<{ href: string; label: string; megaMenu?: "products" | "about" | "segments" }> = [
-    { href: "/segments",        label: "Segments",        megaMenu: "segments" },
-    { href: "/products",        label: "Products",        megaMenu: "products" },
-    { href: "/about",           label: "About",           megaMenu: "about"    },
-    { href: "/production",      label: "Production"      },
-    { href: "/sustainability",  label: "Sustainability"  },
-    { href: "/ecollections",    label: "E-Collections"  },
-    { href: "/designer-studio", label: "Designer Studio" },
-  ];
-
-  const isActive = (path: string) => pathname === path || pathname.startsWith(path + "/");
+  const isActive = (path: string) =>
+    path === "/" ? pathname === "/" : pathname === path || pathname.startsWith(path + "/");
 
   // ─── Nav link class: white on transparent, black on scrolled/non-hero ──────
   const linkClass = (active: boolean) =>

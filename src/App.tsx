@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CookieProvider } from "@/features/cookies/CookieProvider";
 import CookieBanner from "@/features/cookies/CookieBanner";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ScrollToTop from "./components/ScrollToTop";
 import BackToTop from "./components/ui/BackToTop";
 import Layout from "./components/layout/Layout";
@@ -103,7 +103,7 @@ const App = () => (
                 <Route path="/about/our-story" element={<OurStory />} />
                 <Route path="/about/factory" element={<Factory />} />
                 <Route path="/about/certificates" element={<Certificates />} />
-                <Route path="/about/sustainability" element={<Sustainability />} />
+                <Route path="/about/sustainability" element={<Navigate to="/sustainability" replace />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/products/:slug" element={<ProductDetail />} />
                 <Route path="/sustainability" element={<Sustainability />} />
@@ -120,9 +120,9 @@ const App = () => (
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                 <Route path="/terms-of-service" element={<TermsOfService />} />
                 <Route path="/cookie-policy" element={<CookiePolicy />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
               </Route>
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
           </ErrorBoundary>
