@@ -1,4 +1,5 @@
 import { Suspense, useState, useRef, useCallback, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { Canvas, useFrame, useLoader } from "@react-three/fiber";
 import {
   OrbitControls,
@@ -222,7 +223,7 @@ export default function ObjGallery({ open, onClose, initialIndex = 0 }: ObjGalle
 
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center"
       onKeyDown={handleKey}
@@ -345,5 +346,5 @@ export default function ObjGallery({ open, onClose, initialIndex = 0 }: ObjGalle
         </div>
       </div>
     </div>
-  );
+  , document.body);
 }
