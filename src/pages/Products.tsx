@@ -174,11 +174,10 @@ export default function Products() {
     });
 
     filters.segments?.forEach((slug) => {
-      const seg = PRODUCT_SEGMENTS.find((s) => s.slug === slug);
       chips.push({
         key: `seg-${slug}`,
         filterKey: 'segments',
-        label: seg?.name ?? slug,
+        label: slug,
         value: slug,
       });
     });
