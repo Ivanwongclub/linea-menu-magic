@@ -434,7 +434,7 @@ const Header = () => {
                 </div>
 
                 {/* Soft Trims + Branding Trims */}
-                <div className="min-w-0">
+                <div className="flex-shrink-0 min-w-0">
                   <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-6 block opacity-0 pointer-events-none">
                     &nbsp;
                   </span>
