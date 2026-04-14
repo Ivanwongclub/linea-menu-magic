@@ -121,8 +121,8 @@ export default function Production() {
               {workflowSteps.map((step, i) => (
                 <div
                   key={step.number}
-                  className={`flex flex-col ${i % 2 === 1 ? "lg:flex-row-reverse" : "lg:flex-row"} gap-10 lg:gap-16 items-center transition-all duration-700 ease-out ${
-                    workflowVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+                   className={`flex flex-col ${i % 2 === 1 ? "lg:flex-row-reverse" : "lg:flex-row"} gap-10 lg:gap-16 items-center transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${
+                     workflowVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
                   }`}
                   style={getWfDelay(i)}
                 >
@@ -164,7 +164,7 @@ export default function Production() {
           <div className="section-inner">
             <div
               ref={materialsRef}
-              className={`transition-all duration-700 ease-out ${materialsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+              className={`transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${materialsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
             >
               <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-10">
                 <div>
@@ -198,9 +198,9 @@ export default function Production() {
               {/* Material cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {materials[activeCategory].items.map((mat) => (
-                  <div key={mat.name} className="group border border-border rounded-[var(--radius)] overflow-hidden hover:border-foreground/20 hover:shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-200">
+                  <div key={mat.name} className="group border border-border rounded-[var(--radius)] overflow-hidden hover-card hover-img-zoom hover:border-foreground/20 transition-[border-color] duration-200">
                     <div className="aspect-[4/3] overflow-hidden">
-                      <img src={mat.image} alt={mat.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                      <img src={mat.image} alt={mat.name} className="w-full h-full object-cover" loading="lazy" />
                     </div>
                     <div className="p-4">
                       <h3 className="text-[15px] font-semibold text-foreground">{mat.name}</h3>
@@ -218,8 +218,8 @@ export default function Production() {
           <div className="section-inner">
             <div
               ref={qualRef}
-              className={`flex flex-col lg:flex-row gap-12 lg:gap-16 items-center transition-all duration-700 ease-out ${
-                qualVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+               className={`flex flex-col lg:flex-row gap-12 lg:gap-16 items-center transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${
+                 qualVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
               }`}
             >
               <div className="lg:w-1/2">

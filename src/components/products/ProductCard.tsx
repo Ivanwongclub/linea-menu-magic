@@ -82,9 +82,9 @@ export default function ProductCard({
   const altText = `${product.name_en ?? product.name}${product.primary_category ? ` — ${product.primary_category.name}` : ''}`;
 
   return (
-    <div className="group bg-card border border-border rounded-[var(--radius)] overflow-hidden cursor-pointer transition-[border-color,box-shadow] duration-200 hover:border-foreground hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
+    <div className="group bg-card border border-border rounded-[var(--radius)] overflow-hidden cursor-pointer hover-card transition-[border-color] duration-200 hover:border-foreground">
       {/* Image area */}
-      <div className="aspect-square relative overflow-hidden bg-secondary">
+      <div className="aspect-square relative overflow-hidden bg-secondary hover-img-zoom">
         {!imageLoaded && !imageError && (
           <div aria-hidden="true" className="absolute inset-0 bg-secondary animate-pulse" />
         )}
@@ -107,7 +107,7 @@ export default function ProductCard({
           decoding="async"
           onLoad={() => setImageLoaded(true)}
           onError={() => setImageError(true)}
-          className={`absolute inset-0 w-full h-full object-contain p-3 transition-all duration-500 ease-out group-hover:scale-[1.04] ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+          className={`absolute inset-0 w-full h-full object-contain p-3 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
         />
 
         {/* Tag badges (top-left) */}
@@ -143,7 +143,7 @@ export default function ProductCard({
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); onQuickView(product); }}
             aria-label={`Quick view ${product.name_en ?? product.name}`}
-            className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 translate-y-1 group-hover:translate-y-0 focus-visible:translate-y-0 transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--foreground))] focus-visible:ring-offset-2"
+            className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 translate-y-2 group-hover:translate-y-0 focus-visible:translate-y-0 transition-[opacity,transform] duration-[420ms] ease-[cubic-bezier(0.19,1,0.22,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--foreground))] focus-visible:ring-offset-2"
           >
             <span className="inline-flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-foreground border border-border text-xs font-medium px-3 py-1.5 rounded-[var(--radius)]">
               <Eye className="h-3.5 w-3.5" />
