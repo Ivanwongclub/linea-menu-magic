@@ -221,11 +221,11 @@ const Header = () => {
                 }
                 if (link.megaMenu === "products") {
                   return (
-                    <div key={link.href} className="relative" onMouseEnter={handleProductsEnter} onMouseLeave={handleProductsLeave}>
-                      <button className={linkClass(isActive(link.href)) + " flex items-center gap-1"}>
+                     <div key={link.href} className="relative" onMouseEnter={handleProductsEnter} onMouseLeave={handleProductsLeave}>
+                      <Link to="/products" onClick={closeAllMenus} className={linkClass(isActive(link.href)) + " flex items-center gap-1"}>
                         {link.label}
                         <ChevronDown size={14} className={`transition-transform duration-200 ${isProductsOpen ? "rotate-180" : ""}`} />
-                      </button>
+                      </Link>
                     </div>
                   );
                 }
