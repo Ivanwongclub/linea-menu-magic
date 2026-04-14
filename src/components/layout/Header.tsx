@@ -400,9 +400,9 @@ const Header = () => {
         >
           <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
             <div className="w-full px-10 lg:px-16 xl:px-24 py-10">
-              <div className="flex items-start gap-10">
+              <div className="flex items-start gap-16">
                 {/* Hardware column */}
-                <div className="min-w-0">
+                <div className="flex-shrink-0 min-w-0">
                   <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-6 block">
                     Browse by Category
                   </span>
