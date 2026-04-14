@@ -23,7 +23,7 @@ import metalZipperImg from "@/assets/products/metal-zipper.jpg";
 import cottonLaceImg from "@/assets/products/cotton-lace.jpg";
 import wovenLabelImg from "@/assets/products/woven-label.jpg";
 import otherCategoryImg from "@/assets/products/other-category.jpg";
-import featuredSegmentImg from "@/assets/products/featured-segment.jpg";
+
 import megaProductsGrid from "@/assets/products/mega-products-grid.png";
 
 // ─── About flat link list ──────────────────────────────────────────────────────
@@ -375,27 +375,6 @@ const Header = () => {
                     </div>
                   );
                 })()}
-
-                {/* Right: featured image placeholder */}
-                <div className="flex-shrink-0 w-[260px] border-l border-[hsl(var(--border))] pl-6 flex flex-col">
-                  <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground mb-4 block">
-                    Featured
-                  </span>
-                  <div className="flex-1 relative overflow-hidden bg-secondary min-h-[200px]">
-                    <img
-                      src={featuredSegmentImg}
-                      alt="Featured fashion hardware trims"
-                      className="absolute inset-0 w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-                  <Link
-                    to={`/products?segments=${activeSegmentSlug}`}
-                    className="mt-4 text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    Browse all →
-                  </Link>
-                </div>
 
               </div>
             </div>
