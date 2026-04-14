@@ -266,6 +266,8 @@ function DetailSkeleton() {
 
 export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
+  const location = useLocation();
+  const isStudioContext = location.pathname.startsWith('/designer-studio');
   const { product, loading, error } = useProduct(slug ?? '');
   const [show3D, setShow3D] = useState(false);
 
