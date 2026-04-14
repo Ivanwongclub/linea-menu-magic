@@ -92,31 +92,31 @@ const MilestoneTeaser = () => {
   }, []);
 
   return (
-    <section className="py-24 overflow-hidden bg-[#080808]">
+    <section className="py-24 overflow-hidden bg-white">
       {/* Heading — constrained */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div ref={headerRef} className="mb-6">
           <span
-            className={`text-[11px] font-medium tracking-[0.12em] uppercase text-white/40 block mb-3 transition-all duration-700 ease-out ${
+            className={`text-[11px] font-medium tracking-[0.12em] uppercase text-foreground/40 block mb-3 transition-all duration-700 ease-out ${
               headerVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"
             }`}
           >
             About WIN-CYC
           </span>
-          <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-4">
+          <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-4">
             <span className="inline-block mr-4">Our</span>
             <span className="inline-block font-serif-display">Journey</span>
           </h2>
         </div>
       </div>
 
-      {/* Timeline — full viewport width */}
-      <div className="w-full px-10 lg:px-14 xl:px-20 relative mt-16">
+      {/* Timeline — full viewport width, small gutter */}
+      <div className="w-full px-6 lg:px-8 relative mt-16">
         {/* Left arrow */}
         <button
           onClick={scrollLeft}
           aria-label="Scroll left"
-          className="absolute z-20 text-white/40 hover:text-white transition-colors duration-200"
+          className="absolute z-20 text-foreground/30 hover:text-foreground transition-colors duration-200"
           style={{ left: "8px", top: "50%", transform: "translateY(-50%)" }}
         >
           <ChevronLeft size={32} strokeWidth={1} />
@@ -126,7 +126,7 @@ const MilestoneTeaser = () => {
         <button
           onClick={scrollRight}
           aria-label="Scroll right"
-          className="absolute z-20 text-white/40 hover:text-white transition-colors duration-200"
+          className="absolute z-20 text-foreground/30 hover:text-foreground transition-colors duration-200"
           style={{ right: "8px", top: "50%", transform: "translateY(-50%)" }}
         >
           <ChevronRight size={32} strokeWidth={1} />
@@ -138,11 +138,11 @@ const MilestoneTeaser = () => {
           className="overflow-x-auto scrollbar-hide pb-2"
           style={{ scrollSnapType: "x proximity" }}
         >
-          <div ref={timelineRef} style={{ minWidth: "max-content" }}>
+          <div ref={timelineRef} style={{ minWidth: `${COLS * 260}px` }}>
             <div
               className="grid"
               style={{
-                gridTemplateColumns: `repeat(${COLS}, minmax(120px, 160px))`,
+                gridTemplateColumns: `repeat(${COLS}, minmax(240px, 1fr))`,
                 gridTemplateRows: "1fr auto 1fr",
                 columnGap: "16px",
               }}
@@ -167,10 +167,10 @@ const MilestoneTeaser = () => {
                   className="relative"
                   style={{ gridRow: 2, gridColumn: i + 1, height: "1px" }}
                 >
-                  <div className="absolute inset-0 bg-white/20" />
+                  <div className="absolute inset-0 bg-foreground/12" />
                   {i === 0 && (
                     <div
-                      className="absolute top-0 left-0 h-full bg-white/60"
+                      className="absolute top-0 left-0 h-full bg-foreground/60"
                       style={{
                         width: timelineVisible ? `calc(${COLS} * 100% + ${(COLS - 1) * 16}px)` : "0%",
                         transition: "width 2s cubic-bezier(0.4,0,0.2,1)",
@@ -181,8 +181,8 @@ const MilestoneTeaser = () => {
                   <div
                     className={`absolute left-0 top-1/2 -translate-y-1/2 rounded-full border-2 transition-all duration-500 ${
                       m.isHighlight
-                        ? "w-[14px] h-[14px] bg-white border-white"
-                        : "w-[12px] h-[12px] bg-[#080808] border-white/50"
+                        ? "w-[14px] h-[14px] bg-foreground border-foreground"
+                        : "w-[12px] h-[12px] bg-white border-foreground/40"
                     } ${timelineVisible ? "scale-100 opacity-100" : "scale-0 opacity-0"}`}
                     style={{ transitionDelay: `${300 + i * 80}ms` }}
                   />
@@ -216,7 +216,7 @@ const MilestoneTeaser = () => {
         >
           <Link
             to="/about/our-story"
-            className="group inline-flex items-center text-sm tracking-wider text-white/50 hover:text-white transition-colors duration-200 link-elegant"
+            className="group inline-flex items-center text-sm tracking-wider text-foreground/50 hover:text-foreground transition-colors duration-200 link-elegant"
           >
             Read Our Full Story
             <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300 group-hover:translate-x-2" />
@@ -240,7 +240,7 @@ const MilestoneCard = ({
   if (m.isHighlight) {
     return (
       <div
-        className={`border border-white/20 bg-white/5 rounded-lg overflow-hidden transition-all duration-700 ease-out ${
+        className={`border border-foreground/12 bg-foreground/[0.04] rounded-lg overflow-hidden pl-1 transition-all duration-700 ease-out ${
           isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
         }`}
         style={{ transitionDelay: `${delay}ms` }}
@@ -259,15 +259,15 @@ const MilestoneCard = ({
         )}
         <div className="p-3">
           {m.badge && (
-            <span className="text-[9px] font-mono tracking-[0.15em] uppercase text-white/40 block">
+            <span className="text-[9px] font-mono tracking-[0.15em] uppercase text-foreground/40 block">
               {m.badge}
             </span>
           )}
-          <span className="text-[52px] lg:text-[64px] font-bold text-white leading-none block mb-2 tracking-tight">
+          <span className="text-[36px] lg:text-[44px] font-bold text-foreground leading-none block mb-2 tracking-tight">
             {m.year}
           </span>
-          <h3 className="text-sm font-semibold text-white mt-1 leading-snug">{m.title}</h3>
-          <p className="text-xs text-white/45 mt-1 leading-relaxed">{m.desc}</p>
+          <h3 className="text-sm font-semibold text-foreground mt-1 leading-snug">{m.title}</h3>
+          <p className="text-xs text-foreground/45 mt-1 leading-relaxed">{m.desc}</p>
         </div>
       </div>
     );
@@ -275,7 +275,7 @@ const MilestoneCard = ({
 
   return (
     <div
-      className={`transition-all duration-700 ease-out ${
+      className={`pl-1 transition-all duration-700 ease-out ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
       }`}
       style={{ transitionDelay: `${delay}ms` }}
@@ -292,11 +292,11 @@ const MilestoneCard = ({
           />
         </div>
       )}
-      <span className="text-[52px] lg:text-[64px] font-bold text-white leading-none block mb-2 tracking-tight">
+      <span className="text-[36px] lg:text-[44px] font-bold text-foreground leading-none block mb-2 tracking-tight">
         {m.year}
       </span>
-      <h3 className="text-sm font-semibold text-white mt-1 leading-snug">{m.title}</h3>
-      <p className="text-xs text-white/45 mt-1 leading-relaxed">{m.desc}</p>
+      <h3 className="text-sm font-semibold text-foreground mt-1 leading-snug">{m.title}</h3>
+      <p className="text-xs text-foreground/45 mt-1 leading-relaxed">{m.desc}</p>
     </div>
   );
 };
