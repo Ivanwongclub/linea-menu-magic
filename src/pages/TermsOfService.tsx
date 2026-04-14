@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
 
 const TermsOfService = () => {
   useEffect(() => {
