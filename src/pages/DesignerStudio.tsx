@@ -35,10 +35,10 @@ const DesignerStudio = () => {
       <section className="py-12 px-6 lg:px-10 border-b border-border">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
           <div>
-            <p className="text-[10px] tracking-[0.35em] uppercase text-muted-foreground/50 font-medium mb-2">
+            <h1 className="text-xl font-bold tracking-tight text-foreground mb-1">
               Designer Studio
-            </p>
-            <p className="text-sm text-muted-foreground/70 max-w-md">
+            </h1>
+            <p className="text-sm text-foreground max-w-md">
               Browse the full component library. Enter the studio to build review-ready trim concepts.
             </p>
           </div>
