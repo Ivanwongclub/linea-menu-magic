@@ -99,6 +99,17 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      transitionTimingFunction: {
+        "out-expo":    "cubic-bezier(0.19, 1, 0.22, 1)",
+        "out-quart":   "cubic-bezier(0.25, 1, 0.5, 1)",
+        "spring":      "cubic-bezier(0.34, 1.4, 0.64, 1)",
+        "in-out-soft": "cubic-bezier(0.45, 0, 0.15, 1)",
+      },
+      transitionDuration: {
+        "420": "420ms",
+        "680": "680ms",
+        "900": "900ms",
+      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },
@@ -124,6 +135,26 @@ export default {
           from: { opacity: "0", transform: "translateY(-10px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
+        "reveal-up": {
+          from: { opacity: "0", transform: "translateY(28px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "reveal-left": {
+          from: { opacity: "0", transform: "translateX(-32px)" },
+          to: { opacity: "1", transform: "translateX(0)" },
+        },
+        "reveal-right": {
+          from: { opacity: "0", transform: "translateX(32px)" },
+          to: { opacity: "1", transform: "translateX(0)" },
+        },
+        "reveal-scale": {
+          from: { opacity: "0", transform: "scale(0.94)" },
+          to: { opacity: "1", transform: "scale(1)" },
+        },
+        "page-enter": {
+          from: { opacity: "0", transform: "translateY(12px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -132,6 +163,11 @@ export default {
         "fade-up": "fade-up 0.6s ease-out",
         "slide-in-right": "slide-in-right 0.3s ease-out",
         "slide-down": "slide-down 0.25s ease-out",
+        "reveal-up":    "reveal-up    680ms cubic-bezier(0.19,1,0.22,1) both",
+        "reveal-left":  "reveal-left  680ms cubic-bezier(0.19,1,0.22,1) both",
+        "reveal-right": "reveal-right 680ms cubic-bezier(0.19,1,0.22,1) both",
+        "reveal-scale": "reveal-scale 680ms cubic-bezier(0.25,1,0.5,1)  both",
+        "page-enter":   "page-enter   900ms cubic-bezier(0.19,1,0.22,1) both",
       },
     },
   },
