@@ -162,7 +162,7 @@ export default function Production() {
         {/* ── SECTION 2: Workflow steps ─────────────────────────────────── */}
         <section className="section-off-white">
           <div className="section-inner">
-            <div ref={workflowRef} className="space-y-20 lg:space-y-28">
+            <div ref={workflowRef} className="space-y-12 lg:space-y-16">
               {workflowSteps.map((step, i) => (
                 <div
                   key={step.number}
