@@ -144,12 +144,16 @@ const Header = () => {
 
   const isActive = (path: string) => pathname === path || pathname.startsWith(path + "/");
 
-  // ─── Nav link class: always white, hover = black text (no background change) ─
+  // ─── Nav link class: white on transparent, black on scrolled/non-hero ──────
   const linkClass = (active: boolean) =>
     `text-[15px] font-medium tracking-[0.04em] uppercase whitespace-nowrap transition-colors duration-200 py-1 ${
       active
-        ? "text-foreground"
-        : "text-white hover:text-foreground"
+        ? isTransparent
+          ? "text-white"
+          : "text-foreground"
+        : isTransparent
+          ? "text-white/80 hover:text-white"
+          : "text-foreground/60 hover:text-foreground"
     }`;
 
   const iconClass = `p-2 transition-all duration-300 ${
@@ -176,16 +180,20 @@ const Header = () => {
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
 
-            {/* Logo: transparent bg, always black, 40% larger */}
+            {/* Logo: state-aware for hero transparency vs scrolled white bar */}
             <Link to="/" className="inline-flex items-center justify-center px-2 py-1 transition-all duration-300">
               <div className="flex flex-col items-center justify-center leading-none">
                 <span
-                  className="text-[21px] lg:text-[24px] font-bold text-foreground transition-colors duration-300"
+                  className={`text-[21px] lg:text-[24px] font-bold transition-colors duration-300 ${
+                    isTransparent ? "text-white" : "text-foreground"
+                  }`}
                   style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 700, letterSpacing: "0.04em" }}
                 >
                   WIN-CYC
                 </span>
-                <span className="text-[12px] lg:text-[16px] tracking-[0.12em] uppercase text-foreground transition-colors duration-300">
+                <span className={`text-[12px] lg:text-[16px] tracking-[0.12em] uppercase transition-colors duration-300 ${
+                  isTransparent ? "text-white/70" : "text-foreground"
+                }`}>
                   Group Limited
                 </span>
               </div>
@@ -233,14 +241,28 @@ const Header = () => {
             </nav>
 
             {/* CTA buttons */}
-            <div className="hidden lg:flex items-center space-x-3">
+            <div className="hidden lg:flex items-center space-x-3 ml-auto">
               <Link to="/contact">
-                <Button size="sm" className="border border-white/60 bg-white/10 text-white hover:bg-white hover:text-foreground transition-all duration-200">
+                <Button
+                  size="sm"
+                  className={
+                    isTransparent
+                      ? "border border-white/60 bg-white/10 text-white hover:bg-white hover:text-foreground transition-all duration-200"
+                      : "border border-border bg-transparent text-foreground/70 hover:text-foreground hover:border-foreground transition-all duration-200"
+                  }
+                >
                   Contact
                 </Button>
               </Link>
               <Link to="/designer-studio">
-                <Button size="sm" className="bg-white text-foreground border border-white/80 hover:bg-foreground hover:text-background transition-all duration-200">
+                <Button
+                  size="sm"
+                  className={
+                    isTransparent
+                      ? "bg-white text-foreground border border-white/80 hover:bg-foreground hover:text-background transition-all duration-200"
+                      : "bg-foreground text-background border border-foreground hover:bg-foreground/80 transition-all duration-200"
+                  }
+                >
                   B2B Login
                 </Button>
               </Link>
