@@ -100,8 +100,8 @@ const MilestoneTeaser = () => {
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div ref={headerRef} className="mb-6">
           <span
-            className={`text-[11px] font-medium tracking-[0.12em] uppercase text-foreground/40 block mb-3 transition-all duration-700 ease-out ${
-              headerVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"
+             className={`text-[11px] font-medium tracking-[0.12em] uppercase text-foreground/40 block mb-3 transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${
+               headerVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"
             }`}
           >
             About WIN-CYC
@@ -129,8 +129,8 @@ const MilestoneTeaser = () => {
               {milestones.map((m, i) => (
                 <div
                   key={`above-${i}`}
-                  className={`flex items-end pb-4 transition-all duration-700 ease-out ${
-                    timelineVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+                   className={`flex items-end pb-4 transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${
+                     timelineVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
                   }`}
                   style={{ gridRow: 1, gridColumn: i + 1, transitionDelay: `${i * 80}ms` }}
                 >
@@ -151,7 +151,7 @@ const MilestoneTeaser = () => {
                       className="absolute top-0 left-0 h-full bg-foreground/80"
                       style={{
                         width: timelineVisible ? `calc(${COLS} * 100% + ${(COLS - 1) * 16}px)` : "0%",
-                        transition: "width 2s cubic-bezier(0.4,0,0.2,1)",
+                        transition: "width 1.4s cubic-bezier(0.19,1,0.22,1)",
                         transitionDelay: "200ms",
                       }}
                     />
@@ -171,8 +171,8 @@ const MilestoneTeaser = () => {
               {milestones.map((m, i) => (
                 <div
                   key={`below-${i}`}
-                  className={`flex items-start pt-4 transition-all duration-700 ease-out ${
-                    timelineVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
+                   className={`flex items-start pt-4 transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${
+                     timelineVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
                   }`}
                   style={{ gridRow: 3, gridColumn: i + 1, transitionDelay: `${i * 80 + 100}ms` }}
                 >
@@ -187,8 +187,8 @@ const MilestoneTeaser = () => {
       {/* CTA — constrained */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8 mt-14">
         <div
-          className={`transition-all duration-700 ease-out ${
-            timelineVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+           className={`transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${
+             timelineVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
           }`}
           style={{ transitionDelay: "1200ms" }}
         >
@@ -218,8 +218,8 @@ const MilestoneCard = ({
   if (m.isHighlight) {
     return (
       <div
-        className={`border border-foreground/12 bg-foreground/[0.04] rounded-lg overflow-hidden pl-1 transition-all duration-700 ease-out ${
-          isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+         className={`border border-foreground/12 bg-foreground/[0.04] rounded-lg overflow-hidden pl-1 transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${
+           isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
         }`}
         style={{ transitionDelay: `${delay}ms` }}
       >
@@ -241,7 +241,7 @@ const MilestoneCard = ({
               {m.badge}
             </span>
           )}
-          <span className="text-[38px] lg:text-[44px] font-bold text-foreground/80 leading-none block mb-1 tracking-tight">
+           <span className={`text-[38px] lg:text-[44px] font-bold text-foreground/80 leading-none block mb-1 tracking-tight transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.34,1.4,0.64,1)] ${isVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-4 scale-95"}`} style={{ transitionDelay: `${delay + 100}ms` }}>
             {m.year}
           </span>
           <h3 className="text-sm font-semibold text-foreground mt-1 leading-snug">{m.title}</h3>
@@ -253,8 +253,8 @@ const MilestoneCard = ({
 
   return (
     <div
-      className={`pl-1 transition-all duration-700 ease-out ${
-        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+       className={`pl-1 transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${
+         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
       }`}
       style={{ transitionDelay: `${delay}ms` }}
     >
@@ -272,7 +272,7 @@ const MilestoneCard = ({
           />
         </div>
       )}
-      <span className="text-[38px] lg:text-[44px] font-bold text-foreground/80 leading-none block mb-1 tracking-tight">
+      <span className={`text-[38px] lg:text-[44px] font-bold text-foreground/80 leading-none block mb-1 tracking-tight transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.34,1.4,0.64,1)] ${isVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-4 scale-95"}`} style={{ transitionDelay: `${delay + 100}ms` }}>
         {m.year}
       </span>
       <h3 className="text-sm font-semibold text-foreground mt-1 leading-snug">{m.title}</h3>
