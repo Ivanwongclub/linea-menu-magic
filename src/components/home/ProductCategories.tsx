@@ -52,7 +52,7 @@ const CategoryCard = ({
         className="w-full h-full object-cover transition-transform duration-[400ms] ease-out group-hover:scale-[1.04]"
       />
     </div>
-    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent transition-opacity duration-400 group-hover:from-black/80" />
+    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
     <div className="absolute inset-0 flex flex-col justify-end p-6 lg:p-8">
       <h3 className="text-lg font-semibold tracking-tight text-white">
         {category.titleEn}
