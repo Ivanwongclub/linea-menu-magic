@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { ENV } from "@/config/env";
 import { getProductImageUrl } from "@/lib/productImage";
 
 import { Input } from "@/components/ui/input";

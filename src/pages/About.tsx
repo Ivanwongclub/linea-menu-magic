@@ -166,11 +166,11 @@ const About = () => {
                     <div className="w-[80px] flex-shrink-0 text-right pt-0.5">
                       <span
                         className={`font-bold leading-none tracking-tight block ${
-                          (milestone as any).isHighlight
+                          milestone.isHighlight
                             ? "text-[22px] lg:text-[26px] text-foreground"
                             : "text-[22px] lg:text-[26px] text-foreground/75"
                         } ${
-                          (milestone as any).isVintage ? "text-foreground/50" : ""
+                          milestone.isVintage ? "text-foreground/50" : ""
                         }`}
                       >
                         {milestone.year}
@@ -181,7 +181,7 @@ const About = () => {
                     <div className="flex-shrink-0 relative" style={{ marginLeft: "-5px", marginTop: "6px" }}>
                       <div
                         className={`rounded-full border-2 ${
-                          (milestone as any).isHighlight
+                          milestone.isHighlight
                             ? "w-[14px] h-[14px] bg-foreground border-foreground"
                             : "w-[12px] h-[12px] bg-heritage border-foreground/50"
                         }`}
@@ -192,11 +192,11 @@ const About = () => {
                     <div className="flex-1 pb-2">
                       <p
                         className={`leading-relaxed ${
-                          (milestone as any).isHighlight
+                          milestone.isHighlight
                             ? "text-foreground font-semibold text-[15px]"
                             : "text-foreground/70 text-[14px]"
                         } ${
-                          (milestone as any).isVintage ? "text-foreground/50" : ""
+                          milestone.isVintage ? "text-foreground/50" : ""
                         }`}
                       >
                         {milestone.event}

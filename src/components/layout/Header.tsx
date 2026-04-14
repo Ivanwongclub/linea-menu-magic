@@ -293,7 +293,7 @@ const Header = () => {
         <div className={`transition-all duration-200 ease-out ${
           isSegmentsOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-1 pointer-events-none"
         }`}>
-          <div className="bg-white border-b-[3px] border-b-foreground shadow-[0_8px_24px_rgba(0,0,0,0.06)] h-[660px]">
+          <div className="bg-white border-b-[3px] border-b-foreground shadow-mega h-[660px]">
             <div className="w-full pr-10 lg:pr-16 xl:pr-24 py-10 h-full" style={{ paddingLeft: navLeftOffset }}>
               <div className="flex gap-0 h-full">
 
@@ -387,7 +387,7 @@ const Header = () => {
         <div className={`transition-all duration-200 ease-out ${
           isProductsOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-1 pointer-events-none"
         }`}>
-          <div className="bg-white border-b-[3px] border-b-foreground shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
+          <div className="bg-white border-b-[3px] border-b-foreground shadow-mega">
             <div className="w-full pr-10 lg:pr-16 xl:pr-24 py-10" style={{ paddingLeft: navLeftOffset }}>
               <div className="flex items-start gap-10">
                 {/* Hardware column */}
@@ -483,7 +483,7 @@ const Header = () => {
         <div className={`transition-all duration-200 ease-out ${
           isAboutOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-1 pointer-events-none"
         }`}>
-          <div className="bg-white border-b-[3px] border-b-foreground shadow-[0_8px_24px_rgba(0,0,0,0.06)] h-[560px]">
+          <div className="bg-white border-b-[3px] border-b-foreground shadow-mega h-[560px]">
             <div className="w-full pr-10 lg:pr-16 xl:pr-24 py-10 h-full" style={{ paddingLeft: navLeftOffset }}>
               <div className="flex gap-0 h-full">
                 <div className="flex-[6] pr-10 flex gap-10">
