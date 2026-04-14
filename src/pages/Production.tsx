@@ -321,6 +321,14 @@ export default function Production() {
             </div>
           </div>
         </section>
+
+        {/* 3D Gallery popup */}
+        <Suspense fallback={null}>
+          <ObjGallery
+            open={galleryOpen}
+            onClose={() => setGalleryOpen(false)}
+          />
+        </Suspense>
     </>
   );
 }
