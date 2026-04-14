@@ -297,7 +297,7 @@ const Header = () => {
           onMouseEnter={handleSegmentsEnter}
           onMouseLeave={handleSegmentsLeave}
         >
-          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] h-[560px]">
+          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] h-[660px]">
             <div className="w-full pr-10 lg:pr-16 xl:pr-24 py-10 h-full" style={{ paddingLeft: navLeftOffset }}>
               <div className="flex gap-0 h-full">
 
@@ -339,7 +339,7 @@ const Header = () => {
                 {(() => {
                   const active = PRODUCT_SEGMENT_DETAILS.find((s) => s.slug === activeSegmentSlug) ?? PRODUCT_SEGMENT_DETAILS[0];
                   return (
-                    <div className="flex-1 px-8 flex flex-col gap-5 min-w-0 h-full">
+                    <div className="flex-1 px-8 flex flex-col gap-5 min-w-0 h-full overflow-y-auto">
                       <div>
                         <p className="text-[18px] font-semibold text-foreground">{active.name}</p>
                         <p className="text-[13px] text-muted-foreground mt-2 leading-relaxed">{active.tagline}</p>
