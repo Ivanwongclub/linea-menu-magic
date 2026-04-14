@@ -11,9 +11,9 @@ const Footer = () => {
           {/* Brand */}
           <div className="lg:col-span-1">
             <div className="mb-6">
-              <div className="flex flex-col items-start leading-none select-none">
-                <span className="text-[20px] font-bold tracking-[0.04em] text-white">WIN-CYC</span>
-                <span className="text-[8px] font-medium uppercase tracking-[0.22em] text-white/70">Group Limited</span>
+              <div className="flex flex-col items-center leading-none select-none">
+                <span className="text-[24px] font-extrabold tracking-[0.06em] text-white">WIN-CYC</span>
+                <span className="text-[10px] font-normal uppercase tracking-[0.28em] text-white/50">Group Limited</span>
               </div>
             </div>
             <p className="text-xs text-white/45 tracking-[0.06em] mt-3 leading-relaxed">
