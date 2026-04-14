@@ -200,7 +200,7 @@ const Header = () => {
             </Link>
 
             {/* Desktop nav */}
-            <nav className="hidden lg:flex items-center gap-8 ml-16 xl:ml-24">
+            <nav className="hidden lg:flex items-center justify-center gap-8 flex-1">
               {navLinks.map((link) => {
                 if (link.megaMenu === "segments") {
                   return (
