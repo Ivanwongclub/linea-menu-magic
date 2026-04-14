@@ -90,7 +90,7 @@ function slugify(name: string) {
   return name.toLowerCase().replace(/\s+&\s+/g, "-").replace(/\s+/g, "-");
 }
 
-const DEFAULT_PREVIEW = MEGA_FAMILIES[0].image;
+
 
 // ─── Component ─────────────────────────────────────────────────────────────────
 const Header = () => {
