@@ -44,12 +44,12 @@ const DesignerStudio = () => {
           </div>
           <div className="flex gap-3 shrink-0">
             <Link to="/designer-studio/dashboard">
-              <Button size="sm" className="tracking-[0.1em] text-xs px-6">
+              <Button size="sm" className="tracking-[0.05em] text-xs px-6 capitalize">
                 Enter Studio
               </Button>
             </Link>
             <Link to="/contact">
-              <Button variant="outline" size="sm" className="tracking-[0.1em] text-xs px-6">
+              <Button variant="outline" size="sm" className="tracking-[0.05em] text-xs px-6 capitalize">
                 Request Access
               </Button>
             </Link>
@@ -75,7 +75,7 @@ const DesignerStudio = () => {
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setActiveFamily(null)}
-                className={`px-3 py-1.5 text-[11px] tracking-[0.08em] uppercase border transition-colors ${
+                className={`px-3 py-1.5 text-[11px] tracking-[0.03em] capitalize border transition-colors ${
                   !activeFamily
                     ? "bg-foreground text-background border-foreground"
                     : "bg-transparent text-muted-foreground border-border hover:border-foreground/40"
@@ -87,7 +87,7 @@ const DesignerStudio = () => {
                 <button
                   key={f.slug}
                   onClick={() => setActiveFamily(f.slug === activeFamily ? null : f.slug)}
-                  className={`px-3 py-1.5 text-[11px] tracking-[0.08em] uppercase border transition-colors ${
+                  className={`px-3 py-1.5 text-[11px] tracking-[0.03em] capitalize border transition-colors ${
                     activeFamily === f.slug
                       ? "bg-foreground text-background border-foreground"
                       : "bg-transparent text-muted-foreground border-border hover:border-foreground/40"
@@ -139,7 +139,7 @@ const DesignerStudio = () => {
             <Button
               variant="outline-inverse"
               size="lg"
-              className="tracking-[0.1em] text-xs px-10 mb-16"
+              className="tracking-[0.05em] text-xs px-10 mb-16 capitalize"
             >
               Request Access
             </Button>
