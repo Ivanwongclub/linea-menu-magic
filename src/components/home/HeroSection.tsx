@@ -90,6 +90,7 @@ const HeroSection = () => {
   const [scrollY, setScrollY] = useState(0);
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
+  const safeCurrent = Math.min(current, slides.length - 1);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -173,7 +174,7 @@ const HeroSection = () => {
       {/* Background color layer */}
       <div
         className="absolute inset-0 transition-colors duration-700 ease-in-out"
-        style={{ backgroundColor: slides[current].bgColor }}
+        style={{ backgroundColor: slides[safeCurrent].bgColor }}
       />
       {prev !== null && (
         <div
@@ -424,8 +425,8 @@ const HeroSection = () => {
         onClick={goPrev}
         className="absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-10 w-11 h-11 hidden md:flex items-center justify-center rounded-full border transition-all duration-200 hover:scale-110"
         style={{
-          borderColor: slides[current].textColor + "33",
-          color: slides[current].textColor,
+          borderColor: slides[safeCurrent].textColor + "33",
+          color: slides[safeCurrent].textColor,
           opacity: opacityFade * 0.7,
         }}
         aria-label="Previous slide"
@@ -438,8 +439,8 @@ const HeroSection = () => {
         onClick={goNext}
         className="absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-10 w-11 h-11 hidden md:flex items-center justify-center rounded-full border transition-all duration-200 hover:scale-110"
         style={{
-          borderColor: slides[current].textColor + "33",
-          color: slides[current].textColor,
+          borderColor: slides[safeCurrent].textColor + "33",
+          color: slides[safeCurrent].textColor,
           opacity: opacityFade * 0.7,
         }}
         aria-label="Next slide"
@@ -461,7 +462,7 @@ const HeroSection = () => {
             style={{
               width: index === current ? "24px" : "6px",
               height: "6px",
-              background: slides[current].textColor,
+              background: slides[safeCurrent].textColor,
               opacity: index === current ? 0.9 : 0.3,
             }}
           />
@@ -472,7 +473,7 @@ const HeroSection = () => {
       <div
         className="absolute top-8 right-8 z-10 text-xs font-mono tracking-widest hidden md:block"
         style={{
-          color: slides[current].textColor,
+          color: slides[safeCurrent].textColor,
           opacity: opacityFade * 0.4,
         }}
       >
@@ -486,7 +487,7 @@ const HeroSection = () => {
           key={current}
           className="h-full origin-left hero-progress-bar"
           style={{
-            background: slides[current].textColor,
+            background: slides[safeCurrent].textColor,
             opacity: 0.5,
             animationPlayState: isPaused ? "paused" : "running",
           }}

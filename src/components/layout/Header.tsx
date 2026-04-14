@@ -133,7 +133,7 @@ const Header = () => {
 
   // ─── Nav link class: always white, hover = black text (no background change) ─
   const linkClass = (active: boolean) =>
-    `text-[13px] font-medium tracking-[0.04em] uppercase whitespace-nowrap transition-colors duration-200 py-1 ${
+    `text-[15px] font-medium tracking-[0.04em] uppercase whitespace-nowrap transition-colors duration-200 py-1 ${
       active
         ? "text-foreground"
         : "text-white hover:text-foreground"
@@ -179,7 +179,7 @@ const Header = () => {
             </Link>
 
             {/* Desktop nav */}
-            <nav className="hidden lg:flex items-center gap-5">
+            <nav className="hidden lg:flex items-center gap-8">
               {navLinks.map((link) => {
                 if (link.megaMenu === "segments") {
                   return (
@@ -249,9 +249,9 @@ const Header = () => {
           onMouseEnter={handleSegmentsEnter}
           onMouseLeave={handleSegmentsLeave}
         >
-          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] min-h-[380px]">
-            <div className="max-w-7xl mx-auto px-6 lg:px-8 py-10">
-              <div className="flex gap-0">
+          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] h-[460px]">
+            <div className="max-w-7xl mx-auto px-6 lg:px-8 py-10 h-full">
+              <div className="flex gap-0 h-full">
 
                 {/* Left: segment selector list */}
                 <div className="w-[220px] flex-shrink-0 border-r border-[hsl(var(--border))] flex flex-col">
@@ -291,7 +291,7 @@ const Header = () => {
                 {(() => {
                   const active = PRODUCT_SEGMENT_DETAILS.find((s) => s.slug === activeSegmentSlug) ?? PRODUCT_SEGMENT_DETAILS[0];
                   return (
-                    <div className="flex-1 px-8 flex flex-col gap-5 min-w-0">
+                    <div className="flex-1 px-8 flex flex-col gap-5 min-w-0 h-full">
                       <div>
                         <p className="text-[18px] font-semibold text-foreground">{active.name}</p>
                         <p className="text-[13px] text-muted-foreground mt-2 leading-relaxed">{active.tagline}</p>
@@ -362,9 +362,9 @@ const Header = () => {
           onMouseEnter={handleProductsEnter}
           onMouseLeave={handleProductsLeave}
         >
-          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] min-h-[380px]">
-            <div className="max-w-7xl mx-auto px-6 lg:px-8 py-10">
-              <div className="flex">
+          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] h-[460px]">
+            <div className="max-w-7xl mx-auto px-6 lg:px-8 py-10 h-full">
+              <div className="flex h-full">
                 <div className="flex-1 flex gap-10">
                   {/* Hardware column */}
                   <div className="min-w-0">
@@ -472,9 +472,9 @@ const Header = () => {
           onMouseEnter={handleAboutEnter}
           onMouseLeave={handleAboutLeave}
         >
-          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] min-h-[380px]">
-            <div className="max-w-7xl mx-auto px-6 lg:px-8 py-10">
-              <div className="flex gap-0">
+          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] h-[460px]">
+            <div className="max-w-7xl mx-auto px-6 lg:px-8 py-10 h-full">
+              <div className="flex gap-0 h-full">
                 <div className="flex-[6] pr-10 flex gap-10">
                   <div className="min-w-0">
                     <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-6 block">
