@@ -18,7 +18,7 @@ import ProductsSidebar from '@/components/products/ProductsSidebar';
 import ProductCard from '@/components/products/ProductCard';
 import type { ViewMode } from '@/components/products/ProductCard';
 import type { Product, ProductFilters } from '@/features/products/types';
-import { PRODUCT_FAMILIES, PRODUCT_SEGMENTS } from '@/features/products/taxonomy';
+import { PRODUCT_FAMILIES } from '@/features/products/taxonomy';
 
 import { useProducts } from '@/features/products/hooks/useProducts';
 import { useProductTaxonomy } from '@/features/products/hooks/useProductTaxonomy';
