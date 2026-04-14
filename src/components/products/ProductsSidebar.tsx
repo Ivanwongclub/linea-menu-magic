@@ -214,7 +214,7 @@ export default function ProductsSidebar({
         </div>
       )}
 
-      <FilterSection label="Product Family" defaultOpen isFirst>
+      <div className="border-t border-border pt-4">
         <div className="space-y-4">
           {familyGroups.map((group) => {
             if (group.categories.length === 0) return null;
@@ -225,13 +225,13 @@ export default function ProductsSidebar({
                   onClick={() =>
                     setFilters({
                       family: isActiveFamily ? undefined : group.slug,
-                      categories: undefined, // reset sub-categories when switching family
+                      categories: undefined,
                     })
                   }
                   className={`text-sm font-medium w-full text-left mb-1.5 transition-colors ${
                     isActiveFamily
                       ? 'text-foreground'
-                      : 'text-muted-foreground hover:text-foreground'
+                      : 'text-foreground hover:text-muted-foreground'
                   }`}
                 >
                   {group.name}
@@ -297,7 +297,7 @@ export default function ProductsSidebar({
             </div>
           )}
         </div>
-      </FilterSection>
+      </div>
 
 
 
