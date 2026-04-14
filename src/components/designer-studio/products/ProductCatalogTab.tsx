@@ -465,12 +465,12 @@ function GenerateAIImagesButton({
     try {
       while (hasMore) {
         const res = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-product-images`,
+          `${ENV.SUPABASE_URL}/functions/v1/generate-product-images`,
           {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+              Authorization: `Bearer ${ENV.SUPABASE_KEY}`,
             },
             body: JSON.stringify({ batchSize: 10 }),
           },
