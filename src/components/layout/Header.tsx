@@ -514,7 +514,7 @@ const Header = () => {
                             <Link
                               to={item.href!}
                               onClick={closeAllMenus}
-                              className="text-[14px] text-muted-foreground hover:text-foreground transition-colors duration-150 block py-[7px]"
+                              className="text-[15px] font-semibold text-muted-foreground hover:text-foreground transition-colors duration-150 block py-[7px]"
                               onMouseEnter={() => { setAboutPreviewImage(item.image!); setAboutPreviewLabel(item.label!); }}
                             >
                               {item.label}
