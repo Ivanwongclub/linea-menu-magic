@@ -327,23 +327,49 @@ const Sustainability = () => {
                 sustainProductsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
               }`}
             >
-              <div className="mb-10">
-                <h2 className="text-[clamp(1.6rem,3vw,2.4rem)] font-bold text-foreground mb-6 leading-tight">
-                  Here are some related sustainable products:
+              {/* Editorial heading + material pillars */}
+              <div className="mb-14">
+                <p className="text-xs tracking-[0.2em] uppercase text-muted-foreground mb-4">Sustainable Materials</p>
+                <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-10 leading-[1.1]">
+                  Responsibly Sourced
                 </h2>
-                <ul className="space-y-1.5">
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-border rounded-xl overflow-hidden">
                   {[
-                    "Recycled metal (zinc alloy, copper), TPE, PP, PE, ABS and polyamide (certified according to Global Recycled Standard)",
-                    "Sustainable Metal Colours (entirely made without electroplating — audited and certified by SGS)",
-                    "Biodegradable plastic (a self-degrading biopolymer)",
-                    "Natural materials such as Real Horn and Corozo (renewable resource)",
-                  ].map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-[15px] text-muted-foreground leading-relaxed">
-                      <span className="text-foreground/40 mt-0.5 flex-shrink-0">—</span>
-                      <span>{item}</span>
-                    </li>
+                    {
+                      label: "Recycled Metals & Polymers",
+                      body: "Zinc alloy, copper, TPE, PP, PE, ABS and polyamide — certified to the Global Recycled Standard.",
+                      accent: "GRS",
+                    },
+                    {
+                      label: "Sustainable Metal Colours",
+                      body: "Entirely made without electroplating. Audited and certified by SGS.",
+                      accent: "SGS",
+                    },
+                    {
+                      label: "Biodegradable Plastic",
+                      body: "A self-degrading biopolymer that returns to nature at end of life.",
+                      accent: "BIO",
+                    },
+                    {
+                      label: "Natural Materials",
+                      body: "Real Horn and Corozo — renewable resources with timeless character.",
+                      accent: "NAT",
+                    },
+                  ].map((card, i) => (
+                    <div
+                      key={card.label}
+                      className={`bg-background p-6 flex flex-col gap-3 transition-all duration-500 ease-out ${
+                        sustainProductsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+                      }`}
+                      style={{ transitionDelay: `${i * 100}ms` }}
+                    >
+                      <span className="text-[11px] font-mono tracking-widest text-muted-foreground/60 uppercase">{card.accent}</span>
+                      <h3 className="text-sm font-semibold text-foreground leading-snug">{card.label}</h3>
+                      <p className="text-[13px] text-muted-foreground leading-relaxed">{card.body}</p>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
