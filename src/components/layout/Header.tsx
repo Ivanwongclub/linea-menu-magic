@@ -370,11 +370,12 @@ const Header = () => {
                     Featured
                   </span>
                   <div className="flex-1 relative overflow-hidden bg-secondary min-h-[200px]">
-                    <div className="absolute inset-0 flex items-end p-4">
-                      <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
-                        Product image coming soon
-                      </span>
-                    </div>
+                    <img
+                      src={featuredSegmentImg}
+                      alt="Featured fashion hardware trims"
+                      className="absolute inset-0 w-full h-full object-cover"
+                      loading="lazy"
+                    />
                   </div>
                   <Link
                     to={`/products?segments=${activeSegmentSlug}`}
