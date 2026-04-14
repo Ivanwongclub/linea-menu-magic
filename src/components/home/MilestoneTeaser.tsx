@@ -3,54 +3,111 @@ import { useScrollAnimation } from "@/hooks/use-scroll-animation";
 import LetterReveal from "@/components/ui/LetterReveal";
 import { ArrowRight } from "lucide-react";
 import milestoneFoundingImg from "@/assets/milestone-founding.jpg";
+import milestoneCraftImg from "@/assets/milestone-craftsmanship.jpg";
+import milestoneIsoImg from "@/assets/milestone-iso-quality.jpg";
 import milestoneGlobalImg from "@/assets/milestone-global.jpg";
+import factoryHeroImg from "@/assets/factory-hero.jpg";
+import factoryProductionImg from "@/assets/factory-production.jpg";
+import milestoneIntegratedImg from "@/assets/milestone-integrated.jpg";
+import sustainabilityRecycledImg from "@/assets/sustainability-recycled-metal.jpg";
 import milestoneDigitalImg from "@/assets/milestone-digital.jpg";
 
 interface Milestone {
   year: string;
-  label: string;
+  title: string;
   desc: string;
-  image?: string;
+  image: string;
+  position: "above" | "below";
+  animClass: string;
   isHighlight?: boolean;
-  month?: string;
+  badge?: string;
 }
 
 const milestones: Milestone[] = [
   {
     year: "1979",
-    label: "Founded in Hong Kong",
-    desc: "A small workshop with a vision for world-class trims.",
+    title: "Founded in Hong Kong",
+    desc: "A small workshop with a vision for world-class garment trims.",
     image: milestoneFoundingImg,
+    position: "above",
+    animClass: "ms-anim-warm",
+  },
+  {
+    year: "1990s",
+    title: "Manufacturing Depth",
+    desc: "Refining tooling, production techniques, and craft expertise.",
+    image: milestoneCraftImg,
+    position: "below",
+    animClass: "ms-anim-zoom",
   },
   {
     year: "2000",
-    label: "ISO 9001 Certified",
-    desc: "International quality systems across all production lines.",
+    title: "ISO 9001 Certified",
+    desc: "International quality management systems formalised.",
+    image: milestoneIsoImg,
+    position: "above",
+    animClass: "ms-anim-zoom",
+  },
+  {
+    year: "2000s–2010s",
+    title: "Global Supply Partner",
+    desc: "Leading brands across Europe, the Americas & Asia Pacific.",
+    image: milestoneGlobalImg,
+    position: "below",
+    animClass: "ms-anim-drift",
   },
   {
     year: "2010s",
-    label: "Global Supply Partner",
-    desc: "Serving leading brands across Europe, Americas & Asia Pacific.",
-    image: milestoneGlobalImg,
+    title: "OEM & ODM Capability",
+    desc: "Concept-to-production — sampling, mould-making, volume manufacturing.",
+    image: factoryHeroImg,
+    position: "above",
+    animClass: "ms-anim-pan",
+  },
+  {
+    year: "2015",
+    title: "Multi-Location Operations",
+    desc: "Hong Kong HQ, Dongguan production, regional offices worldwide.",
+    image: factoryProductionImg,
+    position: "below",
+    animClass: "ms-anim-pan",
+  },
+  {
+    year: "2020s",
+    title: "Integrated Solutions",
+    desc: "Full-service partner — design, compliance, trim programmes.",
+    image: milestoneIntegratedImg,
+    position: "above",
+    animClass: "ms-anim-drift",
+  },
+  {
+    year: "45+ Years",
+    title: "Sustainability Commitment",
+    desc: "Recycled and eco-conscious accessories for responsible brands.",
+    image: sustainabilityRecycledImg,
+    position: "below",
+    animClass: "ms-anim-breathe",
   },
   {
     year: "2026",
-    label: "New Era",
-    desc: "A new WinCYC — Digital Transformation.",
+    title: "New Era",
+    desc: "Digital transformation — catalogue, collaboration & speed.",
     image: milestoneDigitalImg,
+    position: "below",
     isHighlight: true,
-    month: "May",
+    badge: "May 2026 · New Era",
+    animClass: "ms-anim-shimmer",
   },
 ];
 
 const MilestoneTeaser = () => {
   const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation({ threshold: 0.2 });
-  const { ref: timelineRef, isVisible: timelineVisible } = useScrollAnimation({ threshold: 0.15 });
+  const { ref: timelineRef, isVisible: timelineVisible } = useScrollAnimation({ threshold: 0.1 });
 
   return (
     <section className="py-24 overflow-hidden bg-secondary/30">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        {/* About WinCYC header */}
+        {/* Header */}
         <div ref={headerRef} className="mb-6">
           <span
             className={`section-label transition-all duration-700 ease-out ${
@@ -79,7 +136,7 @@ const MilestoneTeaser = () => {
           </h2>
         </div>
 
-        {/* Intro blurb */}
+        {/* Intro */}
         <p
           className={`text-muted-foreground max-w-xl mb-16 leading-relaxed transition-all duration-700 ease-out ${
             headerVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
@@ -91,73 +148,78 @@ const MilestoneTeaser = () => {
 
         {/* Horizontal timeline */}
         <div ref={timelineRef} className="relative">
-          {/* Connecting line — sits at dot center (16px from top of dot area) */}
+          {/* Spine base line */}
           <div className="absolute top-[7px] left-0 right-0 h-px bg-border hidden md:block" />
+          {/* Spine fill — animated */}
           <div
-            className={`absolute top-[7px] left-0 h-px bg-foreground hidden md:block transition-all duration-[1.5s] ease-out ${
-              timelineVisible ? "right-0" : "right-full"
+            className={`absolute top-[7px] left-0 right-0 h-px bg-foreground hidden md:block transform-gpu origin-left ${
+              timelineVisible ? "animate-[ms-line-grow_2s_ease-out_forwards]" : "scale-x-0"
             }`}
-            style={{ transitionDelay: "300ms" }}
+            style={{ animationDelay: "300ms" }}
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-9 gap-8 md:gap-4">
             {milestones.map((m, i) => (
               <div
                 key={m.year}
                 className={`relative transition-all duration-700 ease-out ${
-                  timelineVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-                }`}
-                style={{ transitionDelay: `${300 + i * 200}ms` }}
+                  timelineVisible ? "opacity-100 translate-y-0 ms-visible" : "opacity-0 translate-y-8"
+                } ${m.animClass}`}
+                style={{ transitionDelay: `${300 + i * 150}ms` }}
               >
-                {/* Dot — centered on the line */}
-                <div className="hidden md:block mb-6">
+                {/* Dot */}
+                <div className="hidden md:flex items-center mb-5">
                   <div
-                    className={`rounded-full border-2 transition-all duration-500 ${
+                    className={`rounded-full border-2 ${
                       m.isHighlight
                         ? "w-[14px] h-[14px] bg-foreground border-foreground"
                         : "w-[14px] h-[14px] bg-background border-foreground"
+                    } ${
+                      timelineVisible
+                        ? "animate-[ms-dot-pop_0.5s_cubic-bezier(0.34,1.56,0.64,1)_forwards]"
+                        : "scale-0 opacity-0"
                     }`}
-                    style={{ transitionDelay: `${500 + i * 200}ms` }}
+                    style={{ animationDelay: `${500 + i * 150}ms` }}
                   />
                 </div>
 
                 {/* Card */}
                 {m.isHighlight ? (
                   <div className="bg-foreground text-background rounded-lg overflow-hidden">
-                    {m.image && (
+                    <div className="overflow-hidden rounded-sm">
                       <img
                         src={m.image}
-                        alt={m.label}
+                        alt={m.title}
                         width={800}
-                        height={544}
+                        height={608}
                         loading="lazy"
                         className="w-full h-32 object-cover"
                       />
-                    )}
-                    <div className="p-5">
+                    </div>
+                    <div className="p-4">
                       <span className="text-[10px] font-mono tracking-[0.15em] uppercase opacity-70">
-                        {m.month} {m.year} · New Era
+                        {m.badge}
                       </span>
-                      <h3 className="text-base font-semibold mt-1">{m.label}</h3>
-                      <p className="text-sm opacity-80 mt-2 leading-relaxed">{m.desc}</p>
+                      <h3 className="text-sm font-semibold mt-1">{m.title}</h3>
+                      <p className="text-xs opacity-80 mt-1.5 leading-relaxed">{m.desc}</p>
                     </div>
                   </div>
                 ) : (
                   <div>
-                    {m.image && (
+                    <div className="overflow-hidden rounded-sm mb-3">
                       <img
                         src={m.image}
-                        alt={m.label}
+                        alt={m.title}
                         width={800}
-                        height={544}
+                        height={608}
                         loading="lazy"
-                        className="w-full h-28 object-cover rounded-lg mb-3"
+                        className="w-full h-28 object-cover"
                       />
-                    )}
+                    </div>
                     <span className="text-[10px] font-mono tracking-[0.12em] text-muted-foreground">
                       {m.year}
                     </span>
-                    <h3 className="text-sm font-semibold text-foreground mt-1">{m.label}</h3>
+                    <h3 className="text-sm font-semibold text-foreground mt-1">{m.title}</h3>
                     <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{m.desc}</p>
                   </div>
                 )}
