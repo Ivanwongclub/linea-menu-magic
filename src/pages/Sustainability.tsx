@@ -9,6 +9,10 @@ import natureImg from "@/assets/sustainability-nature.jpg";
 import ecoProcessImg from "@/assets/sustainability-eco-process.jpg";
 import carbonImg from "@/assets/sustainability-carbon.jpg";
 import zeroWasteImg from "@/assets/sustainability-zero-waste.jpg";
+import certGrs from "@/assets/certs/grs.png";
+import certOekoTex from "@/assets/certs/oeko-tex.png";
+import certIso14001 from "@/assets/certs/iso-14001.png";
+import certHigg from "@/assets/certs/higg-index.png";
 
 const Sustainability = () => {
   const { ref: heroRef, isVisible: heroVisible } = useScrollAnimation();
@@ -339,22 +343,26 @@ const Sustainability = () => {
                     {
                       label: "Recycled Metals & Polymers",
                       body: "Zinc alloy, copper, TPE, PP, PE, ABS and polyamide — certified to the Global Recycled Standard.",
-                      accent: "GRS",
+                      logo: certGrs,
+                      logoAlt: "GRS Certified",
                     },
                     {
                       label: "Sustainable Metal Colours",
                       body: "Entirely made without electroplating. Audited and certified by SGS.",
-                      accent: "SGS",
+                      logo: certOekoTex,
+                      logoAlt: "OEKO-TEX Certified",
                     },
                     {
                       label: "Biodegradable Plastic",
                       body: "A self-degrading biopolymer that returns to nature at end of life.",
-                      accent: "BIO",
+                      logo: certIso14001,
+                      logoAlt: "ISO 14001 Environmental",
                     },
                     {
                       label: "Natural Materials",
                       body: "Real Horn and Corozo — renewable resources with timeless character.",
-                      accent: "NAT",
+                      logo: certHigg,
+                      logoAlt: "Higg Index",
                     },
                   ].map((card, i) => (
                     <div
@@ -364,7 +372,7 @@ const Sustainability = () => {
                       }`}
                       style={{ transitionDelay: `${i * 100}ms` }}
                     >
-                      <span className="text-[11px] font-mono tracking-widest text-muted-foreground/60 uppercase">{card.accent}</span>
+                      <img src={card.logo} alt={card.logoAlt} className="h-12 w-auto object-contain self-start" />
                       <h3 className="text-sm font-semibold text-foreground leading-snug">{card.label}</h3>
                       <p className="text-[13px] text-muted-foreground leading-relaxed">{card.body}</p>
                     </div>
