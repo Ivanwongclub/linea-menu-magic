@@ -93,7 +93,6 @@ export default function Production() {
           { label: "Home", href: "/" },
           { label: "Production" },
         ]}
-        title="Production"
       />
         {/* ── SECTION 1: Page intro ──────────────────────────────────────── */}
         <section className="section-light">

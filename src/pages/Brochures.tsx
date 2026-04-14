@@ -20,7 +20,6 @@ export default function Brochures() {
     <div className="min-h-screen flex flex-col bg-background">
       <PageBreadcrumb
         segments={[{ label: "Home", href: "/" }, { label: "E-Collections" }]}
-        title="E-Collections"
       />
 
       <div className="max-w-7xl mx-auto w-full px-6 lg:px-8 mb-8">
