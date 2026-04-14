@@ -238,7 +238,7 @@ const OurStory = () => {
             </div>
           </div>
         </div>
-    </div>
+    </>
   );
 };
 
@@ -294,7 +294,7 @@ const CenteredMilestoneItem = ({
               )}
             </div>
             <div />
-          </div>
+          </>
         ) : (
           <>
             <div />
@@ -305,10 +305,10 @@ const CenteredMilestoneItem = ({
                 <MilestoneContent milestone={m} align="left" />
               )}
             </div>
-          </div>
+          </>
         )}
       </div>
-    </>
+    </div>
   );
 };
 

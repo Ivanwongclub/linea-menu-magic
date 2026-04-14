@@ -736,7 +736,7 @@ const DesignerStudioDashboard = () => {
           setTimeout(() => setIsSearchDialogOpen(true), 100);
         }}
       />
-    </>
+    </div>
   );
 };
 

@@ -456,7 +456,7 @@ export default function ProductDetail() {
                     <>
                       <span className="text-muted-foreground/40">·</span>
                       <span className="text-[11px] font-mono text-muted-foreground">{product.item_code}</span>
-                    </div>
+                    </>
                   )}
                 </div>
                 <h1 className="text-2xl lg:text-3xl font-semibold tracking-tight text-foreground leading-tight mb-2">
