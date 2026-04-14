@@ -1,5 +1,3 @@
-import Header from "../../components/layout/Header";
-import Footer from "../../components/layout/Footer";
 import ContentSection from "../../components/about/ContentSection";
 import { useScrollAnimation } from "@/hooks/use-scroll-animation";
 import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
@@ -70,9 +68,7 @@ const OurStory = () => {
   const { ref: timelineHeaderRef, isVisible: timelineHeaderVisible } = useScrollAnimation({ threshold: 0.2 });
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-
+    <>
       <PageBreadcrumb
         segments={[
           { label: "Home", href: "/" },
@@ -80,8 +76,6 @@ const OurStory = () => {
           { label: "Our Story" },
         ]}
       />
-
-      <main className="py-8 px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           {/* Intro — The Beginning */}
           <div
@@ -244,10 +238,7 @@ const OurStory = () => {
             </div>
           </div>
         </div>
-      </main>
-
-      <Footer />
-    </div>
+    </>
   );
 };
 
@@ -317,7 +308,7 @@ const CenteredMilestoneItem = ({
           </>
         )}
       </div>
-    </div>
+    </>
   );
 };
 

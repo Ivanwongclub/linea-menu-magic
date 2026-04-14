@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { BookOpen, Code2, Link2 } from "lucide-react";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
 import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
 import EmbedModal from "@/components/EmbedModal";
 import { useBrochures, type BrochureWithMeta } from "@/features/flipbook/hooks/useBrochures";
@@ -20,8 +18,6 @@ export default function Brochures() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-
       <PageBreadcrumb
         segments={[{ label: "Home", href: "/" }, { label: "Brochures" }]}
         title="Brochures"
@@ -35,8 +31,6 @@ export default function Brochures() {
           Browse and read our latest publications
         </p>
       </section>
-
-      <main className="flex-1 max-w-7xl mx-auto w-full px-6 lg:px-8 pb-20">
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {Array.from({ length: 6 }).map((_, i) => (
@@ -68,8 +62,6 @@ export default function Brochures() {
             ))}
           </div>
         )}
-      </main>
-
       {embedModal && (
         <EmbedModal
           slug={embedModal.slug}
@@ -78,9 +70,7 @@ export default function Brochures() {
           onClose={() => setEmbedModal(null)}
         />
       )}
-
-      <Footer />
-    </div>
+    </>
   );
 }
 
@@ -219,6 +209,6 @@ function BrochureCard({
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

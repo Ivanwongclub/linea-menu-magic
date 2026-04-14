@@ -1,7 +1,5 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -375,10 +373,7 @@ const DesignerStudioDashboard = () => {
           isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
         }`}
       >
-        <Header />
       </div>
-
-      <main className="flex-1">
         <div className="max-w-7xl mx-auto px-4 lg:px-6">
 
           {/* Page title + primary CTA */}
@@ -719,8 +714,6 @@ const DesignerStudioDashboard = () => {
             </div>
           )}
         </div>
-      </main>
-
       <ProductQuickView
         item={quickViewItem}
         open={isQuickViewOpen}
@@ -743,9 +736,7 @@ const DesignerStudioDashboard = () => {
           setTimeout(() => setIsSearchDialogOpen(true), 100);
         }}
       />
-
-      <Footer />
-    </div>
+    </>
   );
 };
 

@@ -1,5 +1,3 @@
-import Header from "../../components/layout/Header";
-import Footer from "../../components/layout/Footer";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 import { Award, Shield, Leaf, CheckCircle, FileCheck, Globe } from "lucide-react";
 import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
@@ -80,10 +78,7 @@ const Certificates = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
-      <main className="w-full">
+    <>
         <PageBreadcrumb
           segments={[
             { label: "Home", href: "/" },
@@ -207,10 +202,7 @@ const Certificates = () => {
             </div>
           </div>
         </section>
-      </main>
-      
-      <Footer />
-    </div>
+    </>
   );
 };
 

@@ -1,6 +1,4 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/footer/Footer";
 import { ArrowLeft, Calendar, MapPin, Share2, Facebook, Twitter, Linkedin, Mail, ChevronRight } from "lucide-react";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 import { newsItems, categoryOptions } from "@/data/newsData";
@@ -19,9 +17,7 @@ const NewsDetail = () => {
   
   if (!newsItem) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main className="py-24 px-6 lg:px-8">
+      <>
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-3xl font-bold text-foreground mb-4">Article Not Found</h1>
             <p className="text-muted-foreground mb-8">The article you are looking for does not exist or has been removed.</p>
@@ -30,8 +26,6 @@ const NewsDetail = () => {
               Back to News
             </Link>
           </div>
-        </main>
-        <Footer />
       </div>
     );
   }
@@ -53,10 +47,7 @@ const NewsDetail = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
-      <main>
+    <>
         {/* Hero Image */}
         <section ref={heroRef} className="relative h-[50vh] min-h-[400px] overflow-hidden">
           <img
@@ -232,10 +223,7 @@ const NewsDetail = () => {
             </div>
           </div>
         </section>
-      </main>
-      
-      <Footer />
-    </div>
+    </>
   );
 };
 

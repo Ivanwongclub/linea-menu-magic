@@ -1,8 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { SlidersHorizontal, X, LayoutGrid, List, PackageOpen } from 'lucide-react';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
 import PageBreadcrumb from '@/components/ui/PageBreadcrumb';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
@@ -269,10 +267,7 @@ export default function Products() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-
-      <main>
+    <>
         {/* Breadcrumb */}
         <PageBreadcrumb
           segments={[
@@ -463,13 +458,7 @@ export default function Products() {
             </div>
           </div>
         </section>
-
-
-
-      </main>
-
-      <Footer />
-    </div>
+    </>
   );
 }
 
@@ -497,6 +486,6 @@ function ProductGridSkeleton({ viewMode = 'grid' }: { viewMode?: ViewMode }) {
           </div>
         </div>
       ))}
-    </div>
+    </>
   );
 }

@@ -5,8 +5,6 @@ import {
   ShieldCheck, Factory, ArrowRight, Layers, ClipboardList,
   Package, Cpu, Globe, ChevronRight,
 } from 'lucide-react';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
 import PageBreadcrumb from '@/components/ui/PageBreadcrumb';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -126,7 +124,7 @@ function HeroGallery({ images, onOpen3D, has3D }: { images: ProductImage[]; onOp
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 }
 
@@ -138,7 +136,7 @@ function SpecTile({ label, value }: { label: string; value: string | null | unde
     <div className="py-2">
       <p className="text-[10px] text-muted-foreground uppercase tracking-[0.1em] mb-0.5">{label}</p>
       <p className="text-[13px] font-medium text-foreground leading-snug">{value}</p>
-    </div>
+    </>
   );
 }
 
@@ -151,7 +149,7 @@ function SectionHeading({ id, title, icon: Icon }: { id: string; title: string; 
         <Icon className="h-4 w-4 text-background" />
       </div>
       <h2 className="text-sm font-bold uppercase tracking-[0.1em] text-foreground">{title}</h2>
-    </div>
+    </>
   );
 }
 
@@ -198,7 +196,7 @@ function SpecLine({ label, value, icon: Icon }: { label: string; value: string |
         <dt className="text-[11px] text-muted-foreground uppercase tracking-[0.08em] shrink-0">{label}</dt>
         <dd className="text-[13px] font-medium text-foreground text-right truncate">{value}</dd>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -257,7 +255,7 @@ function DetailSkeleton() {
           <Skeleton className="h-14 w-full" />
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -315,18 +313,15 @@ export default function ProductDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
+      <>
         <DetailSkeleton />
-        <Footer />
       </div>
     );
   }
 
   if (error || !product) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
+      <>
         <div className="section-inner py-24 text-center">
           <h1 className="text-xl font-semibold mb-2">Product not found</h1>
           <p className="text-sm text-muted-foreground mb-6">
@@ -336,7 +331,6 @@ export default function ProductDetail() {
             <Link to="/products">Back to Trim Library</Link>
           </Button>
         </div>
-        <Footer />
       </div>
     );
   }
@@ -432,10 +426,7 @@ export default function ProductDetail() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-
-      <main>
+    <>
         <PageBreadcrumb segments={breadcrumbSegments} title={product.name_en ?? product.name} />
 
         {/* ════════════════════════════════════════════════
@@ -762,10 +753,6 @@ export default function ProductDetail() {
 
         {/* ── Related Trims ── */}
         <RelatedProducts product={product} />
-      </main>
-
-      <Footer />
-
       {/* 3D Model Dialog */}
       {product.model_url && (
         <Dialog open={show3D} onOpenChange={setShow3D}>
@@ -777,6 +764,6 @@ export default function ProductDetail() {
           </DialogContent>
         </Dialog>
       )}
-    </div>
+    </>
   );
 }

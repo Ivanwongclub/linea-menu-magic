@@ -1,5 +1,3 @@
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
 import { Leaf, Recycle, Factory, TreePine, Wind, Droplets, Sun, ArrowRight } from "lucide-react";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 import LetterReveal from "@/components/ui/LetterReveal";
@@ -55,10 +53,7 @@ const Sustainability = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-
-      <main>
+    <>
         <PageBreadcrumb
           segments={[
             { label: "Home", href: "/" },
@@ -322,10 +317,7 @@ const Sustainability = () => {
             </div>
           </div>
         </section>
-      </main>
-
-      <Footer />
-    </div>
+    </>
   );
 };
 

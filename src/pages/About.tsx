@@ -1,5 +1,3 @@
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 import LetterReveal from "@/components/ui/LetterReveal";
 import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
@@ -31,10 +29,7 @@ const About = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
-      <main>
+    <>
         <PageBreadcrumb
           segments={[
             { label: "Home", href: "/" },
@@ -206,10 +201,7 @@ const About = () => {
             </div>
           </div>
         </section>
-      </main>
-      
-      <Footer />
-    </div>
+    </>
   );
 };
 
