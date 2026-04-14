@@ -1,44 +1,27 @@
 
 
-## Plan: Dynamically Align Mega Menus to "SEGMENTS" Nav Link
+# Replace Text Logo with Generated SVG Image
 
-### Problem
-After centering the nav with `justify-center flex-1`, the hardcoded `pl-[200px]` no longer aligns with the "SEGMENTS" link position, which now varies based on screen width.
+## What changes
 
-### Approach
-Use a ref on the first nav link ("SEGMENTS") to measure its left offset, then apply that as `paddingLeft` on each mega menu's inner container dynamically. This ensures alignment regardless of screen size.
+1. **Create `/public/wincyc.svg`** — Generate an SVG file with "WIN-CYC" (bold) and "Group Limited" (small caps) styled to match the current text logo, black fill for the normal version.
 
-### Changes — `src/components/layout/Header.tsx`
+2. **Create `/public/wincyc-white.svg`** — Same logo but with white fill, for use on dark backgrounds (hero transparent header, footer).
 
-1. **Add a ref** to the SEGMENTS nav button wrapper (`div` at line 207):
-   ```tsx
-   const segmentsRef = useRef<HTMLDivElement>(null);
-   ```
+3. **Update Header logo** (`src/components/layout/Header.tsx`, lines 204-220):
+   - Replace the text-based `<div>` with an `<img>` tag
+   - Use `wincyc-white.svg` when `isTransparent`, `wincyc.svg` otherwise
+   - Size: `h-10` (40px), auto width
 
-2. **Compute left offset** with a state + resize listener:
-   ```tsx
-   const [navLeftOffset, setNavLeftOffset] = useState(200);
-   useEffect(() => {
-     const update = () => {
-       if (segmentsRef.current) {
-         setNavLeftOffset(segmentsRef.current.getBoundingClientRect().left);
-       }
-     };
-     update();
-     window.addEventListener('resize', update);
-     return () => window.removeEventListener('resize', update);
-   }, []);
-   ```
+4. **Update Footer logo** (`src/components/layout/Footer.tsx`, lines 13-25):
+   - Replace the text-based `<div>` with `<img src="/wincyc-white.svg" />`
+   - Size: `h-8` (32px), auto width
 
-3. **Apply ref** to the SEGMENTS button wrapper:
-   ```tsx
-   <div key={link.href} className="relative" ref={segmentsRef} ...>
-   ```
+5. **Update BrandLogo component** (`src/components/viewer/BrandLogo.tsx`):
+   - Replace text rendering with the SVG image, using variant prop to pick white/dark version
 
-4. **Replace hardcoded padding** on all 3 mega menu inner containers (lines 288, 402, 497):
-   - Remove `pl-[200px] xl:pl-[240px]`
-   - Add inline style: `style={{ paddingLeft: navLeftOffset }}`
-
-### Files modified
-- `src/components/layout/Header.tsx`
+## Technical notes
+- SVGs will use Poppins-style geometry matching the current font rendering
+- Both SVGs have transparent backgrounds (no rect fill)
+- The `isTransparent` conditional in the header switches between the two SVG variants
 
