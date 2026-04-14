@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import {
   FileDown, Box, Send, Palette, BookmarkPlus, Download,
   ShieldCheck, Factory, ArrowRight, Layers, ClipboardList,
@@ -266,6 +266,8 @@ function DetailSkeleton() {
 
 export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
+  const location = useLocation();
+  const isStudioContext = location.pathname.startsWith('/designer-studio');
   const { product, loading, error } = useProduct(slug ?? '');
   const [show3D, setShow3D] = useState(false);
 
@@ -326,7 +328,9 @@ export default function ProductDetail() {
           The product you're looking for doesn't exist or has been removed.
         </p>
         <Button variant="outline" asChild>
-          <Link to="/products">Back to Trim Library</Link>
+          <Link to={isStudioContext ? '/designer-studio' : '/products'}>
+            Back to {isStudioContext ? 'Designer Studio' : 'Trim Library'}
+          </Link>
         </Button>
       </div>
     );
@@ -403,10 +407,13 @@ export default function ProductDetail() {
   }
   const allProductionEntries = Object.entries(mergedProdObj);
 
+  const libraryHref = isStudioContext ? '/designer-studio' : '/products';
+  const libraryLabel = isStudioContext ? 'Designer Studio' : 'Trim Library';
+
   const breadcrumbSegments = [
     { label: 'Home', href: '/' },
-    { label: 'Trim Library', href: '/products' },
-    ...(primaryCat ? [{ label: primaryCat.name, href: `/products?category=${primaryCat.slug}` }] : []),
+    { label: libraryLabel, href: libraryHref },
+    ...(primaryCat ? [{ label: primaryCat.name, href: `${libraryHref}${isStudioContext ? '' : `?category=${primaryCat.slug}`}` }] : []),
     { label: product.name_en ?? product.name },
   ];
 
