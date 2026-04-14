@@ -284,7 +284,7 @@ const Header = () => {
           onMouseEnter={handleSegmentsEnter}
           onMouseLeave={handleSegmentsLeave}
         >
-          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] h-[540px]">
+          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] h-[560px]">
             <div className="w-full px-10 lg:px-16 xl:px-24 py-10 h-full">
               <div className="flex gap-0 h-full">
 
@@ -331,18 +331,18 @@ const Header = () => {
                         <p className="text-[18px] font-semibold text-foreground">{active.name}</p>
                         <p className="text-[13px] text-muted-foreground mt-2 leading-relaxed">{active.tagline}</p>
                       </div>
-                      <div className="flex flex-col gap-5">
+                      <div className="flex flex-col gap-6">
                         {active.categories.map((group) => (
                           <div key={group.family}>
                             <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground block mb-3">
                               {group.family}
                             </span>
-                            <div className="grid gap-[5px]" style={{ gridTemplateColumns: "repeat(4, 130px)" }}>
+                            <div className="grid gap-[6px]" style={{ gridTemplateColumns: "repeat(5, 140px)" }}>
                               {group.items.map((item) => (
                                 <Link
                                   key={item}
                                   to={`/products?categories=${slugify(item)}&segments=${active.slug}`}
-                                  className="w-[130px] py-2.5 text-[12px] text-center border border-[hsl(var(--border))] text-muted-foreground hover:bg-foreground hover:text-background hover:border-foreground transition-colors duration-150 block"
+                                  className="w-[140px] py-3 text-[13px] text-center border border-[hsl(var(--border))] text-muted-foreground hover:bg-foreground hover:text-background hover:border-foreground transition-colors duration-150 block"
                                 >
                                   {item}
                                 </Link>
@@ -397,7 +397,7 @@ const Header = () => {
           onMouseEnter={handleProductsEnter}
           onMouseLeave={handleProductsLeave}
         >
-          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] h-[540px]">
+          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] h-[560px]">
             <div className="w-full px-10 lg:px-16 xl:px-24 py-10 h-full">
               <div className="flex h-full">
                 <div className="flex-1 flex gap-10">
@@ -507,7 +507,7 @@ const Header = () => {
           onMouseEnter={handleAboutEnter}
           onMouseLeave={handleAboutLeave}
         >
-          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] h-[540px]">
+          <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] h-[560px]">
             <div className="w-full px-10 lg:px-16 xl:px-24 py-10 h-full">
               <div className="flex gap-0 h-full">
                 <div className="flex-[6] pr-10 flex gap-10">
