@@ -417,16 +417,13 @@ export default function Products() {
                   }
                 >
                   {products.map((product, idx) => (
-                    <div
-                      key={product.id}
-                      className={`${viewMode === 'grid' && idx === 0 ? 'col-span-2 row-span-2' : ''}`}
-                    >
-                      <Link to={`/products/${product.slug}`} className={viewMode === 'grid' && idx === 0 ? 'block h-full' : ''}>
+                    <div key={product.id}>
+                      <Link to={`/products/${product.slug}`}>
                         <ProductCard
                           product={product}
                           viewMode={viewMode}
                           index={idx}
-                          isHeroLayout={viewMode === 'grid' && idx === 0}
+                          isHeroLayout={false}
                           onQuickView={() => setQuickViewProduct(product)}
                         />
                       </Link>
@@ -478,9 +475,9 @@ function ProductGridSkeleton({ viewMode = 'grid' }: { viewMode?: ViewMode }) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
       {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className={i === 0 ? 'col-span-2 row-span-1' : ''}>
+        <div key={i}>
           <div className="space-y-3">
-            <Skeleton className={`w-full ${i === 0 ? 'aspect-[2/1]' : 'aspect-square'}`} />
+            <Skeleton className="w-full aspect-square" />
             <Skeleton className="h-3 w-2/3" />
             <Skeleton className="h-3 w-1/3" />
           </div>
