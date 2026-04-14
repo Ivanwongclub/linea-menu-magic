@@ -1,10 +1,9 @@
-import { useState, lazy, Suspense } from "react";
+import { useState, Suspense } from "react";
 import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
 import { Link } from "react-router-dom";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 import { ArrowRight, CheckCircle, Box } from "lucide-react";
-
-const ObjGallery = lazy(() => import("@/components/production/ObjGallery"));
+import ObjGallery from "@/components/production/ObjGallery";
 import factoryProductionImg from "@/assets/factory-production.jpg";
 import productionHeroImg from "@/assets/production-hero.jpg";
 import heritageImg from "@/assets/heritage-craftsmanship.jpg";
