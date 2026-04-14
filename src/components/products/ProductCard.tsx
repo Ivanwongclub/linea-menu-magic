@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Sparkles, Heart, Eye, Leaf } from 'lucide-react';
+import { Sparkles, Heart, Eye, Leaf, Box } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { Product } from '@/features/products/types';
 import { getProductPlaceholderUrl } from '@/features/products/utils/productImagePlaceholder';
@@ -123,6 +123,14 @@ export default function ProductCard({
                 +{extraTagCount}
               </span>
             )}
+          </div>
+        )}
+
+        {/* 3D / OBJ badge (top-right) */}
+        {product.model_url && (
+          <div className="absolute top-2.5 right-2.5 bg-white/90 backdrop-blur-sm text-[hsl(var(--foreground))] text-[9px] font-medium uppercase tracking-[0.08em] px-2 py-0.5 rounded-[var(--radius)] border border-[hsl(var(--border))] flex items-center gap-1 z-20">
+            <Box className="w-2.5 h-2.5" />
+            3D
           </div>
         )}
 

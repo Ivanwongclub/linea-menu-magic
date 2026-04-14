@@ -38,7 +38,8 @@ import {
 // Library imports — Supabase-backed
 import { useUserLibrary } from "@/features/products/hooks/useUserLibrary";
 import { useProductTaxonomy } from "@/features/products/hooks/useProductTaxonomy";
-import type { UserLibraryItem } from "@/features/products/types";
+import { useProducts } from "@/features/products/hooks/useProducts";
+import type { UserLibraryItem, Product } from "@/features/products/types";
 import type { SortField } from "@/components/designer-studio/LibraryTable";
 import LibraryItemCard from "@/components/designer-studio/LibraryItemCard";
 import LibraryTable from "@/components/designer-studio/LibraryTable";
@@ -138,6 +139,7 @@ const DesignerStudioDashboard = () => {
   const adminDefaultItems = useMemo(() => libraryItems.filter(item => item.is_admin_default), [libraryItems]);
 
   // Library UI states
+  const [librarySource, setLibrarySource] = useState<'all' | 'my'>('all');
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
@@ -145,6 +147,9 @@ const DesignerStudioDashboard = () => {
   const [sortField, setSortField] = useState<SortField>("addedAt");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [isSearchDialogOpen, setIsSearchDialogOpen] = useState(false);
+
+  // Full catalog data
+  const { products: catalogProducts, loading: catalogLoading } = useProducts({});
 
   // Legacy detail views (keep old types for compatibility)
   const [selectedLibraryItem, setSelectedLibraryItem] = useState<LibraryItem | null>(null);
@@ -182,9 +187,36 @@ const DesignerStudioDashboard = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Convert catalog Product → UserLibraryItem shape for card rendering
+  const catalogAsLibraryItems: UserLibraryItem[] = useMemo(() => {
+    return catalogProducts.map((p): UserLibraryItem => ({
+      id: `catalog-${p.id}`,
+      product_id: p.id,
+      team_id: teamId,
+      is_favourite: false,
+      is_admin_default: false,
+      downloadable_files: [],
+      added_at: p.created_at,
+      section: 'All Products',
+      product: p,
+    }));
+  }, [catalogProducts, teamId]);
+
+  // Merge favourite state from actual library items onto catalog items
+  const mergedCatalogItems: UserLibraryItem[] = useMemo(() => {
+    const favSet = new Set(libraryItems.filter(i => i.is_favourite).map(i => i.product_id));
+    return catalogAsLibraryItems.map(item => ({
+      ...item,
+      is_favourite: favSet.has(item.product_id),
+    }));
+  }, [catalogAsLibraryItems, libraryItems]);
+
+  // Choose source
+  const sourceItems = librarySource === 'all' ? mergedCatalogItems : libraryItems;
+
   // Library filtering & sorting
   const filteredLibraryItems = useMemo(() => {
-    const filtered = libraryItems.filter((item) => {
+    const filtered = sourceItems.filter((item) => {
       const p = item.product;
       const name = item.custom_name || p?.name_en || p?.name || '';
       const code = p?.item_code || '';
@@ -224,7 +256,7 @@ const DesignerStudioDashboard = () => {
       }
       return sortOrder === 'asc' ? comparison : -comparison;
     });
-  }, [libraryItems, searchQuery, categoryFilter, showFavoritesOnly, sortField, sortOrder]);
+  }, [sourceItems, searchQuery, categoryFilter, showFavoritesOnly, sortField, sortOrder]);
 
   const favouriteCount = useMemo(() => libraryItems.filter(i => i.is_favourite).length, [libraryItems]);
 
@@ -469,7 +501,7 @@ const DesignerStudioDashboard = () => {
                   <div>
                     <h2 className="text-lg font-semibold text-foreground">Component Library</h2>
                     <p className="text-xs text-muted-foreground">
-                      {libraryItems.length} components{libraryItems[0]?.team_name ? ` · ${libraryItems[0].team_name}` : ''}
+                      {filteredLibraryItems.length} components
                     </p>
                   </div>
                 </div>
@@ -479,6 +511,30 @@ const DesignerStudioDashboard = () => {
                     <span className="hidden sm:inline">Add Component</span>
                   </Button>
                 </div>
+              </div>
+
+              {/* All Products / My Library toggle */}
+              <div className="flex items-center gap-1 mb-4 bg-[hsl(var(--muted))] rounded-[var(--radius)] p-0.5 w-fit">
+                <button
+                  onClick={() => setLibrarySource('all')}
+                  className={`px-3 py-1.5 text-xs font-medium uppercase tracking-[0.06em] rounded-[calc(var(--radius)-2px)] transition-colors ${
+                    librarySource === 'all'
+                      ? 'bg-[hsl(var(--background))] text-[hsl(var(--foreground))] shadow-sm'
+                      : 'text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]'
+                  }`}
+                >
+                  All Products ({catalogProducts.length})
+                </button>
+                <button
+                  onClick={() => setLibrarySource('my')}
+                  className={`px-3 py-1.5 text-xs font-medium uppercase tracking-[0.06em] rounded-[calc(var(--radius)-2px)] transition-colors ${
+                    librarySource === 'my'
+                      ? 'bg-[hsl(var(--background))] text-[hsl(var(--foreground))] shadow-sm'
+                      : 'text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]'
+                  }`}
+                >
+                  My Library ({libraryItems.length})
+                </button>
               </div>
 
               {/* Library Filters */}
@@ -571,13 +627,13 @@ const DesignerStudioDashboard = () => {
                 </p>
               </div>
 
-              {libraryLoading ? (
+              {(libraryLoading || catalogLoading) ? (
                 <div className="text-center py-16">
                   <p className="text-sm text-muted-foreground">Loading library...</p>
                 </div>
               ) : filteredLibraryItems.length > 0 ? (
                 libraryViewMode === "grid" ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 lg:gap-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
                     {filteredLibraryItems.map((item) => (
                       <LibraryItemCard
                         key={item.id}
