@@ -6,7 +6,7 @@ import aboutHeritageImage from "@/assets/about-heritage.jpg";
 const About = () => {
   const { ref: storyRef, isVisible: storyVisible } = useScrollAnimation();
   const { ref: valuesHeaderRef, isVisible: valuesHeaderVisible } = useScrollAnimation();
-  const { ref: valuesRef, isVisible: valuesVisible, getDelay: getValuesDelay } = useStaggeredAnimation(3, 150);
+  const { ref: valuesRef, isVisible: valuesVisible, getDelay: getValuesDelay } = useStaggeredAnimation(2, 150);
   const { ref: timelineHeaderRef, isVisible: timelineHeaderVisible } = useScrollAnimation();
   const { ref: timelineRef, isVisible: timelineVisible, getDelay: getTimelineDelay } = useStaggeredAnimation(9, 100);
 
@@ -32,7 +32,6 @@ const About = () => {
   const values = [
     { title: "Quality First", desc: "Adhering to international quality standards, every product undergoes rigorous testing." },
     { title: "Innovative Design", desc: "Keeping pace with fashion trends, continuously developing innovative styles and materials." },
-    { title: "Sustainability", desc: "Practising environmental responsibility, driving sustainable production methods." },
   ];
 
   return (
@@ -116,7 +115,7 @@ const About = () => {
               />
             </div>
 
-            <div ref={valuesRef} className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div ref={valuesRef} className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {values.map((value, index) => (
                 <div 
                   key={value.title}
