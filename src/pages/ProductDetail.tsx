@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import {
   FileDown, Box, Send, Palette, BookmarkPlus, Download,
   ShieldCheck, Factory, ArrowRight, Layers, ClipboardList,
