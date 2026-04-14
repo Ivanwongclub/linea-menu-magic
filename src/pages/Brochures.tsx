@@ -22,11 +22,11 @@ export default function Brochures() {
         segments={[{ label: "Home", href: "/" }, { label: "E-Collections" }]}
       />
 
-      <div className="max-w-7xl mx-auto w-full px-6 lg:px-8 mb-8">
-        <p className="text-muted-foreground text-sm max-w-xl leading-relaxed">
+      <div className="max-w-7xl mx-auto w-full px-6 lg:px-8 pb-16">
+        <p className="text-muted-foreground text-sm max-w-xl leading-relaxed mb-8">
           Browse and download our latest product collections
         </p>
-      </div>
+
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {Array.from({ length: 6 }).map((_, i) => (
@@ -58,6 +58,8 @@ export default function Brochures() {
             ))}
           </div>
         )}
+      </div>
+
       {embedModal && (
         <EmbedModal
           slug={embedModal.slug}
