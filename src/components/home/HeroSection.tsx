@@ -20,7 +20,7 @@ const slides = [
     ctaText: "Learn More",
     ctaUrl: "/products?category=buttons",
     image: buttonsCategoryImg,
-    bgColor: "#E8E4DC",
+    bgColor: "#EDE8DF",
     textColor: "#1a1a1a",
   },
   {
@@ -34,7 +34,7 @@ const slides = [
     ctaText: "Learn More",
     ctaUrl: "/products?category=hardware",
     image: hardwareCategoryImg,
-    bgColor: "#D4D0C8",
+    bgColor: "#E0DDD8",
     textColor: "#1a1a1a",
   },
   {
@@ -48,7 +48,7 @@ const slides = [
     ctaText: "Learn More",
     ctaUrl: "/products?category=webbing",
     image: otherCategoryImg,
-    bgColor: "#C8D4CC",
+    bgColor: "#E4DDD4",
     textColor: "#1a1a1a",
   },
   {
@@ -62,7 +62,7 @@ const slides = [
     ctaText: "Learn More",
     ctaUrl: "/products?category=zipper-pullers",
     image: zippersCategoryImg,
-    bgColor: "#D8D0C4",
+    bgColor: "#D8D5D0",
     textColor: "#1a1a1a",
   },
   {
@@ -76,7 +76,7 @@ const slides = [
     ctaText: "Learn More",
     ctaUrl: "/products",
     image: laceCategoryImg,
-    bgColor: "#E4DCD4",
+    bgColor: "#EAE6E0",
     textColor: "#1a1a1a",
   },
 ];
