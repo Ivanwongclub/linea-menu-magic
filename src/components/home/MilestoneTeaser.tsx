@@ -111,7 +111,7 @@ const MilestoneTeaser = () => {
       </div>
 
       {/* Timeline — full width, no scroll */}
-      <div className="w-full px-12 lg:px-16 xl:px-20 relative mt-12">
+      <div className="w-full px-12 lg:px-16 xl:px-20 relative mt-20">
         <div ref={scrollRef} className="pb-2">
           <div ref={timelineRef}>
             <div
