@@ -109,6 +109,8 @@ const Header = () => {
   const [mobileAboutOpen,    setMobileAboutOpen]    = useState(false);
   const [mobileSegmentsOpen, setMobileSegmentsOpen] = useState(false);
   const [scrolled,           setScrolled]           = useState(false);
+  const [productsMegaHydrated, setProductsMegaHydrated] = useState(false);
+  const [aboutMegaHydrated, setAboutMegaHydrated] = useState(false);
   const [aboutPreviewImage,  setAboutPreviewImage]  = useState(ABOUT_DEFAULT_PREVIEW);
   const [aboutPreviewLabel,  setAboutPreviewLabel]  = useState("Our Story");
   const [activeSegmentSlug,  setActiveSegmentSlug]  = useState("apparel");
@@ -152,6 +154,14 @@ const Header = () => {
     setIsSegmentsOpen(false);
     setIsMenuOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (isProductsOpen) setProductsMegaHydrated(true);
+  }, [isProductsOpen]);
+
+  useEffect(() => {
+    if (isAboutOpen) setAboutMegaHydrated(true);
+  }, [isAboutOpen]);
 
   const isActive = (path: string) =>
     path === "/" ? pathname === "/" : pathname === path || pathname.startsWith(path + "/");
@@ -384,27 +394,57 @@ const Header = () => {
         onMouseEnter={handleProductsEnter}
         onMouseLeave={handleProductsLeave}
       >
-        <div className={`transition-all duration-200 ease-out ${
-          isProductsOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-1 pointer-events-none"
-        }`}>
-          <div className="bg-white border-b-[3px] border-b-foreground shadow-mega">
-            <div className="w-full pr-10 lg:pr-16 xl:pr-24 py-10" style={{ paddingLeft: navLeftOffset }}>
-              <div className="flex items-start gap-10">
-                {/* Hardware column */}
-                <div className="flex-shrink-0 min-w-0">
-                  {(() => {
-                    const hardware = MEGA_FAMILIES[0];
-                    return (
-                      <div>
+        {productsMegaHydrated && (
+          <div className={`transition-all duration-200 ease-out ${
+            isProductsOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-1 pointer-events-none"
+          }`}>
+            <div className="bg-white border-b-[3px] border-b-foreground shadow-mega">
+              <div className="w-full pr-10 lg:pr-16 xl:pr-24 py-10" style={{ paddingLeft: navLeftOffset }}>
+                <div className="flex items-start gap-10">
+                  {/* Hardware column */}
+                  <div className="flex-shrink-0 min-w-0">
+                    {(() => {
+                      const hardware = MEGA_FAMILIES[0];
+                      return (
+                        <div>
+                          <Link
+                            to={`/products?family=${hardware.slug}`}
+                            onClick={closeAllMenus}
+                            className="text-[15px] font-semibold text-foreground hover:text-muted-foreground transition-colors block mb-3"
+                          >
+                            {hardware.name}
+                          </Link>
+                          <ul className="space-y-2">
+                            {hardware.subcategories.map((sub) => (
+                              <li key={sub.en}>
+                                <Link
+                                  to={`/products?category=${slugify(sub.en)}`}
+                                  onClick={closeAllMenus}
+                                  className="text-[14px] text-foreground hover:text-muted-foreground transition-colors duration-150 block"
+                                >
+                                  {sub.en}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                  {/* Soft Trims + Branding Trims */}
+                  <div className="flex-shrink-0 min-w-0">
+                    {MEGA_FAMILIES.slice(1).map((family) => (
+                      <div key={family.slug} className="mb-6 last:mb-0">
                         <Link
-                          to={`/products?family=${hardware.slug}`}
+                          to={`/products?family=${family.slug}`}
                           onClick={closeAllMenus}
                           className="text-[15px] font-semibold text-foreground hover:text-muted-foreground transition-colors block mb-3"
                         >
-                          {hardware.name}
+                          {family.name}
                         </Link>
                         <ul className="space-y-2">
-                          {hardware.subcategories.map((sub) => (
+                          {family.subcategories.map((sub) => (
                             <li key={sub.en}>
                               <Link
                                 to={`/products?category=${slugify(sub.en)}`}
@@ -417,60 +457,33 @@ const Header = () => {
                           ))}
                         </ul>
                       </div>
-                    );
-                  })()}
-                </div>
-
-                {/* Soft Trims + Branding Trims */}
-                <div className="flex-shrink-0 min-w-0">
-                  {MEGA_FAMILIES.slice(1).map((family) => (
-                    <div key={family.slug} className="mb-6 last:mb-0">
-                      <Link
-                        to={`/products?family=${family.slug}`}
-                        onClick={closeAllMenus}
-                        className="text-[15px] font-semibold text-foreground hover:text-muted-foreground transition-colors block mb-3"
-                      >
-                        {family.name}
-                      </Link>
-                      <ul className="space-y-2">
-                        {family.subcategories.map((sub) => (
-                          <li key={sub.en}>
-                            <Link
-                              to={`/products?category=${slugify(sub.en)}`}
-                              onClick={closeAllMenus}
-                              className="text-[14px] text-foreground hover:text-muted-foreground transition-colors duration-150 block"
-                            >
-                              {sub.en}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Static product grid collage */}
-                <div className="flex-shrink-0 w-[400px] flex flex-col">
-                  <div className="relative aspect-square overflow-hidden bg-secondary">
-                    <img
-                      src={megaProductsGrid}
-                      alt="Product categories overview"
-                      className="absolute inset-0 w-full h-full object-cover"
-                      loading="lazy"
-                    />
+                    ))}
                   </div>
-                  <Link
-                    to="/products"
-                    onClick={closeAllMenus}
-                    className="mt-4 text-[11px] font-medium uppercase tracking-[0.1em] text-foreground hover:text-muted-foreground transition-colors"
-                  >
-                    View All Products →
-                  </Link>
+
+                  {/* Static product grid collage */}
+                  <div className="flex-shrink-0 w-[400px] flex flex-col">
+                    <div className="relative aspect-square overflow-hidden bg-secondary">
+                      <img
+                        src={megaProductsGrid}
+                        alt="Product categories overview"
+                        className="absolute inset-0 w-full h-full object-cover"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </div>
+                    <Link
+                      to="/products"
+                      onClick={closeAllMenus}
+                      className="mt-4 text-[11px] font-medium uppercase tracking-[0.1em] text-foreground hover:text-muted-foreground transition-colors"
+                    >
+                      View All Products →
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* ── About Mega Menu ──────────────────────────────────────────────────── */}
@@ -480,86 +493,96 @@ const Header = () => {
         onMouseEnter={handleAboutEnter}
         onMouseLeave={handleAboutLeave}
       >
-        <div className={`transition-all duration-200 ease-out ${
-          isAboutOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-1 pointer-events-none"
-        }`}>
-          <div className="bg-white border-b-[3px] border-b-foreground shadow-mega h-[560px]">
-            <div className="w-full pr-10 lg:pr-16 xl:pr-24 py-10 h-full" style={{ paddingLeft: navLeftOffset }}>
-              <div className="flex gap-0 h-full">
-                <div className="flex-[6] pr-10 flex gap-10">
-                  <div className="min-w-0">
-                    <ul className="space-y-0">
-                      {ABOUT_LINKS.map((item, i) => {
-                        if (item.divider) {
-                          return <li key={`divider-${i}`}><hr className="my-2 border-border" /></li>;
-                        }
-                        return (
-                          <li key={item.href}>
-                            <Link
-                              to={item.href!}
-                              onClick={closeAllMenus}
-                              className="text-[15px] font-semibold text-foreground hover:text-muted-foreground transition-colors duration-150 block py-[7px]"
-                              onMouseEnter={() => { setAboutPreviewImage(item.image!); setAboutPreviewLabel(item.label!); }}
-                            >
-                              {item.label}
-                            </Link>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </div>
-                  <div
-                    className="flex-1 min-w-[280px] flex flex-col"
-                    onMouseEnter={() => { setAboutPreviewImage(ABOUT_DEFAULT_PREVIEW); setAboutPreviewLabel("Our Story"); }}
-                  >
-                    <div className="relative flex-1 rounded-[var(--radius)] overflow-hidden">
-                      <img
-                        key={aboutPreviewImage}
-                        src={aboutPreviewImage}
-                        alt={aboutPreviewLabel}
-                        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
-                        style={{ animation: "fadeIn 250ms ease" }}
-                      />
+        {aboutMegaHydrated && (
+          <div className={`transition-all duration-200 ease-out ${
+            isAboutOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-1 pointer-events-none"
+          }`}>
+            <div className="bg-white border-b-[3px] border-b-foreground shadow-mega h-[560px]">
+              <div className="w-full pr-10 lg:pr-16 xl:pr-24 py-10 h-full" style={{ paddingLeft: navLeftOffset }}>
+                <div className="flex gap-0 h-full">
+                  <div className="flex-[6] pr-10 flex gap-10">
+                    <div className="min-w-0">
+                      <ul className="space-y-0">
+                        {ABOUT_LINKS.map((item, i) => {
+                          if (item.divider) {
+                            return <li key={`divider-${i}`}><hr className="my-2 border-border" /></li>;
+                          }
+                          return (
+                            <li key={item.href}>
+                              <Link
+                                to={item.href!}
+                                onClick={closeAllMenus}
+                                className="text-[15px] font-semibold text-foreground hover:text-muted-foreground transition-colors duration-150 block py-[7px]"
+                                onMouseEnter={() => { setAboutPreviewImage(item.image!); setAboutPreviewLabel(item.label!); }}
+                              >
+                                {item.label}
+                              </Link>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                    <div
+                      className="flex-1 min-w-[280px] flex flex-col"
+                      onMouseEnter={() => { setAboutPreviewImage(ABOUT_DEFAULT_PREVIEW); setAboutPreviewLabel("Our Story"); }}
+                    >
+                      <div className="relative flex-1 rounded-[var(--radius)] overflow-hidden">
+                        <img
+                          key={aboutPreviewImage}
+                          src={aboutPreviewImage}
+                          alt={aboutPreviewLabel}
+                          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
+                          style={{ animation: "fadeIn 250ms ease" }}
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="w-px bg-[hsl(var(--border))] self-stretch" />
+                  <div className="w-px bg-[hsl(var(--border))] self-stretch" />
 
-                <div className="flex-[4] pl-10">
-                  <div className="space-y-3">
-                    {ABOUT_TRUST_CARDS.map((card) => (
-                      <Link
-                        key={card.title}
-                        to={card.href}
-                        onClick={closeAllMenus}
-                        className="group block rounded-[var(--radius)] border border-[hsl(var(--border))] overflow-hidden hover:border-foreground/20 hover:shadow-[0_2px_12px_rgba(0,0,0,0.08)] transition-all duration-200"
-                      >
-                        <div className="flex items-stretch h-[88px]">
-                          <div className="w-20 flex-shrink-0 overflow-hidden">
-                            <img src={card.image} alt={card.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  <div className="flex-[4] pl-10">
+                    <div className="space-y-3">
+                      {ABOUT_TRUST_CARDS.map((card) => (
+                        <Link
+                          key={card.title}
+                          to={card.href}
+                          onClick={closeAllMenus}
+                          className="group block rounded-[var(--radius)] border border-[hsl(var(--border))] overflow-hidden hover:border-foreground/20 hover:shadow-[0_2px_12px_rgba(0,0,0,0.08)] transition-all duration-200"
+                        >
+                          <div className="flex items-stretch h-[88px]">
+                            <div className="w-20 flex-shrink-0 overflow-hidden">
+                              <img
+                                src={card.image}
+                                alt={card.title}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                loading="lazy"
+                                decoding="async"
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0 flex flex-col justify-center px-4">
+                              <span className="text-[15px] font-semibold text-foreground block">{card.title}</span>
+                              <span className="text-[12px] text-muted-foreground leading-snug block mt-0.5">{card.description}</span>
+                            </div>
+                            <div className="flex items-center pr-3">
+                              <ChevronRight size={14} className="text-muted-foreground/40 group-hover:text-foreground/60 transition-colors flex-shrink-0" />
+                            </div>
                           </div>
-                          <div className="flex-1 min-w-0 flex flex-col justify-center px-4">
-                            <span className="text-[15px] font-semibold text-foreground block">{card.title}</span>
-                            <span className="text-[12px] text-muted-foreground leading-snug block mt-0.5">{card.description}</span>
-                          </div>
-                          <div className="flex items-center pr-3">
-                            <ChevronRight size={14} className="text-muted-foreground/40 group-hover:text-foreground/60 transition-colors flex-shrink-0" />
-                          </div>
-                        </div>
+                        </Link>
+                      ))}
+                    </div>
+                    <div className="mt-6 pt-4 border-t border-[hsl(var(--border))]">
+                      <Link to="/about/our-story" onClick={closeAllMenus} className="text-[11px] font-medium uppercase tracking-[0.1em] text-foreground hover:text-muted-foreground transition-colors">
+                        Learn More About Us →
                       </Link>
-                    ))}
-                  </div>
-                  <div className="mt-6 pt-4 border-t border-[hsl(var(--border))]">
-                    <Link to="/about/our-story" onClick={closeAllMenus} className="text-[11px] font-medium uppercase tracking-[0.1em] text-foreground hover:text-muted-foreground transition-colors">
-                      Learn More About Us →
-                    </Link>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Spacer */}

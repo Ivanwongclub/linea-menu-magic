@@ -13,7 +13,11 @@ export async function uploadFlipbookImage(
 
   const { error } = await supabase.storage
     .from("flipbook-assets")
-    .upload(path, file, { upsert: true, contentType: file.type });
+    .upload(path, file, {
+      upsert: true,
+      contentType: file.type,
+      cacheControl: "31536000",
+    });
 
   if (error) throw error;
 

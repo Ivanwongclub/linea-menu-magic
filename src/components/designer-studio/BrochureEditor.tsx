@@ -11,7 +11,6 @@ import {
 import { toast } from "sonner";
 
 import PageManager from "@/components/designer-studio/PageManager";
-import Header from "@/components/layout/Header";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -264,7 +263,7 @@ export default function BrochureEditor({ brochureId, onBack }: BrochureEditorPro
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Sticky top bar */}
-      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
+      <div className="sticky top-20 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="max-w-7xl mx-auto px-4 lg:px-6">
           <div className="flex items-center justify-between h-14">
             <div className="flex items-center gap-3">

@@ -15,7 +15,6 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 
-import Header from "@/components/layout/Header";
 import { useProductTaxonomy } from "@/features/products/hooks/useProductTaxonomy";
 
 /* ── Key-value editor ────────────────────────────────────── */
@@ -269,7 +268,7 @@ export default function ProductEditor({ productId, onBack }: ProductEditorProps)
       const path = `images/${productId}/${Date.now()}.${ext}`;
       const { error: uploadError } = await supabase.storage
         .from("product-assets")
-        .upload(path, file, { upsert: true });
+        .upload(path, file, { upsert: true, cacheControl: "31536000" });
       if (uploadError) {
         toast.error(`Upload failed: ${file.name}`);
         continue;
@@ -303,7 +302,7 @@ export default function ProductEditor({ productId, onBack }: ProductEditorProps)
     const path = `thumbnails/${productId}/${Date.now()}.${ext}`;
     const { error } = await supabase.storage
       .from("product-assets")
-      .upload(path, file, { upsert: true });
+      .upload(path, file, { upsert: true, cacheControl: "31536000" });
     if (error) {
       toast.error("Thumbnail upload failed");
     } else {
@@ -340,7 +339,6 @@ export default function ProductEditor({ productId, onBack }: ProductEditorProps)
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
         <div className="max-w-5xl mx-auto px-4 py-12 text-center">
           <Loader2 className="w-6 h-6 animate-spin mx-auto text-muted-foreground" />
         </div>
@@ -350,10 +348,8 @@ export default function ProductEditor({ productId, onBack }: ProductEditorProps)
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-
       {/* Top bar */}
-      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
+      <div className="sticky top-20 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" onClick={onBack} className="gap-1">

@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { RFQ, RFQStatus, statusLabels, statusColors, Comment } from "@/data/mockRFQData";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -97,9 +95,7 @@ const RFQDetail = ({ rfq, onBack, onStatusChange }: RFQDetailProps) => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-      
-      <div className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
+      <div className="sticky top-20 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 lg:px-6 py-2 flex items-center gap-4">
           <Button 
             variant="ghost" 
@@ -360,8 +356,6 @@ const RFQDetail = ({ rfq, onBack, onStatusChange }: RFQDetailProps) => {
           </div>
         </div>
       </main>
-      
-      <Footer />
     </div>
   );
 };

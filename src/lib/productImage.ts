@@ -25,6 +25,10 @@ export function getProductImageUrl(
   // Supabase URL — append transform params
   if (rawUrl.includes('supabase.co')) {
     const base = rawUrl.split('?')[0]; // strip any existing params
+    if (!ENV.SUPABASE_IMAGE_TRANSFORMS_ENABLED) {
+      // Avoid multiple cache keys when transforms are disabled.
+      return base;
+    }
     return `${base}?${SIZE_PARAMS[size]}`;
   }
   return rawUrl;

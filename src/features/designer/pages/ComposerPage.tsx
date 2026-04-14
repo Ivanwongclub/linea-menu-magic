@@ -240,7 +240,11 @@ export default function ComposerPage() {
     }
 
     const path = `backgrounds/${session.id}/${Date.now()}-${file.name}`
-    const { error } = await supabase.storage.from('design-assets').upload(path, file, { contentType: file.type, upsert: true })
+    const { error } = await supabase.storage.from('design-assets').upload(path, file, {
+      contentType: file.type,
+      upsert: true,
+      cacheControl: '31536000',
+    })
     if (error) { toast.error('Upload failed'); return }
 
     const { data: { publicUrl } } = supabase.storage.from('design-assets').getPublicUrl(path)
@@ -278,7 +282,11 @@ export default function ComposerPage() {
       rendered.toBlob(async (blob) => {
         if (!blob) return
         const path = `exports/${session.id}/${Date.now()}.png`
-        await supabase.storage.from('design-assets').upload(path, blob, { contentType: 'image/png', upsert: false })
+        await supabase.storage.from('design-assets').upload(path, blob, {
+          contentType: 'image/png',
+          upsert: false,
+          cacheControl: '31536000',
+        })
       }, 'image/png')
 
       toast.success('Exported successfully')
