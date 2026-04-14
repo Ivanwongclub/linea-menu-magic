@@ -30,12 +30,11 @@ import megaProductsGrid from "@/assets/products/mega-products-grid.png";
 interface AboutLink { label?: string; href?: string; image?: string; divider?: true; }
 
 const ABOUT_LINKS: AboutLink[] = [
-  { label: "About WIN-CYC",  href: "/about",              image: aboutHeritageImg  },
+  { label: "About Us",       href: "/about",              image: aboutHeritageImg  },
   { label: "Our Story",      href: "/about/our-story",    image: aboutHeritageImg  },
   { label: "Factory",        href: "/about/factory",      image: heritageCraftImg  },
   { label: "Certificates",   href: "/about/certificates", image: aboutShowroomImg  },
   { label: "Sustainability", href: "/sustainability",      image: aboutShowroomImg  },
-  { divider: true },
   { label: "News",           href: "/news",               image: aboutHeritageImg  },
 ];
 
