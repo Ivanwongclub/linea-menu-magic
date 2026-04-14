@@ -1,5 +1,6 @@
-const SUPABASE_STORAGE =
-  import.meta.env.VITE_SUPABASE_URL + '/storage/v1/object/public/product-assets';
+import { ENV } from "@/config/env";
+
+const SUPABASE_STORAGE = `${ENV.STORAGE_URL}/product-assets`;
 
 export type ImageSize = 'thumb' | 'card' | 'pdp' | 'menu';
 

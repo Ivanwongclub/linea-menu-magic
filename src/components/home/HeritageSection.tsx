@@ -32,7 +32,7 @@ const HeritageSection = () => {
 
             {/* Floating stat card — bottom-right overlapping */}
             <div
-              className={`absolute -bottom-5 -right-5 bg-white border border-[hsl(var(--border))] rounded-[var(--radius)] p-5 shadow-[0_8px_32px_rgba(0,0,0,0.12)] transition-all duration-700 ease-out ${
+              className={`absolute -bottom-5 -right-5 bg-white border border-[hsl(var(--border))] rounded-[var(--radius)] p-5 shadow-card transition-all duration-700 ease-out ${
                 imageVisible ? "opacity-100 translate-x-0 translate-y-0" : "opacity-0 translate-x-4 translate-y-4"
               }`}
               style={{ transitionDelay: "400ms" }}

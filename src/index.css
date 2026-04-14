@@ -50,6 +50,13 @@
 
     --radius: 0.25rem;
 
+    /* Heritage — warm ivory for history/milestone sections */
+    --color-heritage-bg: 40 20% 97%;
+
+    /* Shadows */
+    --shadow-mega: 0 8px 24px rgba(0,0,0,0.06);
+    --shadow-card: 0 8px 32px rgba(0,0,0,0.12);
+
     /* Sidebar */
     --sidebar-background: transparent;
     --sidebar-foreground: 0 0% 0%;

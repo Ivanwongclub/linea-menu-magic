@@ -10,7 +10,14 @@ const About = () => {
   const { ref: timelineHeaderRef, isVisible: timelineHeaderVisible } = useScrollAnimation();
   const { ref: timelineRef, isVisible: timelineVisible, getDelay: getTimelineDelay } = useStaggeredAnimation(9, 100);
 
-  const milestones = [
+  interface TimelineMilestone {
+    year: string;
+    event: string;
+    isHighlight?: boolean;
+    isVintage?: boolean;
+  }
+
+  const milestones: TimelineMilestone[] = [
     { year: "1979",        event: "Founded in Hong Kong — a small workshop with a vision for world-class garment trims.",             isVintage: true  },
     { year: "1990s",       event: "Manufacturing depth — a decade refining tooling, production techniques, and craft expertise.",     isVintage: true  },
     { year: "2000",        event: "ISO 9001 certified — international quality management systems formalised across all operations."               },
@@ -84,6 +91,7 @@ const About = () => {
                 <img 
                   src={aboutHeritageImage} 
                   alt="WIN-CYC heritage craftsmanship" 
+                  loading="lazy"
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -126,7 +134,7 @@ const About = () => {
         </section>
 
         {/* Timeline */}
-        <section className="py-24 px-6 lg:px-8 overflow-hidden bg-[#F7F5F2]">
+        <section className="py-24 px-6 lg:px-8 overflow-hidden bg-heritage">
           <div className="max-w-7xl mx-auto">
             <div ref={timelineHeaderRef} className="mb-16">
               <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${
@@ -159,11 +167,11 @@ const About = () => {
                     <div className="w-[80px] flex-shrink-0 text-right pt-0.5">
                       <span
                         className={`font-bold leading-none tracking-tight block ${
-                          (milestone as any).isHighlight
+                          milestone.isHighlight
                             ? "text-[22px] lg:text-[26px] text-foreground"
                             : "text-[22px] lg:text-[26px] text-foreground/75"
                         } ${
-                          (milestone as any).isVintage ? "text-foreground/50" : ""
+                          milestone.isVintage ? "text-foreground/50" : ""
                         }`}
                       >
                         {milestone.year}
@@ -174,9 +182,9 @@ const About = () => {
                     <div className="flex-shrink-0 relative" style={{ marginLeft: "-5px", marginTop: "6px" }}>
                       <div
                         className={`rounded-full border-2 ${
-                          (milestone as any).isHighlight
+                          milestone.isHighlight
                             ? "w-[14px] h-[14px] bg-foreground border-foreground"
-                            : "w-[12px] h-[12px] bg-[#F7F5F2] border-foreground/50"
+                            : "w-[12px] h-[12px] bg-heritage border-foreground/50"
                         }`}
                       />
                     </div>
@@ -185,11 +193,11 @@ const About = () => {
                     <div className="flex-1 pb-2">
                       <p
                         className={`leading-relaxed ${
-                          (milestone as any).isHighlight
+                          milestone.isHighlight
                             ? "text-foreground font-semibold text-[15px]"
                             : "text-foreground/70 text-[14px]"
                         } ${
-                          (milestone as any).isVintage ? "text-foreground/50" : ""
+                          milestone.isVintage ? "text-foreground/50" : ""
                         }`}
                       >
                         {milestone.event}

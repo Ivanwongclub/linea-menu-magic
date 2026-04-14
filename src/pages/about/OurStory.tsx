@@ -208,7 +208,7 @@ const OurStory = () => {
           </div>
 
           {/* ─── Milestone Timeline — centered ─── */}
-          <div className="mt-16 mb-8 bg-[#F7F5F2] rounded-lg px-8 py-12">
+          <div className="mt-16 mb-8 bg-heritage rounded-lg px-8 py-12">
             <div ref={timelineHeaderRef} className="mb-12 text-center">
               <span
                 className={`section-label inline-block transition-all duration-700 ease-out ${
@@ -276,7 +276,7 @@ const CenteredMilestoneItem = ({
           className={`rounded-full border-2 ${
             m.isHighlight
               ? "bg-foreground border-foreground"
-              : "bg-[#F7F5F2] border-foreground/60"
+              : "bg-heritage border-foreground/60"
           }`}
           style={{ width: m.isHighlight ? 16 : 14, height: m.isHighlight ? 16 : 14 }}
         />
