@@ -103,8 +103,14 @@ const Navigation = () => {
   ];
   
   const navItems = [
+    {
+      name: "Segments",
+      href: "/products?segment=apparel",
+      submenuItems: [],
+      images: []
+    },
     { 
-      name: "產品", 
+      name: "Products", 
       href: "/products",
       submenuItems: [
         "Buttons",
@@ -127,14 +133,14 @@ const Navigation = () => {
       images: []
     },
     {
-      name: "Brochures",
-      href: "/brochures",
+      name: "E-Collections",
+      href: "/ecollections",
       submenuItems: [],
       images: []
     },
     { 
-      name: "關於我們", 
-      href: "/about/our-story",
+      name: "About", 
+      href: "/about",
       submenuItems: [
         "Our Story",
         "Factory",
