@@ -400,7 +400,7 @@ const Header = () => {
         >
           <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
             <div className="w-full px-10 lg:px-16 xl:px-24 py-10">
-              <div className="<div className="flex items-start gap-10">">
+              <div className="flex items-start gap-10">
                 {/* Hardware column */}
                 <div className="flex-shrink-0 min-w-0">
                   <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-6 block">
@@ -463,7 +463,7 @@ const Header = () => {
                 </div>
 
                 {/* Static product grid collage */}
-                <div className="<div className="flex-shrink-0 w-[400px] flex flex-col">">
+                <div className="flex-shrink-0 w-[400px] flex flex-col">
                   <div className="relative aspect-square overflow-hidden bg-secondary">
                     <img
                       src={megaProductsGrid}
