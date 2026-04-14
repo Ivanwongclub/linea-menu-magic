@@ -328,7 +328,7 @@ const Header = () => {
                   </div>
                   {/* Designer Studio CTA */}
                   <div className="mt-auto pt-5 border-t border-[hsl(var(--border))]" style={{ marginTop: "auto" }}>
-                    <Link to="/designer-studio" onClick={closeAllMenus} className="text-[12px] text-muted-foreground hover:text-foreground transition-colors leading-snug block">
+                    <Link to="/designer-studio" onClick={closeAllMenus} className="text-[12px] text-foreground hover:text-muted-foreground transition-colors leading-snug block">
                       Custom via our<br />
                       <span className="font-semibold text-foreground">Designer Studio →</span>
                     </Link>
@@ -369,7 +369,7 @@ const Header = () => {
                         <Link
                           to={`/products?segment=${active.slug}`}
                           onClick={closeAllMenus}
-                          className="text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
+                          className="text-[11px] font-medium uppercase tracking-[0.1em] text-foreground hover:text-muted-foreground transition-colors"
                         >
                           View all {active.name} products →
                         </Link>
@@ -419,7 +419,7 @@ const Header = () => {
                               <Link
                                 to={`/products?category=${slugify(sub.en)}`}
                                 onClick={closeAllMenus}
-                                className="text-[14px] text-muted-foreground hover:text-foreground transition-colors duration-150 block"
+                                className="text-[14px] text-foreground hover:text-muted-foreground transition-colors duration-150 block"
                               >
                                 {sub.en}
                               </Link>
@@ -451,7 +451,7 @@ const Header = () => {
                             <Link
                               to={`/products?category=${slugify(sub.en)}`}
                               onClick={closeAllMenus}
-                              className="text-[14px] text-muted-foreground hover:text-foreground transition-colors duration-150 block"
+                              className="text-[14px] text-foreground hover:text-muted-foreground transition-colors duration-150 block"
                             >
                               {sub.en}
                             </Link>
@@ -475,7 +475,7 @@ const Header = () => {
                   <Link
                     to="/products"
                     onClick={closeAllMenus}
-                    className="mt-4 text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
+                    className="mt-4 text-[11px] font-medium uppercase tracking-[0.1em] text-foreground hover:text-muted-foreground transition-colors"
                   >
                     View All Products →
                   </Link>
@@ -514,7 +514,7 @@ const Header = () => {
                             <Link
                               to={item.href!}
                               onClick={closeAllMenus}
-                              className="text-[15px] font-semibold text-muted-foreground hover:text-foreground transition-colors duration-150 block py-[7px]"
+                              className="text-[15px] font-semibold text-foreground hover:text-muted-foreground transition-colors duration-150 block py-[7px]"
                               onMouseEnter={() => { setAboutPreviewImage(item.image!); setAboutPreviewLabel(item.label!); }}
                             >
                               {item.label}
@@ -573,7 +573,7 @@ const Header = () => {
                     ))}
                   </div>
                   <div className="mt-6 pt-4 border-t border-[hsl(var(--border))]">
-                    <Link to="/about/our-story" onClick={closeAllMenus} className="text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors">
+                    <Link to="/about/our-story" onClick={closeAllMenus} className="text-[11px] font-medium uppercase tracking-[0.1em] text-foreground hover:text-muted-foreground transition-colors">
                       Learn More About Us →
                     </Link>
                   </div>
