@@ -1,8 +1,8 @@
-import { useState, Suspense } from "react";
+import { useState, useMemo, Suspense } from "react";
 import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
 import { Link } from "react-router-dom";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
-import { ArrowRight, CheckCircle, Box, Images } from "lucide-react";
+import { ArrowRight, CheckCircle, Box, Images, ChevronLeft, ChevronRight } from "lucide-react";
 import ObjGallery from "@/components/production/ObjGallery";
 import PrintGallery from "@/components/production/PrintGallery";
 import factoryProductionImg from "@/assets/factory-production.jpg";
@@ -128,6 +128,7 @@ export default function Production() {
   const { ref: capRef, isVisible: capVisible, getDelay: getCapDelay } = useStaggeredAnimation(6, 80);
   const { ref: qualRef, isVisible: qualVisible } = useScrollAnimation({ threshold: 0.2 });
   const [activeTab, setActiveTab] = useState<MaterialCategory>("All");
+  const [matIndex, setMatIndex] = useState(0);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [printGalleryOpen, setPrintGalleryOpen] = useState(false);
 
@@ -255,8 +256,8 @@ export default function Production() {
                   {MATERIAL_TABS.map((tab) => (
                     <button
                       key={tab}
-                      onClick={() => setActiveTab(tab)}
-                      className={`px-7 py-3 text-[13px] font-medium tracking-wide transition-colors duration-150 border-b-2 -mb-px ${
+                      onClick={() => { setActiveTab(tab); setMatIndex(0); }}
+                      className={`px-8 py-4 text-[18px] lg:text-[20px] font-bold tracking-wide transition-colors duration-150 border-b-2 -mb-px ${
                         activeTab === tab
                           ? "border-foreground text-foreground"
                           : "border-transparent text-muted-foreground hover:text-foreground"
@@ -268,49 +269,92 @@ export default function Production() {
                 </div>
               </div>
 
-              {/* Material rows — alternating layout */}
-              <div className="space-y-16 lg:space-y-20">
-                {MATERIALS.filter((m) => activeTab === "All" || m.category === activeTab).map((mat, i) => (
-                  <div
-                    key={mat.id}
-                    className={`flex flex-col ${i % 2 === 1 ? "lg:flex-row-reverse" : "lg:flex-row"} gap-8 lg:gap-14 items-center`}
-                  >
-                    {/* Image — half width */}
-                    <div className="lg:w-1/2 w-full">
-                      <div className="aspect-[4/3] overflow-hidden rounded-[var(--radius)]">
-                        <img src={mat.image} alt={mat.name} className="w-full h-full object-cover" loading="lazy" />
+              {/* Material carousel */}
+              {(() => {
+                const filtered = MATERIALS.filter((m) => activeTab === "All" || m.category === activeTab);
+                const mat = filtered[matIndex] || filtered[0];
+                if (!mat) return null;
+                const isFirst = matIndex === 0;
+                const isLast = matIndex >= filtered.length - 1;
+                return (
+                  <div className="relative">
+                    {/* Prev / Next */}
+                    <div className="flex items-center justify-between mb-6">
+                      <span className="text-[13px] text-muted-foreground">
+                        {matIndex + 1} / {filtered.length}
+                      </span>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setMatIndex((i) => Math.max(0, i - 1))}
+                          disabled={isFirst}
+                          className={`w-10 h-10 flex items-center justify-center border transition-colors duration-150 ${
+                            isFirst ? "border-border text-muted-foreground/30 cursor-not-allowed" : "border-foreground/20 text-foreground hover:bg-foreground hover:text-background"
+                          }`}
+                        >
+                          <ChevronLeft size={18} />
+                        </button>
+                        <button
+                          onClick={() => setMatIndex((i) => Math.min(filtered.length - 1, i + 1))}
+                          disabled={isLast}
+                          className={`w-10 h-10 flex items-center justify-center border transition-colors duration-150 ${
+                            isLast ? "border-border text-muted-foreground/30 cursor-not-allowed" : "border-foreground/20 text-foreground hover:bg-foreground hover:text-background"
+                          }`}
+                        >
+                          <ChevronRight size={18} />
+                        </button>
                       </div>
                     </div>
 
-                    {/* Content — half width */}
-                    <div className="lg:w-1/2 w-full">
-                      <div className="max-w-md">
-                        {/* Category tag */}
-                        <span className="text-[11px] font-medium tracking-[0.12em] uppercase text-muted-foreground">
-                          {mat.category}
-                        </span>
-                        {/* Title */}
-                        <h3 className="text-[22px] lg:text-[26px] font-semibold text-foreground mt-2 leading-tight">
-                          {mat.name}
-                        </h3>
-                        {/* Subtitle */}
-                        <p className="text-[13px] text-muted-foreground mt-1">
-                          {mat.subtitle}
-                        </p>
-                        {/* Body */}
-                        <p className="text-[15px] text-muted-foreground leading-relaxed mt-4">
-                          {mat.body}
-                        </p>
-                        {/* CTA */}
-                        <Link to="/ecollections" className="group inline-flex items-center gap-2 mt-6 text-[13px] font-medium text-foreground hover:text-foreground/70 transition-colors">
-                          View in E-Collections
-                          <ArrowRight size={14} className="transition-transform duration-300 group-hover:translate-x-1" />
-                        </Link>
+                    {/* Active material row */}
+                    <div
+                      key={mat.id}
+                      className={`flex flex-col ${matIndex % 2 === 1 ? "lg:flex-row-reverse" : "lg:flex-row"} gap-8 lg:gap-14 items-center transition-opacity duration-300`}
+                    >
+                      {/* Image */}
+                      <div className="lg:w-1/2 w-full">
+                        <div className="aspect-[4/3] overflow-hidden rounded-[var(--radius)]">
+                          <img src={mat.image} alt={mat.name} className="w-full h-full object-cover" loading="lazy" />
+                        </div>
+                      </div>
+
+                      {/* Content */}
+                      <div className="lg:w-1/2 w-full">
+                        <div className="max-w-md">
+                          <span className="text-[11px] font-medium tracking-[0.12em] uppercase text-muted-foreground">
+                            {mat.category}
+                          </span>
+                          <h3 className="text-[22px] lg:text-[26px] font-semibold text-foreground mt-2 leading-tight">
+                            {mat.name}
+                          </h3>
+                          <p className="text-[13px] text-muted-foreground mt-1">
+                            {mat.subtitle}
+                          </p>
+                          <p className="text-[15px] text-muted-foreground leading-relaxed mt-4">
+                            {mat.body}
+                          </p>
+                          <Link to="/ecollections" className="group inline-flex items-center gap-2 mt-6 text-[13px] font-medium text-foreground hover:text-foreground/70 transition-colors">
+                            View in E-Collections
+                            <ArrowRight size={14} className="transition-transform duration-300 group-hover:translate-x-1" />
+                          </Link>
+                        </div>
                       </div>
                     </div>
+
+                    {/* Dot indicators */}
+                    <div className="flex justify-center gap-2 mt-10">
+                      {filtered.map((_, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setMatIndex(idx)}
+                          className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                            idx === matIndex ? "bg-foreground w-6" : "bg-foreground/20 hover:bg-foreground/40"
+                          }`}
+                        />
+                      ))}
+                    </div>
                   </div>
-                ))}
-              </div>
+                );
+              })()}
             </div>
           </div>
         </section>
