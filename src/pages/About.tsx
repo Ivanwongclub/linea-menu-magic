@@ -10,7 +10,14 @@ const About = () => {
   const { ref: timelineHeaderRef, isVisible: timelineHeaderVisible } = useScrollAnimation();
   const { ref: timelineRef, isVisible: timelineVisible, getDelay: getTimelineDelay } = useStaggeredAnimation(9, 100);
 
-  const milestones = [
+  interface TimelineMilestone {
+    year: string;
+    event: string;
+    isHighlight?: boolean;
+    isVintage?: boolean;
+  }
+
+  const milestones: TimelineMilestone[] = [
     { year: "1979",        event: "Founded in Hong Kong — a small workshop with a vision for world-class garment trims.",             isVintage: true  },
     { year: "1990s",       event: "Manufacturing depth — a decade refining tooling, production techniques, and craft expertise.",     isVintage: true  },
     { year: "2000",        event: "ISO 9001 certified — international quality management systems formalised across all operations."               },
@@ -126,7 +133,7 @@ const About = () => {
         </section>
 
         {/* Timeline */}
-        <section className="py-24 px-6 lg:px-8 overflow-hidden bg-[#F7F5F2]">
+        <section className="py-24 px-6 lg:px-8 overflow-hidden bg-heritage">
           <div className="max-w-7xl mx-auto">
             <div ref={timelineHeaderRef} className="mb-16">
               <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${
@@ -176,7 +183,7 @@ const About = () => {
                         className={`rounded-full border-2 ${
                           (milestone as any).isHighlight
                             ? "w-[14px] h-[14px] bg-foreground border-foreground"
-                            : "w-[12px] h-[12px] bg-[#F7F5F2] border-foreground/50"
+                            : "w-[12px] h-[12px] bg-heritage border-foreground/50"
                         }`}
                       />
                     </div>

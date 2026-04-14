@@ -95,7 +95,7 @@ const MilestoneTeaser = () => {
   }, []);
 
   return (
-    <section className="py-24 overflow-hidden bg-[#F7F5F2]">
+    <section className="py-24 overflow-hidden bg-heritage">
       {/* Heading — constrained */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div ref={headerRef} className="mb-6">
@@ -160,7 +160,7 @@ const MilestoneTeaser = () => {
                     className={`absolute left-0 top-1/2 -translate-y-1/2 rounded-full border-2 transition-all duration-500 ${
                       m.isHighlight
                         ? "w-[16px] h-[16px] bg-foreground border-foreground"
-                        : "w-[14px] h-[14px] bg-[#F7F5F2] border-foreground/60"
+                        : "w-[14px] h-[14px] bg-heritage border-foreground/60"
                     } ${timelineVisible ? "scale-100 opacity-100" : "scale-0 opacity-0"}`}
                     style={{ transitionDelay: `${300 + i * 80}ms` }}
                   />
