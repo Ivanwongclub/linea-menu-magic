@@ -59,7 +59,6 @@ const Sustainability = () => {
             { label: "Home", href: "/" },
             { label: "Sustainability" },
           ]}
-          title="Sustainability"
         />
 
         {/* Hero — two-column with bottle */}
