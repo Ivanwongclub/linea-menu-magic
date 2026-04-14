@@ -1,27 +1,20 @@
 
 
-# Replace Text Logo with Generated SVG Image
+## Make sidebar full-height visible without scrolling
 
-## What changes
+**Problem**: The product grid area can be shorter than the sidebar, causing the sidebar content to be cut off or require scrolling.
 
-1. **Create `/public/wincyc.svg`** — Generate an SVG file with "WIN-CYC" (bold) and "Group Limited" (small caps) styled to match the current text logo, black fill for the normal version.
+**Solution**: Set a minimum height on the main content area (the flex container holding sidebar + grid) so the page stretches tall enough to display the full sidebar without scrolling.
 
-2. **Create `/public/wincyc-white.svg`** — Same logo but with white fill, for use on dark backgrounds (hero transparent header, footer).
+### Changes
 
-3. **Update Header logo** (`src/components/layout/Header.tsx`, lines 204-220):
-   - Replace the text-based `<div>` with an `<img>` tag
-   - Use `wincyc-white.svg` when `isTransparent`, `wincyc.svg` otherwise
-   - Size: `h-10` (40px), auto width
+**File: `src/pages/Products.tsx`** (line ~315)
 
-4. **Update Footer logo** (`src/components/layout/Footer.tsx`, lines 13-25):
-   - Replace the text-based `<div>` with `<img src="/wincyc-white.svg" />`
-   - Size: `h-8` (32px), auto width
+- On the flex container (`div` with `max-w-7xl mx-auto flex items-start gap-10`), add a `min-h` style that ensures the container is at least as tall as needed for the sidebar.
+- Remove `max-h-[calc(100vh-96px)] overflow-y-auto` from the sidebar `<aside>` (line ~317) so the sidebar naturally takes its full content height instead of being scroll-constrained.
+- Keep `sticky top-[80px]` on the aside so it still sticks while scrolling long product grids, but remove the scroll/overflow constraints that clip it.
 
-5. **Update BrandLogo component** (`src/components/viewer/BrandLogo.tsx`):
-   - Replace text rendering with the SVG image, using variant prop to pick white/dark version
-
-## Technical notes
-- SVGs will use Poppins-style geometry matching the current font rendering
-- Both SVGs have transparent backgrounds (no rect fill)
-- The `isTransparent` conditional in the header switches between the two SVG variants
+This way:
+- When the grid is short, the page extends to show the full sidebar
+- When the grid is long, the sidebar sticks as you scroll
 
