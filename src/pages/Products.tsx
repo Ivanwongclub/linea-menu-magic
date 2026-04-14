@@ -314,7 +314,7 @@ export default function Products() {
         <section className="px-6 lg:px-8 pb-24">
           <div className="max-w-7xl mx-auto flex items-start gap-10">
             {/* Desktop Sidebar */}
-            <aside className="hidden lg:flex lg:flex-col w-[240px] flex-shrink-0 sticky top-[80px] self-start max-h-[calc(100vh-96px)] overflow-y-auto overscroll-contain scrollbar-hide pb-8">
+            <aside className="hidden lg:flex lg:flex-col w-[240px] flex-shrink-0 sticky top-[80px] self-start pb-8">
               <ProductsSidebar {...sidebarProps} />
             </aside>
 
