@@ -362,14 +362,14 @@ export default function Production() {
                   <p className="mt-6 text-[15px] text-muted-foreground leading-relaxed">
                     We take responsible production seriously. We're continuously working to find sustainable manufacturing solutions in order to minimise our impact on the environment — along with the innovative and sophisticated processes involved in the production of recycled materials.
                   </p>
-                  <div className="flex flex-wrap items-center gap-6 mt-8">
+                  <div className="flex flex-wrap items-center gap-8 mt-8">
                     {[
                       { src: certGrs, alt: "Global Recycled Standard" },
                       { src: certOekoTex, alt: "OEKO-TEX Standard 100" },
                       { src: certHigg, alt: "Higg Index" },
                       { src: certSmeta, alt: "SMETA" },
                     ].map((cert) => (
-                      <img key={cert.alt} src={cert.src} alt={cert.alt} className="h-12 w-auto object-contain" loading="lazy" />
+                      <img key={cert.alt} src={cert.src} alt={cert.alt} className="h-20 w-auto object-contain" loading="lazy" />
                     ))}
                   </div>
                 </div>
