@@ -11,17 +11,7 @@ const Footer = () => {
           {/* Brand */}
           <div className="lg:col-span-1">
             <div className="mb-6">
-              <div className="inline-flex items-center justify-center px-0 py-1">
-                <div className="flex flex-col items-center justify-center leading-none">
-                  <span className="text-sm lg:text-base text-white font-bold tracking-[0.04em]"
-                    style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 700 }}>
-                    WIN-CYC
-                  </span>
-                  <span className="text-[8px] lg:text-[11px] tracking-[0.12em] text-white/70 uppercase">
-                    Group Limited
-                  </span>
-                </div>
-              </div>
+              <img src="/wincyc-white.svg" alt="WIN-CYC Group Limited" className="h-8 w-auto" />
             </div>
             <p className="text-xs text-white/45 tracking-[0.06em] mt-3 leading-relaxed">
               Timeless Craftsmanship in Garment Accessories since 1979.

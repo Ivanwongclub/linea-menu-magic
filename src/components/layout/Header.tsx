@@ -202,21 +202,11 @@ const Header = () => {
 
             {/* Logo: state-aware for hero transparency vs scrolled white bar */}
             <Link to="/" className="inline-flex items-center justify-center px-2 py-1 transition-all duration-300">
-              <div className="flex flex-col items-center justify-center leading-none">
-                <span
-                  className={`text-[21px] lg:text-[24px] font-bold transition-colors duration-300 ${
-                    isTransparent ? "text-white" : "text-foreground"
-                  }`}
-                  style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 700, letterSpacing: "0.04em" }}
-                >
-                  WIN-CYC
-                </span>
-                <span className={`text-[12px] lg:text-[16px] tracking-[0.12em] uppercase transition-colors duration-300 ${
-                  isTransparent ? "text-white/70" : "text-foreground"
-                }`}>
-                  Group Limited
-                </span>
-              </div>
+              <img
+                src={isTransparent ? "/wincyc-white.svg" : "/wincyc.svg"}
+                alt="WIN-CYC Group Limited"
+                className="h-10 w-auto transition-opacity duration-300"
+              />
             </Link>
 
             {/* Desktop nav */}
