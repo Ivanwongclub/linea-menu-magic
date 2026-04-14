@@ -17,15 +17,13 @@ const NewsDetail = () => {
   
   if (!newsItem) {
     return (
-      <>
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-3xl font-bold text-foreground mb-4">Article Not Found</h1>
-            <p className="text-muted-foreground mb-8">The article you are looking for does not exist or has been removed.</p>
-            <Link to="/news" className="inline-flex items-center gap-2 text-foreground hover:text-foreground/80 transition-colors">
-              <ArrowLeft className="w-4 h-4" />
-              Back to News
-            </Link>
-          </div>
+      <div className="max-w-4xl mx-auto text-center py-24">
+        <h1 className="text-3xl font-bold text-foreground mb-4">Article Not Found</h1>
+        <p className="text-muted-foreground mb-8">The article you are looking for does not exist or has been removed.</p>
+        <Link to="/news" className="inline-flex items-center gap-2 text-foreground hover:text-foreground/80 transition-colors">
+          <ArrowLeft className="w-4 h-4" />
+          Back to News
+        </Link>
       </div>
     );
   }
