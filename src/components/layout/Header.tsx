@@ -462,8 +462,8 @@ const Header = () => {
                   ))}
                 </div>
 
-                {/* Product grid image — square panel */}
-                <div className="flex-shrink-0 w-[420px] flex flex-col ml-auto">
+                {/* Static product grid collage */}
+                <div className="flex-shrink-0 w-[480px] flex flex-col ml-auto">
                   <div className="relative aspect-square overflow-hidden bg-secondary">
                     <img
                       src={megaProductsGrid}
