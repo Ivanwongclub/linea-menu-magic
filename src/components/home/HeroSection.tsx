@@ -79,20 +79,6 @@ const slides = [
     bgColor: "#E4DCD4",
     textColor: "#1a1a1a",
   },
-  {
-    id: 6,
-    label: "Since 1979",
-    title: "Timeless",
-    titleAccent: "craftsmanship",
-    subtitle: "Timeless Craftsmanship · Since 1979",
-    description:
-      "WIN-CYC Group has been crafting precision trims and accessories for the world's leading fashion brands since 1979.",
-    ctaText: "Our Story",
-    ctaUrl: "/about/our-story",
-    image: null as string | null,
-    bgColor: "#0a0a0a",
-    textColor: "#ffffff",
-  },
 ];
 
 const HeroSection = () => {

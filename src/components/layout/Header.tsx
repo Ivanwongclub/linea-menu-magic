@@ -167,12 +167,12 @@ const Header = () => {
             <Link to="/" className="inline-flex items-center justify-center px-2 py-1 transition-all duration-300">
               <div className="flex flex-col items-center justify-center leading-none">
                 <span
-                  className="text-sm lg:text-base font-bold text-foreground transition-colors duration-300"
+                  className="text-[21px] lg:text-[24px] font-bold text-foreground transition-colors duration-300"
                   style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 700, letterSpacing: "0.04em" }}
                 >
                   WIN-CYC
                 </span>
-                <span className="text-[8px] lg:text-[11px] tracking-[0.12em] uppercase text-foreground transition-colors duration-300">
+                <span className="text-[12px] lg:text-[16px] tracking-[0.12em] uppercase text-foreground transition-colors duration-300">
                   Group Limited
                 </span>
               </div>
