@@ -131,12 +131,12 @@ const Header = () => {
 
   const isActive = (path: string) => pathname === path || pathname.startsWith(path + "/");
 
-  // Nav links: always white text, black pill on active/hover
+  // ─── Nav link class: always white, hover = black text (no background change) ─
   const linkClass = (active: boolean) =>
-    `text-[14px] font-medium tracking-[0.04em] uppercase transition-all duration-200 px-3 py-1.5 rounded-sm ${
+    `text-[13px] font-medium tracking-[0.04em] uppercase whitespace-nowrap transition-colors duration-200 py-1 ${
       active
-        ? "bg-foreground text-background"
-        : "text-white hover:bg-foreground hover:text-background"
+        ? "text-foreground"
+        : "text-white hover:text-foreground"
     }`;
 
   const iconClass = `p-2 transition-all duration-300 ${
@@ -179,7 +179,7 @@ const Header = () => {
             </Link>
 
             {/* Desktop nav */}
-            <nav className="hidden lg:flex items-center gap-6">
+            <nav className="hidden lg:flex items-center gap-5">
               {navLinks.map((link) => {
                 if (link.megaMenu === "segments") {
                   return (
