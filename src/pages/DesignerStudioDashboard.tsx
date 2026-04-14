@@ -38,7 +38,8 @@ import {
 // Library imports — Supabase-backed
 import { useUserLibrary } from "@/features/products/hooks/useUserLibrary";
 import { useProductTaxonomy } from "@/features/products/hooks/useProductTaxonomy";
-import type { UserLibraryItem } from "@/features/products/types";
+import { useProducts } from "@/features/products/hooks/useProducts";
+import type { UserLibraryItem, Product } from "@/features/products/types";
 import type { SortField } from "@/components/designer-studio/LibraryTable";
 import LibraryItemCard from "@/components/designer-studio/LibraryItemCard";
 import LibraryTable from "@/components/designer-studio/LibraryTable";
