@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react'
 import { Plus, Search } from 'lucide-react'
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
+import { getProductImageUrl } from '@/lib/productImage'
 import type { DesignLayer, DesignSession } from '../types'
 
 interface LibraryProduct {
@@ -102,7 +103,7 @@ export default function ProductPickerSheet({
               >
                 <div className="aspect-square bg-[hsl(var(--secondary))] overflow-hidden">
                   <img
-                    src={item.products?.thumbnail_url ?? ''}
+                    src={getProductImageUrl(item.products?.thumbnail_url ?? '', 'thumb')}
                     alt={item.products?.name_en ?? ''}
                     className="w-full h-full object-contain p-2"
                   />
