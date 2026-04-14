@@ -150,6 +150,7 @@ const Header = () => {
     { href: "/segments",        label: "Segments",        megaMenu: "segments" },
     { href: "/products",        label: "Products",        megaMenu: "products" },
     { href: "/about",           label: "About",           megaMenu: "about"    },
+    { href: "/production",      label: "Production"      },
     { href: "/sustainability",  label: "Sustainability"  },
     { href: "/brochures",       label: "E-Collections"  },
     { href: "/designer-studio", label: "Designer Studio" },
