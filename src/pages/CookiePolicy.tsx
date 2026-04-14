@@ -60,10 +60,7 @@ const CookiePolicy = () => {
         />
 
         <div className="max-w-4xl mx-auto px-6 py-12">
-          <header className="mb-12 text-center">
-            <h1 className="text-4xl font-light text-foreground mb-4">Cookie Policy</h1>
-            <p className="text-muted-foreground">Last updated: March 2026</p>
-          </header>
+          <p className="text-sm text-muted-foreground mb-12">Last updated: March 2026</p>
 
           <div className="space-y-12">
             {/* Section 1 */}
