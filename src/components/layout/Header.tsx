@@ -178,7 +178,7 @@ const Header = () => {
         }`}
       >
         <div className="w-full px-10 lg:px-16 xl:px-24">
-          <div className="flex items-center justify-between h-20">
+          <div className="flex items-center h-20">
 
             {/* Logo: state-aware for hero transparency vs scrolled white bar */}
             <Link to="/" className="inline-flex items-center justify-center px-2 py-1 transition-all duration-300">
