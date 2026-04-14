@@ -110,6 +110,19 @@ const Header = () => {
   const productsTimeout = useRef<ReturnType<typeof setTimeout>>();
   const aboutTimeout    = useRef<ReturnType<typeof setTimeout>>();
   const segmentsTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const segmentsRef     = useRef<HTMLDivElement>(null);
+  const [navLeftOffset, setNavLeftOffset] = useState(200);
+
+  useEffect(() => {
+    const update = () => {
+      if (segmentsRef.current) {
+        setNavLeftOffset(segmentsRef.current.getBoundingClientRect().left);
+      }
+    };
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
 
   const isHeroPage    = pathname === "/";
   const isTransparent = isHeroPage && !scrolled;
@@ -204,7 +217,7 @@ const Header = () => {
               {navLinks.map((link) => {
                 if (link.megaMenu === "segments") {
                   return (
-                    <div key={link.href} className="relative" onMouseEnter={handleSegmentsEnter} onMouseLeave={handleSegmentsLeave}>
+                    <div key={link.href} className="relative" ref={segmentsRef} onMouseEnter={handleSegmentsEnter} onMouseLeave={handleSegmentsLeave}>
                       <button className={linkClass(false) + " flex items-center gap-1"}>
                         {link.label}
                         <ChevronDown size={14} className={`transition-transform duration-200 ${isSegmentsOpen ? "rotate-180" : ""}`} />
@@ -285,7 +298,7 @@ const Header = () => {
           onMouseLeave={handleSegmentsLeave}
         >
           <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] h-[560px]">
-            <div className="w-full pr-10 lg:pr-16 xl:pr-24 pl-[200px] xl:pl-[240px] py-10 h-full">
+            <div className="w-full pr-10 lg:pr-16 xl:pr-24 py-10 h-full" style={{ paddingLeft: navLeftOffset }}>
               <div className="flex gap-0 h-full">
 
                 {/* Left: segment selector list */}
@@ -399,7 +412,7 @@ const Header = () => {
           onMouseLeave={handleProductsLeave}
         >
           <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
-            <div className="w-full pr-10 lg:pr-16 xl:pr-24 pl-[200px] xl:pl-[240px] py-10">
+            <div className="w-full pr-10 lg:pr-16 xl:pr-24 py-10" style={{ paddingLeft: navLeftOffset }}>
               <div className="flex items-start gap-10">
                 {/* Hardware column */}
                 <div className="flex-shrink-0 min-w-0">
@@ -494,7 +507,7 @@ const Header = () => {
           onMouseLeave={handleAboutLeave}
         >
           <div className="bg-white border-b border-[hsl(var(--border))] shadow-[0_8px_24px_rgba(0,0,0,0.06)] h-[560px]">
-            <div className="w-full pr-10 lg:pr-16 xl:pr-24 pl-[200px] xl:pl-[240px] py-10 h-full">
+            <div className="w-full pr-10 lg:pr-16 xl:pr-24 py-10 h-full" style={{ paddingLeft: navLeftOffset }}>
               <div className="flex gap-0 h-full">
                 <div className="flex-[6] pr-10 flex gap-10">
                   <div className="min-w-0">
