@@ -139,6 +139,7 @@ const DesignerStudioDashboard = () => {
   const adminDefaultItems = useMemo(() => libraryItems.filter(item => item.is_admin_default), [libraryItems]);
 
   // Library UI states
+  const [librarySource, setLibrarySource] = useState<'all' | 'my'>('all');
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
@@ -146,6 +147,9 @@ const DesignerStudioDashboard = () => {
   const [sortField, setSortField] = useState<SortField>("addedAt");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [isSearchDialogOpen, setIsSearchDialogOpen] = useState(false);
+
+  // Full catalog data
+  const { products: catalogProducts, loading: catalogLoading } = useProducts({});
 
   // Legacy detail views (keep old types for compatibility)
   const [selectedLibraryItem, setSelectedLibraryItem] = useState<LibraryItem | null>(null);
