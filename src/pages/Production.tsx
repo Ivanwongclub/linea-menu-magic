@@ -39,9 +39,10 @@ const workflowSteps = [
   {
     number: "03",
     title: "Service & Delivery",
-    body: "Export-ready logistics coordinated from Hong Kong headquarters. Local offices in key markets provide rapid response, sample management, and on-the-ground support throughout the supply chain.",
-    bullets: ["Export Logistics from Hong Kong", "Regional Office Support", "Sample Turnaround"],
+    body: "Local offices in key markets provide rapid response, sample management, and on-the-ground support throughout the supply chain.",
+    bullets: ["Regional Office Support", "Sample Turnaround"],
     image: valuePartnershipImg,
+    showStudioLink: true,
   },
 ];
 
