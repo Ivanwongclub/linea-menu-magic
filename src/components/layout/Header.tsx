@@ -205,16 +205,16 @@ const Header = () => {
             : "bg-white/95 backdrop-blur-sm border-b border-[hsl(var(--border))] shadow-[0_1px_8px_rgba(0,0,0,0.06)]"
         }`}
       >
-        <div className="w-full px-10 lg:px-16 xl:px-24">
-          <div className="flex items-center h-20">
+        <div className="w-full px-4 sm:px-6 lg:px-16 xl:px-24">
+          <div className="flex items-center h-20 gap-3">
 
             {/* Logo: state-aware for hero transparency vs scrolled white bar */}
-            <Link to="/" className="inline-flex items-center justify-center px-2 py-1 transition-all duration-300">
+            <Link to="/" className="inline-flex items-center justify-center px-2 py-1 transition-all duration-300 flex-shrink-0">
               <div className="flex flex-col items-center leading-none select-none">
-                <span className={`text-[28px] font-extrabold tracking-[0.06em] transition-colors duration-300 ${isTransparent ? "text-white" : "text-foreground"}`}>
+                <span className={`text-[22px] sm:text-[26px] lg:text-[28px] font-extrabold tracking-[0.06em] transition-colors duration-300 ${isTransparent ? "text-white" : "text-foreground"}`}>
                   WIN-CYC
                 </span>
-                <span className={`text-[12px] lg:text-[16px] tracking-[0.12em] uppercase transition-colors duration-300 ${isTransparent ? "text-white/70" : "text-foreground"}`}>
+                <span className={`text-[10px] sm:text-[12px] lg:text-[16px] tracking-[0.12em] uppercase transition-colors duration-300 ${isTransparent ? "text-white/70" : "text-foreground"}`}>
                   Group Limited
                 </span>
               </div>
@@ -290,7 +290,7 @@ const Header = () => {
             </div>
 
             {/* Mobile toggle */}
-            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className={`lg:hidden ${iconClass}`} aria-label="Toggle menu">
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className={`lg:hidden ml-auto flex-shrink-0 ${iconClass}`} aria-label="Toggle menu">
               {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           </div>
@@ -596,10 +596,26 @@ const Header = () => {
       {isMenuOpen &&
         createPortal(
           <div className="lg:hidden fixed inset-0 z-[100] bg-white overflow-y-auto" style={{ animation: "slideInRight 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards" }}>
-            <div className="flex items-center justify-end h-20 px-6">
-              <button onClick={() => setIsMenuOpen(false)} className="p-2 text-foreground hover:text-muted-foreground transition-colors duration-150" aria-label="Close menu">
-                <X size={22} />
-              </button>
+            <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-border">
+              <div className="relative flex items-center justify-center h-20 px-4 sm:px-6">
+                <Link to="/" onClick={() => setIsMenuOpen(false)} className="inline-flex items-center justify-center px-2 py-1">
+                  <div className="flex flex-col items-center leading-none select-none">
+                    <span className="text-[22px] sm:text-[26px] font-extrabold tracking-[0.06em] text-foreground">
+                      WIN-CYC
+                    </span>
+                    <span className="text-[10px] sm:text-[12px] tracking-[0.12em] uppercase text-foreground">
+                      Group Limited
+                    </span>
+                  </div>
+                </Link>
+                <button
+                  onClick={() => setIsMenuOpen(false)}
+                  className="absolute right-4 sm:right-6 p-2 text-foreground hover:text-muted-foreground transition-colors duration-150"
+                  aria-label="Close menu"
+                >
+                  <X size={22} />
+                </button>
+              </div>
             </div>
             <nav className="flex flex-col">
               {NAV_LINKS.map((link) => {
