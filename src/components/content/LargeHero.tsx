@@ -1,14 +1,15 @@
 import heroImage from "@/assets/hero-image.jpg";
+import OptimizedImage from "@/components/ui/OptimizedImage";
 
 const LargeHero = () => {
   return (
     <section className="w-full mb-16 px-6">
       <div className="w-full aspect-[16/9] mb-3 overflow-hidden">
-        <img 
+        <OptimizedImage 
           src={heroImage} 
           alt="Modern jewelry collection" 
-          loading="lazy"
-          decoding="async"
+          priority="eager"
+          sizes="100vw"
           className="w-full h-full object-cover"
         />
       </div>
