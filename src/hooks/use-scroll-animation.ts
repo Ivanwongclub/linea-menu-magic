@@ -1,9 +1,11 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useLayoutEffect, useRef, useState, useCallback } from "react";
 
 interface UseScrollAnimationOptions {
   threshold?: number;
   rootMargin?: string;
   triggerOnce?: boolean;
+  disableTopOnRouteEntry?: boolean;
+  topZonePx?: number;
 }
 
 export const useScrollAnimation = (options: UseScrollAnimationOptions = {}) => {
@@ -11,17 +13,31 @@ export const useScrollAnimation = (options: UseScrollAnimationOptions = {}) => {
     threshold = 0.12,
     rootMargin = "0px 0px -40px 0px",
     triggerOnce = true,
+    disableTopOnRouteEntry = true,
+    topZonePx = 220,
   } = options;
 
   const ref = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const element = ref.current;
     if (!element) return;
 
     // Respect prefers-reduced-motion — show immediately
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setIsVisible(true);
+      return;
+    }
+
+    // Route-entry UX: keep top-of-page content instantly visible, while lower content
+    // still uses scroll-triggered entrance animations.
+    const rect = element.getBoundingClientRect();
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+    const isRouteEntry = window.scrollY <= 8;
+    const topZoneThreshold = Math.max(topZonePx, Math.floor(viewportHeight * 0.28));
+    const isInTopZone = rect.top <= topZoneThreshold && rect.bottom > 0;
+    if (triggerOnce && disableTopOnRouteEntry && isRouteEntry && isInTopZone) {
       setIsVisible(true);
       return;
     }
@@ -40,7 +56,7 @@ export const useScrollAnimation = (options: UseScrollAnimationOptions = {}) => {
 
     observer.observe(element);
     return () => observer.disconnect();
-  }, [threshold, rootMargin, triggerOnce]);
+  }, [threshold, rootMargin, triggerOnce, disableTopOnRouteEntry, topZonePx]);
 
   return { ref, isVisible };
 };

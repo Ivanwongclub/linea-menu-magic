@@ -82,7 +82,7 @@ const Factory = () => {
         {/* Hero */}
         <section className="relative overflow-hidden">
           <div className="aspect-[21/9] md:aspect-[3/1] w-full overflow-hidden">
-            <img src={factoryHero} alt="WinCYC manufacturing facility" className="w-full h-full object-cover" width={1920} height={864} />
+            <img src={factoryHero} alt="WinCYC manufacturing facility" className="w-full h-full object-cover" width={1920} height={864} loading="eager" fetchPriority="high" decoding="async" />
             <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/20 to-transparent" />
           </div>
           <div className="absolute inset-0 flex items-end">

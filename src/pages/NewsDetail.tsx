@@ -54,6 +54,9 @@ const NewsDetail = () => {
             className={`w-full h-full object-cover transition-all duration-1000 ease-out ${
               heroVisible ? 'scale-100 opacity-100' : 'scale-110 opacity-0'
             }`}
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
           
@@ -139,6 +142,9 @@ const NewsDetail = () => {
                             src={image}
                             alt={`${newsItem.title} - Image ${index + 1}`}
                             className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                            loading={index === 0 ? "eager" : "lazy"}
+                            fetchPriority={index === 0 ? "high" : "low"}
+                            decoding="async"
                           />
                         </div>
                       ))}
@@ -189,6 +195,8 @@ const NewsDetail = () => {
                                   src={item.image}
                                   alt={item.title}
                                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                  loading="lazy"
+                                  decoding="async"
                                 />
                               </div>
                               <div className="flex-1 min-w-0">

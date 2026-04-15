@@ -88,6 +88,9 @@ const News = () => {
                           src={item.image}
                           alt={item.title}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          loading={index === 0 ? "eager" : "lazy"}
+                          fetchPriority={index === 0 ? "high" : "low"}
+                          decoding="async"
                         />
                       </div>
                       <div className="p-6">
@@ -155,6 +158,9 @@ const News = () => {
                           src={item.image}
                           alt={item.title}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          loading={index < 3 ? "eager" : "lazy"}
+                          fetchPriority={index < 3 ? "high" : "low"}
+                          decoding="async"
                         />
                       </div>
                       <div className="p-5">

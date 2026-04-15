@@ -107,6 +107,7 @@ function BrochureCard({
   };
 
   const coverSrc = brochure.first_page_url ?? brochure.cover_image_url;
+  const isAboveFold = index < 3;
 
   return (
     <div
@@ -126,9 +127,9 @@ function BrochureCard({
               src={coverSrc}
               alt={brochure.title}
               className="w-full h-full object-cover object-top transition-transform duration-[400ms] ease-out group-hover:scale-[1.03]"
-              loading="lazy"
+              loading={isAboveFold ? "eager" : "lazy"}
+              fetchPriority={isAboveFold ? "high" : "low"}
               decoding="async"
-              fetchPriority="low"
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center bg-muted">

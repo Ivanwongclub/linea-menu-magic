@@ -106,6 +106,9 @@ const Sustainability = () => {
                     width={768}
                     height={1024}
                     className="w-full h-auto object-contain drop-shadow-xl"
+                    loading="eager"
+                    fetchPriority="high"
+                    decoding="async"
                   />
                   <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-sm px-5 py-2 rounded-full shadow-md">
                     <span className="text-xs font-medium tracking-wide" style={{ color: "hsl(150 40% 30%)" }}>♻ From Waste to Trim</span>

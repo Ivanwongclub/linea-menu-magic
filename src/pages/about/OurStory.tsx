@@ -93,6 +93,9 @@ const OurStory = () => {
                     width={800}
                     height={544}
                     className="w-full h-full object-cover"
+                    loading="eager"
+                    fetchPriority="high"
+                    decoding="async"
                   />
                 </div>
                 <div>
