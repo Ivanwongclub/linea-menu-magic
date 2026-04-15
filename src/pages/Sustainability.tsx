@@ -391,8 +391,6 @@ const Sustainability = () => {
                   { name: "Recycled TPE", img: "/images/sustainable/sustainable-tpe.jpg" },
                   { name: "Sustainable\nMetal Colours", img: "/images/sustainable/sustainable-metal-colours.jpg" },
                   { name: "Biodegradable\nPlastic", img: "/images/sustainable/sustainable-biodegradable.jpg" },
-                  { name: "Real Horn", img: "/images/sustainable/sustainable-real-horn.jpg" },
-                  { name: "Corozo", img: "/images/sustainable/sustainable-corozo.jpg" },
                 ].map((product, i) => (
                   <div
                     key={product.name}
