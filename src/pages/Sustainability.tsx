@@ -375,7 +375,7 @@ const Sustainability = () => {
                       }`}
                       style={{ transitionDelay: `${i * 100}ms` }}
                     >
-                      <img src={card.logo} alt={card.logoAlt} className="h-12 w-auto object-contain self-start" />
+                      <img src={card.logo} alt={card.logoAlt} className="h-16 w-auto object-contain self-start" />
                       <h3 className="text-sm font-semibold text-foreground leading-snug">{card.label}</h3>
                       <p className="text-[13px] text-muted-foreground leading-relaxed">{card.body}</p>
                     </div>
@@ -383,7 +383,7 @@ const Sustainability = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-6">
                 {[
                   { name: "Recycled Zinc\nAlloy/Copper", img: "/images/sustainable/sustainable-zinc-alloy.jpg" },
                   { name: "Recycled Polyester", img: "/images/sustainable/sustainable-polyester.jpg" },
