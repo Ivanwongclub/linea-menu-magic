@@ -607,18 +607,113 @@ const Header = () => {
               </button>
             </div>
 
-            {/* Flat link list */}
+            {/* Link list with collapsible sub-menus */}
             <nav className="flex flex-col flex-1">
-              {NAV_LINKS.map((link) => (
-                <Link
-                  key={link.href}
-                  to={link.megaMenu === "segments" ? "/products?segment=apparel" : link.href}
-                  onClick={() => setIsMenuOpen(false)}
-                  className="text-lg font-medium tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 block py-4 px-6 border-b border-border"
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {NAV_LINKS.map((link) => {
+                /* Products — collapsible */
+                if (link.megaMenu === "products") {
+                  return (
+                    <div key={link.href}>
+                      <button
+                        onClick={() => setMobileProductsOpen(!mobileProductsOpen)}
+                        className="w-full flex items-center justify-between text-lg font-medium tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 py-4 px-6 border-b border-border"
+                      >
+                        {link.label}
+                        <ChevronDown size={18} className={`transition-transform duration-200 ${mobileProductsOpen ? "rotate-180" : ""}`} />
+                      </button>
+                      {mobileProductsOpen && (
+                        <div className="bg-secondary border-b border-border">
+                          {MEGA_FAMILIES.map((family) => (
+                            <div key={family.slug}>
+                              <span className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground px-6 pt-3 pb-1">{family.name}</span>
+                              {family.subcategories.map((sub) => (
+                                <Link
+                                  key={sub.en}
+                                  to={`/products?category=${slugify(sub.en)}`}
+                                  onClick={() => setIsMenuOpen(false)}
+                                  className="text-sm text-foreground hover:text-muted-foreground transition-colors duration-150 block py-2 px-8 border-b border-border last:border-b-0"
+                                >
+                                  {sub.en}
+                                </Link>
+                              ))}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+
+                /* About — collapsible */
+                if (link.megaMenu === "about") {
+                  return (
+                    <div key={link.href}>
+                      <button
+                        onClick={() => setMobileAboutOpen(!mobileAboutOpen)}
+                        className="w-full flex items-center justify-between text-lg font-medium tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 py-4 px-6 border-b border-border"
+                      >
+                        {link.label}
+                        <ChevronDown size={18} className={`transition-transform duration-200 ${mobileAboutOpen ? "rotate-180" : ""}`} />
+                      </button>
+                      {mobileAboutOpen && (
+                        <div className="bg-secondary border-b border-border">
+                          {ABOUT_LINKS.filter(l => l.label && l.href).map((l) => (
+                            <Link
+                              key={l.href}
+                              to={l.href!}
+                              onClick={() => setIsMenuOpen(false)}
+                              className="text-sm text-foreground hover:text-muted-foreground transition-colors duration-150 block py-2 px-8 border-b border-border last:border-b-0"
+                            >
+                              {l.label}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+
+                /* Segments — collapsible (links to segment filters) */
+                if (link.megaMenu === "segments") {
+                  return (
+                    <div key={link.href}>
+                      <button
+                        onClick={() => setMobileSegmentsOpen(!mobileSegmentsOpen)}
+                        className="w-full flex items-center justify-between text-lg font-medium tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 py-4 px-6 border-b border-border"
+                      >
+                        {link.label}
+                        <ChevronDown size={18} className={`transition-transform duration-200 ${mobileSegmentsOpen ? "rotate-180" : ""}`} />
+                      </button>
+                      {mobileSegmentsOpen && (
+                        <div className="bg-secondary border-b border-border">
+                          {["Apparel", "Footwear", "Bags & Luggage", "Beauty"].map((seg) => (
+                            <Link
+                              key={seg}
+                              to={`/products?segment=${slugify(seg)}`}
+                              onClick={() => setIsMenuOpen(false)}
+                              className="text-sm text-foreground hover:text-muted-foreground transition-colors duration-150 block py-2 px-8 border-b border-border last:border-b-0"
+                            >
+                              {seg}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+
+                /* Simple links */
+                return (
+                  <Link
+                    key={link.href}
+                    to={link.href}
+                    onClick={() => setIsMenuOpen(false)}
+                    className="text-lg font-medium tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 block py-4 px-6 border-b border-border"
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
 
               {/* CTA buttons */}
               <div className="mt-auto px-6 pb-8 pt-6 space-y-3">
