@@ -362,8 +362,8 @@ const Sustainability = () => {
                       logoAlt: "ISO 14001 Environmental",
                     },
                     {
-                      label: "Natural Materials",
-                      body: "Real Horn and Corozo — renewable resources with timeless character.",
+                      label: "Factory Sustainability",
+                      body: "Facility-level environmental performance verified through the Higg Index FEM — measuring energy, water, waste and chemical management.",
                       logo: certHigg,
                       logoAlt: "Higg Index",
                     },
