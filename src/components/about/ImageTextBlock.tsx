@@ -1,3 +1,5 @@
+import OptimizedImage from "@/components/ui/OptimizedImage";
+
 interface ImageTextBlockProps {
   image: string;
   imageAlt: string;
@@ -16,9 +18,10 @@ const ImageTextBlock = ({
   return (
     <div className={`flex flex-col ${imagePosition === 'right' ? 'lg:flex-row-reverse' : 'lg:flex-row'} gap-12 items-center`}>
       <div className="flex-1">
-        <img 
+        <OptimizedImage 
           src={image} 
           alt={imageAlt}
+          sizes="(max-width: 1024px) 100vw, 50vw"
           className="w-full aspect-square lg:aspect-auto lg:h-[800px] object-cover"
         />
       </div>
