@@ -182,10 +182,11 @@ function RouteAndNetworkWarmup() {
     let timeoutId: number | undefined;
     let idleId: number | undefined;
 
-    if ("requestIdleCallback" in window) {
-      idleId = window.requestIdleCallback(preloadRoutes, { timeout: 2500 });
+    const win = window as Window & typeof globalThis;
+    if ("requestIdleCallback" in win) {
+      idleId = win.requestIdleCallback(preloadRoutes, { timeout: 2500 });
     } else {
-      timeoutId = window.setTimeout(preloadRoutes, 1200);
+      timeoutId = win.setTimeout(preloadRoutes, 1200);
     }
 
     return () => {
