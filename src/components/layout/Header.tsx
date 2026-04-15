@@ -589,166 +589,45 @@ const Header = () => {
       {/* ── Mobile Navigation ────────────────────────────────────────────────── */}
       {isMenuOpen &&
         createPortal(
-          <div className="lg:hidden fixed inset-0 z-[100] bg-white overflow-y-auto" style={{ animation: "slideInRight 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards" }}>
-            <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-border">
-              <div className="relative flex items-center justify-center h-20 px-4 sm:px-6">
-                <Link to="/" onClick={() => setIsMenuOpen(false)} className="inline-flex items-center justify-center px-2 py-1">
-                  <BrandWordmark compact />
-                </Link>
-                <button
-                  onClick={() => setIsMenuOpen(false)}
-                  className="absolute right-4 sm:right-6 p-2 text-foreground hover:text-muted-foreground transition-colors duration-150"
-                  aria-label="Close menu"
-                >
-                  <X size={22} />
-                </button>
-              </div>
+          <div
+            className="lg:hidden fixed inset-0 z-[100] bg-white overflow-y-auto"
+            style={{ animation: "slideInRight 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards" }}
+          >
+            {/* Header with logo + close */}
+            <div className="flex items-center justify-between h-20 px-6 border-b border-border">
+              <Link to="/" onClick={() => setIsMenuOpen(false)} className="inline-flex items-center">
+                <BrandWordmark compact />
+              </Link>
+              <button
+                onClick={() => setIsMenuOpen(false)}
+                className="p-2 text-foreground hover:text-muted-foreground transition-colors duration-150"
+                aria-label="Close menu"
+              >
+                <X size={22} />
+              </button>
             </div>
-            <nav className="flex flex-col">
-              <div className="px-4 sm:px-6 pt-4 pb-3 border-b border-border/70 bg-white">
-                <p className="text-[9px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Quick Access</p>
-                <div className="mt-3 grid grid-cols-2 gap-2.5">
-                  <Link to="/products" onClick={() => setIsMenuOpen(false)} className="rounded-xl border border-border/70 bg-white px-3 py-2.5 text-[12px] font-medium tracking-[0.01em] text-foreground/90 text-center">Products</Link>
-                  <Link to="/ecollections" onClick={() => setIsMenuOpen(false)} className="rounded-xl border border-border/70 bg-white px-3 py-2.5 text-[12px] font-medium tracking-[0.01em] text-foreground/90 text-center">E-Collections</Link>
-                  <Link to="/news" onClick={() => setIsMenuOpen(false)} className="rounded-xl border border-border/70 bg-white px-3 py-2.5 text-[12px] font-medium tracking-[0.01em] text-foreground/90 text-center">News</Link>
-                  <Link to="/about/our-story" onClick={() => setIsMenuOpen(false)} className="rounded-xl border border-border/70 bg-white px-3 py-2.5 text-[12px] font-medium tracking-[0.01em] text-foreground/90 text-center">Our Story</Link>
-                </div>
-              </div>
 
-              <div className="px-4 sm:px-6 py-5 space-y-2.5">
-                {NAV_LINKS.map((link) => {
-                  const triggerBaseClass = "w-full flex items-center justify-between text-left text-[16px] font-medium tracking-[0.01em] text-foreground hover:text-muted-foreground transition-colors duration-150 px-4 py-3.5";
+            {/* Flat link list */}
+            <nav className="flex flex-col flex-1">
+              {NAV_LINKS.map((link) => (
+                <Link
+                  key={link.href}
+                  to={link.megaMenu === "segments" ? "/products?segment=apparel" : link.href}
+                  onClick={() => setIsMenuOpen(false)}
+                  className="text-lg font-medium tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 block py-4 px-6 border-b border-border"
+                >
+                  {link.label}
+                </Link>
+              ))}
 
-                  if (link.megaMenu === "segments") {
-                    return (
-                      <div key={link.href} className="rounded-2xl border border-border/70 bg-white overflow-hidden">
-                        <button onClick={() => setMobileSegmentsOpen(!mobileSegmentsOpen)} className={triggerBaseClass}>
-                          {link.label}
-                          <ChevronDown size={17} className={`transition-transform duration-200 ${mobileSegmentsOpen ? "rotate-180" : ""}`} />
-                        </button>
-                        {mobileSegmentsOpen && (
-                          <div className="border-t border-border/60 bg-white px-3.5 pb-3.5 pt-2.5 space-y-2.5">
-                            {PRODUCT_SEGMENT_DETAILS.map((seg) => {
-                              const sampleItems = seg.categories.flatMap((g) => g.items).slice(0, 3);
-                              return (
-                                <div key={seg.slug} className="rounded-xl border border-border/60 bg-white p-3.5">
-                                  <div className="flex items-start justify-between gap-3">
-                                    <div className="min-w-0">
-                                      <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-foreground">{seg.name}</p>
-                                      <p className="text-[11px] text-muted-foreground/90 mt-1 leading-relaxed">{seg.tagline}</p>
-                                    </div>
-                                    <Link to={`/products?segment=${seg.slug}`} onClick={() => setIsMenuOpen(false)} className="text-[11px] font-medium text-foreground/90 whitespace-nowrap">
-                                      Explore →
-                                    </Link>
-                                  </div>
-                                  <div className="mt-2.5 flex flex-wrap gap-1.5">
-                                    {sampleItems.map((item) => (
-                                      <Link
-                                        key={item}
-                                        to={`/products?category=${slugify(item)}&segment=${seg.slug}`}
-                                        onClick={() => setIsMenuOpen(false)}
-                                        className="text-[11px] text-muted-foreground hover:text-foreground border border-border/70 rounded-full px-2.5 py-1 transition-colors"
-                                      >
-                                        {item}
-                                      </Link>
-                                    ))}
-                                  </div>
-                                </div>
-                              );
-                            })}
-                            <Link to="/designer-studio" onClick={() => setIsMenuOpen(false)} className="block rounded-xl border border-border/70 bg-white px-3.5 py-2.5 text-[12px] font-medium text-foreground">
-                              Custom via Designer Studio →
-                            </Link>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  }
-
-                  if (link.megaMenu === "products") {
-                    return (
-                      <div key={link.href} className="rounded-2xl border border-border/70 bg-white overflow-hidden">
-                        <button onClick={() => setMobileProductsOpen(!mobileProductsOpen)} className={triggerBaseClass}>
-                          {link.label}
-                          <ChevronDown size={17} className={`transition-transform duration-200 ${mobileProductsOpen ? "rotate-180" : ""}`} />
-                        </button>
-                        {mobileProductsOpen && (
-                          <div className="border-t border-border/60 bg-white px-3.5 pb-3.5 pt-2.5 space-y-2.5">
-                            {MEGA_FAMILIES.map((family) => (
-                              <div key={family.slug} className="rounded-xl border border-border/60 bg-white p-3.5">
-                                <div className="flex items-center justify-between gap-3">
-                                  <p className="text-[12px] font-semibold text-foreground">{family.name}</p>
-                                  <Link to={`/products?family=${family.slug}`} onClick={() => setIsMenuOpen(false)} className="text-[11px] font-medium text-foreground/90 whitespace-nowrap">
-                                    View →
-                                  </Link>
-                                </div>
-                                <div className="mt-2.5 flex flex-wrap gap-1.5">
-                                  {family.subcategories.slice(0, 4).map((sub) => (
-                                    <Link
-                                      key={sub.en}
-                                      to={`/products?category=${slugify(sub.en)}`}
-                                      onClick={() => setIsMenuOpen(false)}
-                                      className="text-[11px] text-muted-foreground hover:text-foreground border border-border/70 rounded-full px-2.5 py-1 transition-colors"
-                                    >
-                                      {sub.en}
-                                    </Link>
-                                  ))}
-                                </div>
-                              </div>
-                            ))}
-                            <Link to="/products" onClick={() => setIsMenuOpen(false)} className="block rounded-xl border border-border/70 bg-white px-3.5 py-2.5 text-[12px] font-medium text-foreground">
-                              View All Products →
-                            </Link>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  }
-
-                  if (link.megaMenu === "about") {
-                    return (
-                      <div key={link.href} className="rounded-2xl border border-border/70 bg-white overflow-hidden">
-                        <button onClick={() => setMobileAboutOpen(!mobileAboutOpen)} className={triggerBaseClass}>
-                          {link.label}
-                          <ChevronDown size={17} className={`transition-transform duration-200 ${mobileAboutOpen ? "rotate-180" : ""}`} />
-                        </button>
-                        {mobileAboutOpen && (
-                          <div className="border-t border-border/60 bg-white px-3.5 pb-3.5 pt-2.5">
-                            <div className="grid grid-cols-2 gap-2.5">
-                              {ABOUT_LINKS.filter((item) => !item.divider).map((item) => (
-                                <Link
-                                  key={item.href}
-                                  to={item.href!}
-                                  onClick={() => setIsMenuOpen(false)}
-                                  className="rounded-xl border border-border/70 bg-white px-3 py-2.5 text-[12px] font-medium text-foreground/90 text-center hover:text-muted-foreground transition-colors"
-                                >
-                                  {item.label}
-                                </Link>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  }
-
-                  return (
-                    <Link
-                      key={link.href}
-                      to={link.href}
-                      onClick={() => setIsMenuOpen(false)}
-                      className="flex items-center justify-between rounded-2xl border border-border/70 bg-white px-4 py-3.5 text-[16px] font-medium tracking-[0.01em] text-foreground hover:text-muted-foreground transition-colors duration-150"
-                    >
-                      <span>{link.label}</span>
-                      <ChevronRight size={16} className="text-muted-foreground/50" />
-                    </Link>
-                  );
-                })}
-              </div>
-
-              <div className="px-4 sm:px-6 pb-8 pt-4 space-y-3 border-t border-border/70 bg-white">
-                <Link to="/contact" onClick={() => setIsMenuOpen(false)}><Button className="w-full">Contact</Button></Link>
-                <Link to="/designer-studio" onClick={() => setIsMenuOpen(false)}><Button variant="outline" className="w-full">B2B Login</Button></Link>
+              {/* CTA buttons */}
+              <div className="mt-auto px-6 pb-8 pt-6 space-y-3">
+                <Link to="/contact" onClick={() => setIsMenuOpen(false)}>
+                  <Button className="w-full">Contact</Button>
+                </Link>
+                <Link to="/designer-studio" onClick={() => setIsMenuOpen(false)}>
+                  <Button variant="outline" className="w-full">B2B Login</Button>
+                </Link>
               </div>
             </nav>
           </div>,
