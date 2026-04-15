@@ -4,6 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, X, ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PRODUCT_FAMILIES, PRODUCT_SEGMENT_DETAILS } from "@/features/products/taxonomy";
+import BrandWordmark from "@/components/layout/BrandWordmark";
 import aboutHeritageImg from "@/assets/about-heritage.jpg";
 import heritageCraftImg from "@/assets/heritage-craftsmanship.jpg";
 import aboutShowroomImg from "@/assets/about-showroom.jpg";
@@ -208,16 +209,9 @@ const Header = () => {
         <div className="w-full px-4 sm:px-6 lg:px-16 xl:px-24">
           <div className="flex items-center h-20 gap-3">
 
-            {/* Logo: fixed black brand treatment on all pages/states */}
+            {/* Logo: single shared wordmark component (always black) */}
             <Link to="/" className="inline-flex items-center justify-center px-2 py-1 transition-all duration-300 flex-shrink-0">
-              <div className="flex flex-col items-center leading-none select-none">
-                <span className="text-[22px] sm:text-[26px] lg:text-[28px] font-extrabold tracking-[0.06em] text-foreground transition-colors duration-300">
-                  WIN-CYC
-                </span>
-                <span className="text-[10px] sm:text-[12px] lg:text-[16px] tracking-[0.12em] uppercase text-foreground transition-colors duration-300">
-                  Group Limited
-                </span>
-              </div>
+              <BrandWordmark />
             </Link>
 
             {/* Desktop nav */}
@@ -599,14 +593,7 @@ const Header = () => {
             <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-border">
               <div className="relative flex items-center justify-center h-20 px-4 sm:px-6">
                 <Link to="/" onClick={() => setIsMenuOpen(false)} className="inline-flex items-center justify-center px-2 py-1">
-                  <div className="flex flex-col items-center leading-none select-none">
-                    <span className="text-[22px] sm:text-[26px] font-extrabold tracking-[0.06em] text-foreground">
-                      WIN-CYC
-                    </span>
-                    <span className="text-[10px] sm:text-[12px] tracking-[0.12em] uppercase text-foreground">
-                      Group Limited
-                    </span>
-                  </div>
+                  <BrandWordmark compact />
                 </Link>
                 <button
                   onClick={() => setIsMenuOpen(false)}
