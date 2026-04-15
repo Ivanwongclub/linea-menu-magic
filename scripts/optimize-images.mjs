@@ -14,9 +14,8 @@ import path from "node:path";
 import sharp from "sharp";
 
 // ── Config ──────────────────────────────────────────────
-const WIDTHS = [480, 768, 1200, 1600];
+const WIDTHS = [480, 1200];
 const FORMATS = /** @type {const} */ ([
-  { ext: "avif", opts: { quality: 50 } },
   { ext: "webp", opts: { quality: 68 } },
   { ext: "jpg", opts: { quality: 72, mozjpeg: true } },
 ]);
