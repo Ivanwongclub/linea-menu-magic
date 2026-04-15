@@ -106,6 +106,8 @@ export default function ProductPickerSheet({
                     src={getProductImageUrl(item.products?.thumbnail_url ?? '', 'thumb')}
                     alt={item.products?.name_en ?? ''}
                     className="w-full h-full object-contain p-2"
+                    loading="lazy"
+                    decoding="async"
                   />
                 </div>
                 <div className="p-2">

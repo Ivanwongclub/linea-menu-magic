@@ -1,4 +1,4 @@
-import founders from "@/assets/founders.png";
+import founders from "@/assets/founders.jpg";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 const EditorialSection = () => {
@@ -19,7 +19,7 @@ const EditorialSection = () => {
         
         <div className="order-first md:order-last">
           <div className="w-full aspect-square overflow-hidden">
-            <img src={founders} alt="Linea founders - two women in minimalist jewelry" className="w-full h-full object-cover" />
+            <img src={founders} alt="Linea founders - two women in minimalist jewelry" className="w-full h-full object-cover" loading="lazy" decoding="async" />
           </div>
         </div>
       </div>

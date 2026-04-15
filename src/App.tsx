@@ -66,20 +66,8 @@ const routePreloaders: Array<() => Promise<unknown>> = [
   loadSustainability,
   loadNews,
   loadNewsDetail,
-  loadDesignerStudio,
-  loadDesignerStudioDashboard,
-  loadComposerPage,
-  loadPresentationPage,
   loadBrochures,
-  loadBrochureViewer,
   loadContact,
-  loadPrivacyPolicy,
-  loadTermsOfService,
-  loadCookiePolicy,
-  loadOurStory,
-  loadFactory,
-  loadCertificates,
-  loadProduction,
 ];
 
 
@@ -169,11 +157,26 @@ function RouteAndNetworkWarmup() {
 
   useEffect(() => {
     const preloadRoutes = () => {
-      routePreloaders.forEach((loader, index) => {
-        window.setTimeout(() => {
-          void loader().catch(() => undefined);
-        }, index * 120);
-      });
+      const connection = (navigator as Navigator & {
+        connection?: { saveData?: boolean; effectiveType?: string };
+      }).connection;
+
+      if (connection?.saveData) {
+        return;
+      }
+
+      if (connection?.effectiveType === "2g" || connection?.effectiveType === "slow-2g") {
+        return;
+      }
+
+      const run = async () => {
+        for (const loader of routePreloaders) {
+          await loader().catch(() => undefined);
+          await new Promise((resolve) => window.setTimeout(resolve, 140));
+        }
+      };
+
+      void run();
     };
 
     let timeoutId: number | undefined;

@@ -7,7 +7,7 @@ import { PRODUCT_FAMILIES, PRODUCT_SEGMENT_DETAILS } from "@/features/products/t
 import aboutHeritageImg from "@/assets/about-heritage.jpg";
 import heritageCraftImg from "@/assets/heritage-craftsmanship.jpg";
 import aboutShowroomImg from "@/assets/about-showroom.jpg";
-import foundersImg from "@/assets/founders.png";
+import foundersImg from "@/assets/founders.jpg";
 
 import buttonsCategoryImg from "@/assets/products/buttons-category.jpg";
 import hardwareCategoryImg from "@/assets/products/hardware-category.jpg";
@@ -201,7 +201,7 @@ const Header = () => {
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out ${
           isTransparent
-            ? "bg-transparent border-b border-transparent shadow-none"
+            ? "bg-black/20 backdrop-blur-[2px] border-b border-white/20 shadow-none"
             : "bg-white/95 backdrop-blur-sm border-b border-[hsl(var(--border))] shadow-[0_1px_8px_rgba(0,0,0,0.06)]"
         }`}
       >

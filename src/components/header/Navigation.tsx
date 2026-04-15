@@ -80,7 +80,7 @@ const Navigation = () => {
   
   // Preload dropdown images for faster display
   useEffect(() => {
-    const imagesToPreload = ["/founders.png"];
+    const imagesToPreload = ["/founders.jpg"];
     imagesToPreload.forEach(src => {
       const img = new Image();
       img.src = src;
@@ -148,7 +148,7 @@ const Navigation = () => {
         "Store Locator"
       ],
       images: [
-        { src: "/founders.png", alt: "Company Founders", label: "了解更多" }
+        { src: "/founders.jpg", alt: "Company Founders", label: "了解更多" }
       ]
     }
   ];

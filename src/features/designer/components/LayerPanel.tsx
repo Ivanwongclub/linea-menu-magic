@@ -4,6 +4,7 @@ import { Slider } from '@/components/ui/slider'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
+import { getProductImageUrl } from '@/lib/productImage'
 import type { DesignLayer } from '../types'
 
 interface LayerPanelProps {
@@ -103,7 +104,13 @@ export default function LayerPanel({
                   {isAnnotation ? (
                     <Type className="w-3.5 h-3.5 text-[hsl(var(--muted-foreground))]" />
                   ) : layer.image_url ? (
-                    <img src={layer.image_url} alt="" className="w-full h-full object-contain" />
+                    <img
+                      src={getProductImageUrl(layer.image_url, 'thumb')}
+                      alt=""
+                      className="w-full h-full object-contain"
+                      loading="lazy"
+                      decoding="async"
+                    />
                   ) : null}
                 </div>
 
