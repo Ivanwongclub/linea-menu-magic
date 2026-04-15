@@ -179,19 +179,20 @@ function RouteAndNetworkWarmup() {
       void run();
     };
 
-    let timeoutId: number | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
     let idleId: number | undefined;
 
-    if ("requestIdleCallback" in window) {
-      idleId = window.requestIdleCallback(preloadRoutes, { timeout: 2500 });
+    const hasIdleCb = typeof window !== "undefined" && "requestIdleCallback" in window;
+    if (hasIdleCb) {
+      idleId = (window as any).requestIdleCallback(preloadRoutes, { timeout: 2500 });
     } else {
-      timeoutId = window.setTimeout(preloadRoutes, 1200);
+      timeoutId = setTimeout(preloadRoutes, 1200);
     }
 
     return () => {
-      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
-      if (idleId !== undefined && "cancelIdleCallback" in window) {
-        window.cancelIdleCallback(idleId);
+      if (timeoutId !== undefined) clearTimeout(timeoutId);
+      if (idleId !== undefined && hasIdleCb) {
+        (window as any).cancelIdleCallback(idleId);
       }
     };
   }, []);
