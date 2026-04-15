@@ -618,86 +618,148 @@ const Header = () => {
               </div>
             </div>
             <nav className="flex flex-col">
-              {NAV_LINKS.map((link) => {
+              <div className="px-4 sm:px-6 pt-4 pb-3 border-b border-border bg-white">
+                <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">Quick Access</p>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <Link to="/products" onClick={() => setIsMenuOpen(false)} className="rounded-lg border border-border bg-background px-3 py-2 text-[12px] font-medium text-foreground text-center">Products</Link>
+                  <Link to="/ecollections" onClick={() => setIsMenuOpen(false)} className="rounded-lg border border-border bg-background px-3 py-2 text-[12px] font-medium text-foreground text-center">E-Collections</Link>
+                  <Link to="/news" onClick={() => setIsMenuOpen(false)} className="rounded-lg border border-border bg-background px-3 py-2 text-[12px] font-medium text-foreground text-center">News</Link>
+                  <Link to="/about/our-story" onClick={() => setIsMenuOpen(false)} className="rounded-lg border border-border bg-background px-3 py-2 text-[12px] font-medium text-foreground text-center">Our Story</Link>
+                </div>
+              </div>
 
-                if (link.megaMenu === "segments") {
-                  return (
-                    <div key={link.href}>
-                      <button onClick={() => setMobileSegmentsOpen(!mobileSegmentsOpen)} className="w-full flex items-center justify-between text-2xl font-semibold tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 py-5 px-6 border-b border-border">
-                        {link.label}
-                        <ChevronDown size={18} className={`transition-transform duration-200 ${mobileSegmentsOpen ? "rotate-180" : ""}`} />
-                      </button>
-                      {mobileSegmentsOpen && (
-                        <div className="bg-secondary">
-                          {PRODUCT_SEGMENT_DETAILS.map((seg) => (
-                            <div key={seg.slug}>
-                              <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground block pt-4 pb-1 px-6">{seg.name}</span>
-                              {seg.categories.flatMap((g) => g.items).slice(0, 6).map((item) => (
-                                <Link key={item} to={`/products?category=${slugify(item)}&segment=${seg.slug}`} onClick={() => setIsMenuOpen(false)} className="text-[13px] text-muted-foreground hover:text-foreground transition-colors block py-2 px-8 border-b border-border/30">{item}</Link>
+              <div className="px-4 sm:px-6 py-4 space-y-2">
+                {NAV_LINKS.map((link) => {
+                  const triggerBaseClass = "w-full flex items-center justify-between text-left text-[17px] font-semibold tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 px-4 py-3";
+
+                  if (link.megaMenu === "segments") {
+                    return (
+                      <div key={link.href} className="rounded-xl border border-border bg-card overflow-hidden">
+                        <button onClick={() => setMobileSegmentsOpen(!mobileSegmentsOpen)} className={triggerBaseClass}>
+                          {link.label}
+                          <ChevronDown size={17} className={`transition-transform duration-200 ${mobileSegmentsOpen ? "rotate-180" : ""}`} />
+                        </button>
+                        {mobileSegmentsOpen && (
+                          <div className="border-t border-border bg-secondary/40 px-3 pb-3 pt-2 space-y-2">
+                            {PRODUCT_SEGMENT_DETAILS.map((seg) => {
+                              const sampleItems = seg.categories.flatMap((g) => g.items).slice(0, 3);
+                              return (
+                                <div key={seg.slug} className="rounded-lg border border-border bg-background p-3">
+                                  <div className="flex items-start justify-between gap-3">
+                                    <div className="min-w-0">
+                                      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground">{seg.name}</p>
+                                      <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">{seg.tagline}</p>
+                                    </div>
+                                    <Link to={`/products?segment=${seg.slug}`} onClick={() => setIsMenuOpen(false)} className="text-[11px] font-medium text-foreground whitespace-nowrap">
+                                      Explore →
+                                    </Link>
+                                  </div>
+                                  <div className="mt-2.5 flex flex-wrap gap-1.5">
+                                    {sampleItems.map((item) => (
+                                      <Link
+                                        key={item}
+                                        to={`/products?category=${slugify(item)}&segment=${seg.slug}`}
+                                        onClick={() => setIsMenuOpen(false)}
+                                        className="text-[11px] text-muted-foreground hover:text-foreground border border-border rounded-full px-2.5 py-1 transition-colors"
+                                      >
+                                        {item}
+                                      </Link>
+                                    ))}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            <Link to="/designer-studio" onClick={() => setIsMenuOpen(false)} className="block rounded-lg border border-border bg-background px-3 py-2.5 text-[12px] font-medium text-foreground">
+                              Custom via Designer Studio →
+                            </Link>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
+
+                  if (link.megaMenu === "products") {
+                    return (
+                      <div key={link.href} className="rounded-xl border border-border bg-card overflow-hidden">
+                        <button onClick={() => setMobileProductsOpen(!mobileProductsOpen)} className={triggerBaseClass}>
+                          {link.label}
+                          <ChevronDown size={17} className={`transition-transform duration-200 ${mobileProductsOpen ? "rotate-180" : ""}`} />
+                        </button>
+                        {mobileProductsOpen && (
+                          <div className="border-t border-border bg-secondary/40 px-3 pb-3 pt-2 space-y-2">
+                            {MEGA_FAMILIES.map((family) => (
+                              <div key={family.slug} className="rounded-lg border border-border bg-background p-3">
+                                <div className="flex items-center justify-between gap-3">
+                                  <p className="text-[12px] font-semibold text-foreground">{family.name}</p>
+                                  <Link to={`/products?family=${family.slug}`} onClick={() => setIsMenuOpen(false)} className="text-[11px] font-medium text-foreground whitespace-nowrap">
+                                    View →
+                                  </Link>
+                                </div>
+                                <div className="mt-2.5 flex flex-wrap gap-1.5">
+                                  {family.subcategories.slice(0, 4).map((sub) => (
+                                    <Link
+                                      key={sub.en}
+                                      to={`/products?category=${slugify(sub.en)}`}
+                                      onClick={() => setIsMenuOpen(false)}
+                                      className="text-[11px] text-muted-foreground hover:text-foreground border border-border rounded-full px-2.5 py-1 transition-colors"
+                                    >
+                                      {sub.en}
+                                    </Link>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                            <Link to="/products" onClick={() => setIsMenuOpen(false)} className="block rounded-lg border border-border bg-background px-3 py-2.5 text-[12px] font-medium text-foreground">
+                              View All Products →
+                            </Link>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
+
+                  if (link.megaMenu === "about") {
+                    return (
+                      <div key={link.href} className="rounded-xl border border-border bg-card overflow-hidden">
+                        <button onClick={() => setMobileAboutOpen(!mobileAboutOpen)} className={triggerBaseClass}>
+                          {link.label}
+                          <ChevronDown size={17} className={`transition-transform duration-200 ${mobileAboutOpen ? "rotate-180" : ""}`} />
+                        </button>
+                        {mobileAboutOpen && (
+                          <div className="border-t border-border bg-secondary/40 px-3 pb-3 pt-2">
+                            <div className="grid grid-cols-2 gap-2">
+                              {ABOUT_LINKS.filter((item) => !item.divider).map((item) => (
+                                <Link
+                                  key={item.href}
+                                  to={item.href!}
+                                  onClick={() => setIsMenuOpen(false)}
+                                  className="rounded-lg border border-border bg-background px-3 py-2.5 text-[12px] font-medium text-foreground text-center hover:text-muted-foreground transition-colors"
+                                >
+                                  {item.label}
+                                </Link>
                               ))}
-                              <Link to={`/products?segment=${seg.slug}`} onClick={() => setIsMenuOpen(false)} className="text-[13px] font-medium text-foreground block py-2 px-8 border-b border-border/50">All {seg.name} →</Link>
                             </div>
-                          ))}
-                          <Link to="/designer-studio" onClick={() => setIsMenuOpen(false)} className="text-sm text-muted-foreground hover:text-foreground block py-3.5 px-6 border-b border-border">Custom via our Designer Studio →</Link>
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
 
-                if (link.megaMenu === "products") {
                   return (
-                    <div key={link.href}>
-                      <button onClick={() => setMobileProductsOpen(!mobileProductsOpen)} className="w-full flex items-center justify-between text-2xl font-semibold tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 py-5 px-6 border-b border-border">
-                        {link.label}
-                        <ChevronDown size={18} className={`transition-transform duration-200 ${mobileProductsOpen ? "rotate-180" : ""}`} />
-                      </button>
-                      {mobileProductsOpen && (
-                        <div className="bg-secondary">
-                          {MEGA_FAMILIES.map((family) => (
-                            <div key={family.slug}>
-                              <Link to={`/products?family=${family.slug}`} onClick={() => setIsMenuOpen(false)} className="flex items-baseline gap-2 text-sm font-semibold text-foreground py-3.5 px-6 border-b border-border">{family.name}</Link>
-                              {family.subcategories.map((sub) => (
-                                <Link key={sub.en} to={`/products?category=${slugify(sub.en)}`} onClick={() => setIsMenuOpen(false)} className="text-[13px] text-muted-foreground hover:text-foreground transition-colors block py-2 px-10 border-b border-border/30">{sub.en}</Link>
-                              ))}
-                            </div>
-                          ))}
-                          <Link to="/products" onClick={() => setIsMenuOpen(false)} className="text-sm font-medium text-foreground block py-3.5 px-6 border-b border-border">View All Products →</Link>
-                        </div>
-                      )}
-                    </div>
+                    <Link
+                      key={link.href}
+                      to={link.href}
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3 text-[17px] font-semibold tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150"
+                    >
+                      <span>{link.label}</span>
+                      <ChevronRight size={16} className="text-muted-foreground/50" />
+                    </Link>
                   );
-                }
+                })}
+              </div>
 
-                if (link.megaMenu === "about") {
-                  return (
-                    <div key={link.href}>
-                      <button onClick={() => setMobileAboutOpen(!mobileAboutOpen)} className="w-full flex items-center justify-between text-2xl font-semibold tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 py-5 px-6 border-b border-border">
-                        {link.label}
-                        <ChevronDown size={18} className={`transition-transform duration-200 ${mobileAboutOpen ? "rotate-180" : ""}`} />
-                      </button>
-                      {mobileAboutOpen && (
-                        <div className="bg-secondary">
-                          {ABOUT_LINKS.map((item, i) => {
-                            if (item.divider) return <hr key={`mob-div-${i}`} className="border-border mx-6" />;
-                            return (
-                              <Link key={item.href} to={item.href!} onClick={() => setIsMenuOpen(false)} className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-150 block py-2.5 px-6 border-b border-border/30">{item.label}</Link>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
-
-                return (
-                  <Link key={link.href} to={link.href} onClick={() => setIsMenuOpen(false)} className="text-2xl font-semibold tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 py-5 px-6 border-b border-border">
-                    {link.label}
-                  </Link>
-                );
-              })}
-
-              <div className="px-6 pb-8 pt-6 space-y-4">
+              <div className="px-4 sm:px-6 pb-8 pt-3 space-y-3 border-t border-border bg-white">
                 <Link to="/contact" onClick={() => setIsMenuOpen(false)}><Button className="w-full">Contact</Button></Link>
                 <Link to="/designer-studio" onClick={() => setIsMenuOpen(false)}><Button variant="outline" className="w-full">B2B Login</Button></Link>
               </div>
