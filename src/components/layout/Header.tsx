@@ -208,13 +208,13 @@ const Header = () => {
         <div className="w-full px-4 sm:px-6 lg:px-16 xl:px-24">
           <div className="flex items-center h-20 gap-3">
 
-            {/* Logo: state-aware for hero transparency vs scrolled white bar */}
+            {/* Logo: fixed black brand treatment on all pages/states */}
             <Link to="/" className="inline-flex items-center justify-center px-2 py-1 transition-all duration-300 flex-shrink-0">
               <div className="flex flex-col items-center leading-none select-none">
-                <span className={`text-[22px] sm:text-[26px] lg:text-[28px] font-extrabold tracking-[0.06em] transition-colors duration-300 ${isTransparent ? "text-white" : "text-foreground"}`}>
+                <span className="text-[22px] sm:text-[26px] lg:text-[28px] font-extrabold tracking-[0.06em] text-foreground transition-colors duration-300">
                   WIN-CYC
                 </span>
-                <span className={`text-[10px] sm:text-[12px] lg:text-[16px] tracking-[0.12em] uppercase transition-colors duration-300 ${isTransparent ? "text-white/70" : "text-foreground"}`}>
+                <span className="text-[10px] sm:text-[12px] lg:text-[16px] tracking-[0.12em] uppercase text-foreground transition-colors duration-300">
                   Group Limited
                 </span>
               </div>
