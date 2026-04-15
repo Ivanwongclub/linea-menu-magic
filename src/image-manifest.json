@@ -1,1 +1,1729 @@
-{}
+{
+  "assets/about-heritage.jpg": {
+    "original": 135339,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__about-heritage-480.webp",
+        "size": 31448
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__about-heritage-480.jpg",
+        "size": 37510
+      }
+    ]
+  },
+  "assets/about-showroom.jpg": {
+    "original": 121377,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__about-showroom-480.webp",
+        "size": 22854
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__about-showroom-480.jpg",
+        "size": 23871
+      }
+    ]
+  },
+  "assets/certs/bsci.png": {
+    "original": 45960,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__certs__bsci-480.webp",
+        "size": 21806
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__certs__bsci-480.jpg",
+        "size": 11636
+      },
+      {
+        "width": 1200,
+        "format": "jpg",
+        "path": "/optimized/assets__certs__bsci-1200.jpg",
+        "size": 36491
+      }
+    ]
+  },
+  "assets/certs/grs.png": {
+    "original": 20328,
+    "variants": []
+  },
+  "assets/certs/higg-index.png": {
+    "original": 13040,
+    "variants": []
+  },
+  "assets/certs/iso-14001.png": {
+    "original": 58802,
+    "variants": []
+  },
+  "assets/certs/iso-9001.png": {
+    "original": 147587,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__certs__iso-9001-480.webp",
+        "size": 14694
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__certs__iso-9001-480.jpg",
+        "size": 22172
+      },
+      {
+        "width": 1200,
+        "format": "webp",
+        "path": "/optimized/assets__certs__iso-9001-1200.webp",
+        "size": 37200
+      },
+      {
+        "width": 1200,
+        "format": "jpg",
+        "path": "/optimized/assets__certs__iso-9001-1200.jpg",
+        "size": 64366
+      }
+    ]
+  },
+  "assets/certs/oeko-tex.png": {
+    "original": 8321,
+    "variants": []
+  },
+  "assets/certs/reach.png": {
+    "original": 90014,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__certs__reach-480.webp",
+        "size": 7196
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__certs__reach-480.jpg",
+        "size": 11195
+      }
+    ]
+  },
+  "assets/certs/smeta.png": {
+    "original": 11856,
+    "variants": []
+  },
+  "assets/contact-hongkong.jpg": {
+    "original": 100697,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__contact-hongkong-480.webp",
+        "size": 17228
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__contact-hongkong-480.jpg",
+        "size": 19254
+      }
+    ]
+  },
+  "assets/eclipse.jpg": {
+    "original": 590927,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__eclipse-480.webp",
+        "size": 4568
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__eclipse-480.jpg",
+        "size": 6818
+      },
+      {
+        "width": 1200,
+        "format": "webp",
+        "path": "/optimized/assets__eclipse-1200.webp",
+        "size": 17272
+      },
+      {
+        "width": 1200,
+        "format": "jpg",
+        "path": "/optimized/assets__eclipse-1200.jpg",
+        "size": 28538
+      }
+    ]
+  },
+  "assets/factory-hero.jpg": {
+    "original": 242446,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__factory-hero-480.webp",
+        "size": 18004
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__factory-hero-480.jpg",
+        "size": 20933
+      },
+      {
+        "width": 1200,
+        "format": "webp",
+        "path": "/optimized/assets__factory-hero-1200.webp",
+        "size": 67448
+      },
+      {
+        "width": 1200,
+        "format": "jpg",
+        "path": "/optimized/assets__factory-hero-1200.jpg",
+        "size": 89108
+      }
+    ]
+  },
+  "assets/factory-production.jpg": {
+    "original": 83634,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__factory-production-480.webp",
+        "size": 26676
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__factory-production-480.jpg",
+        "size": 28894
+      }
+    ]
+  },
+  "assets/founders.jpg": {
+    "original": 145331,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__founders-480.webp",
+        "size": 8442
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__founders-480.jpg",
+        "size": 11425
+      }
+    ]
+  },
+  "assets/founders.png": {
+    "original": 675415,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__founders-480.webp",
+        "size": 8384
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__founders-480.jpg",
+        "size": 11414
+      }
+    ]
+  },
+  "assets/halo.jpg": {
+    "original": 642208,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__halo-480.webp",
+        "size": 5688
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__halo-480.jpg",
+        "size": 8580
+      },
+      {
+        "width": 1200,
+        "format": "webp",
+        "path": "/optimized/assets__halo-1200.webp",
+        "size": 19804
+      },
+      {
+        "width": 1200,
+        "format": "jpg",
+        "path": "/optimized/assets__halo-1200.jpg",
+        "size": 32186
+      }
+    ]
+  },
+  "assets/heritage-craftsmanship.jpg": {
+    "original": 62558,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__heritage-craftsmanship-480.webp",
+        "size": 15382
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__heritage-craftsmanship-480.jpg",
+        "size": 21919
+      }
+    ]
+  },
+  "assets/hero-image.jpg": {
+    "original": 367476,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__hero-image-480.webp",
+        "size": 9660
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__hero-image-480.jpg",
+        "size": 13842
+      },
+      {
+        "width": 1200,
+        "format": "webp",
+        "path": "/optimized/assets__hero-image-1200.webp",
+        "size": 39530
+      },
+      {
+        "width": 1200,
+        "format": "jpg",
+        "path": "/optimized/assets__hero-image-1200.jpg",
+        "size": 57751
+      }
+    ]
+  },
+  "assets/hero-image.png": {
+    "original": 2786827,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__hero-image-480.webp",
+        "size": 9880
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__hero-image-480.jpg",
+        "size": 13900
+      },
+      {
+        "width": 1200,
+        "format": "webp",
+        "path": "/optimized/assets__hero-image-1200.webp",
+        "size": 39532
+      },
+      {
+        "width": 1200,
+        "format": "jpg",
+        "path": "/optimized/assets__hero-image-1200.jpg",
+        "size": 57797
+      }
+    ]
+  },
+  "assets/lintel.jpg": {
+    "original": 558835,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__lintel-480.webp",
+        "size": 4994
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__lintel-480.jpg",
+        "size": 7310
+      },
+      {
+        "width": 1200,
+        "format": "webp",
+        "path": "/optimized/assets__lintel-1200.webp",
+        "size": 18900
+      },
+      {
+        "width": 1200,
+        "format": "jpg",
+        "path": "/optimized/assets__lintel-1200.jpg",
+        "size": 29763
+      }
+    ]
+  },
+  "assets/location-hongkong.jpg": {
+    "original": 147017,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__location-hongkong-480.webp",
+        "size": 22018
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__location-hongkong-480.jpg",
+        "size": 25748
+      }
+    ]
+  },
+  "assets/location-newyork.jpg": {
+    "original": 141206,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__location-newyork-480.webp",
+        "size": 22322
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__location-newyork-480.jpg",
+        "size": 26106
+      }
+    ]
+  },
+  "assets/location-shanghai.jpg": {
+    "original": 87283,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__location-shanghai-480.webp",
+        "size": 10432
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__location-shanghai-480.jpg",
+        "size": 15122
+      }
+    ]
+  },
+  "assets/location-vietnam.jpg": {
+    "original": 193066,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__location-vietnam-480.webp",
+        "size": 30498
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__location-vietnam-480.jpg",
+        "size": 32457
+      }
+    ]
+  },
+  "assets/materials/brass-surface.jpg": {
+    "original": 195045,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__materials__brass-surface-480.webp",
+        "size": 14970
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__materials__brass-surface-480.jpg",
+        "size": 15678
+      },
+      {
+        "width": 1200,
+        "format": "webp",
+        "path": "/optimized/assets__materials__brass-surface-1200.webp",
+        "size": 69114
+      },
+      {
+        "width": 1200,
+        "format": "jpg",
+        "path": "/optimized/assets__materials__brass-surface-1200.jpg",
+        "size": 85334
+      }
+    ]
+  },
+  "assets/materials/cotton-surface.jpg": {
+    "original": 213944,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__materials__cotton-surface-480.webp",
+        "size": 31126
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__materials__cotton-surface-480.jpg",
+        "size": 31925
+      }
+    ]
+  },
+  "assets/materials/metal-surface.jpg": {
+    "original": 213781,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__materials__metal-surface-480.webp",
+        "size": 19206
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__materials__metal-surface-480.jpg",
+        "size": 16177
+      },
+      {
+        "width": 1200,
+        "format": "webp",
+        "path": "/optimized/assets__materials__metal-surface-1200.webp",
+        "size": 95906
+      },
+      {
+        "width": 1200,
+        "format": "jpg",
+        "path": "/optimized/assets__materials__metal-surface-1200.jpg",
+        "size": 96161
+      }
+    ]
+  },
+  "assets/materials/resin-surface.jpg": {
+    "original": 87425,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__materials__resin-surface-480.webp",
+        "size": 4406
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__materials__resin-surface-480.jpg",
+        "size": 7465
+      },
+      {
+        "width": 1200,
+        "format": "webp",
+        "path": "/optimized/assets__materials__resin-surface-1200.webp",
+        "size": 18156
+      },
+      {
+        "width": 1200,
+        "format": "jpg",
+        "path": "/optimized/assets__materials__resin-surface-1200.jpg",
+        "size": 32857
+      }
+    ]
+  },
+  "assets/milestone-craftsmanship.jpg": {
+    "original": 44993,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__milestone-craftsmanship-480.webp",
+        "size": 12524
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__milestone-craftsmanship-480.jpg",
+        "size": 17144
+      }
+    ]
+  },
+  "assets/milestone-digital.jpg": {
+    "original": 47211,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__milestone-digital-480.webp",
+        "size": 12032
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__milestone-digital-480.jpg",
+        "size": 18258
+      }
+    ]
+  },
+  "assets/milestone-founding.jpg": {
+    "original": 103647,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__milestone-founding-480.webp",
+        "size": 28822
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__milestone-founding-480.jpg",
+        "size": 28505
+      }
+    ]
+  },
+  "assets/milestone-global.jpg": {
+    "original": 26573,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__milestone-global-480.webp",
+        "size": 5424
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__milestone-global-480.jpg",
+        "size": 8402
+      }
+    ]
+  },
+  "assets/milestone-integrated.jpg": {
+    "original": 151444,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__milestone-integrated-480.webp",
+        "size": 30836
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__milestone-integrated-480.jpg",
+        "size": 34843
+      }
+    ]
+  },
+  "assets/milestone-iso-quality.jpg": {
+    "original": 88240,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__milestone-iso-quality-480.webp",
+        "size": 17408
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__milestone-iso-quality-480.jpg",
+        "size": 22943
+      }
+    ]
+  },
+  "assets/oblique.jpg": {
+    "original": 448025,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__oblique-480.webp",
+        "size": 3548
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__oblique-480.jpg",
+        "size": 5682
+      },
+      {
+        "width": 1200,
+        "format": "webp",
+        "path": "/optimized/assets__oblique-1200.webp",
+        "size": 15074
+      },
+      {
+        "width": 1200,
+        "format": "jpg",
+        "path": "/optimized/assets__oblique-1200.jpg",
+        "size": 24734
+      }
+    ]
+  },
+  "assets/office-hk.jpg": {
+    "original": 67996,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__office-hk-480.webp",
+        "size": 16578
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__office-hk-480.jpg",
+        "size": 23137
+      }
+    ]
+  },
+  "assets/office-showroom.jpg": {
+    "original": 115000,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__office-showroom-480.webp",
+        "size": 33800
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__office-showroom-480.jpg",
+        "size": 34671
+      }
+    ]
+  },
+  "assets/pantheon.jpg": {
+    "original": 92115,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__pantheon-480.webp",
+        "size": 2190
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__pantheon-480.jpg",
+        "size": 3641
+      },
+      {
+        "width": 1200,
+        "format": "webp",
+        "path": "/optimized/assets__pantheon-1200.webp",
+        "size": 9994
+      },
+      {
+        "width": 1200,
+        "format": "jpg",
+        "path": "/optimized/assets__pantheon-1200.jpg",
+        "size": 15688
+      }
+    ]
+  },
+  "assets/production-hero.jpg": {
+    "original": 172614,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__production-hero-480.webp",
+        "size": 10358
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__production-hero-480.jpg",
+        "size": 12637
+      },
+      {
+        "width": 1200,
+        "format": "webp",
+        "path": "/optimized/assets__production-hero-1200.webp",
+        "size": 38506
+      },
+      {
+        "width": 1200,
+        "format": "jpg",
+        "path": "/optimized/assets__production-hero-1200.jpg",
+        "size": 50323
+      }
+    ]
+  },
+  "assets/products/belt-buckle.jpg": {
+    "original": 156432,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__products__belt-buckle-480.webp",
+        "size": 20796
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__products__belt-buckle-480.jpg",
+        "size": 27647
+      }
+    ]
+  },
+  "assets/products/brand-button.jpg": {
+    "original": 100502,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__products__brand-button-480.webp",
+        "size": 12500
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__products__brand-button-480.jpg",
+        "size": 15679
+      }
+    ]
+  },
+  "assets/products/branded-zipper.jpg": {
+    "original": 76436,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__products__branded-zipper-480.webp",
+        "size": 7042
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__products__branded-zipper-480.jpg",
+        "size": 10671
+      }
+    ]
+  },
+  "assets/products/buttons-category.jpg": {
+    "original": 78457,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__products__buttons-category-480.webp",
+        "size": 5876
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__products__buttons-category-480.jpg",
+        "size": 9297
+      },
+      {
+        "width": 1200,
+        "format": "webp",
+        "path": "/optimized/assets__products__buttons-category-1200.webp",
+        "size": 21412
+      },
+      {
+        "width": 1200,
+        "format": "jpg",
+        "path": "/optimized/assets__products__buttons-category-1200.jpg",
+        "size": 39566
+      }
+    ]
+  },
+  "assets/products/cotton-lace.jpg": {
+    "original": 92396,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__products__cotton-lace-480.webp",
+        "size": 9944
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__products__cotton-lace-480.jpg",
+        "size": 13710
+      }
+    ]
+  },
+  "assets/products/engraved-button.jpg": {
+    "original": 126441,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__products__engraved-button-480.webp",
+        "size": 15368
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__products__engraved-button-480.jpg",
+        "size": 19235
+      }
+    ]
+  },
+  "assets/products/featured-segment.jpg": {
+    "original": 102532,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__products__featured-segment-480.webp",
+        "size": 17310
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__products__featured-segment-480.jpg",
+        "size": 18707
+      }
+    ]
+  },
+  "assets/products/hardware-category.jpg": {
+    "original": 95728,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__products__hardware-category-480.webp",
+        "size": 9796
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__products__hardware-category-480.jpg",
+        "size": 12990
+      },
+      {
+        "width": 1200,
+        "format": "webp",
+        "path": "/optimized/assets__products__hardware-category-1200.webp",
+        "size": 38294
+      },
+      {
+        "width": 1200,
+        "format": "jpg",
+        "path": "/optimized/assets__products__hardware-category-1200.jpg",
+        "size": 55320
+      }
+    ]
+  },
+  "assets/products/lace-category.jpg": {
+    "original": 108507,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__products__lace-category-480.webp",
+        "size": 8280
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__products__lace-category-480.jpg",
+        "size": 9515
+      },
+      {
+        "width": 1200,
+        "format": "webp",
+        "path": "/optimized/assets__products__lace-category-1200.webp",
+        "size": 44236
+      },
+      {
+        "width": 1200,
+        "format": "jpg",
+        "path": "/optimized/assets__products__lace-category-1200.jpg",
+        "size": 59956
+      }
+    ]
+  },
+  "assets/products/mega-products-grid.jpg": {
+    "original": 373431,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__products__mega-products-grid-480.webp",
+        "size": 37380
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__products__mega-products-grid-480.jpg",
+        "size": 39270
+      }
+    ]
+  },
+  "assets/products/mega-products-grid.png": {
+    "original": 252080,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__products__mega-products-grid-480.webp",
+        "size": 37598
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__products__mega-products-grid-480.jpg",
+        "size": 39358
+      }
+    ]
+  },
+  "assets/products/metal-button.jpg": {
+    "original": 113075,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__products__metal-button-480.webp",
+        "size": 14918
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__products__metal-button-480.jpg",
+        "size": 19310
+      }
+    ]
+  },
+  "assets/products/metal-clasp.jpg": {
+    "original": 108976,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__products__metal-clasp-480.webp",
+        "size": 11604
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__products__metal-clasp-480.jpg",
+        "size": 15109
+      }
+    ]
+  },
+  "assets/products/metal-zipper.jpg": {
+    "original": 115074,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__products__metal-zipper-480.webp",
+        "size": 15152
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__products__metal-zipper-480.jpg",
+        "size": 17791
+      }
+    ]
+  },
+  "assets/products/nylon-zipper.jpg": {
+    "original": 102718,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__products__nylon-zipper-480.webp",
+        "size": 10564
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__products__nylon-zipper-480.jpg",
+        "size": 14875
+      }
+    ]
+  },
+  "assets/products/other-category.jpg": {
+    "original": 91756,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__products__other-category-480.webp",
+        "size": 5896
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__products__other-category-480.jpg",
+        "size": 9087
+      },
+      {
+        "width": 1200,
+        "format": "webp",
+        "path": "/optimized/assets__products__other-category-1200.webp",
+        "size": 23840
+      },
+      {
+        "width": 1200,
+        "format": "jpg",
+        "path": "/optimized/assets__products__other-category-1200.jpg",
+        "size": 43145
+      }
+    ]
+  },
+  "assets/products/resin-buttons.jpg": {
+    "original": 59576,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__products__resin-buttons-480.webp",
+        "size": 4934
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__products__resin-buttons-480.jpg",
+        "size": 8661
+      }
+    ]
+  },
+  "assets/products/snap-button.jpg": {
+    "original": 81101,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__products__snap-button-480.webp",
+        "size": 8190
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__products__snap-button-480.jpg",
+        "size": 11461
+      }
+    ]
+  },
+  "assets/products/woven-label.jpg": {
+    "original": 143523,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__products__woven-label-480.webp",
+        "size": 16236
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__products__woven-label-480.jpg",
+        "size": 15339
+      }
+    ]
+  },
+  "assets/products/zippers-category.jpg": {
+    "original": 88473,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__products__zippers-category-480.webp",
+        "size": 5788
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__products__zippers-category-480.jpg",
+        "size": 7393
+      },
+      {
+        "width": 1200,
+        "format": "webp",
+        "path": "/optimized/assets__products__zippers-category-1200.webp",
+        "size": 24286
+      },
+      {
+        "width": 1200,
+        "format": "jpg",
+        "path": "/optimized/assets__products__zippers-category-1200.jpg",
+        "size": 38571
+      }
+    ]
+  },
+  "assets/shadowline-1.jpg": {
+    "original": 414456,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__shadowline-1-480.webp",
+        "size": 6264
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__shadowline-1-480.jpg",
+        "size": 8385
+      },
+      {
+        "width": 1200,
+        "format": "webp",
+        "path": "/optimized/assets__shadowline-1-1200.webp",
+        "size": 25370
+      },
+      {
+        "width": 1200,
+        "format": "jpg",
+        "path": "/optimized/assets__shadowline-1-1200.jpg",
+        "size": 37603
+      }
+    ]
+  },
+  "assets/shadowline.jpg": {
+    "original": 891342,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__shadowline-480.webp",
+        "size": 8310
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__shadowline-480.jpg",
+        "size": 10307
+      },
+      {
+        "width": 1200,
+        "format": "webp",
+        "path": "/optimized/assets__shadowline-1200.webp",
+        "size": 32914
+      },
+      {
+        "width": 1200,
+        "format": "jpg",
+        "path": "/optimized/assets__shadowline-1200.jpg",
+        "size": 45935
+      }
+    ]
+  },
+  "assets/sustainability-bottle.jpg": {
+    "original": 32146,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__sustainability-bottle-480.webp",
+        "size": 5878
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__sustainability-bottle-480.jpg",
+        "size": 8844
+      }
+    ]
+  },
+  "assets/sustainability-carbon.jpg": {
+    "original": 218826,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__sustainability-carbon-480.webp",
+        "size": 36772
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__sustainability-carbon-480.jpg",
+        "size": 34963
+      }
+    ]
+  },
+  "assets/sustainability-eco-process.jpg": {
+    "original": 57131,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__sustainability-eco-process-480.webp",
+        "size": 9730
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__sustainability-eco-process-480.jpg",
+        "size": 15716
+      }
+    ]
+  },
+  "assets/sustainability-forest.jpg": {
+    "original": 209620,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__sustainability-forest-480.webp",
+        "size": 11486
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__sustainability-forest-480.jpg",
+        "size": 12704
+      },
+      {
+        "width": 1200,
+        "format": "webp",
+        "path": "/optimized/assets__sustainability-forest-1200.webp",
+        "size": 56342
+      },
+      {
+        "width": 1200,
+        "format": "jpg",
+        "path": "/optimized/assets__sustainability-forest-1200.jpg",
+        "size": 63406
+      }
+    ]
+  },
+  "assets/sustainability-nature.jpg": {
+    "original": 93599,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__sustainability-nature-480.webp",
+        "size": 24784
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__sustainability-nature-480.jpg",
+        "size": 24891
+      }
+    ]
+  },
+  "assets/sustainability-recycled-metal.jpg": {
+    "original": 80555,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__sustainability-recycled-metal-480.webp",
+        "size": 25738
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__sustainability-recycled-metal-480.jpg",
+        "size": 28846
+      }
+    ]
+  },
+  "assets/sustainability-zero-waste.jpg": {
+    "original": 228646,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__sustainability-zero-waste-480.webp",
+        "size": 51012
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__sustainability-zero-waste-480.jpg",
+        "size": 45903
+      }
+    ]
+  },
+  "assets/sustainability.jpg": {
+    "original": 133638,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__sustainability-480.webp",
+        "size": 24358
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__sustainability-480.jpg",
+        "size": 28126
+      }
+    ]
+  },
+  "assets/value-innovation.jpg": {
+    "original": 57187,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__value-innovation-480.webp",
+        "size": 18386
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__value-innovation-480.jpg",
+        "size": 22284
+      }
+    ]
+  },
+  "assets/value-partnership.jpg": {
+    "original": 63180,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__value-partnership-480.webp",
+        "size": 17086
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__value-partnership-480.jpg",
+        "size": 21357
+      }
+    ]
+  },
+  "assets/value-quality.jpg": {
+    "original": 27710,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/assets__value-quality-480.webp",
+        "size": 6512
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/assets__value-quality-480.jpg",
+        "size": 10450
+      }
+    ]
+  },
+  "arcus-bracelet.png": {
+    "original": 1483146,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/arcus-bracelet-480.webp",
+        "size": 17838
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/arcus-bracelet-480.jpg",
+        "size": 19346
+      }
+    ]
+  },
+  "earrings-collection.png": {
+    "original": 1466460,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/earrings-collection-480.webp",
+        "size": 18376
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/earrings-collection-480.jpg",
+        "size": 22614
+      }
+    ]
+  },
+  "founders.jpg": {
+    "original": 145331,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/founders-480.webp",
+        "size": 8442
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/founders-480.jpg",
+        "size": 11425
+      }
+    ]
+  },
+  "founders.png": {
+    "original": 675415,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/founders-480.webp",
+        "size": 8384
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/founders-480.jpg",
+        "size": 11414
+      }
+    ]
+  },
+  "images/3dprint/3dprint-buckle-prototype.jpg": {
+    "original": 15780,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/images__3dprint__3dprint-buckle-prototype-480.webp",
+        "size": 1116
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/images__3dprint__3dprint-buckle-prototype-480.jpg",
+        "size": 2043
+      }
+    ]
+  },
+  "images/3dprint/3dprint-button-prototype.jpg": {
+    "original": 14847,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/images__3dprint__3dprint-button-prototype-480.webp",
+        "size": 1184
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/images__3dprint__3dprint-button-prototype-480.jpg",
+        "size": 2071
+      }
+    ]
+  },
+  "images/3dprint/3dprint-snap-prototype.jpg": {
+    "original": 15685,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/images__3dprint__3dprint-snap-prototype-480.webp",
+        "size": 1162
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/images__3dprint__3dprint-snap-prototype-480.jpg",
+        "size": 2048
+      }
+    ]
+  },
+  "images/3dprint/3dprint-zipper-prototype.jpg": {
+    "original": 14761,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/images__3dprint__3dprint-zipper-prototype-480.webp",
+        "size": 850
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/images__3dprint__3dprint-zipper-prototype-480.jpg",
+        "size": 1921
+      }
+    ]
+  },
+  "images/sustainable/sustainable-biodegradable.jpg": {
+    "original": 63914,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/images__sustainable__sustainable-biodegradable-480.webp",
+        "size": 8386
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/images__sustainable__sustainable-biodegradable-480.jpg",
+        "size": 13324
+      }
+    ]
+  },
+  "images/sustainable/sustainable-corozo.jpg": {
+    "original": 6765,
+    "variants": []
+  },
+  "images/sustainable/sustainable-metal-colours.jpg": {
+    "original": 49156,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/images__sustainable__sustainable-metal-colours-480.webp",
+        "size": 7114
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/images__sustainable__sustainable-metal-colours-480.jpg",
+        "size": 10133
+      }
+    ]
+  },
+  "images/sustainable/sustainable-nylon.jpg": {
+    "original": 55149,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/images__sustainable__sustainable-nylon-480.webp",
+        "size": 7722
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/images__sustainable__sustainable-nylon-480.jpg",
+        "size": 11086
+      }
+    ]
+  },
+  "images/sustainable/sustainable-polyester.jpg": {
+    "original": 39444,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/images__sustainable__sustainable-polyester-480.webp",
+        "size": 4152
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/images__sustainable__sustainable-polyester-480.jpg",
+        "size": 7755
+      }
+    ]
+  },
+  "images/sustainable/sustainable-real-horn.jpg": {
+    "original": 50776,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/images__sustainable__sustainable-real-horn-480.webp",
+        "size": 7410
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/images__sustainable__sustainable-real-horn-480.jpg",
+        "size": 11742
+      }
+    ]
+  },
+  "images/sustainable/sustainable-tpe.jpg": {
+    "original": 48378,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/images__sustainable__sustainable-tpe-480.webp",
+        "size": 6994
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/images__sustainable__sustainable-tpe-480.jpg",
+        "size": 10835
+      }
+    ]
+  },
+  "images/sustainable/sustainable-zinc-alloy.jpg": {
+    "original": 51458,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/images__sustainable__sustainable-zinc-alloy-480.webp",
+        "size": 6852
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/images__sustainable__sustainable-zinc-alloy-480.jpg",
+        "size": 9362
+      }
+    ]
+  },
+  "rings-collection.png": {
+    "original": 1342010,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/rings-collection-480.webp",
+        "size": 14882
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/rings-collection-480.jpg",
+        "size": 18347
+      }
+    ]
+  },
+  "span-bracelet.png": {
+    "original": 1469273,
+    "variants": [
+      {
+        "width": 480,
+        "format": "webp",
+        "path": "/optimized/span-bracelet-480.webp",
+        "size": 21092
+      },
+      {
+        "width": 480,
+        "format": "jpg",
+        "path": "/optimized/span-bracelet-480.jpg",
+        "size": 23145
+      }
+    ]
+  }
+}
