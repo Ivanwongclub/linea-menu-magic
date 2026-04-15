@@ -593,7 +593,14 @@ const Header = () => {
             <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-border">
               <div className="relative flex items-center justify-center h-20 px-4 sm:px-6">
                 <Link to="/" onClick={() => setIsMenuOpen(false)} className="inline-flex items-center justify-center px-2 py-1">
-                  <BrandWordmark compact />
+                  <div className="flex flex-col items-center leading-none select-none">
+                    <span className="text-[22px] sm:text-[26px] font-extrabold tracking-[0.06em] text-foreground">
+                      WIN-CYC
+                    </span>
+                    <span className="text-[10px] sm:text-[12px] tracking-[0.12em] uppercase text-foreground">
+                      Group Limited
+                    </span>
+                  </div>
                 </Link>
                 <button
                   onClick={() => setIsMenuOpen(false)}
