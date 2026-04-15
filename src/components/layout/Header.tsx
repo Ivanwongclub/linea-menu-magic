@@ -158,6 +158,7 @@ const Header = () => {
 
   const isActive = (path: string) =>
     path === "/" ? pathname === "/" : pathname === path || pathname.startsWith(path + "/");
+  const mobileNavLinks = NAV_LINKS.filter((link) => link.href !== "/ecollections");
 
   // ─── Nav link class: white on transparent, black on scrolled/non-hero ──────
   const linkClass = (active: boolean) =>
@@ -609,7 +610,25 @@ const Header = () => {
 
             {/* Link list with collapsible sub-menus */}
             <nav className="flex flex-col flex-1">
-              {NAV_LINKS.map((link) => {
+              <div className="px-6 pt-4 pb-4 border-b border-border bg-secondary/40">
+                <Link
+                  to="/news"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="group flex items-center justify-between rounded-xl border border-foreground bg-foreground px-4 py-3 text-background transition-colors duration-150 hover:bg-foreground/90"
+                >
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-background/70">
+                      Newsroom
+                    </span>
+                    <span className="text-[15px] font-semibold tracking-[0.01em]">
+                      Latest Updates
+                    </span>
+                  </div>
+                  <ChevronRight size={16} className="text-background/80 group-hover:text-background transition-colors duration-150" />
+                </Link>
+              </div>
+
+              {mobileNavLinks.map((link) => {
                 /* Products — collapsible */
                 if (link.megaMenu === "products") {
                   return (
