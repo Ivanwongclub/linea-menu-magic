@@ -2,11 +2,6 @@ import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { Search, X, ChevronDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
 import type { ProductFilters } from '@/features/products/types';
 import type {
   ProductCategory,
@@ -17,7 +12,7 @@ import type {
 } from '@/features/products/types';
 import {
   PRODUCT_FAMILIES,
-  getFamilyForCategory,
+  PRODUCT_SEGMENTS,
 } from '@/features/products/taxonomy';
 
 interface Taxonomy {
@@ -106,6 +101,11 @@ export default function ProductsSidebar({
   setActiveCollection,
 }: ProductsSidebarProps) {
   const [localSearch, setLocalSearch] = useState(filters.search ?? '');
+  const [openFamilies, setOpenFamilies] = useState<Record<string, boolean>>({
+    hardware: true,
+    'soft-trims': true,
+    'branding-trims': true,
+  });
   const debouncedSearch = useDebouncedValue(localSearch, 300);
   const lastPushed = useRef(filters.search ?? '');
 
@@ -149,14 +149,15 @@ export default function ProductsSidebar({
     }));
   }, [taxonomy.categories]);
 
-  // Categories that don't belong to any family
-  const uncategorized = useMemo(() => {
-    const allFamilySlugs = PRODUCT_FAMILIES.flatMap((f) => f.categorySlugs);
-    return taxonomy.categories.filter((cat) => !allFamilySlugs.includes(cat.slug));
-  }, [taxonomy.categories]);
-
-  const sustainableMaterials = taxonomy.materials.filter((m) => m.is_sustainable);
-  const standardMaterials = taxonomy.materials.filter((m) => !m.is_sustainable);
+  const selectedSegment = filters.segments?.[0];
+  const handleSegmentSelect = useCallback(
+    (slug: string) => {
+      setFilters({
+        segments: selectedSegment === slug ? undefined : [slug],
+      });
+    },
+    [selectedSegment, setFilters]
+  );
 
   return (
     <div className="space-y-0">
@@ -183,6 +184,31 @@ export default function ProductsSidebar({
               <X className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
             </button>
           )}
+        </div>
+      </div>
+
+      {/* Segments — prominent quick filter buttons */}
+      <div className="mb-4">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground mb-2">
+          Segments
+        </p>
+        <div className="grid grid-cols-3 gap-2">
+          {PRODUCT_SEGMENTS.map((segment) => {
+            const isActive = selectedSegment === segment.slug;
+            return (
+              <button
+                key={segment.slug}
+                onClick={() => handleSegmentSelect(segment.slug)}
+                className={`h-8 rounded-[var(--radius)] text-[11px] font-semibold tracking-[0.04em] border transition-colors ${
+                  isActive
+                    ? 'bg-foreground text-background border-foreground'
+                    : 'bg-background text-foreground border-border hover:border-foreground/40'
+                }`}
+              >
+                {segment.name}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -219,83 +245,70 @@ export default function ProductsSidebar({
           {familyGroups.map((group) => {
             if (group.categories.length === 0) return null;
             const isActiveFamily = filters.family === group.slug;
+            const isOpen = openFamilies[group.slug] ?? true;
             return (
               <div key={group.slug}>
-                <button
-                  onClick={() =>
-                    setFilters({
-                      family: isActiveFamily ? undefined : group.slug,
-                      categories: undefined,
-                    })
-                  }
-                  className={`text-sm font-medium w-full text-left mb-1.5 transition-colors ${
-                    isActiveFamily
-                      ? 'text-foreground'
-                      : 'text-foreground hover:text-muted-foreground'
-                  }`}
-                >
-                  {group.name}
-                </button>
-                <div className="space-y-1.5 pl-3 border-l border-border">
-                  {group.categories.map((cat) => {
-                    const count = categoryCounts?.[cat.slug] ?? 0;
-                    return (
-                      <div key={cat.id} className="flex items-center gap-2">
-                        <Checkbox
-                          id={`cat-${cat.slug}`}
-                          checked={filters.categories?.includes(cat.slug) ?? false}
-                          onCheckedChange={() =>
-                            setFilters({ categories: toggleArrayFilter(filters.categories, cat.slug) })
-                          }
-                        />
-                        <label
-                          htmlFor={`cat-${cat.slug}`}
-                          className="text-sm text-foreground cursor-pointer flex-1"
-                        >
-                          {cat.name}
-                        </label>
-                        {count > 0 && (
-                          <span className="text-xs text-muted-foreground">{count}</span>
-                        )}
-                      </div>
-                    );
-                  })}
+                <div className="flex items-center justify-between mb-1.5">
+                  <button
+                    onClick={() =>
+                      setFilters({
+                        family: isActiveFamily ? undefined : group.slug,
+                        categories: undefined,
+                      })
+                    }
+                    className={`text-sm font-semibold text-left transition-colors ${
+                      isActiveFamily
+                        ? 'text-foreground'
+                        : 'text-foreground hover:text-muted-foreground'
+                    }`}
+                  >
+                    {group.name}
+                  </button>
+                  <button
+                    onClick={() =>
+                      setOpenFamilies((prev) => ({
+                        ...prev,
+                        [group.slug]: !isOpen,
+                      }))
+                    }
+                    className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label={`${isOpen ? 'Collapse' : 'Expand'} ${group.name}`}
+                  >
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                    />
+                  </button>
                 </div>
+                {isOpen && (
+                  <div className="space-y-1.5 pl-3 border-l border-border">
+                    {group.categories.map((cat) => {
+                      const count = categoryCounts?.[cat.slug] ?? 0;
+                      return (
+                        <div key={cat.id} className="flex items-center gap-2">
+                          <Checkbox
+                            id={`cat-${cat.slug}`}
+                            checked={filters.categories?.includes(cat.slug) ?? false}
+                            onCheckedChange={() =>
+                              setFilters({ categories: toggleArrayFilter(filters.categories, cat.slug) })
+                            }
+                          />
+                          <label
+                            htmlFor={`cat-${cat.slug}`}
+                            className="text-sm text-foreground cursor-pointer flex-1"
+                          >
+                            {cat.name}
+                          </label>
+                          {count > 0 && (
+                            <span className="text-xs text-muted-foreground">{count}</span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             );
           })}
-          {uncategorized.length > 0 && (
-            <div>
-              <span className="text-sm font-medium text-muted-foreground block mb-1.5">
-                Other
-              </span>
-              <div className="space-y-1.5 pl-3 border-l border-border">
-                {uncategorized.map((cat) => {
-                  const count = categoryCounts?.[cat.slug] ?? 0;
-                  return (
-                    <div key={cat.id} className="flex items-center gap-2">
-                      <Checkbox
-                        id={`cat-${cat.slug}`}
-                        checked={filters.categories?.includes(cat.slug) ?? false}
-                        onCheckedChange={() =>
-                          setFilters({ categories: toggleArrayFilter(filters.categories, cat.slug) })
-                        }
-                      />
-                      <label
-                        htmlFor={`cat-${cat.slug}`}
-                        className="text-sm text-foreground cursor-pointer flex-1"
-                      >
-                        {cat.name}
-                      </label>
-                      {count > 0 && (
-                        <span className="text-xs text-muted-foreground">{count}</span>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
@@ -306,34 +319,6 @@ export default function ProductsSidebar({
         {productCount} product{productCount !== 1 ? 's' : ''} found
       </div>
     </div>
-  );
-}
-
-function FilterSection({
-  label,
-  children,
-  defaultOpen = true,
-  isFirst = false,
-}: {
-  label: string;
-  children: React.ReactNode;
-  defaultOpen?: boolean;
-  isFirst?: boolean;
-}) {
-  const [open, setOpen] = useState(defaultOpen);
-
-  return (
-    <Collapsible open={open} onOpenChange={setOpen}>
-      <SectionHeading isFirst={isFirst}>
-        <CollapsibleTrigger className="flex items-center justify-between w-full">
-          <span>{label}</span>
-          <ChevronDown
-            className={`h-3.5 w-3.5 transition-transform ${open ? 'rotate-180' : ''}`}
-          />
-        </CollapsibleTrigger>
-      </SectionHeading>
-      <CollapsibleContent className="pb-4 scroll-mt-0">{children}</CollapsibleContent>
-    </Collapsible>
   );
 }
 
