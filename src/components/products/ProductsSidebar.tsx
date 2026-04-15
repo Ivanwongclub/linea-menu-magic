@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { Search, X, ChevronDown } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { ProductFilters } from '@/features/products/types';
@@ -23,20 +24,12 @@ interface Taxonomy {
   tags: ProductTag[];
 }
 
-interface Collection {
-  slug: string;
-  label: string;
-}
-
 interface ProductsSidebarProps {
   filters: ProductFilters;
   setFilters: (updates: Partial<ProductFilters>) => void;
   taxonomy: Taxonomy;
   productCount: number;
   categoryCounts?: Record<string, number>;
-  collections?: Collection[];
-  activeCollection?: string | null;
-  setActiveCollection?: (slug: string | null) => void;
 }
 
 function toggleArrayFilter(
@@ -90,15 +83,24 @@ const hasActiveFilters = (filters: ProductFilters): boolean =>
     filters.tags?.length
   );
 
+const NEWS_BADGES: Array<{
+  key: 'all' | 'company' | 'product' | 'quality' | 'operations';
+  label: string;
+  featured?: boolean;
+}> = [
+  { key: 'all', label: 'All News', featured: true },
+  { key: 'product', label: 'Products' },
+  { key: 'company', label: 'Company' },
+  { key: 'quality', label: 'Quality' },
+  { key: 'operations', label: 'Operations' },
+];
+
 export default function ProductsSidebar({
   filters,
   setFilters,
   taxonomy,
   productCount,
   categoryCounts,
-  collections,
-  activeCollection,
-  setActiveCollection,
 }: ProductsSidebarProps) {
   const [localSearch, setLocalSearch] = useState(filters.search ?? '');
   const [openFamilies, setOpenFamilies] = useState<Record<string, boolean>>({
@@ -136,8 +138,7 @@ export default function ProductsSidebar({
       certifications: undefined,
       tags: undefined,
     });
-    setActiveCollection?.(null);
-  }, [setFilters, setActiveCollection]);
+  }, [setFilters]);
 
   // Group categories by family for structured display
   const familyGroups = useMemo(() => {
@@ -212,33 +213,35 @@ export default function ProductsSidebar({
         </div>
       </div>
 
-      {/* Collections — no header */}
-      {collections && collections.length > 0 && (
-        <div className="mb-1 pb-4">
-          <div className="space-y-1">
-            {collections.map((col) => (
-              <button
-                key={col.slug}
-                onClick={() =>
-                  setActiveCollection?.(activeCollection === col.slug ? null : col.slug)
-                }
-                className={`w-full text-left text-sm px-0 py-1.5 transition-colors duration-200 flex items-center gap-2 ${
-                  activeCollection === col.slug
-                    ? 'text-foreground font-medium'
-                    : 'text-foreground hover:text-muted-foreground'
-                }`}
-              >
-                <span
-                  className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                    activeCollection === col.slug ? 'bg-foreground' : 'bg-transparent border border-border'
-                  }`}
-                />
-                {col.label}
-              </button>
-            ))}
-          </div>
+      {/* News shortcuts — replace collections with obvious badges */}
+      <div className="mb-4 pb-4 border-b border-border">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground">
+            News
+          </p>
+          <Link
+            to="/news"
+            className="text-[10px] font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
+          >
+            View all
+          </Link>
         </div>
-      )}
+        <div className="flex flex-wrap gap-2">
+          {NEWS_BADGES.map((badge) => (
+            <Link
+              key={badge.key}
+              to={badge.key === 'all' ? '/news' : `/news?category=${badge.key}`}
+              className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold tracking-[0.02em] transition-colors ${
+                badge.featured
+                  ? 'bg-foreground text-background border-foreground hover:bg-foreground/90'
+                  : 'bg-background text-foreground border-border hover:border-foreground/50'
+              }`}
+            >
+              {badge.label}
+            </Link>
+          ))}
+        </div>
+      </div>
 
       <div className="border-t border-border pt-4">
         <div className="space-y-4">

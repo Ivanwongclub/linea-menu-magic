@@ -1,6 +1,6 @@
 import { ArrowRight, Calendar, MapPin } from "lucide-react";
-import { Link } from "react-router-dom";
-import { useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 import { newsItems, categoryOptions } from "@/data/newsData";
 import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
@@ -8,7 +8,12 @@ import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
 type CategoryType = "all" | "company" | "product" | "quality" | "operations";
 
 const News = () => {
-  const [activeCategory, setActiveCategory] = useState<CategoryType>("all");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const categoryFromURL = searchParams.get("category") as CategoryType | null;
+  const isValidCategory = !!categoryFromURL && categoryOptions.some((c) => c.key === categoryFromURL);
+  const [activeCategory, setActiveCategory] = useState<CategoryType>(
+    isValidCategory ? categoryFromURL! : "all"
+  );
   
   const { ref: filterRef, isVisible: filterVisible } = useScrollAnimation();
   const { ref: featuredHeaderRef, isVisible: featuredHeaderVisible } = useScrollAnimation();
@@ -16,6 +21,25 @@ const News = () => {
   const { ref: regularHeaderRef, isVisible: regularHeaderVisible } = useScrollAnimation();
   const { ref: regularRef, isVisible: regularVisible, getDelay: getRegularDelay } = useStaggeredAnimation(8, 100);
   const { ref: ctaRef, isVisible: ctaVisible } = useScrollAnimation();
+
+  useEffect(() => {
+    if (isValidCategory) {
+      setActiveCategory(categoryFromURL!);
+    } else {
+      setActiveCategory("all");
+    }
+  }, [categoryFromURL, isValidCategory]);
+
+  const handleCategoryChange = (category: CategoryType) => {
+    setActiveCategory(category);
+    const next = new URLSearchParams(searchParams);
+    if (category === "all") {
+      next.delete("category");
+    } else {
+      next.set("category", category);
+    }
+    setSearchParams(next, { replace: true });
+  };
 
   const filteredItems = newsItems.filter((item) => {
     return activeCategory === "all" || item.category === activeCategory;
@@ -43,7 +67,7 @@ const News = () => {
               {categoryOptions.map((category) => (
                 <button
                   key={category.key}
-                  onClick={() => setActiveCategory(category.key as CategoryType)}
+                  onClick={() => handleCategoryChange(category.key as CategoryType)}
                   className={`px-3 py-1.5 text-sm transition-all duration-300 ${
                     activeCategory === category.key
                       ? "bg-foreground text-background"

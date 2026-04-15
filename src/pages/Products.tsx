@@ -32,13 +32,6 @@ const FEATURED_OPTIONS = [
   { value: 'logo-ready', label: 'Logo-Ready' },
 ];
 
-const COLLECTIONS = [
-  { slug: 'ss-2026', label: 'Spring Summer 2026' },
-  { slug: 'denim-hardware', label: 'Denim Hardware Edit' },
-  { slug: 'beauty-packaging', label: 'Beauty Packaging Details' },
-  { slug: 'signature-branding', label: 'Signature Branding Trims' },
-];
-
 // ─── Featured filtering logic (temporary front-end mapping) ─
 function matchesFeatured(product: Product, featured: string): boolean {
   switch (featured) {
@@ -57,29 +50,6 @@ function matchesFeatured(product: Product, featured: string): boolean {
   }
 }
 
-// ─── Collection filtering logic (temporary front-end mapping) ─
-function matchesCollection(product: Product, collection: string): boolean {
-  switch (collection) {
-    case 'ss-2026':
-      return product.tags?.some((t) => t.slug === 'seasonal') ?? false;
-    case 'denim-hardware':
-      return product.categories?.some((c) =>
-        ['jeans-buttons', 'rivets', 'eyelets', 'hook-eyes'].includes(c.slug)
-      ) ?? false;
-    case 'beauty-packaging':
-      return product.categories?.some((c) =>
-        ['beads', 'cord-ends', 'cord-stoppers', 'toggles'].includes(c.slug)
-      ) ?? false;
-    case 'signature-branding':
-      // Badges and patches only — webbing removed (it's a soft trim, not branding)
-      return product.categories?.some((c) =>
-        ['badges', 'patches'].includes(c.slug)
-      ) ?? false;
-    default:
-      return true;
-  }
-}
-
 // ─── Page ───────────────────────────────────────────────
 
 export default function Products() {
@@ -89,28 +59,21 @@ export default function Products() {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
 
-  // Derive featured/collection from URL state
+  // Derive featured from URL state
   const activeFeatured = filters.featured ?? 'all';
-  const activeCollection = filters.collection ?? null;
 
   const setActiveFeatured = (value: string) => {
     setFilters({ featured: value === 'all' ? undefined : value });
   };
-  const setActiveCollection = (slug: string | null) => {
-    setFilters({ collection: slug ?? undefined });
-  };
 
-  // Apply Featured + Collection filtering on top of backend/sidebar results
+  // Apply featured filtering on top of backend/sidebar results
   const products = useMemo(() => {
     let result = allProducts;
     if (activeFeatured !== 'all') {
       result = result.filter((p) => matchesFeatured(p, activeFeatured));
     }
-    if (activeCollection) {
-      result = result.filter((p) => matchesCollection(p, activeCollection));
-    }
     return result;
-  }, [allProducts, activeFeatured, activeCollection]);
+  }, [allProducts, activeFeatured]);
 
   const totalCount = products.length;
 
@@ -137,16 +100,6 @@ export default function Products() {
         filterKey: 'featured',
         label: opt?.label ?? activeFeatured,
         value: activeFeatured,
-      });
-    }
-
-    if (activeCollection) {
-      const col = COLLECTIONS.find((c) => c.slug === activeCollection);
-      chips.push({
-        key: `collection-${activeCollection}`,
-        filterKey: 'collection',
-        label: col?.label ?? activeCollection,
-        value: activeCollection,
       });
     }
 
@@ -232,17 +185,13 @@ export default function Products() {
     }
 
     return chips;
-  }, [filters, taxonomy, activeFeatured, activeCollection]);
+  }, [filters, taxonomy, activeFeatured]);
 
   const activeFilterCount = activeChips.length;
 
   const removeChip = (chip: (typeof activeChips)[0]) => {
     if (chip.filterKey === 'featured') {
       setActiveFeatured('all');
-      return;
-    }
-    if (chip.filterKey === 'collection') {
-      setActiveCollection(null);
       return;
     }
     if (chip.filterKey === 'search' || chip.filterKey === 'family') {
@@ -261,9 +210,6 @@ export default function Products() {
     taxonomy,
     productCount: totalCount,
     categoryCounts,
-    collections: COLLECTIONS,
-    activeCollection,
-    setActiveCollection,
   };
 
   return (
@@ -436,13 +382,12 @@ export default function Products() {
                   <p className="text-sm font-medium text-foreground mb-1">No products found</p>
                   <p className="text-sm text-muted-foreground mb-4">Try adjusting your filters or browse selection.</p>
                   <div className="flex gap-2">
-                    {(activeFeatured !== 'all' || activeCollection !== null) && (
+                    {activeFeatured !== 'all' && (
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => {
                           setActiveFeatured('all');
-                          setActiveCollection(null);
                         }}
                       >
                         Reset browse
