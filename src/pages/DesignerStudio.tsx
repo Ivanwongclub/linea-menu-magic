@@ -252,7 +252,7 @@ const DesignerStudio = () => {
             <div className="absolute top-6 left-6 right-6 flex items-center justify-between border border-foreground/15 bg-background px-4 py-2.5">
               <div className="flex items-center gap-2">
                 <Lock className="w-3 h-3 text-foreground" strokeWidth={2} />
-                <span className="text-[10px] uppercase tracking-[0.18em] text-foreground font-semibold">Polo Ralph Lauren</span>
+                <span className="text-[10px] uppercase tracking-[0.18em] text-foreground font-semibold">Your Brand Workspace</span>
               </div>
               <span className="text-[9px] uppercase tracking-[0.15em] text-muted-foreground">Private</span>
             </div>
