@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
 import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
 import { Link } from "react-router-dom";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
@@ -135,6 +135,18 @@ export default function Production() {
   const [matIndex, setMatIndex] = useState(0);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [printGalleryOpen, setPrintGalleryOpen] = useState(false);
+
+  useEffect(() => {
+    const link = document.createElement("link");
+    link.rel = "preload";
+    link.as = "image";
+    link.href = "/optimized/assets__production-hero-1200.avif";
+    link.type = "image/avif";
+    document.head.appendChild(link);
+    return () => {
+      document.head.removeChild(link);
+    };
+  }, []);
 
   return (
     <>
