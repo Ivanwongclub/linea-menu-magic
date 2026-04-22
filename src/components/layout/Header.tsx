@@ -639,16 +639,132 @@ const Header = () => {
           >
             {/* Link list with collapsible sub-menus */}
             <nav className="flex flex-col flex-1">
-              {mobileNavLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  to={link.href}
-                  onClick={() => setIsMenuOpen(false)}
-                  className="text-lg font-medium tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 block py-4 px-6 border-b border-border"
-                >
-                  {t(link.labelKey)}
-                </Link>
-              ))}
+              {mobileNavLinks.map((link) => {
+                if (link.megaMenu === "products") {
+                  const open = mobileProductsOpen;
+                  return (
+                    <div key={link.href} className="border-b border-border">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMobileProductsOpen((v) => !v);
+                          if (open) setMobileProductFamilyOpen(null);
+                        }}
+                        className="w-full flex items-center justify-between text-lg font-medium tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 py-4 px-6"
+                        aria-expanded={open}
+                      >
+                        <span>{t(link.labelKey)}</span>
+                        <ChevronDown
+                          size={18}
+                          className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+                        />
+                      </button>
+                      {open && (
+                        <div className="bg-secondary/40 border-t border-border">
+                          <Link
+                            to="/products"
+                            onClick={() => setIsMenuOpen(false)}
+                            className="block text-[13px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors py-3 px-6"
+                          >
+                            {t("header.products.viewAll")}
+                          </Link>
+                          {MEGA_FAMILIES.map((family) => {
+                            const familyOpen = mobileProductFamilyOpen === family.slug;
+                            return (
+                              <div key={family.slug} className="border-t border-border">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setMobileProductFamilyOpen(familyOpen ? null : family.slug)
+                                  }
+                                  className="w-full flex items-center justify-between text-[15px] font-semibold text-foreground hover:text-muted-foreground transition-colors py-3 px-6"
+                                  aria-expanded={familyOpen}
+                                >
+                                  <span>{t(family.nameKey)}</span>
+                                  <ChevronDown
+                                    size={16}
+                                    className={`transition-transform duration-200 ${familyOpen ? "rotate-180" : ""}`}
+                                  />
+                                </button>
+                                {familyOpen && (
+                                  <ul className="bg-background border-t border-border">
+                                    <li>
+                                      <Link
+                                        to={`/products?family=${family.slug}`}
+                                        onClick={() => setIsMenuOpen(false)}
+                                        className="block text-[13px] text-muted-foreground hover:text-foreground transition-colors py-2.5 px-9 italic"
+                                      >
+                                        {t("header.products.viewAll")}
+                                      </Link>
+                                    </li>
+                                    {family.subcategories.map((sub) => (
+                                      <li key={sub.en}>
+                                        <Link
+                                          to={`/products?category=${slugify(sub.en)}`}
+                                          onClick={() => setIsMenuOpen(false)}
+                                          className="block text-[14px] text-foreground hover:text-muted-foreground transition-colors py-2.5 px-9"
+                                        >
+                                          {t(sub.key)}
+                                        </Link>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+
+                if (link.megaMenu === "about") {
+                  const open = mobileAboutOpen;
+                  return (
+                    <div key={link.href} className="border-b border-border">
+                      <button
+                        type="button"
+                        onClick={() => setMobileAboutOpen((v) => !v)}
+                        className="w-full flex items-center justify-between text-lg font-medium tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 py-4 px-6"
+                        aria-expanded={open}
+                      >
+                        <span>{t(link.labelKey)}</span>
+                        <ChevronDown
+                          size={18}
+                          className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+                        />
+                      </button>
+                      {open && (
+                        <ul className="bg-secondary/40 border-t border-border">
+                          {ABOUT_LINKS.filter((l) => !l.divider && l.href).map((item) => (
+                            <li key={item.href} className="border-t border-border first:border-t-0">
+                              <Link
+                                to={item.href!}
+                                onClick={() => setIsMenuOpen(false)}
+                                className="block text-[14px] text-foreground hover:text-muted-foreground transition-colors py-3 px-9"
+                              >
+                                {t(item.labelKey!)}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  );
+                }
+
+                return (
+                  <Link
+                    key={link.href}
+                    to={link.href}
+                    onClick={() => setIsMenuOpen(false)}
+                    className="text-lg font-medium tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 block py-4 px-6 border-b border-border"
+                  >
+                    {t(link.labelKey)}
+                  </Link>
+                );
+              })}
 
               {/* CTA buttons */}
               <div className="mt-auto px-6 pb-8 pt-6 space-y-3">
