@@ -28,11 +28,11 @@ import StudioWorkflowRail from "@/components/designer-studio/StudioWorkflowRail"
 const REVEAL_BASE = "transition-all duration-700 ease-[cubic-bezier(0.19,1,0.22,1)]";
 
 const trustWordmarks = [
-  "POLO RALPH LAUREN",
-  "TOMMY HILFIGER",
-  "LACOSTE",
-  "CALVIN KLEIN",
-  "HUGO BOSS",
+  "GLOBAL APPAREL BRANDS",
+  "PREMIUM DENIM HOUSES",
+  "OUTDOOR & PERFORMANCE",
+  "LUXURY READY-TO-WEAR",
+  "HERITAGE SPORTSWEAR",
 ];
 
 const DesignerStudio = () => {
