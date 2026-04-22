@@ -30,7 +30,7 @@ const workflowSteps = [
     title: "Design & Development",
     body: "From initial concept to production-ready specification. Our development team works directly with clients on 3D prototyping, finish selection, and material sourcing — turning ideas into trim-ready samples.",
     bullets: ["3D Artwork & Prototyping"],
-    image: "/optimized/assets__value-innovation-480.webp",
+    image: valueInnovationImg,
     showGallery: true,
   },
   {
@@ -38,7 +38,7 @@ const workflowSteps = [
     title: "Production",
     body: "From rapid 3D-printed prototypes to full production runs — our facility combines digital fabrication with vertically integrated manufacturing to move from concept to finished trim faster than traditional methods.",
     bullets: ["3D Printing"],
-    image: "/optimized/assets__factory-production-768.webp",
+    image: factoryProductionImg,
     showPrintGallery: true,
   },
   {
@@ -46,7 +46,7 @@ const workflowSteps = [
     title: "Service & Delivery",
     body: "Local offices in key markets provide rapid response, sample management, and on-the-ground support throughout the supply chain.",
     bullets: ["Regional Office Support", "Sample Turnaround"],
-    image: "/optimized/assets__value-partnership-480.webp",
+    image: valuePartnershipImg,
     showStudioLink: true,
   },
 ];
