@@ -286,7 +286,7 @@ export default function Production() {
                         className="group mt-6 inline-flex items-center gap-3 px-5 py-3 border border-foreground/20 hover:border-foreground hover:bg-foreground hover:text-background transition-all duration-300 text-[13px] font-medium tracking-wide"
                       >
                         <Images size={16} />
-                        View Prototype Gallery
+                        View 3D Print
                       </button>
                     )}
 
