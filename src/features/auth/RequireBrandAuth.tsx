@@ -3,6 +3,7 @@ import { Navigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "./AuthProvider";
 import { Button } from "@/components/ui/button";
 import { ShieldAlert } from "lucide-react";
+import { useI18n } from "@/features/i18n/I18nProvider";
 
 interface Props {
   children: ReactNode;
@@ -10,6 +11,7 @@ interface Props {
 
 export default function RequireBrandAuth({ children }: Props) {
   const { session, brands, loading, membershipLoading } = useAuth();
+  const { t } = useI18n();
   const location = useLocation();
 
   if (loading || (session && membershipLoading)) {
@@ -33,18 +35,17 @@ export default function RequireBrandAuth({ children }: Props) {
             <ShieldAlert className="w-5 h-5" strokeWidth={1.5} />
           </div>
           <div className="space-y-2">
-            <h1 className="text-xl font-light tracking-wide text-foreground">No brand access yet</h1>
+            <h1 className="text-xl font-light tracking-wide text-foreground">{t("auth.noBrand.title")}</h1>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Your account is not yet associated with a brand workspace. Please contact your account
-              manager or our support team to request access to the Designer Studio.
+              {t("auth.noBrand.body")}
             </p>
           </div>
           <div className="flex flex-col gap-2">
             <Button asChild className="rounded-none">
-              <Link to="/contact">Contact support</Link>
+              <Link to="/contact">{t("auth.noBrand.contact")}</Link>
             </Button>
             <Button asChild variant="ghost" className="rounded-none">
-              <Link to="/designer-studio">Back to public catalog</Link>
+              <Link to="/designer-studio">{t("auth.noBrand.back")}</Link>
             </Button>
           </div>
         </div>

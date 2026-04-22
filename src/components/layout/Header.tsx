@@ -3,9 +3,10 @@ import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PRODUCT_FAMILIES } from "@/features/products/taxonomy";
 import { useAuth } from "@/features/auth/AuthProvider";
+import { useI18n } from "@/features/i18n/I18nProvider";
 import BrandWordmark from "@/components/layout/BrandWordmark";
+import LanguageSwitcher from "@/components/layout/LanguageSwitcher";
 import aboutHeritageImg from "@/assets/about-heritage-showroom.jpg";
 import heritageCraftImg from "@/assets/about-heritage-showroom.jpg";
 const aboutShowroomImg = "/optimized/assets__about-showroom-480.webp";
@@ -41,79 +42,94 @@ const megaDrawcordsImg = "/images/mega/drawcords.jpg";
 const megaBadgesImg = "/images/mega/badges.jpg";
 
 const MEGA_GRID_ITEMS = [
-  { label: "Buttons",        img: megaButtonsImg,       slug: "buttons"        },
-  { label: "Snap Buttons",   img: megaSnapButtonsImg,   slug: "snap-buttons"   },
-  { label: "Jeans Buttons",  img: megaJeansButtonsImg,  slug: "jeans-buttons"  },
-  { label: "Shank Buttons",  img: megaShankButtonsImg,  slug: "shank-buttons"  },
-  { label: "Buckles",        img: megaBucklesImg,       slug: "buckles"        },
-  { label: "Eyelets",        img: megaEyeletsImg,       slug: "eyelets"        },
-  { label: "Hook & Eyes",    img: megaHookEyesImg,      slug: "hook-eyes"      },
-  { label: "Rivets",         img: megaRivetsImg,        slug: "rivets"         },
-  { label: "Zipper Pullers", img: megaZipperPullersImg, slug: "zipper-pullers" },
-  { label: "Toggles",        img: megaTogglesImg,       slug: "toggles"        },
-  { label: "Cord Ends",      img: megaCordEndsImg,      slug: "cord-ends"      },
-  { label: "Cord Stoppers",  img: megaCordStoppersImg,  slug: "cord-stoppers"  },
-  { label: "Beads",          img: megaBeadsImg,         slug: "beads"          },
-  { label: "Drawcords",      img: megaDrawcordsImg,     slug: "drawcords"      },
-  { label: "Badges",         img: megaBadgesImg,        slug: "badges"         },
+  { labelKey: "header.product.buttons", img: megaButtonsImg, slug: "buttons" },
+  { labelKey: "header.product.snapButtons", img: megaSnapButtonsImg, slug: "snap-buttons" },
+  { labelKey: "header.product.jeansButtons", img: megaJeansButtonsImg, slug: "jeans-buttons" },
+  { labelKey: "header.product.shankButtons", img: megaShankButtonsImg, slug: "shank-buttons" },
+  { labelKey: "header.product.buckles", img: megaBucklesImg, slug: "buckles" },
+  { labelKey: "header.product.eyelets", img: megaEyeletsImg, slug: "eyelets" },
+  { labelKey: "header.product.hookEyes", img: megaHookEyesImg, slug: "hook-eyes" },
+  { labelKey: "header.product.rivets", img: megaRivetsImg, slug: "rivets" },
+  { labelKey: "header.product.zipperPullers", img: megaZipperPullersImg, slug: "zipper-pullers" },
+  { labelKey: "header.product.toggles", img: megaTogglesImg, slug: "toggles" },
+  { labelKey: "header.product.cordEnds", img: megaCordEndsImg, slug: "cord-ends" },
+  { labelKey: "header.product.cordStoppers", img: megaCordStoppersImg, slug: "cord-stoppers" },
+  { labelKey: "header.product.beads", img: megaBeadsImg, slug: "beads" },
+  { labelKey: "header.product.drawcords", img: megaDrawcordsImg, slug: "drawcords" },
+  { labelKey: "header.product.badges", img: megaBadgesImg, slug: "badges" },
 ];
 
 
 // ─── About flat link list ──────────────────────────────────────────────────────
-interface AboutLink { label?: string; href?: string; image?: string; divider?: true; }
+interface AboutLink { labelKey?: string; href?: string; image?: string; divider?: true; }
 
 const ABOUT_LINKS: AboutLink[] = [
-  { label: "About Us",       href: "/about",              image: aboutHeritageImg  },
-  { label: "Our Story",      href: "/about/our-story",    image: aboutHeritageImg  },
-  { label: "Factory",        href: "/about/factory",      image: heritageCraftImg  },
-  { label: "Certificates",   href: "/about/certificates", image: aboutShowroomImg  },
-  { label: "Sustainability", href: "/sustainability",      image: aboutShowroomImg  },
-  { label: "News",           href: "/news",               image: aboutHeritageImg  },
+  { labelKey: "header.about.aboutUs", href: "/about", image: aboutHeritageImg },
+  { labelKey: "header.about.ourStory", href: "/about/our-story", image: aboutHeritageImg },
+  { labelKey: "header.about.factory", href: "/about/factory", image: heritageCraftImg },
+  { labelKey: "header.about.certificates", href: "/about/certificates", image: aboutShowroomImg },
+  { labelKey: "header.about.sustainability", href: "/sustainability", image: aboutShowroomImg },
+  { labelKey: "header.about.news", href: "/news", image: aboutHeritageImg },
 ];
 
 const ABOUT_DEFAULT_PREVIEW = aboutHeritageImg;
 
 const ABOUT_TRUST_CARDS = [
-  { title: "Heritage",       description: "Four decades of craftsmanship excellence", href: "/about/our-story", image: foundersImg      },
-  { title: "Manufacturing",  description: "Precision production at scale",            href: "/about/factory",   image: heritageCraftImg },
-  { title: "Responsibility", description: "Certified sustainable operations",         href: "/sustainability",  image: aboutShowroomImg },
+  {
+    titleKey: "header.about.card.heritage",
+    descriptionKey: "header.about.card.heritageDesc",
+    href: "/about/our-story",
+    image: foundersImg,
+  },
+  {
+    titleKey: "header.about.card.manufacturing",
+    descriptionKey: "header.about.card.manufacturingDesc",
+    href: "/about/factory",
+    image: heritageCraftImg,
+  },
+  {
+    titleKey: "header.about.card.responsibility",
+    descriptionKey: "header.about.card.responsibilityDesc",
+    href: "/sustainability",
+    image: aboutShowroomImg,
+  },
 ];
 
 // ─── Products families ─────────────────────────────────────────────────────────
 const MEGA_FAMILIES = [
   {
-    name: "Hardware", slug: "hardware",
+    nameKey: "header.family.hardware", slug: "hardware",
     image: hardwareCategoryImg,
     subcategories: [
-      { en: "Buttons",        image: metalButtonImg       },
-      { en: "Snap Buttons",   image: snapButtonImg        },
-      { en: "Jeans Buttons",  image: engravedButtonImg    },
-      { en: "Shank Buttons",  image: metalButtonImg       },
-      { en: "Buckles",        image: beltBuckleImg        },
-      { en: "Eyelets",        image: otherCategoryImg     },
-      { en: "Hook & Eyes",    image: metalClaspImg        },
-      { en: "Rivets",         image: otherCategoryImg     },
-      { en: "Zipper Pullers", image: metalZipperImg       },
-      { en: "Toggles",        image: otherCategoryImg     },
-      { en: "Cord Ends",      image: cottonLaceImg        },
-      { en: "Cord Stoppers",  image: cottonLaceImg        },
-      { en: "Beads",          image: resinButtonsImg      },
+      { en: "Buttons", key: "header.product.buttons", image: metalButtonImg },
+      { en: "Snap Buttons", key: "header.product.snapButtons", image: snapButtonImg },
+      { en: "Jeans Buttons", key: "header.product.jeansButtons", image: engravedButtonImg },
+      { en: "Shank Buttons", key: "header.product.shankButtons", image: metalButtonImg },
+      { en: "Buckles", key: "header.product.buckles", image: beltBuckleImg },
+      { en: "Eyelets", key: "header.product.eyelets", image: otherCategoryImg },
+      { en: "Hook & Eyes", key: "header.product.hookEyes", image: metalClaspImg },
+      { en: "Rivets", key: "header.product.rivets", image: otherCategoryImg },
+      { en: "Zipper Pullers", key: "header.product.zipperPullers", image: metalZipperImg },
+      { en: "Toggles", key: "header.product.toggles", image: otherCategoryImg },
+      { en: "Cord Ends", key: "header.product.cordEnds", image: cottonLaceImg },
+      { en: "Cord Stoppers", key: "header.product.cordStoppers", image: cottonLaceImg },
+      { en: "Beads", key: "header.product.beads", image: resinButtonsImg },
     ],
   },
   {
-    name: "Soft Trims", slug: "soft-trims",
+    nameKey: "header.family.softTrims", slug: "soft-trims",
     image: laceImg,
     subcategories: [
-      { en: "Drawcords", image: cottonLaceImg },
-      { en: "Webbing",   image: laceImg       },
+      { en: "Drawcords", key: "header.product.drawcords", image: cottonLaceImg },
+      { en: "Webbing", key: "header.product.webbing", image: laceImg },
     ],
   },
   {
-    name: "Branding Trims", slug: "branding-trims",
+    nameKey: "header.family.brandingTrims", slug: "branding-trims",
     image: wovenLabelImg,
     subcategories: [
-      { en: "Badges",  image: wovenLabelImg },
-      { en: "Patches", image: wovenLabelImg },
+      { en: "Badges", key: "header.product.badges", image: wovenLabelImg },
+      { en: "Patches", key: "header.product.patches", image: wovenLabelImg },
     ],
   },
 ];
@@ -122,17 +138,18 @@ function slugify(name: string) {
   return name.toLowerCase().replace(/\s+&\s+/g, "-").replace(/\s+/g, "-");
 }
 
-const NAV_LINKS: Array<{ href: string; label: string; megaMenu?: "products" | "about" }> = [
-  { href: "/products",        label: "Products",        megaMenu: "products" },
-  { href: "/about",           label: "About",           megaMenu: "about"    },
-  { href: "/production",      label: "Production"      },
-  { href: "/sustainability",  label: "Sustainability"  },
-  { href: "/ecollections",    label: "E-Catalogue"  },
-  { href: "/designer-studio", label: "Designer Studio" },
+const NAV_LINKS: Array<{ href: string; labelKey: string; megaMenu?: "products" | "about" }> = [
+  { href: "/products", labelKey: "header.nav.products", megaMenu: "products" },
+  { href: "/about", labelKey: "header.nav.about", megaMenu: "about" },
+  { href: "/production", labelKey: "header.nav.production" },
+  { href: "/sustainability", labelKey: "header.nav.sustainability" },
+  { href: "/ecollections", labelKey: "header.nav.ecatalogue" },
+  { href: "/designer-studio", labelKey: "header.nav.designerStudio" },
 ];
 
 // ─── Component ─────────────────────────────────────────────────────────────────
 const Header = () => {
+  const { t } = useI18n();
   const [isMenuOpen,         setIsMenuOpen]         = useState(false);
   const [isAboutOpen,        setIsAboutOpen]        = useState(false);
   const [isProductsOpen,     setIsProductsOpen]     = useState(false);
@@ -142,7 +159,7 @@ const Header = () => {
   const [productsMegaHydrated, setProductsMegaHydrated] = useState(false);
   const [aboutMegaHydrated, setAboutMegaHydrated] = useState(false);
   const [aboutPreviewImage,  setAboutPreviewImage]  = useState(ABOUT_DEFAULT_PREVIEW);
-  const [aboutPreviewLabel,  setAboutPreviewLabel]  = useState("Our Story");
+  const [aboutPreviewLabelKey,  setAboutPreviewLabelKey]  = useState("header.about.ourStory");
   const { session, primaryBrand } = useAuth();
 
   const { pathname } = useLocation();
@@ -165,7 +182,7 @@ const Header = () => {
   const isHeroPage    = pathname === "/";
   const isTransparent = isHeroPage && !scrolled && !isMenuOpen && !isProductsOpen && !isAboutOpen;
   const studioCtaHref = session ? "/designer-studio" : "/designer-studio/login";
-  const studioCtaLabel = primaryBrand?.name ?? "B2B Login";
+  const studioCtaLabel = primaryBrand?.name ?? t("header.cta.b2bLogin");
 
   useEffect(() => {
     document.body.style.overflow = isMenuOpen ? "hidden" : "";
@@ -240,7 +257,7 @@ const Header = () => {
                   return (
                     <div key={link.href} className="relative" ref={productsRef} onMouseEnter={handleProductsEnter} onMouseLeave={handleProductsLeave}>
                       <Link to="/products" onClick={closeAllMenus} className={linkClass(isActive(link.href)) + " flex items-center gap-1"}>
-                        {link.label}
+                        {t(link.labelKey)}
                         <ChevronDown size={14} className={`transition-transform duration-200 ${isProductsOpen ? "rotate-180" : ""}`} />
                       </Link>
                     </div>
@@ -250,7 +267,7 @@ const Header = () => {
                   return (
                     <div key={link.href} className="relative" onMouseEnter={handleAboutEnter} onMouseLeave={handleAboutLeave}>
                       <Link to="/about" onClick={closeAllMenus} className={linkClass(isActive(link.href)) + " flex items-center gap-1"}>
-                        {link.label}
+                        {t(link.labelKey)}
                         <ChevronDown size={14} className={`transition-transform duration-200 ${isAboutOpen ? "rotate-180" : ""}`} />
                       </Link>
                     </div>
@@ -258,7 +275,7 @@ const Header = () => {
                 }
                 return (
                   <Link key={link.href} to={link.href} className={linkClass(isActive(link.href))}>
-                    {link.label}
+                    {t(link.labelKey)}
                   </Link>
                 );
               })}
@@ -266,6 +283,7 @@ const Header = () => {
 
             {/* CTA buttons */}
             <div className="hidden lg:flex items-center space-x-3 ml-auto">
+              <LanguageSwitcher />
               <Link to="/contact" onClick={closeAllMenus}>
                 <Button
                   size="sm"
@@ -275,7 +293,7 @@ const Header = () => {
                       : "border border-border bg-transparent text-foreground hover:bg-foreground hover:text-background hover:border-foreground transition-all duration-200"
                   }
                 >
-                  Contact
+                  {t("header.cta.contact")}
                 </Button>
               </Link>
               <Link to={studioCtaHref}>
@@ -293,7 +311,7 @@ const Header = () => {
             </div>
 
             {/* Mobile toggle */}
-            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className={`lg:hidden ml-auto flex-shrink-0 ${iconClass}`} aria-label="Toggle menu">
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className={`lg:hidden ml-auto flex-shrink-0 ${iconClass}`} aria-label={t("header.menu.toggle")}>
               {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           </div>
@@ -325,7 +343,7 @@ const Header = () => {
                             onClick={closeAllMenus}
                             className="text-[15px] font-semibold text-foreground hover:text-muted-foreground transition-colors block mb-3"
                           >
-                            {hardware.name}
+                            {t(hardware.nameKey)}
                           </Link>
                           <ul className="space-y-2">
                             {hardware.subcategories.map((sub) => (
@@ -335,7 +353,7 @@ const Header = () => {
                                   onClick={closeAllMenus}
                                   className="text-[14px] text-foreground hover:text-muted-foreground transition-colors duration-150 block"
                                 >
-                                  {sub.en}
+                                  {t(sub.key)}
                                 </Link>
                               </li>
                             ))}
@@ -354,7 +372,7 @@ const Header = () => {
                           onClick={closeAllMenus}
                           className="text-[15px] font-semibold text-foreground hover:text-muted-foreground transition-colors block mb-3"
                         >
-                          {family.name}
+                          {t(family.nameKey)}
                         </Link>
                         <ul className="space-y-2">
                           {family.subcategories.map((sub) => (
@@ -364,7 +382,7 @@ const Header = () => {
                                 onClick={closeAllMenus}
                                 className="text-[14px] text-foreground hover:text-muted-foreground transition-colors duration-150 block"
                               >
-                                {sub.en}
+                                {t(sub.key)}
                               </Link>
                             </li>
                           ))}
@@ -386,14 +404,14 @@ const Header = () => {
                           <div className="aspect-square overflow-hidden bg-secondary rounded-sm">
                             <img
                               src={item.img}
-                              alt={item.label}
+                              alt={t(item.labelKey)}
                               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                               loading="lazy"
                               decoding="async"
                             />
                           </div>
                           <span className="mt-1 text-[9px] font-medium capitalize tracking-[0.07em] text-muted-foreground group-hover:text-foreground transition-colors text-center leading-tight px-0.5 truncate">
-                            {item.label}
+                            {t(item.labelKey)}
                           </span>
                         </Link>
                       ))}
@@ -403,7 +421,7 @@ const Header = () => {
                       onClick={closeAllMenus}
                       className="mt-4 text-[11px] font-medium uppercase tracking-[0.1em] text-foreground hover:text-muted-foreground transition-colors"
                     >
-                      View All Products →
+                      {t("header.products.viewAll")}
                     </Link>
                   </div>
                 </div>
@@ -440,9 +458,9 @@ const Header = () => {
                                 to={item.href!}
                                 onClick={closeAllMenus}
                                 className="text-[15px] font-semibold text-foreground hover:text-muted-foreground transition-colors duration-150 block py-[7px]"
-                                onMouseEnter={() => { setAboutPreviewImage(item.image!); setAboutPreviewLabel(item.label!); }}
+                                onMouseEnter={() => { setAboutPreviewImage(item.image!); setAboutPreviewLabelKey(item.labelKey!); }}
                               >
-                                {item.label}
+                                {t(item.labelKey!)}
                               </Link>
                             </li>
                           );
@@ -451,13 +469,13 @@ const Header = () => {
                     </div>
                     <div
                       className="flex-1 min-w-[280px] flex flex-col"
-                      onMouseEnter={() => { setAboutPreviewImage(ABOUT_DEFAULT_PREVIEW); setAboutPreviewLabel("Our Story"); }}
+                      onMouseEnter={() => { setAboutPreviewImage(ABOUT_DEFAULT_PREVIEW); setAboutPreviewLabelKey("header.about.ourStory"); }}
                     >
                       <div className="relative flex-1 rounded-[var(--radius)] overflow-hidden">
                         <img
                           key={aboutPreviewImage}
                           src={aboutPreviewImage}
-                          alt={aboutPreviewLabel}
+                          alt={t(aboutPreviewLabelKey)}
                           className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
                           style={{ animation: "fadeIn 250ms ease" }}
                           loading="lazy"
@@ -473,7 +491,7 @@ const Header = () => {
                     <div className="space-y-3">
                       {ABOUT_TRUST_CARDS.map((card) => (
                         <Link
-                          key={card.title}
+                          key={card.titleKey}
                           to={card.href}
                           onClick={closeAllMenus}
                           className="group block rounded-[var(--radius)] border border-[hsl(var(--border))] overflow-hidden hover:border-foreground/20 hover:shadow-[0_2px_12px_rgba(0,0,0,0.08)] transition-all duration-200"
@@ -482,15 +500,15 @@ const Header = () => {
                             <div className="w-20 flex-shrink-0 overflow-hidden">
                               <img
                                 src={card.image}
-                                alt={card.title}
+                                alt={t(card.titleKey)}
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                 loading="lazy"
                                 decoding="async"
                               />
                             </div>
                             <div className="flex-1 min-w-0 flex flex-col justify-center px-4">
-                              <span className="text-[15px] font-semibold text-foreground block">{card.title}</span>
-                              <span className="text-[12px] text-muted-foreground leading-snug block mt-0.5">{card.description}</span>
+                              <span className="text-[15px] font-semibold text-foreground block">{t(card.titleKey)}</span>
+                              <span className="text-[12px] text-muted-foreground leading-snug block mt-0.5">{t(card.descriptionKey)}</span>
                             </div>
                             <div className="flex items-center pr-3">
                               <ChevronRight size={14} className="text-muted-foreground/40 group-hover:text-foreground/60 transition-colors flex-shrink-0" />
@@ -501,7 +519,7 @@ const Header = () => {
                     </div>
                     <div className="mt-6 pt-4 border-t border-[hsl(var(--border))]">
                       <Link to="/about/our-story" onClick={closeAllMenus} className="text-[11px] font-medium uppercase tracking-[0.1em] text-foreground hover:text-muted-foreground transition-colors">
-                        Learn More About Us →
+                        {t("header.about.learnMore")}
                       </Link>
                     </div>
                   </div>
@@ -527,13 +545,16 @@ const Header = () => {
               <Link to="/" onClick={() => setIsMenuOpen(false)} className="inline-flex items-center">
                 <BrandWordmark compact />
               </Link>
-              <button
-                onClick={() => setIsMenuOpen(false)}
-                className="p-2 text-foreground hover:text-muted-foreground transition-colors duration-150"
-                aria-label="Close menu"
-              >
-                <X size={22} />
-              </button>
+              <div className="flex items-center gap-1.5">
+                <LanguageSwitcher compact />
+                <button
+                  onClick={() => setIsMenuOpen(false)}
+                  className="p-2 text-foreground hover:text-muted-foreground transition-colors duration-150"
+                  aria-label={t("header.menu.close")}
+                >
+                  <X size={22} />
+                </button>
+              </div>
             </div>
 
             {/* Link list with collapsible sub-menus */}
@@ -542,14 +563,14 @@ const Header = () => {
                 <Link
                   to="/news"
                   onClick={() => setIsMenuOpen(false)}
-                  className="group flex items-center justify-between rounded-xl border border-foreground bg-foreground px-4 py-3 text-background transition-colors duration-150 hover:bg-foreground/90"
+                    className="group flex items-center justify-between rounded-xl border border-foreground bg-foreground px-4 py-3 text-background transition-colors duration-150 hover:bg-foreground/90"
                 >
                   <div className="flex flex-col">
                     <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-background/70">
-                      Newsroom
+                      {t("header.mobile.newsroom")}
                     </span>
                     <span className="text-[15px] font-semibold tracking-[0.01em]">
-                      Latest Updates
+                      {t("header.mobile.latestUpdates")}
                     </span>
                   </div>
                   <ChevronRight size={16} className="text-background/80 group-hover:text-background transition-colors duration-150" />
@@ -565,14 +586,14 @@ const Header = () => {
                         onClick={() => setMobileProductsOpen(!mobileProductsOpen)}
                         className="w-full flex items-center justify-between text-lg font-medium tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 py-4 px-6 border-b border-border"
                       >
-                        {link.label}
+                        {t(link.labelKey)}
                         <ChevronDown size={18} className={`transition-transform duration-200 ${mobileProductsOpen ? "rotate-180" : ""}`} />
                       </button>
                       {mobileProductsOpen && (
                         <div className="bg-secondary border-b border-border">
                           {MEGA_FAMILIES.map((family) => (
                             <div key={family.slug}>
-                              <span className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground px-6 pt-3 pb-1">{family.name}</span>
+                              <span className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground px-6 pt-3 pb-1">{t(family.nameKey)}</span>
                               {family.subcategories.map((sub) => (
                                 <Link
                                   key={sub.en}
@@ -580,7 +601,7 @@ const Header = () => {
                                   onClick={() => setIsMenuOpen(false)}
                                   className="text-sm text-foreground hover:text-muted-foreground transition-colors duration-150 block py-2 px-8 border-b border-border last:border-b-0"
                                 >
-                                  {sub.en}
+                                  {t(sub.key)}
                                 </Link>
                               ))}
                             </div>
@@ -599,19 +620,19 @@ const Header = () => {
                         onClick={() => setMobileAboutOpen(!mobileAboutOpen)}
                         className="w-full flex items-center justify-between text-lg font-medium tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 py-4 px-6 border-b border-border"
                       >
-                        {link.label}
+                        {t(link.labelKey)}
                         <ChevronDown size={18} className={`transition-transform duration-200 ${mobileAboutOpen ? "rotate-180" : ""}`} />
                       </button>
                       {mobileAboutOpen && (
                         <div className="bg-secondary border-b border-border">
-                          {ABOUT_LINKS.filter(l => l.label && l.href).map((l) => (
+                          {ABOUT_LINKS.filter(l => l.labelKey && l.href).map((l) => (
                             <Link
                               key={l.href}
                               to={l.href!}
                               onClick={() => setIsMenuOpen(false)}
                               className="text-sm text-foreground hover:text-muted-foreground transition-colors duration-150 block py-2 px-8 border-b border-border last:border-b-0"
                             >
-                              {l.label}
+                              {t(l.labelKey!)}
                             </Link>
                           ))}
                         </div>
@@ -628,7 +649,7 @@ const Header = () => {
                     onClick={() => setIsMenuOpen(false)}
                     className="text-lg font-medium tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 block py-4 px-6 border-b border-border"
                   >
-                    {link.label}
+                    {t(link.labelKey)}
                   </Link>
                 );
               })}
@@ -636,7 +657,7 @@ const Header = () => {
               {/* CTA buttons */}
               <div className="mt-auto px-6 pb-8 pt-6 space-y-3">
                 <Link to="/contact" onClick={() => setIsMenuOpen(false)}>
-                  <Button className="w-full">Contact</Button>
+                  <Button className="w-full">{t("header.cta.contact")}</Button>
                 </Link>
                 <Link to={studioCtaHref} onClick={() => setIsMenuOpen(false)}>
                   <Button variant="outline" className="w-full">

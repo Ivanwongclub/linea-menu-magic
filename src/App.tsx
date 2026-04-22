@@ -8,6 +8,7 @@ import CookieBanner from "@/features/cookies/CookieBanner";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/features/auth/AuthProvider";
 import RequireBrandAuth from "@/features/auth/RequireBrandAuth";
+import { I18nProvider, useI18n } from "@/features/i18n/I18nProvider";
 import ScrollToTop from "./components/ScrollToTop";
 import BackToTop from "./components/ui/BackToTop";
 import Layout from "./components/layout/Layout";
@@ -85,6 +86,25 @@ const queryClient = new QueryClient({
   },
 });
 
+function AppErrorFallback() {
+  const { t } = useI18n();
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-8 text-center">
+      <h1 className="text-lg font-light tracking-wide text-foreground">{t("app.error.title")}</h1>
+      <p className="text-sm text-muted-foreground max-w-md">
+        {t("app.error.body")}
+      </p>
+      <button
+        onClick={() => window.location.reload()}
+        className="text-xs px-6 py-2 border border-foreground text-foreground hover:bg-foreground hover:text-background transition-colors"
+      >
+        {t("app.error.reload")}
+      </button>
+    </div>
+  );
+}
+
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
   { hasError: boolean }
@@ -98,20 +118,7 @@ class ErrorBoundary extends React.Component<
   }
   render() {
     if (this.state.hasError) {
-      return (
-        <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-8 text-center">
-          <h1 className="text-lg font-light tracking-wide text-foreground">Something went wrong.</h1>
-          <p className="text-sm text-muted-foreground max-w-md">
-            Please refresh the page. If the problem persists, contact support.
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            className="text-xs px-6 py-2 border border-foreground text-foreground hover:bg-foreground hover:text-background transition-colors"
-          >
-            Reload page
-          </button>
-        </div>
-      );
+      return <AppErrorFallback />;
     }
     return this.props.children;
   }
@@ -208,63 +215,65 @@ function RouteAndNetworkWarmup() {
 // Use consent.analytics for GA4, consent.marketing for Meta/LinkedIn.
 
 const App = () => (
-  <CookieProvider>
-    <CookieBanner />
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AuthProvider>
-            <RouteAndNetworkWarmup />
-            <ScrollToTop />
-            <BackToTop />
-            <ErrorBoundary>
-            <Routes>
-              <Route element={<Layout />}>
-                <Route path="/" element={<Index />} />
-                <Route path="/about" element={withRouteSuspense(<About />)} />
-                <Route path="/about/our-story" element={withRouteSuspense(<OurStory />)} />
-                <Route path="/about/factory" element={withRouteSuspense(<Factory />)} />
-                <Route path="/about/certificates" element={withRouteSuspense(<Certificates />)} />
-                <Route path="/about/sustainability" element={<Navigate to="/sustainability" replace />} />
-                <Route path="/products" element={withRouteSuspense(<Products />)} />
-                <Route path="/products/:slug" element={withRouteSuspense(<ProductDetail />)} />
-                <Route path="/sustainability" element={withRouteSuspense(<Sustainability />)} />
-                <Route path="/production" element={withRouteSuspense(<Production />)} />
-                <Route path="/news" element={withRouteSuspense(<News />)} />
-                <Route path="/news/:id" element={withRouteSuspense(<NewsDetail />)} />
-                <Route path="/ecollections" element={withRouteSuspense(<Brochures />)} />
-                <Route path="/ecollections/:slug" element={withRouteSuspense(<BrochureViewer />)} />
-                <Route path="/designer-studio" element={withRouteSuspense(<DesignerStudio />)} />
-                <Route path="/designer-studio/login" element={withRouteSuspense(<DesignerStudioLogin />)} />
-                <Route path="/designer-studio/products/:slug" element={withRouteSuspense(<ProductDetail />)} />
-                <Route
-                  path="/designer-studio/dashboard"
-                  element={<RequireBrandAuth>{withRouteSuspense(<DesignerStudioDashboard />)}</RequireBrandAuth>}
-                />
-                <Route
-                  path="/designer-studio/compose/:sessionId"
-                  element={<RequireBrandAuth>{withRouteSuspense(<ComposerPage />)}</RequireBrandAuth>}
-                />
-                <Route
-                  path="/designer-studio/present/:sessionId"
-                  element={<RequireBrandAuth>{withRouteSuspense(<PresentationPage />)}</RequireBrandAuth>}
-                />
-                <Route path="/contact" element={withRouteSuspense(<Contact />)} />
-                <Route path="/privacy-policy" element={withRouteSuspense(<PrivacyPolicy />)} />
-                <Route path="/terms-of-service" element={withRouteSuspense(<TermsOfService />)} />
-                <Route path="/cookie-policy" element={withRouteSuspense(<CookiePolicy />)} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={withRouteSuspense(<NotFound />)} />
-              </Route>
-            </Routes>
-          </ErrorBoundary>
-          </AuthProvider>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </CookieProvider>
+  <I18nProvider>
+    <CookieProvider>
+      <CookieBanner />
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AuthProvider>
+              <RouteAndNetworkWarmup />
+              <ScrollToTop />
+              <BackToTop />
+              <ErrorBoundary>
+                <Routes>
+                  <Route element={<Layout />}>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/about" element={withRouteSuspense(<About />)} />
+                    <Route path="/about/our-story" element={withRouteSuspense(<OurStory />)} />
+                    <Route path="/about/factory" element={withRouteSuspense(<Factory />)} />
+                    <Route path="/about/certificates" element={withRouteSuspense(<Certificates />)} />
+                    <Route path="/about/sustainability" element={<Navigate to="/sustainability" replace />} />
+                    <Route path="/products" element={withRouteSuspense(<Products />)} />
+                    <Route path="/products/:slug" element={withRouteSuspense(<ProductDetail />)} />
+                    <Route path="/sustainability" element={withRouteSuspense(<Sustainability />)} />
+                    <Route path="/production" element={withRouteSuspense(<Production />)} />
+                    <Route path="/news" element={withRouteSuspense(<News />)} />
+                    <Route path="/news/:id" element={withRouteSuspense(<NewsDetail />)} />
+                    <Route path="/ecollections" element={withRouteSuspense(<Brochures />)} />
+                    <Route path="/ecollections/:slug" element={withRouteSuspense(<BrochureViewer />)} />
+                    <Route path="/designer-studio" element={withRouteSuspense(<DesignerStudio />)} />
+                    <Route path="/designer-studio/login" element={withRouteSuspense(<DesignerStudioLogin />)} />
+                    <Route path="/designer-studio/products/:slug" element={withRouteSuspense(<ProductDetail />)} />
+                    <Route
+                      path="/designer-studio/dashboard"
+                      element={<RequireBrandAuth>{withRouteSuspense(<DesignerStudioDashboard />)}</RequireBrandAuth>}
+                    />
+                    <Route
+                      path="/designer-studio/compose/:sessionId"
+                      element={<RequireBrandAuth>{withRouteSuspense(<ComposerPage />)}</RequireBrandAuth>}
+                    />
+                    <Route
+                      path="/designer-studio/present/:sessionId"
+                      element={<RequireBrandAuth>{withRouteSuspense(<PresentationPage />)}</RequireBrandAuth>}
+                    />
+                    <Route path="/contact" element={withRouteSuspense(<Contact />)} />
+                    <Route path="/privacy-policy" element={withRouteSuspense(<PrivacyPolicy />)} />
+                    <Route path="/terms-of-service" element={withRouteSuspense(<TermsOfService />)} />
+                    <Route path="/cookie-policy" element={withRouteSuspense(<CookiePolicy />)} />
+                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                    <Route path="*" element={withRouteSuspense(<NotFound />)} />
+                  </Route>
+                </Routes>
+              </ErrorBoundary>
+            </AuthProvider>
+          </BrowserRouter>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </CookieProvider>
+  </I18nProvider>
 );
 
 export default App;

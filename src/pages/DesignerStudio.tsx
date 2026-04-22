@@ -8,8 +8,10 @@ import { useProducts } from "@/features/products/hooks/useProducts";
 import { useProductTaxonomy } from "@/features/products/hooks/useProductTaxonomy";
 import { PRODUCT_FAMILIES } from "@/features/products/taxonomy";
 import { useAuth } from "@/features/auth/AuthProvider";
+import { useI18n } from "@/features/i18n/I18nProvider";
 
 const DesignerStudio = () => {
+  const { t } = useI18n();
   const { session, primaryBrand } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFamily, setActiveFamily] = useState<string | null>(null);
@@ -32,12 +34,18 @@ const DesignerStudio = () => {
 
   // Build family chips from taxonomy
   const familyChips = useMemo(() => {
+    const familyNameMap: Record<string, string> = {
+      hardware: t("header.family.hardware"),
+      "soft-trims": t("header.family.softTrims"),
+      "branding-trims": t("header.family.brandingTrims"),
+    };
+
     return PRODUCT_FAMILIES.map((f) => ({
       slug: f.slug,
-      name: f.name,
+      name: familyNameMap[f.slug] ?? f.name,
       count: categories.filter((c) => f.categorySlugs.includes(c.slug)).length,
     }));
-  }, [categories]);
+  }, [categories, t]);
 
   return (
     <>
@@ -46,21 +54,21 @@ const DesignerStudio = () => {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
           <div>
             <h1 className="text-xl font-bold tracking-tight text-foreground mb-1">
-              Designer Studio
+              {t("studio.title")}
             </h1>
             <p className="text-sm text-foreground max-w-md">
-              Browse the full component library. Enter the studio to build review-ready trim concepts.
+              {t("studio.subtitle")}
             </p>
           </div>
           <div className="flex gap-3 shrink-0">
             <Link to="/designer-studio/dashboard?tab=library">
               <Button size="sm" className="tracking-[0.05em] text-xs px-6 capitalize">
-                Enter Studio
+                {t("studio.enter")}
               </Button>
             </Link>
             <Link to="/contact">
               <Button variant="outline" size="sm" className="tracking-[0.05em] text-xs px-6 capitalize">
-                Request Access
+                {t("studio.requestAccess")}
               </Button>
             </Link>
           </div>
@@ -75,7 +83,7 @@ const DesignerStudio = () => {
             <div className="relative w-full sm:max-w-xs">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40" />
               <Input
-                placeholder="Search components…"
+                placeholder={t("studio.searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9 h-9 text-sm"
@@ -94,7 +102,7 @@ const DesignerStudio = () => {
                     : "bg-transparent text-muted-foreground border-border hover:border-foreground/40"
                 }`}
               >
-                All
+                {t("studio.all")}
               </button>
               {familyChips.map((f) => (
                 <button
@@ -124,7 +132,7 @@ const DesignerStudio = () => {
                       : "bg-transparent text-muted-foreground border-border hover:border-foreground/40"
                   }`}
                 >
-                  {primaryBrand?.name ?? "Brand"}
+                  {primaryBrand?.name ?? t("dashboard.library.brandCatalogue")}
                 </button>
               )}
             </div>
@@ -139,7 +147,7 @@ const DesignerStudio = () => {
             </div>
           ) : products.length === 0 ? (
             <div className="text-center py-20 text-muted-foreground/50 text-sm">
-              No components found.
+              {t("studio.empty")}
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -161,10 +169,10 @@ const DesignerStudio = () => {
       <section className="py-20 px-6 lg:px-10 bg-foreground text-background">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-2xl font-semibold mb-4 tracking-tight">
-            Ready to build review-ready concepts?
+            {t("studio.readyTitle")}
           </h2>
           <p className="text-background/40 text-sm mb-10 max-w-md mx-auto leading-relaxed">
-            Request access to enter a secure workspace for concept development, component placement, and team presentation.
+            {t("studio.readyBody")}
           </p>
           <Link to="/contact">
             <Button
@@ -172,15 +180,15 @@ const DesignerStudio = () => {
               size="lg"
               className="tracking-[0.05em] text-xs px-10 mb-16 capitalize"
             >
-              Request Access
+              {t("studio.requestAccessBtn")}
             </Button>
           </Link>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-left">
             {[
-              { step: "01", title: "Request access", desc: "Contact the team to introduce your brand and design workflow." },
-              { step: "02", title: "Workspace approval", desc: "We review fit, confirm needs, and prepare the appropriate access level." },
-              { step: "03", title: "Start building", desc: "Create concept boards, compare directions, and prepare presentations." },
+              { step: "01", title: t("studio.step1Title"), desc: t("studio.step1Desc") },
+              { step: "02", title: t("studio.step2Title"), desc: t("studio.step2Desc") },
+              { step: "03", title: t("studio.step3Title"), desc: t("studio.step3Desc") },
             ].map((item) => (
               <div key={item.step}>
                 <span className="text-3xl font-bold text-background/8 block mb-3 tracking-tight">

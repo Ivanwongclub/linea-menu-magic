@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
 import { useScrollAnimation } from "@/hooks/use-scroll-animation";
+import { useI18n } from "@/features/i18n/I18nProvider";
 import LetterReveal from "@/components/ui/LetterReveal";
 import { Button } from "@/components/ui/button";
 
 const DesignerCTA = () => {
+  const { t } = useI18n();
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.3 });
 
   return (
@@ -20,12 +22,12 @@ const DesignerCTA = () => {
              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          Exclusive
+          {t("home.designer.label")}
         </span>
 
         <div className="mb-6">
           <LetterReveal
-            text="Designer"
+            text={t("home.designer.heading1")}
             as="h2"
             className="text-5xl md:text-6xl lg:text-7xl font-bold uppercase tracking-[0.15em] text-white"
             isVisible={isVisible}
@@ -33,7 +35,7 @@ const DesignerCTA = () => {
             letterDelay={50}
           />
           <LetterReveal
-            text="Studio"
+            text={t("home.designer.heading2")}
             as="span"
             className="block text-5xl md:text-6xl lg:text-7xl font-bold uppercase tracking-[0.15em] text-white"
             isVisible={isVisible}
@@ -48,7 +50,7 @@ const DesignerCTA = () => {
           }`}
           style={{ transitionDelay: "900ms" }}
         >
-          Access our comprehensive trim library, explore 3D product models, and streamline your workflow with our exclusive B2B platform.
+          {t("home.designer.body")}
         </p>
 
         <div
@@ -58,10 +60,10 @@ const DesignerCTA = () => {
           style={{ transitionDelay: "1000ms" }}
         >
           <Link to="/designer-studio">
-            <Button variant="outline-inverse" size="lg">Enter Studio</Button>
+            <Button variant="outline-inverse" size="lg">{t("home.designer.enter")}</Button>
           </Link>
           <Link to="/contact">
-            <Button variant="outline-inverse" size="lg">Get in Touch</Button>
+            <Button variant="outline-inverse" size="lg">{t("home.designer.touch")}</Button>
           </Link>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useI18n } from "@/features/i18n/I18nProvider";
 
 import buttonsCategoryImg from "@/assets/products/buttons-category.jpg";
 import hardwareCategoryImg from "@/assets/products/hardware-category.jpg";
@@ -11,13 +12,9 @@ import laceCategoryImg from "@/assets/products/lace-category.jpg";
 const slides = [
   {
     id: 1,
-    label: "Products — Buttons",
-    title: "Custom clothing",
-    titleAccent: "buttons",
-    subtitle: "unique, cost effective & sustainable",
-    description:
-      "From idea to finished trim. We successfully combine stylish trimming solutions, our own cost effective production facilities and a focus on fashion.",
-    ctaText: "Learn More",
+    labelKey: "home.hero.slide1.label",
+    titleKey: "home.hero.slide1.title",
+    titleAccentKey: "home.hero.slide1.accent",
     ctaUrl: "/products?category=buttons",
     image: buttonsCategoryImg,
     bgColor: "#EDE8DF",
@@ -25,13 +22,9 @@ const slides = [
   },
   {
     id: 2,
-    label: "Products — Hardware",
-    title: "Custom metal",
-    titleAccent: "hardware",
-    subtitle: "unique, cost effective & sustainable",
-    description:
-      "From idea to finished trim. We successfully combine stylish trimming solutions, our own cost effective production facilities and a focus on fashion.",
-    ctaText: "Learn More",
+    labelKey: "home.hero.slide2.label",
+    titleKey: "home.hero.slide2.title",
+    titleAccentKey: "home.hero.slide2.accent",
     ctaUrl: "/products?category=hardware",
     image: hardwareCategoryImg,
     bgColor: "#E0DDD8",
@@ -39,13 +32,9 @@ const slides = [
   },
   {
     id: 3,
-    label: "Products — Webbing",
-    title: "Custom webbing",
-    titleAccent: "trims",
-    subtitle: "unique, cost effective & sustainable",
-    description:
-      "From idea to finished trim. We successfully combine stylish trimming solutions, our own cost effective production facilities and a focus on fashion.",
-    ctaText: "Learn More",
+    labelKey: "home.hero.slide3.label",
+    titleKey: "home.hero.slide3.title",
+    titleAccentKey: "home.hero.slide3.accent",
     ctaUrl: "/products?category=webbing",
     image: otherCategoryImg,
     bgColor: "#E4DDD4",
@@ -53,13 +42,9 @@ const slides = [
   },
   {
     id: 4,
-    label: "Products — Zippers",
-    title: "Custom zipper",
-    titleAccent: "pullers",
-    subtitle: "unique, cost effective & sustainable",
-    description:
-      "From idea to finished trim. We successfully combine stylish trimming solutions, our own cost effective production facilities and a focus on fashion.",
-    ctaText: "Learn More",
+    labelKey: "home.hero.slide4.label",
+    titleKey: "home.hero.slide4.title",
+    titleAccentKey: "home.hero.slide4.accent",
     ctaUrl: "/products?category=zipper-pullers",
     image: zippersCategoryImg,
     bgColor: "#D8D5D0",
@@ -67,13 +52,9 @@ const slides = [
   },
   {
     id: 5,
-    label: "Products — Lace",
-    title: "Custom lace &",
-    titleAccent: "trimmings",
-    subtitle: "unique, cost effective & sustainable",
-    description:
-      "From idea to finished trim. We successfully combine stylish trimming solutions, our own cost effective production facilities and a focus on fashion.",
-    ctaText: "Learn More",
+    labelKey: "home.hero.slide5.label",
+    titleKey: "home.hero.slide5.title",
+    titleAccentKey: "home.hero.slide5.accent",
     ctaUrl: "/products",
     image: laceCategoryImg,
     bgColor: "#EAE6E0",
@@ -82,6 +63,7 @@ const slides = [
 ];
 
 const HeroSection = () => {
+  const { t } = useI18n();
   const [current, setCurrent] = useState(0);
   const [prev, setPrev] = useState<number | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -247,7 +229,7 @@ const HeroSection = () => {
                       transitionDelay: isActive ? "200ms" : "0ms",
                     }}
                   >
-                    {slide.label}
+                    {t(slide.labelKey)}
                   </p>
                   <h1
                     className="text-5xl lg:text-6xl font-light leading-[1.1] mb-2 transition-all duration-[600ms]"
@@ -258,9 +240,9 @@ const HeroSection = () => {
                       transitionDelay: isActive ? "300ms" : "0ms",
                     }}
                   >
-                    {slide.title}
+                    {t(slide.titleKey)}
                     <br />
-                    <span className="font-bold italic">{slide.titleAccent}</span>
+                    <span className="font-bold italic">{t(slide.titleAccentKey)}</span>
                   </h1>
                   <p
                     className="text-sm uppercase tracking-[0.15em] mt-3 mb-6 transition-all duration-500"
@@ -271,7 +253,7 @@ const HeroSection = () => {
                       transitionDelay: isActive ? "450ms" : "0ms",
                     }}
                   >
-                    {slide.subtitle}
+                    {t("home.hero.subtitle")}
                   </p>
                   <p
                     className="text-sm leading-relaxed max-w-md mb-8 transition-all duration-500"
@@ -282,7 +264,7 @@ const HeroSection = () => {
                       transitionDelay: isActive ? "550ms" : "0ms",
                     }}
                   >
-                    {slide.description}
+                    {t("home.hero.description")}
                   </p>
                   <div
                     className="transition-all duration-500"
@@ -309,7 +291,7 @@ const HeroSection = () => {
                         e.currentTarget.style.color = slide.textColor;
                       }}
                     >
-                      {slide.ctaText}
+                      {t("home.hero.cta")}
                       <span>→</span>
                     </Link>
                   </div>
@@ -320,7 +302,7 @@ const HeroSection = () => {
                   <div className="col-span-3 relative flex items-center justify-center">
                     <img
                       src={slide.image}
-                      alt={slide.label}
+                      alt={t(slide.labelKey)}
                       loading={index === 0 ? "eager" : "lazy"}
                       decoding={index === 0 ? "auto" : "async"}
                       fetchPriority={index === 0 ? "high" : undefined}
@@ -355,7 +337,7 @@ const HeroSection = () => {
                     transitionDelay: isActive ? "200ms" : "0ms",
                   }}
                 >
-                  {slide.label}
+                  {t(slide.labelKey)}
                 </p>
                 <h1
                   className="font-light leading-[1.1] mb-2 transition-all duration-[600ms]"
@@ -367,9 +349,9 @@ const HeroSection = () => {
                     transitionDelay: isActive ? "300ms" : "0ms",
                   }}
                 >
-                  {slide.title}
+                  {t(slide.titleKey)}
                   <br />
-                  <span className="font-bold italic">{slide.titleAccent}</span>
+                  <span className="font-bold italic">{t(slide.titleAccentKey)}</span>
                 </h1>
                 <p
                   className="text-xs uppercase tracking-[0.12em] mt-2 mb-4 transition-all duration-500"
@@ -380,7 +362,7 @@ const HeroSection = () => {
                     transitionDelay: isActive ? "400ms" : "0ms",
                   }}
                 >
-                  {slide.subtitle}
+                  {t("home.hero.subtitle")}
                 </p>
                 <p
                   className="text-sm leading-relaxed mb-6 transition-all duration-500"
@@ -391,7 +373,7 @@ const HeroSection = () => {
                     transitionDelay: isActive ? "500ms" : "0ms",
                   }}
                 >
-                  {slide.description}
+                  {t("home.hero.description")}
                 </p>
                 <div
                   className="transition-all duration-500"
@@ -410,7 +392,7 @@ const HeroSection = () => {
                       background: "transparent",
                     }}
                   >
-                    {slide.ctaText}
+                    {t("home.hero.cta")}
                     <span>→</span>
                   </Link>
                 </div>

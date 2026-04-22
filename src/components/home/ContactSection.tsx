@@ -3,6 +3,7 @@ import { Mail, Phone, MapPin, ArrowRight } from "lucide-react";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 import { Button } from "@/components/ui/button";
 import { offices, factories } from "@/data/locations";
+import { useI18n } from "@/features/i18n/I18nProvider";
 
 const allLocations = [
   ...offices.map((o) => ({ city: o.city, role: o.label })),
@@ -10,14 +11,21 @@ const allLocations = [
 ];
 
 const ContactSection = () => {
+  const { t } = useI18n();
   const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation();
   const { ref: cardsRef, isVisible: cardsVisible, getDelay } = useStaggeredAnimation(3, 150);
 
   const contactItems = [
-    { icon: Mail, title: "Email", content: "info@wincyc.com", href: "mailto:info@wincyc.com" },
-    { icon: Phone, title: "Phone", content: "+852 1234 5678", href: "tel:+85212345678" },
-    { icon: MapPin, title: "Location", content: "Hong Kong & Guangdong", href: null },
+    { icon: Mail, title: t("home.contact.email"), content: "info@wincyc.com", href: "mailto:info@wincyc.com" },
+    { icon: Phone, title: t("home.contact.phone"), content: "+852 1234 5678", href: "tel:+85212345678" },
+    { icon: MapPin, title: t("home.contact.location"), content: t("home.contact.locationValue"), href: null },
   ];
+
+  const roleMap: Record<string, string> = {
+    Headquarters: t("home.location.headquarters"),
+    "Sales Office": t("home.location.salesOffice"),
+    "Manufacturing Hub": t("home.location.manufacturingHub"),
+  };
 
   return (
     <section className="section-light overflow-hidden">
@@ -29,18 +37,18 @@ const ContactSection = () => {
         }`}
       >
         <div className="lg:w-1/2">
-          <span className="section-label">Get in touch</span>
+          <span className="section-label">{t("home.contact.label")}</span>
           <h2 className="text-3xl font-semibold tracking-tight mt-2 text-foreground">
-            We'd love to hear from you
+            {t("home.contact.title")}
           </h2>
           <p className="text-sm text-muted-foreground mt-4 max-w-md leading-relaxed">
-            Coordinated from Hong Kong since 1979, with manufacturing in China & Vietnam and sales offices in Shanghai & New York.
+            {t("home.contact.body")}
           </p>
           <Link
             to="/about/factory"
             className="inline-flex items-center gap-2 mt-5 text-xs uppercase tracking-[0.15em] text-foreground border-b border-foreground/30 hover:border-foreground pb-1 transition-colors"
           >
-            View all locations
+            {t("home.contact.viewLocations")}
             <ArrowRight className="w-3.5 h-3.5" strokeWidth={1.5} />
           </Link>
         </div>
@@ -52,7 +60,7 @@ const ContactSection = () => {
               className="border border-[hsl(var(--border))] rounded-[var(--radius)] p-4"
             >
               <span className="text-xs uppercase tracking-[0.1em] text-muted-foreground block mb-1">
-                {loc.role}
+                {roleMap[loc.role] ?? loc.role}
               </span>
               <span className="text-base font-semibold text-foreground">
                 {loc.city}
@@ -99,7 +107,7 @@ const ContactSection = () => {
           }`}
           style={{ transitionDelay: "450ms" }}
         >
-          <Button size="lg">Get a Quote</Button>
+          <Button size="lg">{t("home.contact.quote")}</Button>
         </Link>
       </div>
     </section>

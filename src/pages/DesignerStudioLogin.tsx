@@ -5,22 +5,27 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Loader2, Lock } from "lucide-react";
+import { useI18n } from "@/features/i18n/I18nProvider";
 
-function validateFields(email: string, password: string) {
+function validateFields(
+  email: string,
+  password: string,
+  t: (key: string) => string,
+) {
   const errors: { email?: string; password?: string } = {};
   const normalizedEmail = email.trim();
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   if (!normalizedEmail) {
-    errors.email = "Email is required";
+    errors.email = t("login.validation.emailRequired");
   } else if (normalizedEmail.length > 255 || !emailRegex.test(normalizedEmail)) {
-    errors.email = "Enter a valid email address";
+    errors.email = t("login.validation.emailInvalid");
   }
 
   if (!password) {
-    errors.password = "Password is required";
+    errors.password = t("login.validation.passwordRequired");
   } else if (password.length > 128) {
-    errors.password = "Password is too long";
+    errors.password = t("login.validation.passwordTooLong");
   }
 
   return { errors, normalizedEmail };
@@ -30,6 +35,7 @@ export default function DesignerStudioLogin() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { signIn, session, loading } = useAuth();
+  const { t } = useI18n();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -51,7 +57,7 @@ export default function DesignerStudioLogin() {
     setAuthError(null);
     setFieldErrors({});
 
-    const { errors, normalizedEmail } = validateFields(email, password);
+    const { errors, normalizedEmail } = validateFields(email, password, t);
     if (errors.email || errors.password) {
       setFieldErrors(errors);
       return;
@@ -63,11 +69,11 @@ export default function DesignerStudioLogin() {
 
     if (error) {
       if (/invalid login credentials/i.test(error)) {
-        setAuthError("Invalid email or password. Please try again.");
+        setAuthError(t("login.error.invalidCredentials"));
       } else if (/email not confirmed/i.test(error)) {
-        setAuthError("Email not confirmed. Please contact support.");
+        setAuthError(t("login.error.emailNotConfirmed"));
       } else {
-        setAuthError("Sign in failed. Please try again in a moment.");
+        setAuthError(t("login.error.generic"));
       }
       return;
     }
@@ -82,14 +88,14 @@ export default function DesignerStudioLogin() {
           <div className="mx-auto w-10 h-10 flex items-center justify-center border border-foreground">
             <Lock className="w-4 h-4" strokeWidth={1.5} />
           </div>
-          <h1 className="text-2xl font-light tracking-wide text-foreground">Designer Studio</h1>
-          <p className="text-sm text-muted-foreground">Sign in to access your brand workspace</p>
+          <h1 className="text-2xl font-light tracking-wide text-foreground">{t("login.title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("login.subtitle")}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5 border border-border p-8 bg-background">
           <div className="space-y-2">
             <Label htmlFor="email" className="text-xs uppercase tracking-wider text-muted-foreground">
-              Email
+              {t("login.email")}
             </Label>
             <Input
               id="email"
@@ -109,7 +115,7 @@ export default function DesignerStudioLogin() {
 
           <div className="space-y-2">
             <Label htmlFor="password" className="text-xs uppercase tracking-wider text-muted-foreground">
-              Password
+              {t("login.password")}
             </Label>
             <Input
               id="password"
@@ -140,21 +146,21 @@ export default function DesignerStudioLogin() {
           >
             {submitting ? (
               <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Signing in...
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t("login.signingIn")}
               </>
             ) : (
-              "Sign in"
+              t("login.signIn")
             )}
           </Button>
 
           <div className="border-t border-border pt-5 space-y-2">
-            <p className="text-xs uppercase tracking-wider text-muted-foreground">Demo account</p>
+            <p className="text-xs uppercase tracking-wider text-muted-foreground">{t("login.demoAccount")}</p>
             <div className="text-xs text-foreground/80 space-y-1 font-mono">
               <div>Email: demo.polo@wincyc.com</div>
               <div>Password: PoloDemo2026!</div>
             </div>
             <p className="text-xs text-muted-foreground pt-1">
-              For reviewers: signs you in as a Polo Ralph Lauren brand designer.
+              {t("login.demoNote")}
             </p>
           </div>
         </form>
@@ -164,7 +170,7 @@ export default function DesignerStudioLogin() {
             to="/designer-studio"
             className="text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
-            ← Browse public catalog without signing in
+            {t("login.browsePublic")}
           </Link>
         </div>
       </div>

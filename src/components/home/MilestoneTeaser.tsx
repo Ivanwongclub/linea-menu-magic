@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useRef, useCallback } from "react";
 import { useScrollAnimation } from "@/hooks/use-scroll-animation";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { useI18n } from "@/features/i18n/I18nProvider";
 import milestoneFoundingImg from "@/assets/milestone-founding.jpg";
 import milestoneCraftImg from "@/assets/milestone-craftsmanship.jpg";
 import milestoneGlobalImg from "@/assets/milestone-global.jpg";
@@ -11,6 +12,7 @@ import sustainabilityImg from "@/assets/sustainability-recycled-metal.jpg";
 import milestoneDigitalImg from "@/assets/milestone-digital.jpg";
 
 interface Milestone {
+  id: string;
   year: string;
   title: string;
   desc: string;
@@ -20,71 +22,60 @@ interface Milestone {
   isVintage?: boolean;
 }
 
-const milestones: Milestone[] = [
+const milestoneBlueprint: Omit<Milestone, "year" | "title" | "desc" | "badge">[] = [
   {
-    year: "2026",
-    title: "New Era",
-    desc: "Digital transformation — catalogue, collaboration & speed.",
+    id: "1",
     image: milestoneDigitalImg,
     isHighlight: true,
-    badge: "May 2026 · New Era",
   },
   {
-    year: "45+ Years",
-    title: "Sustainability",
-    desc: "Recycled and eco-conscious accessories for responsible brands.",
+    id: "2",
     image: sustainabilityImg,
   },
   {
-    year: "2020s",
-    title: "Integrated Solutions",
-    desc: "Full-service partner — design, compliance, trim programmes.",
+    id: "3",
   },
   {
-    year: "2015",
-    title: "Multi-Location Operations",
-    desc: "Hong Kong HQ, Dongguan production, regional offices worldwide.",
+    id: "4",
     image: factoryProductionImg,
   },
   {
-    year: "2010s",
-    title: "OEM & ODM Capability",
-    desc: "Concept-to-production — sampling, mould-making, volume manufacturing.",
+    id: "5",
     image: factoryHeroImg,
   },
   {
-    year: "2000s–2010s",
-    title: "Global Supply Partner",
-    desc: "Leading brands across Europe, Americas & Asia Pacific.",
+    id: "6",
     image: milestoneGlobalImg,
   },
   {
-    year: "2000",
-    title: "ISO 9001 Certified",
-    desc: "International quality management systems formalised.",
+    id: "7",
   },
   {
-    year: "1990s",
-    title: "Manufacturing Depth",
-    desc: "Refining tooling, production techniques, and craft expertise.",
+    id: "8",
     image: milestoneCraftImg,
     isVintage: true,
   },
   {
-    year: "1979",
-    title: "Founded in Hong Kong",
-    desc: "A small workshop with a vision for world-class garment trims.",
+    id: "9",
     image: milestoneFoundingImg,
     isVintage: true,
   },
 ];
 
-const COLS = milestones.length;
+const COLS = milestoneBlueprint.length;
 
 const MilestoneTeaser = () => {
+  const { t } = useI18n();
   const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation({ threshold: 0.2 });
   const { ref: timelineRef, isVisible: timelineVisible } = useScrollAnimation({ threshold: 0.1 });
   const scrollRef = useRef<HTMLDivElement>(null);
+  const milestones: Milestone[] = milestoneBlueprint.map((milestone) => ({
+    ...milestone,
+    year: t(`home.milestone.${milestone.id}.year`),
+    title: t(`home.milestone.${milestone.id}.title`),
+    desc: t(`home.milestone.${milestone.id}.desc`),
+    badge: milestone.isHighlight ? t(`home.milestone.${milestone.id}.badge`) : undefined,
+  }));
 
   const scrollLeft = useCallback(() => {
     scrollRef.current?.scrollBy({ left: -500, behavior: "smooth" });
@@ -104,11 +95,11 @@ const MilestoneTeaser = () => {
                headerVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"
             }`}
           >
-            About WIN-CYC
+            {t("home.milestone.label")}
           </span>
           <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-8">
-            <span className="inline-block mr-4">Our</span>
-            <span className="inline-block font-serif-display">Journey</span>
+            <span className="inline-block mr-4">{t("home.milestone.our")}</span>
+            <span className="inline-block font-serif-display">{t("home.milestone.journey")}</span>
           </h2>
         </div>
       </div>
@@ -196,7 +187,7 @@ const MilestoneTeaser = () => {
             to="/about/our-story"
             className="group inline-flex items-center text-sm tracking-wider text-foreground/50 hover:text-foreground transition-colors duration-200 link-elegant"
           >
-            Read Our Full Story
+            {t("home.milestone.readStory")}
             <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300 group-hover:translate-x-2" />
           </Link>
         </div>

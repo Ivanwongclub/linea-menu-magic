@@ -1,10 +1,12 @@
 import { Link } from "react-router-dom";
 import { useScrollAnimation } from "@/hooks/use-scroll-animation";
+import { useI18n } from "@/features/i18n/I18nProvider";
 import LetterReveal from "@/components/ui/LetterReveal";
 import heritageCraftsmanship from "@/assets/heritage-craftsmanship.jpg";
 import aboutShowroom from "@/assets/about-showroom.jpg";
 
 const HeritageSection = () => {
+  const { t } = useI18n();
   const { ref: contentRef, isVisible: contentVisible } = useScrollAnimation({ threshold: 0.2 });
   const { ref: imageRef, isVisible: imageVisible } = useScrollAnimation({ threshold: 0.3 });
 
@@ -39,7 +41,7 @@ const HeritageSection = () => {
             >
               <span className="text-3xl font-semibold text-foreground block">45+</span>
               <p className="text-xs text-muted-foreground uppercase tracking-[0.08em] mt-1">
-                Years of craftsmanship
+                {t("home.heritage.stat")}
               </p>
             </div>
           </div>
@@ -51,11 +53,11 @@ const HeritageSection = () => {
                  contentVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"
               }`}
             >
-              Heritage
+              {t("home.heritage.label")}
             </span>
             <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6">
               <LetterReveal
-                text="Our"
+                text={t("home.heritage.our")}
                 as="span"
                 className="text-outline inline-block mr-4"
                 isVisible={contentVisible}
@@ -63,7 +65,7 @@ const HeritageSection = () => {
                 letterDelay={60}
               />
               <LetterReveal
-                text="Story"
+                text={t("home.heritage.story")}
                 as="span"
                 className="inline-block font-serif-display"
                 isVisible={contentVisible}
@@ -78,7 +80,7 @@ const HeritageSection = () => {
                 }`}
                 style={{ transitionDelay: "200ms" }}
               >
-                Since our founding in 1979, WIN-CYC GROUP has been dedicated to the research and manufacturing of premium garment accessories.
+                {t("home.heritage.p1")}
               </p>
               <p
                  className={`transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${
@@ -86,7 +88,7 @@ const HeritageSection = () => {
                 }`}
                 style={{ transitionDelay: "300ms" }}
               >
-                From our roots in Hong Kong, we have grown into an internationally certified global supplier serving leading brands across Europe, the Americas, Japan, and Asia Pacific.
+                {t("home.heritage.p2")}
               </p>
             </div>
             <div
@@ -99,7 +101,7 @@ const HeritageSection = () => {
                 to="/about"
                 className="group inline-flex items-center text-sm tracking-wider text-foreground link-elegant"
               >
-                Discover More
+                {t("home.heritage.discover")}
                 <svg
                   className="ml-2 w-4 h-4 transition-transform duration-300 group-hover:translate-x-2"
                   fill="none"

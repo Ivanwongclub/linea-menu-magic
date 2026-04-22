@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
 import { useCookieContext } from "@/features/cookies/CookieProvider";
+import { useI18n } from "@/features/i18n/I18nProvider";
 
 const Footer = () => {
   const { resetConsent, openCustomise } = useCookieContext();
+  const { t } = useI18n();
 
   return (
     <footer className="w-full bg-foreground text-background pt-16 pb-8">
@@ -17,27 +19,27 @@ const Footer = () => {
               </div>
             </div>
             <p className="text-xs text-white/45 tracking-[0.06em] mt-3 leading-relaxed">
-              Timeless Craftsmanship in Garment Accessories since 1979.
+              {t("footer.brand.tagline")}
             </p>
           </div>
 
           {/* Navigation */}
           <div className="lg:col-span-1">
             <h4 className="text-xs font-medium uppercase tracking-[0.12em] text-white/40 mb-5">
-              Navigation
+              {t("footer.nav.title")}
             </h4>
             <ul className="space-y-3">
               {[
-                { to: "/", label: "Home" },
-                { to: "/about", label: "About" },
-                { to: "/products", label: "Products" },
-                { to: "/sustainability", label: "Sustainability" },
-                { to: "/ecollections", label: "E-Catalogue" },
-                { to: "/designer-studio", label: "Designer Studio" },
+                { to: "/", key: "footer.nav.home" },
+                { to: "/about", key: "footer.nav.about" },
+                { to: "/products", key: "footer.nav.products" },
+                { to: "/sustainability", key: "footer.nav.sustainability" },
+                { to: "/ecollections", key: "footer.nav.ecatalogue" },
+                { to: "/designer-studio", key: "footer.nav.designerStudio" },
               ].map(link => (
                 <li key={link.to}>
                   <Link to={link.to} className="text-sm text-white/65 hover:text-white hover:underline transition-colors duration-150">
-                    {link.label}
+                    {t(link.key)}
                   </Link>
                 </li>
               ))}
@@ -47,19 +49,19 @@ const Footer = () => {
           {/* Products */}
           <div className="lg:col-span-1">
             <h4 className="text-xs font-medium uppercase tracking-[0.12em] text-white/40 mb-5">
-              Products
+              {t("footer.products.title")}
             </h4>
             <ul className="space-y-3">
               {[
-                { to: "/products#buttons", label: "Buttons" },
-                { to: "/products#zippers", label: "Zippers" },
-                { to: "/products#lace", label: "Lace & Trimming" },
-                { to: "/products#hardware", label: "Metal Hardware" },
-                { to: "/products#other", label: "Other Products" },
+                { to: "/products#buttons", key: "footer.products.buttons" },
+                { to: "/products#zippers", key: "footer.products.zippers" },
+                { to: "/products#lace", key: "footer.products.laceTrim" },
+                { to: "/products#hardware", key: "footer.products.metalHardware" },
+                { to: "/products#other", key: "footer.products.other" },
               ].map(link => (
                 <li key={link.to}>
                   <Link to={link.to} className="text-sm text-white/65 hover:text-white hover:underline transition-colors duration-150">
-                    {link.label}
+                    {t(link.key)}
                   </Link>
                 </li>
               ))}
@@ -69,26 +71,26 @@ const Footer = () => {
           {/* Contact */}
           <div className="lg:col-span-1">
             <h4 className="text-xs font-medium uppercase tracking-[0.12em] text-white/40 mb-5">
-              Contact
+              {t("footer.contact.title")}
             </h4>
             <div className="space-y-4 text-sm text-white/65">
               <div>
-                <p className="text-white mb-1 font-medium">Email</p>
+                <p className="text-white mb-1 font-medium">{t("footer.contact.email")}</p>
                 <a href="mailto:info@wincyc.com" className="hover:text-white hover:underline transition-colors duration-150">
                   info@wincyc.com
                 </a>
               </div>
               <div>
-                <p className="text-white mb-1 font-medium">Phone</p>
+                <p className="text-white mb-1 font-medium">{t("footer.contact.phone")}</p>
                 <a href="tel:+85212345678" className="hover:text-white hover:underline transition-colors duration-150">
                   +852 1234 5678
                 </a>
               </div>
               <div>
-                <p className="text-white mb-1 font-medium">Address</p>
+                <p className="text-white mb-1 font-medium">{t("footer.contact.address")}</p>
                 <p className="leading-relaxed">
-                  Hong Kong<br />
-                  Guangdong, China
+                  {t("footer.contact.hk")}<br />
+                  {t("footer.contact.gd")}
                 </p>
               </div>
             </div>
@@ -102,24 +104,24 @@ const Footer = () => {
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="flex items-center gap-4">
               <p className="text-xs text-white/35">
-                © 2024 WIN-CYC GROUP LIMITED. All rights reserved.
+                {t("footer.rights")}
               </p>
               <button
                 onClick={() => { resetConsent(); openCustomise(); }}
                 className="text-xs text-white/45 hover:text-white/70 transition-colors duration-150"
               >
-                Cookie Settings
+                {t("footer.cookieSettings")}
               </button>
             </div>
             <div className="flex space-x-6">
               <Link to="/privacy-policy" className="text-xs text-white/35 hover:text-white transition-colors duration-150">
-                Privacy Policy
+                {t("footer.privacy")}
               </Link>
               <Link to="/terms-of-service" className="text-xs text-white/35 hover:text-white transition-colors duration-150">
-                Terms of Service
+                {t("footer.terms")}
               </Link>
               <Link to="/cookie-policy" className="text-xs text-white/35 hover:text-white transition-colors duration-150">
-                Cookies
+                {t("footer.cookies")}
               </Link>
             </div>
           </div>

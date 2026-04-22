@@ -1,20 +1,38 @@
 import { Link } from "react-router-dom";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
+import { useI18n } from "@/features/i18n/I18nProvider";
 import LetterReveal from "@/components/ui/LetterReveal";
 import { Button } from "@/components/ui/button";
 import sustainabilityImage from "@/assets/sustainability.jpg";
 import heritageCraftsmanship from "@/assets/heritage-craftsmanship.jpg";
 
 const SustainabilitySection = () => {
+  const { t } = useI18n();
   const { ref: imageRef, isVisible: imageVisible } = useScrollAnimation({ threshold: 0.2 });
   const { ref: contentRef, isVisible: contentVisible } = useScrollAnimation({ threshold: 0.2 });
   const { ref: certRef, isVisible: certVisible, getDelay } = useStaggeredAnimation(4, 100);
 
   const certifications = [
-    { abbreviation: "GRS", name: "Global Recycled Standard", description: "Verifies recycled content and responsible production practices across the supply chain." },
-    { abbreviation: "RCS", name: "Recycled Claim Standard", description: "Tracks and certifies recycled raw materials through the entire production process." },
-    { abbreviation: "OEKO", name: "OEKO-TEX Standard 100", description: "Tests for harmful substances ensuring products are safe for human use." },
-    { abbreviation: "ISO", name: "ISO 9001 Quality Management", description: "International standard for consistent quality management systems and processes." },
+    {
+      abbreviation: t("home.sustainability.cert1.abbr"),
+      name: t("home.sustainability.cert1.name"),
+      description: t("home.sustainability.cert1.desc"),
+    },
+    {
+      abbreviation: t("home.sustainability.cert2.abbr"),
+      name: t("home.sustainability.cert2.name"),
+      description: t("home.sustainability.cert2.desc"),
+    },
+    {
+      abbreviation: t("home.sustainability.cert3.abbr"),
+      name: t("home.sustainability.cert3.name"),
+      description: t("home.sustainability.cert3.desc"),
+    },
+    {
+      abbreviation: t("home.sustainability.cert4.abbr"),
+      name: t("home.sustainability.cert4.name"),
+      description: t("home.sustainability.cert4.desc"),
+    },
   ];
 
   return (
@@ -59,7 +77,7 @@ const SustainabilitySection = () => {
                 contentVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-8"
               }`}
             >
-              Sustainability
+              {t("home.sustainability.label")}
             </span>
             <div className="flex items-start gap-4 mb-6">
               <span
@@ -70,7 +88,7 @@ const SustainabilitySection = () => {
               />
               <div className="text-5xl md:text-6xl lg:text-7xl text-white leading-[0.9]">
                 <LetterReveal
-                  text="Our"
+                  text={t("home.sustainability.our")}
                   as="span"
                   className="font-light block"
                   isVisible={contentVisible}
@@ -78,7 +96,7 @@ const SustainabilitySection = () => {
                   letterDelay={60}
                 />
                 <LetterReveal
-                  text="Commitment"
+                  text={t("home.sustainability.commitment")}
                   as="span"
                   className="font-bold block"
                   isVisible={contentVisible}
@@ -93,7 +111,7 @@ const SustainabilitySection = () => {
               }`}
               style={{ transitionDelay: "600ms" }}
             >
-              We believe that quality products should be environmentally responsible. Through internationally certified sustainable processes, we are committed to reducing our ecological footprint while maintaining exceptional quality standards.
+              {t("home.sustainability.body")}
             </p>
 
             {/* Certification cards */}
@@ -126,7 +144,7 @@ const SustainabilitySection = () => {
               }`}
               style={{ transitionDelay: "700ms" }}
             >
-              <Button variant="outline-inverse">Learn More</Button>
+              <Button variant="outline-inverse">{t("home.sustainability.learnMore")}</Button>
             </Link>
           </div>
         </div>
