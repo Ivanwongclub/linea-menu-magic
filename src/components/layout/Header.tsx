@@ -639,127 +639,16 @@ const Header = () => {
           >
             {/* Link list with collapsible sub-menus */}
             <nav className="flex flex-col flex-1">
-              {mobileNavLinks.map((link) => {
-                /* Products — collapsible */
-                if (link.megaMenu === "products") {
-                  return (
-                    <div key={link.href}>
-                      <button
-                        onClick={() => {
-                          const nextOpen = !mobileProductsOpen;
-                          setMobileProductsOpen(nextOpen);
-                          if (nextOpen && !mobileProductFamilyOpen) {
-                            setMobileProductFamilyOpen(MEGA_FAMILIES[0]?.slug ?? null);
-                          }
-                          if (!nextOpen) {
-                            setMobileProductFamilyOpen(null);
-                          }
-                        }}
-                        className="w-full flex items-center justify-between text-lg font-medium tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 py-4 px-6 border-b border-border"
-                        aria-expanded={mobileProductsOpen}
-                        aria-controls="mobile-products-level2"
-                      >
-                        {t(link.labelKey)}
-                        <ChevronDown size={18} className={`transition-transform duration-200 ${mobileProductsOpen ? "rotate-180" : ""}`} />
-                      </button>
-                      {mobileProductsOpen && (
-                        <div id="mobile-products-level2" className="bg-secondary/70 border-b border-border">
-                          {MEGA_FAMILIES.map((family) => (
-                            <div key={family.slug} className="border-b border-border/70 last:border-b-0">
-                              <button
-                                onClick={() =>
-                                  setMobileProductFamilyOpen((prev) =>
-                                    prev === family.slug ? null : family.slug
-                                  )
-                                }
-                                className="w-full flex items-center justify-between py-3 px-6 text-sm font-semibold tracking-[0.06em] uppercase text-foreground hover:text-muted-foreground transition-colors duration-150"
-                                aria-expanded={mobileProductFamilyOpen === family.slug}
-                                aria-controls={`mobile-product-family-${family.slug}`}
-                              >
-                                <span>{t(family.nameKey)}</span>
-                                <ChevronDown
-                                  size={16}
-                                  className={`transition-transform duration-200 ${
-                                    mobileProductFamilyOpen === family.slug ? "rotate-180" : ""
-                                  }`}
-                                />
-                              </button>
-
-                              {mobileProductFamilyOpen === family.slug && (
-                                <div
-                                  id={`mobile-product-family-${family.slug}`}
-                                  className="bg-background/60 border-t border-border/60 ml-4 border-l-2 border-border/40"
-                                >
-                                  <Link
-                                    to={`/products?family=${family.slug}`}
-                                    onClick={() => setIsMenuOpen(false)}
-                                    className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground hover:text-foreground transition-colors duration-150 block py-2.5 px-6 border-b border-border/60"
-                                  >
-                                    {t("header.products.viewAll")}
-                                  </Link>
-                                  {family.subcategories.map((sub) => (
-                                    <Link
-                                      key={sub.en}
-                                      to={`/products?category=${slugify(sub.en)}`}
-                                      onClick={() => setIsMenuOpen(false)}
-                                      className="text-sm text-foreground hover:text-muted-foreground transition-colors duration-150 block py-2.5 px-8 border-b border-border/60 last:border-b-0"
-                                    >
-                                      {t(sub.key)}
-                                    </Link>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
-
-                /* About — collapsible */
-                if (link.megaMenu === "about") {
-                  return (
-                    <div key={link.href}>
-                      <button
-                        onClick={() => setMobileAboutOpen(!mobileAboutOpen)}
-                        className="w-full flex items-center justify-between text-lg font-medium tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 py-4 px-6 border-b border-border"
-                        aria-expanded={mobileAboutOpen}
-                        aria-controls="mobile-about-level2"
-                      >
-                        {t(link.labelKey)}
-                        <ChevronDown size={18} className={`transition-transform duration-200 ${mobileAboutOpen ? "rotate-180" : ""}`} />
-                      </button>
-                      {mobileAboutOpen && (
-                        <div id="mobile-about-level2" className="bg-secondary border-b border-border">
-                          {ABOUT_LINKS.filter(l => l.labelKey && l.href).map((l) => (
-                            <Link
-                              key={l.href}
-                              to={l.href!}
-                              onClick={() => setIsMenuOpen(false)}
-                              className="text-sm text-foreground hover:text-muted-foreground transition-colors duration-150 block py-2 px-8 border-b border-border last:border-b-0"
-                            >
-                              {t(l.labelKey!)}
-                            </Link>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
-
-                /* Simple links */
-                return (
-                  <Link
-                    key={link.href}
-                    to={link.href}
-                    onClick={() => setIsMenuOpen(false)}
-                    className="text-lg font-medium tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 block py-4 px-6 border-b border-border"
-                  >
-                    {t(link.labelKey)}
-                  </Link>
-                );
-              })}
+              {mobileNavLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  to={link.href}
+                  onClick={() => setIsMenuOpen(false)}
+                  className="text-lg font-medium tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 block py-4 px-6 border-b border-border"
+                >
+                  {t(link.labelKey)}
+                </Link>
+              ))}
 
               {/* CTA buttons */}
               <div className="mt-auto px-6 pb-8 pt-6 space-y-3">
