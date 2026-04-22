@@ -184,18 +184,18 @@ async function resolveProductSetByDimension(scope: FilterScope): Promise<Set<str
     if (error) throw new Error(error.message);
 
     const wanted = new Set(values.map((value) => value.toLowerCase()));
-    dimensionRows = ((data ?? []) as Record<string, unknown>[]).filter((row) => {
+    dimensionRows = ((data ?? []) as unknown as Record<string, unknown>[]).filter((row) => {
       const raw = row[scope.dimensionFilterColumn];
       return typeof raw === 'string' && wanted.has(raw.toLowerCase());
     });
   } else {
-    const { data, error } = await supabase
-      .from(scope.dimensionTable)
+    const { data, error } = await (supabase
+      .from(scope.dimensionTable) as any)
       .select(scope.dimensionIdColumn)
       .in(scope.dimensionFilterColumn, values);
 
     if (error) throw new Error(error.message);
-    dimensionRows = (data ?? []) as Record<string, unknown>[];
+    dimensionRows = (data ?? []) as unknown as Record<string, unknown>[];
   }
 
   const dimensionIds = dimensionRows
@@ -204,8 +204,8 @@ async function resolveProductSetByDimension(scope: FilterScope): Promise<Set<str
 
   if (dimensionIds.length === 0) return new Set();
 
-  const { data: mapRows, error: mapError } = await supabase
-    .from(scope.mapTable)
+  const { data: mapRows, error: mapError } = await (supabase
+    .from(scope.mapTable) as any)
     .select('product_id')
     .in(scope.mapDimensionColumn, dimensionIds);
 
