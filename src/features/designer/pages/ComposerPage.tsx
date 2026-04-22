@@ -5,14 +5,13 @@ import { toast } from 'sonner'
 import { useDesignSession } from '../hooks/useDesignSession'
 import { createVariantFromSession } from '../hooks/useDesignSessions'
 import { useUserLibrary } from '@/features/products/hooks/useUserLibrary'
+import { useAuth } from '@/features/auth/AuthProvider'
 import ComposerCanvas from '../components/ComposerCanvas'
 import ComposerToolbar from '../components/ComposerToolbar'
 import type { SaveStatus } from '../components/ComposerToolbar'
 import LayerPanel from '../components/LayerPanel'
 import ProductPickerSheet from '../components/ProductPickerSheet'
 import type { DesignLayer } from '../types'
-
-const DEMO_TEAM_ID = '00000000-0000-0000-0000-000000000001'
 
 export default function ComposerPage() {
   const { sessionId } = useParams<{ sessionId: string }>()
@@ -21,14 +20,9 @@ export default function ComposerPage() {
 
   const { session, layers, loading, addLayer, updateLayer, deleteLayer, reorderLayers } = useDesignSession(sessionId ?? '')
 
-  // Team ID for library
-  const [teamId, setTeamId] = useState(DEMO_TEAM_ID)
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      const meta = data.user?.user_metadata
-      if (meta?.team_id) setTeamId(meta.team_id as string)
-    })
-  }, [])
+  // Brand-scoped team ID from auth context (RequireBrandAuth guarantees primaryBrand)
+  const { primaryBrand } = useAuth()
+  const teamId = primaryBrand?.id ?? ''
   const { items: libraryItems } = useUserLibrary(teamId)
 
   const [selectedLayerIds, setSelectedLayerIds] = useState<string[]>([])

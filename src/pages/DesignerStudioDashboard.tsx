@@ -68,6 +68,7 @@ import ComposerSessionList from "@/features/designer/components/ComposerSessionL
 import { useDesignSessions } from "@/features/designer/hooks/useDesignSessions";
 
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/features/auth/AuthProvider";
 
 // ─── Adapter: UserLibraryItem → legacy LibraryItem ──────
 function toLegacyItem(item: UserLibraryItem): LibraryItem {
@@ -102,8 +103,6 @@ function toLegacyItem(item: UserLibraryItem): LibraryItem {
 
 type SortOrder = "asc" | "desc";
 
-const DEMO_TEAM_ID = '00000000-0000-0000-0000-000000000001';
-
 const validTabs = ['library', 'rfq', 'brochures', 'products', 'composer'] as const;
 type TabId = typeof validTabs[number];
 
@@ -111,14 +110,9 @@ const DesignerStudioDashboard = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // Auth-based team ID
-  const [teamId, setTeamId] = useState(DEMO_TEAM_ID);
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      const meta = data.user?.user_metadata;
-      if (meta?.team_id) setTeamId(meta.team_id as string);
-    });
-  }, []);
+  // Brand-scoped team ID from auth context (RequireBrandAuth guarantees primaryBrand exists)
+  const { primaryBrand } = useAuth();
+  const teamId = primaryBrand?.id ?? '';
 
   // Main tab state — read from URL ?tab= param
   const tabFromUrl = searchParams.get('tab');

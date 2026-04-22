@@ -14,6 +14,62 @@ export type Database = {
   }
   public: {
     Tables: {
+      brand_memberships: {
+        Row: {
+          brand_id: string
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["brand_role"]
+          user_id: string
+        }
+        Insert: {
+          brand_id: string
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["brand_role"]
+          user_id: string
+        }
+        Update: {
+          brand_id?: string
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["brand_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brand_memberships_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      brands: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
       customization_requests: {
         Row: {
           created_at: string
@@ -626,6 +682,7 @@ export type Database = {
       }
       products: {
         Row: {
+          brand_id: string | null
           created_at: string
           description: string | null
           description_en: string | null
@@ -645,6 +702,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          brand_id?: string | null
           created_at?: string
           description?: string | null
           description_en?: string | null
@@ -664,6 +722,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          brand_id?: string | null
           created_at?: string
           description?: string | null
           description_en?: string | null
@@ -682,7 +741,15 @@ export type Database = {
           thumbnail_url?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "products_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_library_items: {
         Row: {
@@ -748,10 +815,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      user_has_brand: {
+        Args: { _brand_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      brand_role: "member" | "manager" | "owner"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -878,6 +948,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      brand_role: ["member", "manager", "owner"],
+    },
   },
 } as const
