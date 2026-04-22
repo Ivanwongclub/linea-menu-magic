@@ -24,7 +24,39 @@ const metalZipperImg = "/optimized/assets__products__metal-zipper-480.webp";
 const cottonLaceImg = "/optimized/assets__products__cotton-lace-480.webp";
 const wovenLabelImg = "/optimized/assets__products__woven-label-480.webp";
 const otherCategoryImg = "/optimized/assets__products__other-category-480.webp";
-const megaProductsGrid = "/optimized/assets__products__mega-products-grid-480.webp";
+const megaButtonsImg = "/images/mega/buttons.jpg";
+const megaSnapButtonsImg = "/images/mega/snap-buttons.jpg";
+const megaJeansButtonsImg = "/images/mega/jeans-buttons.jpg";
+const megaShankButtonsImg = "/images/mega/shank-buttons.jpg";
+const megaBucklesImg = "/images/mega/buckles.jpg";
+const megaEyeletsImg = "/images/mega/eyelets.jpg";
+const megaHookEyesImg = "/images/mega/hook-eyes.jpg";
+const megaRivetsImg = "/images/mega/rivets.jpg";
+const megaZipperPullersImg = "/images/mega/zipper-pullers.jpg";
+const megaTogglesImg = "/images/mega/toggles.jpg";
+const megaCordEndsImg = "/images/mega/cord-ends.jpg";
+const megaCordStoppersImg = "/images/mega/cord-stoppers.jpg";
+const megaBeadsImg = "/images/mega/beads.jpg";
+const megaDrawcordsImg = "/images/mega/drawcords.jpg";
+const megaBadgesImg = "/images/mega/badges.jpg";
+
+const MEGA_GRID_ITEMS = [
+  { label: "Buttons",        img: megaButtonsImg,       slug: "buttons"        },
+  { label: "Snap Buttons",   img: megaSnapButtonsImg,   slug: "snap-buttons"   },
+  { label: "Jeans Buttons",  img: megaJeansButtonsImg,  slug: "jeans-buttons"  },
+  { label: "Shank Buttons",  img: megaShankButtonsImg,  slug: "shank-buttons"  },
+  { label: "Buckles",        img: megaBucklesImg,       slug: "buckles"        },
+  { label: "Eyelets",        img: megaEyeletsImg,       slug: "eyelets"        },
+  { label: "Hook & Eyes",    img: megaHookEyesImg,      slug: "hook-eyes"      },
+  { label: "Rivets",         img: megaRivetsImg,        slug: "rivets"         },
+  { label: "Zipper Pullers", img: megaZipperPullersImg, slug: "zipper-pullers" },
+  { label: "Toggles",        img: megaTogglesImg,       slug: "toggles"        },
+  { label: "Cord Ends",      img: megaCordEndsImg,      slug: "cord-ends"      },
+  { label: "Cord Stoppers",  img: megaCordStoppersImg,  slug: "cord-stoppers"  },
+  { label: "Beads",          img: megaBeadsImg,         slug: "beads"          },
+  { label: "Drawcords",      img: megaDrawcordsImg,     slug: "drawcords"      },
+  { label: "Badges",         img: megaBadgesImg,        slug: "badges"         },
+];
 
 
 // ─── About flat link list ──────────────────────────────────────────────────────
@@ -344,16 +376,30 @@ const Header = () => {
                     ))}
                   </div>
 
-                  {/* Static product grid collage */}
-                  <div className="flex-shrink-0 w-[400px] flex flex-col">
-                    <div className="relative aspect-square overflow-hidden bg-secondary">
-                      <img
-                        src={megaProductsGrid}
-                        alt="Product categories overview"
-                        className="absolute inset-0 w-full h-full object-cover"
-                        loading="lazy"
-                        decoding="async"
-                      />
+                  {/* 5×3 product image grid */}
+                  <div className="flex-shrink-0 w-[500px] flex flex-col">
+                    <div className="grid grid-cols-5 gap-1.5">
+                      {MEGA_GRID_ITEMS.map((item) => (
+                        <Link
+                          key={item.slug}
+                          to={`/products?category=${item.slug}`}
+                          onClick={closeAllMenus}
+                          className="group flex flex-col"
+                        >
+                          <div className="aspect-square overflow-hidden bg-secondary rounded-sm">
+                            <img
+                              src={item.img}
+                              alt={item.label}
+                              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                              loading="lazy"
+                              decoding="async"
+                            />
+                          </div>
+                          <span className="mt-1 text-[9px] font-medium uppercase tracking-[0.07em] text-muted-foreground group-hover:text-foreground transition-colors text-center leading-tight px-0.5 truncate">
+                            {item.label}
+                          </span>
+                        </Link>
+                      ))}
                     </div>
                     <Link
                       to="/products"
