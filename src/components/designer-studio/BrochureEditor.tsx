@@ -238,7 +238,7 @@ export default function BrochureEditor({ brochureId, onBack }: BrochureEditorPro
 
       if (isNew || !savedForm) {
         await createBrochure.mutateAsync({ id: effectiveId, ...payload });
-        toast.success("Brochure created");
+        toast.success("Catalogue created");
       } else {
         await updateBrochure.mutateAsync({ id: effectiveId, ...payload });
         toast.success("Changes saved");
@@ -246,7 +246,7 @@ export default function BrochureEditor({ brochureId, onBack }: BrochureEditorPro
 
       setSavedForm({ ...form });
     } catch {
-      toast.error("Failed to save brochure");
+      toast.error("Failed to save catalogue");
     } finally {
       setSaving(false);
     }
@@ -273,7 +273,7 @@ export default function BrochureEditor({ brochureId, onBack }: BrochureEditorPro
               </Button>
               <Separator orientation="vertical" className="h-5" />
               <h1 className="text-sm font-medium text-foreground truncate max-w-[300px]">
-                {isNew ? "New Brochure" : form.title || "Untitled"}
+                {isNew ? "New Catalogue" : form.title || "Untitled"}
               </h1>
             </div>
 

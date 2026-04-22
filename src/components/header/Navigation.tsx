@@ -133,7 +133,7 @@ const Navigation = () => {
       images: []
     },
     {
-      name: "E-Collections",
+      name: "E-Catalogue",
       href: "/ecollections",
       submenuItems: [],
       images: []

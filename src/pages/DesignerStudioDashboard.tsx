@@ -477,9 +477,9 @@ const DesignerStudioDashboard = () => {
                   <BookOpen className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground">Brochures & Content</p>
+                  <p className="text-sm font-medium text-foreground">E-Catalogue & Content</p>
                   <p className="text-[11px] text-muted-foreground truncate">
-                    Manage catalogs & product data
+                    Manage catalogues & product data
                   </p>
                 </div>
                 <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />
@@ -706,7 +706,7 @@ const DesignerStudioDashboard = () => {
                     className="flex items-center gap-2 px-4 py-3 text-xs font-medium uppercase tracking-[0.08em] rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:text-foreground text-muted-foreground bg-transparent hover:text-foreground transition-colors"
                   >
                     <BookOpen className="w-3.5 h-3.5" />
-                    Brochures
+                    E-Catalogue
                   </TabsTrigger>
                   <TabsTrigger
                     value="products"
