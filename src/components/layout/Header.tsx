@@ -395,7 +395,7 @@ const Header = () => {
                               decoding="async"
                             />
                           </div>
-                          <span className="mt-1 text-[9px] font-medium uppercase tracking-[0.07em] text-muted-foreground group-hover:text-foreground transition-colors text-center leading-tight px-0.5 truncate">
+                          <span className="mt-1 text-[9px] font-medium capitalize tracking-[0.07em] text-muted-foreground group-hover:text-foreground transition-colors text-center leading-tight px-0.5 truncate">
                             {item.label}
                           </span>
                         </Link>
