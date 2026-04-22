@@ -428,13 +428,12 @@ export default function Production() {
                       { src: certHigg, alt: "Higg Index" },
                       { src: certSmeta, alt: "SMETA" },
                     ].map((cert) => (
-                      <img
+                      <OptimizedImage
                         key={cert.alt}
                         src={cert.src}
                         alt={cert.alt}
                         className="h-20 w-auto object-contain"
-                        loading="lazy"
-                        decoding="async"
+                        priority="lazy"
                       />
                     ))}
                   </div>
