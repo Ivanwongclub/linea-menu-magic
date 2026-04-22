@@ -458,14 +458,13 @@ export default function Production() {
                   { image: sustainabilityNatureImg, title: "Our Commitment", body: "Functionality and product performance is of upmost importance — ensuring all products go through quality control procedures aligned with environmental standards.", href: "/about" },
                 ].map((card) => (
                   <Link key={card.title} to={card.href} className="group relative aspect-[3/4] overflow-hidden rounded-[var(--radius)] block">
-                    <img
+                    <OptimizedImage
                       src={card.image}
                       alt={card.title}
                       className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       width={900}
                       height={1200}
-                      loading="lazy"
-                      decoding="async"
+                      priority="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
                     <div className="absolute bottom-0 left-0 right-0 p-6">
