@@ -21,7 +21,7 @@ const About = () => {
     { year: "1979",        event: "Founded in Hong Kong — a small workshop with a vision for world-class garment trims.",             isVintage: true  },
     { year: "1990s",       event: "Manufacturing depth — a decade refining tooling, production techniques, and craft expertise.",     isVintage: true  },
     { year: "2000",        event: "ISO 9001 certified — international quality management systems formalised across all operations."               },
-    { year: "2000s–2010s", event: "Global supply partner — serving leading brands across Europe, Americas & Asia Pacific."                       },
+    { year: "2000s-2010s", event: "Global supply partner — serving leading brands across Europe, Americas & Asia Pacific."                       },
     { year: "2010s",       event: "OEM & ODM capability — concept-to-production: sampling, mould-making, volume manufacturing."                  },
     { year: "2015",        event: "Multi-location operations — Hong Kong HQ, Dongguan production, regional offices worldwide."                   },
     { year: "2020s",       event: "Integrated solutions partner — full-service design, compliance, and trim programme management."               },
