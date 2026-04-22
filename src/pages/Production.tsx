@@ -215,14 +215,13 @@ export default function Production() {
                   {/* Image */}
                   <div className="lg:w-1/2 w-full">
                     <div className="aspect-[4/3] overflow-hidden rounded-[var(--radius)]">
-                      <img
+                      <OptimizedImage
                         src={step.image}
                         alt={step.title}
                         className="w-full h-full object-cover"
                         width={1200}
                         height={900}
-                        loading={i === 0 ? "eager" : "lazy"}
-                        decoding="async"
+                        priority={i === 0 ? "eager" : "lazy"}
                       />
                     </div>
                   </div>
