@@ -1,42 +1,49 @@
 
 
-## Restore alternating left/right timeline on `/about/our-story`
+## Rename "E-Collections" → "E-Catalogue" across the public site
 
-Bring back the zig-zag layout for "Our Journey" while keeping the recent improvements (smaller year, tighter spacing, full-color images, wider content).
+Surgical UI-copy rename. Internal code identifiers (routes, tables, file paths, props, component names like `Brochures`, `BrochureViewer`, `BrochuresPanel`) stay as-is to avoid breaking Supabase, bookmarks, embed links, and the admin workflow. Only **user-facing strings** change.
 
-### What changes
+### Scope decision
 
-**Layout — center spine + alternating sides**
+- **Keep URL `/ecollections/...`** — changing it breaks every published embed iframe, shared link, and existing bookmarks. Backend tables/slugs unchanged.
+- **Keep file & component names** (`Brochures.tsx`, `BrochureEditor.tsx`, `useBrochures`, etc.) — purely internal.
+- **Rename only visible labels** wherever they appear to end users.
 
-- Container: keep `max-w-4xl` (wider than original `max-w-3xl` so descriptions still get more room than before).
-- Spine: move back to horizontal center (`left-1/2 -translate-x-1/2`).
-- Each milestone row uses a 2-column grid (`md:grid-cols-2`):
-  - Even index (0, 2, 4…) → content on **left** column, right column empty.
-  - Odd index (1, 3, 5…) → content on **right** column, left column empty.
-- Year sits inline with the milestone content (above title), aligned to the spine side: right-aligned on left-side rows, left-aligned on right-side rows.
-- Dot stays centered on the spine for every row.
+### Visible copy changes
 
-**Keep from previous edit (do NOT revert)**
+| Location | Before | After |
+|---|---|---|
+| Header nav (desktop + mobile) | E-Collections | E-Catalogue |
+| Footer link | E-Collections | E-Catalogue |
+| Breadcrumb on `/ecollections` | E-Collections | E-Catalogue |
+| Empty state on `/ecollections` | "No e-collections published yet" | "No catalogues published yet" |
+| `Production.tsx` CTA | "View in E-Collections" | "View in E-Catalogue" |
+| Admin dashboard tab + card | "Brochures", "Brochures & Content" | "E-Catalogue", "E-Catalogue & Content" |
+| Admin editor headings/labels referring to "Brochure" in user-facing text within `BrochureEditor.tsx` / `BrochuresPanel.tsx` | "Brochure" | "Catalogue" (only visible strings — keep variable/prop names) |
+| Page `<title>` / meta in `Brochures.tsx` if present | E-Collections | E-Catalogue |
 
-- Year font size: `text-[15px] lg:text-[16px]`, no "Est." prefix.
-- Row spacing: `mb-5`.
-- Header bottom margin: `mb-10`.
-- Body/title margins: `mb-2`, `mb-3`, `mt-2`.
-- Inline image cap: `max-w-[320px]`.
-- Full-color images (no `grayscale`/`sepia`/`opacity-70`).
+### Files to change (UI-text only)
 
-**Mobile**
+- `src/components/layout/Header.tsx` — `NAV_LINKS` label
+- `src/components/header/Navigation.tsx` — `name: "E-Collections"`
+- `src/components/layout/Footer.tsx` — link label
+- `src/pages/Brochures.tsx` — breadcrumb, empty state, intro copy, any title
+- `src/pages/Production.tsx` — "View in E-Collections" CTA
+- `src/pages/DesignerStudioDashboard.tsx` — visible tab label "Brochures" → "E-Catalogue", card title "Brochures & Content" → "E-Catalogue & Content"
+- `src/components/designer-studio/BrochureEditor.tsx` — visible headings/labels/toasts only
+- `src/components/designer-studio/BrochuresPanel.tsx` — visible headings/empty states only
 
-- Below `md`: collapse to single column, year + content stacked left-aligned (existing mobile pattern).
+### Memory updates
 
-### Out of scope
+- Update `mem://branding/ecollections-renaming` → reflect new term "E-Catalogue" (replaces both "Brochures" and "E-Collections" in user-facing copy).
+- Update Core rule in `mem://index.md` from `Strictly use "E-Collections", never "Brochures"` → `Strictly use "E-Catalogue" in all user-facing copy. Internal code may keep "brochure"/"ecollections" identifiers for stability.`
 
-- Intro, Heritage & Growth, Core Values, breadcrumb, page header.
-- Highlight card structure for "May 2026".
-- Animations and scroll reveals.
-- Milestone copy/data.
+### Intentionally NOT changing
 
-### Files to change
-
-- `src/pages/about/OurStory.tsx` — timeline section + `CenteredMilestoneItem` only. ~20 lines edited, no new imports, no new components.
+- URL paths (`/ecollections`, `/ecollections/:slug`), embed iframe URLs, copy-link behavior.
+- Supabase table names, columns, slugs.
+- Component / hook / file names.
+- Admin internal variable names (`editingBrochureId`, `BrochuresPanel`, etc.).
+- Any logic, layout, styling, or routing.
 
