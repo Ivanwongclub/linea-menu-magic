@@ -1,23 +1,43 @@
 
-Widen milestone card images on the home page timeline without altering text, spacing, or timeline structure.
+Align the home page "Get in touch" locations with the authoritative data on `/about/factory`.
 
-**Problem:** Images currently fill only the card's natural column width (1/9th of the timeline grid). The user wants wider images while keeping text columns and timeline alignment unchanged.
+## Findings
 
-**Approach:** Let the image visually overflow its narrow grid column while the text content stays anchored to the column. The card's text/year/title/desc remain in place; only the `<img>` wrapper expands horizontally beyond the card boundary.
+**Home page (`src/components/home/ContactSection.tsx`)** currently lists:
+- Hong Kong — HQ — 1979
+- Shenzhen — Production — 2011
+- Munich — Europe — 2012
+- New York — Americas — 2013
 
-**Changes to `src/components/home/MilestoneTeaser.tsx`:**
+**`/about/factory` (`src/pages/about/Factory.tsx`)** is the authoritative source and lists two groups:
+- **Offices**: Hong Kong (HQ), plus other regional offices
+- **Manufacturing**: Guangdong / Shenzhen production facilities
 
-1. **Highlight card image wrapper** (around line 232-242):
-   - Change wrapper from `<div className="overflow-hidden rounded-t-lg">` to a wider container that breaks out of the card width using negative margins, e.g. `className="overflow-hidden rounded-t-lg -mx-4 lg:-mx-6"`.
-   - Keep `h-48` height and `object-cover` unchanged.
+The home page data is partially fabricated (years and city selection don't match Factory page) and inconsistent with the rest of the site (`ContactSection`'s own copy says "Hong Kong & Guangdong"; footer/contact pages reference HK + Guangdong only).
 
-2. **Regular card image wrapper** (around line 267-278):
-   - Change wrapper from `<div className="overflow-hidden rounded-sm mb-2">` to `className="overflow-hidden rounded-sm mb-2 -mx-4 lg:-mx-6"`.
-   - Keep `h-44` height and all filter/vintage classes unchanged.
+## Plan
 
-3. **Card containers** — add `overflow-visible` where needed so the widened image isn't clipped:
-   - Highlight card outer div: change `overflow-hidden` to `overflow-visible` (the image wrapper retains its own `overflow-hidden` for rounded corners).
+**1. Make `ContactSection` derive from the same source as `/about/factory`.**
 
-**Result:** Each milestone image becomes ~32–48px wider on each side (depending on breakpoint) while year/title/description text and timeline dots stay in their original positions. No layout shift to neighboring milestones since the grid column widths are unchanged.
+- Read the actual `offices` + `factories` arrays from `Factory.tsx` and either:
+  - (a) Extract a shared module `src/data/locations.ts` exporting `offices` and `factories`, then import it in both `Factory.tsx` and `ContactSection.tsx`, OR
+  - (b) Hardcode the same 4 entries in `ContactSection` to match Factory exactly (simpler, no refactor risk).
 
-**Technical note:** Negative horizontal margins are the cleanest way to break an element out of its parent's width without restructuring the grid or affecting sibling alignment.
+Recommended: **option (a)** — single source of truth prevents future drift.
+
+**2. Update the home `ContactSection` location grid:**
+- Show the top 4 locations from the shared data (e.g. 2 offices + 2 factories, or all offices if 4).
+- Use the real `role` and `since` values from Factory page.
+- Add a "View all locations" link below the grid pointing to `/about/factory`.
+
+**3. Fix the supporting copy** in `ContactSection`:
+- "based in Hong Kong with offices and production facilities across Asia, Europe, and the Americas" → adjust to accurately reflect the actual Factory page footprint (likely Hong Kong HQ + Guangdong production, plus any real regional offices listed there).
+
+## Questions before implementing
+
+I need to confirm the exact office/factory entries currently on `/about/factory` so the home page matches. The summary I have shows the structure but not the full data. I'll read `Factory.tsx` during implementation and mirror its arrays exactly.
+
+## Files to change
+- `src/data/locations.ts` (new) — shared `offices` and `factories` arrays
+- `src/pages/about/Factory.tsx` — import from shared module instead of inline arrays
+- `src/components/home/ContactSection.tsx` — replace hardcoded `locations`, update copy, add link to `/about/factory`
