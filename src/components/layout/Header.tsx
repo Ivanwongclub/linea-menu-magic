@@ -185,17 +185,11 @@ const Header = () => {
     path === "/" ? pathname === "/" : pathname === path || pathname.startsWith(path + "/");
   const mobileNavLinks = NAV_LINKS.filter((link) => link.href !== "/ecollections");
 
-  // ─── Nav link class: white on transparent, black on scrolled/non-hero ──────
+  // ─── Nav link class: always black for consistent readability ──────
   const linkClass = (active: boolean) =>
-    `text-[15px] font-medium tracking-[0.04em] uppercase whitespace-nowrap transition-colors duration-200 py-1 ${
-      isTransparent
-        ? "text-white hover:text-white/50"
-        : "text-foreground hover:text-muted-foreground"
-    }`;
+    `text-[15px] font-medium tracking-[0.04em] uppercase whitespace-nowrap transition-colors duration-200 py-1 text-foreground hover:text-muted-foreground`;
 
-  const iconClass = `p-2 transition-all duration-300 ${
-    isTransparent ? "text-white/80 hover:text-white" : "text-foreground hover:text-muted-foreground"
-  }`;
+  const iconClass = `p-2 transition-all duration-300 text-foreground hover:text-muted-foreground`;
 
   const handleProductsEnter = () => {
     clearTimeout(productsTimeout.current);
