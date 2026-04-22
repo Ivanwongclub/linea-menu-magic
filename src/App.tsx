@@ -15,6 +15,7 @@ import { ENV } from "./config/env";
 
 // Homepage loaded eagerly — it's the landing route
 import Index from "./pages/Index";
+import DesignerStudioLogin from "./pages/DesignerStudioLogin";
 
 // All other routes lazy-loaded to reduce initial JS bundle
 const loadAbout = () => import("./pages/About");
@@ -24,7 +25,6 @@ const loadSustainability = () => import("./pages/Sustainability");
 const loadNews = () => import("./pages/News");
 const loadNewsDetail = () => import("./pages/NewsDetail");
 const loadDesignerStudio = () => import("./pages/DesignerStudio");
-const loadDesignerStudioLogin = () => import("./pages/DesignerStudioLogin");
 const loadDesignerStudioDashboard = () => import("./pages/DesignerStudioDashboard");
 const loadComposerPage = () => import("./features/designer/pages/ComposerPage");
 const loadPresentationPage = () => import("./features/designer/pages/PresentationPage");
@@ -47,7 +47,6 @@ const Sustainability = lazy(loadSustainability);
 const News = lazy(loadNews);
 const NewsDetail = lazy(loadNewsDetail);
 const DesignerStudio = lazy(loadDesignerStudio);
-const DesignerStudioLogin = lazy(loadDesignerStudioLogin);
 const DesignerStudioDashboard = lazy(loadDesignerStudioDashboard);
 const ComposerPage = lazy(loadComposerPage);
 const PresentationPage = lazy(loadPresentationPage);

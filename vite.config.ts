@@ -24,8 +24,6 @@ export default defineConfig(({ mode }) => ({
           "vendor-query":    ["@tanstack/react-query"],
           "vendor-supabase": ["@supabase/supabase-js"],
           "vendor-ui":       ["@radix-ui/react-dialog", "@radix-ui/react-select", "@radix-ui/react-collapsible", "@radix-ui/react-checkbox"],
-          "vendor-three":    ["three"],
-          "vendor-r3f":      ["@react-three/fiber", "@react-three/drei"],
         },
       },
     },

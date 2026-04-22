@@ -1,16 +1,30 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
-import { z } from "zod";
 import { useAuth } from "@/features/auth/AuthProvider";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Loader2, Lock } from "lucide-react";
 
-const schema = z.object({
-  email: z.string().trim().email({ message: "Enter a valid email address" }).max(255),
-  password: z.string().min(1, { message: "Password is required" }).max(128),
-});
+function validateFields(email: string, password: string) {
+  const errors: { email?: string; password?: string } = {};
+  const normalizedEmail = email.trim();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!normalizedEmail) {
+    errors.email = "Email is required";
+  } else if (normalizedEmail.length > 255 || !emailRegex.test(normalizedEmail)) {
+    errors.email = "Enter a valid email address";
+  }
+
+  if (!password) {
+    errors.password = "Password is required";
+  } else if (password.length > 128) {
+    errors.password = "Password is too long";
+  }
+
+  return { errors, normalizedEmail };
+}
 
 export default function DesignerStudioLogin() {
   const navigate = useNavigate();
@@ -37,19 +51,14 @@ export default function DesignerStudioLogin() {
     setAuthError(null);
     setFieldErrors({});
 
-    const parsed = schema.safeParse({ email, password });
-    if (!parsed.success) {
-      const errs: { email?: string; password?: string } = {};
-      parsed.error.issues.forEach((issue) => {
-        const k = issue.path[0] as "email" | "password";
-        if (!errs[k]) errs[k] = issue.message;
-      });
-      setFieldErrors(errs);
+    const { errors, normalizedEmail } = validateFields(email, password);
+    if (errors.email || errors.password) {
+      setFieldErrors(errors);
       return;
     }
 
     setSubmitting(true);
-    const { error } = await signIn(parsed.data.email, parsed.data.password);
+    const { error } = await signIn(normalizedEmail, password);
     setSubmitting(false);
 
     if (error) {
