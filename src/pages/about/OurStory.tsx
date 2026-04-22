@@ -268,7 +268,7 @@ const CenteredMilestoneItem = ({
     return (
       <div
         ref={ref}
-        className={`relative mb-16 transition-all duration-700 ease-out ${
+        className={`relative mb-10 transition-all duration-700 ease-out ${
           isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
         }`}
         style={{ transitionDelay: `${index * 100}ms` }}
@@ -298,7 +298,7 @@ const CenteredMilestoneItem = ({
               <span className="text-[11px] font-mono tracking-[0.2em] uppercase opacity-50 block mb-1">
                 Now
               </span>
-              <span className="text-[52px] font-bold leading-none opacity-90">{m.year}</span>
+              <span className="text-[28px] font-bold leading-none opacity-90">{m.year}</span>
             </div>
             <div className="md:border-l md:border-background/20 md:pl-8">
               <span className="text-[10px] font-medium tracking-[0.18em] uppercase opacity-50 block mb-2">
@@ -316,7 +316,7 @@ const CenteredMilestoneItem = ({
   return (
     <div
       ref={ref}
-      className={`relative mb-14 md:grid md:grid-cols-2 md:gap-0 transition-all duration-700 ease-out ${
+      className={`relative mb-8 md:grid md:grid-cols-2 md:gap-0 transition-all duration-700 ease-out ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
       }`}
       style={{ transitionDelay: `${index * 100}ms` }}
@@ -337,7 +337,7 @@ const CenteredMilestoneItem = ({
       {/* Mobile dot + year bar */}
       <div className="md:hidden flex items-center gap-3 mb-4">
         <div className="w-2.5 h-2.5 rounded-full bg-foreground/40 flex-shrink-0" />
-        <span className="text-[22px] font-bold text-foreground/60 leading-none">{m.year}</span>
+        <span className="text-[16px] font-bold text-foreground/60 leading-none">{m.year}</span>
       </div>
 
       {isLeft ? (
@@ -378,7 +378,7 @@ const MilestoneContent = ({
       }`}>
         {m.isVintage ? "Est." : ""}
       </span>
-      <span className={`text-[38px] lg:text-[46px] font-bold leading-none tracking-tight ${
+      <span className={`text-[22px] lg:text-[26px] font-bold leading-none tracking-tight ${
         m.isVintage ? "text-foreground/50" : "text-foreground/80"
       }`}>
         {m.year}
