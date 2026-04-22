@@ -161,7 +161,7 @@ const Header = () => {
   }, []);
 
   const isHeroPage    = pathname === "/";
-  const isTransparent = isHeroPage && !scrolled;
+  const isTransparent = isHeroPage && !scrolled && !isMenuOpen && !isProductsOpen && !isAboutOpen;
 
   useEffect(() => {
     document.body.style.overflow = isMenuOpen ? "hidden" : "";
