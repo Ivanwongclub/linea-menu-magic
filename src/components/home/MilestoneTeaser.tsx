@@ -218,7 +218,7 @@ const MilestoneCard = ({
   if (m.isHighlight) {
     return (
       <div
-         className={`border border-foreground/12 bg-foreground/[0.04] rounded-lg overflow-hidden pl-1 transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${
+         className={`border border-foreground/12 bg-foreground/[0.04] rounded-lg overflow-visible pl-1 transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${
            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
         }`}
         style={{ transitionDelay: `${delay}ms` }}
