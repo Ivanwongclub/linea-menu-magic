@@ -5,27 +5,27 @@ import { Menu, X, ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PRODUCT_FAMILIES } from "@/features/products/taxonomy";
 import BrandWordmark from "@/components/layout/BrandWordmark";
-import aboutHeritageImg from "@/assets/about-heritage.jpg";
-import heritageCraftImg from "@/assets/heritage-craftsmanship.jpg";
-import aboutShowroomImg from "@/assets/about-showroom.jpg";
-import foundersImg from "@/assets/founders.jpg";
 
-import buttonsCategoryImg from "@/assets/products/buttons-category.jpg";
-import hardwareCategoryImg from "@/assets/products/hardware-category.jpg";
-import laceImg from "@/assets/products/lace-category.jpg";
-import zippersCategoryImg from "@/assets/products/zippers-category.jpg";
-import metalButtonImg from "@/assets/products/metal-button.jpg";
-import resinButtonsImg from "@/assets/products/resin-buttons.jpg";
-import snapButtonImg from "@/assets/products/snap-button.jpg";
-import engravedButtonImg from "@/assets/products/engraved-button.jpg";
-import beltBuckleImg from "@/assets/products/belt-buckle.jpg";
-import metalClaspImg from "@/assets/products/metal-clasp.jpg";
-import metalZipperImg from "@/assets/products/metal-zipper.jpg";
-import cottonLaceImg from "@/assets/products/cotton-lace.jpg";
-import wovenLabelImg from "@/assets/products/woven-label.jpg";
-import otherCategoryImg from "@/assets/products/other-category.jpg";
+const aboutHeritageImg = "/optimized/assets__about-heritage-480.webp";
+const heritageCraftImg = "/optimized/assets__about-heritage-768.webp";
+const aboutShowroomImg = "/optimized/assets__about-showroom-480.webp";
+const foundersImg = "/optimized/assets__founders-480.webp";
+const buttonsCategoryImg = "/optimized/assets__products__buttons-category-480.webp";
+const hardwareCategoryImg = "/optimized/assets__products__hardware-category-480.webp";
+const laceImg = "/optimized/assets__products__lace-category-480.webp";
+const zippersCategoryImg = "/optimized/assets__products__zippers-category-480.webp";
+const metalButtonImg = "/optimized/assets__products__metal-button-480.webp";
+const resinButtonsImg = "/optimized/assets__products__resin-buttons-480.webp";
+const snapButtonImg = "/optimized/assets__products__snap-button-480.webp";
+const engravedButtonImg = "/optimized/assets__products__engraved-button-480.webp";
+const beltBuckleImg = "/optimized/assets__products__belt-buckle-480.webp";
+const metalClaspImg = "/optimized/assets__products__metal-clasp-480.webp";
+const metalZipperImg = "/optimized/assets__products__metal-zipper-480.webp";
+const cottonLaceImg = "/optimized/assets__products__cotton-lace-480.webp";
+const wovenLabelImg = "/optimized/assets__products__woven-label-480.webp";
+const otherCategoryImg = "/optimized/assets__products__other-category-480.webp";
+const megaProductsGrid = "/optimized/assets__products__mega-products-grid-480.webp";
 
-import megaProductsGrid from "@/assets/products/mega-products-grid.png";
 
 // ─── About flat link list ──────────────────────────────────────────────────────
 interface AboutLink { label?: string; href?: string; image?: string; divider?: true; }
