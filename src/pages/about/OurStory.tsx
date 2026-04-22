@@ -213,7 +213,7 @@ const OurStory = () => {
           {/* ─── Milestone Timeline ─── */}
           <div className="mt-24 mb-16">
             {/* Header */}
-            <div ref={timelineHeaderRef} className="mb-12 text-center">
+            <div ref={timelineHeaderRef} className="mb-10 text-center">
               <span
                 className={`section-label inline-block transition-all duration-700 ease-out ${
                   timelineHeaderVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
@@ -237,9 +237,9 @@ const OurStory = () => {
             </div>
 
             {/* Timeline */}
-            <div className="relative max-w-3xl mx-auto px-6 lg:px-0">
-              {/* Vertical spine */}
-              <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-foreground/20 to-transparent -translate-x-1/2 hidden md:block" />
+            <div className="relative max-w-4xl mx-auto px-6 lg:px-0">
+              {/* Vertical spine — left rail */}
+              <div className="absolute left-20 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-foreground/20 to-transparent hidden md:block" />
 
               {milestones.map((m, i) => (
                 <CenteredMilestoneItem key={m.year} milestone={m} index={i} isLeft={i % 2 === 0} />
@@ -268,19 +268,19 @@ const CenteredMilestoneItem = ({
     return (
       <div
         ref={ref}
-        className={`relative mb-10 transition-all duration-700 ease-out ${
+        className={`relative mb-6 transition-all duration-700 ease-out ${
           isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
         }`}
         style={{ transitionDelay: `${index * 100}ms` }}
       >
-        {/* Center dot */}
-        <div className="hidden md:flex absolute left-1/2 top-8 -translate-x-1/2 z-10 items-center justify-center">
+        {/* Left-rail dot */}
+        <div className="hidden md:flex absolute left-20 top-8 -translate-x-1/2 z-10 items-center justify-center">
           <div className="w-5 h-5 rounded-full bg-foreground shadow-lg" />
           <div className="absolute w-10 h-10 rounded-full bg-foreground/10 animate-ping" />
         </div>
 
-        {/* Full-width highlight card */}
-        <div className="md:mx-16 bg-foreground text-background rounded-2xl overflow-hidden shadow-2xl">
+        {/* Highlight card — offset to right of rail */}
+        <div className="md:ml-32 bg-foreground text-background rounded-2xl overflow-hidden shadow-2xl">
           {m.image && (
             <div className="aspect-[21/9] overflow-hidden">
               <img
@@ -289,7 +289,7 @@ const CenteredMilestoneItem = ({
                 width={1200}
                 height={514}
                 loading="lazy"
-                className="w-full h-full object-cover opacity-70"
+                className="w-full h-full object-cover"
               />
             </div>
           )}
@@ -316,13 +316,22 @@ const CenteredMilestoneItem = ({
   return (
     <div
       ref={ref}
-      className={`relative mb-8 md:grid md:grid-cols-2 md:gap-0 transition-all duration-700 ease-out ${
+      className={`relative mb-5 md:flex md:items-start transition-all duration-700 ease-out ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
       }`}
       style={{ transitionDelay: `${index * 100}ms` }}
     >
-      {/* Center dot */}
-      <div className="hidden md:block absolute left-1/2 top-6 -translate-x-1/2 z-10">
+      {/* Year rail (desktop) */}
+      <div className="hidden md:block w-20 flex-shrink-0 pt-1 pr-4 text-right">
+        <span className={`text-[15px] lg:text-[16px] font-bold leading-none tracking-tight ${
+          m.isVintage ? "text-foreground/50" : "text-foreground/80"
+        }`}>
+          {m.year}
+        </span>
+      </div>
+
+      {/* Spine dot */}
+      <div className="hidden md:block absolute left-20 top-2 -translate-x-1/2 z-10">
         <div
           className={`rounded-full border-2 transition-all duration-500 ${
             isVisible ? "scale-100" : "scale-0"
@@ -335,30 +344,15 @@ const CenteredMilestoneItem = ({
       </div>
 
       {/* Mobile dot + year bar */}
-      <div className="md:hidden flex items-center gap-3 mb-4">
+      <div className="md:hidden flex items-center gap-3 mb-3">
         <div className="w-2.5 h-2.5 rounded-full bg-foreground/40 flex-shrink-0" />
-        <span className="text-[16px] font-bold text-foreground/60 leading-none">{m.year}</span>
+        <span className="text-[15px] font-bold text-foreground/60 leading-none">{m.year}</span>
       </div>
 
-      {isLeft ? (
-        <>
-          {/* Left side — content */}
-          <div className="md:pr-14 md:text-right">
-            <MilestoneContent milestone={m} align="right" />
-          </div>
-          {/* Right side — empty */}
-          <div />
-        </>
-      ) : (
-        <>
-          {/* Left side — empty */}
-          <div />
-          {/* Right side — content */}
-          <div className="md:pl-14">
-            <MilestoneContent milestone={m} align="left" />
-          </div>
-        </>
-      )}
+      {/* Content — wide */}
+      <div className="flex-1 md:pl-10">
+        <MilestoneContent milestone={m} align="left" />
+      </div>
     </div>
   );
 };
@@ -371,28 +365,14 @@ const MilestoneContent = ({
   align: "left" | "right";
 }) => (
   <div>
-    {/* Year badge */}
-    <div className={`flex items-center gap-3 mb-3 ${align === "right" ? "md:justify-end" : ""}`}>
-      <span className={`text-[11px] font-mono tracking-[0.18em] uppercase text-muted-foreground/60 ${
-        m.isVintage ? "opacity-70" : ""
-      }`}>
-        {m.isVintage ? "Est." : ""}
-      </span>
-      <span className={`text-[22px] lg:text-[26px] font-bold leading-none tracking-tight ${
-        m.isVintage ? "text-foreground/50" : "text-foreground/80"
-      }`}>
-        {m.year}
-      </span>
-    </div>
-
     {/* Thin rule */}
-    <div className={`h-px w-12 bg-foreground/20 mb-4 ${align === "right" ? "md:ml-auto" : ""}`} />
+    <div className={`h-px w-12 bg-foreground/20 mb-3 ${align === "right" ? "md:ml-auto" : ""}`} />
 
     <h3 className="text-[17px] font-semibold text-foreground leading-snug">{m.title}</h3>
-    <p className="text-[14px] text-muted-foreground mt-2.5 leading-relaxed">{m.body}</p>
+    <p className="text-[14px] text-muted-foreground mt-2 leading-relaxed">{m.body}</p>
 
     {m.image && (
-      <div className={`mt-5 rounded-xl overflow-hidden aspect-[4/3] max-w-[260px] ${
+      <div className={`mt-4 rounded-xl overflow-hidden aspect-[4/3] max-w-[320px] ${
         align === "right" ? "md:ml-auto" : ""
       }`}>
         <img
@@ -401,9 +381,7 @@ const MilestoneContent = ({
           width={400}
           height={300}
           loading="lazy"
-          className={`w-full h-full object-cover transition-transform duration-700 hover:scale-105 ${
-            m.isVintage ? "grayscale sepia-[0.15] brightness-90" : ""
-          }`}
+          className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
         />
       </div>
     )}
