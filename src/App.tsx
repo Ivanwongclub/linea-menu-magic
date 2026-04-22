@@ -8,7 +8,7 @@ import CookieBanner from "@/features/cookies/CookieBanner";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/features/auth/AuthProvider";
 import RequireBrandAuth from "@/features/auth/RequireBrandAuth";
-import { I18nProvider, useI18n } from "@/features/i18n/I18nProvider";
+import { I18nProvider } from "@/features/i18n/I18nProvider";
 import ScrollToTop from "./components/ScrollToTop";
 import BackToTop from "./components/ui/BackToTop";
 import Layout from "./components/layout/Layout";
@@ -77,19 +77,17 @@ const queryClient = new QueryClient({
 });
 
 function AppErrorFallback() {
-  const { t } = useI18n();
-
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-8 text-center">
-      <h1 className="text-lg font-light tracking-wide text-foreground">{t("app.error.title")}</h1>
+      <h1 className="text-lg font-light tracking-wide text-foreground">Something went wrong.</h1>
       <p className="text-sm text-muted-foreground max-w-md">
-        {t("app.error.body")}
+        Please reload the page. If the issue persists, contact support.
       </p>
       <button
         onClick={() => window.location.reload()}
         className="text-xs px-6 py-2 border border-foreground text-foreground hover:bg-foreground hover:text-background transition-colors"
       >
-        {t("app.error.reload")}
+        Reload
       </button>
     </div>
   );
