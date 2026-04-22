@@ -6,6 +6,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CookieProvider } from "@/features/cookies/CookieProvider";
 import CookieBanner from "@/features/cookies/CookieBanner";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "@/features/auth/AuthProvider";
+import RequireBrandAuth from "@/features/auth/RequireBrandAuth";
 import ScrollToTop from "./components/ScrollToTop";
 import BackToTop from "./components/ui/BackToTop";
 import Layout from "./components/layout/Layout";
@@ -22,6 +24,7 @@ const loadSustainability = () => import("./pages/Sustainability");
 const loadNews = () => import("./pages/News");
 const loadNewsDetail = () => import("./pages/NewsDetail");
 const loadDesignerStudio = () => import("./pages/DesignerStudio");
+const loadDesignerStudioLogin = () => import("./pages/DesignerStudioLogin");
 const loadDesignerStudioDashboard = () => import("./pages/DesignerStudioDashboard");
 const loadComposerPage = () => import("./features/designer/pages/ComposerPage");
 const loadPresentationPage = () => import("./features/designer/pages/PresentationPage");
@@ -44,6 +47,7 @@ const Sustainability = lazy(loadSustainability);
 const News = lazy(loadNews);
 const NewsDetail = lazy(loadNewsDetail);
 const DesignerStudio = lazy(loadDesignerStudio);
+const DesignerStudioLogin = lazy(loadDesignerStudioLogin);
 const DesignerStudioDashboard = lazy(loadDesignerStudioDashboard);
 const ComposerPage = lazy(loadComposerPage);
 const PresentationPage = lazy(loadPresentationPage);
@@ -212,10 +216,11 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <RouteAndNetworkWarmup />
-          <ScrollToTop />
-          <BackToTop />
-          <ErrorBoundary>
+          <AuthProvider>
+            <RouteAndNetworkWarmup />
+            <ScrollToTop />
+            <BackToTop />
+            <ErrorBoundary>
             <Routes>
               <Route element={<Layout />}>
                 <Route path="/" element={<Index />} />
@@ -233,10 +238,20 @@ const App = () => (
                 <Route path="/ecollections" element={withRouteSuspense(<Brochures />)} />
                 <Route path="/ecollections/:slug" element={withRouteSuspense(<BrochureViewer />)} />
                 <Route path="/designer-studio" element={withRouteSuspense(<DesignerStudio />)} />
+                <Route path="/designer-studio/login" element={withRouteSuspense(<DesignerStudioLogin />)} />
                 <Route path="/designer-studio/products/:slug" element={withRouteSuspense(<ProductDetail />)} />
-                <Route path="/designer-studio/dashboard" element={withRouteSuspense(<DesignerStudioDashboard />)} />
-                <Route path="/designer-studio/compose/:sessionId" element={withRouteSuspense(<ComposerPage />)} />
-                <Route path="/designer-studio/present/:sessionId" element={withRouteSuspense(<PresentationPage />)} />
+                <Route
+                  path="/designer-studio/dashboard"
+                  element={<RequireBrandAuth>{withRouteSuspense(<DesignerStudioDashboard />)}</RequireBrandAuth>}
+                />
+                <Route
+                  path="/designer-studio/compose/:sessionId"
+                  element={<RequireBrandAuth>{withRouteSuspense(<ComposerPage />)}</RequireBrandAuth>}
+                />
+                <Route
+                  path="/designer-studio/present/:sessionId"
+                  element={<RequireBrandAuth>{withRouteSuspense(<PresentationPage />)}</RequireBrandAuth>}
+                />
                 <Route path="/contact" element={withRouteSuspense(<Contact />)} />
                 <Route path="/privacy-policy" element={withRouteSuspense(<PrivacyPolicy />)} />
                 <Route path="/terms-of-service" element={withRouteSuspense(<TermsOfService />)} />
