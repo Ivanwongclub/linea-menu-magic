@@ -440,14 +440,13 @@ export default function Production() {
                 </div>
                 <div className="lg:w-1/2 w-full">
                   <div className="aspect-[4/3] overflow-hidden rounded-[var(--radius)]">
-                    <img
+                    <OptimizedImage
                       src={sustainabilityForestImg}
                       alt="Sustainable manufacturing"
                       className="w-full h-full object-cover"
                       width={1200}
                       height={900}
-                      loading="lazy"
-                      decoding="async"
+                      priority="lazy"
                     />
                   </div>
                 </div>
