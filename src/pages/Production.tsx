@@ -18,7 +18,7 @@ import certHigg from "@/assets/certs/higg-index.png";
 import certSmeta from "@/assets/certs/smeta.png";
 import valueInnovationImg from "@/assets/value-innovation.jpg";
 import valuePartnershipImg from "@/assets/value-partnership.jpg";
-import factoryProductionImg from "@/assets/factory-production.jpg";
+import factoryProductionImg from "@/assets/factory-production.webp";
 
 const ObjGallery = lazy(() => import("@/components/production/ObjGallery"));
 const PrintGallery = lazy(() => import("@/components/production/PrintGallery"));
