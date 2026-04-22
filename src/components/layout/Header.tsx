@@ -154,6 +154,7 @@ const Header = () => {
   const [isAboutOpen,        setIsAboutOpen]        = useState(false);
   const [isProductsOpen,     setIsProductsOpen]     = useState(false);
   const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
+  const [mobileProductFamilyOpen, setMobileProductFamilyOpen] = useState<string | null>(null);
   const [mobileAboutOpen,    setMobileAboutOpen]    = useState(false);
   const [scrolled,           setScrolled]           = useState(false);
   const [productsMegaHydrated, setProductsMegaHydrated] = useState(false);
@@ -180,7 +181,7 @@ const Header = () => {
   }, []);
 
   const isHeroPage    = pathname === "/";
-  const isTransparent = isHeroPage && !scrolled && !isMenuOpen && !isProductsOpen && !isAboutOpen;
+  const isTransparent = isHeroPage && !scrolled && !isProductsOpen && !isAboutOpen;
   const studioCtaHref = session ? "/designer-studio" : "/designer-studio/login";
   const studioCtaLabel = primaryBrand?.name ?? t("header.cta.b2bLogin");
 
@@ -200,7 +201,18 @@ const Header = () => {
     setIsProductsOpen(false);
     setIsAboutOpen(false);
     setIsMenuOpen(false);
+    setMobileProductsOpen(false);
+    setMobileProductFamilyOpen(null);
+    setMobileAboutOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!isMenuOpen) {
+      setMobileProductsOpen(false);
+      setMobileProductFamilyOpen(null);
+      setMobileAboutOpen(false);
+    }
+  }, [isMenuOpen]);
 
   const isActive = (path: string) =>
     path === "/" ? pathname === "/" : pathname === path || pathname.startsWith(path + "/");
@@ -540,53 +552,27 @@ const Header = () => {
       {isMenuOpen &&
         createPortal(
           <div
-            className="lg:hidden fixed inset-0 z-[100] bg-white overflow-y-auto"
-            style={{ animation: "slideInRight 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards" }}
+            className="lg:hidden fixed top-20 left-0 right-0 bottom-0 z-40 bg-white overflow-y-auto border-t border-border"
+            style={{ animation: "slideInDown 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards" }}
           >
-            {/* Header with logo + close */}
-            <div className="flex items-center justify-between h-20 px-6 border-b border-border">
-              <Link to="/" onClick={() => setIsMenuOpen(false)} className="inline-flex items-center">
-                <BrandWordmark compact />
-              </Link>
-              <div className="flex items-center gap-1.5">
-                <LanguageSwitcher compact />
-                <button
-                  onClick={() => setIsMenuOpen(false)}
-                  className="p-2 text-foreground hover:text-muted-foreground transition-colors duration-150"
-                  aria-label={t("header.menu.close")}
-                >
-                  <X size={22} />
-                </button>
-              </div>
-            </div>
-
             {/* Link list with collapsible sub-menus */}
             <nav className="flex flex-col flex-1">
-              <div className="px-6 pt-4 pb-4 border-b border-border bg-secondary/40">
-                <Link
-                  to="/news"
-                  onClick={() => setIsMenuOpen(false)}
-                    className="group flex items-center justify-between rounded-xl border border-foreground bg-foreground px-4 py-3 text-background transition-colors duration-150 hover:bg-foreground/90"
-                >
-                  <div className="flex flex-col">
-                    <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-background/70">
-                      {t("header.mobile.newsroom")}
-                    </span>
-                    <span className="text-[15px] font-semibold tracking-[0.01em]">
-                      {t("header.mobile.latestUpdates")}
-                    </span>
-                  </div>
-                  <ChevronRight size={16} className="text-background/80 group-hover:text-background transition-colors duration-150" />
-                </Link>
-              </div>
-
               {mobileNavLinks.map((link) => {
                 /* Products — collapsible */
                 if (link.megaMenu === "products") {
                   return (
                     <div key={link.href}>
                       <button
-                        onClick={() => setMobileProductsOpen(!mobileProductsOpen)}
+                        onClick={() => {
+                          const nextOpen = !mobileProductsOpen;
+                          setMobileProductsOpen(nextOpen);
+                          if (nextOpen && !mobileProductFamilyOpen) {
+                            setMobileProductFamilyOpen(MEGA_FAMILIES[0]?.slug ?? null);
+                          }
+                          if (!nextOpen) {
+                            setMobileProductFamilyOpen(null);
+                          }
+                        }}
                         className="w-full flex items-center justify-between text-lg font-medium tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 py-4 px-6 border-b border-border"
                       >
                         {t(link.labelKey)}
@@ -595,18 +581,45 @@ const Header = () => {
                       {mobileProductsOpen && (
                         <div className="bg-secondary border-b border-border">
                           {MEGA_FAMILIES.map((family) => (
-                            <div key={family.slug}>
-                              <span className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground px-6 pt-3 pb-1">{t(family.nameKey)}</span>
-                              {family.subcategories.map((sub) => (
-                                <Link
-                                  key={sub.en}
-                                  to={`/products?category=${slugify(sub.en)}`}
-                                  onClick={() => setIsMenuOpen(false)}
-                                  className="text-sm text-foreground hover:text-muted-foreground transition-colors duration-150 block py-2 px-8 border-b border-border last:border-b-0"
-                                >
-                                  {t(sub.key)}
-                                </Link>
-                              ))}
+                            <div key={family.slug} className="border-b border-border/70 last:border-b-0">
+                              <button
+                                onClick={() =>
+                                  setMobileProductFamilyOpen((prev) =>
+                                    prev === family.slug ? null : family.slug
+                                  )
+                                }
+                                className="w-full flex items-center justify-between py-3 px-6 text-sm font-semibold tracking-[0.06em] uppercase text-foreground hover:text-muted-foreground transition-colors duration-150"
+                              >
+                                <span>{t(family.nameKey)}</span>
+                                <ChevronDown
+                                  size={16}
+                                  className={`transition-transform duration-200 ${
+                                    mobileProductFamilyOpen === family.slug ? "rotate-180" : ""
+                                  }`}
+                                />
+                              </button>
+
+                              {mobileProductFamilyOpen === family.slug && (
+                                <div className="bg-background/60 border-t border-border/60">
+                                  <Link
+                                    to={`/products?family=${family.slug}`}
+                                    onClick={() => setIsMenuOpen(false)}
+                                    className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground hover:text-foreground transition-colors duration-150 block py-2.5 px-8 border-b border-border/60"
+                                  >
+                                    {t("header.products.viewAll")}
+                                  </Link>
+                                  {family.subcategories.map((sub) => (
+                                    <Link
+                                      key={sub.en}
+                                      to={`/products?category=${slugify(sub.en)}`}
+                                      onClick={() => setIsMenuOpen(false)}
+                                      className="text-sm text-foreground hover:text-muted-foreground transition-colors duration-150 block py-2.5 px-10 border-b border-border/60 last:border-b-0"
+                                    >
+                                      {t(sub.key)}
+                                    </Link>
+                                  ))}
+                                </div>
+                              )}
                             </div>
                           ))}
                         </div>
@@ -674,7 +687,7 @@ const Header = () => {
         )}
 
       <style>{`
-        @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        @keyframes slideInDown { from { transform: translateY(-12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
       `}</style>
     </>
