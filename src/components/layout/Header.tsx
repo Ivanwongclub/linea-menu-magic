@@ -161,7 +161,7 @@ const Header = () => {
   }, []);
 
   const isHeroPage    = pathname === "/";
-  const isTransparent = isHeroPage && !scrolled;
+  const isTransparent = isHeroPage && !scrolled && !isMenuOpen && !isProductsOpen && !isAboutOpen;
 
   useEffect(() => {
     document.body.style.overflow = isMenuOpen ? "hidden" : "";
@@ -217,8 +217,8 @@ const Header = () => {
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out ${
           isTransparent
-            ? "bg-black/20 backdrop-blur-[2px] border-b border-white/20 shadow-none"
-            : "bg-white/95 backdrop-blur-sm border-b border-[hsl(var(--border))] shadow-[0_1px_8px_rgba(0,0,0,0.06)]"
+            ? "bg-transparent border-b border-transparent shadow-none"
+            : "bg-background border-b border-border shadow-[0_1px_8px_rgba(0,0,0,0.06)]"
         }`}
       >
         <div className="w-full px-4 sm:px-6 lg:px-16 xl:px-24">
