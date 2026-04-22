@@ -219,31 +219,6 @@ const About = () => {
                   </div>
                 ))}
               </div>
-
-                    {/* Content */}
-                    <div className="flex-1 pl-10">
-                      {milestone.isHighlight ? (
-                        <div className="border-l-2 border-foreground pl-6 py-1">
-                          <span className="text-[10px] font-mono tracking-[0.18em] uppercase text-foreground/40 block mb-2">
-                            New Era · May 2026
-                          </span>
-                          <p className="text-[15px] font-semibold text-foreground leading-relaxed">
-                            {milestone.event}
-                          </p>
-                        </div>
-                      ) : (
-                        <p className={`text-[14px] leading-relaxed ${
-                          milestone.isVintage
-                            ? "text-foreground/40"
-                            : "text-foreground/65"
-                        }`}>
-                          {milestone.event}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
         </section>
