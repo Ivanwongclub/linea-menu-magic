@@ -328,7 +328,7 @@ export default function ProductDetail() {
           The product you're looking for doesn't exist or has been removed.
         </p>
         <Button variant="outline" asChild>
-          <Link to={isStudioContext ? '/designer-studio' : '/products'}>
+          <Link to={isStudioContext ? '/designer-studio/trim-library' : '/products'}>
             Back to {isStudioContext ? 'Designer Studio' : 'Trim Library'}
           </Link>
         </Button>
@@ -407,7 +407,7 @@ export default function ProductDetail() {
   }
   const allProductionEntries = Object.entries(mergedProdObj);
 
-  const libraryHref = isStudioContext ? '/designer-studio' : '/products';
+  const libraryHref = isStudioContext ? '/designer-studio/trim-library' : '/products';
   const libraryLabel = isStudioContext ? 'Designer Studio' : 'Trim Library';
 
   const breadcrumbSegments = [
