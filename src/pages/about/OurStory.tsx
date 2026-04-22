@@ -213,7 +213,7 @@ const OurStory = () => {
           {/* ─── Milestone Timeline ─── */}
           <div className="mt-24 mb-16">
             {/* Header */}
-            <div ref={timelineHeaderRef} className="mb-20 text-center">
+            <div ref={timelineHeaderRef} className="mb-12 text-center">
               <span
                 className={`section-label inline-block transition-all duration-700 ease-out ${
                   timelineHeaderVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
@@ -237,7 +237,7 @@ const OurStory = () => {
             </div>
 
             {/* Timeline */}
-            <div className="relative max-w-5xl mx-auto px-6 lg:px-0">
+            <div className="relative max-w-3xl mx-auto px-6 lg:px-0">
               {/* Vertical spine */}
               <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-foreground/20 to-transparent -translate-x-1/2 hidden md:block" />
 
