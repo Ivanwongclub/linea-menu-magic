@@ -53,7 +53,7 @@ const workflowSteps = [
 ];
 
 // ── Material categories for tab filtering ────────────────────────────────────
-type MaterialCategory = "All" | "Organic" | "Synthetic" | "Metal";
+type MaterialCategory = "All" | "Organic" | "Synthetic" | "Metal" | "Recycled";
 
 interface Material {
   id: string;
@@ -64,7 +64,7 @@ interface Material {
   category: MaterialCategory;
 }
 
-const MATERIAL_TABS: MaterialCategory[] = ["All", "Organic", "Synthetic", "Metal"];
+const MATERIAL_TABS: MaterialCategory[] = ["All", "Organic", "Synthetic", "Metal", "Recycled"];
 
 const MATERIALS: Material[] = [
   {
@@ -108,12 +108,36 @@ const MATERIALS: Material[] = [
     category: "Synthetic",
   },
   {
-    id: "recycled",
-    name: "Recycled & GRS Materials",
-    subtitle: "Organic · GRS certified",
-    body: "GRS-certified recycled metal content, recycled polyester cord, and bio-based resin alternatives. We continuously develop our sustainable material range to help brands meet their environmental commitments without compromising on quality, finish, or performance. Every recycled trim is tested to the same standards as virgin-material equivalents.",
-    image: brassSurface,
-    category: "Organic",
+    id: "recycled-polyester",
+    name: "Recycled Polyester",
+    subtitle: "Recycled · GRS certified · rPET",
+    body: "Post-consumer PET bottles transformed into high-performance polyester cord, webbing, and trim components. GRS-certified with full chain-of-custody traceability. Identical performance and hand-feel to virgin polyester — with up to 60% lower carbon footprint. Available in the same colour range as our standard polyester range.",
+    image: "/images/materials/recycled-polyester.jpg",
+    category: "Recycled",
+  },
+  {
+    id: "recycled-nylon",
+    name: "Recycled Nylon",
+    subtitle: "Recycled · GRS certified · rPA6",
+    body: "Regenerated nylon sourced from pre- and post-consumer waste including fishing nets, fabric scraps, and industrial plastic. GRS-certified and chemically identical to virgin nylon PA6 — delivering the same strength, dyeability, and durability. Ideal for drawcords, webbing tapes, and technical trim applications.",
+    image: "/images/materials/recycled-nylon.jpg",
+    category: "Recycled",
+  },
+  {
+    id: "recycled-alloy",
+    name: "Recycled Zinc Alloy",
+    subtitle: "Recycled · Reclaimed metal content",
+    body: "Zinc alloy hardware produced with a high proportion of reclaimed and recycled metal content. Suitable for buckles, toggles, cord ends, and snap buttons. Maintains the same precision die-casting quality and surface finish capability as virgin alloy — available in all standard electroplating colours and antique effects.",
+    image: "/images/materials/recycled-alloy.jpg",
+    category: "Recycled",
+  },
+  {
+    id: "recycled-brass",
+    name: "Recycled Brass",
+    subtitle: "Recycled · Reclaimed copper alloy",
+    body: "Buttons, eyelets, rivets, and hardware produced from reclaimed brass and copper alloy scrap. Fully traceable recycled content with no compromise on surface quality or structural integrity. Compatible with all standard plating and lacquer finishes — supporting your brand's sustainability targets without changing your trim specification.",
+    image: "/images/materials/recycled-brass.jpg",
+    category: "Recycled",
   },
 ];
 
