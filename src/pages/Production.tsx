@@ -403,7 +403,7 @@ export default function Production() {
                             {mat.body}
                           </p>
                           <Link to="/ecollections" className="group inline-flex items-center gap-2 mt-6 text-[13px] font-medium text-foreground hover:text-foreground/70 transition-colors">
-                            View in E-Collections
+                            View in E-Catalogue
                             <ArrowRight size={14} className="transition-transform duration-300 group-hover:translate-x-1" />
                           </Link>
                         </div>

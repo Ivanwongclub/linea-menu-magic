@@ -148,7 +148,7 @@ export default function BrochuresPanel({ onOpenEditor }: BrochuresPanelProps) {
     updateBrochure.mutate(
       { id: b.id, status: next },
       {
-        onSuccess: () => toast.success(`Brochure ${next === "published" ? "published" : "unpublished"}`),
+        onSuccess: () => toast.success(`Catalogue ${next === "published" ? "published" : "unpublished"}`),
         onError: () => toast.error("Failed to update status"),
       }
     );
@@ -159,10 +159,10 @@ export default function BrochuresPanel({ onOpenEditor }: BrochuresPanelProps) {
     if (!deleteTarget) return;
     deleteBrochure.mutate(deleteTarget.id, {
       onSuccess: () => {
-        toast.success("Brochure deleted");
+        toast.success("Catalogue deleted");
         setDeleteTarget(null);
       },
-      onError: () => toast.error("Failed to delete brochure"),
+      onError: () => toast.error("Failed to delete catalogue"),
     });
   };
 
@@ -173,7 +173,7 @@ export default function BrochuresPanel({ onOpenEditor }: BrochuresPanelProps) {
         <div className="relative flex-1 max-w-xs">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
           <Input
-            placeholder="Search brochures…"
+            placeholder="Search catalogues…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-8 h-8 text-sm"
@@ -197,7 +197,7 @@ export default function BrochuresPanel({ onOpenEditor }: BrochuresPanelProps) {
           onClick={() => onOpenEditor?.()}
         >
           <Plus className="w-3.5 h-3.5" />
-          New Brochure
+          New Catalogue
         </Button>
       </div>
 
@@ -210,7 +210,7 @@ export default function BrochuresPanel({ onOpenEditor }: BrochuresPanelProps) {
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16">
-          <p className="text-muted-foreground text-sm">No brochures found</p>
+          <p className="text-muted-foreground text-sm">No catalogues found</p>
         </div>
       ) : (
         <div className="border border-border rounded-lg overflow-hidden">
@@ -300,7 +300,7 @@ export default function BrochuresPanel({ onOpenEditor }: BrochuresPanelProps) {
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete brochure</AlertDialogTitle>
+            <AlertDialogTitle>Delete catalogue</AlertDialogTitle>
             <AlertDialogDescription>
               Delete "{deleteTarget?.title}" and all its pages? This action cannot be undone.
             </AlertDialogDescription>

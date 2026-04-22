@@ -19,12 +19,12 @@ export default function Brochures() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <PageBreadcrumb
-        segments={[{ label: "Home", href: "/" }, { label: "E-Collections" }]}
+        segments={[{ label: "Home", href: "/" }, { label: "E-Catalogue" }]}
       />
 
       <div className="max-w-7xl mx-auto w-full px-6 lg:px-8 pb-16">
         <p className="text-muted-foreground text-sm max-w-xl leading-relaxed mb-8">
-          Browse and download our latest product collections
+          Browse and download our latest product catalogues
         </p>
 
         {isLoading ? (
@@ -42,7 +42,7 @@ export default function Brochures() {
         ) : !brochures?.length ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <BookOpen size={48} className="text-muted-foreground mb-4" />
-            <h2 className="text-lg font-semibold text-foreground mb-1">No e-collections published yet</h2>
+            <h2 className="text-lg font-semibold text-foreground mb-1">No catalogues published yet</h2>
             <p className="text-sm text-muted-foreground">Check back soon.</p>
           </div>
         ) : (

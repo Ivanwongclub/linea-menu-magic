@@ -126,7 +126,7 @@ const NAV_LINKS: Array<{ href: string; label: string; megaMenu?: "products" | "a
   { href: "/about",           label: "About",           megaMenu: "about"    },
   { href: "/production",      label: "Production"      },
   { href: "/sustainability",  label: "Sustainability"  },
-  { href: "/ecollections",    label: "E-Collections"  },
+  { href: "/ecollections",    label: "E-Catalogue"  },
   { href: "/designer-studio", label: "Designer Studio" },
 ];
 
