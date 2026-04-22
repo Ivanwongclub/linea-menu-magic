@@ -43,7 +43,7 @@ const DesignerStudio = () => {
             </p>
           </div>
           <div className="flex gap-3 shrink-0">
-            <Link to="/designer-studio/dashboard">
+            <Link to="/designer-studio/dashboard?tab=library">
               <Button size="sm" className="tracking-[0.05em] text-xs px-6 capitalize">
                 Enter Studio
               </Button>

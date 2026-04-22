@@ -113,11 +113,27 @@ const DesignerStudioDashboard = () => {
   // Brand-scoped team ID from auth context (RequireBrandAuth guarantees primaryBrand exists)
   const { primaryBrand } = useAuth();
   const teamId = primaryBrand?.id ?? '';
+  const brandCatalogueName = primaryBrand?.name ?? 'Brand Catalogue';
 
   // Main tab state — read from URL ?tab= param
   const tabFromUrl = searchParams.get('tab');
-  const initialTab: TabId = validTabs.includes(tabFromUrl as TabId) ? tabFromUrl as TabId : 'composer';
+  const initialTab: TabId = validTabs.includes(tabFromUrl as TabId) ? tabFromUrl as TabId : 'library';
   const [activeMainTab, setActiveMainTab] = useState<TabId>(initialTab);
+
+  // Keep state in sync when URL tab changes (back/forward/manual edits)
+  useEffect(() => {
+    if (validTabs.includes(tabFromUrl as TabId) && tabFromUrl !== activeMainTab) {
+      setActiveMainTab(tabFromUrl as TabId);
+    }
+  }, [tabFromUrl, activeMainTab]);
+
+  // Keep URL in sync when tab changes from in-page controls
+  useEffect(() => {
+    if (tabFromUrl === activeMainTab) return;
+    const params = new URLSearchParams(searchParams);
+    params.set('tab', activeMainTab);
+    navigate(`/designer-studio/dashboard?${params.toString()}`, { replace: true });
+  }, [activeMainTab, tabFromUrl, searchParams, navigate]);
 
   // Product editor state
   const [editingProductId, setEditingProductId] = useState<string | null | undefined>(null);
@@ -494,8 +510,11 @@ const DesignerStudioDashboard = () => {
                   </button>
                   <div>
                     <h2 className="text-lg font-semibold text-foreground">Component Library</h2>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-muted-foreground flex items-center gap-2">
                       {filteredLibraryItems.length} components
+                      <span className="inline-flex items-center rounded-md border border-border px-1.5 py-0.5 text-[10px] uppercase tracking-[0.06em] text-foreground/80">
+                        {brandCatalogueName}
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -517,7 +536,7 @@ const DesignerStudioDashboard = () => {
                       : 'text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]'
                   }`}
                 >
-                  All Products ({catalogProducts.length})
+                  {brandCatalogueName} ({catalogProducts.length})
                 </button>
                 <button
                   onClick={() => setLibrarySource('my')}
