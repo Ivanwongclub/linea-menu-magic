@@ -134,9 +134,9 @@ const About = () => {
         </section>
 
         {/* Timeline */}
-        <section className="py-24 px-6 lg:px-8 overflow-hidden bg-heritage">
-          <div className="max-w-7xl mx-auto">
-            <div ref={timelineHeaderRef} className="mb-16">
+        <section className="py-16 px-6 lg:px-8 overflow-hidden bg-heritage">
+          <div className="max-w-2xl mx-auto">
+            <div ref={timelineHeaderRef} className="mb-10">
               <p className={`text-subtitle mb-4 transition-all duration-700 ease-out ${
                 timelineHeaderVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}>Milestones</p>
@@ -152,9 +152,9 @@ const About = () => {
 
             <div ref={timelineRef} className="relative">
               {/* Vertical spine line */}
-              <div className="absolute left-[88px] top-0 bottom-0 w-[2px] bg-foreground/15" />
+              <div className="absolute left-[72px] top-0 bottom-0 w-px bg-foreground/15" />
 
-              <div className="space-y-10">
+              <div className="space-y-6">
                 {milestones.map((milestone, index) => (
                   <div
                     key={index}
@@ -164,12 +164,12 @@ const About = () => {
                     style={getTimelineDelay(index)}
                   >
                     {/* Year — fixed width, right-aligned, large */}
-                    <div className="w-[80px] flex-shrink-0 text-right pt-0.5">
+                    <div className="w-[64px] flex-shrink-0 text-right pt-0.5">
                       <span
                         className={`font-bold leading-none tracking-tight block ${
                           milestone.isHighlight
-                            ? "text-[22px] lg:text-[26px] text-foreground"
-                            : "text-[22px] lg:text-[26px] text-foreground/75"
+                            ? "text-[13px] text-foreground"
+                            : "text-[13px] text-foreground/75"
                         } ${
                           milestone.isVintage ? "text-foreground/50" : ""
                         }`}
@@ -179,12 +179,12 @@ const About = () => {
                     </div>
 
                     {/* Dot — sits on the spine line */}
-                    <div className="flex-shrink-0 relative" style={{ marginLeft: "-5px", marginTop: "6px" }}>
+                    <div className="flex-shrink-0 relative" style={{ marginLeft: "-5px", marginTop: "4px" }}>
                       <div
                         className={`rounded-full border-2 ${
                           milestone.isHighlight
-                            ? "w-[14px] h-[14px] bg-foreground border-foreground"
-                            : "w-[12px] h-[12px] bg-heritage border-foreground/50"
+                            ? "w-[10px] h-[10px] bg-foreground border-foreground"
+                            : "w-[8px] h-[8px] bg-heritage border-foreground/40"
                         }`}
                       />
                     </div>
@@ -194,8 +194,8 @@ const About = () => {
                       <p
                         className={`leading-relaxed ${
                           milestone.isHighlight
-                            ? "text-foreground font-semibold text-[15px]"
-                            : "text-foreground/70 text-[14px]"
+                            ? "text-foreground font-semibold text-[13px]"
+                            : "text-foreground/70 text-[13px]"
                         } ${
                           milestone.isVintage ? "text-foreground/50" : ""
                         }`}
