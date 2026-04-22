@@ -28,7 +28,7 @@ const LanguageSwitcher = ({ compact = false }: LanguageSwitcherProps) => {
           type="button"
           aria-label={t("i18n.switchLanguage")}
           title={t("i18n.switchLanguage")}
-          className={`inline-flex items-center rounded-sm border border-border/70 text-foreground hover:border-foreground/40 hover:text-foreground transition-colors ${
+          className={`inline-flex items-center rounded-sm text-foreground hover:text-foreground/75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20 transition-colors ${
             compact ? "h-9 gap-1 px-2.5 text-xs" : "h-8 gap-1.5 px-2 text-[11px]"
           }`}
         >
