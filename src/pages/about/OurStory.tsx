@@ -210,9 +210,10 @@ const OurStory = () => {
             </ContentSection>
           </div>
 
-          {/* ─── Milestone Timeline — centered ─── */}
-          <div className="mt-16 mb-8 bg-heritage rounded-lg px-8 py-12">
-            <div ref={timelineHeaderRef} className="mb-12 text-center">
+          {/* ─── Milestone Timeline ─── */}
+          <div className="mt-24 mb-16">
+            {/* Header */}
+            <div ref={timelineHeaderRef} className="mb-20 text-center">
               <span
                 className={`section-label inline-block transition-all duration-700 ease-out ${
                   timelineHeaderVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
@@ -223,17 +224,22 @@ const OurStory = () => {
               <LetterReveal
                 text="Our Journey"
                 as="h2"
-                className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground"
+                className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mt-2"
                 isVisible={timelineHeaderVisible}
                 startDelay={100}
                 letterDelay={60}
               />
+              <p className={`mt-6 text-[15px] text-muted-foreground max-w-xl mx-auto leading-relaxed transition-all duration-700 delay-300 ${
+                timelineHeaderVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+              }`}>
+                45 years of craftsmanship, innovation, and global expansion — from a Hong Kong workshop to a worldwide trim partner.
+              </p>
             </div>
 
-            {/* Centered vertical timeline */}
-            <div className="max-w-3xl mx-auto relative">
-              {/* Center vertical line */}
-              <div className="absolute left-1/2 top-0 bottom-0 w-[2px] bg-foreground/20 -translate-x-1/2" />
+            {/* Timeline */}
+            <div className="relative max-w-5xl mx-auto px-6 lg:px-0">
+              {/* Vertical spine */}
+              <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-foreground/20 to-transparent -translate-x-1/2 hidden md:block" />
 
               {milestones.map((m, i) => (
                 <CenteredMilestoneItem key={m.year} milestone={m} index={i} isLeft={i % 2 === 0} />
@@ -256,61 +262,103 @@ const CenteredMilestoneItem = ({
   index: number;
   isLeft: boolean;
 }) => {
-  const { ref, isVisible } = useScrollAnimation({ threshold: 0.3 });
+  const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
 
-  // dot sizes now inline
+  if (m.isHighlight) {
+    return (
+      <div
+        ref={ref}
+        className={`relative mb-16 transition-all duration-700 ease-out ${
+          isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+        }`}
+        style={{ transitionDelay: `${index * 100}ms` }}
+      >
+        {/* Center dot */}
+        <div className="hidden md:flex absolute left-1/2 top-8 -translate-x-1/2 z-10 items-center justify-center">
+          <div className="w-5 h-5 rounded-full bg-foreground shadow-lg" />
+          <div className="absolute w-10 h-10 rounded-full bg-foreground/10 animate-ping" />
+        </div>
+
+        {/* Full-width highlight card */}
+        <div className="md:mx-16 bg-foreground text-background rounded-2xl overflow-hidden shadow-2xl">
+          {m.image && (
+            <div className="aspect-[21/9] overflow-hidden">
+              <img
+                src={m.image}
+                alt={m.title}
+                width={1200}
+                height={514}
+                loading="lazy"
+                className="w-full h-full object-cover opacity-70"
+              />
+            </div>
+          )}
+          <div className="px-10 py-8 flex flex-col md:flex-row md:items-center gap-6">
+            <div className="flex-shrink-0">
+              <span className="text-[11px] font-mono tracking-[0.2em] uppercase opacity-50 block mb-1">
+                Now
+              </span>
+              <span className="text-[52px] font-bold leading-none opacity-90">{m.year}</span>
+            </div>
+            <div className="md:border-l md:border-background/20 md:pl-8">
+              <span className="text-[10px] font-medium tracking-[0.18em] uppercase opacity-50 block mb-2">
+                New Era
+              </span>
+              <h3 className="text-2xl font-semibold leading-snug">{m.title}</h3>
+              <p className="text-sm opacity-70 mt-3 leading-relaxed max-w-xl">{m.body}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
       ref={ref}
-      className={`relative pb-16 last:pb-0 transition-all duration-700 ease-out ${
+      className={`relative mb-14 md:grid md:grid-cols-2 md:gap-0 transition-all duration-700 ease-out ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
       }`}
-      style={{ transitionDelay: `${index * 120}ms` }}
+      style={{ transitionDelay: `${index * 100}ms` }}
     >
-      {/* Dot — centered on the vertical line */}
-      <div
-        className={`absolute left-1/2 top-2 -translate-x-1/2 z-10 transition-all duration-500 ${
-          isVisible ? "scale-100" : "scale-0"
-        }`}
-        style={{ transitionDelay: `${index * 120 + 200}ms` }}
-      >
+      {/* Center dot */}
+      <div className="hidden md:block absolute left-1/2 top-6 -translate-x-1/2 z-10">
         <div
-          className={`rounded-full border-2 ${
-            m.isHighlight
-              ? "bg-foreground border-foreground"
-              : "bg-heritage border-foreground/60"
+          className={`rounded-full border-2 transition-all duration-500 ${
+            isVisible ? "scale-100" : "scale-0"
+          } ${m.isVintage
+            ? "w-3 h-3 bg-foreground/40 border-foreground/40"
+            : "w-3.5 h-3.5 bg-background border-foreground/60"
           }`}
-          style={{ width: m.isHighlight ? 16 : 14, height: m.isHighlight ? 16 : 14 }}
+          style={{ transitionDelay: `${index * 100 + 200}ms` }}
         />
       </div>
 
-      {/* Content — alternates left/right */}
-      <div className={`grid grid-cols-2 gap-8 ${isLeft ? "" : ""}`}>
-        {isLeft ? (
-          <>
-            <div className="text-right pr-8">
-              {m.isHighlight ? (
-                <HighlightCard milestone={m} />
-              ) : (
-                <MilestoneContent milestone={m} align="right" />
-              )}
-            </div>
-            <div />
-          </>
-        ) : (
-          <>
-            <div />
-            <div className="pl-8">
-              {m.isHighlight ? (
-                <HighlightCard milestone={m} />
-              ) : (
-                <MilestoneContent milestone={m} align="left" />
-              )}
-            </div>
-          </>
-        )}
+      {/* Mobile dot + year bar */}
+      <div className="md:hidden flex items-center gap-3 mb-4">
+        <div className="w-2.5 h-2.5 rounded-full bg-foreground/40 flex-shrink-0" />
+        <span className="text-[22px] font-bold text-foreground/60 leading-none">{m.year}</span>
       </div>
+
+      {isLeft ? (
+        <>
+          {/* Left side — content */}
+          <div className="md:pr-14 md:text-right">
+            <MilestoneContent milestone={m} align="right" />
+          </div>
+          {/* Right side — empty */}
+          <div />
+        </>
+      ) : (
+        <>
+          {/* Left side — empty */}
+          <div />
+          {/* Right side — content */}
+          <div className="md:pl-14">
+            <MilestoneContent milestone={m} align="left" />
+          </div>
+        </>
+      )}
     </div>
   );
 };
@@ -323,43 +371,42 @@ const MilestoneContent = ({
   align: "left" | "right";
 }) => (
   <div>
-    <span className="text-[32px] lg:text-[38px] font-bold text-foreground/70 leading-none tracking-tight block mb-2">{m.year}</span>
-    <h3 className="text-lg font-semibold text-foreground mt-1">{m.title}</h3>
-    <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{m.body}</p>
+    {/* Year badge */}
+    <div className={`flex items-center gap-3 mb-3 ${align === "right" ? "md:justify-end" : ""}`}>
+      <span className={`text-[11px] font-mono tracking-[0.18em] uppercase text-muted-foreground/60 ${
+        m.isVintage ? "opacity-70" : ""
+      }`}>
+        {m.isVintage ? "Est." : ""}
+      </span>
+      <span className={`text-[38px] lg:text-[46px] font-bold leading-none tracking-tight ${
+        m.isVintage ? "text-foreground/50" : "text-foreground/80"
+      }`}>
+        {m.year}
+      </span>
+    </div>
+
+    {/* Thin rule */}
+    <div className={`h-px w-12 bg-foreground/20 mb-4 ${align === "right" ? "md:ml-auto" : ""}`} />
+
+    <h3 className="text-[17px] font-semibold text-foreground leading-snug">{m.title}</h3>
+    <p className="text-[14px] text-muted-foreground mt-2.5 leading-relaxed">{m.body}</p>
+
     {m.image && (
-      <div className={`mt-4 rounded-lg overflow-hidden aspect-[3/2] max-w-xs ${align === "right" ? "ml-auto" : ""}`}>
+      <div className={`mt-5 rounded-xl overflow-hidden aspect-[4/3] max-w-[260px] ${
+        align === "right" ? "md:ml-auto" : ""
+      }`}>
         <img
           src={m.image}
           alt={m.title}
           width={400}
-          height={267}
+          height={300}
           loading="lazy"
-          className={`w-full h-full object-cover ${m.isVintage ? "grayscale sepia-[0.2] brightness-95" : ""}`}
+          className={`w-full h-full object-cover transition-transform duration-700 hover:scale-105 ${
+            m.isVintage ? "grayscale sepia-[0.15] brightness-90" : ""
+          }`}
         />
       </div>
     )}
-  </div>
-);
-
-const HighlightCard = ({ milestone: m }: { milestone: Milestone }) => (
-  <div className="bg-foreground text-background rounded-lg overflow-hidden">
-    {m.image && (
-      <img
-        src={m.image}
-        alt={m.title}
-        width={800}
-        height={400}
-        loading="lazy"
-        className="w-full h-44 object-cover"
-      />
-    )}
-    <div className="p-5">
-      <span className="text-[10px] font-mono tracking-[0.15em] uppercase opacity-60">
-        {m.year} · New Era
-      </span>
-      <h3 className="text-lg font-semibold mt-1.5">{m.title}</h3>
-      <p className="text-sm opacity-80 mt-2 leading-relaxed">{m.body}</p>
-    </div>
   </div>
 );
 
