@@ -1,6 +1,10 @@
 import { useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { X, ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
+import bucklePlatesImg from "@/assets/3dprint/buckle-plates.webp";
+import sideReleaseBucklesImg from "@/assets/3dprint/side-release-buckles.webp";
+import openworkButtonsImg from "@/assets/3dprint/openwork-buttons.webp";
+import pinBadgeImg from "@/assets/3dprint/pin-badge.webp";
 
 interface PrintImage {
   id: string;
@@ -12,32 +16,32 @@ interface PrintImage {
 
 const PRINT_IMAGES: PrintImage[] = [
   {
-    id: "button",
-    src: "/images/3dprint/3dprint-button-prototype.jpg",
-    title: "4-Hole Button",
-    meta: "SLA Resin · Scale 1:1 · 18mm diameter",
+    id: "buckle-plates",
+    src: bucklePlatesImg,
+    title: "Custom Logo Buckle Plates",
+    meta: "FDM PLA · Multi-color · 50×35mm",
     tag: "Prototype 01",
   },
   {
-    id: "buckle",
-    src: "/images/3dprint/3dprint-buckle-prototype.jpg",
-    title: "D-Ring Buckle",
-    meta: "SLA Resin · Scale 1:1 · 32mm width",
+    id: "side-release",
+    src: sideReleaseBucklesImg,
+    title: "Side-Release Buckles",
+    meta: "FDM Nylon · Functional Print · 25mm webbing",
     tag: "Prototype 02",
   },
   {
-    id: "zipper",
-    src: "/images/3dprint/3dprint-zipper-prototype.jpg",
-    title: "Zipper Pull",
-    meta: "SLA Resin · Scale 1:1 · 28mm length",
+    id: "buttons",
+    src: openworkButtonsImg,
+    title: "Openwork Pattern Buttons",
+    meta: "SLA Resin · 2-Hole & 4-Hole · 14–22mm",
     tag: "Prototype 03",
   },
   {
-    id: "snap",
-    src: "/images/3dprint/3dprint-snap-prototype.jpg",
-    title: "Snap Button Set",
-    meta: "FDM Nylon · Cap + Socket · 15mm diameter",
-    tag: "Prototype 07",
+    id: "pin-badge",
+    src: pinBadgeImg,
+    title: "Engraved Pin Badge",
+    meta: "FDM PLA · Embossed Type · 38mm diameter",
+    tag: "Prototype 04",
   },
 ];
 
