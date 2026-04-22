@@ -152,19 +152,19 @@ const About = () => {
 
             <div ref={timelineRef} className="relative">
               {/* Vertical spine line */}
-              <div className="absolute left-[72px] top-0 bottom-0 w-px bg-foreground/15" />
+              <div className="absolute left-[64px] top-0 bottom-0 w-px bg-foreground/15" />
 
               <div className="space-y-6">
                 {milestones.map((milestone, index) => (
                   <div
                     key={index}
-                    className={`relative flex items-start gap-8 transition-all duration-700 ease-out ${
+                    className={`relative flex items-start transition-all duration-700 ease-out ${
                       timelineVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"
                     }`}
                     style={getTimelineDelay(index)}
                   >
-                    {/* Year — fixed width, right-aligned, large */}
-                    <div className="w-[64px] flex-shrink-0 text-right pt-0.5">
+                    {/* Year — fixed width, right-aligned */}
+                    <div className="w-[64px] flex-shrink-0 text-right pr-4 pt-0.5">
                       <span
                         className={`font-bold leading-none tracking-tight block ${
                           milestone.isHighlight
@@ -178,19 +178,19 @@ const About = () => {
                       </span>
                     </div>
 
-                    {/* Dot — sits on the spine line */}
-                    <div className="flex-shrink-0 relative" style={{ marginLeft: "-5px", marginTop: "4px" }}>
+                    {/* Dot — absolutely centred on the spine which sits at left-[64px] */}
+                    <div className="absolute left-[64px] top-[5px] -translate-x-1/2 z-10">
                       <div
-                        className={`rounded-full border-2 ${
+                        className={`rounded-full ${
                           milestone.isHighlight
-                            ? "w-[10px] h-[10px] bg-foreground border-foreground"
-                            : "w-[8px] h-[8px] bg-heritage border-foreground/40"
+                            ? "w-[10px] h-[10px] bg-foreground"
+                            : "w-[7px] h-[7px] bg-background border border-foreground/40"
                         }`}
                       />
                     </div>
 
-                    {/* Event text */}
-                    <div className="flex-1 pb-2">
+                    {/* Event text — padded left to clear the dot */}
+                    <div className="flex-1 pl-6 pb-4">
                       <p
                         className={`leading-relaxed ${
                           milestone.isHighlight
