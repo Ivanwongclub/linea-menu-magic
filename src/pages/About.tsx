@@ -169,8 +169,8 @@ const About = () => {
                     <div className="w-[120px] flex-shrink-0 text-right pr-10 pt-0.5">
                       <span className={`font-semibold tracking-tight leading-tight block ${
                         milestone.isHighlight
-                          ? "text-[14px] text-foreground"
-                          : "text-[12px] text-foreground/50"
+                          ? "text-[18px] text-foreground"
+                          : "text-[16px] text-foreground/50"
                       } ${milestone.isVintage ? "text-foreground/35" : ""}`}>
                         {milestone.year}
                       </span>
