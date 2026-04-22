@@ -136,6 +136,18 @@ export default function Production() {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [printGalleryOpen, setPrintGalleryOpen] = useState(false);
 
+  useEffect(() => {
+    const link = document.createElement("link");
+    link.rel = "preload";
+    link.as = "image";
+    link.href = "/optimized/assets__production-hero-1200.avif";
+    link.type = "image/avif";
+    document.head.appendChild(link);
+    return () => {
+      document.head.removeChild(link);
+    };
+  }, []);
+
   return (
     <>
       <PageBreadcrumb
