@@ -44,9 +44,9 @@ const workflowSteps = [
   },
   {
     number: "03",
-    title: "Service & Delivery",
-    body: "Local offices in key markets provide rapid response, sample management, and on-the-ground support throughout the supply chain.",
-    bullets: ["Regional Office Support", "Sample Turnaround"],
+    title: "Service & Customization",
+    body: "From first sketch to finished trim. Our in-house design team partners with brands to develop bespoke hardware, components and finishes — combining cost-effective vertically integrated production with a fashion-forward perspective. Local offices in key markets keep every project moving, from sample to bulk.",
+    bullets: ["Bespoke Design Service", "In-House Creative Team", "Regional Office Support", "Sample-to-Bulk Continuity"],
     image: valuePartnershipImg,
     showStudioLink: true,
   },
@@ -295,7 +295,7 @@ export default function Production() {
                         to="/designer-studio"
                         className="group mt-6 inline-flex items-center gap-3 px-5 py-3 border border-foreground/20 hover:border-foreground hover:bg-foreground hover:text-background transition-all duration-300 text-[13px] font-medium tracking-wide"
                       >
-                        <span>Custom via Designer Studio</span>
+                        <span>Start a Custom Project</span>
                         <ArrowRight size={15} className="transition-transform duration-300 group-hover:translate-x-1 flex-shrink-0" />
                       </Link>
                     )}
