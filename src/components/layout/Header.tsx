@@ -737,7 +737,7 @@ const Header = () => {
                       </button>
                       {open && (
                         <ul className="bg-secondary/40 border-t border-border">
-                          {ABOUT_LINKS.filter((l) => !l.divider && l.href).map((item) => (
+                          {ABOUT_LINKS.filter((l) => !l.divider && l.href && l.href !== "/sustainability").map((item) => (
                             <li key={item.href} className="border-t border-border first:border-t-0">
                               <Link
                                 to={item.href!}
