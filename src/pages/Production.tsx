@@ -1,10 +1,8 @@
-import { useState, useMemo, Suspense } from "react";
+import { lazy, Suspense, useState } from "react";
 import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
 import { Link } from "react-router-dom";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 import { ArrowRight, CheckCircle, Box, Images, ChevronLeft, ChevronRight } from "lucide-react";
-import ObjGallery from "@/components/production/ObjGallery";
-import PrintGallery from "@/components/production/PrintGallery";
 import factoryProductionImg from "@/assets/factory-production.jpg";
 import productionHeroImg from "@/assets/production-hero.jpg";
 import valueInnovationImg from "@/assets/value-innovation.jpg";
@@ -21,6 +19,9 @@ import certGrs from "@/assets/certs/grs.png";
 import certOekoTex from "@/assets/certs/oeko-tex.png";
 import certHigg from "@/assets/certs/higg-index.png";
 import certSmeta from "@/assets/certs/smeta.png";
+
+const ObjGallery = lazy(() => import("@/components/production/ObjGallery"));
+const PrintGallery = lazy(() => import("@/components/production/PrintGallery"));
 
 // ─── Data ───────────────────────────────────────────────────────────────────
 
@@ -116,6 +117,17 @@ const MATERIALS: Material[] = [
   },
 ];
 
+function GalleryLoadingOverlay({ label }: { label: string }) {
+  return (
+    <div className="fixed inset-0 z-[9998] flex items-center justify-center bg-background/85 backdrop-blur-sm">
+      <div className="flex items-center gap-3 rounded border border-border bg-background px-4 py-3 text-sm text-foreground/80">
+        <span className="h-4 w-4 animate-spin rounded-full border-2 border-foreground/20 border-t-foreground/70" />
+        {label}
+      </div>
+    </div>
+  );
+}
+
 
 // ─── Page ────────────────────────────────────────────────────────────────────
 
@@ -139,7 +151,16 @@ export default function Production() {
         {/* ── SECTION 1: Full-bleed hero ──────────────────────────────── */}
         <section className="relative overflow-hidden">
           <div className="aspect-[21/9] md:aspect-[3/1] w-full overflow-hidden">
-            <img src={productionHeroImg} alt="Precision garment hardware — brass buttons, snap fasteners, buckles" className="w-full h-full object-cover" width={1920} height={640} fetchPriority="high" />
+            <img
+              src={productionHeroImg}
+              alt="Precision garment hardware — brass buttons, snap fasteners, buckles"
+              className="w-full h-full object-cover"
+              width={1920}
+              height={640}
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+            />
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/10" />
           </div>
           <div className="absolute inset-0 flex items-end">
@@ -170,7 +191,15 @@ export default function Production() {
                   {/* Image */}
                   <div className="lg:w-1/2 w-full">
                     <div className="aspect-[4/3] overflow-hidden rounded-[var(--radius)]">
-                      <img src={step.image} alt={step.title} className="w-full h-full object-cover" loading="lazy" />
+                      <img
+                        src={step.image}
+                        alt={step.title}
+                        className="w-full h-full object-cover"
+                        width={1200}
+                        height={900}
+                        loading={i === 0 ? "eager" : "lazy"}
+                        decoding="async"
+                      />
                     </div>
                   </div>
 
@@ -300,7 +329,15 @@ export default function Production() {
                       {/* Image */}
                       <div className="lg:w-1/2 w-full">
                         <div className="aspect-[4/3] overflow-hidden rounded-[var(--radius)]">
-                          <img src={mat.image} alt={mat.name} className="w-full h-full object-cover" loading="lazy" />
+                          <img
+                            src={mat.image}
+                            alt={mat.name}
+                            className="w-full h-full object-cover"
+                            width={1200}
+                            height={900}
+                            loading="lazy"
+                            decoding="async"
+                          />
                         </div>
                       </div>
 
@@ -369,13 +406,28 @@ export default function Production() {
                       { src: certHigg, alt: "Higg Index" },
                       { src: certSmeta, alt: "SMETA" },
                     ].map((cert) => (
-                      <img key={cert.alt} src={cert.src} alt={cert.alt} className="h-20 w-auto object-contain" loading="lazy" />
+                      <img
+                        key={cert.alt}
+                        src={cert.src}
+                        alt={cert.alt}
+                        className="h-20 w-auto object-contain"
+                        loading="lazy"
+                        decoding="async"
+                      />
                     ))}
                   </div>
                 </div>
                 <div className="lg:w-1/2 w-full">
                   <div className="aspect-[4/3] overflow-hidden rounded-[var(--radius)]">
-                    <img src={sustainabilityForestImg} alt="Sustainable manufacturing" className="w-full h-full object-cover" loading="lazy" />
+                    <img
+                      src={sustainabilityForestImg}
+                      alt="Sustainable manufacturing"
+                      className="w-full h-full object-cover"
+                      width={1200}
+                      height={900}
+                      loading="lazy"
+                      decoding="async"
+                    />
                   </div>
                 </div>
               </div>
@@ -386,7 +438,15 @@ export default function Production() {
                   { image: sustainabilityNatureImg, title: "Our Commitment", body: "Functionality and product performance is of upmost importance — ensuring all products go through quality control procedures aligned with environmental standards.", href: "/about" },
                 ].map((card) => (
                   <Link key={card.title} to={card.href} className="group relative aspect-[3/4] overflow-hidden rounded-[var(--radius)] block">
-                    <img src={card.image} alt={card.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
+                    <img
+                      src={card.image}
+                      alt={card.title}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      width={900}
+                      height={1200}
+                      loading="lazy"
+                      decoding="async"
+                    />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
                     <div className="absolute bottom-0 left-0 right-0 p-6">
                       <h3 className="text-[18px] font-semibold text-white mb-2">{card.title}</h3>
@@ -433,18 +493,22 @@ export default function Production() {
 
         {/* 3D Gallery popup */}
         {galleryOpen && (
-          <ObjGallery
-            open={galleryOpen}
-            onClose={() => setGalleryOpen(false)}
-          />
+          <Suspense fallback={<GalleryLoadingOverlay label="Loading 3D gallery..." />}>
+            <ObjGallery
+              open={galleryOpen}
+              onClose={() => setGalleryOpen(false)}
+            />
+          </Suspense>
         )}
 
         {/* Print Gallery popup */}
         {printGalleryOpen && (
-          <PrintGallery
-            open={printGalleryOpen}
-            onClose={() => setPrintGalleryOpen(false)}
-          />
+          <Suspense fallback={<GalleryLoadingOverlay label="Loading prototype gallery..." />}>
+            <PrintGallery
+              open={printGalleryOpen}
+              onClose={() => setPrintGalleryOpen(false)}
+            />
+          </Suspense>
         )}
     </>
   );

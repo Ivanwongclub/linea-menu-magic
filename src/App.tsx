@@ -64,6 +64,7 @@ const routePreloaders: Array<() => Promise<unknown>> = [
   loadProducts,
   loadProductDetail,
   loadSustainability,
+  loadProduction,
   loadNews,
   loadNewsDetail,
   loadBrochures,
