@@ -114,7 +114,7 @@ const MilestoneTeaser = () => {
       </div>
 
       {/* Timeline — full width, no scroll */}
-      <div className="w-full px-12 lg:px-16 xl:px-20 relative mt-32">
+      <div className="w-full max-w-6xl mx-auto px-8 lg:px-12 relative mt-20">
         <div ref={scrollRef} className="pb-2">
           <div ref={timelineRef}>
             <div
@@ -129,7 +129,7 @@ const MilestoneTeaser = () => {
               {milestones.map((m, i) => (
                 <div
                   key={`above-${i}`}
-                   className={`flex items-end pb-4 transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${
+                   className={`flex items-end pb-8 transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${
                      timelineVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
                   }`}
                   style={{ gridRow: 1, gridColumn: i + 1, transitionDelay: `${i * 80}ms` }}
@@ -157,7 +157,7 @@ const MilestoneTeaser = () => {
                     />
                   )}
                   <div
-                    className={`absolute left-0 top-1/2 -translate-y-1/2 rounded-full border-2 transition-all duration-500 ${
+                    className={`absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 rounded-full border-2 transition-all duration-500 ${
                       m.isHighlight
                         ? "w-[16px] h-[16px] bg-foreground border-foreground"
                         : "w-[14px] h-[14px] bg-heritage border-foreground/60"
@@ -171,7 +171,7 @@ const MilestoneTeaser = () => {
               {milestones.map((m, i) => (
                 <div
                   key={`below-${i}`}
-                   className={`flex items-start pt-4 transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${
+                   className={`flex items-start pt-8 transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${
                      timelineVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
                   }`}
                   style={{ gridRow: 3, gridColumn: i + 1, transitionDelay: `${i * 80 + 100}ms` }}
@@ -241,7 +241,7 @@ const MilestoneCard = ({
               {m.badge}
             </span>
           )}
-           <span className={`text-[38px] lg:text-[44px] font-bold text-foreground/80 leading-none block mb-1 tracking-tight transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.34,1.4,0.64,1)] ${isVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-4 scale-95"}`} style={{ transitionDelay: `${delay + 100}ms` }}>
+           <span className={`text-[20px] lg:text-[24px] font-bold text-foreground/80 leading-none block mb-1 tracking-tight transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.34,1.4,0.64,1)] ${isVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-4 scale-95"}`} style={{ transitionDelay: `${delay + 100}ms` }}>
             {m.year}
           </span>
           <h3 className="text-sm font-semibold text-foreground mt-1 leading-snug">{m.title}</h3>
@@ -272,7 +272,7 @@ const MilestoneCard = ({
           />
         </div>
       )}
-      <span className={`text-[38px] lg:text-[44px] font-bold text-foreground/80 leading-none block mb-1 tracking-tight transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.34,1.4,0.64,1)] ${isVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-4 scale-95"}`} style={{ transitionDelay: `${delay + 100}ms` }}>
+      <span className={`text-[20px] lg:text-[24px] font-bold text-foreground/80 leading-none block mb-1 tracking-tight transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.34,1.4,0.64,1)] ${isVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-4 scale-95"}`} style={{ transitionDelay: `${delay + 100}ms` }}>
         {m.year}
       </span>
       <h3 className="text-sm font-semibold text-foreground mt-1 leading-snug">{m.title}</h3>
