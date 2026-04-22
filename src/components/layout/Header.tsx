@@ -661,17 +661,10 @@ const Header = () => {
                       </button>
                       {open && (
                         <div className="bg-secondary/40 border-t border-border">
-                          <Link
-                            to="/products"
-                            onClick={() => setIsMenuOpen(false)}
-                            className="block text-[13px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors py-3 px-6"
-                          >
-                            {t("header.products.viewAll")}
-                          </Link>
                           {MEGA_FAMILIES.map((family) => {
                             const familyOpen = mobileProductFamilyOpen === family.slug;
                             return (
-                              <div key={family.slug} className="border-t border-border">
+                              <div key={family.slug} className="border-t border-border first:border-t-0">
                                 <button
                                   type="button"
                                   onClick={() =>
@@ -688,15 +681,6 @@ const Header = () => {
                                 </button>
                                 {familyOpen && (
                                   <ul className="bg-background border-t border-border">
-                                    <li>
-                                      <Link
-                                        to={`/products?family=${family.slug}`}
-                                        onClick={() => setIsMenuOpen(false)}
-                                        className="block text-[13px] text-muted-foreground hover:text-foreground transition-colors py-2.5 px-9 italic"
-                                      >
-                                        {t("header.products.viewAll")}
-                                      </Link>
-                                    </li>
                                     {family.subcategories.map((sub) => (
                                       <li key={sub.en}>
                                         <Link
