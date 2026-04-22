@@ -1,49 +1,42 @@
 
 
-## Compact, wider-content timeline for `/about/our-story`
+## Restore alternating left/right timeline on `/about/our-story`
 
-Refactor the "Our Journey" timeline so each row is shorter, year text is smaller, descriptions get much more width (fewer wrapped lines), and milestone images render in full color. Surgical edit — only the timeline section of `src/pages/about/OurStory.tsx`.
+Bring back the zig-zag layout for "Our Journey" while keeping the recent improvements (smaller year, tighter spacing, full-color images, wider content).
 
 ### What changes
 
-**Layout — drop alternating columns, use a left-rail year + wide content row**
+**Layout — center spine + alternating sides**
 
-- Replace the `md:grid-cols-2` alternating layout with a single row: narrow year rail (left) → spine dot → wide content (right).
-- Approx. column widths: year rail `w-20` (80px) + dot column + content `flex-1`. Container widens from `max-w-3xl` → `max-w-4xl` so descriptions get noticeably more horizontal room.
-- Spine moves from center to `left-20` to match the new structure.
-- Result: a description like the 1979 founding line collapses from ~4 lines to ~2 lines on desktop.
+- Container: keep `max-w-4xl` (wider than original `max-w-3xl` so descriptions still get more room than before).
+- Spine: move back to horizontal center (`left-1/2 -translate-x-1/2`).
+- Each milestone row uses a 2-column grid (`md:grid-cols-2`):
+  - Even index (0, 2, 4…) → content on **left** column, right column empty.
+  - Odd index (1, 3, 5…) → content on **right** column, left column empty.
+- Year sits inline with the milestone content (above title), aligned to the spine side: right-aligned on left-side rows, left-aligned on right-side rows.
+- Dot stays centered on the spine for every row.
 
-**Spacing — tighter rows**
+**Keep from previous edit (do NOT revert)**
 
-- Row spacing: `mb-8` → `mb-5`.
-- Year-to-rule gap and rule-to-title gap reduced (`mb-3` → `mb-2`, `mb-4` → `mb-3`).
-- Body top margin: `mt-2.5` → `mt-2`.
-- Header bottom margin: `mb-12` → `mb-10`.
-
-**Typography — smaller year**
-
-- Year: `text-[22px] lg:text-[26px]` → `text-[15px] lg:text-[16px]`, kept bold/tracking-tight, color stays muted.
-- Drop the "Est." prefix label (visual noise at smaller size).
-- Title and body sizes unchanged.
-
-**Imagery — full color**
-
-- Remove `grayscale sepia-[0.15] brightness-90` from vintage milestone images.
-- Remove `opacity-70` overlay on the highlighted "May 2026" hero image so it also renders in full color.
-- Slightly enlarge inline image cap from `max-w-[260px]` → `max-w-[320px]` since content column is wider.
+- Year font size: `text-[15px] lg:text-[16px]`, no "Est." prefix.
+- Row spacing: `mb-5`.
+- Header bottom margin: `mb-10`.
+- Body/title margins: `mb-2`, `mb-3`, `mt-2`.
+- Inline image cap: `max-w-[320px]`.
+- Full-color images (no `grayscale`/`sepia`/`opacity-70`).
 
 **Mobile**
 
-- Year rail collapses to a small inline year above content (existing mobile pattern, kept intact, just smaller font to match).
+- Below `md`: collapse to single column, year + content stacked left-aligned (existing mobile pattern).
 
-### Out of scope (not changing)
+### Out of scope
 
-- Intro, Heritage & Growth, Core Values sections — untouched.
-- Highlight card structure for "May 2026" stays (only the image opacity is removed).
-- Animations, scroll reveals, breadcrumb, page header.
+- Intro, Heritage & Growth, Core Values, breadcrumb, page header.
+- Highlight card structure for "May 2026".
+- Animations and scroll reveals.
 - Milestone copy/data.
 
 ### Files to change
 
-- `src/pages/about/OurStory.tsx` — timeline section + `CenteredMilestoneItem` + `MilestoneContent` only. ~25 lines edited, no new imports, no new components.
+- `src/pages/about/OurStory.tsx` — timeline section + `CenteredMilestoneItem` only. ~20 lines edited, no new imports, no new components.
 
