@@ -101,6 +101,11 @@ export type UserLibraryItem = {
 };
 
 export type ProductFilters = {
+  /**
+   * `public` (default): only public catalog rows.
+   * `brand`: include brand-private rows; DB RLS still enforces access.
+   */
+  visibility?: 'public' | 'brand';
   search?: string;
   family?: string;
   categories?: string[];

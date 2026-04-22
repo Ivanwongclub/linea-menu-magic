@@ -130,6 +130,8 @@ export function useProducts(filters: ProductFilters): UseProductsResult {
 
       try {
         // Build the base query with joined relations
+        const brandScoped = filters.visibility === 'brand';
+
         let query = supabase
           .from('products')
           .select(
@@ -154,8 +156,11 @@ export function useProducts(filters: ProductFilters): UseProductsResult {
           `,
             { count: 'exact' }
           )
-          .eq('status', 'active')
-          .eq('is_public', true);
+          .eq('status', 'active');
+
+        if (!brandScoped) {
+          query = query.eq('is_public', true);
+        }
 
         // Text search across name, name_en, item_code
         if (filters.search) {

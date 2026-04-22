@@ -48,7 +48,6 @@ export default function SearchProductDialog({
       .from('products')
       .select('id, name, name_en, item_code, thumbnail_url, slug')
       .eq('status', 'active')
-      .eq('is_public', true)
       .or(`name.ilike.${pattern},name_en.ilike.${pattern},item_code.ilike.${pattern}`)
       .limit(20);
     setResults(data ?? []);

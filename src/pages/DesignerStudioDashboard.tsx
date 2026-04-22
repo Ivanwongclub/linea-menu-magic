@@ -143,7 +143,7 @@ const DesignerStudioDashboard = () => {
   const [isSearchDialogOpen, setIsSearchDialogOpen] = useState(false);
 
   // Full catalog data
-  const { products: catalogProducts, loading: catalogLoading } = useProducts({});
+  const { products: catalogProducts, loading: catalogLoading } = useProducts({ visibility: 'brand' });
 
   // Legacy detail views (keep old types for compatibility)
   const [selectedLibraryItem, setSelectedLibraryItem] = useState<LibraryItem | null>(null);
