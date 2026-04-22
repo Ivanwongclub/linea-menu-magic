@@ -132,42 +132,6 @@ const ObjMesh = ({
   );
 };
 
-// ── Thumbnail mesh (lightweight MeshStandardMaterial) ────────────────────────
-
-const ThumbMesh = ({ url, color, metalness, roughness }: {
-  url: string; color: string; metalness: number; roughness: number;
-}) => {
-  const obj = useLoader(OBJLoader, url);
-  const groupRef = useRef<THREE.Group>(null);
-
-  const scene = useMemo(() => {
-    const clone = obj.clone(true);
-    const mat = new THREE.MeshStandardMaterial({ color, metalness, roughness });
-    clone.traverse((child) => {
-      if ((child as THREE.Mesh).isMesh) (child as THREE.Mesh).material = mat;
-    });
-    const box = new THREE.Box3().setFromObject(clone);
-    const size = box.getSize(new THREE.Vector3());
-    const maxDim = Math.max(size.x, size.y, size.z);
-    if (maxDim > 0) clone.scale.setScalar(1.8 / maxDim);
-    const box2 = new THREE.Box3().setFromObject(clone);
-    clone.position.sub(box2.getCenter(new THREE.Vector3()));
-    return clone;
-  }, [obj, color, metalness, roughness]);
-
-  useFrame((_, delta) => {
-    if (groupRef.current) groupRef.current.rotation.y += delta * 0.4;
-  });
-
-  return (
-    <group ref={groupRef}>
-      <Center>
-        <primitive object={scene} />
-      </Center>
-    </group>
-  );
-};
-
 // ── Progress bar ─────────────────────────────────────────────────────────────
 
 const LoadingOverlay = () => {
@@ -218,28 +182,6 @@ const ModelScene = ({
     <ContactShadows position={[0, -1.2, 0]} opacity={0.35} scale={4} blur={2.5} far={2} />
     <OrbitControls enablePan={false} minDistance={1.5} maxDistance={8} makeDefault />
   </>
-);
-
-// ── Thumbnail card ───────────────────────────────────────────────────────────
-
-const ThumbCanvas = ({ model }: { model: ObjModel }) => (
-  <Canvas
-    camera={{ position: model.camera, fov: 40 }}
-    gl={{ antialias: true, alpha: true, powerPreference: "low-power" }}
-    style={{ width: "100%", height: "100%" }}
-  >
-    <ambientLight intensity={0.5} />
-    <directionalLight position={[3, 5, 3]} intensity={1} />
-    <Environment preset="city" />
-    <Suspense fallback={null}>
-      <ThumbMesh
-        url={model.file}
-        color={model.material.color}
-        metalness={model.material.metalness}
-        roughness={model.material.roughness}
-      />
-    </Suspense>
-  </Canvas>
 );
 
 // ── Main Gallery popup ───────────────────────────────────────────────────────
@@ -460,9 +402,13 @@ export default function ObjGallery({ open, onClose, initialIndex = 0 }: ObjGalle
                   : "border-border hover:border-foreground/40 opacity-60 hover:opacity-90"
               }`}
             >
-              <div className="w-full h-full bg-secondary">
-                <ThumbCanvas model={m} />
-              </div>
+              <img
+                src={`/models/thumbs/${m.id}.jpg`}
+                alt={m.title}
+                className="w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
+              />
               <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-background/80 to-transparent px-1 py-0.5">
                 <span className="text-[9px] text-foreground/70 leading-none truncate block">
                   {m.title}
