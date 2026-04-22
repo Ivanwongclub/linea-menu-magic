@@ -167,6 +167,8 @@ const Header = () => {
   const productsTimeout = useRef<ReturnType<typeof setTimeout>>();
   const aboutTimeout    = useRef<ReturnType<typeof setTimeout>>();
   const productsRef     = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const mobileMenuToggleRef = useRef<HTMLButtonElement>(null);
   const [navLeftOffset, setNavLeftOffset] = useState(200);
 
   useEffect(() => {
@@ -212,6 +214,73 @@ const Header = () => {
       setMobileProductFamilyOpen(null);
       setMobileAboutOpen(false);
     }
+  }, [isMenuOpen]);
+
+  useEffect(() => {
+    if (!isMenuOpen) return;
+
+    const menuRoot = mobileMenuRef.current;
+    if (!menuRoot) return;
+
+    const focusableSelector = [
+      'a[href]',
+      'button:not([disabled])',
+      'input:not([disabled])',
+      'select:not([disabled])',
+      'textarea:not([disabled])',
+      '[tabindex]:not([tabindex="-1"])',
+    ].join(', ');
+
+    const getFocusable = () =>
+      Array.from(menuRoot.querySelectorAll<HTMLElement>(focusableSelector)).filter(
+        (el) => !el.hasAttribute('disabled') && el.tabIndex !== -1
+      );
+
+    const timer = window.setTimeout(() => {
+      const focusable = getFocusable();
+      if (focusable.length > 0) {
+        focusable[0].focus();
+      } else {
+        menuRoot.focus();
+      }
+    }, 0);
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setIsMenuOpen(false);
+        mobileMenuToggleRef.current?.focus();
+        return;
+      }
+
+      if (event.key !== "Tab") return;
+
+      const focusable = getFocusable();
+      if (focusable.length === 0) {
+        event.preventDefault();
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+
+      if (event.shiftKey) {
+        if (active === first || active === menuRoot) {
+          event.preventDefault();
+          last.focus();
+        }
+      } else if (active === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.clearTimeout(timer);
+      document.removeEventListener("keydown", onKeyDown);
+    };
   }, [isMenuOpen]);
 
   const isActive = (path: string) =>
@@ -325,7 +394,14 @@ const Header = () => {
             {/* Mobile controls */}
             <div className="lg:hidden ml-auto flex items-center gap-1.5">
               <LanguageSwitcher compact />
-              <button onClick={() => setIsMenuOpen(!isMenuOpen)} className={`flex-shrink-0 ${iconClass}`} aria-label={t("header.menu.toggle")}>
+              <button
+                ref={mobileMenuToggleRef}
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className={`flex-shrink-0 ${iconClass}`}
+                aria-label={t("header.menu.toggle")}
+                aria-expanded={isMenuOpen}
+                aria-controls="mobile-menu-panel"
+              >
                 {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
               </button>
             </div>
@@ -552,8 +628,14 @@ const Header = () => {
       {isMenuOpen &&
         createPortal(
           <div
+            id="mobile-menu-panel"
+            ref={mobileMenuRef}
             className="lg:hidden fixed top-20 left-0 right-0 bottom-0 z-40 bg-white overflow-y-auto border-t border-border"
             style={{ animation: "slideInDown 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards" }}
+            role="dialog"
+            aria-modal="true"
+            aria-label={t("header.menu.toggle")}
+            tabIndex={-1}
           >
             {/* Link list with collapsible sub-menus */}
             <nav className="flex flex-col flex-1">
@@ -574,12 +656,14 @@ const Header = () => {
                           }
                         }}
                         className="w-full flex items-center justify-between text-lg font-medium tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 py-4 px-6 border-b border-border"
+                        aria-expanded={mobileProductsOpen}
+                        aria-controls="mobile-products-level2"
                       >
                         {t(link.labelKey)}
                         <ChevronDown size={18} className={`transition-transform duration-200 ${mobileProductsOpen ? "rotate-180" : ""}`} />
                       </button>
                       {mobileProductsOpen && (
-                        <div className="bg-secondary border-b border-border">
+                        <div id="mobile-products-level2" className="bg-secondary/70 border-b border-border">
                           {MEGA_FAMILIES.map((family) => (
                             <div key={family.slug} className="border-b border-border/70 last:border-b-0">
                               <button
@@ -589,6 +673,8 @@ const Header = () => {
                                   )
                                 }
                                 className="w-full flex items-center justify-between py-3 px-6 text-sm font-semibold tracking-[0.06em] uppercase text-foreground hover:text-muted-foreground transition-colors duration-150"
+                                aria-expanded={mobileProductFamilyOpen === family.slug}
+                                aria-controls={`mobile-product-family-${family.slug}`}
                               >
                                 <span>{t(family.nameKey)}</span>
                                 <ChevronDown
@@ -600,11 +686,14 @@ const Header = () => {
                               </button>
 
                               {mobileProductFamilyOpen === family.slug && (
-                                <div className="bg-background/60 border-t border-border/60">
+                                <div
+                                  id={`mobile-product-family-${family.slug}`}
+                                  className="bg-background/60 border-t border-border/60 ml-4 border-l-2 border-border/40"
+                                >
                                   <Link
                                     to={`/products?family=${family.slug}`}
                                     onClick={() => setIsMenuOpen(false)}
-                                    className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground hover:text-foreground transition-colors duration-150 block py-2.5 px-8 border-b border-border/60"
+                                    className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground hover:text-foreground transition-colors duration-150 block py-2.5 px-6 border-b border-border/60"
                                   >
                                     {t("header.products.viewAll")}
                                   </Link>
@@ -613,7 +702,7 @@ const Header = () => {
                                       key={sub.en}
                                       to={`/products?category=${slugify(sub.en)}`}
                                       onClick={() => setIsMenuOpen(false)}
-                                      className="text-sm text-foreground hover:text-muted-foreground transition-colors duration-150 block py-2.5 px-10 border-b border-border/60 last:border-b-0"
+                                      className="text-sm text-foreground hover:text-muted-foreground transition-colors duration-150 block py-2.5 px-8 border-b border-border/60 last:border-b-0"
                                     >
                                       {t(sub.key)}
                                     </Link>
@@ -635,12 +724,14 @@ const Header = () => {
                       <button
                         onClick={() => setMobileAboutOpen(!mobileAboutOpen)}
                         className="w-full flex items-center justify-between text-lg font-medium tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 py-4 px-6 border-b border-border"
+                        aria-expanded={mobileAboutOpen}
+                        aria-controls="mobile-about-level2"
                       >
                         {t(link.labelKey)}
                         <ChevronDown size={18} className={`transition-transform duration-200 ${mobileAboutOpen ? "rotate-180" : ""}`} />
                       </button>
                       {mobileAboutOpen && (
-                        <div className="bg-secondary border-b border-border">
+                        <div id="mobile-about-level2" className="bg-secondary border-b border-border">
                           {ABOUT_LINKS.filter(l => l.labelKey && l.href).map((l) => (
                             <Link
                               key={l.href}
