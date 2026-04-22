@@ -138,7 +138,7 @@ const About = () => {
           <div className="max-w-4xl mx-auto">
             {/* Header */}
             <div ref={timelineHeaderRef} className="mb-24">
-              <p className={`text-[11px] font-medium tracking-[0.18em] uppercase text-foreground/40 block mb-6 transition-all duration-700 ease-out ${
+              <p className={`text-[11px] font-medium tracking-[0.18em] uppercase text-foreground/60 block mb-6 transition-all duration-700 ease-out ${
                 timelineHeaderVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
               }`}>Milestones</p>
               <LetterReveal
@@ -154,7 +154,7 @@ const About = () => {
             {/* Timeline rows */}
             <div ref={timelineRef} className="relative">
               {/* Spine — starts below header */}
-              <div className="absolute left-[140px] top-0 bottom-0 w-px bg-foreground/30" />
+              <div className="absolute left-[140px] top-0 bottom-0 w-px bg-foreground/40" />
 
               <div className="space-y-0">
                 {milestones.map((milestone, index) => (
@@ -162,7 +162,7 @@ const About = () => {
                     key={index}
                     className={`relative flex items-start transition-all duration-700 ease-out ${
                       timelineVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"
-                    } ${milestone.isHighlight ? "pt-10 pb-2" : "py-7"}`}
+                    } ${milestone.isHighlight ? "pt-12 pb-4" : "py-7"}`}
                     style={getTimelineDelay(index)}
                   >
                     {/* Year */}
@@ -170,8 +170,8 @@ const About = () => {
                       <span className={`font-semibold tracking-tight leading-tight block ${
                         milestone.isHighlight
                           ? "text-[18px] text-foreground"
-                          : "text-[16px] text-foreground/50"
-                      } ${milestone.isVintage ? "text-foreground/35" : ""}`}>
+                          : "text-[16px] text-foreground/80"
+                      } ${milestone.isVintage ? "text-foreground/60" : ""}`}>
                         {milestone.year}
                       </span>
                     </div>
@@ -179,28 +179,38 @@ const About = () => {
                     {/* Dot on spine */}
                     <div className="absolute left-[140px] top-[calc(1.75rem+1px)] -translate-x-1/2 z-10">
                       {milestone.isHighlight ? (
-                        <div className="w-3 h-3 rounded-full bg-foreground" />
+                        <>
+                          <span className="absolute -inset-1 rounded-full bg-foreground/20 animate-ping" />
+                          <div className="relative w-3 h-3 rounded-full bg-foreground ring-4 ring-heritage" />
+                        </>
                       ) : (
-                        <div className="w-2 h-2 rounded-full bg-heritage border border-foreground/30" />
+                        <div className="w-2 h-2 rounded-full bg-heritage border border-foreground/50" />
                       )}
                     </div>
 
                     {/* Content */}
                     <div className="flex-1 pl-10">
                       {milestone.isHighlight ? (
-                        <div className="border-l-2 border-foreground pl-6 py-1">
-                          <span className="text-[10px] font-mono tracking-[0.18em] uppercase text-foreground/40 block mb-2">
-                            New Era · May 2026
+                        <div className="relative bg-foreground text-background rounded-lg p-6 shadow-xl shadow-foreground/10">
+                          <span className="absolute top-4 right-4 text-[10px] font-mono tracking-[0.18em] uppercase bg-background text-foreground px-2 py-1 rounded-sm">
+                            New Era
                           </span>
-                          <p className="text-[15px] font-semibold text-foreground leading-relaxed">
+                          <span className="text-[11px] font-mono tracking-[0.2em] uppercase text-background/60 block mb-2">
+                            Coming
+                          </span>
+                          <p className="text-3xl md:text-4xl font-semibold tracking-tight text-background mb-4 leading-none">
+                            May 2026
+                          </p>
+                          <div className="w-10 h-px bg-background/30 mb-4" />
+                          <p className="text-[15px] font-light text-background/90 leading-relaxed max-w-md">
                             {milestone.event}
                           </p>
                         </div>
                       ) : (
                         <p className={`text-[14px] leading-relaxed ${
                           milestone.isVintage
-                            ? "text-foreground/40"
-                            : "text-foreground/65"
+                            ? "text-foreground/70"
+                            : "text-foreground/90"
                         }`}>
                           {milestone.event}
                         </p>
