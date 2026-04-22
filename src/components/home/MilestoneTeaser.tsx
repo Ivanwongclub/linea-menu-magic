@@ -224,7 +224,7 @@ const MilestoneCard = ({
         style={{ transitionDelay: `${delay}ms` }}
       >
         {m.image && (
-          <div className="overflow-hidden rounded-t-lg">
+          <div className="overflow-hidden rounded-t-lg -mx-4 lg:-mx-6">
             <img
               src={m.image}
               alt={m.title}
