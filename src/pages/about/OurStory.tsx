@@ -238,8 +238,8 @@ const OurStory = () => {
 
             {/* Timeline */}
             <div className="relative max-w-4xl mx-auto px-6 lg:px-0">
-              {/* Vertical spine — left rail */}
-              <div className="absolute left-20 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-foreground/20 to-transparent hidden md:block" />
+              {/* Vertical spine — center */}
+              <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-foreground/20 to-transparent hidden md:block" />
 
               {milestones.map((m, i) => (
                 <CenteredMilestoneItem key={m.year} milestone={m} index={i} isLeft={i % 2 === 0} />
