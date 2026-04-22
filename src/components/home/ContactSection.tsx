@@ -1,13 +1,12 @@
 import { Link } from "react-router-dom";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin, ArrowRight } from "lucide-react";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 import { Button } from "@/components/ui/button";
+import { offices, factories } from "@/data/locations";
 
-const locations = [
-  { city: "Hong Kong", role: "HQ", since: "1979" },
-  { city: "Shenzhen", role: "Production", since: "2011" },
-  { city: "Munich", role: "Europe", since: "2012" },
-  { city: "New York", role: "Americas", since: "2013" },
+const allLocations = [
+  ...offices.map((o) => ({ city: o.city, role: o.label })),
+  ...factories.map((f) => ({ city: f.city, role: f.label })),
 ];
 
 const ContactSection = () => {
@@ -35,18 +34,25 @@ const ContactSection = () => {
             We'd love to hear from you
           </h2>
           <p className="text-sm text-muted-foreground mt-4 max-w-md leading-relaxed">
-            Our team is based in Hong Kong with offices and production facilities across Asia, Europe, and the Americas.
+            Coordinated from Hong Kong since 1979, with manufacturing in China & Vietnam and sales offices in Shanghai & New York.
           </p>
+          <Link
+            to="/about/factory"
+            className="inline-flex items-center gap-2 mt-5 text-xs uppercase tracking-[0.15em] text-foreground border-b border-foreground/30 hover:border-foreground pb-1 transition-colors"
+          >
+            View all locations
+            <ArrowRight className="w-3.5 h-3.5" strokeWidth={1.5} />
+          </Link>
         </div>
 
         <div className="lg:w-1/2 grid grid-cols-2 gap-4">
-          {locations.map((loc) => (
+          {allLocations.map((loc) => (
             <div
               key={loc.city}
               className="border border-[hsl(var(--border))] rounded-[var(--radius)] p-4"
             >
               <span className="text-xs uppercase tracking-[0.1em] text-muted-foreground block mb-1">
-                {loc.role} · Est. {loc.since}
+                {loc.role}
               </span>
               <span className="text-base font-semibold text-foreground">
                 {loc.city}
