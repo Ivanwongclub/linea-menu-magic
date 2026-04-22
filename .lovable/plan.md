@@ -1,39 +1,49 @@
 
 
-## Revamp: Section 03 — "Service & Delivery" → "Service & Customization"
+## Compact, wider-content timeline for `/about/our-story`
 
-Reframe the third workflow step from a logistics blurb into a **customer-service & customization promise**, aligned with competitor positioning ("from idea to finished trim … in-house design team … customization"), while keeping the existing two-column workflow layout intact.
+Refactor the "Our Journey" timeline so each row is shorter, year text is smaller, descriptions get much more width (fewer wrapped lines), and milestone images render in full color. Surgical edit — only the timeline section of `src/pages/about/OurStory.tsx`.
 
-### Competitor positioning takeaways
-- One continuous narrative: **idea → design → in-house production → finished trim**
-- Emphasis on **in-house creative team** and **stylish trimming solutions**
-- **Customization** as a headline service (not buried)
-- Cost-effective + fashion-forward as twin value props
+### What changes
 
-### Proposed new content (Section 03)
+**Layout — drop alternating columns, use a left-rail year + wide content row**
 
-| Field | New value |
-|---|---|
-| number | `03` (unchanged) |
-| title | **Service & Customization** |
-| body | "From first sketch to finished trim. Our in-house design team partners with brands to develop bespoke hardware, components and finishes — combining cost-effective vertically integrated production with a fashion-forward perspective. Local offices in key markets keep every project moving, from sample to bulk." |
-| bullets | • Bespoke Design Service<br>• In-House Creative Team<br>• Regional Office Support<br>• Sample-to-Bulk Continuity |
-| CTA | **"Start a Custom Project"** → `/designer-studio` (existing arrow style, label refined) |
+- Replace the `md:grid-cols-2` alternating layout with a single row: narrow year rail (left) → spine dot → wide content (right).
+- Approx. column widths: year rail `w-20` (80px) + dot column + content `flex-1`. Container widens from `max-w-3xl` → `max-w-4xl` so descriptions get noticeably more horizontal room.
+- Spine moves from center to `left-20` to match the new structure.
+- Result: a description like the 1979 founding line collapses from ~4 lines to ~2 lines on desktop.
 
-### Layout changes
-- **No structural changes** to the two-column workflow component — keeps the existing alternating left/right rhythm, oversized `03` watermark, image, headline, body, bullets, CTA.
-- Bullets list expands from 2 → 4 items (the existing `space-y-2` `<ul>` already handles this cleanly).
-- CTA label changes from "Custom via Designer Studio" to "Start a Custom Project" — clearer call-to-action verb, drops internal product name from public copy.
+**Spacing — tighter rows**
 
-### Optional polish (low risk, recommended)
-- Swap `valuePartnershipImg` for a more "creative atelier / design-in-progress" image if one exists in `src/assets/`. I'll grep for candidates and propose 1–2 options before swapping; if nothing fits, keep current image.
+- Row spacing: `mb-8` → `mb-5`.
+- Year-to-rule gap and rule-to-title gap reduced (`mb-3` → `mb-2`, `mb-4` → `mb-3`).
+- Body top margin: `mt-2.5` → `mt-2`.
+- Header bottom margin: `mb-12` → `mb-10`.
+
+**Typography — smaller year**
+
+- Year: `text-[22px] lg:text-[26px]` → `text-[15px] lg:text-[16px]`, kept bold/tracking-tight, color stays muted.
+- Drop the "Est." prefix label (visual noise at smaller size).
+- Title and body sizes unchanged.
+
+**Imagery — full color**
+
+- Remove `grayscale sepia-[0.15] brightness-90` from vintage milestone images.
+- Remove `opacity-70` overlay on the highlighted "May 2026" hero image so it also renders in full color.
+- Slightly enlarge inline image cap from `max-w-[260px]` → `max-w-[320px]` since content column is wider.
+
+**Mobile**
+
+- Year rail collapses to a small inline year above content (existing mobile pattern, kept intact, just smaller font to match).
+
+### Out of scope (not changing)
+
+- Intro, Heritage & Growth, Core Values sections — untouched.
+- Highlight card structure for "May 2026" stays (only the image opacity is removed).
+- Animations, scroll reveals, breadcrumb, page header.
+- Milestone copy/data.
 
 ### Files to change
-- `src/pages/Production.tsx` — update the `workflowSteps[2]` object (`title`, `body`, `bullets`, CTA label on line 298). Roughly 6 lines edited, no new components, no new imports.
 
-### Intentionally NOT changing
-- Section 01, 02, materials, sustainability, hero, modals.
-- Workflow row layout, animations, image aspect ratio.
-- Routing — CTA still points at `/designer-studio`.
-- Adding new icons or sub-sections (keeps diff minimal and consistent with site's restrained editorial tone).
+- `src/pages/about/OurStory.tsx` — timeline section + `CenteredMilestoneItem` + `MilestoneContent` only. ~25 lines edited, no new imports, no new components.
 
