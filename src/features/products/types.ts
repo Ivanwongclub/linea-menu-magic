@@ -118,4 +118,6 @@ export type ProductFilters = {
   sort?: 'name_asc' | 'name_desc';
   featured?: string;
   collection?: string;
+  page?: number;
+  pageSize?: number;
 };

@@ -1,10 +1,11 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { Product, ProductFilters } from '../types';
 import { getCategorySlugsForFamily, PRODUCT_FAMILIES } from '../taxonomy';
 
 /**
- * Temporary segment → category-family mapping.
+ * Temporary segment -> category-family mapping.
  * Maps approved Segment slugs to product family slugs so that
  * selecting "Fashion" shows Hardware products, etc.
  */
@@ -19,6 +20,36 @@ interface UseProductsResult {
   loading: boolean;
   error: string | null;
   totalCount: number;
+}
+
+interface QueryPayload {
+  products: Product[];
+  totalCount: number;
+}
+
+interface FilterScope {
+  values?: string[];
+  dimensionTable:
+    | 'product_categories'
+    | 'product_materials'
+    | 'product_tags'
+    | 'product_industries'
+    | 'product_certifications';
+  dimensionIdColumn: 'id';
+  dimensionFilterColumn: 'slug' | 'abbreviation';
+  mapTable:
+    | 'product_category_map'
+    | 'product_material_map'
+    | 'product_tag_map'
+    | 'product_industry_map'
+    | 'product_certification_map';
+  mapDimensionColumn:
+    | 'category_id'
+    | 'material_id'
+    | 'tag_id'
+    | 'industry_id'
+    | 'certification_id';
+  caseInsensitive?: boolean;
 }
 
 /**
@@ -115,172 +146,292 @@ function transformProduct(row: Record<string, unknown>): Product {
   };
 }
 
-export function useProducts(filters: ProductFilters): UseProductsResult {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [totalCount, setTotalCount] = useState(0);
+function normalizeList(values?: string[]): string[] | undefined {
+  if (!values?.length) return undefined;
+  const normalized = [...new Set(values.map((v) => v.trim()).filter(Boolean))];
+  return normalized.length > 0 ? normalized : undefined;
+}
 
-  useEffect(() => {
-    const controller = new AbortController();
+function intersectSets(sets: Set<string>[]): string[] {
+  if (sets.length === 0) return [];
+  const [first, ...rest] = sets;
+  const intersection = new Set(first);
 
-    const fetchProducts = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        // Build the base query with joined relations
-        const brandScoped = filters.visibility === 'brand';
-
-        let query = supabase
-          .from('products')
-          .select(
-            `
-            *,
-            product_category_map(
-              is_primary,
-              product_categories(id, name, slug, sort_order, icon_url)
-            ),
-            product_material_map(
-              product_materials(id, name, slug, is_sustainable)
-            ),
-            product_tag_map(
-              product_tags(id, name, slug, color)
-            ),
-            product_industry_map(
-              product_industries(id, name, slug, sort_order)
-            ),
-            product_certification_map(
-              product_certifications(id, name, abbreviation, logo_url)
-            )
-          `,
-            { count: 'exact' }
-          )
-          .eq('status', 'active');
-
-        if (!brandScoped) {
-          query = query.eq('is_public', true);
-        }
-
-        // Text search across name, name_en, item_code
-        if (filters.search) {
-          const term = `%${filters.search}%`;
-          query = query.or(
-            `name.ilike.${term},name_en.ilike.${term},item_code.ilike.${term}`
-          );
-        }
-
-        // Sort (only name_asc / name_desc exposed in UI)
-        switch (filters.sort) {
-          case 'name_asc':
-            query = query.order('name', { ascending: true });
-            break;
-          case 'name_desc':
-            query = query.order('name', { ascending: false });
-            break;
-          default:
-            query = query.order('sort_order', { ascending: true });
-        }
-
-        const { data, error: queryError, count } = await query;
-
-        if (controller.signal.aborted) return;
-
-        if (queryError) {
-          setError(queryError.message);
-          setProducts([]);
-          setTotalCount(0);
-          return;
-        }
-
-        let transformed = (data ?? []).map((row) =>
-          transformProduct(row as unknown as Record<string, unknown>)
-        );
-
-        // Client-side junction filtering
-        // Merge family filter into effective category list
-        const effectiveCategories = (() => {
-          const cats = filters.categories ?? [];
-          const familyCats = filters.family
-            ? getCategorySlugsForFamily(filters.family)
-            : [];
-          const merged = [...new Set([...cats, ...familyCats])];
-          return merged.length > 0 ? merged : undefined;
-        })();
-
-        if (effectiveCategories?.length) {
-          transformed = transformed.filter((p) =>
-            p.categories?.some((c) => effectiveCategories.includes(c.slug))
-          );
-        }
-
-        if (filters.materials?.length) {
-          transformed = transformed.filter((p) =>
-            p.materials?.some((m) => filters.materials!.includes(m.slug))
-          );
-        }
-
-        if (filters.tags?.length) {
-          transformed = transformed.filter((p) =>
-            p.tags?.some((t) => filters.tags!.includes(t.slug))
-          );
-        }
-
-        if (filters.is_customizable !== undefined) {
-          transformed = transformed.filter(
-            (p) => p.is_customizable === filters.is_customizable
-          );
-        }
-
-        // Segment filtering (temporary front-end mapping via category families)
-        if (filters.segments?.length) {
-          const segmentCategorySlugs = filters.segments.flatMap((seg) => {
-            const familySlugs = SEGMENT_TO_FAMILIES[seg] ?? [];
-            return familySlugs.flatMap((fs) =>
-              PRODUCT_FAMILIES.find((f) => f.slug === fs)?.categorySlugs ?? []
-            );
-          });
-          if (segmentCategorySlugs.length > 0) {
-            transformed = transformed.filter((p) =>
-              p.categories?.some((c) => segmentCategorySlugs.includes(c.slug))
-            );
-          }
-        }
-
-        setProducts(transformed);
-        setTotalCount(
-          filters.categories?.length ||
-            filters.materials?.length ||
-            filters.tags?.length
-            ? transformed.length
-            : (count ?? transformed.length)
-        );
-      } catch (err) {
-        if (!controller.signal.aborted) {
-          setError(err instanceof Error ? err.message : 'Unknown error');
-        }
-      } finally {
-        if (!controller.signal.aborted) {
-          setLoading(false);
-        }
+  rest.forEach((set) => {
+    for (const value of [...intersection]) {
+      if (!set.has(value)) {
+        intersection.delete(value);
       }
-    };
+    }
+  });
 
-    fetchProducts();
+  return [...intersection];
+}
 
-    return () => controller.abort();
-  }, [
-    filters.search,
-    filters.family,
-    filters.categories?.join(','),
-    filters.segments?.join(','),
-    filters.materials?.join(','),
-    filters.industries?.join(','),
-    filters.certifications?.join(','),
-    filters.tags?.join(','),
-    filters.is_customizable,
-    filters.sort,
-  ]);
+async function resolveProductSetByDimension(scope: FilterScope): Promise<Set<string>> {
+  const values = normalizeList(scope.values);
+  if (!values?.length) return new Set();
 
-  return { products, loading, error, totalCount };
+  const isCaseInsensitive = scope.caseInsensitive === true;
+
+  let dimensionRows: Record<string, unknown>[] = [];
+
+  if (isCaseInsensitive) {
+    const { data, error } = await supabase
+      .from(scope.dimensionTable)
+      .select(`${scope.dimensionIdColumn}, ${scope.dimensionFilterColumn}`);
+
+    if (error) throw new Error(error.message);
+
+    const wanted = new Set(values.map((value) => value.toLowerCase()));
+    dimensionRows = ((data ?? []) as Record<string, unknown>[]).filter((row) => {
+      const raw = row[scope.dimensionFilterColumn];
+      return typeof raw === 'string' && wanted.has(raw.toLowerCase());
+    });
+  } else {
+    const { data, error } = await supabase
+      .from(scope.dimensionTable)
+      .select(scope.dimensionIdColumn)
+      .in(scope.dimensionFilterColumn, values);
+
+    if (error) throw new Error(error.message);
+    dimensionRows = (data ?? []) as Record<string, unknown>[];
+  }
+
+  const dimensionIds = dimensionRows
+    .map((row) => row[scope.dimensionIdColumn] as string | undefined)
+    .filter((value): value is string => Boolean(value));
+
+  if (dimensionIds.length === 0) return new Set();
+
+  const { data: mapRows, error: mapError } = await supabase
+    .from(scope.mapTable)
+    .select('product_id')
+    .in(scope.mapDimensionColumn, dimensionIds);
+
+  if (mapError) throw new Error(mapError.message);
+
+  return new Set(
+    ((mapRows ?? []) as Record<string, unknown>[])
+      .map((row) => row.product_id as string | undefined)
+      .filter((value): value is string => Boolean(value))
+  );
+}
+
+function getEffectiveCategorySlugs(filters: ProductFilters): string[] | undefined {
+  const categories = normalizeList(filters.categories) ?? [];
+  const familyCategories = filters.family
+    ? getCategorySlugsForFamily(filters.family)
+    : [];
+
+  const segmentCategories =
+    normalizeList(filters.segments)?.flatMap((segment) => {
+      const familySlugs = SEGMENT_TO_FAMILIES[segment] ?? [];
+      return familySlugs.flatMap((familySlug) => {
+        return PRODUCT_FAMILIES.find((family) => family.slug === familySlug)?.categorySlugs ?? [];
+      });
+    }) ?? [];
+
+  const merged = [...new Set([...categories, ...familyCategories, ...segmentCategories])];
+  return merged.length > 0 ? merged : undefined;
+}
+
+async function fetchProducts(filters: ProductFilters): Promise<QueryPayload> {
+  const brandScoped = filters.visibility === 'brand';
+
+  const filterScopes: FilterScope[] = [
+    {
+      values: getEffectiveCategorySlugs(filters),
+      dimensionTable: 'product_categories',
+      dimensionIdColumn: 'id',
+      dimensionFilterColumn: 'slug',
+      mapTable: 'product_category_map',
+      mapDimensionColumn: 'category_id',
+    },
+    {
+      values: normalizeList(filters.materials),
+      dimensionTable: 'product_materials',
+      dimensionIdColumn: 'id',
+      dimensionFilterColumn: 'slug',
+      mapTable: 'product_material_map',
+      mapDimensionColumn: 'material_id',
+    },
+    {
+      values: normalizeList(filters.tags),
+      dimensionTable: 'product_tags',
+      dimensionIdColumn: 'id',
+      dimensionFilterColumn: 'slug',
+      mapTable: 'product_tag_map',
+      mapDimensionColumn: 'tag_id',
+    },
+    {
+      values: normalizeList(filters.industries),
+      dimensionTable: 'product_industries',
+      dimensionIdColumn: 'id',
+      dimensionFilterColumn: 'slug',
+      mapTable: 'product_industry_map',
+      mapDimensionColumn: 'industry_id',
+    },
+    {
+      values: normalizeList(filters.certifications),
+      dimensionTable: 'product_certifications',
+      dimensionIdColumn: 'id',
+      dimensionFilterColumn: 'abbreviation',
+      mapTable: 'product_certification_map',
+      mapDimensionColumn: 'certification_id',
+      caseInsensitive: true,
+    },
+  ];
+
+  const activeScopes = filterScopes.filter((scope) => scope.values?.length);
+  const sets: Set<string>[] = [];
+
+  for (const scope of activeScopes) {
+    const set = await resolveProductSetByDimension(scope);
+    if (set.size === 0) {
+      return { products: [], totalCount: 0 };
+    }
+    sets.push(set);
+  }
+
+  const intersectedIds = sets.length > 0 ? intersectSets(sets) : null;
+  if (intersectedIds && intersectedIds.length === 0) {
+    return { products: [], totalCount: 0 };
+  }
+
+  let query = supabase
+    .from('products')
+    .select(
+      `
+      *,
+      product_category_map(
+        is_primary,
+        product_categories(id, name, slug, sort_order, icon_url)
+      ),
+      product_material_map(
+        product_materials(id, name, slug, is_sustainable)
+      ),
+      product_tag_map(
+        product_tags(id, name, slug, color)
+      ),
+      product_industry_map(
+        product_industries(id, name, slug, sort_order)
+      ),
+      product_certification_map(
+        product_certifications(id, name, abbreviation, logo_url)
+      )
+    `,
+      { count: 'exact' }
+    )
+    .eq('status', 'active');
+
+  if (!brandScoped) {
+    query = query.eq('is_public', true);
+  }
+
+  if (intersectedIds && intersectedIds.length > 0) {
+    query = query.in('id', intersectedIds);
+  }
+
+  if (filters.search) {
+    const term = `%${filters.search}%`;
+    query = query.or(`name.ilike.${term},name_en.ilike.${term},item_code.ilike.${term}`);
+  }
+
+  if (filters.is_customizable !== undefined) {
+    query = query.eq('is_customizable', filters.is_customizable);
+  }
+
+  switch (filters.sort) {
+    case 'name_asc':
+      query = query.order('name', { ascending: true });
+      break;
+    case 'name_desc':
+      query = query.order('name', { ascending: false });
+      break;
+    default:
+      query = query.order('sort_order', { ascending: true });
+      break;
+  }
+
+  const hasPagination =
+    typeof filters.page === 'number' &&
+    typeof filters.pageSize === 'number' &&
+    filters.page > 0 &&
+    filters.pageSize > 0;
+
+  if (hasPagination) {
+    const from = (filters.page! - 1) * filters.pageSize!;
+    const to = from + filters.pageSize! - 1;
+    query = query.range(from, to);
+  }
+
+  const { data, error, count } = await query;
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const transformed = (data ?? []).map((row) =>
+    transformProduct(row as unknown as Record<string, unknown>)
+  );
+
+  return {
+    products: transformed,
+    totalCount: count ?? transformed.length,
+  };
+}
+
+export function useProducts(filters: ProductFilters): UseProductsResult {
+  const normalizedFilters = useMemo<ProductFilters>(
+    () => ({
+      visibility: filters.visibility,
+      family: filters.family,
+      is_customizable: filters.is_customizable,
+      sort: filters.sort,
+      search: filters.search?.trim() || undefined,
+      categories: normalizeList(filters.categories),
+      segments: normalizeList(filters.segments),
+      materials: normalizeList(filters.materials),
+      industries: normalizeList(filters.industries),
+      certifications: normalizeList(filters.certifications),
+      tags: normalizeList(filters.tags),
+      page:
+        typeof filters.page === 'number' && Number.isFinite(filters.page)
+          ? Math.max(1, Math.trunc(filters.page))
+          : undefined,
+      pageSize:
+        typeof filters.pageSize === 'number' && Number.isFinite(filters.pageSize)
+          ? Math.max(1, Math.trunc(filters.pageSize))
+          : undefined,
+    }),
+    [
+      filters.visibility,
+      filters.search,
+      filters.family,
+      filters.categories?.join(','),
+      filters.segments?.join(','),
+      filters.materials?.join(','),
+      filters.industries?.join(','),
+      filters.certifications?.join(','),
+      filters.tags?.join(','),
+      filters.is_customizable,
+      filters.sort,
+      filters.page,
+      filters.pageSize,
+    ]
+  );
+
+  const query = useQuery<QueryPayload, Error>({
+    queryKey: ['products', normalizedFilters],
+    queryFn: () => fetchProducts(normalizedFilters),
+    placeholderData: (previous) => previous,
+  });
+
+  return {
+    products: query.data?.products ?? [],
+    loading: query.isLoading,
+    error: query.error?.message ?? null,
+    totalCount: query.data?.totalCount ?? 0,
+  };
 }

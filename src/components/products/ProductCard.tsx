@@ -56,7 +56,7 @@ export default function ProductCard({
 }: ProductCardProps) {
   const rawUrl = resolveProductImage(product, isHeroLayout ? 'full' : 'thumb');
   const imageUrl = getProductImageUrl(rawUrl, isHeroLayout ? 'pdp' : 'card');
-  const isAboveFold = index < 8;
+  const isAboveFold = index < 2;
 
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -72,7 +72,7 @@ export default function ProductCard({
 
   // Featured card — horizontal layout
   if (isHeroLayout) {
-    return <ProductCardFeatured product={product} imageUrl={imageUrl} imageLoaded={imageLoaded} imageError={imageError} onImageLoad={() => setImageLoaded(true)} onImageError={() => setImageError(true)} onQuickView={onQuickView} isFeatured={isFeatured} />;
+    return <ProductCardFeatured product={product} imageUrl={imageUrl} imageLoaded={imageLoaded} imageError={imageError} onImageLoad={() => setImageLoaded(true)} onImageError={() => setImageError(true)} onQuickView={onQuickView} isFeatured={isFeatured} prioritize={isFeatured} />;
   }
 
   const tags = product.tags ?? [];
@@ -104,7 +104,7 @@ export default function ProductCard({
           width={400}
           height={400}
           loading={isAboveFold ? 'eager' : 'lazy'}
-          fetchPriority={isAboveFold ? 'high' : 'low'}
+          fetchPriority={isAboveFold ? 'high' : undefined}
           decoding="async"
           onLoad={() => setImageLoaded(true)}
           onError={() => setImageError(true)}
@@ -215,6 +215,7 @@ function ProductCardFeatured({
   onImageError,
   onQuickView,
   isFeatured = false,
+  prioritize = false,
 }: {
   product: Product;
   imageUrl: string;
@@ -224,6 +225,7 @@ function ProductCardFeatured({
   onImageError: () => void;
   onQuickView?: (product: Product) => void;
   isFeatured?: boolean;
+  prioritize?: boolean;
 }) {
   const altText = `${product.name_en ?? product.name}${product.primary_category ? ` — ${product.primary_category.name}` : ''}`;
   const certs = product.certifications ?? [];
@@ -240,8 +242,8 @@ function ProductCardFeatured({
           alt={altText}
           width={800}
           height={800}
-          loading="eager"
-          fetchPriority="high"
+          loading={prioritize ? 'eager' : 'lazy'}
+          fetchPriority={prioritize ? 'high' : undefined}
           decoding="async"
           onLoad={onImageLoad}
           onError={onImageError}

@@ -63,18 +63,6 @@ const Factory = lazy(loadFactory);
 const Certificates = lazy(loadCertificates);
 const Production = lazy(loadProduction);
 
-const routePreloaders: Array<() => Promise<unknown>> = [
-  loadAbout,
-  loadProducts,
-  loadProductDetail,
-  loadSustainability,
-  loadNews,
-  loadNewsDetail,
-  loadBrochures,
-  loadContact,
-];
-
-
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -162,48 +150,6 @@ function RouteAndNetworkWarmup() {
 
     return () => {
       linkTags.forEach((link) => link.remove());
-    };
-  }, []);
-
-  useEffect(() => {
-    const preloadRoutes = () => {
-      const connection = (navigator as Navigator & {
-        connection?: { saveData?: boolean; effectiveType?: string };
-      }).connection;
-
-      if (connection?.saveData) {
-        return;
-      }
-
-      if (connection?.effectiveType === "2g" || connection?.effectiveType === "slow-2g") {
-        return;
-      }
-
-      const run = async () => {
-        for (const loader of routePreloaders) {
-          await loader().catch(() => undefined);
-          await new Promise((resolve) => window.setTimeout(resolve, 140));
-        }
-      };
-
-      void run();
-    };
-
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
-    let idleId: number | undefined;
-
-    const hasIdleCb = typeof window !== "undefined" && "requestIdleCallback" in window;
-    if (hasIdleCb) {
-      idleId = (window as any).requestIdleCallback(preloadRoutes, { timeout: 2500 });
-    } else {
-      timeoutId = setTimeout(preloadRoutes, 1200);
-    }
-
-    return () => {
-      if (timeoutId !== undefined) clearTimeout(timeoutId);
-      if (idleId !== undefined && hasIdleCb) {
-        (window as any).cancelIdleCallback(idleId);
-      }
     };
   }, []);
 

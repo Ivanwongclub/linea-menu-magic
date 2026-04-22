@@ -14,6 +14,7 @@ const PARAM_KEYS = {
   sort: 'sort',
   featured: 'featured',
   collection: 'collection',
+  page: 'page',
 } as const;
 
 function parseList(value: string | null): string[] | undefined {
@@ -28,6 +29,14 @@ function parseList(value: string | null): string[] | undefined {
 function serializeList(items: string[] | undefined): string | null {
   if (!items?.length) return null;
   return items.join(',');
+}
+
+function parsePage(value: string | null): number | undefined {
+  if (!value) return undefined;
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return undefined;
+  const int = Math.trunc(parsed);
+  return int > 0 ? int : undefined;
 }
 
 interface UseProductFiltersFromURLResult {
@@ -56,6 +65,7 @@ export function useProductFiltersFromURL(): UseProductFiltersFromURLResult {
           : undefined,
       featured: searchParams.get(PARAM_KEYS.featured) || undefined,
       collection: searchParams.get(PARAM_KEYS.collection) || undefined,
+      page: parsePage(searchParams.get(PARAM_KEYS.page)),
     };
   }, [searchParams]);
 
@@ -63,6 +73,13 @@ export function useProductFiltersFromURL(): UseProductFiltersFromURLResult {
     (updates: Partial<ProductFilters>) => {
       setSearchParams((prev) => {
         const next = new URLSearchParams(prev);
+        const updateKeys = Object.keys(updates);
+        const onlyPageUpdate =
+          updateKeys.length > 0 && updateKeys.every((key) => key === 'page');
+
+        if (!onlyPageUpdate && updates.page === undefined) {
+          next.delete(PARAM_KEYS.page);
+        }
 
         Object.entries(updates).forEach(([key, value]) => {
           const paramKey =

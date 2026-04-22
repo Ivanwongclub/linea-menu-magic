@@ -94,14 +94,6 @@ const HeroSection = () => {
     }
   }, []);
 
-  // Preload next slide image
-  useEffect(() => {
-    const next = slides[(current + 1) % slides.length];
-    if (!next.image) return;
-    const img = new Image();
-    img.src = next.image;
-  }, [current]);
-
   const parallaxOffset = scrollY * 0.4;
   const opacityFade = Math.max(0, 1 - scrollY / 600);
 

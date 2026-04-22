@@ -32,6 +32,9 @@ const FEATURED_OPTIONS = [
   { value: 'logo-ready', label: 'Logo-Ready' },
 ];
 
+const DEFAULT_PAGE_SIZE = 24;
+const FEATURED_MODE_FETCH_SIZE = 200;
+
 // ─── Featured filtering logic (temporary front-end mapping) ─
 function matchesFeatured(product: Product, featured: string): boolean {
   switch (featured) {
@@ -55,12 +58,23 @@ function matchesFeatured(product: Product, featured: string): boolean {
 export default function Products() {
   const taxonomy = useProductTaxonomy();
   const { filters, setFilters, clearFilters } = useProductFiltersFromURL();
-  const { products: allProducts, loading } = useProducts(filters);
+  const activeFeatured = filters.featured ?? 'all';
+  const isAllProductsMode = activeFeatured === 'all';
+  const currentPage = Math.max(1, filters.page ?? 1);
+  const queryPage = isAllProductsMode ? currentPage : 1;
+  const queryPageSize = isAllProductsMode ? DEFAULT_PAGE_SIZE : FEATURED_MODE_FETCH_SIZE;
+
+  const {
+    products: allProducts,
+    loading,
+    totalCount: queriedTotalCount,
+  } = useProducts({
+    ...filters,
+    page: queryPage,
+    pageSize: queryPageSize,
+  });
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
-
-  // Derive featured from URL state
-  const activeFeatured = filters.featured ?? 'all';
 
   const setActiveFeatured = (value: string) => {
     setFilters({ featured: value === 'all' ? undefined : value });
@@ -75,7 +89,8 @@ export default function Products() {
     return result;
   }, [allProducts, activeFeatured]);
 
-  const totalCount = products.length;
+  const totalCount = isAllProductsMode ? queriedTotalCount : products.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / DEFAULT_PAGE_SIZE));
 
   // Count products per category (from current result set)
   const categoryCounts = useMemo(() => {
@@ -354,27 +369,53 @@ export default function Products() {
               {loading ? (
                 <ProductGridSkeleton viewMode={viewMode} />
               ) : products.length > 0 ? (
-                <div
-                  aria-label="Product catalog"
-                  className={
-                    viewMode === 'grid'
-                      ? 'grid grid-cols-2 md:grid-cols-4 gap-5 auto-rows-[1fr]'
-                      : 'flex flex-col gap-3'
-                  }
-                >
-                  {products.map((product, idx) => (
-                    <div key={product.id}>
-                      <Link to={`/products/${product.slug}`}>
-                        <ProductCard
-                          product={product}
-                          viewMode={viewMode}
-                          index={idx}
-                          isHeroLayout={false}
-                          onQuickView={() => setQuickViewProduct(product)}
-                        />
-                      </Link>
+                <div>
+                  <div
+                    aria-label="Product catalog"
+                    className={
+                      viewMode === 'grid'
+                        ? 'grid grid-cols-2 md:grid-cols-4 gap-5 auto-rows-[1fr]'
+                        : 'flex flex-col gap-3'
+                    }
+                  >
+                    {products.map((product, idx) => (
+                      <div key={product.id}>
+                        <Link to={`/products/${product.slug}`}>
+                          <ProductCard
+                            product={product}
+                            viewMode={viewMode}
+                            index={idx}
+                            isHeroLayout={false}
+                            onQuickView={() => setQuickViewProduct(product)}
+                          />
+                        </Link>
+                      </div>
+                    ))}
+                  </div>
+
+                  {isAllProductsMode && totalPages > 1 && (
+                    <div className="mt-8 flex items-center justify-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={currentPage <= 1}
+                        onClick={() => setFilters({ page: currentPage - 1 })}
+                      >
+                        Previous
+                      </Button>
+                      <span className="text-xs text-muted-foreground min-w-[92px] text-center">
+                        Page {currentPage} of {totalPages}
+                      </span>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={currentPage >= totalPages}
+                        onClick={() => setFilters({ page: currentPage + 1 })}
+                      >
+                        Next
+                      </Button>
                     </div>
-                  ))}
+                  )}
                 </div>
               ) : (
                 <div role="status" className="flex flex-col items-center justify-center py-24 text-center">
