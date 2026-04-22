@@ -4,6 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, X, ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PRODUCT_FAMILIES } from "@/features/products/taxonomy";
+import { useAuth } from "@/features/auth/AuthProvider";
 import BrandWordmark from "@/components/layout/BrandWordmark";
 import aboutHeritageImg from "@/assets/about-heritage-showroom.jpg";
 import heritageCraftImg from "@/assets/about-heritage-showroom.jpg";
@@ -142,6 +143,7 @@ const Header = () => {
   const [aboutMegaHydrated, setAboutMegaHydrated] = useState(false);
   const [aboutPreviewImage,  setAboutPreviewImage]  = useState(ABOUT_DEFAULT_PREVIEW);
   const [aboutPreviewLabel,  setAboutPreviewLabel]  = useState("Our Story");
+  const { session, primaryBrand } = useAuth();
 
   const { pathname } = useLocation();
   const productsTimeout = useRef<ReturnType<typeof setTimeout>>();
@@ -162,6 +164,8 @@ const Header = () => {
 
   const isHeroPage    = pathname === "/";
   const isTransparent = isHeroPage && !scrolled && !isMenuOpen && !isProductsOpen && !isAboutOpen;
+  const studioCtaHref = session ? "/designer-studio" : "/designer-studio/login";
+  const studioCtaLabel = primaryBrand?.name ?? "B2B Login";
 
   useEffect(() => {
     document.body.style.overflow = isMenuOpen ? "hidden" : "";
@@ -274,7 +278,7 @@ const Header = () => {
                   Contact
                 </Button>
               </Link>
-              <Link to="/designer-studio/login">
+              <Link to={studioCtaHref}>
                 <Button
                   size="sm"
                   className={
@@ -283,7 +287,7 @@ const Header = () => {
                       : "bg-foreground text-background border border-foreground hover:bg-foreground/80 transition-all duration-200"
                   }
                 >
-                  B2B Login
+                  <span className="max-w-[150px] truncate">{studioCtaLabel}</span>
                 </Button>
               </Link>
             </div>
@@ -634,8 +638,10 @@ const Header = () => {
                 <Link to="/contact" onClick={() => setIsMenuOpen(false)}>
                   <Button className="w-full">Contact</Button>
                 </Link>
-                <Link to="/designer-studio/login" onClick={() => setIsMenuOpen(false)}>
-                  <Button variant="outline" className="w-full">B2B Login</Button>
+                <Link to={studioCtaHref} onClick={() => setIsMenuOpen(false)}>
+                  <Button variant="outline" className="w-full">
+                    <span className="truncate">{studioCtaLabel}</span>
+                  </Button>
                 </Link>
               </div>
             </nav>

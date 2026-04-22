@@ -7,15 +7,25 @@ import ProductCard from "@/components/products/ProductCard";
 import { useProducts } from "@/features/products/hooks/useProducts";
 import { useProductTaxonomy } from "@/features/products/hooks/useProductTaxonomy";
 import { PRODUCT_FAMILIES } from "@/features/products/taxonomy";
+import { useAuth } from "@/features/auth/AuthProvider";
 
 const DesignerStudio = () => {
+  const { session, primaryBrand } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFamily, setActiveFamily] = useState<string | null>(null);
+  const [activeBrandBadge, setActiveBrandBadge] = useState(false);
+  const brandCategorySlug = primaryBrand?.slug;
+  const showBrandBadge = Boolean(session && primaryBrand && brandCategorySlug);
 
-  const filters = useMemo(() => ({
-    search: searchQuery || undefined,
-    family: activeFamily || undefined,
-  }), [searchQuery, activeFamily]);
+  const filters = useMemo(
+    () => ({
+      search: searchQuery || undefined,
+      family: activeBrandBadge ? undefined : activeFamily || undefined,
+      categories: activeBrandBadge && brandCategorySlug ? [brandCategorySlug] : undefined,
+      visibility: session ? ("brand" as const) : ("public" as const),
+    }),
+    [searchQuery, activeFamily, activeBrandBadge, brandCategorySlug, session],
+  );
 
   const { products, loading } = useProducts(filters);
   const { categories } = useProductTaxonomy();
@@ -74,9 +84,12 @@ const DesignerStudio = () => {
 
             <div className="flex flex-wrap gap-2">
               <button
-                onClick={() => setActiveFamily(null)}
+                onClick={() => {
+                  setActiveFamily(null);
+                  setActiveBrandBadge(false);
+                }}
                 className={`px-3 py-1.5 text-[11px] tracking-[0.03em] capitalize border transition-colors ${
-                  !activeFamily
+                  !activeFamily && !activeBrandBadge
                     ? "bg-foreground text-background border-foreground"
                     : "bg-transparent text-muted-foreground border-border hover:border-foreground/40"
                 }`}
@@ -86,7 +99,10 @@ const DesignerStudio = () => {
               {familyChips.map((f) => (
                 <button
                   key={f.slug}
-                  onClick={() => setActiveFamily(f.slug === activeFamily ? null : f.slug)}
+                  onClick={() => {
+                    setActiveBrandBadge(false);
+                    setActiveFamily(f.slug === activeFamily ? null : f.slug);
+                  }}
                   className={`px-3 py-1.5 text-[11px] tracking-[0.03em] capitalize border transition-colors ${
                     activeFamily === f.slug
                       ? "bg-foreground text-background border-foreground"
@@ -96,6 +112,21 @@ const DesignerStudio = () => {
                   {f.name}
                 </button>
               ))}
+              {showBrandBadge && (
+                <button
+                  onClick={() => {
+                    setActiveFamily(null);
+                    setActiveBrandBadge((prev) => !prev);
+                  }}
+                  className={`px-3 py-1.5 text-[11px] tracking-[0.03em] border transition-colors ${
+                    activeBrandBadge
+                      ? "bg-foreground text-background border-foreground"
+                      : "bg-transparent text-muted-foreground border-border hover:border-foreground/40"
+                  }`}
+                >
+                  {primaryBrand?.name ?? "Brand"}
+                </button>
+              )}
             </div>
           </div>
 

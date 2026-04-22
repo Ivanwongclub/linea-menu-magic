@@ -510,11 +510,8 @@ const DesignerStudioDashboard = () => {
                   </button>
                   <div>
                     <h2 className="text-lg font-semibold text-foreground">Component Library</h2>
-                    <p className="text-xs text-muted-foreground flex items-center gap-2">
-                      {filteredLibraryItems.length} components
-                      <span className="inline-flex items-center rounded-md border border-border px-1.5 py-0.5 text-[10px] uppercase tracking-[0.06em] text-foreground/80">
-                        {brandCatalogueName}
-                      </span>
+                    <p className="text-xs text-muted-foreground">
+                      {filteredLibraryItems.length} components in {brandCatalogueName}
                     </p>
                   </div>
                 </div>
@@ -536,7 +533,7 @@ const DesignerStudioDashboard = () => {
                       : 'text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]'
                   }`}
                 >
-                  {brandCatalogueName} ({catalogProducts.length})
+                  Brand Catalogue ({catalogProducts.length})
                 </button>
                 <button
                   onClick={() => setLibrarySource('my')}
@@ -546,7 +543,7 @@ const DesignerStudioDashboard = () => {
                       : 'text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]'
                   }`}
                 >
-                  My Library ({libraryItems.length})
+                  Saved Library ({libraryItems.length})
                 </button>
               </div>
 
