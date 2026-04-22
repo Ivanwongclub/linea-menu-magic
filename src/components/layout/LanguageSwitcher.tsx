@@ -28,11 +28,11 @@ const LanguageSwitcher = ({ compact = false }: LanguageSwitcherProps) => {
           type="button"
           aria-label={t("i18n.switchLanguage")}
           title={t("i18n.switchLanguage")}
-          className={`inline-flex items-center rounded-sm border border-transparent text-foreground hover:border-border hover:text-foreground transition-colors ${
+          className={`inline-flex items-center rounded-sm border border-border/70 text-foreground hover:border-foreground/40 hover:text-foreground transition-colors ${
             compact ? "h-9 gap-1 px-2.5 text-xs" : "h-8 gap-1.5 px-2 text-[11px]"
           }`}
         >
-          <Globe className={compact ? "h-4 w-4" : "h-3.5 w-3.5"} strokeWidth={1.8} />
+          <Globe className={compact ? "h-4.5 w-4.5" : "h-4 w-4"} strokeWidth={1.9} />
           <span className="font-medium tracking-[0.08em] uppercase">{current.short}</span>
           <ChevronDown className={compact ? "h-3.5 w-3.5" : "h-3 w-3"} />
         </button>
