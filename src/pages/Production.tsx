@@ -1,5 +1,6 @@
 import { lazy, Suspense, useState, useEffect } from "react";
 import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
+import OptimizedImage from "@/components/ui/OptimizedImage";
 import { Link } from "react-router-dom";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 import { ArrowRight, CheckCircle, Box, Images, ChevronLeft, ChevronRight } from "lucide-react";
