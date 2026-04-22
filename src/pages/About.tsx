@@ -154,7 +154,7 @@ const About = () => {
             {/* Timeline rows */}
             <div ref={timelineRef} className="relative">
               {/* Spine — starts below header */}
-              <div className="absolute left-[120px] top-0 bottom-0 w-px bg-foreground/12" />
+              <div className="absolute left-[140px] top-0 bottom-0 w-px bg-foreground/30" />
 
               <div className="space-y-0">
                 {milestones.map((milestone, index) => (
@@ -166,7 +166,7 @@ const About = () => {
                     style={getTimelineDelay(index)}
                   >
                     {/* Year */}
-                    <div className="w-[120px] flex-shrink-0 text-right pr-10 pt-0.5">
+                    <div className="w-[140px] flex-shrink-0 text-right pr-10 pt-0.5 whitespace-nowrap">
                       <span className={`font-semibold tracking-tight leading-tight block ${
                         milestone.isHighlight
                           ? "text-[18px] text-foreground"
@@ -177,7 +177,7 @@ const About = () => {
                     </div>
 
                     {/* Dot on spine */}
-                    <div className="absolute left-[120px] top-[calc(1.75rem+1px)] -translate-x-1/2 z-10">
+                    <div className="absolute left-[140px] top-[calc(1.75rem+1px)] -translate-x-1/2 z-10">
                       {milestone.isHighlight ? (
                         <div className="w-3 h-3 rounded-full bg-foreground" />
                       ) : (
