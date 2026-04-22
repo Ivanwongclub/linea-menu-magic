@@ -42,7 +42,12 @@ const LanguageSwitcher = ({ compact = false }: LanguageSwitcherProps) => {
           <DropdownMenuItem
             key={option.value}
             onClick={() => setLanguage(option.value)}
-            className="flex items-center justify-between gap-3 px-2.5 py-2 text-xs"
+            aria-current={option.value === language ? "true" : undefined}
+            className={`flex items-center justify-between gap-3 rounded-sm px-2.5 py-2 text-xs transition-colors cursor-pointer ${
+              option.value === language
+                ? "bg-secondary/80 text-foreground"
+                : "text-foreground"
+            } hover:bg-secondary/60 focus:bg-secondary/60 focus:text-foreground data-[highlighted]:bg-secondary/60 data-[highlighted]:text-foreground`}
           >
             <div className="flex items-center gap-2.5">
               <span className="min-w-[24px] text-[10px] font-medium tracking-[0.12em] uppercase text-muted-foreground">
