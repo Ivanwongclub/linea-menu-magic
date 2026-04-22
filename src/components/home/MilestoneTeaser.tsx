@@ -231,7 +231,7 @@ const MilestoneCard = ({
               width={800}
               height={608}
               loading="lazy"
-              className="w-full h-32 object-cover"
+              className="w-full h-48 object-cover"
             />
           </div>
         )}
@@ -266,7 +266,7 @@ const MilestoneCard = ({
             width={800}
             height={608}
             loading="lazy"
-            className={`w-full h-28 object-cover transition-filter duration-500 ${
+            className={`w-full h-44 object-cover transition-filter duration-500 ${
               m.isVintage ? "grayscale sepia-[0.2] brightness-95" : ""
             }`}
           />
