@@ -44,9 +44,9 @@ const workflowSteps = [
   },
   {
     number: "03",
-    title: "Service & Delivery",
-    body: "Local offices in key markets provide rapid response, sample management, and on-the-ground support throughout the supply chain.",
-    bullets: ["Regional Office Support", "Sample Turnaround"],
+    title: "Service & Customization",
+    body: "From first sketch to finished trim. Our in-house design team partners with brands to develop bespoke hardware, components and finishes — combining cost-effective vertically integrated production with a fashion-forward perspective. Local offices in key markets keep every project moving, from sample to bulk.",
+    bullets: ["Bespoke Design Service", "In-House Creative Team", "Regional Office Support", "Sample-to-Bulk Continuity"],
     image: valuePartnershipImg,
     showStudioLink: true,
   },
