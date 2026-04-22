@@ -3,10 +3,6 @@ import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
 import { Link } from "react-router-dom";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 import { ArrowRight, CheckCircle, Box, Images, ChevronLeft, ChevronRight } from "lucide-react";
-import factoryProductionImg from "@/assets/factory-production.jpg";
-import productionHeroImg from "@/assets/production-hero.jpg";
-import valueInnovationImg from "@/assets/value-innovation.jpg";
-import valuePartnershipImg from "@/assets/value-partnership.jpg";
 import brassSurface from "@/assets/materials/brass-surface.jpg";
 import metalSurface from "@/assets/materials/metal-surface.jpg";
 import resinSurface from "@/assets/materials/resin-surface.jpg";
@@ -31,7 +27,7 @@ const workflowSteps = [
     title: "Design & Development",
     body: "From initial concept to production-ready specification. Our development team works directly with clients on 3D prototyping, finish selection, and material sourcing — turning ideas into trim-ready samples.",
     bullets: ["3D Artwork & Prototyping"],
-    image: valueInnovationImg,
+    image: "/optimized/assets__value-innovation-480.webp",
     showGallery: true,
   },
   {
@@ -39,7 +35,7 @@ const workflowSteps = [
     title: "Production",
     body: "From rapid 3D-printed prototypes to full production runs — our facility combines digital fabrication with vertically integrated manufacturing to move from concept to finished trim faster than traditional methods.",
     bullets: ["3D Printing"],
-    image: factoryProductionImg,
+    image: "/optimized/assets__factory-production-768.webp",
     showPrintGallery: true,
   },
   {
@@ -47,7 +43,7 @@ const workflowSteps = [
     title: "Service & Delivery",
     body: "Local offices in key markets provide rapid response, sample management, and on-the-ground support throughout the supply chain.",
     bullets: ["Regional Office Support", "Sample Turnaround"],
-    image: valuePartnershipImg,
+    image: "/optimized/assets__value-partnership-480.webp",
     showStudioLink: true,
   },
 ];
@@ -151,16 +147,28 @@ export default function Production() {
         {/* ── SECTION 1: Full-bleed hero ──────────────────────────────── */}
         <section className="relative overflow-hidden">
           <div className="aspect-[21/9] md:aspect-[3/1] w-full overflow-hidden">
-            <img
-              src={productionHeroImg}
-              alt="Precision garment hardware — brass buttons, snap fasteners, buckles"
-              className="w-full h-full object-cover"
-              width={1920}
-              height={640}
-              loading="eager"
-              decoding="async"
-              fetchPriority="high"
-            />
+            <picture>
+              <source
+                type="image/avif"
+                srcSet="/optimized/assets__production-hero-480.avif 480w, /optimized/assets__production-hero-768.avif 768w, /optimized/assets__production-hero-1200.avif 1200w, /optimized/assets__production-hero-1600.avif 1600w"
+                sizes="100vw"
+              />
+              <source
+                type="image/webp"
+                srcSet="/optimized/assets__production-hero-480.webp 480w, /optimized/assets__production-hero-768.webp 768w, /optimized/assets__production-hero-1200.webp 1200w, /optimized/assets__production-hero-1600.webp 1600w"
+                sizes="100vw"
+              />
+              <img
+                src="/optimized/assets__production-hero-1200.jpg"
+                alt="Precision garment hardware — brass buttons, snap fasteners, buckles"
+                className="w-full h-full object-cover"
+                width={1920}
+                height={640}
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
+              />
+            </picture>
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/10" />
           </div>
           <div className="absolute inset-0 flex items-end">
@@ -191,15 +199,21 @@ export default function Production() {
                   {/* Image */}
                   <div className="lg:w-1/2 w-full">
                     <div className="aspect-[4/3] overflow-hidden rounded-[var(--radius)]">
-                      <img
-                        src={step.image}
-                        alt={step.title}
-                        className="w-full h-full object-cover"
-                        width={1200}
-                        height={900}
-                        loading={i === 0 ? "eager" : "lazy"}
-                        decoding="async"
-                      />
+                      <picture>
+                        <source
+                          type="image/avif"
+                          srcSet={`${step.image.replace('.webp', '.avif')}`}
+                        />
+                        <img
+                          src={step.image}
+                          alt={step.title}
+                          className="w-full h-full object-cover"
+                          width={1200}
+                          height={900}
+                          loading={i === 0 ? "eager" : "lazy"}
+                          decoding="async"
+                        />
+                      </picture>
                     </div>
                   </div>
 
