@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PRODUCT_FAMILIES, PRODUCT_SEGMENT_DETAILS } from "@/features/products/taxonomy";
+import { PRODUCT_FAMILIES } from "@/features/products/taxonomy";
 import BrandWordmark from "@/components/layout/BrandWordmark";
 import aboutHeritageImg from "@/assets/about-heritage.jpg";
 import heritageCraftImg from "@/assets/heritage-craftsmanship.jpg";
@@ -90,8 +90,7 @@ function slugify(name: string) {
   return name.toLowerCase().replace(/\s+&\s+/g, "-").replace(/\s+/g, "-");
 }
 
-const NAV_LINKS: Array<{ href: string; label: string; megaMenu?: "products" | "about" | "segments" }> = [
-  { href: "/segments",        label: "Segments",        megaMenu: "segments" },
+const NAV_LINKS: Array<{ href: string; label: string; megaMenu?: "products" | "about" }> = [
   { href: "/products",        label: "Products",        megaMenu: "products" },
   { href: "/about",           label: "About",           megaMenu: "about"    },
   { href: "/production",      label: "Production"      },
@@ -105,28 +104,24 @@ const Header = () => {
   const [isMenuOpen,         setIsMenuOpen]         = useState(false);
   const [isAboutOpen,        setIsAboutOpen]        = useState(false);
   const [isProductsOpen,     setIsProductsOpen]     = useState(false);
-  const [isSegmentsOpen,     setIsSegmentsOpen]     = useState(false);
   const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
   const [mobileAboutOpen,    setMobileAboutOpen]    = useState(false);
-  const [mobileSegmentsOpen, setMobileSegmentsOpen] = useState(false);
   const [scrolled,           setScrolled]           = useState(false);
   const [productsMegaHydrated, setProductsMegaHydrated] = useState(false);
   const [aboutMegaHydrated, setAboutMegaHydrated] = useState(false);
   const [aboutPreviewImage,  setAboutPreviewImage]  = useState(ABOUT_DEFAULT_PREVIEW);
   const [aboutPreviewLabel,  setAboutPreviewLabel]  = useState("Our Story");
-  const [activeSegmentSlug,  setActiveSegmentSlug]  = useState("apparel");
 
   const { pathname } = useLocation();
   const productsTimeout = useRef<ReturnType<typeof setTimeout>>();
   const aboutTimeout    = useRef<ReturnType<typeof setTimeout>>();
-  const segmentsTimeout = useRef<ReturnType<typeof setTimeout>>();
-  const segmentsRef     = useRef<HTMLDivElement>(null);
+  const productsRef     = useRef<HTMLDivElement>(null);
   const [navLeftOffset, setNavLeftOffset] = useState(200);
 
   useEffect(() => {
     const update = () => {
-      if (segmentsRef.current) {
-        setNavLeftOffset(segmentsRef.current.getBoundingClientRect().left);
+      if (productsRef.current) {
+        setNavLeftOffset(productsRef.current.getBoundingClientRect().left);
       }
     };
     update();
@@ -152,7 +147,6 @@ const Header = () => {
   useEffect(() => {
     setIsProductsOpen(false);
     setIsAboutOpen(false);
-    setIsSegmentsOpen(false);
     setIsMenuOpen(false);
   }, [pathname]);
 
@@ -177,7 +171,6 @@ const Header = () => {
     setProductsMegaHydrated(true);
     setIsProductsOpen(true);
     setIsAboutOpen(false);
-    setIsSegmentsOpen(false);
   };
   const handleProductsLeave = () => { productsTimeout.current = setTimeout(() => setIsProductsOpen(false), 150); };
   const handleAboutEnter    = () => {
@@ -185,14 +178,10 @@ const Header = () => {
     setAboutMegaHydrated(true);
     setIsAboutOpen(true);
     setIsProductsOpen(false);
-    setIsSegmentsOpen(false);
   };
   const handleAboutLeave    = () => { aboutTimeout.current    = setTimeout(() => setIsAboutOpen(false), 150); };
-  const handleSegmentsEnter = () => { clearTimeout(segmentsTimeout.current); setIsSegmentsOpen(true);  setIsProductsOpen(false); setIsAboutOpen(false);    };
-  const handleSegmentsLeave = () => { segmentsTimeout.current = setTimeout(() => setIsSegmentsOpen(false), 150); };
 
   const closeAllMenus = useCallback(() => {
-    setIsSegmentsOpen(false);
     setIsProductsOpen(false);
     setIsAboutOpen(false);
   }, []);
@@ -218,19 +207,9 @@ const Header = () => {
             {/* Desktop nav */}
             <nav className="hidden lg:flex items-center justify-center gap-8 flex-1">
               {NAV_LINKS.map((link) => {
-                if (link.megaMenu === "segments") {
-                  return (
-                    <div key={link.href} className="relative" ref={segmentsRef} onMouseEnter={handleSegmentsEnter} onMouseLeave={handleSegmentsLeave}>
-                      <Link to="/products?segment=apparel" onClick={closeAllMenus} className={linkClass(false) + " flex items-center gap-1"}>
-                        {link.label}
-                        <ChevronDown size={14} className={`transition-transform duration-200 ${isSegmentsOpen ? "rotate-180" : ""}`} />
-                      </Link>
-                    </div>
-                  );
-                }
                 if (link.megaMenu === "products") {
                   return (
-                    <div key={link.href} className="relative" onMouseEnter={handleProductsEnter} onMouseLeave={handleProductsLeave}>
+                    <div key={link.href} className="relative" ref={productsRef} onMouseEnter={handleProductsEnter} onMouseLeave={handleProductsLeave}>
                       <Link to="/products" onClick={closeAllMenus} className={linkClass(isActive(link.href)) + " flex items-center gap-1"}>
                         {link.label}
                         <ChevronDown size={14} className={`transition-transform duration-200 ${isProductsOpen ? "rotate-180" : ""}`} />
@@ -291,100 +270,6 @@ const Header = () => {
           </div>
         </div>
       </header>
-
-      {/* ── Segments Mega Menu ───────────────────────────────────────────────── */}
-      <div
-        className="hidden lg:block fixed left-0 right-0 z-40"
-        style={{ top: "80px", pointerEvents: isSegmentsOpen ? "auto" : "none" }}
-        onMouseEnter={handleSegmentsEnter}
-        onMouseLeave={handleSegmentsLeave}
-      >
-        <div className={`transition-all duration-200 ease-out ${
-          isSegmentsOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-1 pointer-events-none"
-        }`}>
-          <div className="bg-white border-b-[3px] border-b-foreground shadow-mega h-[660px]">
-            <div className="w-full pr-10 lg:pr-16 xl:pr-24 py-10 h-full" style={{ paddingLeft: navLeftOffset }}>
-              <div className="flex gap-0 h-full">
-
-                {/* Left: segment selector list */}
-                <div className="w-[220px] flex-shrink-0 border-r border-[hsl(var(--border))] flex flex-col">
-                  <div className="flex flex-col gap-1">
-                    {PRODUCT_SEGMENT_DETAILS.map((seg) => (
-                      <button
-                        key={seg.slug}
-                        onMouseEnter={() => setActiveSegmentSlug(seg.slug)}
-                        className={`group text-left pl-3 pr-2 py-3.5 border-l-2 transition-all duration-150 ${
-                          activeSegmentSlug === seg.slug
-                            ? "border-foreground bg-foreground text-white"
-                            : "border-transparent hover:bg-foreground hover:text-white hover:border-foreground"
-                        }`}
-                      >
-                        <span className="text-[15px] font-semibold block leading-snug">{seg.name}</span>
-                        <span className={`text-[12px] block mt-0.5 leading-snug ${activeSegmentSlug === seg.slug ? "text-white/70" : "text-muted-foreground group-hover:text-white/70"}`}>
-                          {seg.slug === "apparel"  && "Garments & fashion"}
-                          {seg.slug === "beauty"   && "Cosmetics & packaging"}
-                          {seg.slug === "material" && "By finish & composition"}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                  {/* Designer Studio CTA */}
-                  <div className="mt-auto pt-5 border-t border-[hsl(var(--border))]" style={{ marginTop: "auto" }}>
-                    <Link to="/designer-studio" onClick={closeAllMenus} className="text-[12px] text-foreground hover:text-muted-foreground transition-colors leading-snug block">
-                      Custom via our<br />
-                      <span className="font-semibold text-foreground">Designer Studio →</span>
-                    </Link>
-                  </div>
-                </div>
-
-                {/* Centre: active segment detail */}
-                {(() => {
-                  const active = PRODUCT_SEGMENT_DETAILS.find((s) => s.slug === activeSegmentSlug) ?? PRODUCT_SEGMENT_DETAILS[0];
-                  return (
-                    <div className="flex-1 px-8 flex flex-col gap-5 min-w-0 h-full overflow-y-auto">
-                      <div>
-                        <p className="text-[18px] font-semibold text-foreground">{active.name}</p>
-                        <p className="text-[13px] text-muted-foreground mt-2 leading-relaxed">{active.tagline}</p>
-                      </div>
-                      <div className="flex flex-col gap-6">
-                        {active.categories.map((group) => (
-                          <div key={group.family}>
-                            <span className="text-[14px] font-semibold capitalize tracking-[0.10em] text-foreground block mb-3">
-                              {group.family}
-                            </span>
-                            <div className="grid gap-[6px]" style={{ gridTemplateColumns: "repeat(5, 140px)" }}>
-                              {group.items.map((item) => (
-                                <Link
-                                  key={item}
-                                  to={`/products?category=${slugify(item)}&segment=${active.slug}`}
-                                  onClick={closeAllMenus}
-                                  className="w-[140px] py-3 text-[13px] text-center border border-[hsl(var(--border))] text-muted-foreground hover:bg-foreground hover:text-background hover:border-foreground transition-colors duration-150 block"
-                                >
-                                  {item}
-                                </Link>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="pt-3 border-t border-[hsl(var(--border))] mt-auto">
-                        <Link
-                          to={`/products?segment=${active.slug}`}
-                          onClick={closeAllMenus}
-                          className="text-[11px] font-medium uppercase tracking-[0.1em] text-foreground hover:text-muted-foreground transition-colors"
-                        >
-                          View all {active.name} products →
-                        </Link>
-                      </div>
-                    </div>
-                  );
-                })()}
-
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* ── Products Mega Menu ───────────────────────────────────────────────── */}
       <div
@@ -684,35 +569,6 @@ const Header = () => {
                               className="text-sm text-foreground hover:text-muted-foreground transition-colors duration-150 block py-2 px-8 border-b border-border last:border-b-0"
                             >
                               {l.label}
-                            </Link>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
-
-                /* Segments — collapsible (links to segment filters) */
-                if (link.megaMenu === "segments") {
-                  return (
-                    <div key={link.href}>
-                      <button
-                        onClick={() => setMobileSegmentsOpen(!mobileSegmentsOpen)}
-                        className="w-full flex items-center justify-between text-lg font-medium tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 py-4 px-6 border-b border-border"
-                      >
-                        {link.label}
-                        <ChevronDown size={18} className={`transition-transform duration-200 ${mobileSegmentsOpen ? "rotate-180" : ""}`} />
-                      </button>
-                      {mobileSegmentsOpen && (
-                        <div className="bg-secondary border-b border-border">
-                          {["Apparel", "Footwear", "Bags & Luggage", "Beauty"].map((seg) => (
-                            <Link
-                              key={seg}
-                              to={`/products?segment=${slugify(seg)}`}
-                              onClick={() => setIsMenuOpen(false)}
-                              className="text-sm text-foreground hover:text-muted-foreground transition-colors duration-150 block py-2 px-8 border-b border-border last:border-b-0"
-                            >
-                              {seg}
                             </Link>
                           ))}
                         </div>
