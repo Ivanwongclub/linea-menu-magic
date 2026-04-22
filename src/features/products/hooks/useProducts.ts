@@ -204,8 +204,8 @@ async function resolveProductSetByDimension(scope: FilterScope): Promise<Set<str
 
   if (dimensionIds.length === 0) return new Set();
 
-  const { data: mapRows, error: mapError } = await supabase
-    .from(scope.mapTable)
+  const { data: mapRows, error: mapError } = await (supabase
+    .from(scope.mapTable) as any)
     .select('product_id')
     .in(scope.mapDimensionColumn, dimensionIds);
 
