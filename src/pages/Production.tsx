@@ -15,6 +15,9 @@ import certGrs from "@/assets/certs/grs.png";
 import certOekoTex from "@/assets/certs/oeko-tex.png";
 import certHigg from "@/assets/certs/higg-index.png";
 import certSmeta from "@/assets/certs/smeta.png";
+import valueInnovationImg from "@/assets/value-innovation.jpg";
+import valuePartnershipImg from "@/assets/value-partnership.jpg";
+import factoryProductionImg from "@/assets/factory-production.jpg";
 
 const ObjGallery = lazy(() => import("@/components/production/ObjGallery"));
 const PrintGallery = lazy(() => import("@/components/production/PrintGallery"));
@@ -27,7 +30,7 @@ const workflowSteps = [
     title: "Design & Development",
     body: "From initial concept to production-ready specification. Our development team works directly with clients on 3D prototyping, finish selection, and material sourcing — turning ideas into trim-ready samples.",
     bullets: ["3D Artwork & Prototyping"],
-    image: "/optimized/assets__value-innovation-480.webp",
+    image: valueInnovationImg,
     showGallery: true,
   },
   {
@@ -35,7 +38,7 @@ const workflowSteps = [
     title: "Production",
     body: "From rapid 3D-printed prototypes to full production runs — our facility combines digital fabrication with vertically integrated manufacturing to move from concept to finished trim faster than traditional methods.",
     bullets: ["3D Printing"],
-    image: "/optimized/assets__factory-production-768.webp",
+    image: factoryProductionImg,
     showPrintGallery: true,
   },
   {
@@ -43,7 +46,7 @@ const workflowSteps = [
     title: "Service & Delivery",
     body: "Local offices in key markets provide rapid response, sample management, and on-the-ground support throughout the supply chain.",
     bullets: ["Regional Office Support", "Sample Turnaround"],
-    image: "/optimized/assets__value-partnership-480.webp",
+    image: valuePartnershipImg,
     showStudioLink: true,
   },
 ];
@@ -211,21 +214,15 @@ export default function Production() {
                   {/* Image */}
                   <div className="lg:w-1/2 w-full">
                     <div className="aspect-[4/3] overflow-hidden rounded-[var(--radius)]">
-                      <picture>
-                        <source
-                          type="image/avif"
-                          srcSet={`${step.image.replace('.webp', '.avif')}`}
-                        />
-                        <img
-                          src={step.image}
-                          alt={step.title}
-                          className="w-full h-full object-cover"
-                          width={1200}
-                          height={900}
-                          loading={i === 0 ? "eager" : "lazy"}
-                          decoding="async"
-                        />
-                      </picture>
+                      <img
+                        src={step.image}
+                        alt={step.title}
+                        className="w-full h-full object-cover"
+                        width={1200}
+                        height={900}
+                        loading={i === 0 ? "eager" : "lazy"}
+                        decoding="async"
+                      />
                     </div>
                   </div>
 
