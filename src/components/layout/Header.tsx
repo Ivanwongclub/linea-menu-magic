@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { PRODUCT_FAMILIES } from "@/features/products/taxonomy";
 import BrandWordmark from "@/components/layout/BrandWordmark";
 
-const aboutHeritageImg = "/optimized/assets__about-heritage-480.webp?v=2";
-const heritageCraftImg = "/optimized/assets__about-heritage-768.webp?v=2";
+const aboutHeritageImg = "/optimized/assets__about-heritage-480.webp?v=3";
+const heritageCraftImg = "/optimized/assets__about-heritage-768.webp?v=3";
 const aboutShowroomImg = "/optimized/assets__about-showroom-480.webp";
 const foundersImg = "/optimized/assets__founders-480.webp";
 const buttonsCategoryImg = "/optimized/assets__products__buttons-category-480.webp";
