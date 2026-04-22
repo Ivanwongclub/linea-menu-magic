@@ -1,5 +1,6 @@
 import { lazy, Suspense, useState, useEffect } from "react";
 import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
+import OptimizedImage from "@/components/ui/OptimizedImage";
 import { Link } from "react-router-dom";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 import { ArrowRight, CheckCircle, Box, Images, ChevronLeft, ChevronRight } from "lucide-react";
@@ -214,14 +215,13 @@ export default function Production() {
                   {/* Image */}
                   <div className="lg:w-1/2 w-full">
                     <div className="aspect-[4/3] overflow-hidden rounded-[var(--radius)]">
-                      <img
+                      <OptimizedImage
                         src={step.image}
                         alt={step.title}
                         className="w-full h-full object-cover"
                         width={1200}
                         height={900}
-                        loading={i === 0 ? "eager" : "lazy"}
-                        decoding="async"
+                        priority={i === 0 ? "eager" : "lazy"}
                       />
                     </div>
                   </div>
@@ -352,14 +352,13 @@ export default function Production() {
                       {/* Image */}
                       <div className="lg:w-1/2 w-full">
                         <div className="aspect-[4/3] overflow-hidden rounded-[var(--radius)]">
-                          <img
+                          <OptimizedImage
                             src={mat.image}
                             alt={mat.name}
                             className="w-full h-full object-cover"
                             width={1200}
                             height={900}
-                            loading="lazy"
-                            decoding="async"
+                            priority="lazy"
                           />
                         </div>
                       </div>
@@ -429,27 +428,25 @@ export default function Production() {
                       { src: certHigg, alt: "Higg Index" },
                       { src: certSmeta, alt: "SMETA" },
                     ].map((cert) => (
-                      <img
+                      <OptimizedImage
                         key={cert.alt}
                         src={cert.src}
                         alt={cert.alt}
                         className="h-20 w-auto object-contain"
-                        loading="lazy"
-                        decoding="async"
+                        priority="lazy"
                       />
                     ))}
                   </div>
                 </div>
                 <div className="lg:w-1/2 w-full">
                   <div className="aspect-[4/3] overflow-hidden rounded-[var(--radius)]">
-                    <img
+                    <OptimizedImage
                       src={sustainabilityForestImg}
                       alt="Sustainable manufacturing"
                       className="w-full h-full object-cover"
                       width={1200}
                       height={900}
-                      loading="lazy"
-                      decoding="async"
+                      priority="lazy"
                     />
                   </div>
                 </div>
@@ -461,14 +458,13 @@ export default function Production() {
                   { image: sustainabilityNatureImg, title: "Our Commitment", body: "Functionality and product performance is of upmost importance — ensuring all products go through quality control procedures aligned with environmental standards.", href: "/about" },
                 ].map((card) => (
                   <Link key={card.title} to={card.href} className="group relative aspect-[3/4] overflow-hidden rounded-[var(--radius)] block">
-                    <img
+                    <OptimizedImage
                       src={card.image}
                       alt={card.title}
                       className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       width={900}
                       height={1200}
-                      loading="lazy"
-                      decoding="async"
+                      priority="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
                     <div className="absolute bottom-0 left-0 right-0 p-6">
