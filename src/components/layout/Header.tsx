@@ -274,7 +274,7 @@ const Header = () => {
                   Contact
                 </Button>
               </Link>
-              <Link to="/designer-studio">
+              <Link to="/designer-studio/login">
                 <Button
                   size="sm"
                   className={
@@ -634,7 +634,7 @@ const Header = () => {
                 <Link to="/contact" onClick={() => setIsMenuOpen(false)}>
                   <Button className="w-full">Contact</Button>
                 </Link>
-                <Link to="/designer-studio" onClick={() => setIsMenuOpen(false)}>
+                <Link to="/designer-studio/login" onClick={() => setIsMenuOpen(false)}>
                   <Button variant="outline" className="w-full">B2B Login</Button>
                 </Link>
               </div>
