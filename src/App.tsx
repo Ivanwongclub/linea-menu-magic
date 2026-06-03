@@ -27,6 +27,7 @@ const loadNews = () => import("./pages/News");
 const loadNewsDetail = () => import("./pages/NewsDetail");
 const loadDesignerStudio = () => import("./pages/DesignerStudio");
 const loadDesignerStudioTrimLibrary = () => import("./pages/DesignerStudioTrimLibrary");
+const loadDesignerStudioEditor = () => import("./pages/DesignerStudioEditor");
 const loadDesignerStudioDashboard = () => import("./pages/DesignerStudioDashboard");
 const loadComposerPage = () => import("./features/designer/pages/ComposerPage");
 const loadPresentationPage = () => import("./features/designer/pages/PresentationPage");
@@ -50,6 +51,7 @@ const News = lazy(loadNews);
 const NewsDetail = lazy(loadNewsDetail);
 const DesignerStudio = lazy(loadDesignerStudio);
 const DesignerStudioTrimLibrary = lazy(loadDesignerStudioTrimLibrary);
+const DesignerStudioEditor = lazy(loadDesignerStudioEditor);
 const DesignerStudioDashboard = lazy(loadDesignerStudioDashboard);
 const ComposerPage = lazy(loadComposerPage);
 const PresentationPage = lazy(loadPresentationPage);
@@ -193,6 +195,7 @@ const App = () => (
                     <Route path="/designer-studio" element={withRouteSuspense(<DesignerStudio />)} />
                     <Route path="/designer-studio/trim-library" element={withRouteSuspense(<DesignerStudioTrimLibrary />)} />
                     <Route path="/designer-studio/login" element={withRouteSuspense(<DesignerStudioLogin />)} />
+                    <Route path="/designer-studio/editor" element={withRouteSuspense(<DesignerStudioEditor />)} />
                     <Route path="/designer-studio/products/:slug" element={withRouteSuspense(<ProductDetail />)} />
                     <Route
                       path="/designer-studio/dashboard"

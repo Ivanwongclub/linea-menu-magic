@@ -61,7 +61,7 @@ const DesignerStudioTrimLibrary = () => {
             </p>
           </div>
           <div className="flex gap-3 shrink-0">
-            <Link to="/designer-studio/dashboard?tab=library">
+            <Link to="/designer-studio/editor">
               <Button size="sm" className="tracking-[0.05em] text-xs px-6 capitalize">
                 {t("studio.enter")}
               </Button>
