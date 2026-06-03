@@ -14,7 +14,7 @@ const objectList = document.getElementById('objectList');
 
 // --- Scene -------------------------------------------------------------
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x0e0f13);
+scene.background = new THREE.Color(0xfafafa);
 
 const camera = new THREE.PerspectiveCamera(50, 1, 0.01, 5000);
 camera.position.set(6, 5, 9);
@@ -26,8 +26,8 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 viewport.appendChild(renderer.domElement);
 
 // --- Lighting ----------------------------------------------------------
-scene.add(new THREE.HemisphereLight(0xbfd4ff, 0x202028, 0.85));
-const keyLight = new THREE.DirectionalLight(0xffffff, 2.2);
+scene.add(new THREE.HemisphereLight(0xffffff, 0xe5e5e5, 0.9));
+const keyLight = new THREE.DirectionalLight(0xffffff, 1.8);
 keyLight.position.set(8, 14, 6);
 keyLight.castShadow = true;
 keyLight.shadow.mapSize.set(2048, 2048);
@@ -39,13 +39,13 @@ keyLight.shadow.camera.top = 25;
 keyLight.shadow.camera.bottom = -25;
 keyLight.shadow.bias = -0.0004;
 scene.add(keyLight);
-const fillLight = new THREE.DirectionalLight(0xffffff, 0.5);
+const fillLight = new THREE.DirectionalLight(0xffffff, 0.4);
 fillLight.position.set(-6, 4, -8);
 scene.add(fillLight);
 
 // --- Ground / grid -----------------------------------------------------
-const grid = new THREE.GridHelper(60, 60, 0x3a4150, 0x262b33);
-grid.material.opacity = 0.6;
+const grid = new THREE.GridHelper(60, 60, 0xd4d4d4, 0xe5e5e5);
+grid.material.opacity = 0.8;
 grid.material.transparent = true;
 scene.add(grid);
 
