@@ -935,3 +935,23 @@ setStatus('Ready. Import an .obj file to begin.');
 
 // Bring back whatever was open last time.
 restoreScene();
+
+// ---- URL param autoload (model=<url>&name=<label>) -------------------
+(async function autoloadFromQuery() {
+  try {
+    const params = new URLSearchParams(location.search);
+    const modelUrl = params.get('model');
+    const label = params.get('name');
+    if (modelUrl) {
+      setStatus(`Loading ${label || 'model'}...`);
+      const res = await fetch(modelUrl);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const text = await res.text();
+      const fileName = (label ? label.replace(/\s+/g, '_') : 'model') + '.obj';
+      loadOBJText(text, fileName);
+    }
+  } catch (err) {
+    setStatus(`Failed to load model: ${err.message}`, true);
+  }
+  try { window.parent && window.parent.postMessage({ type: 'editor-ready' }, '*'); } catch (_) {}
+})();
