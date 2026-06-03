@@ -497,7 +497,8 @@ const spaceBtn = $('spaceBtn');
 spaceBtn.addEventListener('click', () => {
   const next = transform.space === 'local' ? 'world' : 'local';
   transform.setSpace(next);
-  spaceBtn.textContent = next === 'world' ? 'World' : 'Local';
+  const dict = (typeof I18N !== 'undefined' && I18N[currentLang]) || { world: 'World', local: 'Local' };
+  spaceBtn.textContent = next === 'world' ? dict.world : dict.local;
 });
 
 let snapOn = false;
@@ -507,7 +508,8 @@ snapBtn.addEventListener('click', () => {
   transform.setTranslationSnap(snapOn ? 0.5 : null);
   transform.setRotationSnap(snapOn ? THREE.MathUtils.degToRad(15) : null);
   transform.setScaleSnap(snapOn ? 0.1 : null);
-  snapBtn.textContent = snapOn ? 'Snap: On' : 'Snap: Off';
+  const dict = (typeof I18N !== 'undefined' && I18N[currentLang]) || { snapOn: 'Snap: On', snapOff: 'Snap: Off' };
+  snapBtn.textContent = snapOn ? dict.snapOn : dict.snapOff;
 });
 
 $('focusBtn').addEventListener('click', () => { if (selected) focusObject(selected); });
