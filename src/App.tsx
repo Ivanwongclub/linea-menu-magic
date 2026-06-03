@@ -51,6 +51,7 @@ const News = lazy(loadNews);
 const NewsDetail = lazy(loadNewsDetail);
 const DesignerStudio = lazy(loadDesignerStudio);
 const DesignerStudioTrimLibrary = lazy(loadDesignerStudioTrimLibrary);
+const DesignerStudioEditor = lazy(loadDesignerStudioEditor);
 const DesignerStudioDashboard = lazy(loadDesignerStudioDashboard);
 const ComposerPage = lazy(loadComposerPage);
 const PresentationPage = lazy(loadPresentationPage);
