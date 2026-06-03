@@ -927,21 +927,129 @@ async function restoreScene() {
 // Flush any pending save synchronously on the way out.
 window.addEventListener('beforeunload', () => { if (saveTimer) saveScene(); });
 
+// ====================================================================
+//  i18n (driven by parent window via postMessage)
+// ====================================================================
+const I18N = {
+  en: {
+    title: '3D Editor', import: 'Import .obj', export: 'Export .obj', addCube: '+ Cube', clear: 'Clear',
+    scene: 'Scene', stats: 'Stats', noObjects: 'No objects loaded.',
+    dropHint: 'Drop .obj files to import',
+    move: 'Move', rotate: 'Rotate', scale: 'Scale', world: 'World', local: 'Local',
+    snapOff: 'Snap: Off', snapOn: 'Snap: On',
+    focus: 'Focus', resetCam: 'Reset Cam', grid: 'Grid',
+    readyHint: 'Import an .obj file, drag-and-drop, or add a primitive to begin.',
+    inspector: 'Inspector', nothingSelected: 'Nothing selected.',
+    name: 'Name', transform: 'Transform', pos: 'Pos', rot: 'Rot°', scaleLabel: 'Scale',
+    appearance: 'Appearance', color: 'Color', metalness: 'Metalness', roughness: 'Roughness',
+    wireframe: 'Wireframe', flatShading: 'Flat shading',
+    texture: 'Texture', noTexture: 'No texture.', editTexture: 'Edit texture…', remove: 'Remove',
+    actions: 'Actions', center: 'Center', dropFloor: 'Drop to floor', duplicate: 'Duplicate', delete: 'Delete',
+    ready: 'Ready.', shortcuts: 'W/E/R transform · F focus · Del delete · Ctrl+D duplicate',
+    textureEditor: 'Texture Editor', brush: 'Brush', size: 'Size', erase: 'Erase',
+    generate: 'Generate', solid: 'Solid', checker: 'Checker', stripes: 'Stripes', dots: 'Dots',
+    gradient: 'Gradient', noise: 'Noise', uvGrid: 'UV Grid', brick: 'Brick',
+    patternScale: 'Pattern scale', image: 'Image', importImage: 'Import image…',
+    mapping: 'Mapping', tile: 'Tile', offset: 'Offset', rotation: 'Rotation°',
+    clearBtn: 'Clear', applyToObject: 'Apply to object',
+  },
+  'zh-Hant': {
+    title: '3D 編輯器', import: '匯入 .obj', export: '匯出 .obj', addCube: '+ 立方體', clear: '清除',
+    scene: '場景', stats: '統計', noObjects: '尚未載入物件。',
+    dropHint: '拖放 .obj 檔案以匯入',
+    move: '移動', rotate: '旋轉', scale: '縮放', world: '世界', local: '本地',
+    snapOff: '吸附：關', snapOn: '吸附：開',
+    focus: '對焦', resetCam: '重設視角', grid: '網格',
+    readyHint: '匯入 .obj 檔案、拖放或加入基本物件以開始。',
+    inspector: '檢視器', nothingSelected: '未選取任何物件。',
+    name: '名稱', transform: '變換', pos: '位置', rot: '旋轉°', scaleLabel: '縮放',
+    appearance: '外觀', color: '顏色', metalness: '金屬感', roughness: '粗糙度',
+    wireframe: '線框', flatShading: '平面著色',
+    texture: '貼圖', noTexture: '無貼圖。', editTexture: '編輯貼圖…', remove: '移除',
+    actions: '操作', center: '置中', dropFloor: '落至地面', duplicate: '複製', delete: '刪除',
+    ready: '就緒。', shortcuts: 'W/E/R 變換 · F 對焦 · Del 刪除 · Ctrl+D 複製',
+    textureEditor: '貼圖編輯器', brush: '筆刷', size: '尺寸', erase: '橡皮擦',
+    generate: '生成', solid: '純色', checker: '棋盤', stripes: '條紋', dots: '圓點',
+    gradient: '漸層', noise: '雜訊', uvGrid: 'UV 網格', brick: '磚塊',
+    patternScale: '圖樣縮放', image: '圖片', importImage: '匯入圖片…',
+    mapping: '映射', tile: '平鋪', offset: '偏移', rotation: '旋轉°',
+    clearBtn: '清除', applyToObject: '套用至物件',
+  },
+  'zh-Hans': {
+    title: '3D 编辑器', import: '导入 .obj', export: '导出 .obj', addCube: '+ 立方体', clear: '清除',
+    scene: '场景', stats: '统计', noObjects: '尚未加载物件。',
+    dropHint: '拖放 .obj 文件以导入',
+    move: '移动', rotate: '旋转', scale: '缩放', world: '世界', local: '本地',
+    snapOff: '吸附：关', snapOn: '吸附：开',
+    focus: '聚焦', resetCam: '重置视角', grid: '网格',
+    readyHint: '导入 .obj 文件、拖放或添加基本物件以开始。',
+    inspector: '检视器', nothingSelected: '未选择任何物件。',
+    name: '名称', transform: '变换', pos: '位置', rot: '旋转°', scaleLabel: '缩放',
+    appearance: '外观', color: '颜色', metalness: '金属感', roughness: '粗糙度',
+    wireframe: '线框', flatShading: '平面着色',
+    texture: '贴图', noTexture: '无贴图。', editTexture: '编辑贴图…', remove: '移除',
+    actions: '操作', center: '居中', dropFloor: '落至地面', duplicate: '复制', delete: '删除',
+    ready: '就绪。', shortcuts: 'W/E/R 变换 · F 聚焦 · Del 删除 · Ctrl+D 复制',
+    textureEditor: '贴图编辑器', brush: '笔刷', size: '尺寸', erase: '橡皮擦',
+    generate: '生成', solid: '纯色', checker: '棋盘', stripes: '条纹', dots: '圆点',
+    gradient: '渐变', noise: '噪点', uvGrid: 'UV 网格', brick: '砖块',
+    patternScale: '图案缩放', image: '图片', importImage: '导入图片…',
+    mapping: '映射', tile: '平铺', offset: '偏移', rotation: '旋转°',
+    clearBtn: '清除', applyToObject: '应用到物件',
+  },
+};
+let currentLang = 'en';
+function applyLanguage(lang) {
+  const dict = I18N[lang] || I18N.en;
+  currentLang = lang;
+  document.documentElement.lang = lang === 'en' ? 'en' : lang;
+  document.querySelectorAll('[data-i18n]').forEach((el) => {
+    const key = el.getAttribute('data-i18n');
+    if (dict[key]) {
+      // For label elements with hidden inputs, only update text nodes
+      if (el.tagName === 'LABEL' && el.querySelector('input[hidden]')) {
+        const input = el.querySelector('input[hidden]');
+        el.textContent = dict[key];
+        el.appendChild(input);
+      } else {
+        el.textContent = dict[key];
+      }
+    }
+  });
+  // Sync dynamic toggles
+  if (snapBtn) snapBtn.textContent = snapOn ? dict.snapOn : dict.snapOff;
+  if (spaceBtn) spaceBtn.textContent = transform.space === 'world' ? dict.world : dict.local;
+}
+window.addEventListener('message', (e) => {
+  const data = e.data;
+  if (data && data.type === 'set-language' && typeof data.language === 'string') {
+    applyLanguage(data.language);
+  }
+});
+
 // Init UI
 refreshOutliner();
 refreshStats();
 updateInspector();
-setStatus('Ready. Import an .obj file to begin.');
-
-// Bring back whatever was open last time.
-restoreScene();
+setStatus((I18N.en).ready);
 
 // ---- URL param autoload (model=<url>&name=<label>) -------------------
+// If a model is requested via URL, do NOT restore previous IndexedDB scene
+// (otherwise the same object accumulates across visits).
+const _urlParams = new URLSearchParams(location.search);
+const _hasModelParam = !!_urlParams.get('model');
+
+if (_hasModelParam) {
+  // Wipe any persisted scene so reopening the same item starts fresh.
+  idbSet([]).catch(() => {});
+} else {
+  restoreScene();
+}
+
 (async function autoloadFromQuery() {
   try {
-    const params = new URLSearchParams(location.search);
-    const modelUrl = params.get('model');
-    const label = params.get('name');
+    const modelUrl = _urlParams.get('model');
+    const label = _urlParams.get('name');
     if (modelUrl) {
       setStatus(`Loading ${label || 'model'}...`);
       const res = await fetch(modelUrl);
