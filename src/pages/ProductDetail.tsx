@@ -532,7 +532,7 @@ export default function ProductDetail() {
                   </Button>
                 )}
 
-                <div className={`grid gap-2 ${product.model_url ? 'grid-cols-3' : 'grid-cols-2'}`}>
+                <div className={`grid gap-2 ${product.model_url ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-2'}`}>
                   <Button variant="ghost" size="sm" className="gap-1.5 text-[11px] h-9">
                     <BookmarkPlus className="h-3.5 w-3.5" />
                     Add to My Library
@@ -545,6 +545,21 @@ export default function ProductDetail() {
                     <Button variant="ghost" size="sm" className="gap-1.5 text-[11px] h-9" onClick={() => setShow3D(true)}>
                       <Box className="h-3.5 w-3.5" />
                       View 3D Model
+                    </Button>
+                  )}
+                  {product.model_url && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="gap-1.5 text-[11px] h-9"
+                      asChild
+                    >
+                      <Link
+                        to={`/designer-studio/editor?model=${encodeURIComponent(product.model_url)}&name=${encodeURIComponent(product.item_code || product.name)}`}
+                      >
+                        <Edit3 className="h-3.5 w-3.5" />
+                        Open in Editor
+                      </Link>
                     </Button>
                   )}
                 </div>
