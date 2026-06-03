@@ -27,6 +27,7 @@ const loadNews = () => import("./pages/News");
 const loadNewsDetail = () => import("./pages/NewsDetail");
 const loadDesignerStudio = () => import("./pages/DesignerStudio");
 const loadDesignerStudioTrimLibrary = () => import("./pages/DesignerStudioTrimLibrary");
+const loadDesignerStudioEditor = () => import("./pages/DesignerStudioEditor");
 const loadDesignerStudioDashboard = () => import("./pages/DesignerStudioDashboard");
 const loadComposerPage = () => import("./features/designer/pages/ComposerPage");
 const loadPresentationPage = () => import("./features/designer/pages/PresentationPage");
