@@ -195,6 +195,7 @@ const App = () => (
                     <Route path="/designer-studio" element={withRouteSuspense(<DesignerStudio />)} />
                     <Route path="/designer-studio/trim-library" element={withRouteSuspense(<DesignerStudioTrimLibrary />)} />
                     <Route path="/designer-studio/login" element={withRouteSuspense(<DesignerStudioLogin />)} />
+                    <Route path="/designer-studio/editor" element={withRouteSuspense(<DesignerStudioEditor />)} />
                     <Route path="/designer-studio/products/:slug" element={withRouteSuspense(<ProductDetail />)} />
                     <Route
                       path="/designer-studio/dashboard"
