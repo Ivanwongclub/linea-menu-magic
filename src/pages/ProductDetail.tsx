@@ -3,7 +3,7 @@ import { useParams, Link, useLocation } from 'react-router-dom';
 import {
   FileDown, Box, Send, Palette, BookmarkPlus, Download,
   ShieldCheck, Factory, ArrowRight, Layers, ClipboardList,
-  Package, Cpu, Globe, ChevronRight,
+  Package, Cpu, Globe, ChevronRight, Edit3,
 } from 'lucide-react';
 import PageBreadcrumb from '@/components/ui/PageBreadcrumb';
 import { Button } from '@/components/ui/button';
