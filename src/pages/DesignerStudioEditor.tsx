@@ -1,10 +1,14 @@
+import { useEffect, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { useI18n } from "@/features/i18n/I18nProvider";
 
 const DesignerStudioEditor = () => {
   const [params] = useSearchParams();
   const model = params.get("model");
   const name = params.get("name");
+  const { language } = useI18n();
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const src = (() => {
     const qs = new URLSearchParams();
@@ -13,6 +17,23 @@ const DesignerStudioEditor = () => {
     const q = qs.toString();
     return `/3d-editor/index.html${q ? `?${q}` : ""}`;
   })();
+
+  // Push language to iframe whenever it changes or the editor signals ready.
+  useEffect(() => {
+    const send = () => {
+      iframeRef.current?.contentWindow?.postMessage(
+        { type: "set-language", language },
+        "*",
+      );
+    };
+    const onMsg = (e: MessageEvent) => {
+      if (e.data?.type === "editor-ready") send();
+    };
+    window.addEventListener("message", onMsg);
+    // Also send on language change (in case editor already loaded)
+    send();
+    return () => window.removeEventListener("message", onMsg);
+  }, [language]);
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">
@@ -32,6 +53,7 @@ const DesignerStudioEditor = () => {
         </div>
       </div>
       <iframe
+        ref={iframeRef}
         title="3D Editor"
         src={src}
         className="flex-1 w-full border-0 bg-background"
