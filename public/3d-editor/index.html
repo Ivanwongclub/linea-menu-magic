@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OBJ Studio — Online 3D Editor</title>
+  <title>3D Editor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
   <link rel="preconnect" href="https://cdn.jsdelivr.net" />
 </head>
@@ -12,26 +15,26 @@
     <!-- Top bar -->
     <header id="topbar">
       <div class="brand">
-        <span class="title">3D Editor</span>
+        <span class="title" data-i18n="title">3D Editor</span>
       </div>
       <div class="topbar-actions">
-        <label class="btn primary" for="fileInput">
+        <label class="btn primary" for="fileInput" data-i18n="import">
           <input type="file" id="fileInput" accept=".obj" multiple hidden />
           Import .obj
         </label>
-        <button class="btn" id="exportBtn" title="Export selection (or all) as .obj">Export .obj</button>
-        <button class="btn" id="addCubeBtn" title="Add a primitive cube">+ Cube</button>
-        <button class="btn ghost" id="clearBtn" title="Remove everything">Clear</button>
+        <button class="btn" id="exportBtn" data-i18n="export">Export .obj</button>
+        <button class="btn" id="addCubeBtn" data-i18n="addCube">+ Cube</button>
+        <button class="btn ghost" id="clearBtn" data-i18n="clear">Clear</button>
       </div>
     </header>
 
     <div id="main">
       <!-- Left: outliner -->
       <aside id="outliner">
-        <div class="panel-head">Scene</div>
+        <div class="panel-head" data-i18n="scene">Scene</div>
         <ul id="objectList"></ul>
-        <div class="panel-head">Stats</div>
-        <div id="stats" class="stats">No objects loaded.</div>
+        <div class="panel-head" data-i18n="stats">Stats</div>
+        <div id="stats" class="stats" data-i18n="noObjects">No objects loaded.</div>
       </aside>
 
       <!-- Center: viewport -->
@@ -39,92 +42,92 @@
         <div id="dropOverlay" class="drop-overlay hidden">
           <div class="drop-inner">
             <div class="drop-icon">⬇</div>
-            <div>Drop .obj files to import</div>
+            <div data-i18n="dropHint">Drop .obj files to import</div>
           </div>
         </div>
         <div id="toolbar">
-          <button class="tool active" data-mode="translate" title="Move (W)">Move</button>
-          <button class="tool" data-mode="rotate" title="Rotate (E)">Rotate</button>
-          <button class="tool" data-mode="scale" title="Scale (R)">Scale</button>
+          <button class="tool active" data-mode="translate" data-i18n="move">Move</button>
+          <button class="tool" data-mode="rotate" data-i18n="rotate">Rotate</button>
+          <button class="tool" data-mode="scale" data-i18n="scale">Scale</button>
           <span class="sep"></span>
-          <button class="tool" id="spaceBtn" title="Toggle world/local space">World</button>
-          <button class="tool" id="snapBtn" title="Toggle grid snapping">Snap: Off</button>
+          <button class="tool" id="spaceBtn" data-i18n="world">World</button>
+          <button class="tool" id="snapBtn" data-i18n="snapOff">Snap: Off</button>
           <span class="sep"></span>
-          <button class="tool" id="focusBtn" title="Frame selected (F)">Focus</button>
-          <button class="tool" id="resetCamBtn" title="Reset camera">Reset Cam</button>
-          <button class="tool" id="gridBtn" title="Toggle grid">Grid</button>
+          <button class="tool" id="focusBtn" data-i18n="focus">Focus</button>
+          <button class="tool" id="resetCamBtn" data-i18n="resetCam">Reset Cam</button>
+          <button class="tool" id="gridBtn" data-i18n="grid">Grid</button>
         </div>
-        <div id="hint">Import an .obj file, drag-and-drop, or add a primitive to begin.</div>
+        <div id="hint" data-i18n="readyHint">Import an .obj file, drag-and-drop, or add a primitive to begin.</div>
       </main>
 
       <!-- Right: inspector -->
       <aside id="inspector">
-        <div class="panel-head">Inspector</div>
-        <div id="noSel" class="muted">Nothing selected.</div>
+        <div class="panel-head" data-i18n="inspector">Inspector</div>
+        <div id="noSel" class="muted" data-i18n="nothingSelected">Nothing selected.</div>
         <div id="props" class="hidden">
           <label class="field">
-            <span>Name</span>
+            <span data-i18n="name">Name</span>
             <input type="text" id="propName" />
           </label>
 
-          <div class="group-title">Transform</div>
+          <div class="group-title" data-i18n="transform">Transform</div>
           <div class="vec3">
-            <span class="vec-label">Pos</span>
+            <span class="vec-label" data-i18n="pos">Pos</span>
             <input type="number" step="0.1" id="posX" /><input type="number" step="0.1" id="posY" /><input type="number" step="0.1" id="posZ" />
           </div>
           <div class="vec3">
-            <span class="vec-label">Rot°</span>
+            <span class="vec-label" data-i18n="rot">Rot°</span>
             <input type="number" step="1" id="rotX" /><input type="number" step="1" id="rotY" /><input type="number" step="1" id="rotZ" />
           </div>
           <div class="vec3">
-            <span class="vec-label">Scale</span>
+            <span class="vec-label" data-i18n="scaleLabel">Scale</span>
             <input type="number" step="0.1" id="sclX" /><input type="number" step="0.1" id="sclY" /><input type="number" step="0.1" id="sclZ" />
           </div>
 
-          <div class="group-title">Appearance</div>
+          <div class="group-title" data-i18n="appearance">Appearance</div>
           <label class="field row">
-            <span>Color</span>
+            <span data-i18n="color">Color</span>
             <input type="color" id="propColor" value="#8a8f98" />
           </label>
           <label class="field row">
-            <span>Metalness</span>
+            <span data-i18n="metalness">Metalness</span>
             <input type="range" id="propMetal" min="0" max="1" step="0.01" value="0.1" />
           </label>
           <label class="field row">
-            <span>Roughness</span>
+            <span data-i18n="roughness">Roughness</span>
             <input type="range" id="propRough" min="0" max="1" step="0.01" value="0.7" />
           </label>
           <label class="field row check">
-            <span>Wireframe</span>
+            <span data-i18n="wireframe">Wireframe</span>
             <input type="checkbox" id="propWire" />
           </label>
           <label class="field row check">
-            <span>Flat shading</span>
+            <span data-i18n="flatShading">Flat shading</span>
             <input type="checkbox" id="propFlat" />
           </label>
 
-          <div class="group-title">Texture</div>
-          <div id="texStatus" class="muted" style="font-size:11px;">No texture.</div>
+          <div class="group-title" data-i18n="texture">Texture</div>
+          <div id="texStatus" class="muted" style="font-size:11px;" data-i18n="noTexture">No texture.</div>
           <div class="btn-row">
-            <button class="btn small" id="openTexBtn">Edit texture…</button>
-            <button class="btn small" id="removeTexBtn">Remove</button>
+            <button class="btn small" id="openTexBtn" data-i18n="editTexture">Edit texture…</button>
+            <button class="btn small" id="removeTexBtn" data-i18n="remove">Remove</button>
           </div>
 
-          <div class="group-title">Actions</div>
+          <div class="group-title" data-i18n="actions">Actions</div>
           <div class="btn-row">
-            <button class="btn small" id="centerBtn">Center</button>
-            <button class="btn small" id="dropFloorBtn">Drop to floor</button>
-            <button class="btn small" id="duplicateBtn">Duplicate</button>
-            <button class="btn small danger" id="deleteBtn">Delete</button>
+            <button class="btn small" id="centerBtn" data-i18n="center">Center</button>
+            <button class="btn small" id="dropFloorBtn" data-i18n="dropFloor">Drop to floor</button>
+            <button class="btn small" id="duplicateBtn" data-i18n="duplicate">Duplicate</button>
+            <button class="btn small danger" id="deleteBtn" data-i18n="delete">Delete</button>
           </div>
         </div>
       </aside>
     </div>
 
     <footer id="statusbar">
-      <span id="statusText">Ready.</span>
+      <span id="statusText" data-i18n="ready">Ready.</span>
       <span class="spacer"></span>
-      <span class="kbd-hint">W/E/R transform · F focus · Del delete · Ctrl+D duplicate</span>
+      <span class="kbd-hint" data-i18n="shortcuts">W/E/R transform · F focus · Del delete · Ctrl+D duplicate</span>
     </footer>
   </div>
 
@@ -132,7 +135,7 @@
   <div id="texModal" class="modal hidden">
     <div class="modal-card">
       <div class="modal-head">
-        <span class="modal-title">Texture Editor</span>
+        <span class="modal-title" data-i18n="textureEditor">Texture Editor</span>
         <span id="texTarget" class="muted"></span>
         <span class="spacer"></span>
         <button class="btn ghost small" id="texCloseBtn">✕</button>
@@ -146,68 +149,68 @@
           </div>
           <div class="tex-paint-row">
             <label class="field row">
-              <span>Brush</span>
+              <span data-i18n="brush">Brush</span>
               <input type="color" id="brushColor" value="#e0533a" />
             </label>
             <label class="field row">
-              <span>Size</span>
+              <span data-i18n="size">Size</span>
               <input type="range" id="brushSize" min="1" max="120" step="1" value="24" />
             </label>
-            <button class="tool" id="eraserBtn" title="Paint with the base color">Erase</button>
+            <button class="tool" id="eraserBtn" data-i18n="erase">Erase</button>
           </div>
         </div>
 
         <!-- Controls -->
         <div class="tex-controls">
-          <div class="group-title">Generate</div>
+          <div class="group-title" data-i18n="generate">Generate</div>
           <div class="vec3 colors2">
             <span class="vec-label">A / B</span>
             <input type="color" id="genColorA" value="#3a6fd0" />
             <input type="color" id="genColorB" value="#dfe4ec" />
           </div>
           <div class="pattern-grid">
-            <button class="btn small" data-pattern="solid">Solid</button>
-            <button class="btn small" data-pattern="checker">Checker</button>
-            <button class="btn small" data-pattern="stripes">Stripes</button>
-            <button class="btn small" data-pattern="dots">Dots</button>
-            <button class="btn small" data-pattern="gradient">Gradient</button>
-            <button class="btn small" data-pattern="noise">Noise</button>
-            <button class="btn small" data-pattern="grid">UV Grid</button>
-            <button class="btn small" data-pattern="brick">Brick</button>
+            <button class="btn small" data-pattern="solid" data-i18n="solid">Solid</button>
+            <button class="btn small" data-pattern="checker" data-i18n="checker">Checker</button>
+            <button class="btn small" data-pattern="stripes" data-i18n="stripes">Stripes</button>
+            <button class="btn small" data-pattern="dots" data-i18n="dots">Dots</button>
+            <button class="btn small" data-pattern="gradient" data-i18n="gradient">Gradient</button>
+            <button class="btn small" data-pattern="noise" data-i18n="noise">Noise</button>
+            <button class="btn small" data-pattern="grid" data-i18n="uvGrid">UV Grid</button>
+            <button class="btn small" data-pattern="brick" data-i18n="brick">Brick</button>
           </div>
           <label class="field row">
-            <span>Pattern scale</span>
+            <span data-i18n="patternScale">Pattern scale</span>
             <input type="range" id="patScale" min="1" max="32" step="1" value="8" />
           </label>
 
-          <div class="group-title">Image</div>
-          <label class="btn small" for="texImgInput" style="text-align:center;">
+          <div class="group-title" data-i18n="image">Image</div>
+          <label class="btn small" for="texImgInput" style="text-align:center;" data-i18n="importImage">
             <input type="file" id="texImgInput" accept="image/*" hidden />
             Import image…
           </label>
 
-          <div class="group-title">Mapping</div>
+          <div class="group-title" data-i18n="mapping">Mapping</div>
           <div class="vec3">
-            <span class="vec-label">Tile</span>
+            <span class="vec-label" data-i18n="tile">Tile</span>
             <input type="number" step="0.1" id="texRepX" value="1" />
             <input type="number" step="0.1" id="texRepY" value="1" />
             <span></span>
           </div>
           <div class="vec3">
-            <span class="vec-label">Offset</span>
+            <span class="vec-label" data-i18n="offset">Offset</span>
             <input type="number" step="0.05" id="texOffX" value="0" />
             <input type="number" step="0.05" id="texOffY" value="0" />
             <span></span>
           </div>
           <label class="field row">
-            <span>Rotation°</span>
+            <span data-i18n="rotation">Rotation°</span>
             <input type="number" step="5" id="texRot" value="0" />
           </label>
 
-          <div class="group-title">Actions</div>
+          <div class="group-title" data-i18n="actions">Actions</div>
           <div class="btn-row">
-            <button class="btn small" id="texClearBtn">Clear</button>
-            <button class="btn primary small" id="texApplyBtn">Apply to object</button>
+            <button class="btn small" id="texClearBtn" data-i18n="clearBtn">Clear</button>
+            <button class="btn primary small" id="texApplyBtn" data-i18n="applyToObject">Apply to object</button>
           </div>
         </div>
       </div>
