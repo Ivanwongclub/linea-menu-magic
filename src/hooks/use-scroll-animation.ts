@@ -14,7 +14,7 @@ export const useScrollAnimation = (options: UseScrollAnimationOptions = {}) => {
     rootMargin = "0px 0px -40px 0px",
     triggerOnce = true,
     disableTopOnRouteEntry = true,
-    topZonePx = 220,
+    topZonePx = 600,
   } = options;
 
   const ref = useRef<HTMLDivElement>(null);
