@@ -68,7 +68,7 @@ const ABOUT_LINKS: AboutLink[] = [
   { labelKey: "header.about.ourStory", href: "/about/our-story", image: aboutHeritageImg },
   { labelKey: "header.about.factory", href: "/about/factory", image: heritageCraftImg },
   { labelKey: "header.about.certificates", href: "/about/certificates", image: aboutShowroomImg },
-  { labelKey: "header.about.sustainability", href: "/sustainability", image: aboutShowroomImg },
+  
   { labelKey: "header.about.news", href: "/news", image: aboutHeritageImg },
 ];
 
