@@ -124,11 +124,15 @@ const ObjMesh = ({
   url,
   colour,
   finish,
+  dtm,
+  plating,
   autoRotate,
 }: {
   url: string;
   colour: HardwareColour;
   finish: HardwareFinish;
+  dtm: DtmFinish | null;
+  plating: Plating | null;
   autoRotate: boolean;
 }) => {
   const obj = useLoader(OBJLoader, url);
@@ -136,14 +140,39 @@ const ObjMesh = ({
 
   const scene = useMemo(() => {
     const clone = obj.clone(true);
-    const mat = new THREE.MeshPhysicalMaterial({
-      color: new THREE.Color(colour.materialHex),
-      metalness: finish.metalness,
-      roughness: finish.roughness,
-      clearcoat: finish.clearcoat,
-      clearcoatRoughness: finish.clearcoatRoughness,
-      envMapIntensity: finish.envMapIntensity,
-    });
+
+    // Precedence: plating > dtm > colour+finish
+    let matProps: THREE.MeshPhysicalMaterialParameters;
+    if (plating) {
+      matProps = {
+        color: new THREE.Color(plating.materialHex),
+        metalness: plating.metalness,
+        roughness: plating.roughness,
+        clearcoat: plating.clearcoat,
+        clearcoatRoughness: plating.clearcoatRoughness,
+        envMapIntensity: plating.envMapIntensity,
+      };
+    } else if (dtm) {
+      matProps = {
+        color: new THREE.Color(colour.materialHex),
+        metalness: dtm.metalness,
+        roughness: dtm.roughness,
+        clearcoat: dtm.clearcoat,
+        clearcoatRoughness: dtm.clearcoatRoughness,
+        envMapIntensity: dtm.envMapIntensity,
+      };
+    } else {
+      matProps = {
+        color: new THREE.Color(colour.materialHex),
+        metalness: finish.metalness,
+        roughness: finish.roughness,
+        clearcoat: finish.clearcoat,
+        clearcoatRoughness: finish.clearcoatRoughness,
+        envMapIntensity: finish.envMapIntensity,
+      };
+    }
+
+    const mat = new THREE.MeshPhysicalMaterial(matProps);
     clone.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
         (child as THREE.Mesh).material = mat;
@@ -158,7 +187,8 @@ const ObjMesh = ({
     const box2 = new THREE.Box3().setFromObject(clone);
     clone.position.sub(box2.getCenter(new THREE.Vector3()));
     return clone;
-  }, [obj, colour.materialHex, finish.id]);
+  }, [obj, colour.materialHex, finish.id, dtm?.id, plating?.id]);
+
 
   useFrame((_, delta) => {
     if (groupRef.current && autoRotate) {
