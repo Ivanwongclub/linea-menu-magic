@@ -31,8 +31,10 @@ const DesignerStudioTrimLibrary = () => {
 
   const { products, loading } = useProducts(filters);
 
-  // Show only 1 product per family — prefer the one with a 3D model
+  // Show only 1 product per family on "All" view — prefer one with 3D model.
+  // When a family chip or brand badge is active, show every product in that filter.
   const displayProducts = useMemo(() => {
+    if (activeFamily || activeBrandBadge) return products;
     const picked: typeof products = [];
     for (const family of PRODUCT_FAMILIES) {
       const withModel = products.find(
@@ -49,7 +51,7 @@ const DesignerStudioTrimLibrary = () => {
       }
     }
     return picked;
-  }, [products]);
+  }, [products, activeFamily, activeBrandBadge]);
   const { categories } = useProductTaxonomy();
 
   // Build family chips from taxonomy
