@@ -1,7 +1,18 @@
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 import LetterReveal from "@/components/ui/LetterReveal";
 import PageBreadcrumb from "@/components/ui/PageBreadcrumb";
+import OptimizedImage from "@/components/ui/OptimizedImage";
+import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 import aboutHeritageImage from "@/assets/about-heritage.jpg";
+import sustainabilityForestImg from "@/assets/sustainability-forest.jpg";
+import sustainabilityRecycledImg from "@/assets/sustainability-recycled-metal.jpg";
+import sustainabilityEcoImg from "@/assets/sustainability-eco-process.jpg";
+import sustainabilityNatureImg from "@/assets/sustainability-nature.jpg";
+import certGrs from "@/assets/certs/grs.png";
+import certOekoTex from "@/assets/certs/oeko-tex.png";
+import certHigg from "@/assets/certs/higg-index.png";
+import certSmeta from "@/assets/certs/smeta.png";
 
 const About = () => {
   const { ref: storyRef, isVisible: storyVisible } = useScrollAnimation();
