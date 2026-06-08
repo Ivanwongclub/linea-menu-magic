@@ -1,22 +1,43 @@
-## Problem
+## Plan: DTM + Electroplating controls in 3D editor
 
-On the Woven Badges detail page, the left thumbnail strip with the "3D" tile is missing, unlike Eco Lace Trim which shows it.
+**File:** `src/components/production/ObjGallery.tsx` (only file touched)
 
-Root cause: in `src/pages/ProductDetail.tsx`, the `HeroGallery` component only renders the left thumbnail rail when `images.length > 1`. The 3D tile lives inside that same rail, so single-image products never show it — even when `model_url` is set in the database (Woven Badges has `/models/metal-badge.obj` set correctly).
+### 1. New data
+Add two arrays alongside `COLOURS` / `FINISHES`:
 
-## Fix
+- `DTM_FINISHES` — 4 options, each maps to material PBR values:
+  - Enamel: metalness 0.05, roughness 0.15, clearcoat 1.0 (glossy non-metal)
+  - Rubberize: metalness 0.0, roughness 0.95, clearcoat 0.0 (soft matte)
+  - Shiny: metalness 0.1, roughness 0.08, clearcoat 1.0 (high gloss lacquer)
+  - Matte: metalness 0.0, roughness 0.85, clearcoat 0.0 (flat)
 
-Change the rail's visibility condition so it renders when there are multiple images **or** a 3D model is available.
+- `PLATINGS` — electroplating swatches (chrome, nickel, gold, copper, black-chrome, gunmetal, rose-gold) with `materialHex` + a metalness/roughness override (high metalness 0.95, low roughness 0.05).
 
-In `src/pages/ProductDetail.tsx` (~line 62), update the desktop rail wrapper:
+### 2. State + mode
+- Add `activeDtm` (nullable, defaults to null = "off") and `activePlating` (nullable).
+- Selecting a DTM chip clears Plating; selecting a Plating swatch clears DTM. Colour + Finish remain the base when neither is active.
 
-- From: `{images.length > 1 && ( ... )}`
-- To:   `{(images.length > 1 || has3D) && ( ... )}`
+### 3. Material application
+In `ObjMesh`, derive the final material props with precedence:
+1. If `activePlating` → use its color + plating metalness/roughness (overrides Colour & Finish).
+2. Else if `activeDtm` → use Colour's hex but DTM's metalness/roughness/clearcoat (overrides Finish).
+3. Else → existing Colour + Finish behavior (unchanged).
 
-Inside the rail, keep the existing `images.map(...)` (it naturally renders 1 thumb if there's only one image) and the existing `{has3D && ...}` 3D tile. The mobile horizontal thumbs block stays as-is (it only deals with images, not 3D).
+Pass `activeDtm`/`activePlating` through `ModelScene` → `ObjMesh` and include them in the `useMemo` deps.
 
-## Verification
+### 4. UI panels
+Extend the existing divided row (`flex flex-col sm:flex-row ... divide-x`) to four sections in this order:
+Colour | Finish | **DTM** | **Electroplating**
 
-- `/designer-studio/products/badge-woven` now shows a single image thumbnail plus the "3D" tile in the left rail; clicking 3D opens the model viewer.
-- `/designer-studio/products/eco-lace-trim` and other multi-image PDPs render unchanged.
-- Products without `model_url` and only one image still show no rail (unchanged behaviour).
+- DTM section: label "DTM (Dye to Match)", chip buttons styled identically to Finish chips (Enamel / Rubberize / Shiny / Matte), plus a small "None" reset chip.
+- Electroplating section: label "Electroplating", round swatch buttons styled identically to Colour swatches, plus active label text on the right.
+
+All styling follows existing tokens: monochrome, `rounded-none` borders, 9–11px uppercase tracked labels, Poppins (inherited). No emojis.
+
+### 5. Reset behavior
+In `prev` / `next` / thumbnail click handlers, also reset `activeDtm` and `activePlating` to null (matches existing reset of Colour/Finish).
+
+### Out of scope
+- No DB / schema changes.
+- No changes to `Model3DViewer`, ProductDetail, or any other 3D entry point.
+- `/products` and trim library untouched.

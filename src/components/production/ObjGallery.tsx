@@ -57,6 +57,49 @@ const FINISHES: HardwareFinish[] = [
 const DEFAULT_COLOUR = COLOURS[0];
 const DEFAULT_FINISH = FINISHES[0];
 
+// ── DTM (Dye to Match) finishes ─────────────────────────────────────────────
+
+interface DtmFinish {
+  id: string;
+  label: string;
+  metalness: number;
+  roughness: number;
+  clearcoat: number;
+  clearcoatRoughness: number;
+  envMapIntensity: number;
+}
+
+const DTM_FINISHES: DtmFinish[] = [
+  { id: "enamel",    label: "Enamel",    metalness: 0.05, roughness: 0.15, clearcoat: 1.0, clearcoatRoughness: 0.04, envMapIntensity: 1.4 },
+  { id: "rubberize", label: "Rubberize", metalness: 0.0,  roughness: 0.95, clearcoat: 0.0, clearcoatRoughness: 0.0,  envMapIntensity: 0.3 },
+  { id: "shiny",     label: "Shiny",     metalness: 0.1,  roughness: 0.08, clearcoat: 1.0, clearcoatRoughness: 0.02, envMapIntensity: 1.6 },
+  { id: "matte",     label: "Matte",     metalness: 0.0,  roughness: 0.85, clearcoat: 0.0, clearcoatRoughness: 0.0,  envMapIntensity: 0.4 },
+];
+
+// ── Electroplating swatches ─────────────────────────────────────────────────
+
+interface Plating {
+  id: string;
+  label: string;
+  hex: string;
+  materialHex: string;
+  metalness: number;
+  roughness: number;
+  clearcoat: number;
+  clearcoatRoughness: number;
+  envMapIntensity: number;
+}
+
+const PLATINGS: Plating[] = [
+  { id: "chrome",       label: "Chrome",       hex: "#D8DADC", materialHex: "#D8DADC", metalness: 1.0, roughness: 0.04, clearcoat: 1.0, clearcoatRoughness: 0.02, envMapIntensity: 2.0 },
+  { id: "nickel",       label: "Nickel",       hex: "#B8B6AE", materialHex: "#B8B6AE", metalness: 1.0, roughness: 0.12, clearcoat: 0.6, clearcoatRoughness: 0.08, envMapIntensity: 1.6 },
+  { id: "gold",         label: "Gold",         hex: "#D4AF37", materialHex: "#D4AF37", metalness: 1.0, roughness: 0.08, clearcoat: 0.8, clearcoatRoughness: 0.04, envMapIntensity: 1.9 },
+  { id: "copper",       label: "Copper",       hex: "#B87333", materialHex: "#B87333", metalness: 1.0, roughness: 0.1,  clearcoat: 0.6, clearcoatRoughness: 0.06, envMapIntensity: 1.7 },
+  { id: "rose-gold",    label: "Rose Gold",    hex: "#B76E79", materialHex: "#B76E79", metalness: 1.0, roughness: 0.1,  clearcoat: 0.7, clearcoatRoughness: 0.05, envMapIntensity: 1.7 },
+  { id: "gunmetal",     label: "Gunmetal",     hex: "#3A3B3D", materialHex: "#3A3B3D", metalness: 1.0, roughness: 0.18, clearcoat: 0.4, clearcoatRoughness: 0.1,  envMapIntensity: 1.3 },
+  { id: "black-chrome", label: "Black Chrome", hex: "#15161A", materialHex: "#15161A", metalness: 1.0, roughness: 0.06, clearcoat: 1.0, clearcoatRoughness: 0.03, envMapIntensity: 1.8 },
+];
+
 // ── Model catalogue ──────────────────────────────────────────────────────────
 
 interface ObjModel {
@@ -81,11 +124,15 @@ const ObjMesh = ({
   url,
   colour,
   finish,
+  dtm,
+  plating,
   autoRotate,
 }: {
   url: string;
   colour: HardwareColour;
   finish: HardwareFinish;
+  dtm: DtmFinish | null;
+  plating: Plating | null;
   autoRotate: boolean;
 }) => {
   const obj = useLoader(OBJLoader, url);
@@ -93,14 +140,39 @@ const ObjMesh = ({
 
   const scene = useMemo(() => {
     const clone = obj.clone(true);
-    const mat = new THREE.MeshPhysicalMaterial({
-      color: new THREE.Color(colour.materialHex),
-      metalness: finish.metalness,
-      roughness: finish.roughness,
-      clearcoat: finish.clearcoat,
-      clearcoatRoughness: finish.clearcoatRoughness,
-      envMapIntensity: finish.envMapIntensity,
-    });
+
+    // Precedence: plating > dtm > colour+finish
+    let matProps: THREE.MeshPhysicalMaterialParameters;
+    if (plating) {
+      matProps = {
+        color: new THREE.Color(plating.materialHex),
+        metalness: plating.metalness,
+        roughness: plating.roughness,
+        clearcoat: plating.clearcoat,
+        clearcoatRoughness: plating.clearcoatRoughness,
+        envMapIntensity: plating.envMapIntensity,
+      };
+    } else if (dtm) {
+      matProps = {
+        color: new THREE.Color(colour.materialHex),
+        metalness: dtm.metalness,
+        roughness: dtm.roughness,
+        clearcoat: dtm.clearcoat,
+        clearcoatRoughness: dtm.clearcoatRoughness,
+        envMapIntensity: dtm.envMapIntensity,
+      };
+    } else {
+      matProps = {
+        color: new THREE.Color(colour.materialHex),
+        metalness: finish.metalness,
+        roughness: finish.roughness,
+        clearcoat: finish.clearcoat,
+        clearcoatRoughness: finish.clearcoatRoughness,
+        envMapIntensity: finish.envMapIntensity,
+      };
+    }
+
+    const mat = new THREE.MeshPhysicalMaterial(matProps);
     clone.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
         (child as THREE.Mesh).material = mat;
@@ -115,7 +187,8 @@ const ObjMesh = ({
     const box2 = new THREE.Box3().setFromObject(clone);
     clone.position.sub(box2.getCenter(new THREE.Vector3()));
     return clone;
-  }, [obj, colour.materialHex, finish.id]);
+  }, [obj, colour.materialHex, finish.id, dtm?.id, plating?.id]);
+
 
   useFrame((_, delta) => {
     if (groupRef.current && autoRotate) {
@@ -160,11 +233,15 @@ const ModelScene = ({
   model,
   colour,
   finish,
+  dtm,
+  plating,
   autoRotate,
 }: {
   model: ObjModel;
   colour: HardwareColour;
   finish: HardwareFinish;
+  dtm: DtmFinish | null;
+  plating: Plating | null;
   autoRotate: boolean;
 }) => (
   <>
@@ -177,6 +254,8 @@ const ModelScene = ({
       url={model.file}
       colour={colour}
       finish={finish}
+      dtm={dtm}
+      plating={plating}
       autoRotate={autoRotate}
     />
     <ContactShadows position={[0, -1.2, 0]} opacity={0.35} scale={4} blur={2.5} far={2} />
@@ -198,21 +277,28 @@ export default function ObjGallery({ open, onClose, initialIndex = 0 }: ObjGalle
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [activeColour, setActiveColour] = useState<HardwareColour>(DEFAULT_COLOUR);
   const [activeFinish, setActiveFinish] = useState<HardwareFinish>(DEFAULT_FINISH);
+  const [activeDtm, setActiveDtm] = useState<DtmFinish | null>(null);
+  const [activePlating, setActivePlating] = useState<Plating | null>(null);
 
   const model = MODELS[activeIndex];
+
+  const resetMaterial = () => {
+    setActiveColour(DEFAULT_COLOUR);
+    setActiveFinish(DEFAULT_FINISH);
+    setActiveDtm(null);
+    setActivePlating(null);
+  };
 
   const prev = useCallback(() => {
     setActiveIndex((i) => (i - 1 + MODELS.length) % MODELS.length);
     setAutoRotate(true);
-    setActiveColour(DEFAULT_COLOUR);
-    setActiveFinish(DEFAULT_FINISH);
+    resetMaterial();
   }, []);
 
   const next = useCallback(() => {
     setActiveIndex((i) => (i + 1) % MODELS.length);
     setAutoRotate(true);
-    setActiveColour(DEFAULT_COLOUR);
-    setActiveFinish(DEFAULT_FINISH);
+    resetMaterial();
   }, []);
 
   const handleKey = useCallback(
@@ -300,6 +386,8 @@ export default function ObjGallery({ open, onClose, initialIndex = 0 }: ObjGalle
                 model={model}
                 colour={activeColour}
                 finish={activeFinish}
+                dtm={activeDtm}
+                plating={activePlating}
                 autoRotate={autoRotate}
               />
             </Suspense>
@@ -382,6 +470,80 @@ export default function ObjGallery({ open, onClose, initialIndex = 0 }: ObjGalle
               </p>
             </div>
 
+            {/* DTM (Dye to Match) picker */}
+            <div className="flex-1 px-5 py-4">
+              <p className="text-[9px] font-medium uppercase tracking-[0.18em] text-muted-foreground mb-3">
+                DTM (Dye to Match)
+              </p>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {DTM_FINISHES.map((d) => (
+                  <button
+                    key={d.id}
+                    onClick={() => {
+                      setActiveDtm(d);
+                      setActivePlating(null);
+                    }}
+                    className={`px-3 py-1.5 text-[10px] font-medium tracking-wide border transition-all duration-150 ${
+                      activeDtm?.id === d.id
+                        ? "bg-foreground text-background border-foreground"
+                        : "bg-transparent text-muted-foreground border-border hover:border-foreground/40 hover:text-foreground"
+                    }`}
+                  >
+                    {d.label}
+                  </button>
+                ))}
+                {activeDtm && (
+                  <button
+                    onClick={() => setActiveDtm(null)}
+                    className="px-2 py-1.5 text-[10px] font-medium tracking-wide text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
+              <p className="text-[10px] text-muted-foreground/60 mt-2">
+                {activeDtm ? `Applied · ${activeDtm.label}` : "Tints base colour with chosen finish"}
+              </p>
+            </div>
+
+            {/* Electroplating picker */}
+            <div className="flex-1 px-5 py-4">
+              <p className="text-[9px] font-medium uppercase tracking-[0.18em] text-muted-foreground mb-3">
+                Electroplating
+              </p>
+              <div className="flex items-center gap-2 flex-wrap">
+                {PLATINGS.map((p) => (
+                  <button
+                    key={p.id}
+                    title={p.label}
+                    onClick={() => {
+                      setActivePlating(p);
+                      setActiveDtm(null);
+                    }}
+                    className={`relative w-6 h-6 rounded-full transition-all duration-150 ${
+                      activePlating?.id === p.id
+                        ? "ring-2 ring-foreground ring-offset-2 ring-offset-background scale-110"
+                        : "hover:scale-110 ring-1 ring-border"
+                    }`}
+                    style={{ backgroundColor: p.hex }}
+                  >
+                    <span className="sr-only">{p.label}</span>
+                  </button>
+                ))}
+                {activePlating && (
+                  <button
+                    onClick={() => setActivePlating(null)}
+                    className="ml-1 px-2 py-1 text-[10px] font-medium tracking-wide text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
+              <p className="text-[10px] text-muted-foreground/60 mt-2">
+                {activePlating ? `Plated · ${activePlating.label}` : "Overrides colour with metal plating"}
+              </p>
+            </div>
+
           </div>
         </div>
 
@@ -393,8 +555,7 @@ export default function ObjGallery({ open, onClose, initialIndex = 0 }: ObjGalle
               onClick={() => {
                 setActiveIndex(idx);
                 setAutoRotate(true);
-                setActiveColour(DEFAULT_COLOUR);
-                setActiveFinish(DEFAULT_FINISH);
+                resetMaterial();
               }}
               className={`relative flex-shrink-0 w-[88px] h-[66px] overflow-hidden border-2 transition-all duration-200 ${
                 idx === activeIndex
