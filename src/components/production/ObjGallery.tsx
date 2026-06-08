@@ -470,6 +470,80 @@ export default function ObjGallery({ open, onClose, initialIndex = 0 }: ObjGalle
               </p>
             </div>
 
+            {/* DTM (Dye to Match) picker */}
+            <div className="flex-1 px-5 py-4">
+              <p className="text-[9px] font-medium uppercase tracking-[0.18em] text-muted-foreground mb-3">
+                DTM (Dye to Match)
+              </p>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {DTM_FINISHES.map((d) => (
+                  <button
+                    key={d.id}
+                    onClick={() => {
+                      setActiveDtm(d);
+                      setActivePlating(null);
+                    }}
+                    className={`px-3 py-1.5 text-[10px] font-medium tracking-wide border transition-all duration-150 ${
+                      activeDtm?.id === d.id
+                        ? "bg-foreground text-background border-foreground"
+                        : "bg-transparent text-muted-foreground border-border hover:border-foreground/40 hover:text-foreground"
+                    }`}
+                  >
+                    {d.label}
+                  </button>
+                ))}
+                {activeDtm && (
+                  <button
+                    onClick={() => setActiveDtm(null)}
+                    className="px-2 py-1.5 text-[10px] font-medium tracking-wide text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
+              <p className="text-[10px] text-muted-foreground/60 mt-2">
+                {activeDtm ? `Applied · ${activeDtm.label}` : "Tints base colour with chosen finish"}
+              </p>
+            </div>
+
+            {/* Electroplating picker */}
+            <div className="flex-1 px-5 py-4">
+              <p className="text-[9px] font-medium uppercase tracking-[0.18em] text-muted-foreground mb-3">
+                Electroplating
+              </p>
+              <div className="flex items-center gap-2 flex-wrap">
+                {PLATINGS.map((p) => (
+                  <button
+                    key={p.id}
+                    title={p.label}
+                    onClick={() => {
+                      setActivePlating(p);
+                      setActiveDtm(null);
+                    }}
+                    className={`relative w-6 h-6 rounded-full transition-all duration-150 ${
+                      activePlating?.id === p.id
+                        ? "ring-2 ring-foreground ring-offset-2 ring-offset-background scale-110"
+                        : "hover:scale-110 ring-1 ring-border"
+                    }`}
+                    style={{ backgroundColor: p.hex }}
+                  >
+                    <span className="sr-only">{p.label}</span>
+                  </button>
+                ))}
+                {activePlating && (
+                  <button
+                    onClick={() => setActivePlating(null)}
+                    className="ml-1 px-2 py-1 text-[10px] font-medium tracking-wide text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
+              <p className="text-[10px] text-muted-foreground/60 mt-2">
+                {activePlating ? `Plated · ${activePlating.label}` : "Overrides colour with metal plating"}
+              </p>
+            </div>
+
           </div>
         </div>
 
@@ -481,8 +555,7 @@ export default function ObjGallery({ open, onClose, initialIndex = 0 }: ObjGalle
               onClick={() => {
                 setActiveIndex(idx);
                 setAutoRotate(true);
-                setActiveColour(DEFAULT_COLOUR);
-                setActiveFinish(DEFAULT_FINISH);
+                resetMaterial();
               }}
               className={`relative flex-shrink-0 w-[88px] h-[66px] overflow-hidden border-2 transition-all duration-200 ${
                 idx === activeIndex
