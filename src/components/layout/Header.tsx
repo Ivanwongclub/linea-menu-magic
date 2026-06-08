@@ -147,6 +147,28 @@ const NAV_LINKS: Array<{ href: string; labelKey: string; megaMenu?: "products" |
   { href: "/designer-studio", labelKey: "header.nav.designerStudio" },
 ];
 
+const routeLoaders: Record<string, () => Promise<unknown>> = {
+  "/about": () => import("@/pages/About"),
+  "/products": () => import("@/pages/Products"),
+  "/production": () => import("@/pages/Production"),
+  "/sustainability": () => import("@/pages/Sustainability"),
+  "/ecollections": () => import("@/pages/Brochures"),
+  "/designer-studio": () => import("@/pages/DesignerStudio"),
+  "/designer-studio/trim-library": () => import("@/pages/DesignerStudioTrimLibrary"),
+  "/news": () => import("@/pages/News"),
+  "/contact": () => import("@/pages/Contact"),
+};
+
+const preloaded = new Set<string>();
+function preloadRoute(href: string) {
+  if (preloaded.has(href)) return;
+  const loader = routeLoaders[href];
+  if (loader) {
+    preloaded.add(href);
+    loader();
+  }
+}
+
 // ─── Component ─────────────────────────────────────────────────────────────────
 const Header = () => {
   const { t } = useI18n();
@@ -298,6 +320,7 @@ const Header = () => {
     setProductsMegaHydrated(true);
     setIsProductsOpen(true);
     setIsAboutOpen(false);
+    preloadRoute("/products");
   };
   const handleProductsLeave = () => { productsTimeout.current = setTimeout(() => setIsProductsOpen(false), 150); };
   const handleAboutEnter    = () => {
@@ -305,6 +328,7 @@ const Header = () => {
     setAboutMegaHydrated(true);
     setIsAboutOpen(true);
     setIsProductsOpen(false);
+    preloadRoute("/about");
   };
   const handleAboutLeave    = () => { aboutTimeout.current    = setTimeout(() => setIsAboutOpen(false), 150); };
 
@@ -360,7 +384,13 @@ const Header = () => {
                   );
                 }
                 return (
-                  <Link key={link.href} to={link.href} className={linkClass(isActive(link.href))}>
+                  <Link
+                    key={link.href}
+                    to={link.href}
+                    className={linkClass(isActive(link.href))}
+                    onMouseEnter={() => preloadRoute(link.href)}
+                    onFocus={() => preloadRoute(link.href)}
+                  >
                     {t(link.labelKey)}
                   </Link>
                 );
