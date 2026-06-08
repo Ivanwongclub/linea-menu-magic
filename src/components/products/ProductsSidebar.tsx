@@ -213,36 +213,6 @@ export default function ProductsSidebar({
         </div>
       </div>
 
-      {/* News shortcuts — replace collections with obvious badges */}
-      <div className="mb-4 pb-4 border-b border-border">
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground">
-            News
-          </p>
-          <Link
-            to="/news"
-            className="text-[10px] font-medium uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
-          >
-            View all
-          </Link>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {NEWS_BADGES.map((badge) => (
-            <Link
-              key={badge.key}
-              to={badge.key === 'all' ? '/news' : `/news?category=${badge.key}`}
-              className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold tracking-[0.02em] transition-colors ${
-                badge.featured
-                  ? 'bg-foreground text-background border-foreground hover:bg-foreground/90'
-                  : 'bg-background text-foreground border-border hover:border-foreground/50'
-              }`}
-            >
-              {badge.label}
-            </Link>
-          ))}
-        </div>
-      </div>
-
       <div className="border-t border-border pt-4">
         <div className="space-y-4">
           {familyGroups.map((group) => {
