@@ -20,6 +20,7 @@ const About = () => {
   const { ref: valuesRef, isVisible: valuesVisible, getDelay: getValuesDelay } = useStaggeredAnimation(2, 150);
   const { ref: timelineHeaderRef, isVisible: timelineHeaderVisible } = useScrollAnimation();
   const { ref: timelineRef, isVisible: timelineVisible, getDelay: getTimelineDelay } = useStaggeredAnimation(9, 100);
+  const { ref: sustainRef, isVisible: sustainVisible } = useScrollAnimation({ threshold: 0.1 });
 
   interface TimelineMilestone {
     year: string;
