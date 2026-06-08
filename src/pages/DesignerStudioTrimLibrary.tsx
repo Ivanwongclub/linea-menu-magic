@@ -44,10 +44,10 @@ const DesignerStudioTrimLibrary = () => {
         picked.push(pick);
       }
     }
-    // Include brand-scoped products (e.g. Polo) when viewing "All"
+    // Include brand-scoped (non-public) products (e.g. Polo) when viewing "All"
     if (!activeFamily && !activeBrandBadge) {
       for (const p of products) {
-        if (p.brand_id && !picked.some((x) => x.id === p.id)) {
+        if (p.is_public === false && !picked.some((x) => x.id === p.id)) {
           picked.push(p);
         }
       }
