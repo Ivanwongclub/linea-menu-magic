@@ -249,3 +249,89 @@ input[type="color"] { width: 44px; height: 26px; padding: 0; border: 1px solid v
 }
 .swatch:hover { border-color: var(--text); }
 .swatch.active { box-shadow: 0 0 0 2px var(--text); border-color: #fff; }
+
+/* ===== Mobile / tablet responsive ===== */
+@media (max-width: 900px) {
+  body { font-size: 14px; overflow: auto; }
+  #app { height: 100vh; height: 100dvh; }
+
+  /* Top bar wraps */
+  #topbar {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+  .topbar-actions { flex-wrap: wrap; }
+  .btn { padding: 9px 12px; font-size: 12px; }
+
+  /* Stack panels vertically */
+  #main { flex-direction: column; }
+  #outliner, #inspector {
+    width: 100%;
+    flex: 0 0 auto;
+    max-height: 38vh;
+    border-left: none;
+    border-right: none;
+    border-top: 1px solid var(--border);
+  }
+  #outliner { border-top: none; border-bottom: 1px solid var(--border); }
+
+  /* Viewport gets a guaranteed height */
+  #viewport {
+    flex: 0 0 auto;
+    height: 50vh;
+    min-height: 280px;
+  }
+
+  /* Toolbar: scrollable, larger tap targets */
+  #toolbar {
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    transform: none;
+    max-width: calc(100% - 20px);
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tool { padding: 9px 12px; font-size: 12px; white-space: nowrap; }
+
+  /* Hint smaller and out of the way */
+  #hint {
+    bottom: 8px;
+    font-size: 11px;
+    max-width: calc(100% - 24px);
+    text-align: center;
+  }
+
+  /* Inspector inputs easier to read & tap */
+  #props { padding: 14px; gap: 14px; }
+  .group-title { font-size: 11px; }
+  .field > span { font-size: 12px; }
+  input[type="text"], input[type="number"] {
+    padding: 10px 11px; font-size: 14px;
+  }
+  input[type="range"] { width: 160px; height: 24px; }
+  input[type="color"] { width: 52px; height: 32px; }
+  .vec3 { grid-template-columns: 44px 1fr 1fr 1fr; gap: 6px; }
+
+  .chip { padding: 9px 12px; font-size: 11px; }
+  .swatch { width: 30px; height: 30px; }
+
+  /* Status bar */
+  #statusbar { flex-wrap: wrap; padding: 8px 12px; }
+  .kbd-hint { display: none; }
+
+  /* Texture modal */
+  .modal-card { width: 96vw; max-height: 96vh; }
+  .modal-body { flex-direction: column; padding: 12px; gap: 12px; }
+  .tex-canvas-wrap, #texCanvas { width: 100%; max-width: 384px; height: auto; aspect-ratio: 1; }
+}
+
+@media (max-width: 480px) {
+  .title { font-size: 12px; }
+  #outliner, #inspector { max-height: 42vh; }
+  #viewport { height: 45vh; min-height: 240px; }
+  .topbar-actions .btn { flex: 1 1 auto; text-align: center; }
+}
