@@ -446,6 +446,110 @@ $('propFlat').addEventListener('change', () => {
   if (selected) { eachMaterial(selected, (m) => { m.flatShading = $('propFlat').checked; m.needsUpdate = true; }); scheduleSave(); }
 });
 
+// ====================================================================
+//  DTM (Dye to Match) + Electroplating
+// ====================================================================
+
+const DTM_FINISHES = [
+  { id: 'enamel',    label: 'Enamel',    metalness: 0.05, roughness: 0.15, clearcoat: 1.0 },
+  { id: 'rubberize', label: 'Rubberize', metalness: 0.0,  roughness: 0.95, clearcoat: 0.0 },
+  { id: 'shiny',     label: 'Shiny',     metalness: 0.1,  roughness: 0.08, clearcoat: 1.0 },
+  { id: 'matte',     label: 'Matte',     metalness: 0.0,  roughness: 0.85, clearcoat: 0.0 },
+];
+
+const PLATINGS = [
+  { id: 'chrome',       label: 'Chrome',       hex: '#dfe2e6', metalness: 1.0, roughness: 0.05 },
+  { id: 'nickel',       label: 'Nickel',       hex: '#c9c7bf', metalness: 0.95, roughness: 0.18 },
+  { id: 'gold',         label: 'Gold',         hex: '#d4af37', metalness: 1.0, roughness: 0.12 },
+  { id: 'copper',       label: 'Copper',       hex: '#b87333', metalness: 1.0, roughness: 0.18 },
+  { id: 'rose-gold',    label: 'Rose Gold',    hex: '#b76e79', metalness: 1.0, roughness: 0.14 },
+  { id: 'gunmetal',     label: 'Gunmetal',     hex: '#4e5258', metalness: 0.95, roughness: 0.30 },
+  { id: 'black-chrome', label: 'Black Chrome', hex: '#1a1a1a', metalness: 1.0, roughness: 0.10 },
+];
+
+function applyAppearance(obj) {
+  if (!obj) return;
+  const dtm = obj.userData.dtm ? DTM_FINISHES.find(d => d.id === obj.userData.dtm) : null;
+  const plating = obj.userData.plating ? PLATINGS.find(p => p.id === obj.userData.plating) : null;
+  eachMaterial(obj, (m) => {
+    if (plating) {
+      m.color.set(plating.hex);
+      m.metalness = plating.metalness;
+      m.roughness = plating.roughness;
+    } else if (dtm) {
+      m.metalness = dtm.metalness;
+      m.roughness = dtm.roughness;
+    }
+    m.needsUpdate = true;
+  });
+}
+
+function renderDtmRow() {
+  const row = document.getElementById('dtmRow');
+  if (!row) return;
+  const activeId = selected?.userData.dtm || null;
+  row.innerHTML = '';
+  DTM_FINISHES.forEach((d) => {
+    const b = document.createElement('button');
+    b.className = 'chip' + (activeId === d.id ? ' active' : '');
+    b.textContent = d.label;
+    b.addEventListener('click', () => {
+      if (!selected) return;
+      selected.userData.dtm = (selected.userData.dtm === d.id) ? null : d.id;
+      if (selected.userData.dtm) selected.userData.plating = null;
+      applyAppearance(selected);
+      updateInspector();
+      scheduleSave();
+    });
+    row.appendChild(b);
+  });
+  const reset = document.createElement('button');
+  reset.className = 'chip';
+  reset.textContent = 'None';
+  reset.addEventListener('click', () => {
+    if (!selected) return;
+    selected.userData.dtm = null;
+    updateInspector();
+    scheduleSave();
+  });
+  row.appendChild(reset);
+}
+
+function renderPlatingRow() {
+  const row = document.getElementById('platingRow');
+  const label = document.getElementById('platingLabel');
+  if (!row) return;
+  const activeId = selected?.userData.plating || null;
+  row.innerHTML = '';
+  PLATINGS.forEach((p) => {
+    const b = document.createElement('button');
+    b.className = 'swatch' + (activeId === p.id ? ' active' : '');
+    b.style.background = p.hex;
+    b.title = p.label;
+    b.addEventListener('click', () => {
+      if (!selected) return;
+      selected.userData.plating = (selected.userData.plating === p.id) ? null : p.id;
+      if (selected.userData.plating) selected.userData.dtm = null;
+      applyAppearance(selected);
+      updateInspector();
+      scheduleSave();
+    });
+    row.appendChild(b);
+  });
+  const active = PLATINGS.find(p => p.id === activeId);
+  if (label) label.textContent = active ? `Plated · ${active.label}` : 'None';
+}
+
+// Re-render DTM/Plating rows whenever inspector updates
+const _origUpdateInspector = updateInspector;
+updateInspector = function () {
+  _origUpdateInspector();
+  renderDtmRow();
+  renderPlatingRow();
+};
+renderDtmRow();
+renderPlatingRow();
+
 // Inspector action buttons
 $('centerBtn').addEventListener('click', () => { if (selected) { centerHorizontally(selected); syncInspectorFromObject(selected); } });
 $('dropFloorBtn').addEventListener('click', () => { if (selected) { dropToFloor(selected); syncInspectorFromObject(selected); } });
