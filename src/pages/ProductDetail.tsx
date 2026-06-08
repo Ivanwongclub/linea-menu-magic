@@ -59,7 +59,7 @@ function HeroGallery({ images, onOpen3D, has3D }: { images: ProductImage[]; onOp
   return (
     <div className="flex gap-3">
       {/* Thumbnail rail — vertical on desktop */}
-      {images.length > 1 && (
+      {(images.length > 1 || has3D) && (
         <div className="hidden md:flex flex-col gap-2 w-16 shrink-0">
           {images.map((img, i) => (
             <button
