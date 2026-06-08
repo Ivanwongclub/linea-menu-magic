@@ -386,6 +386,8 @@ export default function ObjGallery({ open, onClose, initialIndex = 0 }: ObjGalle
                 model={model}
                 colour={activeColour}
                 finish={activeFinish}
+                dtm={activeDtm}
+                plating={activePlating}
                 autoRotate={autoRotate}
               />
             </Suspense>
