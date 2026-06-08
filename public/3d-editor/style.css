@@ -229,3 +229,23 @@ input[type="color"] { width: 44px; height: 26px; padding: 0; border: 1px solid v
 ::-webkit-scrollbar-thumb { background: #d4d4d4; border-radius: 0; }
 ::-webkit-scrollbar-thumb:hover { background: #a3a3a3; }
 ::-webkit-scrollbar-track { background: transparent; }
+
+/* DTM + Plating */
+.chip-row { display: flex; flex-wrap: wrap; gap: 4px; }
+.chip {
+  background: var(--panel); color: var(--text);
+  border: 1px solid var(--border);
+  padding: 6px 9px; font-size: 10px;
+  letter-spacing: .08em; text-transform: uppercase;
+  cursor: pointer; font-family: inherit; line-height: 1;
+}
+.chip:hover { border-color: var(--text); }
+.chip.active { background: var(--text); color: #fff; border-color: var(--text); }
+.swatch-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.swatch {
+  width: 24px; height: 24px; border-radius: 50%;
+  border: 1px solid var(--border); cursor: pointer; padding: 0;
+  position: relative;
+}
+.swatch:hover { border-color: var(--text); }
+.swatch.active { box-shadow: 0 0 0 2px var(--text); border-color: #fff; }
