@@ -331,6 +331,11 @@ const Header = () => {
               <BrandWordmark />
             </Link>
 
+            {/* Trial site indicator */}
+            <span className="flex-shrink-0 bg-[#C25B56] text-white text-[9px] font-medium uppercase tracking-[0.06em] px-2 py-0.5 rounded-sm">
+              Trial Site
+            </span>
+
             {/* Desktop nav */}
             <nav className="hidden lg:flex items-center justify-center gap-8 flex-1">
               {NAV_LINKS.map((link) => {
