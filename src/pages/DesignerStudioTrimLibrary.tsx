@@ -31,29 +31,25 @@ const DesignerStudioTrimLibrary = () => {
 
   const { products, loading } = useProducts(filters);
 
-  // Pick 1 product per family (prefer one with a 3D model).
-  // On "All", also include the user's brand-specific products (e.g. Polo).
+  // Show only 1 product per family — prefer the one with a 3D model
   const displayProducts = useMemo(() => {
     const picked: typeof products = [];
     for (const family of PRODUCT_FAMILIES) {
-      const inFamily = products.filter((p) =>
+      const withModel = products.find(
+        (p) =>
+          p.model_url &&
+          p.categories?.some((c) => family.categorySlugs.includes(c.slug))
+      );
+      const fallback = products.find((p) =>
         p.categories?.some((c) => family.categorySlugs.includes(c.slug))
       );
-      const pick = inFamily.find((p) => p.model_url) ?? inFamily[0];
+      const pick = withModel ?? fallback;
       if (pick && !picked.some((x) => x.id === pick.id)) {
         picked.push(pick);
       }
     }
-    // Include brand-scoped (non-public) products (e.g. Polo) when viewing "All"
-    if (!activeFamily && !activeBrandBadge) {
-      for (const p of products) {
-        if (p.is_public === false && !picked.some((x) => x.id === p.id)) {
-          picked.push(p);
-        }
-      }
-    }
     return picked;
-  }, [products, activeFamily, activeBrandBadge]);
+  }, [products]);
   const { categories } = useProductTaxonomy();
 
   // Build family chips from taxonomy
