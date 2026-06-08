@@ -555,7 +555,7 @@ export default function ProductDetail() {
                       asChild
                     >
                       <Link
-                        to={`/designer-studio/editor?model=${encodeURIComponent(product.model_url)}&name=${encodeURIComponent(product.item_code || product.name)}`}
+                        to={`/designer-studio/editor?model=${encodeURIComponent(product.model_url)}&name=${encodeURIComponent(product.item_code || product.name)}&slug=${encodeURIComponent(product.slug)}`}
                       >
                         <Edit3 className="h-3.5 w-3.5" />
                         Open in Editor
