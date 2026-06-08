@@ -275,6 +275,33 @@ export type Database = {
         }
         Relationships: []
       }
+      editor_sessions: {
+        Row: {
+          created_at: string
+          id: string
+          model_url: string
+          product_name: string
+          product_slug: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          model_url: string
+          product_name: string
+          product_slug?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          model_url?: string
+          product_name?: string
+          product_slug?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       flipbook_brochures: {
         Row: {
           cover_image_url: string | null
