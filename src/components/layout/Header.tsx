@@ -147,6 +147,28 @@ const NAV_LINKS: Array<{ href: string; labelKey: string; megaMenu?: "products" |
   { href: "/designer-studio", labelKey: "header.nav.designerStudio" },
 ];
 
+const routeLoaders: Record<string, () => Promise<unknown>> = {
+  "/about": () => import("@/pages/About"),
+  "/products": () => import("@/pages/Products"),
+  "/production": () => import("@/pages/Production"),
+  "/sustainability": () => import("@/pages/Sustainability"),
+  "/ecollections": () => import("@/pages/Brochures"),
+  "/designer-studio": () => import("@/pages/DesignerStudio"),
+  "/designer-studio/trim-library": () => import("@/pages/DesignerStudioTrimLibrary"),
+  "/news": () => import("@/pages/News"),
+  "/contact": () => import("@/pages/Contact"),
+};
+
+const preloaded = new Set<string>();
+function preloadRoute(href: string) {
+  if (preloaded.has(href)) return;
+  const loader = routeLoaders[href];
+  if (loader) {
+    preloaded.add(href);
+    loader();
+  }
+}
+
 // ─── Component ─────────────────────────────────────────────────────────────────
 const Header = () => {
   const { t } = useI18n();
@@ -298,6 +320,7 @@ const Header = () => {
     setProductsMegaHydrated(true);
     setIsProductsOpen(true);
     setIsAboutOpen(false);
+    preloadRoute("/products");
   };
   const handleProductsLeave = () => { productsTimeout.current = setTimeout(() => setIsProductsOpen(false), 150); };
   const handleAboutEnter    = () => {
@@ -305,6 +328,7 @@ const Header = () => {
     setAboutMegaHydrated(true);
     setIsAboutOpen(true);
     setIsProductsOpen(false);
+    preloadRoute("/about");
   };
   const handleAboutLeave    = () => { aboutTimeout.current    = setTimeout(() => setIsAboutOpen(false), 150); };
 
@@ -360,7 +384,13 @@ const Header = () => {
                   );
                 }
                 return (
-                  <Link key={link.href} to={link.href} className={linkClass(isActive(link.href))}>
+                  <Link
+                    key={link.href}
+                    to={link.href}
+                    className={linkClass(isActive(link.href))}
+                    onMouseEnter={() => preloadRoute(link.href)}
+                    onFocus={() => preloadRoute(link.href)}
+                  >
                     {t(link.labelKey)}
                   </Link>
                 );
@@ -691,6 +721,7 @@ const Header = () => {
                                         <Link
                                           to={`/products?category=${slugify(sub.en)}`}
                                           onClick={() => setIsMenuOpen(false)}
+                                          onTouchStart={() => preloadRoute("/products")}
                                           className="block text-[14px] text-foreground hover:text-muted-foreground transition-colors py-2.5 px-9"
                                         >
                                           {t(sub.key)}
@@ -731,6 +762,7 @@ const Header = () => {
                               <Link
                                 to={item.href!}
                                 onClick={() => setIsMenuOpen(false)}
+                                onTouchStart={() => preloadRoute(item.href!)}
                                 className="block text-[14px] text-foreground hover:text-muted-foreground transition-colors py-3 px-9"
                               >
                                 {t(item.labelKey!)}
@@ -748,6 +780,7 @@ const Header = () => {
                     key={link.href}
                     to={link.href}
                     onClick={() => setIsMenuOpen(false)}
+                    onTouchStart={() => preloadRoute(link.href)}
                     className="text-lg font-medium tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 block py-4 px-6 border-b border-border"
                   >
                     {t(link.labelKey)}
@@ -757,10 +790,10 @@ const Header = () => {
 
               {/* CTA buttons */}
               <div className="mt-auto px-6 pb-8 pt-6 space-y-3">
-                <Link to="/contact" onClick={() => setIsMenuOpen(false)}>
+                <Link to="/contact" onClick={() => setIsMenuOpen(false)} onTouchStart={() => preloadRoute("/contact")}>
                   <Button className="w-full">{t("header.cta.contact")}</Button>
                 </Link>
-                <Link to={studioCtaHref} onClick={() => setIsMenuOpen(false)}>
+                <Link to={studioCtaHref} onClick={() => setIsMenuOpen(false)} onTouchStart={() => preloadRoute(studioCtaHref)}>
                   <Button variant="outline" className="w-full">
                     <span className="truncate">{studioCtaLabel}</span>
                   </Button>
