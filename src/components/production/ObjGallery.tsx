@@ -277,21 +277,28 @@ export default function ObjGallery({ open, onClose, initialIndex = 0 }: ObjGalle
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [activeColour, setActiveColour] = useState<HardwareColour>(DEFAULT_COLOUR);
   const [activeFinish, setActiveFinish] = useState<HardwareFinish>(DEFAULT_FINISH);
+  const [activeDtm, setActiveDtm] = useState<DtmFinish | null>(null);
+  const [activePlating, setActivePlating] = useState<Plating | null>(null);
 
   const model = MODELS[activeIndex];
+
+  const resetMaterial = () => {
+    setActiveColour(DEFAULT_COLOUR);
+    setActiveFinish(DEFAULT_FINISH);
+    setActiveDtm(null);
+    setActivePlating(null);
+  };
 
   const prev = useCallback(() => {
     setActiveIndex((i) => (i - 1 + MODELS.length) % MODELS.length);
     setAutoRotate(true);
-    setActiveColour(DEFAULT_COLOUR);
-    setActiveFinish(DEFAULT_FINISH);
+    resetMaterial();
   }, []);
 
   const next = useCallback(() => {
     setActiveIndex((i) => (i + 1) % MODELS.length);
     setAutoRotate(true);
-    setActiveColour(DEFAULT_COLOUR);
-    setActiveFinish(DEFAULT_FINISH);
+    resetMaterial();
   }, []);
 
   const handleKey = useCallback(
