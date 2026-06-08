@@ -790,10 +790,10 @@ const Header = () => {
 
               {/* CTA buttons */}
               <div className="mt-auto px-6 pb-8 pt-6 space-y-3">
-                <Link to="/contact" onClick={() => setIsMenuOpen(false)}>
+                <Link to="/contact" onClick={() => setIsMenuOpen(false)} onTouchStart={() => preloadRoute("/contact")}>
                   <Button className="w-full">{t("header.cta.contact")}</Button>
                 </Link>
-                <Link to={studioCtaHref} onClick={() => setIsMenuOpen(false)}>
+                <Link to={studioCtaHref} onClick={() => setIsMenuOpen(false)} onTouchStart={() => preloadRoute(studioCtaHref)}>
                   <Button variant="outline" className="w-full">
                     <span className="truncate">{studioCtaLabel}</span>
                   </Button>
