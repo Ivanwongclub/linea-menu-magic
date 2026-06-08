@@ -721,6 +721,7 @@ const Header = () => {
                                         <Link
                                           to={`/products?category=${slugify(sub.en)}`}
                                           onClick={() => setIsMenuOpen(false)}
+                                          onTouchStart={() => preloadRoute("/products")}
                                           className="block text-[14px] text-foreground hover:text-muted-foreground transition-colors py-2.5 px-9"
                                         >
                                           {t(sub.key)}
@@ -761,6 +762,7 @@ const Header = () => {
                               <Link
                                 to={item.href!}
                                 onClick={() => setIsMenuOpen(false)}
+                                onTouchStart={() => preloadRoute(item.href!)}
                                 className="block text-[14px] text-foreground hover:text-muted-foreground transition-colors py-3 px-9"
                               >
                                 {t(item.labelKey!)}
@@ -778,6 +780,7 @@ const Header = () => {
                     key={link.href}
                     to={link.href}
                     onClick={() => setIsMenuOpen(false)}
+                    onTouchStart={() => preloadRoute(link.href)}
                     className="text-lg font-medium tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 block py-4 px-6 border-b border-border"
                   >
                     {t(link.labelKey)}
