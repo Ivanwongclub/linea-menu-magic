@@ -284,14 +284,15 @@ async function fetchProducts(filters: ProductFilters): Promise<QueryPayload> {
   ];
 
   const activeScopes = filterScopes.filter((scope) => scope.values?.length);
-  const sets: Set<string>[] = [];
 
-  for (const scope of activeScopes) {
-    const set = await resolveProductSetByDimension(scope);
-    if (set.size === 0) {
-      return { products: [], totalCount: 0 };
-    }
-    sets.push(set);
+  // Run all dimension queries in parallel instead of sequentially
+  const sets = activeScopes.length > 0
+    ? await Promise.all(activeScopes.map((scope) => resolveProductSetByDimension(scope)))
+    : [];
+
+  // Early exit if any dimension returned zero matches
+  if (sets.some((set) => set.size === 0)) {
+    return { products: [], totalCount: 0 };
   }
 
   const intersectedIds = sets.length > 0 ? intersectSets(sets) : null;
