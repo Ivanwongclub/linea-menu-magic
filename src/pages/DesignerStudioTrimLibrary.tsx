@@ -30,6 +30,26 @@ const DesignerStudioTrimLibrary = () => {
   );
 
   const { products, loading } = useProducts(filters);
+
+  // Show only 1 product per family — prefer the one with a 3D model
+  const displayProducts = useMemo(() => {
+    const picked: typeof products = [];
+    for (const family of PRODUCT_FAMILIES) {
+      const withModel = products.find(
+        (p) =>
+          p.model_url &&
+          p.categories?.some((c) => family.categorySlugs.includes(c.slug))
+      );
+      const fallback = products.find((p) =>
+        p.categories?.some((c) => family.categorySlugs.includes(c.slug))
+      );
+      const pick = withModel ?? fallback;
+      if (pick && !picked.some((x) => x.id === pick.id)) {
+        picked.push(pick);
+      }
+    }
+    return picked;
+  }, [products]);
   const { categories } = useProductTaxonomy();
 
   // Build family chips from taxonomy
@@ -145,13 +165,13 @@ const DesignerStudioTrimLibrary = () => {
                 <div key={i} className="aspect-square bg-secondary animate-pulse rounded-[var(--radius)]" />
               ))}
             </div>
-          ) : products.length === 0 ? (
+          ) : displayProducts.length === 0 ? (
             <div className="text-center py-20 text-muted-foreground/50 text-sm">
               {t("studio.empty")}
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {products.map((product, i) => (
+              {displayProducts.map((product, i) => (
                 <Link key={product.id} to={`/designer-studio/products/${product.slug}`}>
                   <ProductCard
                     product={product}
