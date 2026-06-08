@@ -233,11 +233,15 @@ const ModelScene = ({
   model,
   colour,
   finish,
+  dtm,
+  plating,
   autoRotate,
 }: {
   model: ObjModel;
   colour: HardwareColour;
   finish: HardwareFinish;
+  dtm: DtmFinish | null;
+  plating: Plating | null;
   autoRotate: boolean;
 }) => (
   <>
@@ -250,6 +254,8 @@ const ModelScene = ({
       url={model.file}
       colour={colour}
       finish={finish}
+      dtm={dtm}
+      plating={plating}
       autoRotate={autoRotate}
     />
     <ContactShadows position={[0, -1.2, 0]} opacity={0.35} scale={4} blur={2.5} far={2} />
