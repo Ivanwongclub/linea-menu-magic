@@ -45,28 +45,30 @@ export interface PdpSeedEntry {
 
 const seedData: Record<string, PdpSeedEntry> = {
   'metal-button': {
-    description: 'Classic metal button for garment applications. Available in multiple finishes and sizes, suitable for outerwear, blazers, and branded apparel.',
+    description: 'Classic metal button in zinc alloy with a polished dome face. Available in multiple plated finishes and sizes for shirts, jackets and outerwear.',
     specifications: {
       material: 'Zinc Alloy',
-      finish: 'Nickel Plated',
-      size: '15mm',
-      weight: '4.2g',
+      finish: 'Polished Nickel',
+      size: '15mm (24L)',
+      weight: '2.8g',
       thickness: '2.5mm',
-      attachment: 'Sew-Through (4 Hole)',
-      color_options: ['Silver', 'Gold', 'Antique Brass', 'Gunmetal'],
+      attachment: 'Sew-Through',
+      color_options: ['Polished Nickel', 'Antique Brass', 'Gunmetal', 'Matte Black'],
+      size_options: ['11.5mm (18L)', '15mm (24L)', '20mm (32L)', '25mm (40L)'],
     },
     production: {
-      moq: '5,000 pcs',
-      sample_time: '5–7 days',
-      lead_time: '25–35 days',
+      moq: '2,000 pcs',
+      sample_time: '7–10 days',
+      lead_time: '30–45 days',
       origin: 'Shenzhen, China',
-      capacity: '300,000 pcs/month',
+      capacity: '200,000 pcs/month',
     },
     certifications: [
       { name: 'OEKO-TEX Standard 100', abbreviation: 'OEKO-TEX' },
       { name: 'Nickel-Free Compliant (EU)', abbreviation: 'Ni-Free' },
     ],
-    applications: { industries: ['Apparel', 'Outerwear', 'Uniforms'] },
+    applications: { industries: ['Apparel', 'Outerwear', 'Fashion Accessories'] },
+    is_customizable: true,
   },
 
   'resin-button': {
@@ -231,32 +233,6 @@ const seedData: Record<string, PdpSeedEntry> = {
     applications: { industries: ['Bags & Luggage', 'Outdoor & Sports', 'Military'] },
   },
 
-  'metal-d-ring-buckle': {
-    description: 'Heavy-duty zinc alloy D-ring buckle for bags, belts and straps. Available in multiple plated finishes.',
-    specifications: {
-      material: 'Zinc Alloy',
-      finish: 'Antique Bronze',
-      size: '25mm',
-      weight: '8.5g',
-      thickness: '3.5mm',
-      attachment: 'Loop-Through',
-      color_options: ['Antique Bronze', 'Silver', 'Gold', 'Black'],
-      tensileStrength: '≥ 35 kg',
-    },
-    production: {
-      moq: '2,000 pcs',
-      sample_time: '7–10 days',
-      lead_time: '30–45 days',
-      origin: 'Shenzhen, China',
-      capacity: '200,000 pcs/month',
-    },
-    certifications: [
-      { name: 'OEKO-TEX Standard 100', abbreviation: 'OEKO-TEX' },
-      { name: 'Nickel-Free Compliant (EU)', abbreviation: 'Ni-Free' },
-    ],
-    applications: { industries: ['Bags & Luggage', 'Belts', 'Fashion Accessories'] },
-    is_customizable: true,
-  },
 
   'eco-lace-trim': {
     description: 'OEKO-TEX certified recycled polyester lace trim. Available in 20mm width, suitable for sustainable fashion applications.',

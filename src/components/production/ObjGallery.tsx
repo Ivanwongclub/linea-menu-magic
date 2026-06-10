@@ -114,7 +114,7 @@ interface ObjModel {
 const MODELS: ObjModel[] = [
   { id: "button",  title: "4-Hole Metal Button", subtitle: "Brass alloy · Die-cast · Custom engraving available",   file: "/models/button-4hole.obj",    material: { color: "#C8A84B", metalness: 0.85, roughness: 0.18 }, camera: [0, 2, 3.5] },
   { id: "snap",    title: "Snap Button",         subtitle: "Zinc alloy · Polished finish · 15–25mm diameter range", file: "/models/snap-button.obj",     material: { color: "#B0B0B0", metalness: 0.9,  roughness: 0.12 }, camera: [0, 1.5, 3.5] },
-  { id: "buckle",  title: "D-Ring Buckle",        subtitle: "Cast zinc · Antique brass or nickel finish",            file: "/models/d-ring-buckle.obj",   material: { color: "#A08030", metalness: 0.8,  roughness: 0.25 }, camera: [0, 1.8, 4] },
+  { id: "buckle",  title: "Button",               subtitle: "Cast zinc · Polished nickel or antique brass finish",    file: "/models/d-ring-buckle.obj",   material: { color: "#A08030", metalness: 0.8,  roughness: 0.25 }, camera: [0, 1.8, 4] },
   { id: "eyelet",  title: "Eyelet / Grommet",     subtitle: "Brass or steel · Various diameters · Setter-ready",     file: "/models/eyelet-grommet.obj",  material: { color: "#D4AF70", metalness: 0.88, roughness: 0.15 }, camera: [0, 2.5, 4] },
 ];
 

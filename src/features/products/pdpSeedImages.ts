@@ -38,7 +38,6 @@ const seedImages: Record<string, string[]> = {
 
   // Buckles & hardware
   'plastic-side-release-buckle': [beltBuckle, metalClasp, hardwareCategory],
-  'metal-d-ring-buckle': [metalClasp, beltBuckle, hardwareCategory],
   'rivet-brass': [metalClasp, hardwareCategory, engravedButton],
   'rivet-copper': [metalClasp, hardwareCategory, beltBuckle],
 
