@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Clock, ChevronDown } from "lucide-react";
+import { Link, useSearchParams, useLocation } from "react-router-dom";
+import { ArrowLeft, Clock, ChevronDown, LogIn, Box } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/features/auth/AuthProvider";
 
 const DesignerStudioEditor = () => {
+  const location = useLocation();
   const [params] = useSearchParams();
   const model = params.get("model");
   const name = params.get("name");
@@ -98,7 +100,7 @@ const DesignerStudioEditor = () => {
               </button>
               {historyOpen && sessions.length > 0 && (
                 <div className="absolute left-0 top-full mt-1 w-80 max-h-96 overflow-y-auto bg-background border border-border shadow-lg z-50">
-                  {sessions.map((s: any) => (
+                  {sessions.map((s: { id: string; model_url: string; product_name: string; product_slug?: string; created_at: string }) => (
                     <Link
                       key={s.id}
                       to={`/designer-studio/editor?model=${encodeURIComponent(s.model_url)}&name=${encodeURIComponent(s.product_name)}${s.product_slug ? `&slug=${encodeURIComponent(s.product_slug)}` : ""}`}
@@ -121,15 +123,45 @@ const DesignerStudioEditor = () => {
             </div>
           )}
         </div>
+        {!authSession && (
+          <Link
+            to={`/designer-studio/login?next=${encodeURIComponent(location.pathname + location.search)}`}
+            className="shrink-0"
+          >
+            <Button variant="outline" size="sm" className="gap-1.5 text-xs tracking-[0.05em]">
+              <LogIn className="h-3.5 w-3.5" />
+              Sign in to save your design
+            </Button>
+          </Link>
+        )}
       </div>
-      <iframe
-        ref={iframeRef}
-        title="3D Editor"
-        src={src}
-        className="flex-1 w-full border-0 bg-background"
-        allow="fullscreen"
-        sandbox="allow-scripts allow-same-origin allow-downloads allow-popups"
-      />
+      {model ? (
+        <iframe
+          ref={iframeRef}
+          title="3D Editor"
+          src={src}
+          className="flex-1 w-full border-0 bg-background"
+          allow="fullscreen"
+          sandbox="allow-scripts allow-same-origin allow-downloads allow-popups"
+        />
+      ) : (
+        <div className="flex-1 flex items-center justify-center px-6">
+          <div className="max-w-md w-full text-center space-y-6 border border-border p-10 bg-background">
+            <div className="mx-auto w-12 h-12 flex items-center justify-center border border-foreground">
+              <Box className="w-5 h-5" strokeWidth={1.5} />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-xl font-light tracking-wide text-foreground">No model loaded</h2>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Choose a trim from the library to start customizing in 3D.
+              </p>
+            </div>
+            <Button asChild className="rounded-none">
+              <Link to="/designer-studio/trim-library">Browse Trim Library</Link>
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
