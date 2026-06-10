@@ -26,13 +26,13 @@ const DesignerStudioEditor = () => {
     return `/3d-editor/index.html${q ? `?${q}` : ""}`;
   })();
 
-  // Save editor session on mount (only when a model is loaded)
+  // Save editor session when a model is loaded by an authenticated user
   useEffect(() => {
-    if (!model) return;
+    if (!model || !authSession?.user?.id) return;
     supabase
       .from("editor_sessions")
       .insert({
-        user_id: authSession?.user?.id ?? null,
+        user_id: authSession.user.id,
         product_slug: slug,
         product_name: name ?? "Untitled",
         model_url: model,
@@ -41,7 +41,7 @@ const DesignerStudioEditor = () => {
         /* no-op */
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [model]);
+  }, [model, authSession?.user?.id]);
 
   const { data: sessions = [] } = useQuery({
     queryKey: ["editor-sessions", authSession?.user?.id],
@@ -49,6 +49,7 @@ const DesignerStudioEditor = () => {
       const { data } = await supabase
         .from("editor_sessions")
         .select("*")
+        .eq("user_id", authSession!.user!.id)
         .order("created_at", { ascending: false })
         .limit(20);
       return data ?? [];
