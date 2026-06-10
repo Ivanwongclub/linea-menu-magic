@@ -43,7 +43,7 @@ export default function DesignerStudioLogin() {
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
   const [authError, setAuthError] = useState<string | null>(null);
 
-  const next = searchParams.get("next") || "/designer-studio";
+  const next = searchParams.get("next") || "/designer-studio/dashboard?tab=library";
 
   // If already signed in, bounce to next
   useEffect(() => {

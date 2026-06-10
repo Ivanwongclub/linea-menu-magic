@@ -155,16 +155,18 @@ const routeLoaders: Record<string, () => Promise<unknown>> = {
   "/ecollections": () => import("@/pages/Brochures"),
   "/designer-studio": () => import("@/pages/DesignerStudio"),
   "/designer-studio/trim-library": () => import("@/pages/DesignerStudioTrimLibrary"),
+  "/designer-studio/dashboard": () => import("@/pages/DesignerStudioDashboard"),
   "/news": () => import("@/pages/News"),
   "/contact": () => import("@/pages/Contact"),
 };
 
 const preloaded = new Set<string>();
 function preloadRoute(href: string) {
-  if (preloaded.has(href)) return;
-  const loader = routeLoaders[href];
+  const path = href.split("?")[0];
+  if (preloaded.has(path)) return;
+  const loader = routeLoaders[path];
   if (loader) {
-    preloaded.add(href);
+    preloaded.add(path);
     loader();
   }
 }
@@ -206,8 +208,10 @@ const Header = () => {
 
   const isHeroPage    = pathname === "/";
   const isTransparent = isHeroPage && !scrolled && !isProductsOpen && !isAboutOpen;
-  const studioCtaHref = session ? "/designer-studio" : "/designer-studio/login";
+  const studioCtaHref = session ? "/designer-studio/dashboard?tab=library" : "/designer-studio/login";
   const studioCtaLabel = primaryBrand?.name ?? t("header.cta.b2bLogin");
+  const resolveNavHref = (href: string) =>
+    href === "/designer-studio" && session ? "/designer-studio/dashboard?tab=library" : href;
 
   useEffect(() => {
     document.body.style.overflow = isMenuOpen ? "hidden" : "";
@@ -386,7 +390,7 @@ const Header = () => {
                 return (
                   <Link
                     key={link.href}
-                    to={link.href}
+                    to={resolveNavHref(link.href)}
                     className={linkClass(isActive(link.href))}
                     onMouseEnter={() => preloadRoute(link.href)}
                     onFocus={() => preloadRoute(link.href)}
@@ -778,7 +782,7 @@ const Header = () => {
                 return (
                   <Link
                     key={link.href}
-                    to={link.href}
+                    to={resolveNavHref(link.href)}
                     onClick={() => setIsMenuOpen(false)}
                     onTouchStart={() => preloadRoute(link.href)}
                     className="text-lg font-medium tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 block py-4 px-6 border-b border-border"
