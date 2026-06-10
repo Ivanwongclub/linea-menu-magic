@@ -81,16 +81,19 @@ const DesignerStudioTrimLibrary = () => {
             </p>
           </div>
           <div className="flex gap-3 shrink-0">
-            <Link to="/designer-studio/editor">
-              <Button size="sm" className="tracking-[0.05em] text-xs px-6 capitalize">
-                {t("studio.enter")}
-              </Button>
-            </Link>
-            <Link to="/contact">
-              <Button variant="outline" size="sm" className="tracking-[0.05em] text-xs px-6 capitalize">
-                {t("studio.requestAccess")}
-              </Button>
-            </Link>
+            {session ? (
+              <Link to="/designer-studio/dashboard?tab=library">
+                <Button size="sm" className="tracking-[0.05em] text-xs px-6 capitalize">
+                  {t("studio.myWorkspace")}
+                </Button>
+              </Link>
+            ) : (
+              <Link to="/contact">
+                <Button variant="outline" size="sm" className="tracking-[0.05em] text-xs px-6 capitalize">
+                  {t("studio.requestAccess")}
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </section>
@@ -186,6 +189,7 @@ const DesignerStudioTrimLibrary = () => {
       </section>
 
       {/* Bottom CTA + Onboarding */}
+      {!session && (
       <section className="py-20 px-6 lg:px-10 bg-foreground text-background">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-2xl font-semibold mb-4 tracking-tight">
@@ -223,6 +227,7 @@ const DesignerStudioTrimLibrary = () => {
           </div>
         </div>
       </section>
+      )}
     </>
   );
 };
