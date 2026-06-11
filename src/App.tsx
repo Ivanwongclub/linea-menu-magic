@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useEffect } from "react";
+import React, { lazy, Suspense, useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -114,7 +114,7 @@ class ErrorBoundary extends React.Component<
   }
 }
 
-function RouteTransitionFallback() {
+function RouteSkeleton() {
   return (
     <div className="min-h-[45vh] px-6 lg:px-8 py-16">
       <div className="max-w-7xl mx-auto">
@@ -125,6 +125,18 @@ function RouteTransitionFallback() {
       </div>
     </div>
   );
+}
+
+// Delay the skeleton so fast chunk loads (<180ms) never paint it — eliminates the
+// brief blink users perceive on navigation. Slow loads still get the skeleton.
+function RouteTransitionFallback() {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const id = window.setTimeout(() => setShow(true), 180);
+    return () => window.clearTimeout(id);
+  }, []);
+  if (!show) return null;
+  return <RouteSkeleton />;
 }
 
 function withRouteSuspense(element: React.ReactElement) {

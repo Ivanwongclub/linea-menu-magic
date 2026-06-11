@@ -30,14 +30,18 @@ export const useScrollAnimation = (options: UseScrollAnimationOptions = {}) => {
       return;
     }
 
-    // Route-entry UX: keep top-of-page content instantly visible, while lower content
-    // still uses scroll-triggered entrance animations.
+    // Route-entry UX: anything in the viewport at first layout shows immediately,
+    // so above-the-fold content doesn't flash opacity 0 → 1 between paint and the
+    // IntersectionObserver's first async callback. Below-fold content still fades in.
     const rect = element.getBoundingClientRect();
     const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
     const isRouteEntry = window.scrollY <= 8;
+    const isInViewport = rect.top < viewportHeight && rect.bottom > 0;
+    // topZonePx is retained as a stricter override (in case a caller wants only the
+    // very top of the page bailed out); when omitted, viewport-fold is the boundary.
     const topZoneThreshold = Math.max(topZonePx, Math.floor(viewportHeight * 0.28));
     const isInTopZone = rect.top <= topZoneThreshold && rect.bottom > 0;
-    if (triggerOnce && disableTopOnRouteEntry && isRouteEntry && isInTopZone) {
+    if (triggerOnce && disableTopOnRouteEntry && isRouteEntry && (isInViewport || isInTopZone)) {
       setIsVisible(true);
       return;
     }
