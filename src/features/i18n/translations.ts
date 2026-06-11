@@ -298,14 +298,14 @@ export const translations: Record<AppLanguage, TranslationMap> = {
     "studioIntro.spot2Bullet3": "Public catalogue stays browsable — private stays private",
 
     "studioIntro.metricsLabel": "Platform Footprint",
-    "studioIntro.metric1Value": "1,200+",
-    "studioIntro.metric1Label": "Active components",
-    "studioIntro.metric2Value": "150+",
-    "studioIntro.metric2Label": "Brand teams onboarded",
+    "studioIntro.metric1Value": "500+", // TODO: replace with live DB count
+    "studioIntro.metric1Label": "Catalogued trims",
+    "studioIntro.metric2Value": "3",
+    "studioIntro.metric2Label": "Product families",
     "studioIntro.metric3Value": "< 48h",
-    "studioIntro.metric3Label": "Average RFQ response",
-    "studioIntro.metric4Value": "24/7",
-    "studioIntro.metric4Label": "Brand-private access",
+    "studioIntro.metric3Label": "Typical RFQ response",
+    "studioIntro.metric4Value": "100%",
+    "studioIntro.metric4Label": "Data isolation",
 
     "studioIntro.faqLabel": "Frequently Asked",
     "studioIntro.faqTitle": "Answers for design and sourcing leads",
@@ -318,6 +318,11 @@ export const translations: Record<AppLanguage, TranslationMap> = {
     "studioIntro.faq3A": "Yes. Every E-Catalogue can be embedded as an iframe with hotlinks routed back to the live component, so internal teams always see current data.",
     "studioIntro.faq4Q": "Do you support 3D OBJ uploads?",
     "studioIntro.faq4A": "Yes. The viewer renders real OBJ geometry via Three.js. Manufacturers can upload approved geometry, and your designers can preview it in-browser before sampling.",
+
+    "studioIntro.heroCta3d": "Try the 3D Editor",
+    "studioIntro.featuredLabel": "Featured Trims",
+    "studioIntro.featuredTitle": "Start with a reference, make it yours",
+    "studioIntro.customizeThis": "Customize this →",
 
     "login.title": "Designer Studio",
     "login.subtitle": "Sign in to access your brand workspace",
@@ -605,6 +610,11 @@ export const translations: Record<AppLanguage, TranslationMap> = {
     "studioIntro.bottomBody": "先進入輔料庫探索現有目錄，再登入解鎖您的品牌私有工作空間與協作工具。",
     "studioIntro.contactCta": "聯絡 WIN-CYC",
 
+    "studioIntro.heroCta3d": "試用 3D 編輯器",
+    "studioIntro.featuredLabel": "精選輔料",
+    "studioIntro.featuredTitle": "從參考開始，打造專屬設計",
+    "studioIntro.customizeThis": "自訂此款 →",
+
     "login.title": "設計師工作室",
     "login.subtitle": "登入以進入您的品牌工作空間",
     "login.email": "電子郵件",
@@ -890,6 +900,11 @@ export const translations: Record<AppLanguage, TranslationMap> = {
     "studioIntro.bottomTitle": "准备开始下一个辅料项目了吗？",
     "studioIntro.bottomBody": "先进入辅料库浏览现有目录，再登录解锁您的品牌私有工作空间与协作工具。",
     "studioIntro.contactCta": "联系 WIN-CYC",
+
+    "studioIntro.heroCta3d": "试用 3D 编辑器",
+    "studioIntro.featuredLabel": "精选辅料",
+    "studioIntro.featuredTitle": "从参考开始，打造专属设计",
+    "studioIntro.customizeThis": "自定义此款 →",
 
     "login.title": "设计师工作室",
     "login.subtitle": "登录以进入您的品牌工作空间",
