@@ -24,26 +24,45 @@ export default function StudioHero3D() {
   }, []);
 
   return (
-    <div className="relative w-full aspect-[4/3] border border-border bg-secondary/40 overflow-hidden">
-      {ready ? (
-        <Suspense fallback={<Poster />}>
-          <Model3DViewer
-            hasModel
-            modelUrl="/models/d-ring-buckle.obj"
-            modelType="button"
-          />
-        </Suspense>
-      ) : (
-        <Poster />
-      )}
-      <div className="absolute bottom-3 right-3 pointer-events-none">
-        <Link to={HERO_EDITOR_URL} className="pointer-events-auto">
+    <div className="relative w-full aspect-[4/3] border border-border bg-secondary/40 overflow-hidden rounded-none">
+      {/* Stage content (poster or 3D) */}
+      <div className="absolute inset-0">
+        {ready ? (
+          <Suspense fallback={<PosterStage />}>
+            <Model3DViewer
+              hasModel
+              modelUrl="/models/d-ring-buckle.obj"
+              modelType="button"
+            />
+          </Suspense>
+        ) : (
+          <PosterStage />
+        )}
+      </div>
+
+      {/* Eyebrow — top-left, single inset */}
+      <div className="absolute top-5 left-5 right-5 pointer-events-none">
+        <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+          Interactive 3D
+        </p>
+      </div>
+
+      {/* Caption — bottom-left, hidden on narrow widths to avoid overlap */}
+      <div className="absolute bottom-5 left-5 right-5 pointer-events-none hidden sm:block">
+        <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground max-w-[55%]">
+          {t("studioIntro.customizeThis")}
+        </p>
+      </div>
+
+      {/* CTA — bottom-right, same inset as text */}
+      <div className="absolute bottom-5 right-5">
+        <Link to={HERO_EDITOR_URL}>
           <Button
             size="sm"
             variant="outline"
-            className="text-[10px] uppercase tracking-[0.14em] bg-background/90 backdrop-blur-sm"
+            className="text-[10px] uppercase tracking-[0.14em] bg-background/90 backdrop-blur-sm rounded-none"
           >
-            {t("studioIntro.customizeThis")}
+            {t("studioIntro.customizeThis")} →
           </Button>
         </Link>
       </div>
@@ -51,13 +70,10 @@ export default function StudioHero3D() {
   );
 }
 
-function Poster() {
+function PosterStage() {
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-      <div className="w-20 h-20 rounded-full bg-foreground/[0.06] border border-foreground/10 animate-pulse" />
-      <p className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground/50">
-        Interactive 3D
-      </p>
+      <div className="w-20 h-20 bg-foreground/[0.06] border border-foreground/10 animate-pulse rounded-none" />
     </div>
   );
 }
