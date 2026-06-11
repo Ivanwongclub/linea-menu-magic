@@ -82,7 +82,7 @@ const DesignerStudio = () => {
     <>
       {/* 1. HERO */}
       <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-secondary/40 via-background to-background py-20 lg:py-24 px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-[1.05fr_1fr] gap-12 lg:gap-16 items-center">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-[1.05fr_1fr] gap-12 lg:gap-16 items-start">
           <div>
             <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground mb-5">
               {t("studioIntro.eyebrow")}
