@@ -9,6 +9,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/features/auth/AuthProvider";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { useScrollAnimation } from "@/hooks/use-scroll-animation";
 import StudioHero3D, { HERO_EDITOR_URL } from "@/components/designer-studio/StudioHero3D";
@@ -54,6 +55,11 @@ const FEATURED = [
 
 const DesignerStudio = () => {
   const { t } = useI18n();
+  const { session } = useAuth();
+
+  const workspaceHref = session
+    ? "/designer-studio/dashboard?tab=library"
+    : "/designer-studio/login";
 
   const trust = useScrollAnimation();
   const featured = useScrollAnimation();
@@ -69,7 +75,7 @@ const DesignerStudio = () => {
     { icon: Box, t: "cap3", to: HERO_EDITOR_URL },
     { icon: Link2, t: "cap4", to: "/ecollections" },
     { icon: ClipboardList, t: "cap5", to: "/contact" },
-    { icon: ShieldCheck, t: "cap6", to: undefined },
+    { icon: ShieldCheck, t: "cap6", to: workspaceHref },
   ] as const;
 
   return (

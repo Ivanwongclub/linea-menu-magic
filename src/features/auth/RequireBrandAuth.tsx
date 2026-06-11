@@ -1,8 +1,8 @@
 import { ReactNode } from "react";
-import { Navigate, useLocation, Link } from "react-router-dom";
+import { Navigate, useLocation, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthProvider";
 import { Button } from "@/components/ui/button";
-import { ShieldAlert } from "lucide-react";
+import { ShieldAlert, LogOut } from "lucide-react";
 import { useI18n } from "@/features/i18n/I18nProvider";
 
 interface Props {
@@ -10,9 +10,15 @@ interface Props {
 }
 
 export default function RequireBrandAuth({ children }: Props) {
-  const { session, brands, loading, membershipLoading } = useAuth();
+  const { session, brands, loading, membershipLoading, signOut } = useAuth();
   const { t } = useI18n();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/designer-studio/login");
+  };
 
   if (loading || (session && membershipLoading)) {
     return (
@@ -46,6 +52,14 @@ export default function RequireBrandAuth({ children }: Props) {
             </Button>
             <Button asChild variant="ghost" className="rounded-none">
               <Link to="/designer-studio">{t("auth.noBrand.back")}</Link>
+            </Button>
+            <Button
+              variant="outline"
+              className="rounded-none"
+              onClick={handleSignOut}
+            >
+              <LogOut className="w-3.5 h-3.5 mr-2" />
+              {t("header.cta.signOut")}
             </Button>
           </div>
         </div>

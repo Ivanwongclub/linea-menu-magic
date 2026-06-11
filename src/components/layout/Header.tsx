@@ -1,8 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { Link, useLocation } from "react-router-dom";
-import { Menu, X, ChevronDown, ChevronRight } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Menu, X, ChevronDown, ChevronRight, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth/AuthProvider";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import BrandWordmark from "@/components/layout/BrandWordmark";
@@ -185,7 +193,15 @@ const Header = () => {
   const [aboutMegaHydrated, setAboutMegaHydrated] = useState(false);
   const [aboutPreviewImage,  setAboutPreviewImage]  = useState(ABOUT_DEFAULT_PREVIEW);
   const [aboutPreviewLabelKey,  setAboutPreviewLabelKey]  = useState("header.about.ourStory");
-  const { session, primaryBrand } = useAuth();
+  const { session, primaryBrand, signOut } = useAuth();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const handleSignOut = useCallback(async () => {
+    await signOut();
+    queryClient.clear();
+    navigate("/designer-studio");
+  }, [signOut, queryClient, navigate]);
 
   const { pathname } = useLocation();
   const productsTimeout = useRef<ReturnType<typeof setTimeout>>();
@@ -416,18 +432,46 @@ const Header = () => {
                   {t("header.cta.contact")}
                 </Button>
               </Link>
-              <Link to={studioCtaHref}>
-                <Button
-                  size="sm"
-                  className={
-                    isTransparent
-                      ? "bg-white text-foreground border border-white/80 hover:bg-foreground hover:text-background transition-all duration-200"
-                      : "bg-foreground text-background border border-foreground hover:bg-foreground/80 transition-all duration-200"
-                  }
-                >
-                  <span className="max-w-[150px] truncate">{studioCtaLabel}</span>
-                </Button>
-              </Link>
+              {session ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      size="sm"
+                      className={
+                        isTransparent
+                          ? "bg-white text-foreground border border-white/80 hover:bg-foreground hover:text-background transition-all duration-200"
+                          : "bg-foreground text-background border border-foreground hover:bg-foreground/80 transition-all duration-200"
+                      }
+                    >
+                      <span className="max-w-[150px] truncate">{studioCtaLabel}</span>
+                      <ChevronDown className="h-3 w-3 ml-1 flex-shrink-0" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={() => navigate("/designer-studio/dashboard?tab=library")}>
+                      {t("header.cta.myWorkspace")}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut}>
+                      <LogOut className="w-3.5 h-3.5 mr-2" />
+                      {t("header.cta.signOut")}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Link to={studioCtaHref}>
+                  <Button
+                    size="sm"
+                    className={
+                      isTransparent
+                        ? "bg-white text-foreground border border-white/80 hover:bg-foreground hover:text-background transition-all duration-200"
+                        : "bg-foreground text-background border border-foreground hover:bg-foreground/80 transition-all duration-200"
+                    }
+                  >
+                    <span className="max-w-[150px] truncate">{studioCtaLabel}</span>
+                  </Button>
+                </Link>
+              )}
             </div>
 
             {/* Mobile controls */}
@@ -802,6 +846,16 @@ const Header = () => {
                     <span className="truncate">{studioCtaLabel}</span>
                   </Button>
                 </Link>
+                {session && (
+                  <Button
+                    variant="ghost"
+                    className="w-full text-muted-foreground"
+                    onClick={() => { setIsMenuOpen(false); handleSignOut(); }}
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    {t("header.cta.signOut")}
+                  </Button>
+                )}
               </div>
             </nav>
           </div>,
