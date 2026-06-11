@@ -181,3 +181,96 @@ Migration UPDATE targets `WHERE slug = 'metal-d-ring-buckle'`. The Polo D-Ring b
 - **Thumbnail/product images still show a D-ring shape:** The seed images for `'metal-button'` (`[metalButton, engravedButton, brandButton, snapButton]`) use generic button images from the asset library, so the PDP gallery will show buttons. However, the actual DB product image (if any) may still reference a D-ring photo. Image regeneration / photo replacement is P5b scope.
 - **ObjGallery gallery item retains the `d-ring-buckle.obj` mesh on the Production page:** The gallery entry was relabeled "Button" but still loads the d-ring OBJ mesh. A viewer seeing the 3D model will notice the shape is not a conventional flat button. Mesh replacement is a future asset task; the label is now at least truthful about product category.
 - **`size_options` field added to `PdpSeedEntry.specifications`:** The `specifications` field in `PdpSeedEntry` is typed as `Record<string, unknown>` (or similar loose type), so `size_options` is accepted without a type change. Confirmed by tsc clean pass.
+
+---
+
+## P5a-r Correction (2026-06-11)
+
+### Why the original migration was wrong
+
+The P5a migration targeted `WHERE slug = 'metal-d-ring-buckle'`. A production SQL export run on 2026-06-11 confirmed that **no product with that slug exists** in the live database — the clause was a no-op. The real production state:
+
+- `metal-button` (FST-BTN-001, "Metal Buttons") EXISTS, active, `is_customizable = true`, currently `model_url = '/models/Polo_Button_10.8.obj'`
+- No product references `/models/d-ring-buckle.obj` — the rename assumption was false
+- Five broken references (OBJ files absent from `public/models/`): `/models/hardware.obj`, `/models/zipper.obj`, `/models/hw-snap-002.obj`, `/models/button.obj`, `/models/zip-n3-002.obj`
+- One mismatch: slug `metal-zipper-puller` carries `Polo_Button_10.8-2.obj` (a button OBJ on a zipper product)
+
+Because the migration had **not been applied to Supabase** (only SELECTs were run for the export audit), the file was rewritten in place. No applied migration was modified.
+
+### Corrected SQL (full replacement content of 20260611130000_rename_button_remove_ugly_models.sql)
+
+```sql
+-- Corrected against production state (2026-06-11 export).
+-- The OBJ at /models/d-ring-buckle.obj is a high-quality button model.
+-- Attach it to the existing Metal Buttons product and make that product the canonical Button.
+
+-- 1. Hero product: rename and attach the good button OBJ
+UPDATE public.products
+SET
+  name = 'Button',
+  name_en = 'Button',
+  model_url = '/models/d-ring-buckle.obj',
+  is_customizable = true,
+  description = 'Classic metal button in zinc alloy with a polished dome face. Available in multiple plated finishes and sizes for shirts, jackets and outerwear.'
+WHERE slug = 'metal-button';
+
+-- 2. Remove low-quality 3D models (cord stopper, woven badge)
+UPDATE public.products
+SET model_url = NULL
+WHERE model_url LIKE '%cord-stopper.obj' OR model_url LIKE '%metal-badge.obj';
+
+-- 3. Remove broken 3D references (OBJ files absent from /public/models)
+UPDATE public.products
+SET model_url = NULL
+WHERE model_url IN (
+  '/models/hardware.obj',
+  '/models/zipper.obj',
+  '/models/hw-snap-002.obj',
+  '/models/button.obj',
+  '/models/zip-n3-002.obj'
+);
+
+-- 4. Remove mismatched model (zipper puller displaying a button OBJ)
+UPDATE public.products
+SET model_url = NULL
+WHERE slug = 'metal-zipper-puller';
+```
+
+### STEP 2 — 3D survivors after migration
+
+Products expected to retain a `model_url` after all four clauses run:
+
+| Product | model_url before | After clause 1 | After clauses 2–4 | Survives? |
+|---|---|---|---|---|
+| `metal-button` | `Polo_Button_10.8.obj` | `/models/d-ring-buckle.obj` ← SET | Not matched by any NULL clause | ✅ YES |
+| `btn-polo-001` | `Polo_Button_10.8.obj` | Unchanged | Not matched by any NULL clause | ✅ YES |
+| `btn-m4h-001` | `Polo_Button_10.8.obj` | Unchanged | Not matched by any NULL clause | ✅ YES |
+| Products with `cord-stopper.obj` | — | Unchanged | Clause 2: nulled | ❌ nulled |
+| Products with `metal-badge.obj` | — | Unchanged | Clause 2: nulled | ❌ nulled |
+| Products with broken paths | — | Unchanged | Clause 3: nulled (IN list) | ❌ nulled |
+| `metal-zipper-puller` | `Polo_Button_10.8-2.obj` | Unchanged | Clause 4: nulled | ❌ nulled |
+
+All three survivors use genuine button OBJs, all matched to button products. No zipper, hardware, or soft-trim product retains a 3D model after migration.
+
+### Logic checks
+
+**1. The rename clause keys on an existing slug (`metal-button`)?**  
+✅ YES. Production export confirms `metal-button` (FST-BTN-001) exists. Clause 1 `WHERE slug = 'metal-button'` targets exactly this row.
+
+**2. After migration, exactly three products retain model_url, all genuinely buttons displaying button OBJs?**  
+✅ YES. `metal-button` receives `/models/d-ring-buckle.obj` (a button model verified on disk). `btn-polo-001` and `btn-m4h-001` retain `Polo_Button_10.8.obj` (also verified on disk, also buttons). All four NULL clauses target non-button products or broken paths — none overlap with these three.
+
+**3. No clause can affect the Polo brand-catalogue D-ring product (PRL-BKL-002)?**  
+✅ YES.
+- Clause 1: `WHERE slug = 'metal-button'` — PRL-BKL-002 has a different slug; not matched.
+- Clause 2: LIKE `%cord-stopper.obj` or `%metal-badge.obj` — PRL-BKL-002 has `model_url = NULL` (confirmed in export); the LIKE pattern never matches NULL.
+- Clause 3: IN list of five specific broken paths — none is PRL-BKL-002's model_url (which is NULL).
+- Clause 4: `WHERE slug = 'metal-zipper-puller'` — different slug; not matched.
+PRL-BKL-002 is completely untouched by every WHERE predicate.
+
+**4. Trim library fallback still yields one product per family with all these nulls?**  
+✅ YES. `displayProducts` in `DesignerStudioTrimLibrary.tsx` (lines 38–51): for each PRODUCT_FAMILY it first seeks `withModel = products.find(p => p.model_url && ...)`. If no model exists for a family, `fallback = products.find(p => categories match)` fires unconditionally. The families are Hardware, Soft Trims, and Branding Trims. Even if every hardware product loses its model_url, the fallback picks the first hardware product in the list, so the tile still appears. The trim library grid is never empty due to model_url state.
+
+### tsc / build
+
+**PASS** — `✓ built in 5.47s`, zero TypeScript errors. The migration is a pure SQL file with no TypeScript surface; code changes from P5a are unmodified and continue to pass.
