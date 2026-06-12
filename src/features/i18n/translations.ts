@@ -325,7 +325,7 @@ export const translations: Record<AppLanguage, TranslationMap> = {
     "studioIntro.heroCta3d": "Try the 3D Editor",
     "studioIntro.featuredLabel": "Featured Trims",
     "studioIntro.featuredTitle": "Start with a reference, make it yours",
-    "studioIntro.customizeThis": "Customize this →",
+    "studioIntro.customizeThis": "Customize this",
 
     "login.title": "Designer Studio",
     "login.subtitle": "Sign in to access your brand workspace",
@@ -619,7 +619,7 @@ export const translations: Record<AppLanguage, TranslationMap> = {
     "studioIntro.heroCta3d": "試用 3D 編輯器",
     "studioIntro.featuredLabel": "精選輔料",
     "studioIntro.featuredTitle": "從參考開始，打造專屬設計",
-    "studioIntro.customizeThis": "自訂此款 →",
+    "studioIntro.customizeThis": "自訂此款",
 
     "studioIntro.metricsLabel": "平台規模",
     "studioIntro.metric1Value": "500+", // TODO: replace with live DB count
@@ -923,7 +923,7 @@ export const translations: Record<AppLanguage, TranslationMap> = {
     "studioIntro.heroCta3d": "试用 3D 编辑器",
     "studioIntro.featuredLabel": "精选辅料",
     "studioIntro.featuredTitle": "从参考开始，打造专属设计",
-    "studioIntro.customizeThis": "自定义此款 →",
+    "studioIntro.customizeThis": "自定义此款",
 
     "studioIntro.metricsLabel": "平台规模",
     "studioIntro.metric1Value": "500+", // TODO: replace with live DB count

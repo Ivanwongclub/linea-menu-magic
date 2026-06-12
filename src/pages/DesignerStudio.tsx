@@ -25,12 +25,13 @@ import { getProductThumbnailUrl } from "@/features/products/utils/productImagePl
 
 const REVEAL_BASE = "transition-all duration-700 ease-[cubic-bezier(0.19,1,0.22,1)]";
 
-const trustWordmarks = [
-  { name: "GLOBAL APPAREL BRANDS" },
-  { name: "PREMIUM DENIM HOUSES" },
-  { name: "OUTDOOR & PERFORMANCE" },
-  { name: "LUXURY READY-TO-WEAR" },
-  { name: "HERITAGE SPORTSWEAR" },
+// Real client logos. Tommy Hilfiger's file isn't uploaded yet — falls back to text wordmark.
+const trustWordmarks: { name: string; logoSrc?: string }[] = [
+  { name: "Michael Kors",      logoSrc: "/images/brands/michael-kors.webp" },
+  { name: "Tommy Hilfiger" },
+  { name: "adidas",            logoSrc: "/images/brands/adidas.webp" },
+  { name: "Calvin Klein",      logoSrc: "/images/brands/calvin-klein.webp" },
+  { name: "Polo Ralph Lauren", logoSrc: "/images/brands/ralph-lauren.webp" },
 ];
 
 const DesignerStudio = () => {
@@ -110,14 +111,25 @@ const DesignerStudio = () => {
             {t("studioIntro.trustLabel")}
           </p>
           <div className="flex-1 flex flex-wrap items-center justify-center lg:justify-end gap-x-8 lg:gap-x-12 gap-y-3">
-            {trustWordmarks.map(({ name }) => (
-              <span
-                key={name}
-                className="text-[11px] tracking-[0.22em] text-foreground/40 font-semibold"
-              >
-                {name}
-              </span>
-            ))}
+            {trustWordmarks.map(({ name, logoSrc }) =>
+              logoSrc ? (
+                <img
+                  key={name}
+                  src={logoSrc}
+                  alt={name}
+                  loading="lazy"
+                  decoding="async"
+                  className="h-5 lg:h-6 w-auto object-contain opacity-45 grayscale"
+                />
+              ) : (
+                <span
+                  key={name}
+                  className="text-[11px] tracking-[0.22em] text-foreground/40 font-semibold uppercase"
+                >
+                  {name}
+                </span>
+              ),
+            )}
           </div>
         </div>
       </section>

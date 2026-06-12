@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/features/i18n/I18nProvider";
 
@@ -47,14 +48,8 @@ export default function StudioHero3D() {
         </p>
       </div>
 
-      {/* Caption — bottom-left, hidden on narrow widths to avoid overlap */}
-      <div className="absolute bottom-5 left-5 right-5 pointer-events-none hidden sm:block">
-        <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground max-w-[55%]">
-          {t("studioIntro.customizeThis")}
-        </p>
-      </div>
-
-      {/* CTA — bottom-right, same inset as text */}
+      {/* CTA — bottom-right, single p-5 inset. Only one customize control on the stage;
+          the Model3DViewer renders its own bottom-left "Drag to rotate…" hint when mounted. */}
       <div className="absolute bottom-5 right-5">
         <Link to={HERO_EDITOR_URL}>
           <Button
@@ -62,7 +57,8 @@ export default function StudioHero3D() {
             variant="outline"
             className="text-[10px] uppercase tracking-[0.14em] bg-background/90 backdrop-blur-sm rounded-none"
           >
-            {t("studioIntro.customizeThis")} →
+            {t("studioIntro.customizeThis")}
+            <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
           </Button>
         </Link>
       </div>
