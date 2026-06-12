@@ -82,7 +82,7 @@ const DesignerStudio = () => {
     <>
       {/* 1. HERO */}
       <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-secondary/40 via-background to-background py-20 lg:py-24 px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-[1.05fr_1fr] gap-12 lg:gap-16 items-start">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-[1.05fr_1fr] gap-12 lg:gap-16 items-center">
           <div>
             <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground mb-5">
               {t("studioIntro.eyebrow")}
@@ -301,22 +301,13 @@ const DesignerStudio = () => {
       {/* 8. FINAL CTA */}
       <section
         ref={bottom.ref}
-        className={`relative overflow-hidden py-20 lg:py-24 px-6 lg:px-8 bg-foreground text-background ${REVEAL_BASE} ${bottom.isVisible ? "opacity-100" : "opacity-0"}`}
+        className={`py-20 lg:py-24 px-6 lg:px-8 bg-foreground text-background ${REVEAL_BASE} ${bottom.isVisible ? "opacity-100" : "opacity-0"}`}
       >
-        <img
-          src="/images/studio/cta-backdrop.webp"
-          alt=""
-          aria-hidden="true"
-          loading="lazy"
-          decoding="async"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/70 to-black/80" aria-hidden="true" />
-        <div className="relative z-10 max-w-4xl mx-auto text-center">
+        <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-2xl lg:text-4xl font-semibold tracking-tight mb-4">
             {t("studioIntro.bottomTitle")}
           </h2>
-          <p className="text-sm lg:text-base text-background/85 leading-relaxed max-w-2xl mx-auto mb-8">
+          <p className="text-sm lg:text-base text-background/75 leading-relaxed max-w-2xl mx-auto mb-8">
             {t("studioIntro.bottomBody")}
           </p>
           <div className="flex flex-wrap justify-center gap-3">

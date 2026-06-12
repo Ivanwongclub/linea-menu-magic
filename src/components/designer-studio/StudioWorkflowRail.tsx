@@ -34,15 +34,42 @@ export default function StudioWorkflowRail() {
               {t(`studioIntro.step${key}Body`)}
             </p>
 
-            {/* Mini visual — atelier photograph */}
-            <div className="mt-5 w-full max-w-[260px] aspect-[3/2] border border-border bg-secondary/40 relative overflow-hidden">
-              <img
-                src={`/images/studio/workflow-${key}-${["concept", "craft", "spec", "production"][i]}.webp`}
-                alt={t(`studioIntro.step${key}Title`)}
-                loading="lazy"
-                decoding="async"
-                className="object-cover w-full h-full"
+            {/* Mini visual */}
+            <div className="mt-5 w-full max-w-[200px] aspect-[4/3] border border-border bg-secondary/40 relative overflow-hidden">
+              <div
+                className="absolute inset-0 opacity-[0.05]"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)",
+                  backgroundSize: "16px 16px",
+                }}
               />
+              {key === 1 && (
+                <div className="absolute inset-3 grid grid-cols-3 gap-1.5">
+                  {[...Array(6)].map((_, idx) => (
+                    <div key={idx} className="bg-foreground/[0.06] border border-foreground/10" />
+                  ))}
+                </div>
+              )}
+              {key === 2 && (
+                <>
+                  <div className="absolute top-3 left-3 w-1/2 h-1/2 bg-foreground/[0.08] border border-foreground/15" />
+                  <div className="absolute bottom-3 right-3 w-1/3 h-1/3 bg-foreground/[0.06] border border-foreground/15" />
+                </>
+              )}
+              {key === 3 && (
+                <div className="absolute inset-3 border border-foreground/15 bg-background flex items-center justify-center">
+                  <div className="w-[60%] h-[55%] bg-foreground/[0.06]" />
+                </div>
+              )}
+              {key === 4 && (
+                <div className="absolute inset-3 flex flex-col gap-1.5 p-2">
+                  <div className="h-1.5 bg-foreground/[0.1] w-3/4" />
+                  <div className="h-1.5 bg-foreground/[0.06] w-1/2" />
+                  <div className="h-1.5 bg-foreground/[0.06] w-2/3" />
+                  <div className="mt-auto h-4 bg-foreground border border-foreground w-1/3" />
+                </div>
+              )}
             </div>
           </div>
         ))}
