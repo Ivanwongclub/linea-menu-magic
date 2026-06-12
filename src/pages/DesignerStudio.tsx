@@ -138,40 +138,58 @@ const DesignerStudio = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-5">
-            {FEATURED.map(({ slug, label, family, image, editorUrl }) => (
-              <div key={slug} className="border border-border bg-background overflow-hidden">
-                <div className="aspect-[4/3] overflow-hidden bg-secondary/50">
-                  <img
-                    src={image}
-                    alt={label}
-                    loading="lazy"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="p-4">
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-1">
-                    {family}
-                  </p>
-                  <h3 className="text-sm font-semibold tracking-tight text-foreground mb-3">
-                    {label}
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    <Link to={`/products/${slug}`}>
-                      <Button variant="outline" size="sm" className="text-[10px] uppercase tracking-[0.12em] h-7 px-3">
-                        Details
-                      </Button>
-                    </Link>
-                    {editorUrl && (
-                      <Link to={editorUrl}>
-                        <Button size="sm" className="text-[10px] uppercase tracking-[0.12em] h-7 px-3">
-                          Open in Editor
+            {featuredProducts.map((p) => {
+              const family = getFamilyNameForProduct(p);
+              const editorUrl = p.model_url
+                ? `/designer-studio/editor?model=${encodeURIComponent(p.model_url)}&name=${encodeURIComponent(p.name)}&slug=${encodeURIComponent(p.slug)}`
+                : null;
+              const primaryCategory =
+                p.primary_category ?? p.categories?.[0];
+              const imageSrc = p.thumbnail_url
+                ? getProductImageUrl(p.thumbnail_url, "card")
+                : getProductThumbnailUrl(
+                    p.name,
+                    p.item_code,
+                    primaryCategory?.slug,
+                    primaryCategory?.name,
+                  );
+              return (
+                <div key={p.id} className="border border-border bg-background overflow-hidden">
+                  <div className="aspect-[4/3] overflow-hidden bg-secondary/50">
+                    <img
+                      src={imageSrc}
+                      alt={p.name}
+                      loading="lazy"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="p-4">
+                    {family && (
+                      <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-1">
+                        {family}
+                      </p>
+                    )}
+                    <h3 className="text-sm font-semibold tracking-tight text-foreground mb-3">
+                      {p.name}
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      <Link to={`/designer-studio/products/${p.slug}`}>
+                        <Button variant="outline" size="sm" className="text-[10px] uppercase tracking-[0.12em] h-7 px-3">
+                          Details
                         </Button>
                       </Link>
-                    )}
+                      {editorUrl && (
+                        <Link to={editorUrl}>
+                          <Button size="sm" className="text-[10px] uppercase tracking-[0.12em] h-7 px-3">
+                            Open in Editor
+                          </Button>
+                        </Link>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
