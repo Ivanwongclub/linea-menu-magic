@@ -16,16 +16,13 @@ export default function StudioCapabilityTile({ icon: Icon, title, body, to }: St
       }`}
     >
       <div
-        className={`w-9 h-9 border border-border flex items-center justify-center mb-5 transition-colors duration-300${
-          to ? " group-hover:bg-foreground group-hover:border-foreground" : ""
+        className={`w-9 h-9 flex items-center justify-center mb-5 rounded-none bg-foreground text-background transition-colors duration-200${
+          to
+            ? " group-hover:bg-background group-hover:text-foreground group-hover:border group-hover:border-foreground"
+            : ""
         }`}
       >
-        <Icon
-          className={`w-4 h-4 text-foreground transition-colors duration-300${
-            to ? " group-hover:text-background" : ""
-          }`}
-          strokeWidth={1.5}
-        />
+        <Icon className="w-4 h-4" strokeWidth={1.5} />
       </div>
       <h3 className="text-sm font-semibold tracking-tight text-foreground mb-2">{title}</h3>
       <p className="text-xs text-muted-foreground leading-relaxed">{body}</p>
