@@ -12,9 +12,9 @@ const Index = () => {
   return (
     <>
         <HeroSection />
-        <HeritageSection />
-        <BrandLogosSection />
         <ProductCategories />
+        <BrandLogosSection />
+        <HeritageSection />
         <MilestoneTeaser />
         <Separator className="opacity-50" />
         <SustainabilitySection />
