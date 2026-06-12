@@ -1,6 +1,7 @@
 import HeroSection from "@/components/home/HeroSection";
 import ProductCategories from "@/components/home/ProductCategories";
 import HeritageSection from "@/components/home/HeritageSection";
+import BrandLogosSection from "@/components/home/BrandLogosSection";
 import MilestoneTeaser from "@/components/home/MilestoneTeaser";
 import DesignerCTA from "@/components/home/DesignerCTA";
 import SustainabilitySection from "@/components/home/SustainabilitySection";
@@ -11,8 +12,9 @@ const Index = () => {
   return (
     <>
         <HeroSection />
-        <ProductCategories />
         <HeritageSection />
+        <BrandLogosSection />
+        <ProductCategories />
         <MilestoneTeaser />
         <Separator className="opacity-50" />
         <SustainabilitySection />

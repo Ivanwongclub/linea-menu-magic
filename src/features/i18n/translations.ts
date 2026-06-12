@@ -128,6 +128,7 @@ export const translations: Record<AppLanguage, TranslationMap> = {
     "home.heritage.p2":
       "From our roots in Hong Kong, we have grown into an internationally certified global supplier serving leading brands across Europe, the Americas, Japan, and Asia Pacific.",
     "home.heritage.discover": "Discover More",
+    "home.brands.title": "Trusted by leading brands",
 
     "home.sustainability.label": "Sustainability",
     "home.sustainability.our": "Our",
@@ -496,6 +497,7 @@ export const translations: Record<AppLanguage, TranslationMap> = {
     "home.heritage.p2":
       "立足香港，我們已成為具國際認證的全球供應夥伴，服務歐洲、美洲、日本及亞太地區領先品牌。",
     "home.heritage.discover": "深入了解",
+    "home.brands.title": "深受國際品牌信賴",
 
     "home.sustainability.label": "可持續發展",
     "home.sustainability.our": "我們的",
@@ -799,6 +801,7 @@ export const translations: Record<AppLanguage, TranslationMap> = {
     "home.heritage.p2":
       "立足香港，我们已成长为具国际认证的全球供应伙伴，服务欧洲、美洲、日本与亚太地区领先品牌。",
     "home.heritage.discover": "深入了解",
+    "home.brands.title": "深受国际品牌信赖",
 
     "home.sustainability.label": "可持续发展",
     "home.sustainability.our": "我们的",
