@@ -7,6 +7,7 @@ import ProductCard from "@/components/products/ProductCard";
 import { useProducts } from "@/features/products/hooks/useProducts";
 import { useProductTaxonomy } from "@/features/products/hooks/useProductTaxonomy";
 import { PRODUCT_FAMILIES } from "@/features/products/taxonomy";
+import { pickFamilyFeatured } from "@/features/products/utils/pickFamilyFeatured";
 import { useAuth } from "@/features/auth/AuthProvider";
 import { useI18n } from "@/features/i18n/I18nProvider";
 
