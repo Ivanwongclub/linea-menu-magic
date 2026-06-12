@@ -7,7 +7,6 @@ import ProductCard from "@/components/products/ProductCard";
 import { useProducts } from "@/features/products/hooks/useProducts";
 import { useProductTaxonomy } from "@/features/products/hooks/useProductTaxonomy";
 import { PRODUCT_FAMILIES } from "@/features/products/taxonomy";
-import { pickFamilyFeatured } from "@/features/products/utils/pickFamilyFeatured";
 import { useAuth } from "@/features/auth/AuthProvider";
 import { useI18n } from "@/features/i18n/I18nProvider";
 
@@ -32,9 +31,25 @@ const DesignerStudioTrimLibrary = () => {
 
   const { products, loading } = useProducts(filters);
 
-  // Single source of truth shared with the Designer Studio landing
-  // Featured Trims strip — see pickFamilyFeatured().
-  const displayProducts = useMemo(() => pickFamilyFeatured(products), [products]);
+  // Show only 1 product per family — prefer the one with a 3D model
+  const displayProducts = useMemo(() => {
+    const picked: typeof products = [];
+    for (const family of PRODUCT_FAMILIES) {
+      const withModel = products.find(
+        (p) =>
+          p.model_url &&
+          p.categories?.some((c) => family.categorySlugs.includes(c.slug))
+      );
+      const fallback = products.find((p) =>
+        p.categories?.some((c) => family.categorySlugs.includes(c.slug))
+      );
+      const pick = withModel ?? fallback;
+      if (pick && !picked.some((x) => x.id === pick.id)) {
+        picked.push(pick);
+      }
+    }
+    return picked;
+  }, [products]);
   const { categories } = useProductTaxonomy();
 
   // Build family chips from taxonomy

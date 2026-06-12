@@ -15,13 +15,9 @@ import { useScrollAnimation } from "@/hooks/use-scroll-animation";
 import StudioHero3D, { HERO_EDITOR_URL } from "@/components/designer-studio/StudioHero3D";
 import StudioCapabilityTile from "@/components/designer-studio/StudioCapabilityTile";
 import StudioWorkflowRail from "@/components/designer-studio/StudioWorkflowRail";
-import { useProducts } from "@/features/products/hooks/useProducts";
-import {
-  pickFamilyFeatured,
-  getFamilyNameForProduct,
-} from "@/features/products/utils/pickFamilyFeatured";
-import { getProductImageUrl } from "@/lib/productImage";
-import { getProductThumbnailUrl } from "@/features/products/utils/productImagePlaceholder";
+import metalButtonImg from "@/assets/products/metal-button.jpg";
+import cottonLaceImg from "@/assets/products/cotton-lace.jpg";
+import wovenLabelImg from "@/assets/products/woven-label.jpg";
 
 const REVEAL_BASE = "transition-all duration-700 ease-[cubic-bezier(0.19,1,0.22,1)]";
 
@@ -33,15 +29,33 @@ const trustWordmarks = [
   { name: "HERITAGE SPORTSWEAR" },
 ];
 
+const FEATURED = [
+  {
+    slug: "metal-button",
+    label: "Button",
+    family: "Hardware",
+    image: metalButtonImg,
+    editorUrl: HERO_EDITOR_URL,
+  },
+  {
+    slug: "eco-lace-trim",
+    label: "Eco Lace",
+    family: "Soft Trims",
+    image: cottonLaceImg,
+    editorUrl: null,
+  },
+  {
+    slug: "woven-label",
+    label: "Woven Label",
+    family: "Branding Trims",
+    image: wovenLabelImg,
+    editorUrl: null,
+  },
+] as const;
+
 const DesignerStudio = () => {
   const { t } = useI18n();
   const { session } = useAuth();
-
-  // SAME data + SAME picker as the trim library — guarantees parity.
-  const { products } = useProducts({
-    visibility: session ? "brand" : "public",
-  });
-  const featuredProducts = pickFamilyFeatured(products);
 
   const workspaceHref = session
     ? "/designer-studio/dashboard?tab=library"
@@ -138,58 +152,40 @@ const DesignerStudio = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-5">
-            {featuredProducts.map((p) => {
-              const family = getFamilyNameForProduct(p);
-              const editorUrl = p.model_url
-                ? `/designer-studio/editor?model=${encodeURIComponent(p.model_url)}&name=${encodeURIComponent(p.name)}&slug=${encodeURIComponent(p.slug)}`
-                : null;
-              const primaryCategory =
-                p.primary_category ?? p.categories?.[0];
-              const imageSrc = p.thumbnail_url
-                ? getProductImageUrl(p.thumbnail_url, "card")
-                : getProductThumbnailUrl(
-                    p.name,
-                    p.item_code,
-                    primaryCategory?.slug,
-                    primaryCategory?.name,
-                  );
-              return (
-                <div key={p.id} className="border border-border bg-background overflow-hidden">
-                  <div className="aspect-[4/3] overflow-hidden bg-secondary/50">
-                    <img
-                      src={imageSrc}
-                      alt={p.name}
-                      loading="lazy"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="p-4">
-                    {family && (
-                      <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-1">
-                        {family}
-                      </p>
-                    )}
-                    <h3 className="text-sm font-semibold tracking-tight text-foreground mb-3">
-                      {p.name}
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      <Link to={`/designer-studio/products/${p.slug}`}>
-                        <Button variant="outline" size="sm" className="text-[10px] uppercase tracking-[0.12em] h-7 px-3">
-                          Details
+            {FEATURED.map(({ slug, label, family, image, editorUrl }) => (
+              <div key={slug} className="border border-border bg-background overflow-hidden">
+                <div className="aspect-[4/3] overflow-hidden bg-secondary/50">
+                  <img
+                    src={image}
+                    alt={label}
+                    loading="lazy"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="p-4">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-1">
+                    {family}
+                  </p>
+                  <h3 className="text-sm font-semibold tracking-tight text-foreground mb-3">
+                    {label}
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    <Link to={`/products/${slug}`}>
+                      <Button variant="outline" size="sm" className="text-[10px] uppercase tracking-[0.12em] h-7 px-3">
+                        Details
+                      </Button>
+                    </Link>
+                    {editorUrl && (
+                      <Link to={editorUrl}>
+                        <Button size="sm" className="text-[10px] uppercase tracking-[0.12em] h-7 px-3">
+                          Open in Editor
                         </Button>
                       </Link>
-                      {editorUrl && (
-                        <Link to={editorUrl}>
-                          <Button size="sm" className="text-[10px] uppercase tracking-[0.12em] h-7 px-3">
-                            Open in Editor
-                          </Button>
-                        </Link>
-                      )}
-                    </div>
+                    )}
                   </div>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         </div>
       </section>

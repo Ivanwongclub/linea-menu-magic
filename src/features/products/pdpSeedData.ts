@@ -14,7 +14,6 @@ export interface PdpSeedSpecs {
   thickness?: string;
   attachment?: string;
   color_options?: string[];
-  size_options?: string[];
   tensileStrength?: string;
 }
 
