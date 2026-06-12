@@ -32,25 +32,9 @@ const DesignerStudioTrimLibrary = () => {
 
   const { products, loading } = useProducts(filters);
 
-  // Show only 1 product per family — prefer the one with a 3D model
-  const displayProducts = useMemo(() => {
-    const picked: typeof products = [];
-    for (const family of PRODUCT_FAMILIES) {
-      const withModel = products.find(
-        (p) =>
-          p.model_url &&
-          p.categories?.some((c) => family.categorySlugs.includes(c.slug))
-      );
-      const fallback = products.find((p) =>
-        p.categories?.some((c) => family.categorySlugs.includes(c.slug))
-      );
-      const pick = withModel ?? fallback;
-      if (pick && !picked.some((x) => x.id === pick.id)) {
-        picked.push(pick);
-      }
-    }
-    return picked;
-  }, [products]);
+  // Single source of truth shared with the Designer Studio landing
+  // Featured Trims strip — see pickFamilyFeatured().
+  const displayProducts = useMemo(() => pickFamilyFeatured(products), [products]);
   const { categories } = useProductTaxonomy();
 
   // Build family chips from taxonomy
