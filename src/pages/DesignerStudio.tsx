@@ -20,7 +20,8 @@ import {
   pickFamilyFeatured,
   getFamilyNameForProduct,
 } from "@/features/products/utils/pickFamilyFeatured";
-import { resolveProductImage } from "@/lib/productImage";
+import { getProductImageUrl } from "@/lib/productImage";
+import { getProductThumbnailUrl } from "@/features/products/utils/productImagePlaceholder";
 
 const REVEAL_BASE = "transition-all duration-700 ease-[cubic-bezier(0.19,1,0.22,1)]";
 
