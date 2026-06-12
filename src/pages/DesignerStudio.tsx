@@ -33,33 +33,15 @@ const trustWordmarks = [
   { name: "HERITAGE SPORTSWEAR" },
 ];
 
-const FEATURED = [
-  {
-    slug: "metal-button",
-    label: "Button",
-    family: "Hardware",
-    image: metalButtonImg,
-    editorUrl: HERO_EDITOR_URL,
-  },
-  {
-    slug: "eco-lace-trim",
-    label: "Eco Lace",
-    family: "Soft Trims",
-    image: cottonLaceImg,
-    editorUrl: null,
-  },
-  {
-    slug: "woven-label",
-    label: "Woven Label",
-    family: "Branding Trims",
-    image: wovenLabelImg,
-    editorUrl: null,
-  },
-] as const;
-
 const DesignerStudio = () => {
   const { t } = useI18n();
   const { session } = useAuth();
+
+  // SAME data + SAME picker as the trim library — guarantees parity.
+  const { products } = useProducts({
+    visibility: session ? "brand" : "public",
+  });
+  const featuredProducts = pickFamilyFeatured(products);
 
   const workspaceHref = session
     ? "/designer-studio/dashboard?tab=library"
