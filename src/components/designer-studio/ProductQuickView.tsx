@@ -268,46 +268,51 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                   </p>
                 </div>
 
-                <Separator className="my-4" />
-
-                {/* Pricing Section */}
-                <div className="space-y-3">
-                  <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
-                    <DollarSign className="w-4 h-4 text-muted-foreground" />
-                    Pricing & Quantity
-                  </h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 bg-muted/50 rounded-lg">
-                      <p className="text-xs text-muted-foreground mb-1">Unit Price</p>
-                      <p className="text-lg font-semibold text-foreground">
-                        {item.pricing.currency} ${item.pricing.unitPrice.toFixed(2)}
-                      </p>
-                    </div>
-                    <div className="p-3 bg-muted/50 rounded-lg">
-                      <p className="text-xs text-muted-foreground mb-1">MOQ</p>
-                      <p className="text-lg font-semibold text-foreground">
-                        {item.pricing.moq.toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  {item.pricing.priceBreaks && item.pricing.priceBreaks.length > 0 && (
-                    <div className="space-y-2">
-                      <p className="text-xs text-muted-foreground flex items-center gap-1">
-                        <TrendingDown className="w-3 h-3" />
-                        Volume Pricing
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {item.pricing.priceBreaks.map((pb, idx) => (
-                          <div key={idx} className="px-3 py-1.5 bg-primary/5 border border-primary/20 rounded-md text-xs">
-                            <span className="text-muted-foreground">≥{pb.quantity.toLocaleString()} pcs:</span>
-                            <span className="font-medium text-foreground ml-1">${pb.price.toFixed(2)}</span>
-                          </div>
-                        ))}
+                {/* Pricing Section — gated on real pricing data (P13 T6).
+                    The legacy adapter currently hardcodes unitPrice = 0 / moq = 0,
+                    so this block stays hidden until Phase E surfaces real pricing. */}
+                {item.pricing.unitPrice > 0 && (
+                  <>
+                    <Separator className="my-4" />
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
+                        <DollarSign className="w-4 h-4 text-muted-foreground" />
+                        Pricing & Quantity
+                      </h3>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="p-3 bg-muted/50 rounded-lg">
+                          <p className="text-xs text-muted-foreground mb-1">Unit Price</p>
+                          <p className="text-lg font-semibold text-foreground">
+                            {item.pricing.currency} ${item.pricing.unitPrice.toFixed(2)}
+                          </p>
+                        </div>
+                        <div className="p-3 bg-muted/50 rounded-lg">
+                          <p className="text-xs text-muted-foreground mb-1">MOQ</p>
+                          <p className="text-lg font-semibold text-foreground">
+                            {item.pricing.moq.toLocaleString()}
+                          </p>
+                        </div>
                       </div>
+
+                      {item.pricing.priceBreaks && item.pricing.priceBreaks.length > 0 && (
+                        <div className="space-y-2">
+                          <p className="text-xs text-muted-foreground flex items-center gap-1">
+                            <TrendingDown className="w-3 h-3" />
+                            Volume Pricing
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {item.pricing.priceBreaks.map((pb, idx) => (
+                              <div key={idx} className="px-3 py-1.5 bg-primary/5 border border-primary/20 rounded-md text-xs">
+                                <span className="text-muted-foreground">≥{pb.quantity.toLocaleString()} pcs:</span>
+                                <span className="font-medium text-foreground ml-1">${pb.price.toFixed(2)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
+                  </>
+                )}
 
                 <Separator className="my-4" />
 

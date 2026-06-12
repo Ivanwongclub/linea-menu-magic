@@ -13,14 +13,13 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { 
+import {
   ArrowLeft,
-  Calendar, 
-  Package, 
+  Calendar,
+  Package,
   DollarSign,
   FileText,
   MessageSquare,
-  Upload,
   CheckCircle,
   XCircle,
   Truck,
@@ -179,17 +178,6 @@ const RFQDetail = ({ rfq, onBack, onStatusChange }: RFQDetailProps) => {
                     'button'
                   }
                 />
-                {rfq.modelUrl && (
-                  <div className="mt-4 flex gap-2">
-                    <Button variant="outline" size="sm">
-                      <Download className="w-4 h-4 mr-2" />
-                      Download OBJ
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      Fullscreen View
-                    </Button>
-                  </div>
-                )}
               </Card>
 
               <Card className="p-6">
@@ -269,17 +257,19 @@ const RFQDetail = ({ rfq, onBack, onStatusChange }: RFQDetailProps) => {
                                 </p>
                               </div>
                             </div>
-                            <Button variant="ghost" size="sm">
+                            <a
+                              href={file.url}
+                              download={file.name}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center justify-center h-9 px-3 text-sm text-foreground hover:bg-muted/50 rounded-md transition-colors"
+                            >
                               <Download className="w-4 h-4" />
-                            </Button>
+                            </a>
                           </div>
                         ))}
                       </div>
                     )}
-                    <Button variant="outline" className="w-full mt-4">
-                      <Upload className="w-4 h-4 mr-2" />
-                      Upload File
-                    </Button>
                   </TabsContent>
                 </Tabs>
               </Card>

@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Eye, Box, Heart, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Eye, Box, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import type { UserLibraryItem } from "@/features/products/types";
 import { format } from "date-fns";
 import { getProductImageUrl } from "@/lib/productImage";
@@ -13,7 +13,6 @@ type SortOrder = "asc" | "desc";
 interface LibraryTableProps {
   items: UserLibraryItem[];
   onView: (item: UserLibraryItem) => void;
-  onToggleFavorite: (itemId: string) => void;
   sortField: SortField;
   sortOrder: SortOrder;
   onSort: (field: SortField) => void;
@@ -29,7 +28,6 @@ const SortIcon = ({ field, currentField, order }: { field: SortField; currentFie
 const LibraryTable = ({
   items,
   onView,
-  onToggleFavorite,
   sortField,
   sortOrder,
   onSort,
@@ -40,9 +38,6 @@ const LibraryTable = ({
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50 hover:bg-muted/50">
-              <TableHead className="w-12 text-center">
-                <Heart className="w-4 h-4 mx-auto text-muted-foreground" />
-              </TableHead>
               <TableHead className="w-20">Image</TableHead>
               <TableHead className="w-32">
                 <button
@@ -99,22 +94,6 @@ const LibraryTable = ({
                   className="group hover:bg-muted/30 cursor-pointer"
                   onClick={() => onView(item)}
                 >
-                  <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => onToggleFavorite(item.id)}
-                    >
-                      <Heart
-                        className={`w-4 h-4 transition-colors ${
-                          item.is_favourite
-                            ? "fill-red-500 text-red-500"
-                            : "text-muted-foreground hover:text-red-500"
-                        }`}
-                      />
-                    </Button>
-                  </TableCell>
                   <TableCell>
                     <div className="relative w-14 h-10 rounded overflow-hidden bg-secondary">
                       {thumbnailUrl ? (

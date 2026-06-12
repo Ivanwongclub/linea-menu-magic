@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Box, Layers, Eye, Download, FileDown, Heart, Leaf } from "lucide-react";
+import { Box, Eye, Download, FileDown, Leaf } from "lucide-react";
 import type { UserLibraryItem } from "@/features/products/types";
 import type { Product } from "@/features/products/types";
 import { getProductImageUrl } from "@/lib/productImage";
@@ -9,9 +9,6 @@ import { getProductPlaceholderUrl } from "@/features/products/utils/productImage
 interface LibraryItemCardProps {
   item: UserLibraryItem;
   onView: (item: UserLibraryItem) => void;
-  onToggleFavourite: (id: string) => void;
-  onAddToComposition: (item: UserLibraryItem) => void;
-  onRequestSample: (item: UserLibraryItem) => void;
 }
 
 /** Shared image resolver — same fallback chain as ProductCard */
@@ -40,9 +37,6 @@ function resolveLibraryImage(product: Product | undefined): string {
 const LibraryItemCard = ({
   item,
   onView,
-  onToggleFavourite,
-  onAddToComposition,
-  onRequestSample,
 }: LibraryItemCardProps) => {
   const [showDownloads, setShowDownloads] = useState(false);
 
@@ -129,24 +123,14 @@ const LibraryItemCard = ({
           </div>
         )}
 
-        {/* Hover overlay with quick actions */}
+        {/* Hover overlay — View Details only */}
         <div className="absolute inset-0 bg-[hsl(var(--foreground))]/80 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center gap-2 p-4">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onAddToComposition(item);
-            }}
-            className="w-full flex items-center justify-center gap-2 bg-white text-black text-xs font-medium uppercase tracking-[0.06em] px-3 py-2 rounded-[var(--radius)] hover:bg-white/90 transition-colors"
-          >
-            <Layers className="w-3 h-3" />
-            Add to Composition
-          </button>
           <button
             onClick={(e) => {
               e.stopPropagation();
               onView(item);
             }}
-            className="w-full flex items-center justify-center gap-2 bg-white/20 text-white text-xs font-medium uppercase tracking-[0.06em] px-3 py-2 rounded-[var(--radius)] hover:bg-white/30 transition-colors border border-white/30"
+            className="w-full flex items-center justify-center gap-2 bg-white text-black text-xs font-medium uppercase tracking-[0.06em] px-3 py-2 rounded-[var(--radius)] hover:bg-white/90 transition-colors"
           >
             <Eye className="w-3 h-3" />
             View Details
@@ -180,10 +164,9 @@ const LibraryItemCard = ({
           </p>
         )}
 
-        {/* Action row */}
-        <div className="flex items-center gap-2 mt-1 pt-2 border-t border-[hsl(var(--border))]">
-          {/* Download files */}
-          {hasDownloads && (
+        {/* Action row — files download only (Request and Heart removed per P13 W3/W4) */}
+        {hasDownloads && (
+          <div className="flex items-center gap-2 mt-1 pt-2 border-t border-[hsl(var(--border))]">
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -195,37 +178,8 @@ const LibraryItemCard = ({
               <Download className="w-3 h-3" />
               Files ({downloadCount})
             </button>
-          )}
-
-          {/* Spacer */}
-          <div className="flex-1" />
-
-          {/* RFQ button */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onRequestSample(item);
-            }}
-            className="text-[10px] font-medium uppercase tracking-[0.06em] text-[hsl(var(--foreground))] hover:underline underline-offset-2 transition-colors"
-          >
-            Request →
-          </button>
-
-          {/* Favourite */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleFavourite(item.id);
-            }}
-            className="p-1 rounded text-[hsl(var(--muted-foreground))] hover:text-foreground transition-colors"
-          >
-            <Heart
-              className={`w-3.5 h-3.5 ${
-                item.is_favourite ? "fill-current text-foreground" : ""
-              }`}
-            />
-          </button>
-        </div>
+          </div>
+        )}
 
         {/* Downloads dropdown */}
         {showDownloads && hasDownloads && (

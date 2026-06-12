@@ -101,18 +101,12 @@ export default function ComposerSessionList({ teamId }: ComposerSessionListProps
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold text-foreground">Visual Composer</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Place and visualise trim products on your garment designs
-          </p>
-        </div>
-        <Button variant="default" size="sm" onClick={() => setTemplatePickerOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          New Composition
-        </Button>
+      {/* Header — the "+ New Composition" CTA lives on the page header (P13 W11) */}
+      <div>
+        <h2 className="text-lg font-semibold text-foreground">Visual Composer</h2>
+        <p className="text-sm text-muted-foreground mt-1">
+          Place and visualise trim products on your garment designs
+        </p>
       </div>
 
       {/* Grid */}

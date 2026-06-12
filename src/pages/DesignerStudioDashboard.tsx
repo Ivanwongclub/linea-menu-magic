@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -15,9 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   Search,
-  Filter,
   Plus,
-  Layers,
   Library,
   FileText,
   Clock,
@@ -27,12 +25,9 @@ import {
   Package,
   Grid3X3,
   List,
-  Heart,
   BookOpen,
   X,
-  
   ArrowRight,
-  Check,
 } from "lucide-react";
 
 // Library imports — Supabase-backed
@@ -45,16 +40,14 @@ import LibraryItemCard from "@/components/designer-studio/LibraryItemCard";
 import LibraryTable from "@/components/designer-studio/LibraryTable";
 import SearchProductDialog from "@/components/designer-studio/SearchProductDialog";
 
-// Legacy components that still use old LibraryItem type
-import { LibraryItem, categoryLabels } from "@/data/mockLibraryData";
-import LibraryItemDetail from "@/components/designer-studio/LibraryItemDetail";
+// Legacy LibraryItem still used by ProductQuickView (retired with adapter in Phase E)
+import { LibraryItem } from "@/data/mockLibraryData";
 import ProductQuickView from "@/components/designer-studio/ProductQuickView";
 
-// RFQ imports (untouched)
-import { mockRFQs, RFQ, statusLabels } from "@/data/mockRFQData";
+// RFQ imports (mock surface — Phase B decides hide vs build)
+import { mockRFQs, RFQ } from "@/data/mockRFQData";
 import RFQList from "@/components/designer-studio/RFQList";
 import RFQDetail from "@/components/designer-studio/RFQDetail";
-import CreateRFQDialog from "@/components/designer-studio/CreateRFQDialog";
 import BrochuresPanel from "@/components/designer-studio/BrochuresPanel";
 import BrochureEditor from "@/components/designer-studio/BrochureEditor";
 
@@ -65,6 +58,8 @@ import ProductEditor from "@/components/designer-studio/products/ProductEditor";
 
 // Composer
 import ComposerSessionList from "@/features/designer/components/ComposerSessionList";
+import TemplatePickerDialog from "@/features/designer/components/TemplatePickerDialog";
+import type { SessionTemplate } from "@/features/designer/components/TemplatePickerDialog";
 import { useDesignSessions } from "@/features/designer/hooks/useDesignSessions";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -141,14 +136,11 @@ const DesignerStudioDashboard = () => {
   const [editingProductId, setEditingProductId] = useState<string | null | undefined>(null);
 
   // Library — Supabase data
-  const { items: libraryItems, loading: libraryLoading, toggleFavourite, removeItem } = useUserLibrary(teamId);
+  const { items: libraryItems, loading: libraryLoading } = useUserLibrary(teamId);
   const taxonomy = useProductTaxonomy();
 
-  // Composer sessions
-  const { sessions: recentSessions, loading: sessionsLoading, createSession } = useDesignSessions(teamId);
-
-  // Admin default items for hero
-  const adminDefaultItems = useMemo(() => libraryItems.filter(item => item.is_admin_default), [libraryItems]);
+  // Composer sessions — `createSession` is the only consumer here; the grid renders via ComposerSessionList
+  const { createSession } = useDesignSessions(teamId);
 
   // Library UI states
   const [librarySource, setLibrarySource] = useState<'all' | 'my'>('all');
@@ -163,41 +155,21 @@ const DesignerStudioDashboard = () => {
   // Full catalog data
   const { products: catalogProducts, loading: catalogLoading } = useProducts({ visibility: 'brand' });
 
-  // Legacy detail views (keep old types for compatibility)
-  const [selectedLibraryItem, setSelectedLibraryItem] = useState<LibraryItem | null>(null);
+  // Quick-view modal (single detail surface — P13 W13)
   const [quickViewItem, setQuickViewItem] = useState<LibraryItem | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
 
-  // RFQ states (unchanged)
+  // RFQ states (mock — Phase B)
   const [rfqs, setRfqs] = useState<RFQ[]>(mockRFQs);
   const [selectedRFQ, setSelectedRFQ] = useState<RFQ | null>(null);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [activeRFQTab, setActiveRFQTab] = useState("all");
   const [rfqSearchQuery, setRfqSearchQuery] = useState("");
 
   // Brochure editor state
   const [editingBrochureId, setEditingBrochureId] = useState<string | null | undefined>(null);
 
-  // Header auto-hide on scroll
-  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
-  const lastScrollY = useRef(0);
-  const scrollThreshold = 50;
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY < scrollThreshold) {
-        setIsHeaderVisible(true);
-      } else if (currentScrollY > lastScrollY.current) {
-        setIsHeaderVisible(false);
-      } else {
-        setIsHeaderVisible(true);
-      }
-      lastScrollY.current = currentScrollY;
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  // Template picker (P13 W11 — single composition-create behaviour)
+  const [templatePickerOpen, setTemplatePickerOpen] = useState(false);
 
   // Convert catalog Product → UserLibraryItem shape for card rendering
   const catalogAsLibraryItems: UserLibraryItem[] = useMemo(() => {
@@ -297,21 +269,13 @@ const DesignerStudioDashboard = () => {
     [libraryItems],
   );
 
-  // Library handlers
+  // Library handlers — single detail surface (P13 W13)
   const handleQuickView = (item: UserLibraryItem) => {
     setQuickViewItem(toLegacyItem(item));
     setIsQuickViewOpen(true);
   };
 
-  const handleViewLibraryItem = (item: UserLibraryItem) => {
-    setSelectedLibraryItem(toLegacyItem(item));
-  };
-
-  const handleBackFromLibraryDetail = () => {
-    setSelectedLibraryItem(null);
-  };
-
-  // RFQ handlers (unchanged)
+  // RFQ handlers
   const handleSelectRFQ = (rfq: RFQ) => setSelectedRFQ(rfq);
   const handleBackFromRFQDetail = () => setSelectedRFQ(null);
 
@@ -322,21 +286,6 @@ const DesignerStudioDashboard = () => {
     if (selectedRFQ?.id === rfqId) {
       setSelectedRFQ(prev => prev ? { ...prev, status: newStatus, updatedAt: new Date().toISOString() } : null);
     }
-  };
-
-  const handleCreateRFQ = (newRFQ: Omit<RFQ, 'id' | 'createdAt' | 'updatedAt' | 'status' | 'comments' | 'files'>) => {
-    const rfq: RFQ = {
-      ...newRFQ,
-      id: `RFQ-${String(rfqs.length + 1).padStart(4, '0')}`,
-      status: 'submitted',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      comments: [],
-      files: [],
-    };
-    setRfqs(prev => [rfq, ...prev]);
-    setIsCreateDialogOpen(false);
-    setActiveMainTab("rfq");
   };
 
   // RFQ filtering (unchanged)
@@ -357,10 +306,19 @@ const DesignerStudioDashboard = () => {
     production: rfqs.filter(r => r.status === 'production').length,
   };
 
-  // Composer handler
-  const handleCreateComposition = async () => {
+  // Composer handler — template picker is the single composition-create entry (P13 W11)
+  const handleCreateFromTemplate = async (template: SessionTemplate) => {
+    setTemplatePickerOpen(false);
     try {
-      const session = await createSession('New Composition');
+      const name = template.id === 'blank' ? 'Untitled Composition' : template.name;
+      const session = await createSession(name);
+      if (template.layers.length > 0) {
+        const layerInserts = template.layers.map((l) => ({
+          ...l,
+          session_id: session.id,
+        }));
+        await supabase.from('design_layers').insert(layerInserts);
+      }
       navigate(`/designer-studio/compose/${session.id}`);
     } catch {
       toast.error('Failed to create composition');
@@ -387,15 +345,6 @@ const DesignerStudioDashboard = () => {
     );
   }
 
-  if (selectedLibraryItem) {
-    return (
-      <LibraryItemDetail
-        item={selectedLibraryItem}
-        onBack={handleBackFromLibraryDetail}
-      />
-    );
-  }
-
   if (selectedRFQ) {
     return (
       <RFQDetail
@@ -411,13 +360,6 @@ const DesignerStudioDashboard = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      {/* Auto-hiding Header */}
-      <div
-        className={`sticky top-0 z-50 transition-transform duration-300 [&>header]:static ${
-          isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
-        }`}
-      >
-      </div>
         <div className="max-w-7xl mx-auto px-4 lg:px-6">
 
           {/* Page title + primary CTA */}
@@ -430,7 +372,7 @@ const DesignerStudioDashboard = () => {
                 {t("dashboard.title.subtitle")}
               </p>
             </div>
-            <Button size="sm" className="gap-2" onClick={handleCreateComposition}>
+            <Button size="sm" className="gap-2" onClick={() => setTemplatePickerOpen(true)}>
               <Plus className="w-4 h-4" />
               {t("dashboard.title.newComposition")}
             </Button>
@@ -508,7 +450,7 @@ const DesignerStudioDashboard = () => {
                     onClick={() => setActiveMainTab('composer')}
                     className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    {t("dashboard.common.back")}
+                    ← All Compositions
                   </button>
                   <div>
                     <h2 className="text-lg font-semibold text-foreground">{t("dashboard.library.title")}</h2>
@@ -651,17 +593,13 @@ const DesignerStudioDashboard = () => {
                         key={item.id}
                         item={item}
                         onView={handleQuickView}
-                        onToggleFavourite={toggleFavourite}
-                        onAddToComposition={() => setActiveMainTab('composer')}
-                        onRequestSample={(i) => toast.info(`Request sample for ${i.product?.name_en ?? i.product?.name ?? 'item'}`)}
                       />
                     ))}
                   </div>
                 ) : (
                   <LibraryTable
                     items={filteredLibraryItems}
-                    onView={handleViewLibraryItem}
-                    onToggleFavorite={toggleFavourite}
+                    onView={handleQuickView}
                     sortField={sortField}
                     sortOrder={sortOrder}
                     onSort={handleSort}
@@ -696,7 +634,7 @@ const DesignerStudioDashboard = () => {
                   onClick={() => setActiveMainTab('composer')}
                   className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  ← Back to Projects
+                  ← All Compositions
                 </button>
               </div>
 
@@ -749,10 +687,6 @@ const DesignerStudioDashboard = () => {
                         className="pl-8 h-8 text-sm"
                       />
                     </div>
-                    <Button variant="outline" size="sm" className="gap-1.5 h-8">
-                      <Filter className="w-3.5 h-3.5" />
-                      Filter
-                    </Button>
                   </div>
 
                   <Tabs value={activeRFQTab} onValueChange={setActiveRFQTab} className="w-full">
@@ -788,10 +722,10 @@ const DesignerStudioDashboard = () => {
         onOpenChange={setIsQuickViewOpen}
       />
 
-      <CreateRFQDialog
-        open={isCreateDialogOpen}
-        onOpenChange={setIsCreateDialogOpen}
-        onSubmit={handleCreateRFQ}
+      <TemplatePickerDialog
+        open={templatePickerOpen}
+        onClose={() => setTemplatePickerOpen(false)}
+        onSelect={handleCreateFromTemplate}
       />
 
       <SearchProductDialog

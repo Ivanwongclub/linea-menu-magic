@@ -226,8 +226,6 @@ const Header = () => {
   const isTransparent = isHeroPage && !scrolled && !isProductsOpen && !isAboutOpen;
   const studioCtaHref = session ? "/designer-studio/dashboard?tab=library" : "/designer-studio/login";
   const studioCtaLabel = primaryBrand?.name ?? t("header.cta.b2bLogin");
-  const resolveNavHref = (href: string) =>
-    href === "/designer-studio" && session ? "/designer-studio/dashboard?tab=library" : href;
 
   useEffect(() => {
     document.body.style.overflow = isMenuOpen ? "hidden" : "";
@@ -406,7 +404,7 @@ const Header = () => {
                 return (
                   <Link
                     key={link.href}
-                    to={resolveNavHref(link.href)}
+                    to={link.href}
                     className={linkClass(isActive(link.href))}
                     onMouseEnter={() => preloadRoute(link.href)}
                     onFocus={() => preloadRoute(link.href)}
@@ -826,7 +824,7 @@ const Header = () => {
                 return (
                   <Link
                     key={link.href}
-                    to={resolveNavHref(link.href)}
+                    to={link.href}
                     onClick={() => setIsMenuOpen(false)}
                     onTouchStart={() => preloadRoute(link.href)}
                     className="text-lg font-medium tracking-tight text-foreground hover:text-muted-foreground transition-colors duration-150 block py-4 px-6 border-b border-border"
