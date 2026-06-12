@@ -15,9 +15,12 @@ import { useScrollAnimation } from "@/hooks/use-scroll-animation";
 import StudioHero3D, { HERO_EDITOR_URL } from "@/components/designer-studio/StudioHero3D";
 import StudioCapabilityTile from "@/components/designer-studio/StudioCapabilityTile";
 import StudioWorkflowRail from "@/components/designer-studio/StudioWorkflowRail";
-import metalButtonImg from "@/assets/products/metal-button.jpg";
-import cottonLaceImg from "@/assets/products/cotton-lace.jpg";
-import wovenLabelImg from "@/assets/products/woven-label.jpg";
+import { useProducts } from "@/features/products/hooks/useProducts";
+import {
+  pickFamilyFeatured,
+  getFamilyNameForProduct,
+} from "@/features/products/utils/pickFamilyFeatured";
+import { resolveProductImage } from "@/lib/productImage";
 
 const REVEAL_BASE = "transition-all duration-700 ease-[cubic-bezier(0.19,1,0.22,1)]";
 
