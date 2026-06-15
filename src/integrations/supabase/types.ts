@@ -846,6 +846,10 @@ export type Database = {
         Args: { _brand_id: string; _user_id: string }
         Returns: boolean
       }
+      user_is_brand_manager_or_owner: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       brand_role: "member" | "manager" | "owner"
