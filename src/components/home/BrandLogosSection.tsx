@@ -3,16 +3,16 @@ import { useI18n } from "@/features/i18n/I18nProvider";
 interface Brand {
   name: string;
   src: string;
-  wide?: boolean;
+  heightClass: string;
 }
 
 const brands: Brand[] = [
-  { name: "Ralph Lauren", src: "/images/brands/ralph-lauren.webp" },
-  { name: "Adidas", src: "/images/brands/adidas.webp" },
-  { name: "Puma", src: "/images/brands/puma.webp" },
-  { name: "Tommy Hilfiger", src: "/images/brands/tommy-hilfiger.webp", wide: true },
-  { name: "Michael Kors", src: "/images/brands/michael-kors.webp" },
-  { name: "Calvin Klein", src: "/images/brands/calvin-klein.webp", wide: true },
+  { name: "Ralph Lauren",   src: "/images/brands/ralph-lauren.webp",   heightClass: "h-7 md:h-8" },
+  { name: "Adidas",         src: "/images/brands/adidas.webp",         heightClass: "h-7 md:h-8" },
+  { name: "Puma",           src: "/images/brands/puma.webp",           heightClass: "h-7 md:h-8" },
+  { name: "Tommy Hilfiger", src: "/images/brands/tommy-hilfiger.webp", heightClass: "h-5 md:h-6" },
+  { name: "Michael Kors",   src: "/images/brands/michael-kors.webp",   heightClass: "h-12 md:h-14" },
+  { name: "Calvin Klein",   src: "/images/brands/calvin-klein.webp",   heightClass: "h-5 md:h-6" },
 ];
 
 const BrandLogosSection = () => {
@@ -32,9 +32,7 @@ const BrandLogosSection = () => {
                 alt={brand.name}
                 loading="lazy"
                 decoding="async"
-                className={`${
-                  brand.wide ? "h-5 md:h-6" : "h-7 md:h-8"
-                } w-auto opacity-50 hover:opacity-100 transition-opacity duration-300`}
+                className={`${brand.heightClass} w-auto opacity-50 hover:opacity-100 transition-opacity duration-300`}
               />
             </div>
           ))}
