@@ -7,7 +7,6 @@ import {
   Link2,
   ClipboardList,
   ShieldCheck,
-  ImageOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/features/auth/AuthProvider";
@@ -160,27 +159,16 @@ const DesignerStudio = () => {
                 ? `/designer-studio/editor?model=${encodeURIComponent(p.model_url)}&name=${encodeURIComponent(displayName)}&slug=${encodeURIComponent(p.slug)}`
                 : null;
               // P18 C3: same fallback chain the Trim Library uses, via the shared util.
-              const rawImage = resolveProductImage(p, 'thumb');
-              const imageSrc = rawImage ? getProductImageUrl(rawImage, 'card') : null;
+              const imageSrc = getProductImageUrl(resolveProductImage(p, 'thumb'), 'card');
               return (
                 <div key={p.id} className="border border-border bg-background overflow-hidden">
-                  <div className="aspect-[4/3] overflow-hidden bg-muted relative">
-                    {imageSrc ? (
-                      <img
-                        src={imageSrc}
-                        alt={displayName}
-                        loading="lazy"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div
-                        role="img"
-                        aria-label={`${displayName} — no image available`}
-                        className="absolute inset-0 flex items-center justify-center bg-muted text-muted-foreground"
-                      >
-                        <ImageOff className="h-8 w-8" strokeWidth={1.25} aria-hidden="true" />
-                      </div>
-                    )}
+                  <div className="aspect-[4/3] overflow-hidden bg-secondary/50">
+                    <img
+                      src={imageSrc}
+                      alt={displayName}
+                      loading="lazy"
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <div className="p-4">
                     {family && (

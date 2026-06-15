@@ -1,24 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Sparkles, Heart, Eye, Leaf, Box, ImageOff } from 'lucide-react';
+import { Sparkles, Heart, Eye, Leaf, Box } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { Product } from '@/features/products/types';
 import { getProductImageUrl } from '@/lib/productImage';
 import { resolveProductImage } from '@/features/products/utils/resolveProductImage';
-
-/** Neutral placeholder block — sharp corners, light gray, lucide ImageOff icon.
- *  Used whenever the resolver returns null (no real product photo available).
- *  Deliberately NOT a representative photo from another product. */
-function ImagePlaceholder({ label }: { label?: string }) {
-  return (
-    <div
-      role="img"
-      aria-label={label ? `${label} — no image available` : 'No image available'}
-      className="absolute inset-0 flex items-center justify-center bg-muted text-muted-foreground"
-    >
-      <ImageOff className="h-8 w-8" strokeWidth={1.25} aria-hidden="true" />
-    </div>
-  );
-}
+import { getPdpSeedImages } from '@/features/products/pdpSeedImages';
+import { getProductPlaceholderUrl } from '@/features/products/utils/productImagePlaceholder';
 
 type ViewMode = 'grid' | 'list';
 
@@ -45,7 +32,7 @@ export default function ProductCard({
   isInLibrary,
 }: ProductCardProps) {
   const rawUrl = resolveProductImage(product, isHeroLayout ? 'full' : 'thumb');
-  const imageUrl = rawUrl ? getProductImageUrl(rawUrl, isHeroLayout ? 'pdp' : 'card') : null;
+  const imageUrl = getProductImageUrl(rawUrl, isHeroLayout ? 'pdp' : 'card');
   const isAboveFold = index < 2;
 
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -71,33 +58,35 @@ export default function ProductCard({
   const certs = product.certifications ?? [];
 
   const altText = `${product.name_en ?? product.name}${product.primary_category ? ` — ${product.primary_category.name}` : ''}`;
-  const showPlaceholder = !imageUrl || imageError;
 
   return (
     <div className="group bg-card border border-border rounded-[var(--radius)] overflow-hidden cursor-pointer hover-card transition-[border-color] duration-200 hover:border-foreground">
       {/* Image area */}
       <div className="aspect-square relative overflow-hidden bg-secondary hover-img-zoom">
-        {!imageLoaded && !showPlaceholder && (
+        {!imageLoaded && !imageError && (
           <div aria-hidden="true" className="absolute inset-0 bg-secondary animate-pulse" />
         )}
 
-        {showPlaceholder && <ImagePlaceholder label={altText} />}
-
-        {imageUrl && !imageError && (
+        {imageError && (
           <img
-            src={imageUrl}
+            src={(getPdpSeedImages(product.slug, product.primary_category?.slug) ?? [])[0] ?? getProductPlaceholderUrl(product.name_en ?? product.name, product.item_code, product.primary_category?.slug, product.primary_category?.name, 400)}
             alt={altText}
-            width={400}
-            height={400}
-            loading={isAboveFold ? 'eager' : 'lazy'}
-            fetchPriority={isAboveFold ? 'high' : undefined}
-            decoding="async"
-            onLoad={() => setImageLoaded(true)}
-            onError={() => setImageError(true)}
-            className={`absolute inset-0 w-full h-full object-contain p-3 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+            className="absolute inset-0 w-full h-full object-contain p-3"
           />
         )}
 
+        <img
+          src={imageUrl}
+          alt={altText}
+          width={400}
+          height={400}
+          loading={isAboveFold ? 'eager' : 'lazy'}
+          fetchPriority={isAboveFold ? 'high' : undefined}
+          decoding="async"
+          onLoad={() => setImageLoaded(true)}
+          onError={() => setImageError(true)}
+          className={`absolute inset-0 w-full h-full object-contain p-3 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+        />
 
         {/* Tag badges (top-left) */}
         {visibleTags.length > 0 && (
@@ -206,7 +195,7 @@ function ProductCardFeatured({
   prioritize = false,
 }: {
   product: Product;
-  imageUrl: string | null;
+  imageUrl: string;
   imageLoaded: boolean;
   imageError: boolean;
   onImageLoad: () => void;
@@ -217,31 +206,26 @@ function ProductCardFeatured({
 }) {
   const altText = `${product.name_en ?? product.name}${product.primary_category ? ` — ${product.primary_category.name}` : ''}`;
   const certs = product.certifications ?? [];
-  const showPlaceholder = !imageUrl || imageError;
 
   return (
     <div className="group bg-card border border-border rounded-[var(--radius)] overflow-hidden cursor-pointer transition-[border-color,box-shadow] duration-200 hover:border-foreground hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] flex flex-col h-full">
       {/* Image (upper) */}
       <div className="relative overflow-hidden bg-secondary flex-1 min-h-0">
-        {!imageLoaded && !showPlaceholder && (
+        {!imageLoaded && !imageError && (
           <div aria-hidden="true" className="absolute inset-0 bg-secondary animate-pulse" />
         )}
-        {showPlaceholder && <ImagePlaceholder label={altText} />}
-        {imageUrl && !imageError && (
-          <img
-            src={imageUrl}
-            alt={altText}
-            width={800}
-            height={800}
-            loading={prioritize ? 'eager' : 'lazy'}
-            fetchPriority={prioritize ? 'high' : undefined}
-            decoding="async"
-            onLoad={onImageLoad}
-            onError={onImageError}
-            className={`absolute inset-0 w-full h-full object-cover object-center transition-all duration-500 ease-out group-hover:scale-[1.04] ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-          />
-        )}
-
+        <img
+          src={imageUrl}
+          alt={altText}
+          width={800}
+          height={800}
+          loading={prioritize ? 'eager' : 'lazy'}
+          fetchPriority={prioritize ? 'high' : undefined}
+          decoding="async"
+          onLoad={onImageLoad}
+          onError={onImageError}
+          className={`absolute inset-0 w-full h-full object-cover object-center transition-all duration-500 ease-out group-hover:scale-[1.04] ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+        />
 
         {certs.length > 0 && (
           <div className="absolute bottom-2 right-2 z-10">
@@ -317,20 +301,15 @@ function ProductCardList({
   return (
     <div className="group flex items-center gap-4 h-20 bg-card border border-border rounded-[var(--radius)] overflow-hidden px-3 cursor-pointer transition-[border-color] duration-200 hover:border-foreground">
       <div className="relative h-16 w-16 shrink-0 bg-secondary rounded-[var(--radius)] overflow-hidden">
-        {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={`${product.name_en ?? product.name}${product.primary_category ? ` — ${product.primary_category.name}` : ''}`}
-            width={64}
-            height={64}
-            className="absolute inset-0 h-full w-full object-cover"
-            loading="lazy"
-          />
-        ) : (
-          <ImagePlaceholder label={product.name_en ?? product.name} />
-        )}
+        <img
+          src={imageUrl}
+          alt={`${product.name_en ?? product.name}${product.primary_category ? ` — ${product.primary_category.name}` : ''}`}
+          width={64}
+          height={64}
+          className="absolute inset-0 h-full w-full object-cover"
+          loading="lazy"
+        />
       </div>
-
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium text-foreground truncate">
