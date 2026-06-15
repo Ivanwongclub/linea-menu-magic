@@ -14,6 +14,8 @@ export interface DownloadableFile {
 export interface LibraryItem {
   id: string;
   itemCode: string;
+  /** Product slug — added in P14 so workspace surfaces can deep-link to /contact and /products. Optional for legacy mock rows. */
+  slug?: string;
   name: string;
   nameEn: string;
   category: 'buttons' | 'zippers' | 'lace' | 'hardware' | 'other';

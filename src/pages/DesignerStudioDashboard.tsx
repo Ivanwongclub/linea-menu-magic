@@ -17,11 +17,6 @@ import {
   Search,
   Plus,
   Library,
-  FileText,
-  Clock,
-  Upload,
-  CheckCircle,
-  Eye,
   Package,
   Grid3X3,
   List,
@@ -44,10 +39,9 @@ import SearchProductDialog from "@/components/designer-studio/SearchProductDialo
 import { LibraryItem } from "@/data/mockLibraryData";
 import ProductQuickView from "@/components/designer-studio/ProductQuickView";
 
-// RFQ imports (mock surface — Phase B decides hide vs build)
-import { mockRFQs, RFQ } from "@/data/mockRFQData";
-import RFQList from "@/components/designer-studio/RFQList";
-import RFQDetail from "@/components/designer-studio/RFQDetail";
+// RFQ tab quarantined in P14 — see reports/P14. Workspace lead capture flows through
+// /contact?product=…&source=workspace; the mock RFQ surface is hidden until a real
+// data layer ships in a Phase B-future build.
 import BrochuresPanel from "@/components/designer-studio/BrochuresPanel";
 import BrochureEditor from "@/components/designer-studio/BrochureEditor";
 
@@ -72,6 +66,7 @@ function toLegacyItem(item: UserLibraryItem): LibraryItem {
   return {
     id: item.id,
     itemCode: p?.item_code ?? '',
+    slug: p?.slug,
     name: item.custom_name || p?.name || 'Untitled',
     nameEn: p?.name_en || p?.name || '',
     category: 'buttons' as LibraryItem['category'],
@@ -99,7 +94,8 @@ function toLegacyItem(item: UserLibraryItem): LibraryItem {
 
 type SortOrder = "asc" | "desc";
 
-const validTabs = ['library', 'rfq', 'brochures', 'products', 'composer'] as const;
+// rfq tab quarantined (P14)
+const validTabs = ['library', 'brochures', 'products', 'composer'] as const;
 type TabId = typeof validTabs[number];
 
 const DesignerStudioDashboard = () => {
@@ -114,6 +110,7 @@ const DesignerStudioDashboard = () => {
 
   // Main tab state — read from URL ?tab= param
   const tabFromUrl = searchParams.get('tab');
+  // tab=rfq came from pre-P14 links — redirect cleanly to library (P14 T1)
   const initialTab: TabId = validTabs.includes(tabFromUrl as TabId) ? tabFromUrl as TabId : 'library';
   const [activeMainTab, setActiveMainTab] = useState<TabId>(initialTab);
 
@@ -158,12 +155,6 @@ const DesignerStudioDashboard = () => {
   // Quick-view modal (single detail surface — P13 W13)
   const [quickViewItem, setQuickViewItem] = useState<LibraryItem | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
-
-  // RFQ states (mock — Phase B)
-  const [rfqs, setRfqs] = useState<RFQ[]>(mockRFQs);
-  const [selectedRFQ, setSelectedRFQ] = useState<RFQ | null>(null);
-  const [activeRFQTab, setActiveRFQTab] = useState("all");
-  const [rfqSearchQuery, setRfqSearchQuery] = useState("");
 
   // Brochure editor state
   const [editingBrochureId, setEditingBrochureId] = useState<string | null | undefined>(null);
@@ -275,37 +266,6 @@ const DesignerStudioDashboard = () => {
     setIsQuickViewOpen(true);
   };
 
-  // RFQ handlers
-  const handleSelectRFQ = (rfq: RFQ) => setSelectedRFQ(rfq);
-  const handleBackFromRFQDetail = () => setSelectedRFQ(null);
-
-  const handleStatusChange = (rfqId: string, newStatus: RFQ['status']) => {
-    setRfqs(prev => prev.map(rfq =>
-      rfq.id === rfqId ? { ...rfq, status: newStatus, updatedAt: new Date().toISOString() } : rfq
-    ));
-    if (selectedRFQ?.id === rfqId) {
-      setSelectedRFQ(prev => prev ? { ...prev, status: newStatus, updatedAt: new Date().toISOString() } : null);
-    }
-  };
-
-  // RFQ filtering (unchanged)
-  const filteredRFQs = rfqs.filter(rfq => {
-    const matchesSearch = rfq.itemCode.toLowerCase().includes(rfqSearchQuery.toLowerCase()) ||
-      rfq.id.toLowerCase().includes(rfqSearchQuery.toLowerCase());
-    const matchesTab = activeRFQTab === "all" || rfq.status === activeRFQTab;
-    return matchesSearch && matchesTab;
-  });
-
-  const statusCounts = {
-    all: rfqs.length,
-    submitted: rfqs.filter(r => r.status === 'submitted').length,
-    model_uploaded: rfqs.filter(r => r.status === 'model_uploaded').length,
-    design_confirmed: rfqs.filter(r => r.status === 'design_confirmed').length,
-    printing: rfqs.filter(r => r.status === 'printing').length,
-    sample_review: rfqs.filter(r => r.status === 'sample_review').length,
-    production: rfqs.filter(r => r.status === 'production').length,
-  };
-
   // Composer handler — template picker is the single composition-create entry (P13 W11)
   const handleCreateFromTemplate = async (template: SessionTemplate) => {
     setTemplatePickerOpen(false);
@@ -345,18 +305,8 @@ const DesignerStudioDashboard = () => {
     );
   }
 
-  if (selectedRFQ) {
-    return (
-      <RFQDetail
-        rfq={selectedRFQ}
-        onBack={handleBackFromRFQDetail}
-        onStatusChange={handleStatusChange}
-      />
-    );
-  }
-
   // Whether library or management is expanded
-  const showingSessions = activeMainTab !== 'library' && activeMainTab !== 'rfq' && activeMainTab !== 'brochures' && activeMainTab !== 'products';
+  const showingSessions = activeMainTab !== 'library' && activeMainTab !== 'brochures' && activeMainTab !== 'products';
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -387,7 +337,7 @@ const DesignerStudioDashboard = () => {
 
           {/* ═══════════ SECONDARY: Quick-access strip ═══════════ */}
           {showingSessions && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
               {/* Component Library card */}
               <div
                 onClick={() => setActiveMainTab('library')}
@@ -400,23 +350,6 @@ const DesignerStudioDashboard = () => {
                   <p className="text-sm font-medium text-foreground">{t("dashboard.library.title")}</p>
                   <p className="text-[11px] text-muted-foreground truncate">
                     {t("dashboard.library.cardSummary", { count: libraryItems.length })}
-                  </p>
-                </div>
-                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />
-              </div>
-
-              {/* RFQ card */}
-              <div
-                onClick={() => setActiveMainTab('rfq')}
-                className="flex items-center gap-4 p-4 bg-[hsl(var(--background))] border border-[hsl(var(--border))] rounded-[calc(var(--radius)*2)] cursor-pointer group transition-all duration-200 hover:border-[hsl(var(--foreground))] hover:shadow-[0_2px_12px_rgba(0,0,0,0.05)]"
-              >
-                <div className="w-10 h-10 rounded-[var(--radius)] bg-[hsl(var(--secondary))] flex items-center justify-center flex-shrink-0 group-hover:bg-[hsl(var(--foreground))] group-hover:text-[hsl(var(--background))] transition-colors">
-                  <FileText className="w-4 h-4" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground">Requests & Quotes</p>
-                  <p className="text-[11px] text-muted-foreground truncate">
-                    {statusCounts.all} requests · {statusCounts.submitted} pending
                   </p>
                 </div>
                 <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />
@@ -627,7 +560,7 @@ const DesignerStudioDashboard = () => {
           )}
 
           {/* ═══════════ EXPANDED: MANAGEMENT SECTIONS ═══════════ */}
-          {(activeMainTab === 'rfq' || activeMainTab === 'brochures' || activeMainTab === 'products') && (
+          {(activeMainTab === 'brochures' || activeMainTab === 'products') && (
             <div className="mb-8">
               <div className="flex items-center gap-3 mb-4">
                 <button
@@ -645,13 +578,6 @@ const DesignerStudioDashboard = () => {
               >
                 <TabsList className="h-auto p-0 bg-transparent border-b border-border w-full rounded-none gap-0 justify-start">
                   <TabsTrigger
-                    value="rfq"
-                    className="flex items-center gap-2 px-4 py-3 text-xs font-medium uppercase tracking-[0.08em] rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:text-foreground text-muted-foreground bg-transparent hover:text-foreground transition-colors"
-                  >
-                    <FileText className="w-3.5 h-3.5" />
-                    Requests ({statusCounts.all})
-                  </TabsTrigger>
-                  <TabsTrigger
                     value="brochures"
                     className="flex items-center gap-2 px-4 py-3 text-xs font-medium uppercase tracking-[0.08em] rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:text-foreground text-muted-foreground bg-transparent hover:text-foreground transition-colors"
                   >
@@ -666,44 +592,6 @@ const DesignerStudioDashboard = () => {
                     Products
                   </TabsTrigger>
                 </TabsList>
-
-                <TabsContent value="rfq" className="mt-6">
-                  <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pb-4 mb-4">
-                    <StatCard label="Pending" value={statusCounts.submitted} icon={<FileText className="w-4 h-4" />} color="text-amber-500" compact />
-                    <StatCard label="Model Uploaded" value={statusCounts.model_uploaded} icon={<Upload className="w-4 h-4" />} color="text-blue-500" compact />
-                    <StatCard label="Design Confirmed" value={statusCounts.design_confirmed} icon={<CheckCircle className="w-4 h-4" />} color="text-green-500" compact />
-                    <StatCard label="Printing" value={statusCounts.printing} icon={<Clock className="w-4 h-4" />} color="text-purple-500" compact />
-                    <StatCard label="Sample Review" value={statusCounts.sample_review} icon={<Eye className="w-4 h-4" />} color="text-orange-500" compact />
-                    <StatCard label="In Production" value={statusCounts.production} icon={<Package className="w-4 h-4" />} color="text-emerald-500" compact />
-                  </div>
-
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="relative flex-1 max-w-xs">
-                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                      <Input
-                        placeholder="Search RFQ..."
-                        value={rfqSearchQuery}
-                        onChange={(e) => setRfqSearchQuery(e.target.value)}
-                        className="pl-8 h-8 text-sm"
-                      />
-                    </div>
-                  </div>
-
-                  <Tabs value={activeRFQTab} onValueChange={setActiveRFQTab} className="w-full">
-                    <TabsList className="w-full justify-start overflow-x-auto">
-                      <TabsTrigger value="all">All ({statusCounts.all})</TabsTrigger>
-                      <TabsTrigger value="submitted">Pending</TabsTrigger>
-                      <TabsTrigger value="model_uploaded">Model Uploaded</TabsTrigger>
-                      <TabsTrigger value="design_confirmed">Design Confirmed</TabsTrigger>
-                      <TabsTrigger value="printing">Printing</TabsTrigger>
-                      <TabsTrigger value="sample_review">Sample Review</TabsTrigger>
-                      <TabsTrigger value="production">In Production</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value={activeRFQTab} className="mt-6">
-                      <RFQList rfqs={filteredRFQs} onSelect={handleSelectRFQ} />
-                    </TabsContent>
-                  </Tabs>
-                </TabsContent>
 
                 <TabsContent value="brochures" className="mt-6">
                   <BrochuresPanel onOpenEditor={(id) => setEditingBrochureId(id ?? undefined)} />
@@ -742,32 +630,5 @@ const DesignerStudioDashboard = () => {
   );
 };
 
-const StatCard = ({
-  label,
-  value,
-  icon,
-  color,
-  compact = false,
-}: {
-  label: string;
-  value: number;
-  icon: React.ReactNode;
-  color: string;
-  compact?: boolean;
-}) => (
-  compact ? (
-    <div className="flex items-center gap-2 bg-card border border-border rounded-[var(--radius)] px-3 py-2 flex-shrink-0 hover:shadow-sm transition-shadow">
-      <div className={`${color}`}>{icon}</div>
-      <span className="text-lg font-semibold text-foreground">{value}</span>
-      <span className="text-xs text-[hsl(var(--muted-foreground))] whitespace-nowrap">{label}</span>
-    </div>
-  ) : (
-    <div className="bg-card border border-border rounded-[var(--radius)] p-4 hover:shadow-md transition-shadow">
-      <div className={`${color} mb-2`}>{icon}</div>
-      <p className="text-2xl font-semibold text-foreground">{value}</p>
-      <p className="text-sm text-[hsl(var(--muted-foreground))]">{label}</p>
-    </div>
-  )
-);
 
 export default DesignerStudioDashboard;

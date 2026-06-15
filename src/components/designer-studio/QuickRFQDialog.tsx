@@ -1,3 +1,4 @@
+// QUARANTINED — see reports/P14: workspace RFQ hidden for trial demo. Re-enable when a real RFQ data layer is built (Phase B-future).
 import { useState } from "react";
 import {
   Dialog,

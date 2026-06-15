@@ -79,7 +79,12 @@ export default function ComposerSessionList({ teamId }: ComposerSessionListProps
 
   const handleToggleShare = async (session: DesignSession) => {
     const newStatus = session.status === 'shared' ? 'draft' : 'shared'
-    const { error } = await supabase.from('design_sessions').update({ status: newStatus }).eq('id', session.id)
+    // P14 W16: belt-and-braces team_id filter alongside RLS (user_has_brand_text).
+    const { error } = await supabase
+      .from('design_sessions')
+      .update({ status: newStatus })
+      .eq('id', session.id)
+      .eq('team_id', teamId)
     if (error) { toast.error('Failed to update status'); return }
     toast.success(newStatus === 'shared' ? 'Composition shared' : 'Composition set to draft')
     await updateSession(session.id, { name: session.name })

@@ -112,24 +112,28 @@ export function useDesignSessions(teamId: string) {
   }, [teamId])
 
   const updateSession = useCallback(async (id: string, updates: Partial<Pick<DesignSession, 'name' | 'status' | 'thumbnail_url' | 'background_image_url' | 'background_image_width' | 'background_image_height'>>) => {
+    // P14 W16: belt-and-braces team_id filter alongside RLS.
     const { error: err } = await supabase
       .from('design_sessions')
       .update(updates)
       .eq('id', id)
+      .eq('team_id', teamId)
 
     if (err) throw err
     setSessions(prev => prev.map(s => s.id === id ? { ...s, ...updates, updated_at: new Date().toISOString() } : s))
-  }, [])
+  }, [teamId])
 
   const deleteSession = useCallback(async (id: string) => {
+    // P14 W16: belt-and-braces team_id filter alongside RLS.
     const { error: err } = await supabase
       .from('design_sessions')
       .delete()
       .eq('id', id)
+      .eq('team_id', teamId)
 
     if (err) throw err
     setSessions(prev => prev.filter(s => s.id !== id))
-  }, [])
+  }, [teamId])
 
   const duplicateSession = useCallback(async (sourceId: string) => {
     const session = await createVariantFromSession(sourceId, sessions)

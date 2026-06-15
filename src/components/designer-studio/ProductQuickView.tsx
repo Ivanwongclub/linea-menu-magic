@@ -1,4 +1,5 @@
 import { useState, Suspense, useRef } from "react";
+import { Link } from "react-router-dom";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,17 +7,16 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Environment, ContactShadows, PresentationControls, Center } from "@react-three/drei";
-import { 
-  Box, Globe, Lock, Calendar, Tag, Layers, X, 
-  DollarSign, Package, Clock, Factory, Award, 
-  Palette, Shirt, MapPin, TrendingDown, FileText,
+import {
+  Box, Globe, Lock, Calendar, Tag, Layers, X,
+  DollarSign, Package, Clock, Factory, Award,
+  Palette, Shirt, MapPin, TrendingDown, Send,
   RotateCcw, Sun, Moon, Image, Download, File,
   FileType, FileCode
 } from "lucide-react";
 import { LibraryItem, categoryLabels } from "@/features/products/legacyTypes";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
-import QuickRFQDialog from "./QuickRFQDialog";
 import OBJModel from "./OBJModelLoader";
 import * as THREE from "three";
 
@@ -128,10 +128,15 @@ const MiniScene = ({ modelType, autoRotate, lightMode, modelUrl }: { modelType: 
 };
 
 const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) => {
-  const [showRFQDialog, setShowRFQDialog] = useState(false);
   const [show3D, setShow3D] = useState(false);
   const [autoRotate, setAutoRotate] = useState(true);
   const [lightMode, setLightMode] = useState(true);
+
+  // P14: workspace lead capture flows through the real contact form, not a mock RFQ dialog.
+  // Fall back to itemCode when slug is missing (legacy data) — contact form handles either.
+  const contactQuoteHref = item
+    ? `/contact?product=${encodeURIComponent(item.slug ?? item.itemCode)}&source=workspace`
+    : "/contact?source=workspace";
 
   if (!item) return null;
 
@@ -568,12 +573,11 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                   >
                     Close
                   </Button>
-                  <Button
-                    className="flex-1 gap-2"
-                    onClick={() => setShowRFQDialog(true)}
-                  >
-                    <FileText className="w-4 h-4" />
-                    Request Quote
+                  <Button asChild className="flex-1 gap-2">
+                    <Link to={contactQuoteHref} onClick={() => onOpenChange(false)}>
+                      <Send className="w-4 h-4" />
+                      Request Quote
+                    </Link>
                   </Button>
                 </div>
               </div>
@@ -582,13 +586,6 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
           </div>
         </DialogContent>
       </Dialog>
-
-      {/* RFQ Dialog */}
-      <QuickRFQDialog
-        open={showRFQDialog}
-        onOpenChange={setShowRFQDialog}
-        item={item}
-      />
     </>
   );
 };

@@ -1,3 +1,4 @@
+// QUARANTINED — see reports/P14: workspace RFQ hidden for trial demo. Re-enable when a real RFQ data layer is built (Phase B-future).
 import { RFQ, statusLabels, statusColors } from "@/data/mockRFQData";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";

@@ -203,16 +203,26 @@ export default function ComposerPage() {
 
   const handleRename = useCallback(async (name: string) => {
     if (!session) return
-    await supabase.from('design_sessions').update({ name }).eq('id', session.id)
-  }, [session])
+    // P14 W16: belt-and-braces team_id filter alongside RLS.
+    await supabase
+      .from('design_sessions')
+      .update({ name })
+      .eq('id', session.id)
+      .eq('team_id', teamId)
+  }, [session, teamId])
 
   const handleShareStatusChange = useCallback(async (status: 'draft' | 'shared') => {
     if (!session) return
-    const { error } = await supabase.from('design_sessions').update({ status }).eq('id', session.id)
+    // P14 W16: belt-and-braces team_id filter alongside RLS.
+    const { error } = await supabase
+      .from('design_sessions')
+      .update({ status })
+      .eq('id', session.id)
+      .eq('team_id', teamId)
     if (error) { toast.error('Failed to update share status'); return }
     toast.success(status === 'shared' ? 'Composition marked as shared' : 'Composition set to draft')
     window.location.reload()
-  }, [session])
+  }, [session, teamId])
 
   const handleCreateVariant = useCallback(async () => {
     if (!session) return
@@ -245,16 +255,17 @@ export default function ComposerPage() {
 
     const img = new Image()
     img.onload = async () => {
+      // P14 W16: belt-and-braces team_id filter alongside RLS.
       await supabase.from('design_sessions').update({
         background_image_url: publicUrl,
         background_image_width: img.naturalWidth,
         background_image_height: img.naturalHeight,
-      }).eq('id', session.id)
+      }).eq('id', session.id).eq('team_id', teamId)
       toast.success('Background uploaded')
       window.location.reload()
     }
     img.src = publicUrl
-  }, [session])
+  }, [session, teamId])
 
   const handleExport = useCallback(async () => {
     if (!canvasRef.current || !session) return

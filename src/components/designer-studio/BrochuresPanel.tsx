@@ -8,6 +8,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useBrochures } from "@/features/flipbook/hooks/useBrochures";
 import { useBrochureMutations } from "@/features/flipbook/hooks/useBrochureMutations";
 import type { Brochure, BrochureStatus } from "@/features/flipbook/types";
+import { useAuth } from "@/features/auth/AuthProvider";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -93,6 +94,12 @@ interface BrochuresPanelProps {
 export default function BrochuresPanel({ onOpenEditor }: BrochuresPanelProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { primaryBrand } = useAuth();
+  // P14 W15: only managers/owners may publish, unpublish, delete, or create catalogues.
+  // Members see the catalogue list but the mutating controls (Publish, Delete, + New) are hidden.
+  // Server-side RLS enforces the same rule via the P14 migration.
+  const canManageBrochures =
+    primaryBrand?.role === "manager" || primaryBrand?.role === "owner";
 
   const { data: brochures = [], isLoading } = useBrochures({ allStatuses: true });
   const { updateBrochure, deleteBrochure } = useBrochureMutations();
@@ -191,14 +198,16 @@ export default function BrochuresPanel({ onOpenEditor }: BrochuresPanelProps) {
 
         <div className="flex-1" />
 
-        <Button
-          size="sm"
-          className="gap-1.5 h-8"
-          onClick={() => onOpenEditor?.()}
-        >
-          <Plus className="w-3.5 h-3.5" />
-          New Catalogue
-        </Button>
+        {canManageBrochures && (
+          <Button
+            size="sm"
+            className="gap-1.5 h-8"
+            onClick={() => onOpenEditor?.()}
+          >
+            <Plus className="w-3.5 h-3.5" />
+            New Catalogue
+          </Button>
+        )}
       </div>
 
       {/* Table */}
@@ -260,33 +269,37 @@ export default function BrochuresPanel({ onOpenEditor }: BrochuresPanelProps) {
                         <Pencil className="w-3 h-3" />
                         Edit
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 px-2 text-xs gap-1"
-                        onClick={() => handleTogglePublish(b)}
-                      >
-                        {b.status === "published" ? (
-                          <>
-                            <GlobeLock className="w-3 h-3" />
-                            Unpublish
-                          </>
-                        ) : (
-                          <>
-                            <Globe className="w-3 h-3" />
-                            Publish
-                          </>
-                        )}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 px-2 text-xs gap-1 text-destructive hover:text-destructive"
-                        onClick={() => setDeleteTarget(b)}
-                      >
-                        <Trash2 className="w-3 h-3" />
-                        Delete
-                      </Button>
+                      {canManageBrochures && (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 px-2 text-xs gap-1"
+                            onClick={() => handleTogglePublish(b)}
+                          >
+                            {b.status === "published" ? (
+                              <>
+                                <GlobeLock className="w-3 h-3" />
+                                Unpublish
+                              </>
+                            ) : (
+                              <>
+                                <Globe className="w-3 h-3" />
+                                Publish
+                              </>
+                            )}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 px-2 text-xs gap-1 text-destructive hover:text-destructive"
+                            onClick={() => setDeleteTarget(b)}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                            Delete
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
