@@ -323,7 +323,7 @@ const DesignerStudioWorkspace = () => {
               </p>
             </div>
             <Button size="sm" className="gap-2" onClick={() => setTemplatePickerOpen(true)}>
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4" strokeWidth={1.5} />
               {t("workspace.title.newComposition")}
             </Button>
           </div>
@@ -341,35 +341,35 @@ const DesignerStudioWorkspace = () => {
               {/* Component Library card */}
               <div
                 onClick={() => setActiveMainTab('library')}
-                className="flex items-center gap-4 p-4 bg-[hsl(var(--background))] border border-[hsl(var(--border))] rounded-[calc(var(--radius)*2)] cursor-pointer group transition-all duration-200 hover:border-[hsl(var(--foreground))] hover:shadow-[0_2px_12px_rgba(0,0,0,0.05)]"
+                className="flex items-center gap-4 p-4 bg-background border border-border cursor-pointer group transition-colors duration-200 hover:border-foreground"
               >
-                <div className="w-10 h-10 rounded-[var(--radius)] bg-[hsl(var(--secondary))] flex items-center justify-center flex-shrink-0 group-hover:bg-[hsl(var(--foreground))] group-hover:text-[hsl(var(--background))] transition-colors">
-                  <Library className="w-4 h-4" />
+                <div className="w-10 h-10 bg-secondary flex items-center justify-center flex-shrink-0 group-hover:bg-foreground group-hover:text-background transition-colors">
+                  <Library className="w-4 h-4" strokeWidth={1.5} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground">{t("workspace.library.title")}</p>
-                  <p className="text-[11px] text-muted-foreground truncate">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground truncate">
                     {t("workspace.library.cardSummary", { count: libraryItems.length })}
                   </p>
                 </div>
-                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />
+                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" strokeWidth={1.5} />
               </div>
 
               {/* Brochures + Products card */}
               <div
                 onClick={() => setActiveMainTab('brochures')}
-                className="flex items-center gap-4 p-4 bg-[hsl(var(--background))] border border-[hsl(var(--border))] rounded-[calc(var(--radius)*2)] cursor-pointer group transition-all duration-200 hover:border-[hsl(var(--foreground))] hover:shadow-[0_2px_12px_rgba(0,0,0,0.05)]"
+                className="flex items-center gap-4 p-4 bg-background border border-border cursor-pointer group transition-colors duration-200 hover:border-foreground"
               >
-                <div className="w-10 h-10 rounded-[var(--radius)] bg-[hsl(var(--secondary))] flex items-center justify-center flex-shrink-0 group-hover:bg-[hsl(var(--foreground))] group-hover:text-[hsl(var(--background))] transition-colors">
-                  <BookOpen className="w-4 h-4" />
+                <div className="w-10 h-10 bg-secondary flex items-center justify-center flex-shrink-0 group-hover:bg-foreground group-hover:text-background transition-colors">
+                  <BookOpen className="w-4 h-4" strokeWidth={1.5} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground">E-Catalogue & Content</p>
-                  <p className="text-[11px] text-muted-foreground truncate">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground truncate">
                     Manage catalogues & product data
                   </p>
                 </div>
-                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />
+                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" strokeWidth={1.5} />
               </div>
             </div>
           )}
@@ -394,30 +394,30 @@ const DesignerStudioWorkspace = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Button size="sm" className="gap-1.5 h-8" onClick={() => setIsSearchDialogOpen(true)}>
-                    <Plus className="w-3.5 h-3.5" />
+                    <Plus className="w-3.5 h-3.5" strokeWidth={1.5} />
                     <span className="hidden sm:inline">{t("workspace.library.addComponent")}</span>
                   </Button>
                 </div>
               </div>
 
-              {/* All Products / My Library toggle */}
-              <div className="flex items-center gap-1 mb-4 bg-[hsl(var(--muted))] rounded-[var(--radius)] p-0.5 w-fit">
+              {/* Brand Catalogue / Saved Library — flat segmented control (P16 W24) */}
+              <div className="flex items-center gap-0 mb-4 border-b border-border">
                 <button
                   onClick={() => setLibrarySource('all')}
-                  className={`px-3 py-1.5 text-xs font-medium uppercase tracking-[0.06em] rounded-[calc(var(--radius)-2px)] transition-colors ${
+                  className={`px-4 py-2 text-xs font-medium uppercase tracking-[0.06em] border-b-2 -mb-px transition-colors ${
                     librarySource === 'all'
-                      ? 'bg-[hsl(var(--background))] text-[hsl(var(--foreground))] shadow-sm'
-                      : 'text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]'
+                      ? 'border-foreground text-foreground'
+                      : 'border-transparent text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   {t("workspace.library.brandCatalogue")} ({catalogProducts.length})
                 </button>
                 <button
                   onClick={() => setLibrarySource('my')}
-                  className={`px-3 py-1.5 text-xs font-medium uppercase tracking-[0.06em] rounded-[calc(var(--radius)-2px)] transition-colors ${
+                  className={`px-4 py-2 text-xs font-medium uppercase tracking-[0.06em] border-b-2 -mb-px transition-colors ${
                     librarySource === 'my'
-                      ? 'bg-[hsl(var(--background))] text-[hsl(var(--foreground))] shadow-sm'
-                      : 'text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]'
+                      ? 'border-foreground text-foreground'
+                      : 'border-transparent text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   {t("workspace.library.savedLibrary")} ({libraryItems.length})
@@ -427,7 +427,7 @@ const DesignerStudioWorkspace = () => {
               {/* Library Filters */}
               <div className="flex items-center gap-2 pb-3 overflow-x-auto scrollbar-hide">
                 <div className="relative flex-shrink-0 w-48 lg:w-64">
-                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
                   <Input
                     placeholder={t("workspace.library.search")}
                     value={searchQuery}
@@ -444,7 +444,7 @@ const DesignerStudioWorkspace = () => {
                   className="gap-1.5 h-8 flex-shrink-0"
                   onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
                 >
-                  <Heart className={`w-3.5 h-3.5 ${showFavoritesOnly ? 'fill-current' : ''}`} />
+                  <Heart className={`w-3.5 h-3.5 ${showFavoritesOnly ? 'fill-current' : ''}`} strokeWidth={1.5} />
                   <span className="hidden lg:inline">{t("workspace.library.favourites")}</span>
                   ({favouriteCount})
                 </Button>
@@ -467,19 +467,19 @@ const DesignerStudioWorkspace = () => {
                   type="single"
                   value={libraryViewMode}
                   onValueChange={(value) => value && setLibraryViewMode(value as "grid" | "list")}
-                  className="bg-muted rounded-md p-0.5 flex-shrink-0"
+                  className="border border-border rounded-none flex-shrink-0"
                 >
                   <ToggleGroupItem value="grid" aria-label="Grid view" className="px-2 h-7">
-                    <Grid3X3 className="w-3.5 h-3.5" />
+                    <Grid3X3 className="w-3.5 h-3.5" strokeWidth={1.5} />
                   </ToggleGroupItem>
                   <ToggleGroupItem value="list" aria-label="List view" className="px-2 h-7">
-                    <List className="w-3.5 h-3.5" />
+                    <List className="w-3.5 h-3.5" strokeWidth={1.5} />
                   </ToggleGroupItem>
                 </ToggleGroup>
 
                 {activeFilterCount > 0 && (
                   <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-xs h-7 px-2 flex-shrink-0 text-muted-foreground hover:text-foreground">
-                    <X className="w-3 h-3 mr-1" />
+                    <X className="w-3 h-3 mr-1" strokeWidth={1.5} />
                     {t("workspace.library.clear")} ({activeFilterCount})
                   </Button>
                 )}
@@ -490,10 +490,10 @@ const DesignerStudioWorkspace = () => {
                   <span className="text-xs text-muted-foreground">{t("workspace.library.filters")}:</span>
                   {showFavoritesOnly && (
                     <Badge variant="secondary" className="gap-1 text-xs py-0.5">
-                      <Heart className="w-3 h-3 fill-current" />
+                      <Heart className="w-3 h-3 fill-current" strokeWidth={1.5} />
                       {t("workspace.library.favourites")}
                       <button onClick={() => setShowFavoritesOnly(false)} className="ml-1 hover:text-destructive">
-                        <X className="w-3 h-3" />
+                        <X className="w-3 h-3" strokeWidth={1.5} />
                       </button>
                     </Badge>
                   )}
@@ -501,7 +501,7 @@ const DesignerStudioWorkspace = () => {
                     <Badge variant="secondary" className="gap-1 text-xs py-0.5">
                       {taxonomy.categories.find(c => c.slug === categoryFilter)?.name ?? categoryFilter}
                       <button onClick={() => setCategoryFilter("all")} className="ml-1 hover:text-destructive">
-                        <X className="w-3 h-3" />
+                        <X className="w-3 h-3" strokeWidth={1.5} />
                       </button>
                     </Badge>
                   )}
@@ -547,7 +547,7 @@ const DesignerStudioWorkspace = () => {
                   {libraryItems.length === 0 ? (
                     <div className="flex gap-2 justify-center">
                       <Button size="sm" onClick={() => setIsSearchDialogOpen(true)}>
-                        <Plus className="w-3.5 h-3.5 mr-1" />
+                        <Plus className="w-3.5 h-3.5 mr-1" strokeWidth={1.5} />
                         {t("workspace.library.addComponents")}
                       </Button>
                     </div>
@@ -581,14 +581,14 @@ const DesignerStudioWorkspace = () => {
                     value="brochures"
                     className="flex items-center gap-2 px-4 py-3 text-xs font-medium uppercase tracking-[0.08em] rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:text-foreground text-muted-foreground bg-transparent hover:text-foreground transition-colors"
                   >
-                    <BookOpen className="w-3.5 h-3.5" />
+                    <BookOpen className="w-3.5 h-3.5" strokeWidth={1.5} />
                     E-Catalogue
                   </TabsTrigger>
                   <TabsTrigger
                     value="products"
                     className="flex items-center gap-2 px-4 py-3 text-xs font-medium uppercase tracking-[0.08em] rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:text-foreground text-muted-foreground bg-transparent hover:text-foreground transition-colors"
                   >
-                    <Package className="w-3.5 h-3.5" />
+                    <Package className="w-3.5 h-3.5" strokeWidth={1.5} />
                     Products
                   </TabsTrigger>
                 </TabsList>

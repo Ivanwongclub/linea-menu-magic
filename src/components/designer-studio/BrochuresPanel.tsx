@@ -66,15 +66,22 @@ function usePageCounts(brochureIds: string[]) {
 /*  Status badge                                                       */
 /* ------------------------------------------------------------------ */
 
-const statusConfig: Record<BrochureStatus, { label: string; className: string }> = {
-  draft: { label: "Draft", className: "bg-muted text-muted-foreground" },
-  published: { label: "Published", className: "bg-emerald-500/15 text-emerald-600 border-emerald-500/30" },
-  archived: { label: "Archived", className: "bg-orange-500/15 text-orange-600 border-orange-500/30" },
+// P16 D4: monochrome state language — dot indicator + outline, no colored fills.
+// Filled dot = published (active), outlined dot = draft, muted dot = archived.
+const statusConfig: Record<BrochureStatus, { label: string; dotClassName: string }> = {
+  draft:     { label: "Draft",     dotClassName: "border border-foreground bg-transparent" },
+  published: { label: "Published", dotClassName: "bg-foreground" },
+  archived:  { label: "Archived",  dotClassName: "bg-muted-foreground" },
 };
 
 function StatusBadge({ status }: { status: BrochureStatus }) {
   const cfg = statusConfig[status] ?? statusConfig.draft;
-  return <Badge variant="outline" className={cfg.className}>{cfg.label}</Badge>;
+  return (
+    <Badge variant="outline" className="gap-1.5 border-border text-foreground">
+      <span className={`w-1.5 h-1.5 rounded-full ${cfg.dotClassName}`} />
+      {cfg.label}
+    </Badge>
+  );
 }
 
 /* ------------------------------------------------------------------ */
@@ -178,7 +185,7 @@ export default function BrochuresPanel({ onOpenEditor }: BrochuresPanelProps) {
       {/* Top bar */}
       <div className="flex items-center gap-3 mb-4">
         <div className="relative flex-1 max-w-xs">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
           <Input
             placeholder="Search catalogues…"
             value={searchQuery}
@@ -204,7 +211,7 @@ export default function BrochuresPanel({ onOpenEditor }: BrochuresPanelProps) {
             className="gap-1.5 h-8"
             onClick={() => onOpenEditor?.()}
           >
-            <Plus className="w-3.5 h-3.5" />
+            <Plus className="w-3.5 h-3.5" strokeWidth={1.5} />
             New Catalogue
           </Button>
         )}
@@ -214,7 +221,7 @@ export default function BrochuresPanel({ onOpenEditor }: BrochuresPanelProps) {
       {isLoading ? (
         <div className="space-y-3">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-12 bg-muted animate-pulse rounded" />
+            <div key={i} className="h-12 bg-muted animate-pulse" />
           ))}
         </div>
       ) : filtered.length === 0 ? (
@@ -222,7 +229,7 @@ export default function BrochuresPanel({ onOpenEditor }: BrochuresPanelProps) {
           <p className="text-muted-foreground text-sm">No catalogues found</p>
         </div>
       ) : (
-        <div className="border border-border rounded-lg overflow-hidden">
+        <div className="border border-border overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
@@ -266,7 +273,7 @@ export default function BrochuresPanel({ onOpenEditor }: BrochuresPanelProps) {
                         className="h-7 px-2 text-xs gap-1"
                         onClick={() => onOpenEditor?.(b.id)}
                       >
-                        <Pencil className="w-3 h-3" />
+                        <Pencil className="w-3 h-3" strokeWidth={1.5} />
                         Edit
                       </Button>
                       {canManageBrochures && (
@@ -279,12 +286,12 @@ export default function BrochuresPanel({ onOpenEditor }: BrochuresPanelProps) {
                           >
                             {b.status === "published" ? (
                               <>
-                                <GlobeLock className="w-3 h-3" />
+                                <GlobeLock className="w-3 h-3" strokeWidth={1.5} />
                                 Unpublish
                               </>
                             ) : (
                               <>
-                                <Globe className="w-3 h-3" />
+                                <Globe className="w-3 h-3" strokeWidth={1.5} />
                                 Publish
                               </>
                             )}
@@ -295,7 +302,7 @@ export default function BrochuresPanel({ onOpenEditor }: BrochuresPanelProps) {
                             className="h-7 px-2 text-xs gap-1 text-destructive hover:text-destructive"
                             onClick={() => setDeleteTarget(b)}
                           >
-                            <Trash2 className="w-3 h-3" />
+                            <Trash2 className="w-3 h-3" strokeWidth={1.5} />
                             Delete
                           </Button>
                         </>

@@ -16,12 +16,14 @@ const badgeVariants = cva(
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
         outline:
           "border-foreground bg-transparent text-foreground",
+        // P16 D4: monochrome status variants — variant differentiates by fill/stroke,
+        // not by hue. Callers add a dot indicator inside if extra signal is needed.
         published:
-          "bg-[#f0f7f4] text-[#2d6a4f] border-[#c3ddd6]",
+          "border-foreground bg-foreground text-background",
         draft:
-          "bg-[#f7f7f5] text-[#5c5c3a] border-[#d4d4b8]",
+          "border-border bg-transparent text-foreground",
         archived:
-          "bg-[#faf5f5] text-[#7a3535] border-[#ddbcbc]",
+          "border-border bg-transparent text-muted-foreground",
       },
     },
     defaultVariants: {

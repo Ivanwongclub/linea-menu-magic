@@ -172,7 +172,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                   </Canvas>
                   
                   {/* 3D Controls */}
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-background/90 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-lg">
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-background/90 backdrop-blur-sm border border-border px-3 py-1.5">
                     <Button 
                       variant="ghost" 
                       size="icon" 
@@ -247,8 +247,9 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                         Public
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="text-xs gap-1 border-amber-500/50 text-amber-700 dark:text-amber-400">
-                        <Lock className="w-3 h-3" />
+                      <Badge variant="outline" className="text-xs gap-1.5 border-foreground text-foreground">
+                        <span className="w-1.5 h-1.5 bg-foreground rounded-full" />
+                        <Lock className="w-3 h-3" strokeWidth={1.5} />
                         Exclusive
                       </Badge>
                     )}
@@ -285,13 +286,13 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                         Pricing & Quantity
                       </h3>
                       <div className="grid grid-cols-2 gap-3">
-                        <div className="p-3 bg-muted/50 rounded-lg">
+                        <div className="p-3 bg-secondary border border-border">
                           <p className="text-xs text-muted-foreground mb-1">Unit Price</p>
                           <p className="text-lg font-semibold text-foreground">
                             {item.pricing.currency} ${item.pricing.unitPrice.toFixed(2)}
                           </p>
                         </div>
-                        <div className="p-3 bg-muted/50 rounded-lg">
+                        <div className="p-3 bg-secondary border border-border">
                           <p className="text-xs text-muted-foreground mb-1">MOQ</p>
                           <p className="text-lg font-semibold text-foreground">
                             {item.pricing.moq.toLocaleString()}
@@ -307,7 +308,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                           </p>
                           <div className="flex flex-wrap gap-2">
                             {item.pricing.priceBreaks.map((pb, idx) => (
-                              <div key={idx} className="px-3 py-1.5 bg-primary/5 border border-primary/20 rounded-md text-xs">
+                              <div key={idx} className="px-3 py-1.5 bg-secondary border border-border text-xs">
                                 <span className="text-muted-foreground">≥{pb.quantity.toLocaleString()} pcs:</span>
                                 <span className="font-medium text-foreground ml-1">${pb.price.toFixed(2)}</span>
                               </div>
@@ -462,7 +463,8 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                       </h3>
                       <div className="flex flex-wrap gap-2">
                         {item.certifications.map((cert, idx) => (
-                          <Badge key={idx} variant="outline" className="text-xs bg-green-500/5 border-green-500/30 text-green-700 dark:text-green-400">
+                          <Badge key={idx} variant="outline" className="text-xs gap-1.5 border-foreground text-foreground">
+                            <span className="w-1.5 h-1.5 bg-foreground rounded-full" />
                             {cert}
                           </Badge>
                         ))}
@@ -487,23 +489,23 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                               case 'obj':
                               case 'stl':
                               case 'step':
-                                return <Box className="w-4 h-4 text-blue-500" />;
+                                return <Box className="w-4 h-4 text-foreground" strokeWidth={1.5} />;
                               case 'pdf':
-                                return <FileText className="w-4 h-4 text-red-500" />;
+                                return <FileText className="w-4 h-4 text-foreground" strokeWidth={1.5} />;
                               case 'ai':
                               case 'dwg':
-                                return <FileCode className="w-4 h-4 text-orange-500" />;
+                                return <FileCode className="w-4 h-4 text-foreground" strokeWidth={1.5} />;
                               default:
-                                return <File className="w-4 h-4 text-muted-foreground" />;
+                                return <File className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />;
                             }
                           };
                           
                           return (
                             <div 
                               key={file.id}
-                              className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg hover:bg-muted/80 transition-colors group"
+                              className="flex items-start gap-3 p-3 bg-secondary border border-border hover:border-foreground transition-colors group"
                             >
-                              <div className="p-2 bg-background rounded-md shadow-sm">
+                              <div className="p-2 bg-background border border-border">
                                 {getFileIcon()}
                               </div>
                               <div className="flex-1 min-w-0">

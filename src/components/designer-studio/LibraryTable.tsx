@@ -20,9 +20,9 @@ interface LibraryTableProps {
 
 const SortIcon = ({ field, currentField, order }: { field: SortField; currentField: SortField; order: SortOrder }) => {
   if (field !== currentField) {
-    return <ArrowUpDown className="w-3 h-3 opacity-50" />;
+    return <ArrowUpDown className="w-3 h-3 opacity-50" strokeWidth={1.5} />;
   }
-  return order === "asc" ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />;
+  return order === "asc" ? <ArrowUp className="w-3 h-3" strokeWidth={1.5} /> : <ArrowDown className="w-3 h-3" strokeWidth={1.5} />;
 };
 
 const LibraryTable = ({
@@ -33,7 +33,7 @@ const LibraryTable = ({
   onSort,
 }: LibraryTableProps) => {
   return (
-    <div className="border border-border rounded-[var(--radius)]">
+    <div className="border border-border">
       <ScrollArea className="w-full whitespace-nowrap">
         <Table>
           <TableHeader>
@@ -95,7 +95,7 @@ const LibraryTable = ({
                   onClick={() => onView(item)}
                 >
                   <TableCell>
-                    <div className="relative w-14 h-10 rounded overflow-hidden bg-secondary">
+                    <div className="relative w-14 h-10 overflow-hidden bg-secondary">
                       {thumbnailUrl ? (
                         <img
                           src={thumbnailUrl}
@@ -139,7 +139,7 @@ const LibraryTable = ({
                   <TableCell>
                     {product?.model_url ? (
                       <Badge className="bg-primary/90 text-xs gap-1">
-                        <Box className="w-3 h-3" />
+                        <Box className="w-3 h-3" strokeWidth={1.5} />
                         Yes
                       </Badge>
                     ) : (
@@ -156,7 +156,7 @@ const LibraryTable = ({
                       className="gap-1"
                       onClick={() => onView(item)}
                     >
-                      <Eye className="w-4 h-4" />
+                      <Eye className="w-4 h-4" strokeWidth={1.5} />
                       View
                     </Button>
                   </TableCell>

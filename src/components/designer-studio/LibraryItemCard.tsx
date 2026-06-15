@@ -66,7 +66,7 @@ const LibraryItemCard = ({
 
   return (
     <div
-      className="group relative flex flex-col bg-[hsl(var(--background))] border border-[hsl(var(--border))] rounded-[calc(var(--radius)*2)] overflow-hidden transition-all duration-200 hover:border-[hsl(var(--foreground))] hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] cursor-pointer"
+      className="group relative flex flex-col bg-background border border-border overflow-hidden transition-colors duration-200 hover:border-foreground cursor-pointer"
       onClick={() => onView(item)}
     >
       {/* Image area */}
@@ -89,7 +89,7 @@ const LibraryItemCard = ({
         {visibleTags.length > 0 && (
           <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-20">
             {visibleTags.map((tag) => (
-              <span key={tag.id} className="bg-[hsl(var(--foreground))] text-[hsl(var(--background))] text-[10px] font-medium uppercase tracking-[0.06em] px-2 py-0.5 rounded-[var(--radius)]">
+              <span key={tag.id} className="bg-foreground text-background text-[10px] font-medium uppercase tracking-[0.18em] px-2 py-0.5">
                 {tag.name}
               </span>
             ))}
@@ -98,15 +98,15 @@ const LibraryItemCard = ({
 
         {/* Admin default badge */}
         {item.is_admin_default && !visibleTags.length && (
-          <div className="absolute top-2 left-2 bg-[hsl(var(--foreground))] text-[hsl(var(--background))] text-[9px] font-medium uppercase tracking-[0.08em] px-2 py-0.5 rounded-[var(--radius)]">
+          <div className="absolute top-2 left-2 bg-foreground text-background text-[9px] font-medium uppercase tracking-[0.18em] px-2 py-0.5">
             Collection
           </div>
         )}
 
         {/* 3D / OBJ badge (top-right) */}
         {item.product?.model_url && (
-          <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm text-[hsl(var(--foreground))] text-[9px] font-medium uppercase tracking-[0.08em] px-2 py-0.5 rounded-[var(--radius)] border border-[hsl(var(--border))] flex items-center gap-1">
-            <Box className="w-2.5 h-2.5" />
+          <div className="absolute top-2 right-2 bg-background/90 backdrop-blur-sm text-foreground text-[9px] font-medium uppercase tracking-[0.18em] px-2 py-0.5 border border-border flex items-center gap-1">
+            <Box className="w-2.5 h-2.5" strokeWidth={1.5} />
             3D
           </div>
         )}
@@ -114,8 +114,8 @@ const LibraryItemCard = ({
         {/* Sustainability cert badge (bottom-right) — matching ProductCard */}
         {certs.length > 0 && (
           <div className="absolute bottom-2 right-2 z-10">
-            <div className="bg-white/85 backdrop-blur-sm rounded-[var(--radius)] px-1.5 py-0.5 flex items-center gap-1">
-              <Leaf className="w-2.5 h-2.5 text-[hsl(var(--foreground))]" />
+            <div className="bg-background/85 backdrop-blur-sm border border-border px-1.5 py-0.5 flex items-center gap-1">
+              <Leaf className="w-2.5 h-2.5 text-foreground" strokeWidth={1.5} />
               <span className="text-[9px] font-medium uppercase tracking-[0.06em] text-[hsl(var(--foreground))]">
                 {certs[0].abbreviation}
               </span>
@@ -130,9 +130,9 @@ const LibraryItemCard = ({
               e.stopPropagation();
               onView(item);
             }}
-            className="w-full flex items-center justify-center gap-2 bg-white text-black text-xs font-medium uppercase tracking-[0.06em] px-3 py-2 rounded-[var(--radius)] hover:bg-white/90 transition-colors"
+            className="w-full flex items-center justify-center gap-2 bg-background text-foreground text-xs font-medium uppercase tracking-[0.18em] px-3 py-2 hover:bg-background/90 transition-colors"
           >
-            <Eye className="w-3 h-3" />
+            <Eye className="w-3 h-3" strokeWidth={1.5} />
             View Details
           </button>
         </div>
@@ -142,7 +142,7 @@ const LibraryItemCard = ({
       <div className="p-3 flex flex-col gap-2">
         {/* Category + item code row */}
         <div className="flex items-center justify-between">
-          <span className="text-[10px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--muted-foreground))]">
+          <span className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
             {primaryCategory?.name ?? "—"}
           </span>
           <span className="text-[10px] font-mono text-[hsl(var(--muted-foreground))]">
@@ -175,7 +175,7 @@ const LibraryItemCard = ({
               className="flex items-center gap-1 text-[10px] font-medium uppercase tracking-[0.06em] text-[hsl(var(--muted-foreground))] hover:text-foreground transition-colors"
               title="Download files"
             >
-              <Download className="w-3 h-3" />
+              <Download className="w-3 h-3" strokeWidth={1.5} />
               Files ({downloadCount})
             </button>
           </div>
@@ -183,7 +183,7 @@ const LibraryItemCard = ({
 
         {/* Downloads dropdown */}
         {showDownloads && hasDownloads && (
-          <div className="border border-[hsl(var(--border))] rounded-[var(--radius)] overflow-hidden divide-y divide-[hsl(var(--border))]">
+          <div className="border border-border overflow-hidden divide-y divide-border">
             {downloads.map((file) => (
               <a
                 key={file.id}
@@ -194,7 +194,7 @@ const LibraryItemCard = ({
                 className="flex items-center gap-2 px-3 py-2 text-[11px] text-[hsl(var(--foreground))] hover:bg-[hsl(var(--secondary))] transition-colors"
                 onClick={(e) => e.stopPropagation()}
               >
-                <FileDown className="w-3 h-3 flex-shrink-0 text-[hsl(var(--muted-foreground))]" />
+                <FileDown className="w-3 h-3 flex-shrink-0 text-muted-foreground" strokeWidth={1.5} />
                 <span className="flex-1 truncate">{file.name}</span>
                 <span className="text-[10px] text-[hsl(var(--muted-foreground))] uppercase font-mono flex-shrink-0">
                   {file.type.toUpperCase()}

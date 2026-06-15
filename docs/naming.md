@@ -22,4 +22,5 @@ zh translations (consistency lock):
 - Composition: 組合 (zh-Hant) / 组合 (zh-Hans)
 - Workspace: 工作空間 / 工作空间
 - Studio: 工作室 / 工作室
-- Composer (tool): currently falls back to English in zh locales; if/when translated, follow the artefact verb pattern (e.g. 排版工具).
+- Composer (tool): treated as a brand-name term, not localised — surfaces as "Composer" across all locales (parallel to product names like "Photoshop" or "Figma"). Decision locked in P16. If marketing later requests a zh equivalent, the recommended translation is 排版工具.
+- 3D Editor (tool): same brand-name pattern — surfaces as "3D Editor" across locales. If translated, recommended: 3D 編輯器 / 3D 编辑器.

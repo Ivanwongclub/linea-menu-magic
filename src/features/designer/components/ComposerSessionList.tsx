@@ -124,7 +124,7 @@ export default function ComposerSessionList({ teamId }: ComposerSessionListProps
           {sessions.map(session => (
             <div
               key={session.id}
-              className="group relative border border-border rounded-[calc(var(--radius)*2)] overflow-hidden cursor-pointer hover:border-foreground transition-colors duration-200"
+              className="group relative border border-border overflow-hidden cursor-pointer hover:border-foreground transition-colors duration-200"
               onClick={() => navigate(`/designer-studio/compose/${session.id}`)}
             >
               {/* Thumbnail */}
@@ -147,7 +147,7 @@ export default function ComposerSessionList({ teamId }: ComposerSessionListProps
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <Layers className="w-8 h-8 text-muted-foreground/30" />
+                    <Layers className="w-8 h-8 text-muted-foreground/30" strokeWidth={1.5} />
                   </div>
                 )}
               </div>
@@ -181,8 +181,8 @@ export default function ComposerSessionList({ teamId }: ComposerSessionListProps
               <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild onClick={e => e.stopPropagation()}>
-                    <button className="w-7 h-7 flex items-center justify-center rounded-full bg-background/90 border border-border hover:border-foreground transition-colors">
-                      <MoreHorizontal className="w-3.5 h-3.5" />
+                    <button className="w-7 h-7 flex items-center justify-center bg-background/90 border border-border hover:border-foreground transition-colors">
+                      <MoreHorizontal className="w-3.5 h-3.5" strokeWidth={1.5} />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" onClick={e => e.stopPropagation()}>
@@ -216,7 +216,7 @@ export default function ComposerSessionList({ teamId }: ComposerSessionListProps
           ))}
         </div>
       ) : (
-        <div className="text-center py-16 border border-dashed border-border rounded-[calc(var(--radius)*2)]">
+        <div className="text-center py-16 border border-dashed border-border">
           <Layers className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
           <p className="text-sm text-muted-foreground mb-2">No compositions yet</p>
           <p className="text-xs text-muted-foreground/60 mb-4">

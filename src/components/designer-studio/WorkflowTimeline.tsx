@@ -37,41 +37,41 @@ const WorkflowTimeline = ({ currentStatus }: WorkflowTimelineProps) => {
   };
 
   return (
-    <div className="bg-card border border-border rounded-lg p-4 md:p-6">
+    <div className="bg-card border border-border p-4 md:p-6">
       <div className="flex items-center justify-between relative">
-        {/* Progress Line */}
+        {/* Progress Line — monochrome (P16 D4) */}
         <div className="absolute top-5 left-0 right-0 h-0.5 bg-border" />
-        <div 
-          className="absolute top-5 left-0 h-0.5 bg-primary transition-all duration-500"
-          style={{ 
-            width: `${Math.min(100, (currentIndex / (workflowSteps.length - 1)) * 100)}%` 
+        <div
+          className="absolute top-5 left-0 h-0.5 bg-foreground transition-all duration-500"
+          style={{
+            width: `${Math.min(100, (currentIndex / (workflowSteps.length - 1)) * 100)}%`
           }}
         />
 
-        {workflowSteps.map((step, index) => {
+        {workflowSteps.map((step) => {
           const state = getStepState(step.status);
-          
+
           return (
-            <div 
+            <div
               key={step.status}
               className="relative flex flex-col items-center z-10"
             >
-              {/* Step Circle */}
-              <div 
+              {/* Step Circle — glyph, stays round; monochrome state language (P16) */}
+              <div
                 className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
-                  state === 'completed' 
-                    ? 'bg-primary text-primary-foreground'
+                  state === 'completed'
+                    ? 'bg-foreground text-background'
                     : state === 'current'
-                    ? 'bg-primary/20 border-2 border-primary text-primary'
-                    : 'bg-muted border-2 border-border text-muted-foreground'
+                    ? 'bg-background border-2 border-foreground text-foreground'
+                    : 'bg-secondary border-2 border-border text-muted-foreground'
                 }`}
               >
                 {state === 'completed' ? (
-                  <Check className="w-5 h-5" />
+                  <Check className="w-5 h-5" strokeWidth={1.5} />
                 ) : state === 'current' ? (
-                  <Clock className="w-5 h-5" />
+                  <Clock className="w-5 h-5" strokeWidth={1.5} />
                 ) : (
-                  <Circle className="w-5 h-5" />
+                  <Circle className="w-5 h-5" strokeWidth={1.5} />
                 )}
               </div>
               
