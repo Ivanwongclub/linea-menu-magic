@@ -335,7 +335,7 @@ export default function ObjGallery({ open, onClose, initialIndex = 0 }: ObjGalle
         <div className="flex items-start justify-between px-5 py-4 border-b border-border">
           <div className="min-w-0">
             <span className="text-[11px] text-muted-foreground tracking-widest uppercase">
-              3D Prototype · {activeIndex + 1} / {MODELS.length}
+              3D Model
             </span>
             <h3 className="text-[17px] font-semibold text-foreground mt-0.5 truncate">
               {model.title}
