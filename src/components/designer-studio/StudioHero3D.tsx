@@ -6,10 +6,12 @@ import { useI18n } from "@/features/i18n/I18nProvider";
 
 const Model3DViewer = lazy(() => import("@/components/designer-studio/Model3DViewer"));
 
-// P18 B2: `color` is the polished-brass tone matching what the hero renders, so the
-// 3D Editor opens with the same material applied — what you see is what you customise.
+// P19: hero points at the actual button OBJ (was /models/d-ring-buckle.obj which
+// is a D-ring shape, not a button). P18 B2: `color` is the polished-brass tone the
+// editor applies on deep-link so the customise experience opens in the same family
+// as what the hero renders.
 export const HERO_EDITOR_URL =
-  "/designer-studio/editor?model=/models/d-ring-buckle.obj&product=metal-button&name=Button&color=%23C9A961";
+  "/designer-studio/editor?model=/models/Polo_Button_10.8.obj&product=metal-button&name=Button&color=%23C9A961";
 
 export default function StudioHero3D() {
   const { t } = useI18n();
@@ -44,7 +46,7 @@ export default function StudioHero3D() {
             <Suspense fallback={<PosterStage />}>
               <Model3DViewer
                 hasModel
-                modelUrl="/models/d-ring-buckle.obj"
+                modelUrl="/models/Polo_Button_10.8.obj"
                 modelType="button"
                 showMetadata={false}
               />

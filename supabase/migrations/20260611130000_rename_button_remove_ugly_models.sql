@@ -1,13 +1,13 @@
--- Corrected against production state (2026-06-11 export).
--- The OBJ at /models/d-ring-buckle.obj is a high-quality button model.
--- Attach it to the existing Metal Buttons product and make that product the canonical Button.
+-- Corrected 2026-06-15 (P19): §1 no longer reassigns model_url because the
+-- /models/d-ring-buckle.obj file is a D-ring shape, not a button. metal-button
+-- keeps its existing model_url which points at the real button OBJ
+-- (currently /models/Polo_Button_10.8.obj in production).
 
--- 1. Hero product: rename and attach the good button OBJ
+-- 1. Hero product: rename ONLY — model_url is preserved.
 UPDATE public.products
 SET
   name = 'Button',
   name_en = 'Button',
-  model_url = '/models/d-ring-buckle.obj',
   is_customizable = true,
   description = 'Classic metal button in zinc alloy with a polished dome face. Available in multiple plated finishes and sizes for shirts, jackets and outerwear.'
 WHERE slug = 'metal-button';
