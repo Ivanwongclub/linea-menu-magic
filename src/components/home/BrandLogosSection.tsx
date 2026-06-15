@@ -11,7 +11,7 @@ const brands: Brand[] = [
   { name: "Adidas",         src: "/images/brands/adidas.webp",         heightClass: "h-7 md:h-8" },
   { name: "Puma",           src: "/images/brands/puma.webp",           heightClass: "h-7 md:h-8" },
   { name: "Tommy Hilfiger", src: "/images/brands/tommy-hilfiger.webp", heightClass: "h-5 md:h-6" },
-  { name: "Michael Kors",   src: "/images/brands/michael-kors.webp",   heightClass: "h-12 md:h-14" },
+  { name: "Michael Kors",   src: "/images/brands/michael-kors.webp",   heightClass: "h-14 md:h-16" },
   { name: "Calvin Klein",   src: "/images/brands/calvin-klein.webp",   heightClass: "h-5 md:h-6" },
 ];
 

@@ -23,6 +23,7 @@ import {
   BookOpen,
   X,
   ArrowRight,
+  Heart,
 } from "lucide-react";
 
 // Library imports — Supabase-backed
