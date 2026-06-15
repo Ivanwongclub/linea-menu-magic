@@ -10,6 +10,9 @@ interface Model3DViewerProps {
   hasModel: boolean;
   modelType?: 'button' | 'zipper' | 'lace' | 'hardware';
   modelUrl?: string;
+  /** When false, hides the bottom "Format: OBJ / File size: …" strip.
+   *  Default true preserves the existing QuickView dialog rendering (P18 A3). */
+  showMetadata?: boolean;
 }
 
 // Demo 3D Button Model
@@ -241,7 +244,7 @@ const Loader = () => {
   );
 };
 
-const Model3DViewer = ({ hasModel, modelType = 'button', modelUrl }: Model3DViewerProps) => {
+const Model3DViewer = ({ hasModel, modelType = 'button', modelUrl, showMetadata = true }: Model3DViewerProps) => {
   const [autoRotate, setAutoRotate] = useState(true);
   const [lightMode, setLightMode] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -320,11 +323,13 @@ const Model3DViewer = ({ hasModel, modelType = 'button', modelUrl }: Model3DView
         )}
       </div>
 
-      {/* Model Info */}
-      <div className="flex items-center justify-between text-sm">
-        <span className="text-muted-foreground">Format: OBJ</span>
-        <span className="text-muted-foreground">File size: 2.4 MB</span>
-      </div>
+      {/* Model Info — hidden in the hero (P18 A3); shown by default in dialogs */}
+      {showMetadata && (
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-muted-foreground">Format: OBJ</span>
+          <span className="text-muted-foreground">File size: 2.4 MB</span>
+        </div>
+      )}
     </div>
   );
 };

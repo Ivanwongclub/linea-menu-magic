@@ -6,8 +6,10 @@ import { useI18n } from "@/features/i18n/I18nProvider";
 
 const Model3DViewer = lazy(() => import("@/components/designer-studio/Model3DViewer"));
 
+// P18 B2: `color` is the polished-brass tone matching what the hero renders, so the
+// 3D Editor opens with the same material applied — what you see is what you customise.
 export const HERO_EDITOR_URL =
-  "/designer-studio/editor?model=/models/d-ring-buckle.obj&product=metal-button&name=Button";
+  "/designer-studio/editor?model=/models/d-ring-buckle.obj&product=metal-button&name=Button&color=%23C9A961";
 
 export default function StudioHero3D() {
   const { t } = useI18n();
@@ -25,42 +27,47 @@ export default function StudioHero3D() {
   }, []);
 
   return (
-    <div className="relative w-full aspect-[4/3] border border-border bg-secondary/40 overflow-hidden rounded-none">
-      {/* Stage content (poster or 3D) */}
-      <div className="absolute inset-0">
-        {ready ? (
-          <Suspense fallback={<PosterStage />}>
-            <Model3DViewer
-              hasModel
-              modelUrl="/models/d-ring-buckle.obj"
-              modelType="button"
-            />
-          </Suspense>
-        ) : (
-          <PosterStage />
-        )}
+    <div className="border border-border bg-secondary/40 overflow-hidden rounded-none">
+      {/* Frame header — inside the border, single inset (P18 A4). Replaces the floating
+          "Interactive 3D" eyebrow which collided with Model3DViewer's own "Drag to rotate…"
+          hint at the same top-left corner. */}
+      <div className="flex items-center justify-between px-5 py-3 border-b border-border bg-background">
+        <h3 className="text-sm font-semibold tracking-tight text-foreground">
+          {t("studioIntro.heroFrameTitle")}
+        </h3>
       </div>
 
-      {/* Eyebrow — top-left, single inset */}
-      <div className="absolute top-5 left-5 right-5 pointer-events-none">
-        <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-          Interactive 3D
-        </p>
-      </div>
+      {/* Stage — fixed aspect ratio so the frame stays the same shape between poster and 3D states */}
+      <div className="relative w-full aspect-[4/3]">
+        <div className="absolute inset-0">
+          {ready ? (
+            <Suspense fallback={<PosterStage />}>
+              <Model3DViewer
+                hasModel
+                modelUrl="/models/d-ring-buckle.obj"
+                modelType="button"
+                showMetadata={false}
+              />
+            </Suspense>
+          ) : (
+            <PosterStage />
+          )}
+        </div>
 
-      {/* CTA — bottom-right, single p-5 inset. Only one customize control on the stage;
-          the Model3DViewer renders its own bottom-left "Drag to rotate…" hint when mounted. */}
-      <div className="absolute bottom-5 right-5">
-        <Link to={HERO_EDITOR_URL}>
-          <Button
-            size="sm"
-            variant="outline"
-            className="text-[10px] uppercase tracking-[0.14em] bg-background/90 backdrop-blur-sm rounded-none"
-          >
-            {t("studioIntro.customizeThis")}
-            <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
-          </Button>
-        </Link>
+        {/* CTA — bottom-right, single p-5 inset. Only one customize control on the stage;
+            the Model3DViewer renders its own bottom-left "Drag to rotate…" hint when mounted. */}
+        <div className="absolute bottom-5 right-5">
+          <Link to={HERO_EDITOR_URL}>
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-[10px] uppercase tracking-[0.14em] bg-background/90 backdrop-blur-sm rounded-none"
+            >
+              {t("studioIntro.customizeThis")}
+              <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+            </Button>
+          </Link>
+        </div>
       </div>
     </div>
   );

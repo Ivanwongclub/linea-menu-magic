@@ -2,9 +2,8 @@ import { useState, useEffect } from 'react';
 import { Sparkles, Heart, Eye, Leaf, Box } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { Product } from '@/features/products/types';
-import { getProductPlaceholderUrl } from '@/features/products/utils/productImagePlaceholder';
 import { getProductImageUrl } from '@/lib/productImage';
-import { getPdpSeedImages } from '@/features/products/pdpSeedImages';
+import { resolveProductImage } from '@/features/products/utils/resolveProductImage';
 
 type ViewMode = 'grid' | 'list';
 
@@ -18,30 +17,6 @@ interface ProductCardProps {
   onAddToLibrary?: (product: Product) => void;
   isInLibrary?: boolean;
   linkTo?: string;
-}
-
-function resolveProductImage(
-  product: Product,
-  size: 'thumb' | 'full' = 'thumb',
-): string {
-  if (product.images?.length) {
-    const primary = product.images.find((img) => img.is_primary) ?? product.images[0];
-    if (primary?.url) return primary.url;
-  }
-
-  if (product.thumbnail_url) return product.thumbnail_url;
-
-  // Use seeded images before falling back to placeholder
-  const seeded = getPdpSeedImages(product.slug, product.primary_category?.slug);
-  if (seeded && seeded.length > 0) return seeded[0];
-
-  return getProductPlaceholderUrl(
-    product.name_en ?? product.name,
-    product.item_code,
-    product.primary_category?.slug,
-    product.primary_category?.name,
-    size === 'thumb' ? 400 : 800,
-  );
 }
 
 export default function ProductCard({

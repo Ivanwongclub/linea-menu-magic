@@ -13,6 +13,7 @@ const DesignerStudioEditor = () => {
   const model = params.get("model");
   const name = params.get("name");
   const slug = params.get("slug");
+  const color = params.get("color");  // P18 B3: optional default material color (#RRGGBB)
   const { language } = useI18n();
   const { session: authSession } = useAuth();
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -22,6 +23,7 @@ const DesignerStudioEditor = () => {
     const qs = new URLSearchParams();
     if (model) qs.set("model", model);
     if (name) qs.set("name", name);
+    if (color) qs.set("color", color);
     const q = qs.toString();
     return `/3d-editor/index.html${q ? `?${q}` : ""}`;
   })();
@@ -58,12 +60,14 @@ const DesignerStudioEditor = () => {
   });
 
   // Push language to iframe whenever it changes or the editor signals ready.
+  // Also push the color (P18 B3) on editor-ready, so runtime locale switches don't
+  // wipe the initial color and so re-mounts (history nav) re-apply it.
   useEffect(() => {
     const send = () => {
-      iframeRef.current?.contentWindow?.postMessage(
-        { type: "set-language", language },
-        "*",
-      );
+      const win = iframeRef.current?.contentWindow;
+      if (!win) return;
+      win.postMessage({ type: "set-language", language }, "*");
+      if (color) win.postMessage({ type: "set-material-color", color }, "*");
     };
     const onMsg = (e: MessageEvent) => {
       if (e.data?.type === "editor-ready") send();
@@ -71,7 +75,7 @@ const DesignerStudioEditor = () => {
     window.addEventListener("message", onMsg);
     send();
     return () => window.removeEventListener("message", onMsg);
-  }, [language]);
+  }, [language, color]);
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">

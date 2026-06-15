@@ -1126,10 +1126,29 @@ function applyLanguage(lang) {
   if (snapBtn) snapBtn.textContent = snapOn ? dict.snapOn : dict.snapOff;
   if (spaceBtn) spaceBtn.textContent = transform.space === 'world' ? dict.world : dict.local;
 }
+// P18 B3: helper that paints the active selection's materials with a #RRGGBB color
+// and keeps the propColor input in sync so the user can keep customising from there.
+function applyMaterialColor(hex) {
+  if (!hex || typeof hex !== 'string') return;
+  // accept "#RRGGBB" or "RRGGBB"
+  const normalized = hex.startsWith('#') ? hex : '#' + hex;
+  try {
+    if (selected) {
+      eachMaterial(selected, (m) => m.color.set(normalized));
+    }
+    const input = document.getElementById('propColor');
+    if (input) input.value = normalized;
+    scheduleSave && scheduleSave();
+  } catch (_) { /* swallow — color hex may be malformed; fall back to default material */ }
+}
+
 window.addEventListener('message', (e) => {
   const data = e.data;
   if (data && data.type === 'set-language' && typeof data.language === 'string') {
     applyLanguage(data.language);
+  }
+  if (data && data.type === 'set-material-color' && typeof data.color === 'string') {
+    applyMaterialColor(data.color);
   }
 });
 
@@ -1156,6 +1175,7 @@ if (_hasModelParam) {
   try {
     const modelUrl = _urlParams.get('model');
     const label = _urlParams.get('name');
+    const colorParam = _urlParams.get('color');  // P18 B3
     if (modelUrl) {
       setStatus(`Loading ${label || 'model'}...`);
       const res = await fetch(modelUrl);
@@ -1163,6 +1183,9 @@ if (_hasModelParam) {
       const text = await res.text();
       const fileName = (label ? label.replace(/\s+/g, '_') : 'model') + '.obj';
       loadOBJText(text, fileName);
+      // After the model is loaded and selected, apply the default color if one was
+      // requested via URL. The postMessage path is also hooked up for runtime updates.
+      if (colorParam) applyMaterialColor(colorParam);
     }
   } catch (err) {
     setStatus(`Failed to load model: ${err.message}`, true);

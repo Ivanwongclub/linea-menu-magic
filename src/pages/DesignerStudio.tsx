@@ -21,7 +21,7 @@ import {
   getFamilyNameForProduct,
 } from "@/features/products/utils/pickFamilyFeatured";
 import { getProductImageUrl } from "@/lib/productImage";
-import { getProductThumbnailUrl } from "@/features/products/utils/productImagePlaceholder";
+import { resolveProductImage } from "@/features/products/utils/resolveProductImage";
 
 const REVEAL_BASE = "transition-all duration-700 ease-[cubic-bezier(0.19,1,0.22,1)]";
 
@@ -152,25 +152,20 @@ const DesignerStudio = () => {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-5">
             {featuredProducts.map((p) => {
               const family = getFamilyNameForProduct(p);
+              // P18 C4: localise the displayed name — fall back en → primary name
+              // (the underlying `name` field can be a non-EN locale).
+              const displayName = p.name_en ?? p.name;
               const editorUrl = p.model_url
-                ? `/designer-studio/editor?model=${encodeURIComponent(p.model_url)}&name=${encodeURIComponent(p.name)}&slug=${encodeURIComponent(p.slug)}`
+                ? `/designer-studio/editor?model=${encodeURIComponent(p.model_url)}&name=${encodeURIComponent(displayName)}&slug=${encodeURIComponent(p.slug)}`
                 : null;
-              const primaryCategory =
-                p.primary_category ?? p.categories?.[0];
-              const imageSrc = p.thumbnail_url
-                ? getProductImageUrl(p.thumbnail_url, "card")
-                : getProductThumbnailUrl(
-                    p.name,
-                    p.item_code,
-                    primaryCategory?.slug,
-                    primaryCategory?.name,
-                  );
+              // P18 C3: same fallback chain the Trim Library uses, via the shared util.
+              const imageSrc = getProductImageUrl(resolveProductImage(p, 'thumb'), 'card');
               return (
                 <div key={p.id} className="border border-border bg-background overflow-hidden">
                   <div className="aspect-[4/3] overflow-hidden bg-secondary/50">
                     <img
                       src={imageSrc}
-                      alt={p.name}
+                      alt={displayName}
                       loading="lazy"
                       className="w-full h-full object-cover"
                     />
@@ -182,7 +177,7 @@ const DesignerStudio = () => {
                       </p>
                     )}
                     <h3 className="text-sm font-semibold tracking-tight text-foreground mb-3">
-                      {p.name}
+                      {displayName}
                     </h3>
                     <div className="flex items-center gap-2">
                       <Link to={`/designer-studio/products/${p.slug}`}>
