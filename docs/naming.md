@@ -17,6 +17,7 @@ Retired terms (do not reintroduce):
 - "Concept board" — was the Composer artefact; now "Composition".
 - "Visual Composer" — now just "Composer".
 - "Dashboard" — now "Workspace".
+- `LibraryItem` (legacy type from `legacyTypes.ts`) — workspace surfaces consume `UserLibraryItem` directly. The legacy type survives only for the quarantined `QuickRFQDialog.tsx`; delete the legacy type when QuickRFQDialog is rewritten or retired.
 
 zh translations (consistency lock):
 - Composition: 組合 (zh-Hant) / 组合 (zh-Hans)

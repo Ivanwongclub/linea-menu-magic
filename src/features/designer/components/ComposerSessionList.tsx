@@ -17,6 +17,7 @@ import type { DesignSession } from '../types'
 import { toast } from 'sonner'
 import { supabase } from '@/integrations/supabase/client'
 import { getProductImageUrl } from '@/lib/productImage'
+import { useI18n } from '@/features/i18n/I18nProvider'
 
 interface ComposerSessionListProps {
   teamId: string
@@ -24,6 +25,7 @@ interface ComposerSessionListProps {
 
 export default function ComposerSessionList({ teamId }: ComposerSessionListProps) {
   const navigate = useNavigate()
+  const { t } = useI18n()
   const { sessions, loading, createSession, deleteSession, updateSession, duplicateSession } = useDesignSessions(teamId)
   const [renamingId, setRenamingId] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState('')
@@ -108,9 +110,9 @@ export default function ComposerSessionList({ teamId }: ComposerSessionListProps
     <div className="space-y-4">
       {/* Header — the "+ New Composition" CTA lives on the page header (P13 W11) */}
       <div>
-        <h2 className="text-lg font-semibold text-foreground">Composer</h2>
+        <h2 className="text-lg font-semibold text-foreground">{t('workspace.composer.heading')}</h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Place and visualise trim products on your garment designs
+          {t('workspace.composer.helper')}
         </p>
       </div>
 
@@ -218,9 +220,9 @@ export default function ComposerSessionList({ teamId }: ComposerSessionListProps
       ) : (
         <div className="text-center py-16 border border-dashed border-border">
           <Layers className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-          <p className="text-sm text-muted-foreground mb-2">No compositions yet</p>
+          <p className="text-sm text-muted-foreground mb-2">{t('workspace.composer.empty')}</p>
           <p className="text-xs text-muted-foreground/60 mb-4">
-            Create your first composition to start placing trims on garment designs
+            {t('workspace.composer.emptyHint')}
           </p>
           <Button variant="default" size="sm" onClick={() => setTemplatePickerOpen(true)}>
             <Plus className="w-4 h-4 mr-2" />

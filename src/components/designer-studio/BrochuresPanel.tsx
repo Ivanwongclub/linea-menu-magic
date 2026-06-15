@@ -1,7 +1,14 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
-import { Search, Plus, Trash2, Pencil, Globe, GlobeLock, Archive, X } from "lucide-react";
+import { Search, Plus, Trash2, Pencil, Globe, GlobeLock, Archive, X, MoreHorizontal } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -9,6 +16,7 @@ import { useBrochures } from "@/features/flipbook/hooks/useBrochures";
 import { useBrochureMutations } from "@/features/flipbook/hooks/useBrochureMutations";
 import type { Brochure, BrochureStatus } from "@/features/flipbook/types";
 import { useAuth } from "@/features/auth/AuthProvider";
+import { useI18n } from "@/features/i18n/I18nProvider";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -102,6 +110,7 @@ export default function BrochuresPanel({ onOpenEditor }: BrochuresPanelProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { primaryBrand } = useAuth();
+  const { t } = useI18n();
   // P14 W15: only managers/owners may publish, unpublish, delete, or create catalogues.
   // Members see the catalogue list but the mutating controls (Publish, Delete, + New) are hidden.
   // Server-side RLS enforces the same rule via the P14 migration.
@@ -187,7 +196,7 @@ export default function BrochuresPanel({ onOpenEditor }: BrochuresPanelProps) {
         <div className="relative flex-1 max-w-xs">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
           <Input
-            placeholder="Search catalogues…"
+            placeholder={t("workspace.brochures.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-8 h-8 text-sm"
@@ -212,7 +221,7 @@ export default function BrochuresPanel({ onOpenEditor }: BrochuresPanelProps) {
             onClick={() => onOpenEditor?.()}
           >
             <Plus className="w-3.5 h-3.5" strokeWidth={1.5} />
-            New Catalogue
+            {t("workspace.brochures.newCatalogue")}
           </Button>
         )}
       </div>
@@ -266,47 +275,51 @@ export default function BrochuresPanel({ onOpenEditor }: BrochuresPanelProps) {
                     {format(new Date(b.updated_at), "MMM d, yyyy")}
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 px-2 text-xs gap-1"
-                        onClick={() => onOpenEditor?.(b.id)}
-                      >
-                        <Pencil className="w-3 h-3" strokeWidth={1.5} />
-                        Edit
-                      </Button>
-                      {canManageBrochures && (
-                        <>
+                    {/* P17 T4.1: kebab menu — always rendered, reachable on touch. */}
+                    <div className="flex items-center justify-end">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
                           <Button
                             variant="ghost"
-                            size="sm"
-                            className="h-7 px-2 text-xs gap-1"
-                            onClick={() => handleTogglePublish(b)}
+                            size="icon"
+                            className="h-8 w-8"
+                            aria-label={`Actions for ${b.title}`}
                           >
-                            {b.status === "published" ? (
-                              <>
-                                <GlobeLock className="w-3 h-3" strokeWidth={1.5} />
-                                Unpublish
-                              </>
-                            ) : (
-                              <>
-                                <Globe className="w-3 h-3" strokeWidth={1.5} />
-                                Publish
-                              </>
-                            )}
+                            <MoreHorizontal className="w-4 h-4" strokeWidth={1.5} />
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 px-2 text-xs gap-1 text-destructive hover:text-destructive"
-                            onClick={() => setDeleteTarget(b)}
-                          >
-                            <Trash2 className="w-3 h-3" strokeWidth={1.5} />
-                            Delete
-                          </Button>
-                        </>
-                      )}
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-44">
+                          <DropdownMenuItem onClick={() => onOpenEditor?.(b.id)}>
+                            <Pencil className="w-3.5 h-3.5 mr-2" strokeWidth={1.5} />
+                            Edit
+                          </DropdownMenuItem>
+                          {canManageBrochures && (
+                            <>
+                              <DropdownMenuItem onClick={() => handleTogglePublish(b)}>
+                                {b.status === "published" ? (
+                                  <>
+                                    <GlobeLock className="w-3.5 h-3.5 mr-2" strokeWidth={1.5} />
+                                    Unpublish
+                                  </>
+                                ) : (
+                                  <>
+                                    <Globe className="w-3.5 h-3.5 mr-2" strokeWidth={1.5} />
+                                    Publish
+                                  </>
+                                )}
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => setDeleteTarget(b)}
+                                className="text-destructive focus:text-destructive"
+                              >
+                                <Trash2 className="w-3.5 h-3.5 mr-2" strokeWidth={1.5} />
+                                Delete
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </TableCell>
                 </TableRow>

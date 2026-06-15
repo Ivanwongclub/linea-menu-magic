@@ -1,5 +1,7 @@
-// Transitional types — to be merged into Product type in a future update
-// MIGRATED from src/data/mockLibraryData.ts
+// QUARANTINED (P17 T1) — the workspace no longer consumes these types.
+// The only remaining importer is src/components/designer-studio/QuickRFQDialog.tsx,
+// which is itself quarantined (P14). When the real RFQ data layer ships and
+// QuickRFQDialog is rewritten or deleted, delete this file entirely.
 
 export interface DownloadableFile {
   id: string;

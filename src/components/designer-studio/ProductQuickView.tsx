@@ -9,21 +9,28 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Environment, ContactShadows, PresentationControls, Center } from "@react-three/drei";
 import {
   Box, Globe, Lock, Calendar, Tag, Layers, X,
-  DollarSign, Package, Clock, Factory, Award,
-  Palette, Shirt, MapPin, TrendingDown, Send,
+  Package, Clock, Factory, Award,
+  Palette, Shirt, MapPin, Send,
   RotateCcw, Sun, Moon, Image, Download, File,
-  FileType, FileCode
+  FileCode, FileText
 } from "lucide-react";
-import { LibraryItem, categoryLabels } from "@/features/products/legacyTypes";
+import type { UserLibraryItem } from "@/features/products/types";
 import { format } from "date-fns";
-import { zhTW } from "date-fns/locale";
 import OBJModel from "./OBJModelLoader";
 import * as THREE from "three";
 
 interface ProductQuickViewProps {
-  item: LibraryItem | null;
+  item: UserLibraryItem | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+}
+
+/** Map the canonical product category slug to a 3D model-type bucket. */
+function deriveModelType(categorySlug?: string): 'button' | 'zipper' | 'hardware' {
+  if (!categorySlug) return 'hardware';
+  if (categorySlug.includes('button')) return 'button';
+  if (categorySlug.includes('zipper')) return 'zipper';
+  return 'hardware';
 }
 
 // 3D Models for preview
@@ -132,13 +139,30 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
   const [autoRotate, setAutoRotate] = useState(true);
   const [lightMode, setLightMode] = useState(true);
 
-  // P14: workspace lead capture flows through the real contact form, not a mock RFQ dialog.
-  // Fall back to itemCode when slug is missing (legacy data) — contact form handles either.
-  const contactQuoteHref = item
-    ? `/contact?product=${encodeURIComponent(item.slug ?? item.itemCode)}&source=workspace`
-    : "/contact?source=workspace";
-
   if (!item) return null;
+
+  // P17 T1: consume UserLibraryItem directly — no adapter, no synthetic data.
+  const p = item.product;
+  const displayName = item.custom_name || p?.name_en || p?.name || 'Untitled';
+  const itemCode = p?.item_code ?? '';
+  const slug = p?.slug ?? itemCode;
+  const modelUrl = p?.model_url;
+  const modelType = deriveModelType(p?.primary_category?.slug ?? p?.categories?.[0]?.slug);
+  const description = p?.description_en || p?.description;
+  const isPublic = p?.is_public ?? true;
+  const teamName = item.team_name;
+  const categoryName = p?.primary_category?.name ?? p?.categories?.[0]?.name;
+  const specs = (item.custom_specs ?? p?.specifications ?? {}) as Record<string, unknown>;
+  const production = (p?.production ?? {}) as Record<string, string>;
+  const colorOptions = Array.isArray(specs.color_options) ? (specs.color_options as string[]) : [];
+  const applications = p?.industries?.map(i => i.name) ?? [];
+  const certifications = p?.certifications ?? [];
+  const downloads = item.downloadable_files ?? [];
+  const images = p?.images ?? [];
+  const primaryImage = images.find(img => img.is_primary)?.url ?? images[0]?.url ?? p?.thumbnail_url;
+
+  // P14: workspace lead capture flows through the real contact form, not a mock RFQ dialog.
+  const contactQuoteHref = `/contact?product=${encodeURIComponent(slug)}&source=workspace`;
 
   return (
     <>
@@ -153,13 +177,13 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
               <X className="w-4 h-4" />
               <span>Close</span>
             </button>
-            <span className="text-sm font-medium text-foreground truncate">{item.name}</span>
+            <span className="text-sm font-medium text-foreground truncate">{displayName}</span>
           </div>
 
           <div className="grid md:grid-cols-2 gap-0">
             {/* Image/3D Section */}
             <div className="relative bg-muted aspect-square md:aspect-auto md:min-h-[500px]">
-              {show3D && item.modelUrl ? (
+              {show3D && modelUrl ? (
                 <div className="w-full h-full relative">
                   <Canvas
                     shadows
@@ -167,7 +191,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                     gl={{ antialias: true, alpha: true }}
                   >
                     <Suspense fallback={null}>
-                      <MiniScene modelType={item.category} autoRotate={autoRotate} lightMode={lightMode} modelUrl={item.modelUrl} />
+                      <MiniScene modelType={modelType} autoRotate={autoRotate} lightMode={lightMode} modelUrl={modelUrl} />
                     </Suspense>
                   </Canvas>
                   
@@ -206,11 +230,11 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
               ) : (
                 <>
                   <img
-                    src={item.thumbnailUrl || '/placeholder.svg'}
-                    alt={item.name}
+                    src={primaryImage || '/placeholder.svg'}
+                    alt={displayName}
                     className="w-full h-full object-cover"
                   />
-                  {item.modelUrl && (
+                  {modelUrl && (
                     <Button
                       variant="secondary"
                       size="sm"
@@ -224,9 +248,9 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                 </>
               )}
               
-              {item.modelUrl && !show3D && (
-                <Badge className="absolute top-4 left-4 bg-primary text-primary-foreground">
-                  <Box className="w-3.5 h-3.5 mr-1.5" />
+              {modelUrl && !show3D && (
+                <Badge variant="default" className="absolute top-4 left-4">
+                  <Box className="w-3.5 h-3.5 mr-1.5" strokeWidth={1.5} />
                   3D Model Available
                 </Badge>
               )}
@@ -238,10 +262,12 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
               <div className="bg-background p-6 pb-4 border-b flex-shrink-0">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <Badge variant="outline" className="text-xs">
-                      {categoryLabels[item.category]}
-                    </Badge>
-                    {item.isPublic ? (
+                    {categoryName && (
+                      <Badge variant="outline" className="text-xs">
+                        {categoryName}
+                      </Badge>
+                    )}
+                    {isPublic ? (
                       <Badge variant="secondary" className="text-xs gap-1">
                         <Globe className="w-3 h-3" />
                         Public
@@ -254,9 +280,11 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                       </Badge>
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground font-mono">{item.itemCode}</p>
-                  <h2 className="text-2xl font-semibold text-foreground">{item.name}</h2>
-                  <p className="text-sm text-muted-foreground">{item.nameEn}</p>
+                  <p className="text-sm text-muted-foreground font-mono">{itemCode}</p>
+                  <h2 className="text-2xl font-semibold text-foreground">{displayName}</h2>
+                  {p?.name && p.name !== displayName && (
+                    <p className="text-sm text-muted-foreground">{p.name}</p>
+                  )}
                 </div>
               </div>
 
@@ -270,141 +298,57 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                     Product Description
                   </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    {item.description}
+                    {description || '—'}
                   </p>
                 </div>
 
-                {/* Pricing Section — gated on real pricing data (P13 T6).
-                    The legacy adapter currently hardcodes unitPrice = 0 / moq = 0,
-                    so this block stays hidden until Phase E surfaces real pricing. */}
-                {item.pricing.unitPrice > 0 && (
+                {/* P17 T1.2: Pricing block removed entirely — no real pricing source. */}
+
+                <Separator className="my-4" />
+
+                {/* Production Info — only render fields the product actually has */}
+                {(production.leadTime || production.sampleTime || production.origin || production.capacity) && (
                   <>
-                    <Separator className="my-4" />
                     <div className="space-y-3">
                       <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
-                        <DollarSign className="w-4 h-4 text-muted-foreground" />
-                        Pricing & Quantity
+                        <Factory className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
+                        Production Info
                       </h3>
                       <div className="grid grid-cols-2 gap-3">
-                        <div className="p-3 bg-secondary border border-border">
-                          <p className="text-xs text-muted-foreground mb-1">Unit Price</p>
-                          <p className="text-lg font-semibold text-foreground">
-                            {item.pricing.currency} ${item.pricing.unitPrice.toFixed(2)}
-                          </p>
-                        </div>
-                        <div className="p-3 bg-secondary border border-border">
-                          <p className="text-xs text-muted-foreground mb-1">MOQ</p>
-                          <p className="text-lg font-semibold text-foreground">
-                            {item.pricing.moq.toLocaleString()}
-                          </p>
-                        </div>
-                      </div>
-
-                      {item.pricing.priceBreaks && item.pricing.priceBreaks.length > 0 && (
-                        <div className="space-y-2">
-                          <p className="text-xs text-muted-foreground flex items-center gap-1">
-                            <TrendingDown className="w-3 h-3" />
-                            Volume Pricing
-                          </p>
-                          <div className="flex flex-wrap gap-2">
-                            {item.pricing.priceBreaks.map((pb, idx) => (
-                              <div key={idx} className="px-3 py-1.5 bg-secondary border border-border text-xs">
-                                <span className="text-muted-foreground">≥{pb.quantity.toLocaleString()} pcs:</span>
-                                <span className="font-medium text-foreground ml-1">${pb.price.toFixed(2)}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </>
-                )}
-
-                <Separator className="my-4" />
-
-                {/* Production Info */}
-                <div className="space-y-3">
-                  <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
-                    <Factory className="w-4 h-4 text-muted-foreground" />
-                    Production Info
-                  </h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="flex items-start gap-2">
-                      <Clock className="w-4 h-4 text-muted-foreground mt-0.5" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">Lead Time</p>
-                        <p className="text-sm font-medium">{item.production.leadTime}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <Package className="w-4 h-4 text-muted-foreground mt-0.5" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">Sample Time</p>
-                        <p className="text-sm font-medium">{item.production.sampleTime}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <MapPin className="w-4 h-4 text-muted-foreground mt-0.5" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">Origin</p>
-                        <p className="text-sm font-medium">{item.production.origin}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <Factory className="w-4 h-4 text-muted-foreground mt-0.5" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">Monthly Capacity</p>
-                        <p className="text-sm font-medium">{item.production.capacity}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <Separator className="my-4" />
-
-                {/* Specifications */}
-                {item.specifications && Object.keys(item.specifications).length > 0 && (
-                  <>
-                    <div className="space-y-3">
-                      <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
-                        <Tag className="w-4 h-4 text-muted-foreground" />
-                        Product Specifications
-                      </h3>
-                      <div className="grid grid-cols-2 gap-2">
-                        {item.specifications.material && (
-                          <div className="text-sm">
-                            <span className="text-muted-foreground">Material: </span>
-                            <span className="font-medium">{item.specifications.material}</span>
+                        {production.leadTime && (
+                          <div className="flex items-start gap-2">
+                            <Clock className="w-4 h-4 text-muted-foreground mt-0.5" strokeWidth={1.5} />
+                            <div>
+                              <p className="text-xs text-muted-foreground">Lead Time</p>
+                              <p className="text-sm font-medium">{production.leadTime}</p>
+                            </div>
                           </div>
                         )}
-                        {item.specifications.size && (
-                          <div className="text-sm">
-                            <span className="text-muted-foreground">Size: </span>
-                            <span className="font-medium">{item.specifications.size}</span>
+                        {production.sampleTime && (
+                          <div className="flex items-start gap-2">
+                            <Package className="w-4 h-4 text-muted-foreground mt-0.5" strokeWidth={1.5} />
+                            <div>
+                              <p className="text-xs text-muted-foreground">Sample Time</p>
+                              <p className="text-sm font-medium">{production.sampleTime}</p>
+                            </div>
                           </div>
                         )}
-                        {item.specifications.finish && (
-                          <div className="text-sm">
-                            <span className="text-muted-foreground">Finish: </span>
-                            <span className="font-medium">{item.specifications.finish}</span>
+                        {production.origin && (
+                          <div className="flex items-start gap-2">
+                            <MapPin className="w-4 h-4 text-muted-foreground mt-0.5" strokeWidth={1.5} />
+                            <div>
+                              <p className="text-xs text-muted-foreground">Origin</p>
+                              <p className="text-sm font-medium">{production.origin}</p>
+                            </div>
                           </div>
                         )}
-                        {item.specifications.weight && (
-                          <div className="text-sm">
-                            <span className="text-muted-foreground">Weight: </span>
-                            <span className="font-medium">{item.specifications.weight}</span>
-                          </div>
-                        )}
-                        {item.specifications.thickness && (
-                          <div className="text-sm">
-                            <span className="text-muted-foreground">Thickness: </span>
-                            <span className="font-medium">{item.specifications.thickness}</span>
-                          </div>
-                        )}
-                        {item.specifications.tensileStrength && (
-                          <div className="text-sm">
-                            <span className="text-muted-foreground">Tensile: </span>
-                            <span className="font-medium">{item.specifications.tensileStrength}</span>
+                        {production.capacity && (
+                          <div className="flex items-start gap-2">
+                            <Factory className="w-4 h-4 text-muted-foreground mt-0.5" strokeWidth={1.5} />
+                            <div>
+                              <p className="text-xs text-muted-foreground">Monthly Capacity</p>
+                              <p className="text-sm font-medium">{production.capacity}</p>
+                            </div>
                           </div>
                         )}
                       </div>
@@ -413,16 +357,47 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                   </>
                 )}
 
-                {/* Available Colors */}
-                {item.availableColors && item.availableColors.length > 0 && (
+                {/* Specifications — render any string-valued spec, not a hardcoded whitelist */}
+                {(() => {
+                  const specEntries = Object.entries(specs).filter(
+                    ([key, value]) =>
+                      key !== 'color_options' &&
+                      key !== 'size_options' &&
+                      (typeof value === 'string' || typeof value === 'number') &&
+                      String(value).length > 0,
+                  );
+                  if (specEntries.length === 0) return null;
+                  return (
+                    <>
+                      <div className="space-y-3">
+                        <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
+                          <Tag className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
+                          Product Specifications
+                        </h3>
+                        <div className="grid grid-cols-2 gap-2">
+                          {specEntries.map(([key, value]) => (
+                            <div key={key} className="text-sm">
+                              <span className="text-muted-foreground capitalize">{key.replace(/_/g, ' ')}: </span>
+                              <span className="font-medium">{String(value)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <Separator className="my-4" />
+                    </>
+                  );
+                })()}
+
+                {/* Available Colors — from product.specifications.color_options */}
+                {colorOptions.length > 0 && (
                   <>
                     <div className="space-y-3">
                       <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
-                        <Palette className="w-4 h-4 text-muted-foreground" />
+                        <Palette className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
                         Available Colors
                       </h3>
                       <div className="flex flex-wrap gap-2">
-                        {item.availableColors.map((color, idx) => (
+                        {colorOptions.map((color, idx) => (
                           <Badge key={idx} variant="secondary" className="text-xs">
                             {color}
                           </Badge>
@@ -433,16 +408,16 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                   </>
                 )}
 
-                {/* Applications */}
-                {item.applications && item.applications.length > 0 && (
+                {/* Applications — from product.industries */}
+                {applications.length > 0 && (
                   <>
                     <div className="space-y-3">
                       <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
-                        <Shirt className="w-4 h-4 text-muted-foreground" />
+                        <Shirt className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
                         Applications
                       </h3>
                       <div className="flex flex-wrap gap-2">
-                        {item.applications.map((app, idx) => (
+                        {applications.map((app, idx) => (
                           <Badge key={idx} variant="outline" className="text-xs">
                             {app}
                           </Badge>
@@ -453,19 +428,19 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                   </>
                 )}
 
-                {/* Certifications */}
-                {item.certifications && item.certifications.length > 0 && (
+                {/* Certifications — from product.certifications */}
+                {certifications.length > 0 && (
                   <>
                     <div className="space-y-3">
                       <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
-                        <Award className="w-4 h-4 text-muted-foreground" />
+                        <Award className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
                         Certifications
                       </h3>
                       <div className="flex flex-wrap gap-2">
-                        {item.certifications.map((cert, idx) => (
-                          <Badge key={idx} variant="outline" className="text-xs gap-1.5 border-foreground text-foreground">
+                        {certifications.map((cert) => (
+                          <Badge key={cert.id} variant="outline" className="text-xs gap-1.5 border-foreground text-foreground">
                             <span className="w-1.5 h-1.5 bg-foreground rounded-full" />
-                            {cert}
+                            {cert.abbreviation || cert.name}
                           </Badge>
                         ))}
                       </div>
@@ -474,65 +449,57 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                   </>
                 )}
 
-                {/* Downloadable Files */}
-                {item.downloadableFiles && item.downloadableFiles.length > 0 && (
+                {/* Downloadable Files — from UserLibraryItem.downloadable_files */}
+                {downloads.length > 0 && (
                   <>
                     <div className="space-y-3">
                       <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
-                        <Download className="w-4 h-4 text-muted-foreground" />
+                        <Download className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
                         Downloads
                       </h3>
                       <div className="space-y-2">
-                        {item.downloadableFiles.map((file) => {
+                        {downloads.map((file) => {
                           const getFileIcon = () => {
-                            switch (file.fileType) {
+                            switch (file.type) {
                               case 'obj':
-                              case 'stl':
                               case 'step':
                                 return <Box className="w-4 h-4 text-foreground" strokeWidth={1.5} />;
                               case 'pdf':
                                 return <FileText className="w-4 h-4 text-foreground" strokeWidth={1.5} />;
-                              case 'ai':
                               case 'dwg':
                                 return <FileCode className="w-4 h-4 text-foreground" strokeWidth={1.5} />;
                               default:
                                 return <File className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />;
                             }
                           };
-                          
+
                           return (
-                            <div 
+                            <a
                               key={file.id}
+                              href={file.url}
+                              download={file.name}
+                              target="_blank"
+                              rel="noopener noreferrer"
                               className="flex items-start gap-3 p-3 bg-secondary border border-border hover:border-foreground transition-colors group"
+                              onClick={(e) => e.stopPropagation()}
                             >
                               <div className="p-2 bg-background border border-border">
                                 {getFileIcon()}
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium truncate">{file.name}</p>
-                                <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
-                                  {file.description}
-                                </p>
                                 <div className="flex items-center gap-2 mt-1.5">
                                   <Badge variant="outline" className="text-xs uppercase">
-                                    {file.fileType}
+                                    {file.type}
                                   </Badge>
-                                  <span className="text-xs text-muted-foreground">{file.fileSize}</span>
+                                  <span className="text-xs text-muted-foreground">{file.size}</span>
                                 </div>
                               </div>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  // Mock download - in real app would trigger actual download
-                                  window.open(file.url, '_blank');
-                                }}
-                              >
-                                <Download className="w-4 h-4" />
-                              </Button>
-                            </div>
+                              <Download
+                                className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity self-center"
+                                strokeWidth={1.5}
+                              />
+                            </a>
                           );
                         })}
                       </div>
@@ -545,21 +512,21 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Calendar className="w-3.5 h-3.5" />
-                      Created
+                      <Calendar className="w-3.5 h-3.5" strokeWidth={1.5} />
+                      Added
                     </div>
                     <p className="text-sm font-medium">
-                      {format(new Date(item.createdAt), 'yyyy/MM/dd')}
+                      {format(new Date(item.added_at), 'yyyy/MM/dd')}
                     </p>
                   </div>
 
-                  {item.teamName && !item.isPublic && (
+                  {teamName && !isPublic && (
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Globe className="w-3.5 h-3.5" />
+                        <Globe className="w-3.5 h-3.5" strokeWidth={1.5} />
                         Team
                       </div>
-                      <p className="text-sm font-medium">{item.teamName}</p>
+                      <p className="text-sm font-medium">{teamName}</p>
                     </div>
                   )}
                 </div>

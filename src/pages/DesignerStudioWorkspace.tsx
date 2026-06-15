@@ -35,9 +35,8 @@ import LibraryItemCard from "@/components/designer-studio/LibraryItemCard";
 import LibraryTable from "@/components/designer-studio/LibraryTable";
 import SearchProductDialog from "@/components/designer-studio/SearchProductDialog";
 
-// Legacy LibraryItem still used by ProductQuickView (retired with adapter in Phase E)
-import { LibraryItem } from "@/data/mockLibraryData";
 import ProductQuickView from "@/components/designer-studio/ProductQuickView";
+import CompositionPickerDialog from "@/components/designer-studio/CompositionPickerDialog";
 
 // RFQ tab quarantined in P14 — see reports/P14. Workspace lead capture flows through
 // /contact?product=…&source=workspace; the mock RFQ surface is hidden until a real
@@ -60,38 +59,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/features/auth/AuthProvider";
 import { useI18n } from "@/features/i18n/I18nProvider";
 
-// ─── Adapter: UserLibraryItem → legacy LibraryItem ──────
-function toLegacyItem(item: UserLibraryItem): LibraryItem {
-  const p = item.product;
-  return {
-    id: item.id,
-    itemCode: p?.item_code ?? '',
-    slug: p?.slug,
-    name: item.custom_name || p?.name || 'Untitled',
-    nameEn: p?.name_en || p?.name || '',
-    category: 'buttons' as LibraryItem['category'],
-    description: p?.description_en || p?.description || '',
-    specifications: (p?.specifications as Record<string, string>) ?? {},
-    pricing: { unitPrice: 0, currency: 'USD', moq: 0 },
-    production: {
-      leadTime: (p?.production as Record<string, string>)?.leadTime ?? '',
-      sampleTime: (p?.production as Record<string, string>)?.sampleTime ?? '',
-      origin: (p?.production as Record<string, string>)?.origin ?? '',
-      capacity: (p?.production as Record<string, string>)?.capacity ?? '',
-    },
-    certifications: p?.certifications?.map(c => c.name) ?? [],
-    availableColors: [],
-    applications: p?.industries?.map(i => i.name) ?? [],
-    isPublic: p?.is_public ?? true,
-    teamId: item.team_id,
-    teamName: item.team_name ?? undefined,
-    modelUrl: p?.model_url ?? undefined,
-    thumbnailUrl: p?.thumbnail_url ?? undefined,
-    createdAt: item.added_at,
-    updatedAt: item.added_at,
-  };
-}
-
 type SortOrder = "asc" | "desc";
 
 // rfq tab quarantined (P14)
@@ -100,7 +67,7 @@ type TabId = typeof validTabs[number];
 
 const DesignerStudioWorkspace = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { t } = useI18n();
 
   // Brand-scoped team ID from auth context (RequireBrandAuth guarantees primaryBrand exists)
@@ -139,21 +106,57 @@ const DesignerStudioWorkspace = () => {
   // Composer sessions — `createSession` is the only consumer here; the grid renders via ComposerSessionList
   const { createSession } = useDesignSessions(teamId);
 
-  // Library UI states
-  const [librarySource, setLibrarySource] = useState<'all' | 'my'>('all');
-  const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
-  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
-  const [libraryViewMode, setLibraryViewMode] = useState<"grid" | "list">("grid");
+  // Library UI states — URL-backed (P17 T2 W19): filter state lives in ?q, ?cat,
+  // ?view, ?mode, ?favs so deep links work and back/forward isn't polluted by
+  // keystrokes. Sort and dialog state stay local.
+  const librarySource: 'all' | 'my' = searchParams.get('view') === 'saved' ? 'my' : 'all';
+  const categoryFilter = searchParams.get('cat') ?? 'all';
+  const libraryViewMode: 'grid' | 'list' = searchParams.get('mode') === 'list' ? 'list' : 'grid';
+  const showFavoritesOnly = searchParams.get('favs') === '1';
+  const urlSearchQuery = searchParams.get('q') ?? '';
+
+  // Search input is a local-controlled state for snappy typing; the URL gets
+  // updated on a 300ms debounce so each keystroke doesn't add a router event.
+  const [searchQuery, setSearchQuery] = useState(urlSearchQuery);
   const [sortField, setSortField] = useState<SortField>("addedAt");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [isSearchDialogOpen, setIsSearchDialogOpen] = useState(false);
+
+  // Single helper to write filter changes back to the URL with replace:true.
+  const updateFilter = (next: Record<string, string | null>) => {
+    const params = new URLSearchParams(searchParams);
+    Object.entries(next).forEach(([k, v]) => {
+      if (v === null || v === '') params.delete(k);
+      else params.set(k, v);
+    });
+    if (!params.has('tab')) params.set('tab', 'library');
+    setSearchParams(params, { replace: true });
+  };
+
+  const setLibrarySource = (v: 'all' | 'my') => updateFilter({ view: v === 'my' ? 'saved' : null });
+  const setCategoryFilter = (v: string) => updateFilter({ cat: v === 'all' ? null : v });
+  const setLibraryViewMode = (v: 'grid' | 'list') => updateFilter({ mode: v === 'list' ? 'list' : null });
+  const setShowFavoritesOnly = (next: boolean) => updateFilter({ favs: next ? '1' : null });
+
+  // Debounce the search-query URL write so the address bar settles after typing.
+  useEffect(() => {
+    if (searchQuery === urlSearchQuery) return;
+    const id = window.setTimeout(() => updateFilter({ q: searchQuery || null }), 300);
+    return () => window.clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery]);
+
+  // Keep local search state in sync when the URL changes externally (back/forward).
+  useEffect(() => {
+    if (urlSearchQuery !== searchQuery) setSearchQuery(urlSearchQuery);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlSearchQuery]);
 
   // Full catalog data
   const { products: catalogProducts, loading: catalogLoading } = useProducts({ visibility: 'brand' });
 
   // Quick-view modal (single detail surface — P13 W13)
-  const [quickViewItem, setQuickViewItem] = useState<LibraryItem | null>(null);
+  const [quickViewItem, setQuickViewItem] = useState<UserLibraryItem | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
 
   // Brochure editor state
@@ -161,6 +164,17 @@ const DesignerStudioWorkspace = () => {
 
   // Template picker (P13 W11 — single composition-create behaviour)
   const [templatePickerOpen, setTemplatePickerOpen] = useState(false);
+
+  // Composition picker (P17 T3 — real "Open in Composer" flow)
+  const [composerTarget, setComposerTarget] = useState<UserLibraryItem | null>(null);
+
+  const handleOpenInComposer = (item: UserLibraryItem) => {
+    if (!item.product?.id) {
+      toast.error('Product is missing from library item');
+      return;
+    }
+    setComposerTarget(item);
+  };
 
   // Convert catalog Product → UserLibraryItem shape for card rendering
   const catalogAsLibraryItems: UserLibraryItem[] = useMemo(() => {
@@ -241,9 +255,9 @@ const DesignerStudioWorkspace = () => {
   ].filter(Boolean).length;
 
   const clearAllFilters = () => {
-    setCategoryFilter("all");
-    setShowFavoritesOnly(false);
+    // Wipe cat/favs/q/view/mode but preserve tab=library (P17 T2.2).
     setSearchQuery("");
+    updateFilter({ cat: null, favs: null, q: null, view: null, mode: null });
   };
 
   const handleSort = (field: SortField) => {
@@ -262,7 +276,7 @@ const DesignerStudioWorkspace = () => {
 
   // Library handlers — single detail surface (P13 W13)
   const handleQuickView = (item: UserLibraryItem) => {
-    setQuickViewItem(toLegacyItem(item));
+    setQuickViewItem(item);
     setIsQuickViewOpen(true);
   };
 
@@ -315,7 +329,7 @@ const DesignerStudioWorkspace = () => {
           {/* Page title + primary CTA */}
           <div className="py-6 pb-2 flex items-end justify-between">
             <div>
-              <h1 className="text-2xl font-semibold text-foreground tracking-tight">
+              <h1 className="text-3xl lg:text-4xl font-light tracking-tight text-foreground">
                 {t("workspace.title")}
               </h1>
               <p className="text-sm text-muted-foreground mt-1">
@@ -364,9 +378,9 @@ const DesignerStudioWorkspace = () => {
                   <BookOpen className="w-4 h-4" strokeWidth={1.5} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground">E-Catalogue & Content</p>
+                  <p className="text-sm font-medium text-foreground">{t("workspace.cards.catalogueContent.title")}</p>
                   <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground truncate">
-                    Manage catalogues & product data
+                    {t("workspace.cards.catalogueContent.body")}
                   </p>
                 </div>
                 <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" strokeWidth={1.5} />
@@ -383,7 +397,7 @@ const DesignerStudioWorkspace = () => {
                     onClick={() => setActiveMainTab('composer')}
                     className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    ← All Compositions
+                    {t("workspace.allCompositions")}
                   </button>
                   <div>
                     <h2 className="text-lg font-semibold text-foreground">{t("workspace.library.title")}</h2>
@@ -526,6 +540,7 @@ const DesignerStudioWorkspace = () => {
                         key={item.id}
                         item={item}
                         onView={handleQuickView}
+                        onOpenInComposer={handleOpenInComposer}
                       />
                     ))}
                   </div>
@@ -567,7 +582,7 @@ const DesignerStudioWorkspace = () => {
                   onClick={() => setActiveMainTab('composer')}
                   className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  ← All Compositions
+                  {t("workspace.allCompositions")}
                 </button>
               </div>
 
@@ -626,6 +641,16 @@ const DesignerStudioWorkspace = () => {
           setTimeout(() => setIsSearchDialogOpen(true), 100);
         }}
       />
+
+      {composerTarget?.product?.id && (
+        <CompositionPickerDialog
+          open={!!composerTarget}
+          onOpenChange={(open) => !open && setComposerTarget(null)}
+          productId={composerTarget.product.id}
+          productName={composerTarget.custom_name || composerTarget.product.name || 'Item'}
+          productImageUrl={composerTarget.product.thumbnail_url}
+        />
+      )}
     </div>
   );
 };
