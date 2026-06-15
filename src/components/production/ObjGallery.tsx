@@ -548,41 +548,42 @@ export default function ObjGallery({ open, onClose, initialIndex = 0 }: ObjGalle
           </div>
         </div>
 
-        {/* Thumbnail strip */}
-        <div className="flex-shrink-0 flex items-center gap-3 px-5 py-3 border-t border-border bg-secondary overflow-x-auto">
-          {MODELS.map((m, idx) => (
-            <button
-              key={m.id}
-              onClick={() => {
-                setActiveIndex(idx);
-                setAutoRotate(true);
-                resetMaterial();
-              }}
-              className={`relative flex-shrink-0 w-[88px] h-[66px] overflow-hidden border-2 transition-all duration-200 ${
-                idx === activeIndex
-                  ? "border-foreground scale-105"
-                  : "border-border hover:border-foreground/40 opacity-60 hover:opacity-90"
-              }`}
-            >
-              <img
-                src={`/models/thumbs/${m.id}.jpg`}
-                alt={m.title}
-                className="w-full h-full object-cover"
-                loading="lazy"
-                decoding="async"
-              />
-              <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-background/80 to-transparent px-1 py-0.5">
-                <span className="text-[9px] text-foreground/70 leading-none truncate block">
-                  {m.title}
-                </span>
-              </div>
-            </button>
-          ))}
-          <div className="flex flex-col gap-0.5 ml-auto flex-shrink-0 pl-4">
-            <span className="text-[10px] text-muted-foreground/50">← → to navigate</span>
-            <span className="text-[10px] text-muted-foreground/50">Esc to close</span>
+        {MODELS.length > 1 && (
+          <div className="flex-shrink-0 flex items-center gap-3 px-5 py-3 border-t border-border bg-secondary overflow-x-auto">
+            {MODELS.map((m, idx) => (
+              <button
+                key={m.id}
+                onClick={() => {
+                  setActiveIndex(idx);
+                  setAutoRotate(true);
+                  resetMaterial();
+                }}
+                className={`relative flex-shrink-0 w-[88px] h-[66px] overflow-hidden border-2 transition-all duration-200 ${
+                  idx === activeIndex
+                    ? "border-foreground scale-105"
+                    : "border-border hover:border-foreground/40 opacity-60 hover:opacity-90"
+                }`}
+              >
+                <img
+                  src={`/models/thumbs/${m.id}.jpg`}
+                  alt={m.title}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-background/80 to-transparent px-1 py-0.5">
+                  <span className="text-[9px] text-foreground/70 leading-none truncate block">
+                    {m.title}
+                  </span>
+                </div>
+              </button>
+            ))}
+            <div className="flex flex-col gap-0.5 ml-auto flex-shrink-0 pl-4">
+              <span className="text-[10px] text-muted-foreground/50">← → to navigate</span>
+              <span className="text-[10px] text-muted-foreground/50">Esc to close</span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   , document.body);
