@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import type { Product } from '@/features/products/types';
 import { getProductImageUrl } from '@/lib/productImage';
 import { resolveProductImage } from '@/features/products/utils/resolveProductImage';
+import { getPdpSeedImages } from '@/features/products/pdpSeedImages';
+import { getProductPlaceholderUrl } from '@/features/products/utils/productImagePlaceholder';
 
 type ViewMode = 'grid' | 'list';
 
