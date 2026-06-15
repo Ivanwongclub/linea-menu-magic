@@ -390,19 +390,23 @@ export default function ObjGallery({ open, onClose, initialIndex = 0 }: ObjGalle
             </Suspense>
           </Canvas>
 
-          {/* Navigation arrows */}
-          <button
-            onClick={prev}
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-background border border-border text-foreground/60 hover:bg-foreground hover:text-background transition-colors"
-          >
-            <ChevronLeft size={20} />
-          </button>
-          <button
-            onClick={next}
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-background border border-border text-foreground/60 hover:bg-foreground hover:text-background transition-colors"
-          >
-            <ChevronRight size={20} />
-          </button>
+          {MODELS.length > 1 && (
+            <>
+              {/* Navigation arrows */}
+              <button
+                onClick={prev}
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-background border border-border text-foreground/60 hover:bg-foreground hover:text-background transition-colors"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <button
+                onClick={next}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-background border border-border text-foreground/60 hover:bg-foreground hover:text-background transition-colors"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </>
+          )}
 
           {/* Interaction hint */}
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-[11px] text-muted-foreground pointer-events-none select-none">
