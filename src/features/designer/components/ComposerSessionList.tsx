@@ -108,7 +108,7 @@ export default function ComposerSessionList({ teamId }: ComposerSessionListProps
     <div className="space-y-4">
       {/* Header — the "+ New Composition" CTA lives on the page header (P13 W11) */}
       <div>
-        <h2 className="text-lg font-semibold text-foreground">Visual Composer</h2>
+        <h2 className="text-lg font-semibold text-foreground">Composer</h2>
         <p className="text-sm text-muted-foreground mt-1">
           Place and visualise trim products on your garment designs
         </p>

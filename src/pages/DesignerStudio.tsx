@@ -45,7 +45,7 @@ const DesignerStudio = () => {
   const featuredProducts = pickFamilyFeatured(products);
 
   const workspaceHref = session
-    ? "/designer-studio/dashboard?tab=library"
+    ? "/designer-studio/workspace?tab=library"
     : "/designer-studio/login";
 
   const trust = useScrollAnimation();

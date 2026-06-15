@@ -98,7 +98,7 @@ type SortOrder = "asc" | "desc";
 const validTabs = ['library', 'brochures', 'products', 'composer'] as const;
 type TabId = typeof validTabs[number];
 
-const DesignerStudioDashboard = () => {
+const DesignerStudioWorkspace = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { t } = useI18n();
@@ -106,7 +106,7 @@ const DesignerStudioDashboard = () => {
   // Brand-scoped team ID from auth context (RequireBrandAuth guarantees primaryBrand exists)
   const { primaryBrand } = useAuth();
   const teamId = primaryBrand?.id ?? '';
-  const brandCatalogueName = primaryBrand?.name ?? t("dashboard.library.brandCatalogue");
+  const brandCatalogueName = primaryBrand?.name ?? t("workspace.library.brandCatalogue");
 
   // Main tab state — read from URL ?tab= param
   const tabFromUrl = searchParams.get('tab');
@@ -126,7 +126,7 @@ const DesignerStudioDashboard = () => {
     if (tabFromUrl === activeMainTab) return;
     const params = new URLSearchParams(searchParams);
     params.set('tab', activeMainTab);
-    navigate(`/designer-studio/dashboard?${params.toString()}`, { replace: true });
+    navigate(`/designer-studio/workspace?${params.toString()}`, { replace: true });
   }, [activeMainTab, tabFromUrl, searchParams, navigate]);
 
   // Product editor state
@@ -316,15 +316,15 @@ const DesignerStudioDashboard = () => {
           <div className="py-6 pb-2 flex items-end justify-between">
             <div>
               <h1 className="text-2xl font-semibold text-foreground tracking-tight">
-                {t("studio.title")}
+                {t("workspace.title")}
               </h1>
               <p className="text-sm text-muted-foreground mt-1">
-                {t("dashboard.title.subtitle")}
+                {t("workspace.title.subtitle")}
               </p>
             </div>
             <Button size="sm" className="gap-2" onClick={() => setTemplatePickerOpen(true)}>
               <Plus className="w-4 h-4" />
-              {t("dashboard.title.newComposition")}
+              {t("workspace.title.newComposition")}
             </Button>
           </div>
 
@@ -347,9 +347,9 @@ const DesignerStudioDashboard = () => {
                   <Library className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground">{t("dashboard.library.title")}</p>
+                  <p className="text-sm font-medium text-foreground">{t("workspace.library.title")}</p>
                   <p className="text-[11px] text-muted-foreground truncate">
-                    {t("dashboard.library.cardSummary", { count: libraryItems.length })}
+                    {t("workspace.library.cardSummary", { count: libraryItems.length })}
                   </p>
                 </div>
                 <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />
@@ -386,16 +386,16 @@ const DesignerStudioDashboard = () => {
                     ← All Compositions
                   </button>
                   <div>
-                    <h2 className="text-lg font-semibold text-foreground">{t("dashboard.library.title")}</h2>
+                    <h2 className="text-lg font-semibold text-foreground">{t("workspace.library.title")}</h2>
                     <p className="text-xs text-muted-foreground">
-                      {t("dashboard.library.summary", { count: filteredLibraryItems.length, brand: brandCatalogueName })}
+                      {t("workspace.library.summary", { count: filteredLibraryItems.length, brand: brandCatalogueName })}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button size="sm" className="gap-1.5 h-8" onClick={() => setIsSearchDialogOpen(true)}>
                     <Plus className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">{t("dashboard.library.addComponent")}</span>
+                    <span className="hidden sm:inline">{t("workspace.library.addComponent")}</span>
                   </Button>
                 </div>
               </div>
@@ -410,7 +410,7 @@ const DesignerStudioDashboard = () => {
                       : 'text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]'
                   }`}
                 >
-                  {t("dashboard.library.brandCatalogue")} ({catalogProducts.length})
+                  {t("workspace.library.brandCatalogue")} ({catalogProducts.length})
                 </button>
                 <button
                   onClick={() => setLibrarySource('my')}
@@ -420,7 +420,7 @@ const DesignerStudioDashboard = () => {
                       : 'text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]'
                   }`}
                 >
-                  {t("dashboard.library.savedLibrary")} ({libraryItems.length})
+                  {t("workspace.library.savedLibrary")} ({libraryItems.length})
                 </button>
               </div>
 
@@ -429,7 +429,7 @@ const DesignerStudioDashboard = () => {
                 <div className="relative flex-shrink-0 w-48 lg:w-64">
                   <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                   <Input
-                    placeholder={t("dashboard.library.search")}
+                    placeholder={t("workspace.library.search")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-8 h-8 text-sm"
@@ -445,16 +445,16 @@ const DesignerStudioDashboard = () => {
                   onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
                 >
                   <Heart className={`w-3.5 h-3.5 ${showFavoritesOnly ? 'fill-current' : ''}`} />
-                  <span className="hidden lg:inline">{t("dashboard.library.favourites")}</span>
+                  <span className="hidden lg:inline">{t("workspace.library.favourites")}</span>
                   ({favouriteCount})
                 </Button>
 
                 <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                   <SelectTrigger className="w-[140px] h-8 text-sm flex-shrink-0">
-                    <SelectValue placeholder={t("dashboard.library.category")} />
+                    <SelectValue placeholder={t("workspace.library.category")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">{t("dashboard.library.allCategories")}</SelectItem>
+                    <SelectItem value="all">{t("workspace.library.allCategories")}</SelectItem>
                     {taxonomy.categories.map(c => (
                       <SelectItem key={c.id} value={c.slug}>{c.name}</SelectItem>
                     ))}
@@ -480,18 +480,18 @@ const DesignerStudioDashboard = () => {
                 {activeFilterCount > 0 && (
                   <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-xs h-7 px-2 flex-shrink-0 text-muted-foreground hover:text-foreground">
                     <X className="w-3 h-3 mr-1" />
-                    {t("dashboard.library.clear")} ({activeFilterCount})
+                    {t("workspace.library.clear")} ({activeFilterCount})
                   </Button>
                 )}
               </div>
 
               {activeFilterCount > 0 && (
                 <div className="flex items-center gap-2 flex-wrap mb-4">
-                  <span className="text-xs text-muted-foreground">{t("dashboard.library.filters")}:</span>
+                  <span className="text-xs text-muted-foreground">{t("workspace.library.filters")}:</span>
                   {showFavoritesOnly && (
                     <Badge variant="secondary" className="gap-1 text-xs py-0.5">
                       <Heart className="w-3 h-3 fill-current" />
-                      {t("dashboard.library.favourites")}
+                      {t("workspace.library.favourites")}
                       <button onClick={() => setShowFavoritesOnly(false)} className="ml-1 hover:text-destructive">
                         <X className="w-3 h-3" />
                       </button>
@@ -510,13 +510,13 @@ const DesignerStudioDashboard = () => {
 
               <div className="flex items-center justify-between mb-4">
                 <p className="text-xs text-muted-foreground">
-                  {t("dashboard.library.items", { count: filteredLibraryItems.length })}
+                  {t("workspace.library.items", { count: filteredLibraryItems.length })}
                 </p>
               </div>
 
               {(libraryLoading || catalogLoading) ? (
                 <div className="text-center py-16">
-                  <p className="text-sm text-muted-foreground">{t("dashboard.library.loading")}</p>
+                  <p className="text-sm text-muted-foreground">{t("workspace.library.loading")}</p>
                 </div>
               ) : filteredLibraryItems.length > 0 ? (
                 libraryViewMode === "grid" ? (
@@ -542,17 +542,17 @@ const DesignerStudioDashboard = () => {
                 <div className="text-center py-16">
                   <Library className="w-12 h-12 text-muted-foreground mx-auto mb-4" strokeWidth={1} />
                   <p className="text-muted-foreground mb-2">
-                    {libraryItems.length === 0 ? t("dashboard.library.empty") : t("dashboard.library.noMatch")}
+                    {libraryItems.length === 0 ? t("workspace.library.empty") : t("workspace.library.noMatch")}
                   </p>
                   {libraryItems.length === 0 ? (
                     <div className="flex gap-2 justify-center">
                       <Button size="sm" onClick={() => setIsSearchDialogOpen(true)}>
                         <Plus className="w-3.5 h-3.5 mr-1" />
-                        {t("dashboard.library.addComponents")}
+                        {t("workspace.library.addComponents")}
                       </Button>
                     </div>
                   ) : (
-                    <Button variant="ghost" size="sm" onClick={clearAllFilters}>{t("dashboard.library.clearFilters")}</Button>
+                    <Button variant="ghost" size="sm" onClick={clearAllFilters}>{t("workspace.library.clearFilters")}</Button>
                   )}
                 </div>
               )}
@@ -631,4 +631,4 @@ const DesignerStudioDashboard = () => {
 };
 
 
-export default DesignerStudioDashboard;
+export default DesignerStudioWorkspace;

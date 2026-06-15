@@ -318,7 +318,7 @@ export default function TemplatePickerDialog({ open, onClose, onSelect }: Templa
         <DialogHeader>
           <DialogTitle className="text-base">New Composition</DialogTitle>
           <DialogDescription className="text-xs text-[hsl(var(--muted-foreground))]">
-            Choose a starting structure for your concept board
+            Choose a starting structure for your composition
           </DialogDescription>
         </DialogHeader>
 

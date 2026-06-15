@@ -316,7 +316,7 @@ export default function ComposerPage() {
         session={session}
         zoom={zoom}
         saveStatus={saveStatus}
-        onBack={() => navigate('/designer-studio/dashboard')}
+        onBack={() => navigate('/designer-studio/workspace')}
         onRenameSession={handleRename}
         onUploadBackground={handleUploadBackground}
         onOpenProductPicker={() => setPickerOpen(true)}
@@ -391,7 +391,7 @@ export default function ComposerPage() {
           } : null,
         }))}
         onAddLayer={handleAddLayer}
-        onGoToLibrary={() => navigate('/designer-studio/dashboard?tab=library')}
+        onGoToLibrary={() => navigate('/designer-studio/workspace?tab=library')}
       />
     </div>
   )

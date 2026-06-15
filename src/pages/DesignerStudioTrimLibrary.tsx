@@ -67,7 +67,7 @@ const DesignerStudioTrimLibrary = () => {
           </div>
           <div className="flex gap-3 shrink-0">
             {session ? (
-              <Link to="/designer-studio/dashboard?tab=library">
+              <Link to="/designer-studio/workspace?tab=library">
                 <Button size="sm" className="tracking-[0.05em] text-xs px-6 capitalize">
                   {t("studio.myWorkspace")}
                 </Button>
@@ -140,7 +140,7 @@ const DesignerStudioTrimLibrary = () => {
                       : "bg-transparent text-muted-foreground border-border hover:border-foreground/40"
                   }`}
                 >
-                  {primaryBrand?.name ?? t("dashboard.library.brandCatalogue")}
+                  {primaryBrand?.name ?? t("workspace.library.brandCatalogue")}
                 </button>
               )}
             </div>

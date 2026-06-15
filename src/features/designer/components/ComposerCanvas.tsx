@@ -474,7 +474,7 @@ function EmptyCanvasPlaceholder() {
         </div>
         <div>
           <p className="text-sm font-medium text-foreground">
-            Start your concept board
+            Start your composition
           </p>
           <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
             Upload a garment or flat-lay image as your background, then add components from the Studio library.

@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CookieProvider } from "@/features/cookies/CookieProvider";
 import CookieBanner from "@/features/cookies/CookieBanner";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/features/auth/AuthProvider";
 import RequireBrandAuth from "@/features/auth/RequireBrandAuth";
 import { I18nProvider } from "@/features/i18n/I18nProvider";
@@ -28,7 +28,7 @@ const loadNewsDetail = () => import("./pages/NewsDetail");
 const loadDesignerStudio = () => import("./pages/DesignerStudio");
 const loadDesignerStudioTrimLibrary = () => import("./pages/DesignerStudioTrimLibrary");
 const loadDesignerStudioEditor = () => import("./pages/DesignerStudioEditor");
-const loadDesignerStudioDashboard = () => import("./pages/DesignerStudioDashboard");
+const loadDesignerStudioWorkspace = () => import("./pages/DesignerStudioWorkspace");
 const loadComposerPage = () => import("./features/designer/pages/ComposerPage");
 const loadPresentationPage = () => import("./features/designer/pages/PresentationPage");
 const loadBrochures = () => import("./pages/Brochures");
@@ -52,7 +52,7 @@ const NewsDetail = lazy(loadNewsDetail);
 const DesignerStudio = lazy(loadDesignerStudio);
 const DesignerStudioTrimLibrary = lazy(loadDesignerStudioTrimLibrary);
 const DesignerStudioEditor = lazy(loadDesignerStudioEditor);
-const DesignerStudioDashboard = lazy(loadDesignerStudioDashboard);
+const DesignerStudioWorkspace = lazy(loadDesignerStudioWorkspace);
 const ComposerPage = lazy(loadComposerPage);
 const PresentationPage = lazy(loadPresentationPage);
 const Brochures = lazy(loadBrochures);
@@ -143,6 +143,13 @@ function withRouteSuspense(element: React.ReactElement) {
   return <Suspense fallback={<RouteTransitionFallback />}>{element}</Suspense>;
 }
 
+/** P15 D1: preserve `?tab=…` (and any other search params) when redirecting
+ *  the legacy /designer-studio/dashboard path to /designer-studio/workspace. */
+function WorkspaceRedirect() {
+  const { search, hash } = useLocation();
+  return <Navigate to={`/designer-studio/workspace${search}${hash}`} replace />;
+}
+
 function RouteAndNetworkWarmup() {
   useEffect(() => {
     const href = new URL(ENV.SUPABASE_URL).origin;
@@ -210,8 +217,14 @@ const App = () => (
                     <Route path="/designer-studio/editor" element={withRouteSuspense(<DesignerStudioEditor />)} />
                     <Route path="/designer-studio/products/:slug" element={withRouteSuspense(<ProductDetail />)} />
                     <Route
+                      path="/designer-studio/workspace"
+                      element={<RequireBrandAuth>{withRouteSuspense(<DesignerStudioWorkspace />)}</RequireBrandAuth>}
+                    />
+                    {/* Backward-compat: external bookmarks to the old /dashboard path
+                        survive transparently, preserving any ?tab=… params (P15 D1). */}
+                    <Route
                       path="/designer-studio/dashboard"
-                      element={<RequireBrandAuth>{withRouteSuspense(<DesignerStudioDashboard />)}</RequireBrandAuth>}
+                      element={<WorkspaceRedirect />}
                     />
                     <Route
                       path="/designer-studio/compose/:sessionId"

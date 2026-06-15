@@ -163,7 +163,7 @@ const routeLoaders: Record<string, () => Promise<unknown>> = {
   "/ecollections": () => import("@/pages/Brochures"),
   "/designer-studio": () => import("@/pages/DesignerStudio"),
   "/designer-studio/trim-library": () => import("@/pages/DesignerStudioTrimLibrary"),
-  "/designer-studio/dashboard": () => import("@/pages/DesignerStudioDashboard"),
+  "/designer-studio/workspace": () => import("@/pages/DesignerStudioWorkspace"),
   "/news": () => import("@/pages/News"),
   "/contact": () => import("@/pages/Contact"),
 };
@@ -224,7 +224,7 @@ const Header = () => {
 
   const isHeroPage    = pathname === "/";
   const isTransparent = isHeroPage && !scrolled && !isProductsOpen && !isAboutOpen;
-  const studioCtaHref = session ? "/designer-studio/dashboard?tab=library" : "/designer-studio/login";
+  const studioCtaHref = session ? "/designer-studio/workspace?tab=library" : "/designer-studio/login";
   const studioCtaLabel = primaryBrand?.name ?? t("header.cta.b2bLogin");
 
   useEffect(() => {
@@ -446,7 +446,7 @@ const Header = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem onClick={() => navigate("/designer-studio/dashboard?tab=library")}>
+                    <DropdownMenuItem onClick={() => navigate("/designer-studio/workspace?tab=library")}>
                       {t("header.cta.myWorkspace")}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />

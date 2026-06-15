@@ -42,7 +42,7 @@ export default function PresentationPage() {
           <div className="w-48 h-0.5 rounded-full bg-border overflow-hidden">
             <div className="h-full w-1/3 bg-foreground/20 rounded-full animate-pulse" />
           </div>
-          <p className="text-xs text-muted-foreground tracking-wide">Preparing your concept board…</p>
+          <p className="text-xs text-muted-foreground tracking-wide">Preparing your composition…</p>
         </div>
       </div>
     )
@@ -53,8 +53,8 @@ export default function PresentationPage() {
     return (
       <GatedScreen
         icon={<AlertCircle size={24} className="text-muted-foreground/40" />}
-        heading="This concept board is unavailable"
-        message="The link may have expired, or the board may no longer exist. Please contact your designer for an updated link."
+        heading="This composition is unavailable"
+        message="The link may have expired, or the composition may no longer exist. Please contact your designer for an updated link."
       />
     )
   }
@@ -64,8 +64,8 @@ export default function PresentationPage() {
     return (
       <GatedScreen
         icon={<EyeOff size={24} className="text-muted-foreground/40" />}
-        heading="This concept board is private"
-        message="Your designer hasn't shared this board for viewing yet. Please check back later or reach out to them directly."
+        heading="This composition is private"
+        message="Your designer hasn't shared this composition for viewing yet. Please check back later or reach out to them directly."
       />
     )
   }
