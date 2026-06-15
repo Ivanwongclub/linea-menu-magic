@@ -1,11 +1,24 @@
 import { useState, useEffect } from 'react';
-import { Sparkles, Heart, Eye, Leaf, Box } from 'lucide-react';
+import { Sparkles, Heart, Eye, Leaf, Box, ImageOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { Product } from '@/features/products/types';
 import { getProductImageUrl } from '@/lib/productImage';
 import { resolveProductImage } from '@/features/products/utils/resolveProductImage';
-import { getPdpSeedImages } from '@/features/products/pdpSeedImages';
-import { getProductPlaceholderUrl } from '@/features/products/utils/productImagePlaceholder';
+
+/** Neutral placeholder block — sharp corners, light gray, lucide ImageOff icon.
+ *  Used whenever the resolver returns null (no real product photo available).
+ *  Deliberately NOT a representative photo from another product. */
+function ImagePlaceholder({ label }: { label?: string }) {
+  return (
+    <div
+      role="img"
+      aria-label={label ? `${label} — no image available` : 'No image available'}
+      className="absolute inset-0 flex items-center justify-center bg-muted text-muted-foreground"
+    >
+      <ImageOff className="h-8 w-8" strokeWidth={1.25} aria-hidden="true" />
+    </div>
+  );
+}
 
 type ViewMode = 'grid' | 'list';
 
@@ -32,7 +45,7 @@ export default function ProductCard({
   isInLibrary,
 }: ProductCardProps) {
   const rawUrl = resolveProductImage(product, isHeroLayout ? 'full' : 'thumb');
-  const imageUrl = getProductImageUrl(rawUrl, isHeroLayout ? 'pdp' : 'card');
+  const imageUrl = rawUrl ? getProductImageUrl(rawUrl, isHeroLayout ? 'pdp' : 'card') : null;
   const isAboveFold = index < 2;
 
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -58,35 +71,33 @@ export default function ProductCard({
   const certs = product.certifications ?? [];
 
   const altText = `${product.name_en ?? product.name}${product.primary_category ? ` — ${product.primary_category.name}` : ''}`;
+  const showPlaceholder = !imageUrl || imageError;
 
   return (
     <div className="group bg-card border border-border rounded-[var(--radius)] overflow-hidden cursor-pointer hover-card transition-[border-color] duration-200 hover:border-foreground">
       {/* Image area */}
       <div className="aspect-square relative overflow-hidden bg-secondary hover-img-zoom">
-        {!imageLoaded && !imageError && (
+        {!imageLoaded && !showPlaceholder && (
           <div aria-hidden="true" className="absolute inset-0 bg-secondary animate-pulse" />
         )}
 
-        {imageError && (
+        {showPlaceholder && <ImagePlaceholder label={altText} />}
+
+        {imageUrl && !imageError && (
           <img
-            src={(getPdpSeedImages(product.slug, product.primary_category?.slug) ?? [])[0] ?? getProductPlaceholderUrl(product.name_en ?? product.name, product.item_code, product.primary_category?.slug, product.primary_category?.name, 400)}
+            src={imageUrl}
             alt={altText}
-            className="absolute inset-0 w-full h-full object-contain p-3"
+            width={400}
+            height={400}
+            loading={isAboveFold ? 'eager' : 'lazy'}
+            fetchPriority={isAboveFold ? 'high' : undefined}
+            decoding="async"
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageError(true)}
+            className={`absolute inset-0 w-full h-full object-contain p-3 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
           />
         )}
 
-        <img
-          src={imageUrl}
-          alt={altText}
-          width={400}
-          height={400}
-          loading={isAboveFold ? 'eager' : 'lazy'}
-          fetchPriority={isAboveFold ? 'high' : undefined}
-          decoding="async"
-          onLoad={() => setImageLoaded(true)}
-          onError={() => setImageError(true)}
-          className={`absolute inset-0 w-full h-full object-contain p-3 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-        />
 
         {/* Tag badges (top-left) */}
         {visibleTags.length > 0 && (
