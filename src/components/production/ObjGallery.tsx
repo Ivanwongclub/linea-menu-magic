@@ -112,12 +112,7 @@ interface ObjModel {
 }
 
 const MODELS: ObjModel[] = [
-  { id: "button",  title: "4-Hole Metal Button", subtitle: "Brass alloy · Die-cast · Custom engraving available",   file: "/models/button-4hole.obj",    material: { color: "#C8A84B", metalness: 0.85, roughness: 0.18 }, camera: [0, 2, 3.5] },
-  { id: "snap",    title: "Snap Button",         subtitle: "Zinc alloy · Polished finish · 15–25mm diameter range", file: "/models/snap-button.obj",     material: { color: "#B0B0B0", metalness: 0.9,  roughness: 0.12 }, camera: [0, 1.5, 3.5] },
-  // P19: this card was mislabeled "Button" in P5a — the OBJ at /models/d-ring-buckle.obj
-  // is genuinely a D-ring buckle, not a button. Restored honest labeling.
-  { id: "buckle",  title: "D-Ring Buckle",        subtitle: "Cast zinc · Polished nickel or antique brass finish",    file: "/models/d-ring-buckle.obj",   material: { color: "#A08030", metalness: 0.8,  roughness: 0.25 }, camera: [0, 1.8, 4] },
-  { id: "eyelet",  title: "Eyelet / Grommet",     subtitle: "Brass or steel · Various diameters · Setter-ready",     file: "/models/eyelet-grommet.obj",  material: { color: "#D4AF70", metalness: 0.88, roughness: 0.15 }, camera: [0, 2.5, 4] },
+  { id: "metal-buttons", title: "Metal Buttons", subtitle: "Brass alloy · Die-cast · Custom engraving available", file: "/models/Polo_Button_10.8.obj", material: { color: "#C8A84B", metalness: 0.85, roughness: 0.18 }, camera: [0, 2, 3.5] },
 ];
 
 // ── Main OBJ mesh (MeshPhysicalMaterial) ─────────────────────────────────────
@@ -340,7 +335,7 @@ export default function ObjGallery({ open, onClose, initialIndex = 0 }: ObjGalle
         <div className="flex items-start justify-between px-5 py-4 border-b border-border">
           <div className="min-w-0">
             <span className="text-[11px] text-muted-foreground tracking-widest uppercase">
-              3D Prototype · {activeIndex + 1} / {MODELS.length}
+              3D Model
             </span>
             <h3 className="text-[17px] font-semibold text-foreground mt-0.5 truncate">
               {model.title}
@@ -395,19 +390,23 @@ export default function ObjGallery({ open, onClose, initialIndex = 0 }: ObjGalle
             </Suspense>
           </Canvas>
 
-          {/* Navigation arrows */}
-          <button
-            onClick={prev}
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-background border border-border text-foreground/60 hover:bg-foreground hover:text-background transition-colors"
-          >
-            <ChevronLeft size={20} />
-          </button>
-          <button
-            onClick={next}
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-background border border-border text-foreground/60 hover:bg-foreground hover:text-background transition-colors"
-          >
-            <ChevronRight size={20} />
-          </button>
+          {MODELS.length > 1 && (
+            <>
+              {/* Navigation arrows */}
+              <button
+                onClick={prev}
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-background border border-border text-foreground/60 hover:bg-foreground hover:text-background transition-colors"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <button
+                onClick={next}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-background border border-border text-foreground/60 hover:bg-foreground hover:text-background transition-colors"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </>
+          )}
 
           {/* Interaction hint */}
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-[11px] text-muted-foreground pointer-events-none select-none">
@@ -549,41 +548,42 @@ export default function ObjGallery({ open, onClose, initialIndex = 0 }: ObjGalle
           </div>
         </div>
 
-        {/* Thumbnail strip */}
-        <div className="flex-shrink-0 flex items-center gap-3 px-5 py-3 border-t border-border bg-secondary overflow-x-auto">
-          {MODELS.map((m, idx) => (
-            <button
-              key={m.id}
-              onClick={() => {
-                setActiveIndex(idx);
-                setAutoRotate(true);
-                resetMaterial();
-              }}
-              className={`relative flex-shrink-0 w-[88px] h-[66px] overflow-hidden border-2 transition-all duration-200 ${
-                idx === activeIndex
-                  ? "border-foreground scale-105"
-                  : "border-border hover:border-foreground/40 opacity-60 hover:opacity-90"
-              }`}
-            >
-              <img
-                src={`/models/thumbs/${m.id}.jpg`}
-                alt={m.title}
-                className="w-full h-full object-cover"
-                loading="lazy"
-                decoding="async"
-              />
-              <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-background/80 to-transparent px-1 py-0.5">
-                <span className="text-[9px] text-foreground/70 leading-none truncate block">
-                  {m.title}
-                </span>
-              </div>
-            </button>
-          ))}
-          <div className="flex flex-col gap-0.5 ml-auto flex-shrink-0 pl-4">
-            <span className="text-[10px] text-muted-foreground/50">← → to navigate</span>
-            <span className="text-[10px] text-muted-foreground/50">Esc to close</span>
+        {MODELS.length > 1 && (
+          <div className="flex-shrink-0 flex items-center gap-3 px-5 py-3 border-t border-border bg-secondary overflow-x-auto">
+            {MODELS.map((m, idx) => (
+              <button
+                key={m.id}
+                onClick={() => {
+                  setActiveIndex(idx);
+                  setAutoRotate(true);
+                  resetMaterial();
+                }}
+                className={`relative flex-shrink-0 w-[88px] h-[66px] overflow-hidden border-2 transition-all duration-200 ${
+                  idx === activeIndex
+                    ? "border-foreground scale-105"
+                    : "border-border hover:border-foreground/40 opacity-60 hover:opacity-90"
+                }`}
+              >
+                <img
+                  src={`/models/thumbs/${m.id}.jpg`}
+                  alt={m.title}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-background/80 to-transparent px-1 py-0.5">
+                  <span className="text-[9px] text-foreground/70 leading-none truncate block">
+                    {m.title}
+                  </span>
+                </div>
+              </button>
+            ))}
+            <div className="flex flex-col gap-0.5 ml-auto flex-shrink-0 pl-4">
+              <span className="text-[10px] text-muted-foreground/50">← → to navigate</span>
+              <span className="text-[10px] text-muted-foreground/50">Esc to close</span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   , document.body);
