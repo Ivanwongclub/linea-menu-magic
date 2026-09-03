@@ -157,7 +157,7 @@ export default function DesignerStudioLogin() {
             <p className="text-xs uppercase tracking-wider text-muted-foreground">{t("login.demoAccount")}</p>
             <div className="text-xs text-foreground/80 space-y-1 font-mono">
               <div>Email: demo.polo@wincyc.com</div>
-              <div>Password: PoloDemo2026!</div>
+              <div>Password: $Support1</div>
             </div>
             <p className="text-xs text-muted-foreground pt-1">
               {t("login.demoNote")}
