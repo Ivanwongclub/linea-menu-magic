@@ -8,6 +8,12 @@ const FIELDS: FlatCrudField[] = [
 
 export default function ComplianceStandardsPanel() {
   return (
-    <FlatCrudTable table="compliance_standards" itemLabel="compliance standard" fields={FIELDS} hasSortOrder />
+    <FlatCrudTable
+      table="compliance_standards"
+      itemLabel="compliance standard"
+      itemLabelPlural="compliance standards"
+      fields={FIELDS}
+      hasSortOrder
+    />
   );
 }

@@ -28,5 +28,13 @@ const FIELDS: FlatCrudField[] = [
 ];
 
 export default function FamiliesPanel() {
-  return <FlatCrudTable table="product_families" itemLabel="family" fields={FIELDS} hasSortOrder />;
+  return (
+    <FlatCrudTable
+      table="product_families"
+      itemLabel="family"
+      itemLabelPlural="families"
+      fields={FIELDS}
+      hasSortOrder
+    />
+  );
 }

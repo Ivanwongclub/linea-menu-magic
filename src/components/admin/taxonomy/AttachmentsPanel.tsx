@@ -7,5 +7,13 @@ const FIELDS: FlatCrudField[] = [
 ];
 
 export default function AttachmentsPanel() {
-  return <FlatCrudTable table="product_attachments" itemLabel="attachment" fields={FIELDS} hasSortOrder />;
+  return (
+    <FlatCrudTable
+      table="product_attachments"
+      itemLabel="attachment"
+      itemLabelPlural="attachments"
+      fields={FIELDS}
+      hasSortOrder
+    />
+  );
 }

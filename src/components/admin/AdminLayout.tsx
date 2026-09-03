@@ -6,7 +6,10 @@ import { cn } from "@/lib/utils";
 
 // Nav links are added as their routes land phase by phase, rather than
 // linking ahead to routes that don't exist yet.
-const NAV_ITEMS = [{ to: "/admin/taxonomy", label: "Taxonomy" }];
+const NAV_ITEMS = [
+  { to: "/admin/products", label: "Products" },
+  { to: "/admin/taxonomy", label: "Taxonomy" },
+];
 
 /**
  * Deliberately does not render the customer-facing Header/Footer (Layout.tsx)

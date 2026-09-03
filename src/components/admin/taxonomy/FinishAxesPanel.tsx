@@ -13,19 +13,21 @@ const FIELDS: FlatCrudField[] = [
 interface AxisConfig {
   table: TaxonomyTableName;
   label: string;
+  singular: string;
+  plural: string;
   /** The FK column on `finishes` this axis is referenced by. */
   fkColumn: string;
 }
 
 const AXES: AxisConfig[] = [
-  { table: "finish_processes", label: "Process", fkColumn: "process_id" },
-  { table: "finish_base_families", label: "Base Family", fkColumn: "base_family_id" },
-  { table: "finish_surfaces", label: "Surface", fkColumn: "surface_id" },
-  { table: "finish_tones", label: "Tone", fkColumn: "tone_id" },
-  { table: "finish_effects", label: "Effect", fkColumn: "effect_id" },
-  { table: "finish_tints", label: "Tint", fkColumn: "tint_id" },
-  { table: "finish_coatings", label: "Coating", fkColumn: "coating_id" },
-  { table: "finish_patterns", label: "Pattern", fkColumn: "pattern_id" },
+  { table: "finish_processes", label: "Process", singular: "process", plural: "processes", fkColumn: "process_id" },
+  { table: "finish_base_families", label: "Base Family", singular: "base family", plural: "base families", fkColumn: "base_family_id" },
+  { table: "finish_surfaces", label: "Surface", singular: "surface", plural: "surfaces", fkColumn: "surface_id" },
+  { table: "finish_tones", label: "Tone", singular: "tone", plural: "tones", fkColumn: "tone_id" },
+  { table: "finish_effects", label: "Effect", singular: "effect", plural: "effects", fkColumn: "effect_id" },
+  { table: "finish_tints", label: "Tint", singular: "tint", plural: "tints", fkColumn: "tint_id" },
+  { table: "finish_coatings", label: "Coating", singular: "coating", plural: "coatings", fkColumn: "coating_id" },
+  { table: "finish_patterns", label: "Pattern", singular: "pattern", plural: "patterns", fkColumn: "pattern_id" },
 ];
 
 /**
@@ -49,7 +51,8 @@ export default function FinishAxesPanel() {
         <TabsContent key={axis.table} value={axis.table} className="pt-4">
           <FlatCrudTable
             table={axis.table}
-            itemLabel={axis.label.toLowerCase()}
+            itemLabel={axis.singular}
+            itemLabelPlural={axis.plural}
             fields={FIELDS}
             hasSortOrder
             checkUsageBeforeDelete={async (id) => {

@@ -62,6 +62,8 @@ interface FlatCrudTableProps<T extends TaxonomyTableName> {
   table: T;
   /** Singular display name, e.g. "family", "material" — used in buttons and messages. */
   itemLabel: string;
+  /** Explicit plural — "families", not "familys". */
+  itemLabelPlural: string;
   fields: FlatCrudField[];
   hasSortOrder?: boolean;
   extraColumnLabel?: string;
@@ -123,6 +125,7 @@ function valuesFromRow<T extends TaxonomyTableName>(
 export function FlatCrudTable<T extends TaxonomyTableName>({
   table,
   itemLabel,
+  itemLabelPlural,
   fields,
   hasSortOrder = false,
   extraColumnLabel,
@@ -134,7 +137,12 @@ export function FlatCrudTable<T extends TaxonomyTableName>({
     orderBy: hasSortOrder ? "sort_order" : undefined,
   });
 
-  const rows = (query.data ?? []) as unknown as (TaxonomyRow<T> & RowWithLifecycle)[];
+  const allRows = (query.data ?? []) as unknown as (TaxonomyRow<T> & RowWithLifecycle)[];
+
+  // Archived rows are hidden by default — M2 deactivated the old categories
+  // rather than deleting them, so unfiltered lists are mostly dead weight.
+  const [activeOnly, setActiveOnly] = useState(true);
+  const rows = activeOnly ? allRows.filter((row) => row.is_active) : allRows;
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRow, setEditingRow] = useState<(TaxonomyRow<T> & RowWithLifecycle) | null>(null);
@@ -236,7 +244,21 @@ export function FlatCrudTable<T extends TaxonomyTableName>({
   };
 
   const handleReorder = (reordered: (TaxonomyRow<T> & RowWithLifecycle)[]) => {
-    reorder.mutate(reordered.map((row, index) => ({ id: row.id, sort_order: index })));
+    // The drag list may be the active-only subset. Re-number across the full
+    // table — reordered visible rows first, hidden (archived) rows after in
+    // their existing order — so sort_order stays unique and archived rows
+    // never interleave with the live ones. Only rows whose value actually
+    // changes are written.
+    const visibleIds = new Set(reordered.map((row) => row.id));
+    const hidden = allRows.filter((row) => !visibleIds.has(row.id));
+    const updates = [...reordered, ...hidden]
+      .map((row, index) => ({ id: row.id, sort_order: index, current: row.sort_order }))
+      .filter((u) => u.current !== u.sort_order)
+      .map(({ id, sort_order }) => ({ id, sort_order }));
+    if (updates.length === 0) return;
+    reorder.mutate(updates, {
+      onError: (error) => toast.error(describeSupabaseError(error as { message: string; code?: string })),
+    });
   };
 
   const handleDeleteClick = async (row: TaxonomyRow<T> & RowWithLifecycle) => {
@@ -349,10 +371,18 @@ export function FlatCrudTable<T extends TaxonomyTableName>({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          {rows.length} {rows.length === 1 ? itemLabel : `${itemLabel}s`}
-        </p>
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <p className="text-sm text-muted-foreground">
+            {activeOnly && allRows.length !== rows.length
+              ? `${rows.length} active of ${allRows.length} ${itemLabelPlural}`
+              : `${rows.length} ${rows.length === 1 ? itemLabel : itemLabelPlural}`}
+          </p>
+          <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
+            <Switch checked={activeOnly} onCheckedChange={setActiveOnly} aria-label="Show active only" />
+            Active only
+          </label>
+        </div>
         <Button size="sm" className="rounded-none" onClick={openCreate}>
           <Plus className="w-3.5 h-3.5 mr-2" />
           New {itemLabel}
@@ -381,7 +411,9 @@ export function FlatCrudTable<T extends TaxonomyTableName>({
             ) : rows.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={columnCount} className="text-center text-sm text-muted-foreground py-8">
-                  No {itemLabel}s yet.
+                  {activeOnly && allRows.length > 0
+                    ? `No active ${itemLabelPlural} — ${allRows.length} archived.`
+                    : `No ${itemLabelPlural} yet.`}
                 </TableCell>
               </TableRow>
             ) : hasSortOrder ? (

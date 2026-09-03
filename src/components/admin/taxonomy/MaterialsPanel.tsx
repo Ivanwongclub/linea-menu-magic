@@ -19,6 +19,12 @@ const FIELDS: FlatCrudField[] = [
     helperText:
       "Controls whether finishes can be attached to a product using this material — the database only allows product_finishes rows (and a default finish) when the product's material is flagged metal here. Non-metal products get a plain colour list instead.",
   },
+  {
+    type: "switch",
+    key: "is_sustainable",
+    label: "Sustainable",
+    helperText: 'Drives the "Sustainable Picks" filter chip on the public /products page.',
+  },
 ];
 
 export default function MaterialsPanel() {
@@ -26,15 +32,20 @@ export default function MaterialsPanel() {
     <FlatCrudTable
       table="product_materials"
       itemLabel="material"
+      itemLabelPlural="materials"
       fields={FIELDS}
-      extraColumnLabel="Metal"
-      renderExtraCell={(row: TaxonomyRow<"product_materials">) =>
-        row.is_metal ? (
-          <Badge className="text-[10px]">Metal</Badge>
-        ) : (
-          <span className="text-xs text-muted-foreground">—</span>
-        )
-      }
+      extraColumnLabel="Flags"
+      renderExtraCell={(row: TaxonomyRow<"product_materials">) => (
+        <div className="flex items-center gap-1">
+          {row.is_metal && <Badge className="text-[10px]">Metal</Badge>}
+          {row.is_sustainable && (
+            <Badge variant="outline" className="text-[10px]">
+              Sustainable
+            </Badge>
+          )}
+          {!row.is_metal && !row.is_sustainable && <span className="text-xs text-muted-foreground">—</span>}
+        </div>
+      )}
     />
   );
 }

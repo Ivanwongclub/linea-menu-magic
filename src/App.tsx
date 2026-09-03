@@ -45,7 +45,7 @@ const loadOurStory = () => import("./pages/about/OurStory");
 const loadFactory = () => import("./pages/about/Factory");
 const loadCertificates = () => import("./pages/about/Certificates");
 const loadProduction = () => import("./pages/Production");
-const loadAdminHome = () => import("./pages/admin/AdminHome");
+const loadAdminProducts = () => import("./pages/admin/AdminProducts");
 const loadAdminTaxonomy = () => import("./pages/admin/AdminTaxonomy");
 
 const About = lazy(loadAbout);
@@ -71,7 +71,7 @@ const OurStory = lazy(loadOurStory);
 const Factory = lazy(loadFactory);
 const Certificates = lazy(loadCertificates);
 const Production = lazy(loadProduction);
-const AdminHome = lazy(loadAdminHome);
+const AdminProducts = lazy(loadAdminProducts);
 const AdminTaxonomy = lazy(loadAdminTaxonomy);
 
 const queryClient = new QueryClient({
@@ -214,7 +214,8 @@ const App = () => (
                       </RequireCatalogueEditor>
                     }
                   >
-                    <Route index element={withRouteSuspense(<AdminHome />)} />
+                    <Route index element={<Navigate to="products" replace />} />
+                    <Route path="products" element={withRouteSuspense(<AdminProducts />)} />
                     <Route path="taxonomy" element={withRouteSuspense(<AdminTaxonomy />)} />
                   </Route>
                   <Route element={<Layout />}>

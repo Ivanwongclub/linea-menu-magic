@@ -37,6 +37,7 @@ export default function CategoriesPanel() {
     <FlatCrudTable
       table="product_categories"
       itemLabel="category"
+      itemLabelPlural="categories"
       fields={fields}
       hasSortOrder
       extraColumnLabel="Family"
