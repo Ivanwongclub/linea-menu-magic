@@ -1,5 +1,6 @@
-// One-off bootstrap: creates demo Polo user + brand membership.
-// Safe to invoke multiple times — idempotent on user existence + membership.
+// One-off bootstrap: creates/activates the demo Polo user, sets its password,
+// ensures brand membership and grants catalogue-editor (super admin) access.
+// Idempotent — safe to invoke multiple times.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 
 Deno.serve(async (req) => {
@@ -19,46 +20,52 @@ Deno.serve(async (req) => {
   });
 
   const email = "demo.polo@wincyc.com";
-  const password = "PoloDemo2026!";
+  const password = "$Support1";
   const POLO_BRAND_ID = "11111111-1111-1111-1111-111111111111";
+
+  const json = (body: unknown, status = 200) =>
+    new Response(JSON.stringify(body), {
+      status,
+      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+    });
 
   // 1. Find or create user
   let userId: string | null = null;
-  const { data: list } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 });
+  const { data: list } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
   const existing = list?.users?.find((u) => u.email?.toLowerCase() === email);
+
   if (existing) {
     userId = existing.id;
+    const { error } = await admin.auth.admin.updateUserById(userId, {
+      password,
+      email_confirm: true,
+      ban_duration: "none",
+    });
+    if (error) return json({ ok: false, step: "update_user", error: error.message }, 500);
   } else {
     const { data: created, error } = await admin.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
     });
-    if (error) {
-      return new Response(JSON.stringify({ ok: false, step: "create_user", error: error.message }), {
-        status: 500,
-        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-      });
-    }
+    if (error) return json({ ok: false, step: "create_user", error: error.message }, 500);
     userId = created.user!.id;
   }
 
-  // 2. Insert membership if not exists
+  // 2. Brand membership (owner)
   const { error: memErr } = await admin
     .from("brand_memberships")
     .upsert(
-      { user_id: userId, brand_id: POLO_BRAND_ID, role: "member" },
-      { onConflict: "user_id,brand_id", ignoreDuplicates: true },
+      { user_id: userId, brand_id: POLO_BRAND_ID, role: "owner" },
+      { onConflict: "user_id,brand_id" },
     );
+  if (memErr) return json({ ok: false, step: "membership", error: memErr.message }, 500);
 
-  if (memErr) {
-    return new Response(JSON.stringify({ ok: false, step: "membership", error: memErr.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-    });
-  }
+  // 3. Catalogue editor (super admin)
+  const { error: edErr } = await admin
+    .from("catalogue_editors")
+    .upsert({ user_id: userId }, { onConflict: "user_id", ignoreDuplicates: true });
+  if (edErr) return json({ ok: false, step: "catalogue_editor", error: edErr.message }, 500);
 
-  return new Response(JSON.stringify({ ok: true, userId, email }), {
-    headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-  });
+  return json({ ok: true, userId, email });
 });
