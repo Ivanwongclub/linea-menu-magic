@@ -159,6 +159,13 @@ export default function AdminProducts() {
     missing: rows.filter((r) => !r.item_code),
   });
 
+  // The 25 M2 seed products (slug 'sample-%') are placeholders that stay
+  // draft. Any bulk action that could make them active skips them.
+  const splitSeeds = (rows: AdminProductRow[]) => ({
+    real: rows.filter((r) => !r.slug.startsWith("sample-")),
+    seeds: rows.filter((r) => r.slug.startsWith("sample-")),
+  });
+
   const describeSkipped = (rows: AdminProductRow[], reason: string) =>
     `${rows.length === 1 ? "1 product" : `${rows.length} products`} skipped — ${reason}: ${rows
       .map((r) => r.name)
@@ -175,7 +182,9 @@ export default function AdminProducts() {
 
     let rows = selectedRows;
     if (target === "active") {
-      const { eligible, missing } = splitByItemCode(selectedRows);
+      const { real, seeds } = splitSeeds(selectedRows);
+      if (seeds.length > 0) toast.error(describeSkipped(seeds, "placeholder seeds stay draft"));
+      const { eligible, missing } = splitByItemCode(real);
       if (missing.length > 0) toast.error(describeSkipped(missing, "no item code, can't be made active"));
       if (eligible.length === 0) return;
       rows = eligible;
@@ -218,7 +227,9 @@ export default function AdminProducts() {
 
   const handlePublish = () => {
     if (selectedRows.length === 0) return;
-    const { eligible, missing } = splitByItemCode(selectedRows);
+    const { real, seeds } = splitSeeds(selectedRows);
+    if (seeds.length > 0) toast.error(describeSkipped(seeds, "placeholder seeds stay draft"));
+    const { eligible, missing } = splitByItemCode(real);
     if (missing.length > 0) toast.error(describeSkipped(missing, "no item code, can't be published"));
     if (eligible.length === 0) return;
 

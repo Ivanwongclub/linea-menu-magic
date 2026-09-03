@@ -32,6 +32,7 @@ import { SELECT_NONE_VALUE } from "@/components/admin/shared/flatCrudFields";
 import { useFlatCrudTable } from "@/features/admin/hooks/useFlatCrudTable";
 import { useAdminProduct, type AdminProductDetail, type SaveProductInput } from "@/features/admin/hooks/useAdminProduct";
 import { StatusBadge } from "@/pages/admin/AdminProducts";
+import { SizeVariantsEditor } from "@/components/admin/product-editor/SizeVariantsEditor";
 import type { Database } from "@/integrations/supabase/types";
 
 type ProductUpdate = Database["public"]["Tables"]["products"]["Update"];
@@ -45,9 +46,11 @@ const NONE = SELECT_NONE_VALUE;
 
 interface FormValues {
   name: string;
+  name_en: string;
   slug: string;
   item_code: string;
   description: string;
+  description_en: string;
   is_public: boolean;
   category_id: string;
   material_id: string;
@@ -69,9 +72,11 @@ interface FormValues {
 
 const EMPTY: FormValues = {
   name: "",
+  name_en: "",
   slug: "",
   item_code: "",
   description: "",
+  description_en: "",
   is_public: false,
   category_id: NONE,
   material_id: NONE,
@@ -95,9 +100,11 @@ function fromDetail(p: AdminProductDetail): FormValues {
   const num = (v: number | null) => (v === null || v === undefined ? "" : String(v));
   return {
     name: p.name ?? "",
+    name_en: p.name_en ?? "",
     slug: p.slug ?? "",
     item_code: p.item_code ?? "",
     description: p.description ?? "",
+    description_en: p.description_en ?? "",
     is_public: p.is_public,
     category_id: p.primary_category_id ?? NONE,
     material_id: p.material_id ?? NONE,
@@ -149,9 +156,11 @@ function toPayload(v: FormValues): ProductUpdate {
   const ref = (s: string) => (s === NONE || s === "" ? null : s);
   return {
     name: v.name.trim(),
+    name_en: text(v.name_en),
     slug: v.slug.trim(),
     item_code: text(v.item_code),
     description: text(v.description),
+    description_en: text(v.description_en),
     is_public: v.is_public,
     material_id: ref(v.material_id),
     attachment_id: ref(v.attachment_id),
@@ -319,9 +328,18 @@ export default function AdminProductEditor() {
     }
   };
 
+  // The 25 M2 seed products are placeholders so every category has a sample
+  // in the CMS. They stay draft — never published from here.
+  const isSeed = (product?.slug ?? values.slug).startsWith("sample-");
+
   const handleSave = () => commit(null, { successMessage: isNew ? "Product created." : "Saved." });
-  const handlePublish = () =>
+  const handlePublish = () => {
+    if (isSeed) {
+      toast.error("Placeholder seed products stay draft — they aren't published.");
+      return;
+    }
     commit({ status: "active", is_public: true }, { forPublish: true, successMessage: "Published." });
+  };
   const handleUnpublish = () => commit({ status: "draft" }, { successMessage: "Moved back to draft." });
   const handleRestore = () => commit({ status: "draft" }, { successMessage: "Restored to draft." });
   const handleArchive = () => {
@@ -379,7 +397,7 @@ export default function AdminProductEditor() {
             {busy ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
             {isNew ? "Create draft" : "Save"}
           </Button>
-          {!isNew && status === "draft" && (
+          {!isNew && status === "draft" && !isSeed && (
             <Button className="rounded-none" disabled={busy} onClick={handlePublish}>
               <Globe className="w-3.5 h-3.5 mr-2" />
               Publish
@@ -408,17 +426,26 @@ export default function AdminProductEditor() {
         </div>
       </div>
 
-      {!isNew && status === "draft" && (
+      {!isNew && status === "draft" && !isSeed && (
         <p className="text-xs text-muted-foreground">
           Publish saves your changes and sets the product Active and Public. It needs an item code — the
           database refuses an active product without one.
         </p>
       )}
+      {!isNew && isSeed && (
+        <p className="text-xs text-muted-foreground">
+          Placeholder seed product — one exists per category so the CMS always has a sample. It stays draft
+          and is never published.
+        </p>
+      )}
 
       {/* Identity */}
-      <Section title="Identity">
+      <Section title="Identity" hint="The storefront shows the English override when present, otherwise the base value.">
         <Field label="Name" error={errors.name}>
           <Input className="rounded-none" value={values.name} onChange={(e) => set("name", e.target.value)} />
+        </Field>
+        <Field label="Name (English override)">
+          <Input className="rounded-none" value={values.name_en} onChange={(e) => set("name_en", e.target.value)} />
         </Field>
         <Field
           label="Slug"
@@ -451,11 +478,18 @@ export default function AdminProductEditor() {
             </p>
           </div>
         </div>
-        <Field label="Description" className="space-y-2 md:col-span-2">
+        <Field label="Description">
           <Textarea
             className="rounded-none min-h-[100px]"
             value={values.description}
             onChange={(e) => set("description", e.target.value)}
+          />
+        </Field>
+        <Field label="Description (English override)">
+          <Textarea
+            className="rounded-none min-h-[100px]"
+            value={values.description_en}
+            onChange={(e) => set("description_en", e.target.value)}
           />
         </Field>
       </Section>
@@ -664,9 +698,23 @@ export default function AdminProductEditor() {
         </Field>
       </Section>
 
-      <p className="text-xs text-muted-foreground">
-        Colour and finish assignment, and size variants, are edited here in later phases.
-      </p>
+      {/* Size variants — need a saved product to attach to */}
+      <section className="border border-border p-6 space-y-4">
+        <div>
+          <h2 className="text-sm font-medium tracking-wide text-foreground">Size variants</h2>
+          <p className="text-xs text-muted-foreground">
+            One row per size. Secondary dimension and label are for non-round hardware (D-rings, badges).
+            Ligne is worked out from the primary dimension by the database.
+          </p>
+        </div>
+        {isNew || !id ? (
+          <p className="text-xs text-muted-foreground">Create the product first, then add sizes here.</p>
+        ) : (
+          <SizeVariantsEditor productId={id} />
+        )}
+      </section>
+
+      <p className="text-xs text-muted-foreground">Colour and finish assignment is edited here in a later phase.</p>
 
       <AlertDialog open={confirmArchive} onOpenChange={setConfirmArchive}>
         <AlertDialogContent>
