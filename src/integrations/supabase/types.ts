@@ -7,10 +7,30 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.5"
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
   public: {
     Tables: {
@@ -82,6 +102,36 @@ export type Database = {
         Update: {
           granted_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      compliance_standards: {
+        Row: {
+          code: string
+          id: string
+          is_active: boolean
+          name: string
+          name_zh_hans: string | null
+          name_zh_hant: string | null
+          sort_order: number
+        }
+        Insert: {
+          code: string
+          id?: string
+          is_active?: boolean
+          name: string
+          name_zh_hans?: string | null
+          name_zh_hant?: string | null
+          sort_order?: number
+        }
+        Update: {
+          code?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          name_zh_hans?: string | null
+          name_zh_hant?: string | null
+          sort_order?: number
         }
         Relationships: []
       }
@@ -317,6 +367,414 @@ export type Database = {
         }
         Relationships: []
       }
+      finish_base_families: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          name_zh_hans: string | null
+          name_zh_hant: string | null
+          sort_order: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          name_zh_hans?: string | null
+          name_zh_hant?: string | null
+          sort_order?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          name_zh_hans?: string | null
+          name_zh_hant?: string | null
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      finish_coatings: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          name_zh_hans: string | null
+          name_zh_hant: string | null
+          sort_order: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          name_zh_hans?: string | null
+          name_zh_hant?: string | null
+          sort_order?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          name_zh_hans?: string | null
+          name_zh_hant?: string | null
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      finish_effects: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          name_zh_hans: string | null
+          name_zh_hant: string | null
+          sort_order: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          name_zh_hans?: string | null
+          name_zh_hant?: string | null
+          sort_order?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          name_zh_hans?: string | null
+          name_zh_hant?: string | null
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      finish_patterns: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          name_zh_hans: string | null
+          name_zh_hant: string | null
+          sort_order: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          name_zh_hans?: string | null
+          name_zh_hant?: string | null
+          sort_order?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          name_zh_hans?: string | null
+          name_zh_hant?: string | null
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      finish_processes: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          name_zh_hans: string | null
+          name_zh_hant: string | null
+          sort_order: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          name_zh_hans?: string | null
+          name_zh_hant?: string | null
+          sort_order?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          name_zh_hans?: string | null
+          name_zh_hant?: string | null
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      finish_surfaces: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          name_zh_hans: string | null
+          name_zh_hant: string | null
+          sort_order: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          name_zh_hans?: string | null
+          name_zh_hant?: string | null
+          sort_order?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          name_zh_hans?: string | null
+          name_zh_hant?: string | null
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      finish_tints: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          name_zh_hans: string | null
+          name_zh_hant: string | null
+          sort_order: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          name_zh_hans?: string | null
+          name_zh_hant?: string | null
+          sort_order?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          name_zh_hans?: string | null
+          name_zh_hant?: string | null
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      finish_tones: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          name_zh_hans: string | null
+          name_zh_hant: string | null
+          sort_order: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          name_zh_hans?: string | null
+          name_zh_hant?: string | null
+          sort_order?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          name_zh_hans?: string | null
+          name_zh_hant?: string | null
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      finishes: {
+        Row: {
+          base_family_id: string | null
+          chart_page: string | null
+          coating_id: string | null
+          created_at: string
+          cyc_code: string | null
+          effect_id: string | null
+          factory_name_en: string
+          factory_name_zh_hans: string | null
+          factory_name_zh_hant: string | null
+          hex_approx: string | null
+          id: string
+          is_public: boolean
+          is_standard: boolean
+          marketing_name: string
+          marketing_name_zh_hans: string | null
+          marketing_name_zh_hant: string | null
+          notes: string | null
+          pattern_id: string | null
+          process_id: string | null
+          sort_order: number
+          status: string
+          surface_id: string | null
+          swatch_url: string | null
+          tint_id: string | null
+          tone_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          base_family_id?: string | null
+          chart_page?: string | null
+          coating_id?: string | null
+          created_at?: string
+          cyc_code?: string | null
+          effect_id?: string | null
+          factory_name_en: string
+          factory_name_zh_hans?: string | null
+          factory_name_zh_hant?: string | null
+          hex_approx?: string | null
+          id?: string
+          is_public?: boolean
+          is_standard?: boolean
+          marketing_name: string
+          marketing_name_zh_hans?: string | null
+          marketing_name_zh_hant?: string | null
+          notes?: string | null
+          pattern_id?: string | null
+          process_id?: string | null
+          sort_order?: number
+          status?: string
+          surface_id?: string | null
+          swatch_url?: string | null
+          tint_id?: string | null
+          tone_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          base_family_id?: string | null
+          chart_page?: string | null
+          coating_id?: string | null
+          created_at?: string
+          cyc_code?: string | null
+          effect_id?: string | null
+          factory_name_en?: string
+          factory_name_zh_hans?: string | null
+          factory_name_zh_hant?: string | null
+          hex_approx?: string | null
+          id?: string
+          is_public?: boolean
+          is_standard?: boolean
+          marketing_name?: string
+          marketing_name_zh_hans?: string | null
+          marketing_name_zh_hant?: string | null
+          notes?: string | null
+          pattern_id?: string | null
+          process_id?: string | null
+          sort_order?: number
+          status?: string
+          surface_id?: string | null
+          swatch_url?: string | null
+          tint_id?: string | null
+          tone_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "finishes_base_family_id_fkey"
+            columns: ["base_family_id"]
+            isOneToOne: false
+            referencedRelation: "finish_base_families"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finishes_coating_id_fkey"
+            columns: ["coating_id"]
+            isOneToOne: false
+            referencedRelation: "finish_coatings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finishes_effect_id_fkey"
+            columns: ["effect_id"]
+            isOneToOne: false
+            referencedRelation: "finish_effects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finishes_pattern_id_fkey"
+            columns: ["pattern_id"]
+            isOneToOne: false
+            referencedRelation: "finish_patterns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finishes_process_id_fkey"
+            columns: ["process_id"]
+            isOneToOne: false
+            referencedRelation: "finish_processes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finishes_surface_id_fkey"
+            columns: ["surface_id"]
+            isOneToOne: false
+            referencedRelation: "finish_surfaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finishes_tint_id_fkey"
+            columns: ["tint_id"]
+            isOneToOne: false
+            referencedRelation: "finish_tints"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finishes_tone_id_fkey"
+            columns: ["tone_id"]
+            isOneToOne: false
+            referencedRelation: "finish_tones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       flipbook_brochures: {
         Row: {
           cover_image_url: string | null
@@ -420,32 +878,82 @@ export type Database = {
           },
         ]
       }
+      product_attachments: {
+        Row: {
+          code: string
+          id: string
+          is_active: boolean
+          name: string
+          name_zh_hans: string | null
+          name_zh_hant: string | null
+          sort_order: number
+        }
+        Insert: {
+          code: string
+          id?: string
+          is_active?: boolean
+          name: string
+          name_zh_hans?: string | null
+          name_zh_hant?: string | null
+          sort_order?: number
+        }
+        Update: {
+          code?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          name_zh_hans?: string | null
+          name_zh_hant?: string | null
+          sort_order?: number
+        }
+        Relationships: []
+      }
       product_categories: {
         Row: {
           created_at: string
+          family_id: string | null
           icon_url: string | null
           id: string
+          is_active: boolean
           name: string
+          name_zh_hans: string | null
+          name_zh_hant: string | null
           slug: string | null
           sort_order: number
         }
         Insert: {
           created_at?: string
+          family_id?: string | null
           icon_url?: string | null
           id?: string
+          is_active?: boolean
           name: string
+          name_zh_hans?: string | null
+          name_zh_hant?: string | null
           slug?: string | null
           sort_order?: number
         }
         Update: {
           created_at?: string
+          family_id?: string | null
           icon_url?: string | null
           id?: string
+          is_active?: boolean
           name?: string
+          name_zh_hans?: string | null
+          name_zh_hant?: string | null
           slug?: string | null
           sort_order?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "product_categories_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "product_families"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       product_category_map: {
         Row: {
@@ -530,6 +1038,146 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      product_colours: {
+        Row: {
+          hex: string | null
+          id: string
+          name: string
+          name_zh_hans: string | null
+          name_zh_hant: string | null
+          product_id: string
+          sort_order: number
+        }
+        Insert: {
+          hex?: string | null
+          id?: string
+          name: string
+          name_zh_hans?: string | null
+          name_zh_hant?: string | null
+          product_id: string
+          sort_order?: number
+        }
+        Update: {
+          hex?: string | null
+          id?: string
+          name?: string
+          name_zh_hans?: string | null
+          name_zh_hant?: string | null
+          product_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_colours_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_compliance_map: {
+        Row: {
+          product_id: string
+          standard_id: string
+        }
+        Insert: {
+          product_id: string
+          standard_id: string
+        }
+        Update: {
+          product_id?: string
+          standard_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_compliance_map_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_compliance_map_standard_id_fkey"
+            columns: ["standard_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_standards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_families: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          name_zh_hans: string | null
+          name_zh_hant: string | null
+          segment: string
+          slug: string
+          sort_order: number
+          tagline: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          name_zh_hans?: string | null
+          name_zh_hant?: string | null
+          segment?: string
+          slug: string
+          sort_order?: number
+          tagline?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          name_zh_hans?: string | null
+          name_zh_hant?: string | null
+          segment?: string
+          slug?: string
+          sort_order?: number
+          tagline?: string | null
+        }
+        Relationships: []
+      }
+      product_finishes: {
+        Row: {
+          finish_id: string
+          product_id: string
+          sort_order: number
+        }
+        Insert: {
+          finish_id: string
+          product_id: string
+          sort_order?: number
+        }
+        Update: {
+          finish_id?: string
+          product_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_finishes_finish_id_fkey"
+            columns: ["finish_id"]
+            isOneToOne: false
+            referencedRelation: "finishes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_finishes_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       product_images: {
         Row: {
@@ -653,23 +1301,82 @@ export type Database = {
       product_materials: {
         Row: {
           id: string
+          is_active: boolean
+          is_metal: boolean
           is_sustainable: boolean
           name: string
+          name_zh_hans: string | null
+          name_zh_hant: string | null
           slug: string | null
         }
         Insert: {
           id?: string
+          is_active?: boolean
+          is_metal?: boolean
           is_sustainable?: boolean
           name: string
+          name_zh_hans?: string | null
+          name_zh_hant?: string | null
           slug?: string | null
         }
         Update: {
           id?: string
+          is_active?: boolean
+          is_metal?: boolean
           is_sustainable?: boolean
           name?: string
+          name_zh_hans?: string | null
+          name_zh_hant?: string | null
           slug?: string | null
         }
         Relationships: []
+      }
+      product_size_variants: {
+        Row: {
+          id: string
+          is_default: boolean
+          product_id: string
+          size_label: string | null
+          size_ligne: number | null
+          size_primary_mm: number
+          size_secondary_mm: number | null
+          sort_order: number
+          thickness_mm: number | null
+          weight_g: number | null
+        }
+        Insert: {
+          id?: string
+          is_default?: boolean
+          product_id: string
+          size_label?: string | null
+          size_ligne?: number | null
+          size_primary_mm: number
+          size_secondary_mm?: number | null
+          sort_order?: number
+          thickness_mm?: number | null
+          weight_g?: number | null
+        }
+        Update: {
+          id?: string
+          is_default?: boolean
+          product_id?: string
+          size_label?: string | null
+          size_ligne?: number | null
+          size_primary_mm?: number
+          size_secondary_mm?: number | null
+          sort_order?: number
+          thickness_mm?: number | null
+          weight_g?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_size_variants_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       product_tag_map: {
         Row: {
@@ -724,71 +1431,137 @@ export type Database = {
       }
       products: {
         Row: {
+          attachment_id: string | null
           brand_id: string | null
           created_at: string
+          default_finish_id: string | null
           description: string | null
           description_en: string | null
+          face_style: string | null
+          hole_count: number | null
           id: string
           is_customizable: boolean
           is_public: boolean
           item_code: string | null
+          lead_time_max_days: number | null
+          lead_time_min_days: number | null
+          logo_customisable: boolean
+          material_id: string | null
           model_url: string | null
+          moq_qty: number | null
+          moq_unit: string | null
           name: string
           name_en: string | null
+          nickel_release_compliant: boolean | null
+          origin: string | null
           production: Json | null
+          sample_time_days: number | null
           slug: string
           sort_order: number
           specifications: Json | null
           status: string
+          tensile_strength: string | null
           thumbnail_url: string | null
           updated_at: string
+          wash_resistance: string | null
         }
         Insert: {
+          attachment_id?: string | null
           brand_id?: string | null
           created_at?: string
+          default_finish_id?: string | null
           description?: string | null
           description_en?: string | null
+          face_style?: string | null
+          hole_count?: number | null
           id?: string
           is_customizable?: boolean
           is_public?: boolean
           item_code?: string | null
+          lead_time_max_days?: number | null
+          lead_time_min_days?: number | null
+          logo_customisable?: boolean
+          material_id?: string | null
           model_url?: string | null
+          moq_qty?: number | null
+          moq_unit?: string | null
           name: string
           name_en?: string | null
+          nickel_release_compliant?: boolean | null
+          origin?: string | null
           production?: Json | null
+          sample_time_days?: number | null
           slug: string
           sort_order?: number
           specifications?: Json | null
           status?: string
+          tensile_strength?: string | null
           thumbnail_url?: string | null
           updated_at?: string
+          wash_resistance?: string | null
         }
         Update: {
+          attachment_id?: string | null
           brand_id?: string | null
           created_at?: string
+          default_finish_id?: string | null
           description?: string | null
           description_en?: string | null
+          face_style?: string | null
+          hole_count?: number | null
           id?: string
           is_customizable?: boolean
           is_public?: boolean
           item_code?: string | null
+          lead_time_max_days?: number | null
+          lead_time_min_days?: number | null
+          logo_customisable?: boolean
+          material_id?: string | null
           model_url?: string | null
+          moq_qty?: number | null
+          moq_unit?: string | null
           name?: string
           name_en?: string | null
+          nickel_release_compliant?: boolean | null
+          origin?: string | null
           production?: Json | null
+          sample_time_days?: number | null
           slug?: string
           sort_order?: number
           specifications?: Json | null
           status?: string
+          tensile_strength?: string | null
           thumbnail_url?: string | null
           updated_at?: string
+          wash_resistance?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "products_attachment_id_fkey"
+            columns: ["attachment_id"]
+            isOneToOne: false
+            referencedRelation: "product_attachments"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "products_brand_id_fkey"
             columns: ["brand_id"]
             isOneToOne: false
             referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_default_finish_id_fkey"
+            columns: ["default_finish_id"]
+            isOneToOne: false
+            referencedRelation: "finishes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "product_materials"
             referencedColumns: ["id"]
           },
         ]
@@ -861,6 +1634,10 @@ export type Database = {
         Args: { _brand_id: string; _user_id: string }
         Returns: boolean
       }
+      user_has_brand_text: {
+        Args: { _brand_text: string; _user_id: string }
+        Returns: boolean
+      }
       user_is_brand_manager_or_owner: {
         Args: { _user_id: string }
         Returns: boolean
@@ -884,12 +1661,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
+  TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never) = never,
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -913,11 +1690,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
+  TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never) = never,
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -938,11 +1715,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
+  TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never) = never,
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -963,11 +1740,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never) = never,
+    : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -980,11 +1757,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never) = never,
+    : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -994,9 +1771,13 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       brand_role: ["member", "manager", "owner"],
     },
   },
 } as const
+

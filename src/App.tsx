@@ -12,11 +12,14 @@ import { I18nProvider } from "@/features/i18n/I18nProvider";
 import ScrollToTop from "./components/ScrollToTop";
 import BackToTop from "./components/ui/BackToTop";
 import Layout from "./components/layout/Layout";
+import AdminLayout from "./components/admin/AdminLayout";
+import RequireCatalogueEditor from "./components/admin/RequireCatalogueEditor";
 import { ENV } from "./config/env";
 
 // Homepage loaded eagerly — it's the landing route
 import Index from "./pages/Index";
 import DesignerStudioLogin from "./pages/DesignerStudioLogin";
+import AdminLogin from "./pages/admin/AdminLogin";
 
 // All other routes lazy-loaded to reduce initial JS bundle
 const loadAbout = () => import("./pages/About");
@@ -42,6 +45,7 @@ const loadOurStory = () => import("./pages/about/OurStory");
 const loadFactory = () => import("./pages/about/Factory");
 const loadCertificates = () => import("./pages/about/Certificates");
 const loadProduction = () => import("./pages/Production");
+const loadAdminHome = () => import("./pages/admin/AdminHome");
 
 const About = lazy(loadAbout);
 const Products = lazy(loadProducts);
@@ -66,6 +70,7 @@ const OurStory = lazy(loadOurStory);
 const Factory = lazy(loadFactory);
 const Certificates = lazy(loadCertificates);
 const Production = lazy(loadProduction);
+const AdminHome = lazy(loadAdminHome);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -196,6 +201,19 @@ const App = () => (
               <BackToTop />
               <ErrorBoundary>
                 <Routes>
+                  {/* /admin sits outside the customer-facing Layout (no Header/Footer) —
+                      its own shell, its own login, gated on catalogue_editors. */}
+                  <Route path="/admin/login" element={<AdminLogin />} />
+                  <Route
+                    path="/admin"
+                    element={
+                      <RequireCatalogueEditor>
+                        <AdminLayout />
+                      </RequireCatalogueEditor>
+                    }
+                  >
+                    <Route index element={withRouteSuspense(<AdminHome />)} />
+                  </Route>
                   <Route element={<Layout />}>
                     <Route path="/" element={<Index />} />
                     <Route path="/about" element={withRouteSuspense(<About />)} />
