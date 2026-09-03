@@ -63,9 +63,14 @@ export function useProductSizeVariants(productId: string) {
         if (error) throw error;
       }
       if (fresh.length > 0) {
+        // The `id` KEY must not exist on insert rows, not merely be undefined:
+        // postgrest-js lists every key it sees in a `columns=` param, and
+        // PostgREST then writes null for any listed column missing from the
+        // body — so `{ id: undefined }` becomes `id = null` and the
+        // gen_random_uuid() default never applies.
         const { error } = await supabase
           .from("product_size_variants")
-          .insert(fresh.map((r) => ({ ...r, product_id: productId })));
+          .insert(fresh.map(({ id: _omit, ...r }) => ({ ...r, product_id: productId })));
         if (error) throw error;
       }
     },

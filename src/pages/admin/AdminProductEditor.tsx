@@ -468,16 +468,6 @@ export default function AdminProductEditor() {
             onChange={(e) => set("item_code", e.target.value)}
           />
         </Field>
-        <div className="flex items-start gap-3 border border-border p-3 self-end">
-          <Switch checked={values.is_public} onCheckedChange={(v) => set("is_public", v)} />
-          <div className="space-y-1">
-            <Label className="text-sm text-foreground">Visible on the public site</Label>
-            <p className="text-xs text-muted-foreground">
-              Only takes effect while the product is Active. Publish sets this on; you can switch it off to keep
-              an active product private to the Designer Studio.
-            </p>
-          </div>
-        </div>
         <Field label="Description">
           <Textarea
             className="rounded-none min-h-[100px]"
@@ -492,6 +482,16 @@ export default function AdminProductEditor() {
             onChange={(e) => set("description_en", e.target.value)}
           />
         </Field>
+        <div className="flex items-start gap-3 border border-border p-3 md:col-span-2">
+          <Switch checked={values.is_public} onCheckedChange={(v) => set("is_public", v)} />
+          <div className="space-y-1">
+            <Label className="text-sm text-foreground">Visible on the public site</Label>
+            <p className="text-xs text-muted-foreground">
+              Only takes effect while the product is Active. Publish sets this on; you can switch it off to keep
+              an active product private to the Designer Studio.
+            </p>
+          </div>
+        </div>
       </Section>
 
       {/* Classification */}

@@ -75,7 +75,15 @@ export function SortableList<T>({ items, getId, onReorder, renderItem, as, itemC
   );
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
+      // dnd-kit renders its screen-reader live region as a <div> next to the
+      // items; when the items are <tr>s that div lands inside <tbody>, which
+      // is invalid DOM. Portal it to <body> instead.
+      accessibility={{ container: typeof document !== "undefined" ? document.body : undefined }}
+    >
       <SortableContext items={items.map(getId)} strategy={verticalListSortingStrategy}>
         {items.map((item) => (
           <SortableItem key={getId(item)} id={getId(item)} as={as} className={itemClassName}>

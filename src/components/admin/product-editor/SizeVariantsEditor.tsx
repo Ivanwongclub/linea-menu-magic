@@ -128,8 +128,9 @@ export function SizeVariantsEditor({ productId }: { productId: string }) {
       toast.error(nextErrors.__default ?? "Fix the highlighted sizes.");
       return;
     }
+    // Only saved rows carry an `id` key at all — see the insert path in the hook.
     const rows: SizeVariantWrite[] = drafts.map((d, index) => ({
-      id: d.id,
+      ...(d.id ? { id: d.id } : {}),
       size_primary_mm: Number(d.size_primary_mm),
       size_secondary_mm: parse(d.size_secondary_mm),
       size_label: d.size_label.trim() || null,
