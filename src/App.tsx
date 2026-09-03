@@ -46,6 +46,7 @@ const loadFactory = () => import("./pages/about/Factory");
 const loadCertificates = () => import("./pages/about/Certificates");
 const loadProduction = () => import("./pages/Production");
 const loadAdminProducts = () => import("./pages/admin/AdminProducts");
+const loadAdminProductEditor = () => import("./pages/admin/AdminProductEditor");
 const loadAdminTaxonomy = () => import("./pages/admin/AdminTaxonomy");
 
 const About = lazy(loadAbout);
@@ -72,6 +73,7 @@ const Factory = lazy(loadFactory);
 const Certificates = lazy(loadCertificates);
 const Production = lazy(loadProduction);
 const AdminProducts = lazy(loadAdminProducts);
+const AdminProductEditor = lazy(loadAdminProductEditor);
 const AdminTaxonomy = lazy(loadAdminTaxonomy);
 
 const queryClient = new QueryClient({
@@ -216,6 +218,8 @@ const App = () => (
                   >
                     <Route index element={<Navigate to="products" replace />} />
                     <Route path="products" element={withRouteSuspense(<AdminProducts />)} />
+                    <Route path="products/new" element={withRouteSuspense(<AdminProductEditor />)} />
+                    <Route path="products/:id" element={withRouteSuspense(<AdminProductEditor />)} />
                     <Route path="taxonomy" element={withRouteSuspense(<AdminTaxonomy />)} />
                   </Route>
                   <Route element={<Layout />}>

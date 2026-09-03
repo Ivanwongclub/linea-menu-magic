@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Globe, Lock, Search, X } from "lucide-react";
+import { Globe, Plus, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -47,9 +48,19 @@ const STATUS_LABEL: Record<string, string> = {
   archived: "Archived",
 };
 
-function StatusBadge({ status }: { status: string }) {
-  // Three visually distinct states: solid = live, outlined = not yet, muted = retired.
-  if (status === "active") return <Badge className="text-[10px]">Active</Badge>;
+/**
+ * One column answers "can anyone see this?" — visibility depends on status
+ * AND is_public together. Public/Private only appears on Active rows; drafts
+ * and archived products are never public, so the word would carry nothing.
+ * Solid = live, outlined = not yet, muted = retired.
+ */
+export function StatusBadge({ status, isPublic }: { status: string; isPublic: boolean }) {
+  if (status === "active")
+    return (
+      <Badge className={cn("text-[10px]", !isPublic && "bg-transparent text-foreground")}>
+        Active · {isPublic ? "Public" : "Private"}
+      </Badge>
+    );
   if (status === "archived")
     return (
       <Badge variant="secondary" className="text-[10px] text-muted-foreground line-through">
@@ -66,6 +77,7 @@ function StatusBadge({ status }: { status: string }) {
 type SupabaseError = { message: string; code?: string };
 
 export default function AdminProducts() {
+  const navigate = useNavigate();
   const { query, setStatus, publish } = useAdminProducts();
   const { query: familiesQuery } = useFlatCrudTable("product_families", { orderBy: "sort_order" });
   const { query: categoriesQuery } = useFlatCrudTable("product_categories", { orderBy: "sort_order" });
@@ -226,13 +238,19 @@ export default function AdminProducts() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-light tracking-wide text-foreground">Products</h1>
-        <p className="text-sm text-muted-foreground">
-          {visible.length === products.length
-            ? `${products.length} products`
-            : `${visible.length} of ${products.length} products`}
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-light tracking-wide text-foreground">Products</h1>
+          <p className="text-sm text-muted-foreground">
+            {visible.length === products.length
+              ? `${products.length} products`
+              : `${visible.length} of ${products.length} products`}
+          </p>
+        </div>
+        <Button size="sm" className="rounded-none" onClick={() => navigate("/admin/products/new")}>
+          <Plus className="w-3.5 h-3.5 mr-2" />
+          New product
+        </Button>
       </div>
 
       {/* Filters */}
@@ -345,19 +363,18 @@ export default function AdminProducts() {
               <TableHead>Category</TableHead>
               <TableHead>Material</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="w-16">Public</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {query.isLoading ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center text-sm text-muted-foreground py-8">
+                <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-8">
                   Loading…
                 </TableCell>
               </TableRow>
             ) : visible.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center text-sm text-muted-foreground py-8">
+                <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-8">
                   No products match these filters.
                 </TableCell>
               </TableRow>
@@ -369,9 +386,10 @@ export default function AdminProducts() {
                   <TableRow
                     key={p.id}
                     data-state={isSelected ? "selected" : undefined}
-                    className={cn(p.status === "archived" && "text-muted-foreground")}
+                    className={cn("cursor-pointer", p.status === "archived" && "text-muted-foreground")}
+                    onClick={() => navigate(`/admin/products/${p.id}`)}
                   >
-                    <TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
                       <Checkbox
                         checked={isSelected}
                         onCheckedChange={() => toggleOne(p.id)}
@@ -397,14 +415,7 @@ export default function AdminProducts() {
                     </TableCell>
                     <TableCell className="text-sm">{p.material_name ?? "—"}</TableCell>
                     <TableCell>
-                      <StatusBadge status={p.status} />
-                    </TableCell>
-                    <TableCell>
-                      {p.is_public ? (
-                        <Globe className="w-3.5 h-3.5 text-foreground" aria-label="Public" />
-                      ) : (
-                        <Lock className="w-3.5 h-3.5 text-muted-foreground" aria-label="Private" />
-                      )}
+                      <StatusBadge status={p.status} isPublic={p.is_public} />
                     </TableCell>
                   </TableRow>
                 );

@@ -64,12 +64,16 @@ export function useAdminProducts() {
         .order("updated_at", { ascending: false });
       if (error) throw error;
 
-      return ((data ?? []) as unknown as RawRow[]).map((row) => {
+      // Distinct on product id — the count and the list must both reflect
+      // products, never product×category pairs.
+      const byId = new Map<string, AdminProductRow>();
+      for (const row of (data ?? []) as unknown as RawRow[]) {
+        if (byId.has(row.id)) continue;
         // Primary category, falling back to the first mapped one — same
         // convention as the storefront's transformProduct().
         const maps = row.product_category_map ?? [];
         const primary = maps.find((m) => m.is_primary)?.product_categories ?? maps[0]?.product_categories ?? null;
-        return {
+        byId.set(row.id, {
           id: row.id,
           item_code: row.item_code,
           name: row.name,
@@ -82,8 +86,9 @@ export function useAdminProducts() {
           material_name: row.material?.name ?? null,
           primary_category: primary,
           updated_at: row.updated_at,
-        };
-      });
+        });
+      }
+      return [...byId.values()];
     },
   });
 
