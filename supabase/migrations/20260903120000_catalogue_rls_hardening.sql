@@ -12,6 +12,12 @@
 --
 -- catalogue_editors is NOT seeded here — grants are added separately by
 -- direct SQL once specific accounts are named.
+--
+-- AMENDED 2026-09-03 to match what actually ran live: the products SELECT
+-- policy below was corrected before application (draft/archived house
+-- products are gated on user_is_catalogue_editor(), not on plain
+-- authentication — see the inline comment at that policy). This file is a
+-- record of live state, not the original draft that was reviewed.
 
 -- ---------------------------------------------------------------------
 -- 1. catalogue_editors
@@ -56,13 +62,18 @@ grant execute on function public.user_is_catalogue_editor(uuid) to authenticated
 drop policy if exists "Authed read public + own brand products" on public.products;
 drop policy if exists "Authenticated manage products" on public.products;
 
-create policy "Authed read house + own brand products"
+-- CORRECTED before this migration was applied live: draft/archived house
+-- products are visible only to catalogue editors, not to every authenticated
+-- user (the version below matches what actually ran; the original draft
+-- above this comment block was never applied as written).
+create policy "Authed read published + own brand + editor products"
 on public.products
 for select
 to authenticated
 using (
-  brand_id is null
-  or public.user_has_brand(auth.uid(), brand_id)
+  (status = 'active' and is_public = true and brand_id is null)
+  or (brand_id is not null and public.user_has_brand(auth.uid(), brand_id))
+  or public.user_is_catalogue_editor(auth.uid())
 );
 
 create policy "Catalogue editors insert products"
