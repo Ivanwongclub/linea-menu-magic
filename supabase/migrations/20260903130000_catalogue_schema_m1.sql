@@ -22,10 +22,17 @@
 --      (c) products: BEFORE INSERT OR UPDATE, rejects setting
 --          default_finish_id unless the product's material is_metal = true
 --          (null material passes, same as (a)).
---   6. prevent_code_change() rewritten via to_jsonb; product_compliance_map /
---      product_finishes / product_colours / product_size_variants get
---      parent-visibility-scoped read instead of blanket public read.
+--   6. prevent_code_change() rewritten via to_jsonb, and now only fires once
+--      the old value was already set — finishes.cyc_code is nullable for
+--      non-standard finishes, so a custom finish can still be promoted to a
+--      coded standard one (null -> 'CYC-0136'). Also attached to
+--      compliance_standards.code for consistency with product_attachments.
+--      product_compliance_map / product_finishes / product_colours /
+--      product_size_variants get parent-visibility-scoped read instead of
+--      blanket public read.
 --   7. finishes read policy gated on is_public, catalogue editors see all.
+--      finishes.updated_at now refreshed on every update via a trigger
+--      (previously only defaulted on insert).
 --   8. product_families.segment constrained to ('apparel','beauty','material').
 --
 -- All new/rewritten trigger functions that check sibling-table state
@@ -45,15 +52,29 @@
 
 -- Fix #6: generic "this column is immutable once set" trigger, rewritten to
 -- look the column up dynamically instead of referencing static field names
--- that don't exist on every table this is attached to.
+-- that don't exist on every table this is attached to. Only fires once the
+-- old value was already set — finishes.cyc_code is nullable for
+-- non-standard finishes, and a custom finish must still be promotable to a
+-- coded standard one (null -> 'CYC-0136'). The 8 axis tables' code is NOT
+-- NULL, so this is a no-op change for them.
 create or replace function public.prevent_code_change()
 returns trigger language plpgsql as $$
 declare
   col text := tg_argv[0];
 begin
-  if (to_jsonb(new) ->> col) is distinct from (to_jsonb(old) ->> col) then
+  if (to_jsonb(old) ->> col) is not null
+     and (to_jsonb(new) ->> col) is distinct from (to_jsonb(old) ->> col) then
     raise exception '% is immutable (id %)', col, old.id;
   end if;
+  return new;
+end $$;
+
+-- finishes.updated_at defaults on insert only; this keeps it current on
+-- every update instead of relying on callers to set it themselves.
+create or replace function public.set_updated_at()
+returns trigger language plpgsql as $$
+begin
+  new.updated_at := now();
   return new;
 end $$;
 
@@ -217,6 +238,9 @@ create table public.compliance_standards (
   name_zh_hans text,
   sort_order int not null default 0
 );
+create trigger trg_compliance_standards_code before update on public.compliance_standards
+  for each row execute function public.prevent_code_change('code');
+
 create table public.product_compliance_map (
   product_id uuid not null references public.products(id) on delete cascade,
   standard_id uuid not null references public.compliance_standards(id) on delete restrict,
@@ -285,6 +309,8 @@ create table public.finishes (
 );
 create trigger trg_finishes_code before update on public.finishes
   for each row execute function public.prevent_code_change('cyc_code');
+create trigger trg_finishes_updated_at before update on public.finishes
+  for each row execute function public.set_updated_at();
 create index idx_finishes_process on public.finishes(process_id);
 create index idx_finishes_base on public.finishes(base_family_id);
 create index idx_finishes_surface on public.finishes(surface_id);
