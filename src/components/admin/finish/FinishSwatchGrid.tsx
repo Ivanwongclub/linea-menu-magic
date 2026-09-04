@@ -2,7 +2,8 @@ import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { localizedFinishName } from "@/features/admin/lib/localize";
-import { finishSwatchStyle, type FinishRow } from "@/features/admin/hooks/useFinishes";
+import { FinishSwatch } from "@/features/finishes/FinishSwatch";
+import type { FinishRow } from "@/features/admin/hooks/useFinishes";
 
 interface Props {
   finishes: FinishRow[];
@@ -35,7 +36,8 @@ export function FinishSwatchGrid({ finishes, attachedIds, onToggle, busy }: Prop
               attached ? "border-foreground bg-secondary/40" : "border-border hover:border-foreground/50",
             )}
           >
-            <div className="relative aspect-square w-full border border-border/60" style={finishSwatchStyle(f)}>
+            <div className="relative aspect-square w-full">
+              <FinishSwatch finish={f} className="absolute inset-0 border border-border/60" />
               {attached && (
                 <span className="absolute top-1 right-1 w-5 h-5 flex items-center justify-center bg-foreground text-background">
                   <Check className="w-3 h-3" />

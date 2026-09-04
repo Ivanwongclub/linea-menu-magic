@@ -12,7 +12,8 @@ import { localizedFinishName } from "@/features/admin/lib/localize";
 import { describeSupabaseError } from "@/components/admin/shared/supabaseError";
 import { FinishFacetRail } from "@/components/admin/finish/FinishFacetRail";
 import { FinishEditDialog } from "@/components/admin/finish/FinishEditDialog";
-import { finishSwatchStyle, useFinishAxes, useFinishes, type FinishRow } from "@/features/admin/hooks/useFinishes";
+import { useFinishAxes, useFinishes, type FinishRow } from "@/features/admin/hooks/useFinishes";
+import { FinishSwatch } from "@/features/finishes/FinishSwatch";
 import { useFinishFilter } from "@/features/admin/hooks/useFinishFilter";
 import { useFinishMutations } from "@/features/admin/hooks/useFinishMutations";
 
@@ -186,7 +187,7 @@ export default function AdminFinishes() {
                           <Checkbox checked={isSelected} onCheckedChange={() => toggleOne(f.id)} aria-label={f.cyc_code ?? f.factory_name_en} />
                         </TableCell>
                         <TableCell className="p-2">
-                          <div className="w-8 h-8 border border-border/60" style={finishSwatchStyle(f)} />
+                          <FinishSwatch finish={f} className="w-8 h-8 border border-border/60" />
                         </TableCell>
                         <TableCell className="font-mono text-xs">{f.cyc_code ?? <span className="italic text-muted-foreground">{t("admin.finish.noCode")}</span>}</TableCell>
                         <TableCell className="text-sm">{localizedFinishName(f, language)}</TableCell>

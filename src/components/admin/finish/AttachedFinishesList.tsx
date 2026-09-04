@@ -6,7 +6,8 @@ import { useI18n } from "@/features/i18n/I18nProvider";
 import { localizedFinishName } from "@/features/admin/lib/localize";
 import { SortableList } from "@/components/admin/shared/SortableList";
 import { SELECT_NONE_VALUE } from "@/components/admin/shared/flatCrudFields";
-import { finishSwatchStyle, type FinishRow } from "@/features/admin/hooks/useFinishes";
+import { FinishSwatch } from "@/features/finishes/FinishSwatch";
+import type { FinishRow } from "@/features/admin/hooks/useFinishes";
 
 interface Props {
   attached: FinishRow[];
@@ -47,7 +48,7 @@ export function AttachedFinishesList({ attached, defaultFinishId, onReorder, onD
                 >
                   <GripVertical className="w-4 h-4" />
                 </button>
-                <div className="w-7 h-7 border border-border/60 shrink-0" style={finishSwatchStyle(f)} />
+                <FinishSwatch finish={f} className="w-7 h-7 border border-border/60 shrink-0" />
                 <span className="font-mono text-xs text-muted-foreground w-20 shrink-0">{f.cyc_code ?? "—"}</span>
                 <span className="text-sm flex-1 truncate">{localizedFinishName(f, language)}</span>
                 {defaultFinishId === f.id && (

@@ -14,6 +14,7 @@ import { describeSupabaseError } from "@/components/admin/shared/supabaseError";
 import { SELECT_NONE_VALUE } from "@/components/admin/shared/flatCrudFields";
 import { FINISH_AXES, type AxisValues, type FinishRow } from "@/features/admin/hooks/useFinishes";
 import { useFinishMutations, type FinishInsert, type FinishUpdate } from "@/features/admin/hooks/useFinishMutations";
+import { FinishSwatch } from "@/features/finishes/FinishSwatch";
 
 const NONE = SELECT_NONE_VALUE;
 const HEX = /^#[0-9a-f]{6}$/i;
@@ -204,9 +205,15 @@ export function FinishEditDialog({ open, onOpenChange, finish, axes }: Props) {
   };
 
   const busy = create.isPending || update.isPending;
-  const swatchStyle = values.swatch_url.trim()
-    ? { backgroundImage: `url(${values.swatch_url.trim()})`, backgroundSize: "cover" }
-    : { backgroundColor: HEX.test(values.hex_approx.trim()) ? values.hex_approx.trim() : "#d4d4d4" };
+  // Live preview: the material model comes from the saved row (the database
+  // derives it from the axes on write), the colour/photo from the form.
+  const preview = {
+    hex_approx: HEX.test(values.hex_approx.trim()) ? values.hex_approx.trim() : null,
+    swatch_url: values.swatch_url.trim() || null,
+    metalness: finish?.metalness ?? 1,
+    roughness: finish?.roughness ?? 0.08,
+    anisotropy: finish?.anisotropy ?? 0,
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -297,7 +304,7 @@ export function FinishEditDialog({ open, onOpenChange, finish, axes }: Props) {
 
           {/* Appearance */}
           <section className="grid grid-cols-1 md:grid-cols-[auto_1fr_1fr] gap-4 items-start">
-            <div className="w-20 h-20 border border-border/60" style={swatchStyle} />
+            <FinishSwatch finish={preview} className="w-20 h-20 border border-border/60" />
             <Field label={t("admin.finishes.field.hex")} error={errors.hex_approx}>
               <Input data-testid="finish-hex" className="rounded-none font-mono" placeholder="#RRGGBB" value={values.hex_approx} onChange={(e) => set("hex_approx", e.target.value)} />
             </Field>
@@ -339,7 +346,7 @@ export function FinishEditDialog({ open, onOpenChange, finish, axes }: Props) {
                 <div key={axis.key} className="space-y-1">
                   <span className="text-[10px] text-muted-foreground">{t(`admin.axis.${axis.key}`)}</span>
                   <Select value={values.axes[axis.fk]} onValueChange={(v) => setAxis(axis.fk, v)}>
-                    <SelectTrigger className="rounded-none h-9 text-xs">
+                    <SelectTrigger className="rounded-none h-9 text-xs" data-testid={`finish-axis-${axis.key}`}>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>

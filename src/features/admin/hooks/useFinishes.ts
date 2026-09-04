@@ -73,9 +73,3 @@ export function useFinishAxes() {
 }
 
 export const finishDisplayName = (f: FinishRow) => f.marketing_name || f.factory_name_en;
-
-/** hex_approx until swatch_url exists; neutral grey when neither is set. */
-export const finishSwatchStyle = (f: FinishRow) =>
-  f.swatch_url
-    ? { backgroundImage: `url(${f.swatch_url})`, backgroundSize: "cover" }
-    : { backgroundColor: f.hex_approx ?? "#d4d4d4" };

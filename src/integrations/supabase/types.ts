@@ -633,6 +633,7 @@ export type Database = {
       }
       finishes: {
         Row: {
+          anisotropy: number
           base_family_id: string | null
           chart_page: string | null
           coating_id: string | null
@@ -649,9 +650,11 @@ export type Database = {
           marketing_name: string
           marketing_name_zh_hans: string | null
           marketing_name_zh_hant: string | null
+          metalness: number
           notes: string | null
           pattern_id: string | null
           process_id: string | null
+          roughness: number
           sort_order: number
           status: string
           surface_id: string | null
@@ -661,6 +664,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          anisotropy: number
           base_family_id?: string | null
           chart_page?: string | null
           coating_id?: string | null
@@ -677,9 +681,11 @@ export type Database = {
           marketing_name: string
           marketing_name_zh_hans?: string | null
           marketing_name_zh_hant?: string | null
+          metalness: number
           notes?: string | null
           pattern_id?: string | null
           process_id?: string | null
+          roughness: number
           sort_order?: number
           status?: string
           surface_id?: string | null
@@ -689,6 +695,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          anisotropy?: number
           base_family_id?: string | null
           chart_page?: string | null
           coating_id?: string | null
@@ -705,9 +712,11 @@ export type Database = {
           marketing_name?: string
           marketing_name_zh_hans?: string | null
           marketing_name_zh_hant?: string | null
+          metalness?: number
           notes?: string | null
           pattern_id?: string | null
           process_id?: string | null
+          roughness?: number
           sort_order?: number
           status?: string
           surface_id?: string | null
@@ -1642,6 +1651,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      finish_material_params: {
+        Args: {
+          p_base_family: string
+          p_coating: string
+          p_effect: string
+          p_pattern: string
+          p_process: string
+          p_surface: string
+          p_tint: string
+          p_tone: string
+        }
+        Returns: Record<string, unknown>
+      }
       user_has_brand: {
         Args: { _brand_id: string; _user_id: string }
         Returns: boolean

@@ -96,4 +96,5 @@ keyboard (focus the drag handle, Space, Arrow keys, Space).
 - `finish-picker-layout.mjs` — the attached list and default selector render below a viewport-bounded picker (regression for "nothing below the grid").
 - `admin-i18n.mjs` — the CMS renders in the stored language and the header switcher changes it live.
 - `finish-manager.mjs` — Phase 7: filtered bulk `is_public`, per-finish edit with locked identity, create with the standard/code rule, first-time code set then locked.
+- `swatch-renderer.mjs` — the four nickels render on four branches of the material model (mirror / brushed / matt / sand); changing a surface axis in the manager recomputes roughness/anisotropy; hand-set values are respected until an axis changes.
 - `product-language-tabs.mjs` — name/description under English / 繁體 / 简体 tabs, other fields always visible, header switcher leaves the active tab alone, trilingual read-back.

@@ -15,6 +15,7 @@ dist-ssr
 # Supabase CLI scratch state and e2e-local failure screenshots
 supabase/.temp
 scripts/e2e-local/last-failure.png
+scripts/e2e-local/.shots/
 
 # Editor directories and files
 .vscode/*
