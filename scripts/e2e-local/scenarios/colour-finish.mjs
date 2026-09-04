@@ -102,13 +102,7 @@ export default async function ({ page, admin, editor, status, h }) {
   assert.deepEqual(links, [{ finish_id: f1.id, sort_order: 0 }, { finish_id: f2.id, sort_order: 1 }]);
 
   // Reorder by keyboard: pick up the second row, move it up, drop
-  const handle = page.locator('[data-testid="attached-finish"][data-code="CYC-0002"]').getByLabel("Drag to reorder");
-  await handle.focus();
-  await page.keyboard.press("Space");
-  await page.waitForTimeout(150);
-  await page.keyboard.press("ArrowUp");
-  await page.waitForTimeout(150);
-  await page.keyboard.press("Space");
+  await h.keyboardReorder(page.locator('[data-testid="attached-finish"][data-code="CYC-0002"]').getByLabel("Drag to reorder"), "up");
   await page.waitForFunction(() => document.querySelector('[data-testid="attached-finish"]')?.getAttribute("data-code") === "CYC-0002");
   await page.waitForTimeout(500);
   ({ data: links } = await admin.from("product_finishes").select("finish_id, sort_order").eq("product_id", metal.id).order("sort_order"));

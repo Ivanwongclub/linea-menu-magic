@@ -2,9 +2,11 @@ import { GripVertical, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useI18n } from "@/features/i18n/I18nProvider";
+import { localizedFinishName } from "@/features/admin/lib/localize";
 import { SortableList } from "@/components/admin/shared/SortableList";
 import { SELECT_NONE_VALUE } from "@/components/admin/shared/flatCrudFields";
-import { finishDisplayName, finishSwatchStyle, type FinishRow } from "@/features/admin/hooks/useFinishes";
+import { finishSwatchStyle, type FinishRow } from "@/features/admin/hooks/useFinishes";
 
 interface Props {
   attached: FinishRow[];
@@ -16,16 +18,15 @@ interface Props {
 }
 
 export function AttachedFinishesList({ attached, defaultFinishId, onReorder, onDetach, onSetDefault, busy }: Props) {
+  const { t, language } = useI18n();
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <span className="text-xs uppercase tracking-wider text-muted-foreground">
-          Attached ({attached.length})
-        </span>
-      </div>
+      <span className="text-xs uppercase tracking-wider text-muted-foreground">
+        {t("admin.finish.attached", { count: attached.length })}
+      </span>
 
       {attached.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Nothing attached yet — click swatches below to add finishes.</p>
+        <p className="text-sm text-muted-foreground">{t("admin.finish.nothingAttached")}</p>
       ) : (
         <div className="space-y-1">
           <SortableList
@@ -41,24 +42,24 @@ export function AttachedFinishesList({ attached, defaultFinishId, onReorder, onD
                 <button
                   type="button"
                   className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground touch-none"
-                  aria-label="Drag to reorder"
+                  aria-label={t("admin.common.dragToReorder")}
                   {...dragHandleProps}
                 >
                   <GripVertical className="w-4 h-4" />
                 </button>
                 <div className="w-7 h-7 border border-border/60 shrink-0" style={finishSwatchStyle(f)} />
                 <span className="font-mono text-xs text-muted-foreground w-20 shrink-0">{f.cyc_code ?? "—"}</span>
-                <span className="text-sm flex-1 truncate">{finishDisplayName(f)}</span>
+                <span className="text-sm flex-1 truncate">{localizedFinishName(f, language)}</span>
                 {defaultFinishId === f.id && (
                   <span className="text-[10px] uppercase tracking-wider text-foreground border border-foreground px-1.5">
-                    Default
+                    {t("admin.finish.defaultBadge")}
                   </span>
                 )}
                 <Button
                   variant="ghost"
                   size="sm"
                   className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
-                  aria-label={`Detach ${f.cyc_code ?? finishDisplayName(f)}`}
+                  aria-label={t("admin.finish.detach", { code: f.cyc_code ?? localizedFinishName(f, language) })}
                   disabled={busy}
                   onClick={() => onDetach(f)}
                 >
@@ -71,25 +72,25 @@ export function AttachedFinishesList({ attached, defaultFinishId, onReorder, onD
       )}
 
       <div className="max-w-sm space-y-2">
-        <Label className="text-xs uppercase tracking-wider text-muted-foreground">Default finish</Label>
+        <Label className="text-xs uppercase tracking-wider text-muted-foreground">{t("admin.finish.default")}</Label>
         <Select
           value={defaultFinishId ?? SELECT_NONE_VALUE}
           onValueChange={(v) => onSetDefault(v === SELECT_NONE_VALUE ? null : v)}
           disabled={busy || attached.length === 0}
         >
           <SelectTrigger className="rounded-none" data-testid="default-finish-select">
-            <SelectValue placeholder="— No default —" />
+            <SelectValue placeholder={t("admin.finish.noDefault")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={SELECT_NONE_VALUE}>— No default —</SelectItem>
+            <SelectItem value={SELECT_NONE_VALUE}>{t("admin.finish.noDefault")}</SelectItem>
             {attached.map((f) => (
               <SelectItem key={f.id} value={f.id}>
-                {f.cyc_code ?? "—"} · {finishDisplayName(f)}
+                {f.cyc_code ?? "—"} · {localizedFinishName(f, language)}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        <p className="text-xs text-muted-foreground">Limited to the finishes attached above.</p>
+        <p className="text-xs text-muted-foreground">{t("admin.finish.defaultHint")}</p>
       </div>
     </div>
   );

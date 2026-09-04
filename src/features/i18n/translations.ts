@@ -1,9 +1,12 @@
+import { adminTranslations } from "./adminTranslations";
+
 export type AppLanguage = "en" | "zh-Hant" | "zh-Hans";
 
 type TranslationMap = Record<string, string>;
 
 export const translations: Record<AppLanguage, TranslationMap> = {
   en: {
+    ...adminTranslations.en,
     "i18n.switchLanguage": "Switch language",
     "i18n.en": "English",
     "i18n.zhHant": "Traditional Chinese",
@@ -385,6 +388,7 @@ export const translations: Record<AppLanguage, TranslationMap> = {
   },
 
   "zh-Hant": {
+    ...adminTranslations["zh-Hant"],
     "i18n.switchLanguage": "切換語言",
     "i18n.en": "英文",
     "i18n.zhHant": "繁體中文",
@@ -700,6 +704,7 @@ export const translations: Record<AppLanguage, TranslationMap> = {
   },
 
   "zh-Hans": {
+    ...adminTranslations["zh-Hans"],
     "i18n.switchLanguage": "切换语言",
     "i18n.en": "英文",
     "i18n.zhHant": "繁体中文",

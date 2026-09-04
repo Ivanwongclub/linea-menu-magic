@@ -3,15 +3,9 @@ import { toast } from "sonner";
 import { GripVertical, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/features/i18n/I18nProvider";
 import { SortableList } from "@/components/admin/shared/SortableList";
 import { describeSupabaseError } from "@/components/admin/shared/supabaseError";
 import {
@@ -58,29 +52,8 @@ function previewLigne(primary: string): number | null {
 
 const parse = (s: string) => (s.trim() === "" ? null : Number(s));
 
-function validate(drafts: Draft[]): Record<string, string> {
-  const errors: Record<string, string> = {};
-  drafts.forEach((d) => {
-    const p = Number(d.size_primary_mm);
-    if (d.size_primary_mm.trim() === "" || !Number.isFinite(p) || p <= 0) {
-      errors[d.key] = "Primary size is required and must be above 0.";
-      return;
-    }
-    for (const k of ["size_secondary_mm", "weight_g", "thickness_mm"] as const) {
-      const v = parse(d[k]);
-      if (v !== null && (!Number.isFinite(v) || v < 0)) {
-        errors[d.key] = "Measurements must be 0 or more.";
-        return;
-      }
-    }
-  });
-  if (drafts.filter((d) => d.is_default).length > 1) {
-    errors.__default = "Only one size can be the default.";
-  }
-  return errors;
-}
-
 export function SizeVariantsEditor({ productId }: { productId: string }) {
+  const { t } = useI18n();
   const { query, saveAll } = useProductSizeVariants(productId);
 
   const initial = useMemo(() => (query.data ?? []).map(fromRow), [query.data]);
@@ -88,7 +61,6 @@ export function SizeVariantsEditor({ productId }: { productId: string }) {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => setDrafts(initial), [initial]);
-
   const dirty = JSON.stringify(drafts) !== JSON.stringify(initial);
 
   const update = (key: string, patch: Partial<Draft>) =>
@@ -100,10 +72,7 @@ export function SizeVariantsEditor({ productId }: { productId: string }) {
         return next;
       }),
     );
-
-  const setDefault = (key: string) =>
-    setDrafts((prev) => prev.map((d) => ({ ...d, is_default: d.key === key })));
-
+  const setDefault = (key: string) => setDrafts((prev) => prev.map((d) => ({ ...d, is_default: d.key === key })));
   const addRow = () =>
     setDrafts((prev) => [
       ...prev,
@@ -118,14 +87,28 @@ export function SizeVariantsEditor({ productId }: { productId: string }) {
         size_ligne: null,
       },
     ]);
-
   const removeRow = (key: string) => setDrafts((prev) => prev.filter((d) => d.key !== key));
 
   const handleSave = () => {
-    const nextErrors = validate(drafts);
+    const nextErrors: Record<string, string> = {};
+    for (const d of drafts) {
+      const p = Number(d.size_primary_mm);
+      if (d.size_primary_mm.trim() === "" || !Number.isFinite(p) || p <= 0) {
+        nextErrors[d.key] = t("admin.sizes.validation.primary");
+        continue;
+      }
+      for (const k of ["size_secondary_mm", "weight_g", "thickness_mm"] as const) {
+        const v = parse(d[k]);
+        if (v !== null && (!Number.isFinite(v) || v < 0)) {
+          nextErrors[d.key] = t("admin.sizes.validation.measurements");
+          break;
+        }
+      }
+    }
+    if (drafts.filter((d) => d.is_default).length > 1) nextErrors.__default = t("admin.sizes.validation.oneDefault");
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) {
-      toast.error(nextErrors.__default ?? "Fix the highlighted sizes.");
+      toast.error(nextErrors.__default ?? t("admin.sizes.validation.fix"));
       return;
     }
     // Only saved rows carry an `id` key at all — see the insert path in the hook.
@@ -145,8 +128,8 @@ export function SizeVariantsEditor({ productId }: { productId: string }) {
     saveAll.mutate(
       { rows, removedIds },
       {
-        onSuccess: () => toast.success("Sizes saved."),
-        onError: (error) => toast.error(describeSupabaseError(error as { message: string; code?: string })),
+        onSuccess: () => toast.success(t("admin.sizes.saved")),
+        onError: (error) => toast.error(describeSupabaseError(error as { message: string; code?: string }, t)),
       },
     );
   };
@@ -170,13 +153,13 @@ export function SizeVariantsEditor({ productId }: { productId: string }) {
           <TableHeader>
             <TableRow>
               <TableHead className="w-8" />
-              <TableHead>Primary (mm)</TableHead>
-              <TableHead>Secondary (mm)</TableHead>
-              <TableHead>Label</TableHead>
-              <TableHead className="text-muted-foreground">Ligne</TableHead>
-              <TableHead>Weight (g)</TableHead>
-              <TableHead>Thickness (mm)</TableHead>
-              <TableHead className="w-20">Default</TableHead>
+              <TableHead>{t("admin.sizes.primary")}</TableHead>
+              <TableHead>{t("admin.sizes.secondary")}</TableHead>
+              <TableHead>{t("admin.sizes.label")}</TableHead>
+              <TableHead className="text-muted-foreground">{t("admin.sizes.ligne")}</TableHead>
+              <TableHead>{t("admin.sizes.weight")}</TableHead>
+              <TableHead>{t("admin.sizes.thickness")}</TableHead>
+              <TableHead className="w-20">{t("admin.sizes.default")}</TableHead>
               <TableHead className="w-10" />
             </TableRow>
           </TableHeader>
@@ -184,13 +167,13 @@ export function SizeVariantsEditor({ productId }: { productId: string }) {
             {query.isLoading ? (
               <TableRow>
                 <TableCell colSpan={9} className="text-center text-sm text-muted-foreground py-6">
-                  Loading…
+                  {t("admin.common.loading")}
                 </TableCell>
               </TableRow>
             ) : drafts.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={9} className="text-center text-sm text-muted-foreground py-6">
-                  No sizes yet.
+                  {t("admin.sizes.empty")}
                 </TableCell>
               </TableRow>
             ) : (
@@ -204,8 +187,9 @@ export function SizeVariantsEditor({ productId }: { productId: string }) {
                   <>
                     <TableCell className="w-8 pt-3">
                       <button
+                        type="button"
                         className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground touch-none"
-                        aria-label="Drag to reorder"
+                        aria-label={t("admin.common.dragToReorder")}
                         {...dragHandleProps}
                       >
                         <GripVertical className="w-4 h-4" />
@@ -235,7 +219,7 @@ export function SizeVariantsEditor({ productId }: { productId: string }) {
                         name={`default-size-${productId}`}
                         checked={d.is_default}
                         onChange={() => setDefault(d.key)}
-                        aria-label="Default size"
+                        aria-label={t("admin.sizes.defaultAria")}
                         className="accent-foreground"
                       />
                     </TableCell>
@@ -244,10 +228,10 @@ export function SizeVariantsEditor({ productId }: { productId: string }) {
                         variant="ghost"
                         size="sm"
                         className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+                        aria-label={t("admin.common.remove")}
                         onClick={() => removeRow(d.key)}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
-                        <span className="sr-only">Remove</span>
                       </Button>
                     </TableCell>
                   </>
@@ -263,10 +247,10 @@ export function SizeVariantsEditor({ productId }: { productId: string }) {
       <div className="flex items-center justify-between">
         <Button variant="outline" size="sm" className="rounded-none" onClick={addRow}>
           <Plus className="w-3.5 h-3.5 mr-2" />
-          Add size
+          {t("admin.sizes.add")}
         </Button>
         <Button size="sm" className="rounded-none" disabled={!dirty || saveAll.isPending} onClick={handleSave}>
-          {saveAll.isPending ? "Saving…" : "Save sizes"}
+          {saveAll.isPending ? t("admin.common.saving") : t("admin.sizes.save")}
         </Button>
       </div>
     </div>

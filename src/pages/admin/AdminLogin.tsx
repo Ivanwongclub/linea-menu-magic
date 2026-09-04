@@ -1,26 +1,28 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useAuth } from "@/features/auth/AuthProvider";
+import { useI18n } from "@/features/i18n/I18nProvider";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import LanguageSwitcher from "@/components/layout/LanguageSwitcher";
 import { Loader2, Lock } from "lucide-react";
 
-function validateFields(email: string, password: string) {
+function validateFields(email: string, password: string, t: (key: string) => string) {
   const errors: { email?: string; password?: string } = {};
   const normalizedEmail = email.trim();
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   if (!normalizedEmail) {
-    errors.email = "Email is required.";
+    errors.email = t("admin.login.validation.emailRequired");
   } else if (normalizedEmail.length > 255 || !emailRegex.test(normalizedEmail)) {
-    errors.email = "Enter a valid email address.";
+    errors.email = t("admin.login.validation.emailInvalid");
   }
 
   if (!password) {
-    errors.password = "Password is required.";
+    errors.password = t("admin.login.validation.passwordRequired");
   } else if (password.length > 128) {
-    errors.password = "Password is too long.";
+    errors.password = t("admin.login.validation.passwordTooLong");
   }
 
   return { errors, normalizedEmail };
@@ -37,6 +39,7 @@ export default function AdminLogin() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { signIn, session, loading } = useAuth();
+  const { t } = useI18n();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -57,7 +60,7 @@ export default function AdminLogin() {
     setAuthError(null);
     setFieldErrors({});
 
-    const { errors, normalizedEmail } = validateFields(email, password);
+    const { errors, normalizedEmail } = validateFields(email, password, t);
     if (errors.email || errors.password) {
       setFieldErrors(errors);
       return;
@@ -69,11 +72,11 @@ export default function AdminLogin() {
 
     if (error) {
       if (/invalid login credentials/i.test(error)) {
-        setAuthError("Incorrect email or password.");
+        setAuthError(t("admin.login.error.invalidCredentials"));
       } else if (/email not confirmed/i.test(error)) {
-        setAuthError("Confirm your email before signing in.");
+        setAuthError(t("admin.login.error.emailNotConfirmed"));
       } else {
-        setAuthError("Something went wrong signing in. Try again.");
+        setAuthError(t("admin.login.error.generic"));
       }
       return;
     }
@@ -83,19 +86,22 @@ export default function AdminLogin() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-6 py-20 bg-background">
+      <div className="absolute top-4 right-6">
+        <LanguageSwitcher />
+      </div>
       <div className="w-full max-w-md space-y-8">
         <div className="text-center space-y-3">
           <div className="mx-auto w-10 h-10 flex items-center justify-center border border-foreground">
             <Lock className="w-4 h-4" strokeWidth={1.5} />
           </div>
-          <h1 className="text-2xl font-light tracking-wide text-foreground">WIN-CYC Admin</h1>
-          <p className="text-sm text-muted-foreground">Sign in to manage the catalogue.</p>
+          <h1 className="text-2xl font-light tracking-wide text-foreground">{t("admin.login.title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("admin.login.subtitle")}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5 border border-border p-8 bg-background">
           <div className="space-y-2">
             <Label htmlFor="email" className="text-xs uppercase tracking-wider text-muted-foreground">
-              Email
+              {t("admin.login.email")}
             </Label>
             <Input
               id="email"
@@ -115,7 +121,7 @@ export default function AdminLogin() {
 
           <div className="space-y-2">
             <Label htmlFor="password" className="text-xs uppercase tracking-wider text-muted-foreground">
-              Password
+              {t("admin.login.password")}
             </Label>
             <Input
               id="password"
@@ -142,17 +148,17 @@ export default function AdminLogin() {
           <Button type="submit" disabled={submitting} className="w-full rounded-none">
             {submitting ? (
               <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Signing in…
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t("admin.login.signingIn")}
               </>
             ) : (
-              "Sign in"
+              t("admin.login.signIn")
             )}
           </Button>
         </form>
 
         <div className="text-center">
           <Link to="/" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-            Back to wincyc.com
+            {t("admin.login.back")}
           </Link>
         </div>
       </div>

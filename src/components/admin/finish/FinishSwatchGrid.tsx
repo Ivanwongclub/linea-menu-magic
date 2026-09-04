@@ -1,6 +1,8 @@
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { finishDisplayName, finishSwatchStyle, type FinishRow } from "@/features/admin/hooks/useFinishes";
+import { useI18n } from "@/features/i18n/I18nProvider";
+import { localizedFinishName } from "@/features/admin/lib/localize";
+import { finishSwatchStyle, type FinishRow } from "@/features/admin/hooks/useFinishes";
 
 interface Props {
   finishes: FinishRow[];
@@ -10,8 +12,9 @@ interface Props {
 }
 
 export function FinishSwatchGrid({ finishes, attachedIds, onToggle, busy }: Props) {
+  const { t, language } = useI18n();
   if (finishes.length === 0) {
-    return <p className="text-sm text-muted-foreground py-10 text-center">No finishes match.</p>;
+    return <p className="text-sm text-muted-foreground py-10 text-center">{t("admin.finish.noMatch")}</p>;
   }
   return (
     <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
@@ -39,9 +42,11 @@ export function FinishSwatchGrid({ finishes, attachedIds, onToggle, busy }: Prop
                 </span>
               )}
             </div>
-            <div className="font-mono text-[10px] text-muted-foreground truncate">{f.cyc_code ?? "no code"}</div>
-            <div className="text-xs text-foreground truncate">{finishDisplayName(f)}</div>
-            {f.status !== "active" && <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{f.status}</div>}
+            <div className="font-mono text-[10px] text-muted-foreground truncate">{f.cyc_code ?? t("admin.finish.noCode")}</div>
+            <div className="text-xs text-foreground truncate">{localizedFinishName(f, language)}</div>
+            {f.status !== "active" && (
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{f.status}</div>
+            )}
           </button>
         );
       })}

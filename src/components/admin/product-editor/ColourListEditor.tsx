@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/features/i18n/I18nProvider";
 import { SortableList } from "@/components/admin/shared/SortableList";
 import { describeSupabaseError } from "@/components/admin/shared/supabaseError";
 import { useProductColours, type ColourRow, type ColourWrite } from "@/features/admin/hooks/useProductColours";
@@ -29,17 +30,9 @@ const fromRow = (r: ColourRow): Draft => ({
 
 const HEX = /^#[0-9a-f]{6}$/i;
 
-function validate(drafts: Draft[]) {
-  const errors: Record<string, string> = {};
-  for (const d of drafts) {
-    if (!d.name.trim()) errors[d.key] = "Name is required.";
-    else if (d.hex.trim() && !HEX.test(d.hex.trim())) errors[d.key] = "Hex must look like #1A2B3C.";
-  }
-  return errors;
-}
-
 /** Plain colour list for non-metal products — the counterpart of the finish picker. */
 export function ColourListEditor({ productId }: { productId: string }) {
+  const { t } = useI18n();
   const { query, saveAll } = useProductColours(productId);
   const initial = useMemo(() => (query.data ?? []).map(fromRow), [query.data]);
   const [drafts, setDrafts] = useState<Draft[]>([]);
@@ -58,10 +51,14 @@ export function ColourListEditor({ productId }: { productId: string }) {
   const removeRow = (key: string) => setDrafts((prev) => prev.filter((d) => d.key !== key));
 
   const handleSave = () => {
-    const nextErrors = validate(drafts);
+    const nextErrors: Record<string, string> = {};
+    for (const d of drafts) {
+      if (!d.name.trim()) nextErrors[d.key] = t("admin.colours.validation.name");
+      else if (d.hex.trim() && !HEX.test(d.hex.trim())) nextErrors[d.key] = t("admin.colours.validation.hex");
+    }
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) {
-      toast.error("Fix the highlighted colours.");
+      toast.error(t("admin.colours.validation.fix"));
       return;
     }
     // Saved rows carry their id; new rows get no `id` key at all.
@@ -78,8 +75,8 @@ export function ColourListEditor({ productId }: { productId: string }) {
     saveAll.mutate(
       { rows, removedIds },
       {
-        onSuccess: () => toast.success("Colours saved."),
-        onError: (error) => toast.error(describeSupabaseError(error as { message: string; code?: string })),
+        onSuccess: () => toast.success(t("admin.colours.saved")),
+        onError: (error) => toast.error(describeSupabaseError(error as { message: string; code?: string }, t)),
       },
     );
   };
@@ -92,21 +89,25 @@ export function ColourListEditor({ productId }: { productId: string }) {
             <TableRow>
               <TableHead className="w-8" />
               <TableHead className="w-12" />
-              <TableHead>Name</TableHead>
-              <TableHead>Traditional (繁體)</TableHead>
-              <TableHead>Simplified (简体)</TableHead>
-              <TableHead className="w-32">Hex</TableHead>
+              <TableHead>{t("admin.colours.name")}</TableHead>
+              <TableHead>{t("admin.colours.hant")}</TableHead>
+              <TableHead>{t("admin.colours.hans")}</TableHead>
+              <TableHead className="w-32">{t("admin.colours.hex")}</TableHead>
               <TableHead className="w-10" />
             </TableRow>
           </TableHeader>
           <TableBody>
             {query.isLoading ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center text-sm text-muted-foreground py-6">Loading…</TableCell>
+                <TableCell colSpan={7} className="text-center text-sm text-muted-foreground py-6">
+                  {t("admin.common.loading")}
+                </TableCell>
               </TableRow>
             ) : drafts.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center text-sm text-muted-foreground py-6">No colours yet.</TableCell>
+                <TableCell colSpan={7} className="text-center text-sm text-muted-foreground py-6">
+                  {t("admin.colours.empty")}
+                </TableCell>
               </TableRow>
             ) : (
               <SortableList
@@ -121,7 +122,7 @@ export function ColourListEditor({ productId }: { productId: string }) {
                       <button
                         type="button"
                         className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground touch-none"
-                        aria-label="Drag to reorder"
+                        aria-label={t("admin.common.dragToReorder")}
                         {...dragHandleProps}
                       >
                         <GripVertical className="w-4 h-4" />
@@ -147,7 +148,7 @@ export function ColourListEditor({ productId }: { productId: string }) {
                       <Input className="rounded-none h-8 text-sm font-mono" placeholder="#RRGGBB" value={d.hex} onChange={(e) => update(d.key, { hex: e.target.value })} />
                     </TableCell>
                     <TableCell className="p-2">
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive" aria-label="Remove colour" onClick={() => removeRow(d.key)}>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive" aria-label={t("admin.colours.remove")} onClick={() => removeRow(d.key)}>
                         <Trash2 className="w-3.5 h-3.5" />
                       </Button>
                     </TableCell>
@@ -161,10 +162,10 @@ export function ColourListEditor({ productId }: { productId: string }) {
       <div className="flex items-center justify-between">
         <Button variant="outline" size="sm" className="rounded-none" onClick={addRow}>
           <Plus className="w-3.5 h-3.5 mr-2" />
-          Add colour
+          {t("admin.colours.add")}
         </Button>
         <Button size="sm" className="rounded-none" disabled={!dirty || saveAll.isPending} onClick={handleSave}>
-          {saveAll.isPending ? "Saving…" : "Save colours"}
+          {saveAll.isPending ? t("admin.common.saving") : t("admin.colours.save")}
         </Button>
       </div>
     </div>

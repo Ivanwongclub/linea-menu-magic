@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/features/auth/AuthProvider";
+import { useI18n } from "@/features/i18n/I18nProvider";
 import { useCatalogueEditorStatus } from "@/features/admin/hooks/useCatalogueEditorStatus";
 import { Button } from "@/components/ui/button";
 import { ShieldAlert, LogOut } from "lucide-react";
@@ -19,6 +20,7 @@ interface Props {
 export default function RequireCatalogueEditor({ children }: Props) {
   const { session, loading: authLoading, signOut } = useAuth();
   const { isEditor, loading: editorLoading } = useCatalogueEditorStatus();
+  const { t } = useI18n();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -50,15 +52,12 @@ export default function RequireCatalogueEditor({ children }: Props) {
             <ShieldAlert className="w-5 h-5" strokeWidth={1.5} />
           </div>
           <div className="space-y-2">
-            <h1 className="text-xl font-light tracking-wide text-foreground">No access</h1>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              This account isn't set up as a catalogue editor. Contact whoever
-              administers the WIN-CYC admin CMS to request access.
-            </p>
+            <h1 className="text-xl font-light tracking-wide text-foreground">{t("admin.noAccess.title")}</h1>
+            <p className="text-sm text-muted-foreground leading-relaxed">{t("admin.noAccess.body")}</p>
           </div>
           <Button variant="outline" className="rounded-none" onClick={handleSignOut}>
             <LogOut className="w-3.5 h-3.5 mr-2" />
-            Sign out
+            {t("admin.common.signOut")}
           </Button>
         </div>
       </div>

@@ -1,9 +1,12 @@
 import { useMemo } from "react";
+import { useI18n } from "@/features/i18n/I18nProvider";
+import { localizedName } from "@/features/admin/lib/localize";
 import { FlatCrudTable } from "@/components/admin/shared/FlatCrudTable";
 import { useFlatCrudTable } from "@/features/admin/hooks/useFlatCrudTable";
 import type { FlatCrudField } from "@/components/admin/shared/flatCrudFields";
 
 export default function CategoriesPanel() {
+  const { t, language } = useI18n();
   const { query: familiesQuery } = useFlatCrudTable("product_families", { orderBy: "sort_order" });
   const families = useMemo(() => familiesQuery.data ?? [], [familiesQuery.data]);
 
@@ -12,38 +15,39 @@ export default function CategoriesPanel() {
       {
         type: "text",
         key: "slug",
-        label: "Slug",
+        label: t("admin.tax.slug"),
         required: true,
         lockAfterCreate: true,
-        helperText: "Used in category filters elsewhere in the site — set once, not editable after creation.",
+        helperText: t("admin.tax.slugHintCategory"),
       },
-      { type: "nameGroup", key: "name", label: "Name", required: true },
+      { type: "nameGroup", key: "name", label: t("admin.tax.name"), required: true },
       {
         type: "select",
         key: "family_id",
-        label: "Family",
-        placeholder: "No family",
+        label: t("admin.tax.family"),
+        placeholder: t("admin.tax.noFamilyPlaceholder"),
         allowNone: true,
-        noneLabel: "— No family —",
-        options: families.map((f) => ({ value: f.id, label: f.name })),
+        noneLabel: t("admin.tax.noFamily"),
+        options: families.map((f) => ({ value: f.id, label: localizedName(f, language) })),
       },
     ],
-    [families],
+    [families, t, language],
   );
 
-  const familyName = (id: string | null) => families.find((f) => f.id === id)?.name ?? "—";
+  const familyName = (id: string | null) => {
+    const f = families.find((x) => x.id === id);
+    return f ? localizedName(f, language) : "—";
+  };
 
   return (
     <FlatCrudTable
       table="product_categories"
-      itemLabel="category"
-      itemLabelPlural="categories"
+      itemLabel={t("admin.item.category")}
+      itemLabelPlural={t("admin.item.categories")}
       fields={fields}
       hasSortOrder
-      extraColumnLabel="Family"
-      renderExtraCell={(row) => (
-        <span className="text-sm text-muted-foreground">{familyName(row.family_id)}</span>
-      )}
+      extraColumnLabel={t("admin.tax.family")}
+      renderExtraCell={(row) => <span className="text-sm text-muted-foreground">{familyName(row.family_id)}</span>}
     />
   );
 }

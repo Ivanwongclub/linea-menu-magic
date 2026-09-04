@@ -38,6 +38,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useI18n } from "@/features/i18n/I18nProvider";
+import { localizedName } from "@/features/admin/lib/localize";
 import { SortableList } from "@/components/admin/shared/SortableList";
 import { describeSupabaseError } from "@/components/admin/shared/supabaseError";
 import {
@@ -60,9 +62,9 @@ interface RowWithLifecycle {
 
 interface FlatCrudTableProps<T extends TaxonomyTableName> {
   table: T;
-  /** Singular display name, e.g. "family", "material" — used in buttons and messages. */
+  /** Singular display name, already translated, e.g. "family" / "系列". */
   itemLabel: string;
-  /** Explicit plural — "families", not "familys". */
+  /** Explicit plural, already translated — "families", not "familys". */
   itemLabelPlural: string;
   fields: FlatCrudField[];
   hasSortOrder?: boolean;
@@ -77,8 +79,11 @@ interface FlatCrudTableProps<T extends TaxonomyTableName> {
    * archive-only.
    */
   checkUsageBeforeDelete?: (id: string) => Promise<number>;
-  usageNounPlural?: string;
+  /** Translated noun for the in-use message, e.g. "finishes". */
+  usageNoun?: string;
 }
+
+type SupabaseError = { message: string; code?: string };
 
 function emptyValues(fields: FlatCrudField[]): FlatCrudFormValues {
   const values: FlatCrudFormValues = {};
@@ -99,10 +104,7 @@ function emptyValues(fields: FlatCrudField[]): FlatCrudFormValues {
   return values;
 }
 
-function valuesFromRow<T extends TaxonomyTableName>(
-  fields: FlatCrudField[],
-  row: TaxonomyRow<T>,
-): FlatCrudFormValues {
+function valuesFromRow<T extends TaxonomyTableName>(fields: FlatCrudField[], row: TaxonomyRow<T>): FlatCrudFormValues {
   const values: FlatCrudFormValues = {};
   const record = row as unknown as Record<string, unknown>;
   for (const field of fields) {
@@ -131,8 +133,9 @@ export function FlatCrudTable<T extends TaxonomyTableName>({
   extraColumnLabel,
   renderExtraCell,
   checkUsageBeforeDelete,
-  usageNounPlural = "finishes",
+  usageNoun,
 }: FlatCrudTableProps<T>) {
+  const { t, language } = useI18n();
   const { query, create, update, setActive, reorder, remove } = useFlatCrudTable(table, {
     orderBy: hasSortOrder ? "sort_order" : undefined,
   });
@@ -152,6 +155,9 @@ export function FlatCrudTable<T extends TaxonomyTableName>({
   const [pendingDelete, setPendingDelete] = useState<(TaxonomyRow<T> & RowWithLifecycle) | null>(null);
   const [checkingDeleteId, setCheckingDeleteId] = useState<string | null>(null);
 
+  const onError = (error: unknown) => toast.error(describeSupabaseError(error as SupabaseError, t));
+  const vars = { item: itemLabel, plural: itemLabelPlural };
+
   const openCreate = () => {
     setEditingRow(null);
     setValues(emptyValues(fields));
@@ -168,15 +174,16 @@ export function FlatCrudTable<T extends TaxonomyTableName>({
 
   const handleSubmit = () => {
     const errors: Record<string, string> = {};
+    const required = t("admin.validation.required");
     for (const field of fields) {
       if (field.type === "nameGroup" && field.required !== false) {
-        if (!String(values[field.key] ?? "").trim()) errors[field.key] = "Required.";
+        if (!String(values[field.key] ?? "").trim()) errors[field.key] = required;
       }
       if ((field.type === "code" || field.type === "text") && field.required) {
-        if (!String(values[field.key] ?? "").trim()) errors[field.key] = "Required.";
+        if (!String(values[field.key] ?? "").trim()) errors[field.key] = required;
       }
       if (field.type === "select" && field.required) {
-        if (!values[field.key] || values[field.key] === SELECT_NONE_VALUE) errors[field.key] = "Required.";
+        if (!values[field.key] || values[field.key] === SELECT_NONE_VALUE) errors[field.key] = required;
       }
     }
     if (Object.keys(errors).length > 0) {
@@ -185,7 +192,7 @@ export function FlatCrudTable<T extends TaxonomyTableName>({
     }
 
     // Trim to the exact set of DB columns this form owns; select fields with
-    // an empty string mean "unset" (nullable FK columns like family_id).
+    // the "none" sentinel mean "unset" (nullable FK columns like family_id).
     const payload: Record<string, string | boolean | null> = {};
     for (const field of fields) {
       if (field.type === "nameGroup") {
@@ -216,19 +223,19 @@ export function FlatCrudTable<T extends TaxonomyTableName>({
         { id: editingRow.id, values: payload as never },
         {
           onSuccess: () => {
-            toast.success(`${itemLabel} updated.`);
+            toast.success(t("admin.crud.updated", vars));
             setDialogOpen(false);
           },
-          onError: (error) => toast.error(describeSupabaseError(error as { message: string; code?: string })),
+          onError,
         },
       );
     } else {
       create.mutate(payload as never, {
         onSuccess: () => {
-          toast.success(`${itemLabel} created.`);
+          toast.success(t("admin.crud.created", vars));
           setDialogOpen(false);
         },
-        onError: (error) => toast.error(describeSupabaseError(error as { message: string; code?: string })),
+        onError,
       });
     }
   };
@@ -237,8 +244,8 @@ export function FlatCrudTable<T extends TaxonomyTableName>({
     setActive.mutate(
       { id: row.id, isActive: nextActive },
       {
-        onSuccess: () => toast.success(nextActive ? `${itemLabel} restored.` : `${itemLabel} archived.`),
-        onError: (error) => toast.error(describeSupabaseError(error as { message: string; code?: string })),
+        onSuccess: () => toast.success(t(nextActive ? "admin.crud.restored" : "admin.crud.archivedToast", vars)),
+        onError,
       },
     );
   };
@@ -256,9 +263,7 @@ export function FlatCrudTable<T extends TaxonomyTableName>({
       .filter((u) => u.current !== u.sort_order)
       .map(({ id, sort_order }) => ({ id, sort_order }));
     if (updates.length === 0) return;
-    reorder.mutate(updates, {
-      onError: (error) => toast.error(describeSupabaseError(error as { message: string; code?: string })),
-    });
+    reorder.mutate(updates, { onError });
   };
 
   const handleDeleteClick = async (row: TaxonomyRow<T> & RowWithLifecycle) => {
@@ -267,12 +272,12 @@ export function FlatCrudTable<T extends TaxonomyTableName>({
     try {
       const count = await checkUsageBeforeDelete(row.id);
       if (count > 0) {
-        toast.error(
-          `${count} ${count === 1 ? usageNounPlural.replace(/es$/, "") : usageNounPlural} use this — deactivate it instead of deleting.`,
-        );
+        toast.error(t("admin.crud.inUse", { count, noun: usageNoun ?? t("admin.item.finishes") }));
         return;
       }
       setPendingDelete(row);
+    } catch (error) {
+      onError(error);
     } finally {
       setCheckingDeleteId(null);
     }
@@ -282,28 +287,40 @@ export function FlatCrudTable<T extends TaxonomyTableName>({
     if (!pendingDelete) return;
     remove.mutate(pendingDelete.id, {
       onSuccess: () => {
-        toast.success(`${itemLabel} deleted.`);
+        toast.success(t("admin.crud.deleted", vars));
         setPendingDelete(null);
       },
       onError: (error) => {
-        toast.error(describeSupabaseError(error as { message: string; code?: string }));
+        onError(error);
         setPendingDelete(null);
       },
     });
   };
 
+  const codeField = fields.find((f) => f.type === "code");
+  const nameField = fields.find((f) => f.type === "nameGroup");
+
   const renderRowCells = (row: TaxonomyRow<T> & RowWithLifecycle, dragHandleProps?: Record<string, unknown>) => {
     const record = row as unknown as Record<string, unknown>;
-    const codeField = fields.find((f) => f.type === "code");
-    const nameField = fields.find((f) => f.type === "nameGroup");
+    const zh = nameField
+      ? [record[`${nameField.key}_zh_hant`], record[`${nameField.key}_zh_hans`]].filter(Boolean).join(" / ")
+      : "";
+    const primary = nameField ? localizedName(row as unknown as { name: string; name_zh_hant?: string | null; name_zh_hans?: string | null }, language) : "";
+    // Show the other names beneath the localised one, without repeating it.
+    const secondary = nameField
+      ? [record[nameField.key], record[`${nameField.key}_zh_hant`], record[`${nameField.key}_zh_hans`]]
+          .filter((v) => v && v !== primary)
+          .join(" / ")
+      : zh;
 
     return (
       <>
         {hasSortOrder && (
           <TableCell className="w-8">
             <button
+              type="button"
               className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground touch-none"
-              aria-label="Drag to reorder"
+              aria-label={t("admin.common.dragToReorder")}
               {...(dragHandleProps ?? {})}
             >
               <GripVertical className="w-4 h-4" />
@@ -311,19 +328,11 @@ export function FlatCrudTable<T extends TaxonomyTableName>({
           </TableCell>
         )}
         {codeField && (
-          <TableCell className="font-mono text-xs text-muted-foreground">
-            {String(record[codeField.key] ?? "—")}
-          </TableCell>
+          <TableCell className="font-mono text-xs text-muted-foreground">{String(record[codeField.key] ?? "—")}</TableCell>
         )}
         <TableCell>
-          <div className="text-sm text-foreground">{nameField ? String(record[nameField.key] ?? "") : ""}</div>
-          {nameField && (record[`${nameField.key}_zh_hant`] || record[`${nameField.key}_zh_hans`]) && (
-            <div className="text-xs text-muted-foreground">
-              {[record[`${nameField.key}_zh_hant`], record[`${nameField.key}_zh_hans`]]
-                .filter(Boolean)
-                .join(" / ")}
-            </div>
-          )}
+          <div className="text-sm text-foreground">{primary}</div>
+          {secondary && <div className="text-xs text-muted-foreground">{secondary}</div>}
         </TableCell>
         {renderExtraCell && <TableCell>{renderExtraCell(row)}</TableCell>}
         <TableCell>
@@ -331,10 +340,10 @@ export function FlatCrudTable<T extends TaxonomyTableName>({
             <Switch
               checked={row.is_active}
               onCheckedChange={(checked) => handleToggleActive(row, checked)}
-              aria-label={row.is_active ? "Active — click to archive" : "Archived — click to restore"}
+              aria-label={t(row.is_active ? "admin.crud.toggleToArchive" : "admin.crud.toggleToRestore")}
             />
             <Badge variant={row.is_active ? "default" : "secondary"} className="text-[10px]">
-              {row.is_active ? "Active" : "Archived"}
+              {t(row.is_active ? "admin.crud.active" : "admin.crud.archived")}
             </Badge>
           </div>
         </TableCell>
@@ -342,7 +351,7 @@ export function FlatCrudTable<T extends TaxonomyTableName>({
           <div className="flex items-center justify-end gap-1">
             <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => openEdit(row)}>
               <Pencil className="w-3.5 h-3.5" />
-              <span className="sr-only">Edit</span>
+              <span className="sr-only">{t("admin.common.edit")}</span>
             </Button>
             {checkUsageBeforeDelete && (
               <Button
@@ -353,7 +362,7 @@ export function FlatCrudTable<T extends TaxonomyTableName>({
                 onClick={() => handleDeleteClick(row)}
               >
                 <Trash2 className="w-3.5 h-3.5" />
-                <span className="sr-only">Delete</span>
+                <span className="sr-only">{t("admin.common.delete")}</span>
               </Button>
             )}
           </div>
@@ -362,30 +371,26 @@ export function FlatCrudTable<T extends TaxonomyTableName>({
     );
   };
 
-  const columnCount =
-    (hasSortOrder ? 1 : 0) +
-    (fields.some((f) => f.type === "code") ? 1 : 0) +
-    1 + // name
-    (renderExtraCell ? 1 : 0) +
-    2; // status, actions
+  const columnCount = (hasSortOrder ? 1 : 0) + (codeField ? 1 : 0) + 1 + (renderExtraCell ? 1 : 0) + 2;
+
+  const countLabel =
+    activeOnly && allRows.length !== rows.length
+      ? t("admin.crud.activeOf", { active: rows.length, total: allRows.length, plural: itemLabelPlural })
+      : t(rows.length === 1 ? "admin.crud.countOne" : "admin.crud.countMany", { count: rows.length, ...vars });
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <p className="text-sm text-muted-foreground">
-            {activeOnly && allRows.length !== rows.length
-              ? `${rows.length} active of ${allRows.length} ${itemLabelPlural}`
-              : `${rows.length} ${rows.length === 1 ? itemLabel : itemLabelPlural}`}
-          </p>
+          <p className="text-sm text-muted-foreground">{countLabel}</p>
           <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
-            <Switch checked={activeOnly} onCheckedChange={setActiveOnly} aria-label="Show active only" />
-            Active only
+            <Switch checked={activeOnly} onCheckedChange={setActiveOnly} aria-label={t("admin.crud.activeOnly")} />
+            {t("admin.crud.activeOnly")}
           </label>
         </div>
         <Button size="sm" className="rounded-none" onClick={openCreate}>
           <Plus className="w-3.5 h-3.5 mr-2" />
-          New {itemLabel}
+          {t("admin.crud.new", vars)}
         </Button>
       </div>
 
@@ -394,26 +399,26 @@ export function FlatCrudTable<T extends TaxonomyTableName>({
           <TableHeader>
             <TableRow>
               {hasSortOrder && <TableHead className="w-8" />}
-              {fields.some((f) => f.type === "code") && <TableHead>Code</TableHead>}
-              <TableHead>Name</TableHead>
+              {codeField && <TableHead>{t("admin.crud.col.code")}</TableHead>}
+              <TableHead>{t("admin.crud.col.name")}</TableHead>
               {extraColumnLabel && <TableHead>{extraColumnLabel}</TableHead>}
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>{t("admin.crud.col.status")}</TableHead>
+              <TableHead className="text-right">{t("admin.crud.col.actions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {query.isLoading ? (
               <TableRow>
                 <TableCell colSpan={columnCount} className="text-center text-sm text-muted-foreground py-8">
-                  Loading…
+                  {t("admin.common.loading")}
                 </TableCell>
               </TableRow>
             ) : rows.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={columnCount} className="text-center text-sm text-muted-foreground py-8">
                   {activeOnly && allRows.length > 0
-                    ? `No active ${itemLabelPlural} — ${allRows.length} archived.`
-                    : `No ${itemLabelPlural} yet.`}
+                    ? t("admin.crud.noneActive", { plural: itemLabelPlural, count: allRows.length })
+                    : t("admin.crud.none", { plural: itemLabelPlural })}
                 </TableCell>
               </TableRow>
             ) : hasSortOrder ? (
@@ -435,7 +440,7 @@ export function FlatCrudTable<T extends TaxonomyTableName>({
       <FlatCrudFormDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        title={editingRow ? `Edit ${itemLabel}` : `New ${itemLabel}`}
+        title={t(editingRow ? "admin.crud.editTitle" : "admin.crud.newTitle", vars)}
         fields={fields}
         mode={editingRow ? "edit" : "create"}
         values={values}
@@ -448,14 +453,12 @@ export function FlatCrudTable<T extends TaxonomyTableName>({
       <AlertDialog open={!!pendingDelete} onOpenChange={(open) => !open && setPendingDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete this {itemLabel}?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This can't be undone. Nothing currently references it, so the database will allow the delete.
-            </AlertDialogDescription>
+            <AlertDialogTitle>{t("admin.crud.deleteTitle", vars)}</AlertDialogTitle>
+            <AlertDialogDescription>{t("admin.crud.deleteBody")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+            <AlertDialogCancel>{t("admin.common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>{t("admin.common.delete")}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -488,9 +491,9 @@ function FlatCrudFormDialog({
   submitting,
   onSubmit,
 }: FlatCrudFormDialogProps) {
-  const setField = (key: string, value: string | boolean) => {
-    onChange({ ...values, [key]: value });
-  };
+  const { t } = useI18n();
+  const setField = (key: string, value: string | boolean) => onChange({ ...values, [key]: value });
+  const labelClass = "text-xs uppercase tracking-wider text-muted-foreground";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -505,91 +508,49 @@ function FlatCrudFormDialog({
               const [en, hant, hans] = nameGroupKeys(field.key);
               return (
                 <div key={field.key} className="space-y-2">
-                  <Label className="text-xs uppercase tracking-wider text-muted-foreground">
-                    {field.label}
-                  </Label>
+                  <Label className={labelClass}>{field.label}</Label>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    <div className="space-y-1">
-                      <span className="text-[10px] text-muted-foreground">English</span>
-                      <Input
-                        className="rounded-none"
-                        value={String(values[en] ?? "")}
-                        onChange={(e) => setField(en, e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <span className="text-[10px] text-muted-foreground">Traditional (繁體)</span>
-                      <Input
-                        className="rounded-none"
-                        value={String(values[hant] ?? "")}
-                        onChange={(e) => setField(hant, e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <span className="text-[10px] text-muted-foreground">Simplified (简体)</span>
-                      <Input
-                        className="rounded-none"
-                        value={String(values[hans] ?? "")}
-                        onChange={(e) => setField(hans, e.target.value)}
-                      />
-                    </div>
+                    {[
+                      [en, t("admin.crud.english")],
+                      [hant, t("admin.crud.hant")],
+                      [hans, t("admin.crud.hans")],
+                    ].map(([key, sub]) => (
+                      <div key={key} className="space-y-1">
+                        <span className="text-[10px] text-muted-foreground">{sub}</span>
+                        <Input
+                          className="rounded-none"
+                          value={String(values[key] ?? "")}
+                          onChange={(e) => setField(key, e.target.value)}
+                        />
+                      </div>
+                    ))}
                   </div>
-                  {fieldErrors[field.key] && (
-                    <p className="text-xs text-destructive">{fieldErrors[field.key]}</p>
-                  )}
+                  {fieldErrors[field.key] && <p className="text-xs text-destructive">{fieldErrors[field.key]}</p>}
                 </div>
               );
             }
 
-            if (field.type === "code") {
-              const locked = mode === "edit";
+            if (field.type === "code" || field.type === "text") {
+              const locked = mode === "edit" && (field.type === "code" || field.lockAfterCreate);
               return (
                 <div key={field.key} className="space-y-2">
-                  <Label className="text-xs uppercase tracking-wider text-muted-foreground">
-                    {field.label}
-                  </Label>
+                  <Label className={labelClass}>{field.label}</Label>
                   {locked ? (
-                    <div className="text-sm font-mono px-3 py-2 border border-border bg-secondary/50 text-muted-foreground">
+                    <div className={`text-sm px-3 py-2 border border-border bg-secondary/50 text-muted-foreground ${field.type === "code" ? "font-mono" : ""}`}>
                       {String(values[field.key] ?? "—")}
-                      <span className="ml-2 text-[10px] uppercase tracking-wider">Immutable once set</span>
+                      {field.type === "code" && (
+                        <span className="ml-2 text-[10px] uppercase tracking-wider">{t("admin.crud.immutable")}</span>
+                      )}
                     </div>
                   ) : (
                     <Input
-                      className="rounded-none font-mono"
+                      className={`rounded-none ${field.type === "code" ? "font-mono" : ""}`}
                       value={String(values[field.key] ?? "")}
                       onChange={(e) => setField(field.key, e.target.value)}
                     />
                   )}
                   {field.helperText && <p className="text-xs text-muted-foreground">{field.helperText}</p>}
-                  {fieldErrors[field.key] && (
-                    <p className="text-xs text-destructive">{fieldErrors[field.key]}</p>
-                  )}
-                </div>
-              );
-            }
-
-            if (field.type === "text") {
-              const locked = mode === "edit" && field.lockAfterCreate;
-              return (
-                <div key={field.key} className="space-y-2">
-                  <Label className="text-xs uppercase tracking-wider text-muted-foreground">
-                    {field.label}
-                  </Label>
-                  {locked ? (
-                    <div className="text-sm px-3 py-2 border border-border bg-secondary/50 text-muted-foreground">
-                      {String(values[field.key] ?? "—")}
-                    </div>
-                  ) : (
-                    <Input
-                      className="rounded-none"
-                      value={String(values[field.key] ?? "")}
-                      onChange={(e) => setField(field.key, e.target.value)}
-                    />
-                  )}
-                  {field.helperText && <p className="text-xs text-muted-foreground">{field.helperText}</p>}
-                  {fieldErrors[field.key] && (
-                    <p className="text-xs text-destructive">{fieldErrors[field.key]}</p>
-                  )}
+                  {fieldErrors[field.key] && <p className="text-xs text-destructive">{fieldErrors[field.key]}</p>}
                 </div>
               );
             }
@@ -597,19 +558,14 @@ function FlatCrudFormDialog({
             if (field.type === "select") {
               return (
                 <div key={field.key} className="space-y-2">
-                  <Label className="text-xs uppercase tracking-wider text-muted-foreground">
-                    {field.label}
-                  </Label>
-                  <Select
-                    value={String(values[field.key] ?? "")}
-                    onValueChange={(v) => setField(field.key, v)}
-                  >
+                  <Label className={labelClass}>{field.label}</Label>
+                  <Select value={String(values[field.key] ?? "")} onValueChange={(v) => setField(field.key, v)}>
                     <SelectTrigger className="rounded-none">
-                      <SelectValue placeholder={field.placeholder ?? "Select…"} />
+                      <SelectValue placeholder={field.placeholder ?? t("admin.crud.select")} />
                     </SelectTrigger>
                     <SelectContent>
                       {field.allowNone && (
-                        <SelectItem value={SELECT_NONE_VALUE}>{field.noneLabel ?? "None"}</SelectItem>
+                        <SelectItem value={SELECT_NONE_VALUE}>{field.noneLabel ?? t("admin.crud.noneOption")}</SelectItem>
                       )}
                       {field.options.map((opt) => (
                         <SelectItem key={opt.value} value={opt.value}>
@@ -619,9 +575,7 @@ function FlatCrudFormDialog({
                     </SelectContent>
                   </Select>
                   {field.helperText && <p className="text-xs text-muted-foreground">{field.helperText}</p>}
-                  {fieldErrors[field.key] && (
-                    <p className="text-xs text-destructive">{fieldErrors[field.key]}</p>
-                  )}
+                  {fieldErrors[field.key] && <p className="text-xs text-destructive">{fieldErrors[field.key]}</p>}
                 </div>
               );
             }
@@ -629,10 +583,7 @@ function FlatCrudFormDialog({
             // switch
             return (
               <div key={field.key} className="flex items-start gap-3 border border-border p-3">
-                <Switch
-                  checked={Boolean(values[field.key])}
-                  onCheckedChange={(checked) => setField(field.key, checked)}
-                />
+                <Switch checked={Boolean(values[field.key])} onCheckedChange={(checked) => setField(field.key, checked)} />
                 <div className="space-y-1">
                   <Label className="text-sm text-foreground">{field.label}</Label>
                   {field.helperText && <p className="text-xs text-muted-foreground">{field.helperText}</p>}
@@ -644,10 +595,10 @@ function FlatCrudFormDialog({
 
         <DialogFooter>
           <Button variant="outline" className="rounded-none" onClick={() => onOpenChange(false)}>
-            Cancel
+            {t("admin.common.cancel")}
           </Button>
           <Button className="rounded-none" disabled={submitting} onClick={onSubmit}>
-            {submitting ? "Saving…" : "Save"}
+            {submitting ? t("admin.common.saving") : t("admin.common.save")}
           </Button>
         </DialogFooter>
       </DialogContent>

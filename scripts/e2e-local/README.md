@@ -90,3 +90,6 @@ keyboard (focus the drag handle, Space, Arrow keys, Space).
 
 - `size-variants.mjs` — Phase 5 sizes: insert, upsert + insert batch, generated ligne.
 - `colour-finish.mjs` — Phase 6 colours and finishes, including the three metal-gate trigger cases.
+- `finish-picker-layout.mjs` — the attached list and default selector render below a viewport-bounded picker (regression for "nothing below the grid").
+- `admin-i18n.mjs` — the CMS renders in the stored language and the header switcher changes it live.
+- `finish-manager.mjs` — Phase 7: filtered bulk `is_public`, per-finish edit with locked identity, create with the standard/code rule, first-time code set then locked.

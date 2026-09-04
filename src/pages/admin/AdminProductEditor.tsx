@@ -27,6 +27,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useI18n } from "@/features/i18n/I18nProvider";
+import { localizedName } from "@/features/admin/lib/localize";
 import { describeSupabaseError } from "@/components/admin/shared/supabaseError";
 import { SELECT_NONE_VALUE } from "@/components/admin/shared/flatCrudFields";
 import { useFlatCrudTable } from "@/features/admin/hooks/useFlatCrudTable";
@@ -38,6 +40,7 @@ import type { Database } from "@/integrations/supabase/types";
 
 type ProductUpdate = Database["public"]["Tables"]["products"]["Update"];
 type SupabaseError = { message: string; code?: string };
+type Translate = (key: string, vars?: Record<string, string | number>) => string;
 
 const NONE = SELECT_NONE_VALUE;
 
@@ -121,8 +124,7 @@ function fromDetail(p: AdminProductDetail): FormValues {
     origin: p.origin ?? "",
     tensile_strength: p.tensile_strength ?? "",
     wash_resistance: p.wash_resistance ?? "",
-    nickel_release_compliant:
-      p.nickel_release_compliant === null ? "unknown" : p.nickel_release_compliant ? "yes" : "no",
+    nickel_release_compliant: p.nickel_release_compliant === null ? "unknown" : p.nickel_release_compliant ? "yes" : "no",
     compliance_standard_ids: p.compliance_standard_ids,
   };
 }
@@ -134,20 +136,20 @@ const slugify = (s: string) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
 
-function validate(v: FormValues, { forPublish }: { forPublish: boolean }) {
+function validate(v: FormValues, { forPublish }: { forPublish: boolean }, t: Translate) {
   const errors: Partial<Record<keyof FormValues, string>> = {};
-  if (!v.name.trim()) errors.name = "Required.";
-  if (!v.slug.trim()) errors.slug = "Required.";
+  if (!v.name.trim()) errors.name = t("admin.validation.required");
+  if (!v.slug.trim()) errors.slug = t("admin.validation.required");
   // published_needs_item_code: check here, in words, before the constraint does.
-  if (forPublish && !v.item_code.trim()) errors.item_code = "Add an item code before publishing.";
+  if (forPublish && !v.item_code.trim()) errors.item_code = t("admin.validation.itemCodeBeforePublish");
   const int = (s: string) => (s.trim() === "" ? null : Number(s));
   for (const k of ["hole_count", "moq_qty", "lead_time_min_days", "lead_time_max_days", "sample_time_days"] as const) {
     const n = int(v[k]);
-    if (n !== null && (!Number.isInteger(n) || n < 0)) errors[k] = "Whole number, 0 or more.";
+    if (n !== null && (!Number.isInteger(n) || n < 0)) errors[k] = t("admin.validation.wholeNumber");
   }
   const min = int(v.lead_time_min_days);
   const max = int(v.lead_time_max_days);
-  if (min !== null && max !== null && min > max) errors.lead_time_max_days = "Must be at least the minimum.";
+  if (min !== null && max !== null && min > max) errors.lead_time_max_days = t("admin.validation.maxAtLeastMin");
   return errors;
 }
 
@@ -176,8 +178,7 @@ function toPayload(v: FormValues): ProductUpdate {
     origin: text(v.origin),
     tensile_strength: text(v.tensile_strength),
     wash_resistance: text(v.wash_resistance),
-    nickel_release_compliant:
-      v.nickel_release_compliant === "unknown" ? null : v.nickel_release_compliant === "yes",
+    nickel_release_compliant: v.nickel_release_compliant === "unknown" ? null : v.nickel_release_compliant === "yes",
   };
 }
 
@@ -228,6 +229,7 @@ export default function AdminProductEditor() {
   const { id } = useParams<{ id: string }>();
   const isNew = !id;
   const navigate = useNavigate();
+  const { t, language } = useI18n();
 
   const { query, save, create } = useAdminProduct(id);
   const { query: familiesQuery } = useFlatCrudTable("product_families", { orderBy: "sort_order" });
@@ -256,17 +258,18 @@ export default function AdminProductEditor() {
 
   /* ---------- option lists: active rows, plus whatever is currently set ---------- */
 
+  const archivedSuffix = t("admin.common.archivedSuffix");
   const families = useMemo(() => familiesQuery.data ?? [], [familiesQuery.data]);
   const categoryGroups = useMemo(() => {
     const cats = (categoriesQuery.data ?? []).filter((c) => c.is_active || c.id === values.category_id);
     const groups = families
       .filter((f) => f.is_active || cats.some((c) => c.family_id === f.id))
-      .map((f) => ({ label: f.name, items: cats.filter((c) => c.family_id === f.id) }))
+      .map((f) => ({ label: localizedName(f, language), items: cats.filter((c) => c.family_id === f.id) }))
       .filter((g) => g.items.length > 0);
     const orphans = cats.filter((c) => !c.family_id || !families.some((f) => f.id === c.family_id));
-    if (orphans.length > 0) groups.push({ label: "No family", items: orphans });
+    if (orphans.length > 0) groups.push({ label: t("admin.field.noFamilyGroup"), items: orphans });
     return groups;
-  }, [categoriesQuery.data, families, values.category_id]);
+  }, [categoriesQuery.data, families, values.category_id, language, t]);
 
   const materials = useMemo(
     () =>
@@ -280,17 +283,15 @@ export default function AdminProductEditor() {
     [attachmentsQuery.data, values.attachment_id],
   );
   const standards = useMemo(
-    () =>
-      (standardsQuery.data ?? []).filter((s) => s.is_active || values.compliance_standard_ids.includes(s.id)),
+    () => (standardsQuery.data ?? []).filter((s) => s.is_active || values.compliance_standard_ids.includes(s.id)),
     [standardsQuery.data, values.compliance_standard_ids],
   );
-
   const selectedMaterial = materials.find((m) => m.id === values.material_id);
 
   /* ---------- save + status actions ---------- */
 
   const busy = save.isPending || create.isPending;
-  const onError = (error: unknown) => toast.error(describeSupabaseError(error as SupabaseError));
+  const onError = (error: unknown) => toast.error(describeSupabaseError(error as SupabaseError, t));
 
   /**
    * Every action saves the whole form in one write, so the status change and
@@ -300,19 +301,17 @@ export default function AdminProductEditor() {
     statusChange: { status?: string; is_public?: boolean } | null,
     { forPublish = false, successMessage }: { forPublish?: boolean; successMessage: string },
   ) => {
-    const nextErrors = validate(values, { forPublish });
+    const nextErrors = validate(values, { forPublish }, t);
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) {
-      toast.error(forPublish && nextErrors.item_code ? nextErrors.item_code : "Fix the highlighted fields.");
+      toast.error(forPublish && nextErrors.item_code ? nextErrors.item_code : t("admin.validation.fixFields"));
       return;
     }
-
     const input: SaveProductInput = {
       product: { ...toPayload(values), ...(statusChange ?? {}) },
       primaryCategoryId: values.category_id === NONE ? null : values.category_id,
       complianceStandardIds: values.compliance_standard_ids,
     };
-
     if (isNew) {
       create.mutate(
         { ...input, product: { ...input.product, name: values.name.trim(), slug: values.slug.trim() } },
@@ -333,19 +332,19 @@ export default function AdminProductEditor() {
   // in the CMS. They stay draft — never published from here.
   const isSeed = (product?.slug ?? values.slug).startsWith("sample-");
 
-  const handleSave = () => commit(null, { successMessage: isNew ? "Product created." : "Saved." });
+  const handleSave = () => commit(null, { successMessage: t(isNew ? "admin.editor.created" : "admin.editor.saved") });
   const handlePublish = () => {
     if (isSeed) {
-      toast.error("Placeholder seed products stay draft — they aren't published.");
+      toast.error(t("admin.editor.seedRefuse"));
       return;
     }
-    commit({ status: "active", is_public: true }, { forPublish: true, successMessage: "Published." });
+    commit({ status: "active", is_public: true }, { forPublish: true, successMessage: t("admin.editor.published") });
   };
-  const handleUnpublish = () => commit({ status: "draft" }, { successMessage: "Moved back to draft." });
-  const handleRestore = () => commit({ status: "draft" }, { successMessage: "Restored to draft." });
+  const handleUnpublish = () => commit({ status: "draft" }, { successMessage: t("admin.editor.movedToDraft") });
+  const handleRestore = () => commit({ status: "draft" }, { successMessage: t("admin.editor.restored") });
   const handleArchive = () => {
     setConfirmArchive(false);
-    commit({ status: "archived", is_public: false }, { successMessage: "Archived." });
+    commit({ status: "archived", is_public: false }, { successMessage: t("admin.editor.archived") });
   };
 
   /* ---------- render ---------- */
@@ -360,9 +359,9 @@ export default function AdminProductEditor() {
   if (!isNew && query.isError) {
     return (
       <div className="space-y-3">
-        <p className="text-sm text-destructive">{describeSupabaseError(query.error as SupabaseError)}</p>
+        <p className="text-sm text-destructive">{describeSupabaseError(query.error as SupabaseError, t)}</p>
         <Button asChild variant="outline" className="rounded-none">
-          <Link to="/admin/products">Back to products</Link>
+          <Link to="/admin/products">{t("admin.editor.backToProducts")}</Link>
         </Button>
       </div>
     );
@@ -370,48 +369,62 @@ export default function AdminProductEditor() {
 
   const status = product?.status ?? "draft";
   const isBrandOwned = !!product?.brand_id;
+  const numberField = (key: keyof FormValues & string, label: string) => (
+    <Field label={label} error={errors[key]}>
+      <Input
+        className="rounded-none"
+        type="number"
+        min={0}
+        step={1}
+        value={String(values[key])}
+        onChange={(e) => set(key, e.target.value as never)}
+      />
+    </Field>
+  );
+  const textField = (key: keyof FormValues & string, label: string, extra?: { hint?: string; mono?: boolean }) => (
+    <Field label={label} error={errors[key]} hint={extra?.hint}>
+      <Input
+        className={extra?.mono ? "rounded-none font-mono" : "rounded-none"}
+        value={String(values[key])}
+        onChange={(e) => set(key, e.target.value as never)}
+      />
+    </Field>
+  );
 
   return (
     <div className="space-y-6">
       {/* Header + actions */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-2">
-          <Link
-            to="/admin/products"
-            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="w-3 h-3" /> Products
+          <Link to="/admin/products" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="w-3 h-3" /> {t("admin.nav.products")}
           </Link>
           <div className="flex items-center gap-3">
-            <h1 className="text-xl font-light tracking-wide text-foreground">
-              {isNew ? "New product" : product?.name}
-            </h1>
+            <h1 className="text-xl font-light tracking-wide text-foreground">{isNew ? t("admin.editor.new") : product?.name}</h1>
             {!isNew && <StatusBadge status={status} isPublic={product?.is_public ?? false} />}
-            {isBrandOwned && (
-              <span className="text-xs text-muted-foreground">Brand-owned — a customer's catalogue</span>
-            )}
+            {isBrandOwned && <span className="text-xs text-muted-foreground">{t("admin.editor.brandOwned")}</span>}
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" className="rounded-none" disabled={busy} onClick={handleSave}>
             {busy ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-            {isNew ? "Create draft" : "Save"}
+            {t(isNew ? "admin.editor.createDraft" : "admin.common.save")}
           </Button>
           {!isNew && status === "draft" && !isSeed && (
             <Button className="rounded-none" disabled={busy} onClick={handlePublish}>
               <Globe className="w-3.5 h-3.5 mr-2" />
-              Publish
+              {t("admin.editor.publish")}
             </Button>
           )}
           {!isNew && status === "active" && (
             <Button variant="outline" className="rounded-none" disabled={busy} onClick={handleUnpublish}>
-              Back to draft
+              {t("admin.editor.backToDraft")}
             </Button>
           )}
           {!isNew && status === "archived" && (
             <Button variant="outline" className="rounded-none" disabled={busy} onClick={handleRestore}>
-              Restore to draft
+              {t("admin.editor.restore")}
             </Button>
           )}
           {!isNew && status !== "archived" && !isBrandOwned && (
@@ -421,37 +434,23 @@ export default function AdminProductEditor() {
               disabled={busy}
               onClick={() => setConfirmArchive(true)}
             >
-              Archive
+              {t("admin.common.archive")}
             </Button>
           )}
         </div>
       </div>
 
-      {!isNew && status === "draft" && !isSeed && (
-        <p className="text-xs text-muted-foreground">
-          Publish saves your changes and sets the product Active and Public. It needs an item code — the
-          database refuses an active product without one.
-        </p>
-      )}
-      {!isNew && isSeed && (
-        <p className="text-xs text-muted-foreground">
-          Placeholder seed product — one exists per category so the CMS always has a sample. It stays draft
-          and is never published.
-        </p>
-      )}
+      {!isNew && status === "draft" && !isSeed && <p className="text-xs text-muted-foreground">{t("admin.editor.publishHint")}</p>}
+      {!isNew && isSeed && <p className="text-xs text-muted-foreground">{t("admin.editor.seedHint")}</p>}
 
       {/* Identity */}
-      <Section title="Identity" hint="The storefront shows the English override when present, otherwise the base value.">
-        <Field label="Name" error={errors.name}>
-          <Input className="rounded-none" value={values.name} onChange={(e) => set("name", e.target.value)} />
-        </Field>
-        <Field label="Name (English override)">
-          <Input className="rounded-none" value={values.name_en} onChange={(e) => set("name_en", e.target.value)} />
-        </Field>
+      <Section title={t("admin.editor.section.identity")} hint={t("admin.editor.section.identityHint")}>
+        {textField("name", t("admin.field.name"))}
+        {textField("name_en", t("admin.field.nameEn"))}
         <Field
-          label="Slug"
+          label={t("admin.field.slug")}
           error={errors.slug}
-          hint={isNew ? "Generated from the name until you edit it." : "Changing this breaks existing links to the product."}
+          hint={t(isNew ? "admin.field.slugHintNew" : "admin.field.slugHintExisting")}
         >
           <Input
             className="rounded-none font-mono"
@@ -462,55 +461,38 @@ export default function AdminProductEditor() {
             }}
           />
         </Field>
-        <Field label="Item code" error={errors.item_code} hint="Required before the product can be published.">
-          <Input
-            className="rounded-none font-mono"
-            value={values.item_code}
-            onChange={(e) => set("item_code", e.target.value)}
-          />
+        {textField("item_code", t("admin.field.itemCode"), { hint: t("admin.field.itemCodeHint"), mono: true })}
+        <Field label={t("admin.field.description")}>
+          <Textarea className="rounded-none min-h-[100px]" value={values.description} onChange={(e) => set("description", e.target.value)} />
         </Field>
-        <Field label="Description">
-          <Textarea
-            className="rounded-none min-h-[100px]"
-            value={values.description}
-            onChange={(e) => set("description", e.target.value)}
-          />
-        </Field>
-        <Field label="Description (English override)">
-          <Textarea
-            className="rounded-none min-h-[100px]"
-            value={values.description_en}
-            onChange={(e) => set("description_en", e.target.value)}
-          />
+        <Field label={t("admin.field.descriptionEn")}>
+          <Textarea className="rounded-none min-h-[100px]" value={values.description_en} onChange={(e) => set("description_en", e.target.value)} />
         </Field>
         <div className="flex items-start gap-3 border border-border p-3 md:col-span-2">
           <Switch checked={values.is_public} onCheckedChange={(v) => set("is_public", v)} />
           <div className="space-y-1">
-            <Label className="text-sm text-foreground">Visible on the public site</Label>
-            <p className="text-xs text-muted-foreground">
-              Only takes effect while the product is Active. Publish sets this on; you can switch it off to keep
-              an active product private to the Designer Studio.
-            </p>
+            <Label className="text-sm text-foreground">{t("admin.field.visible")}</Label>
+            <p className="text-xs text-muted-foreground">{t("admin.field.visibleHint")}</p>
           </div>
         </div>
       </Section>
 
       {/* Classification */}
-      <Section title="Classification">
-        <Field label="Category" hint="One primary category, grouped by family.">
+      <Section title={t("admin.editor.section.classification")}>
+        <Field label={t("admin.field.category")} hint={t("admin.field.categoryHint")}>
           <Select value={values.category_id} onValueChange={(v) => set("category_id", v)}>
             <SelectTrigger className="rounded-none">
-              <SelectValue placeholder="Select a category" />
+              <SelectValue placeholder={t("admin.field.selectCategory")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={NONE}>— No category —</SelectItem>
+              <SelectItem value={NONE}>{t("admin.field.noCategory")}</SelectItem>
               {categoryGroups.map((g) => (
                 <SelectGroup key={g.label}>
                   <SelectLabel>{g.label}</SelectLabel>
                   {g.items.map((c) => (
                     <SelectItem key={c.id} value={c.id}>
-                      {c.name}
-                      {!c.is_active ? " (archived)" : ""}
+                      {localizedName(c, language)}
+                      {!c.is_active ? archivedSuffix : ""}
                     </SelectItem>
                   ))}
                 </SelectGroup>
@@ -519,42 +501,42 @@ export default function AdminProductEditor() {
           </Select>
         </Field>
         <Field
-          label="Material"
-          hint={
+          label={t("admin.field.material")}
+          hint={t(
             selectedMaterial
               ? selectedMaterial.is_metal
-                ? "Metal — finishes can be attached (Phase 6)."
-                : "Non-metal — gets a colour list rather than finishes (Phase 6)."
-              : "Decides whether the product gets finishes (metal) or a colour list."
-          }
+                ? "admin.field.materialHintMetal"
+                : "admin.field.materialHintNonMetal"
+              : "admin.field.materialHintNone",
+          )}
         >
           <Select value={values.material_id} onValueChange={(v) => set("material_id", v)}>
             <SelectTrigger className="rounded-none" data-testid="material-select">
-              <SelectValue placeholder="Select a material" />
+              <SelectValue placeholder={t("admin.field.selectMaterial")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={NONE}>— No material —</SelectItem>
+              <SelectItem value={NONE}>{t("admin.field.noMaterial")}</SelectItem>
               {materials.map((m) => (
                 <SelectItem key={m.id} value={m.id}>
-                  {m.name}
-                  {m.is_metal ? " · metal" : ""}
-                  {!m.is_active ? " (archived)" : ""}
+                  {localizedName(m, language)}
+                  {m.is_metal ? t("admin.field.metalSuffix") : ""}
+                  {!m.is_active ? archivedSuffix : ""}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </Field>
-        <Field label="Attachment">
+        <Field label={t("admin.field.attachment")}>
           <Select value={values.attachment_id} onValueChange={(v) => set("attachment_id", v)}>
             <SelectTrigger className="rounded-none">
-              <SelectValue placeholder="Select an attachment" />
+              <SelectValue placeholder={t("admin.field.selectAttachment")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={NONE}>— None —</SelectItem>
+              <SelectItem value={NONE}>{t("admin.field.none")}</SelectItem>
               {attachments.map((a) => (
                 <SelectItem key={a.id} value={a.id}>
-                  {a.name}
-                  {!a.is_active ? " (archived)" : ""}
+                  {localizedName(a, language)}
+                  {!a.is_active ? archivedSuffix : ""}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -563,97 +545,36 @@ export default function AdminProductEditor() {
       </Section>
 
       {/* Physical */}
-      <Section title="Physical">
-        <Field label="Face style">
-          <Input className="rounded-none" value={values.face_style} onChange={(e) => set("face_style", e.target.value)} />
-        </Field>
-        <Field label="Hole count" error={errors.hole_count}>
-          <Input
-            className="rounded-none"
-            type="number"
-            min={0}
-            step={1}
-            value={values.hole_count}
-            onChange={(e) => set("hole_count", e.target.value)}
-          />
-        </Field>
+      <Section title={t("admin.editor.section.physical")}>
+        {textField("face_style", t("admin.field.faceStyle"))}
+        {numberField("hole_count", t("admin.field.holeCount"))}
         <div className="flex items-start gap-3 border border-border p-3">
           <Switch checked={values.logo_customisable} onCheckedChange={(v) => set("logo_customisable", v)} />
-          <Label className="text-sm text-foreground">Logo customisable</Label>
+          <Label className="text-sm text-foreground">{t("admin.field.logoCustomisable")}</Label>
         </div>
       </Section>
 
       {/* Commercial */}
-      <Section title="Commercial">
+      <Section title={t("admin.editor.section.commercial")}>
         <div className="grid grid-cols-[1fr_auto] gap-2">
-          <Field label="MOQ" error={errors.moq_qty}>
-            <Input
-              className="rounded-none"
-              type="number"
-              min={0}
-              step={1}
-              value={values.moq_qty}
-              onChange={(e) => set("moq_qty", e.target.value)}
-            />
-          </Field>
-          <Field label="Unit">
+          {numberField("moq_qty", t("admin.field.moq"))}
+          <Field label={t("admin.field.unit")}>
             <Input className="rounded-none w-24" value={values.moq_unit} onChange={(e) => set("moq_unit", e.target.value)} />
           </Field>
         </div>
         <div className="grid grid-cols-2 gap-2">
-          <Field label="Lead time min (days)" error={errors.lead_time_min_days}>
-            <Input
-              className="rounded-none"
-              type="number"
-              min={0}
-              step={1}
-              value={values.lead_time_min_days}
-              onChange={(e) => set("lead_time_min_days", e.target.value)}
-            />
-          </Field>
-          <Field label="Lead time max (days)" error={errors.lead_time_max_days}>
-            <Input
-              className="rounded-none"
-              type="number"
-              min={0}
-              step={1}
-              value={values.lead_time_max_days}
-              onChange={(e) => set("lead_time_max_days", e.target.value)}
-            />
-          </Field>
+          {numberField("lead_time_min_days", t("admin.field.leadMin"))}
+          {numberField("lead_time_max_days", t("admin.field.leadMax"))}
         </div>
-        <Field label="Sample time (days)" error={errors.sample_time_days}>
-          <Input
-            className="rounded-none"
-            type="number"
-            min={0}
-            step={1}
-            value={values.sample_time_days}
-            onChange={(e) => set("sample_time_days", e.target.value)}
-          />
-        </Field>
-        <Field label="Origin">
-          <Input className="rounded-none" value={values.origin} onChange={(e) => set("origin", e.target.value)} />
-        </Field>
+        {numberField("sample_time_days", t("admin.field.sampleTime"))}
+        {textField("origin", t("admin.field.origin"))}
       </Section>
 
       {/* Technical */}
-      <Section title="Technical">
-        <Field label="Tensile strength">
-          <Input
-            className="rounded-none"
-            value={values.tensile_strength}
-            onChange={(e) => set("tensile_strength", e.target.value)}
-          />
-        </Field>
-        <Field label="Wash resistance">
-          <Input
-            className="rounded-none"
-            value={values.wash_resistance}
-            onChange={(e) => set("wash_resistance", e.target.value)}
-          />
-        </Field>
-        <Field label="Nickel release compliant">
+      <Section title={t("admin.editor.section.technical")}>
+        {textField("tensile_strength", t("admin.field.tensile"))}
+        {textField("wash_resistance", t("admin.field.wash"))}
+        <Field label={t("admin.field.nickel")}>
           <Select
             value={values.nickel_release_compliant}
             onValueChange={(v) => set("nickel_release_compliant", v as FormValues["nickel_release_compliant"])}
@@ -662,15 +583,15 @@ export default function AdminProductEditor() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="unknown">Not stated</SelectItem>
-              <SelectItem value="yes">Yes</SelectItem>
-              <SelectItem value="no">No</SelectItem>
+              <SelectItem value="unknown">{t("admin.field.nickel.unknown")}</SelectItem>
+              <SelectItem value="yes">{t("admin.field.nickel.yes")}</SelectItem>
+              <SelectItem value="no">{t("admin.field.nickel.no")}</SelectItem>
             </SelectContent>
           </Select>
         </Field>
-        <Field label="Compliance standards" className="space-y-2 md:col-span-2">
+        <Field label={t("admin.field.compliance")} className="space-y-2 md:col-span-2">
           {standards.length === 0 ? (
-            <p className="text-xs text-muted-foreground">No compliance standards defined yet.</p>
+            <p className="text-xs text-muted-foreground">{t("admin.field.complianceEmpty")}</p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {standards.map((s) => {
@@ -689,8 +610,8 @@ export default function AdminProductEditor() {
                       }
                     />
                     <span className="font-mono text-xs text-muted-foreground w-20">{s.code}</span>
-                    <span>{s.name}</span>
-                    {!s.is_active && <span className="text-xs text-muted-foreground">(archived)</span>}
+                    <span>{localizedName(s, language)}</span>
+                    {!s.is_active && <span className="text-xs text-muted-foreground">{archivedSuffix}</span>}
                   </label>
                 );
               })}
@@ -702,14 +623,11 @@ export default function AdminProductEditor() {
       {/* Size variants — need a saved product to attach to */}
       <section className="border border-border p-6 space-y-4">
         <div>
-          <h2 className="text-sm font-medium tracking-wide text-foreground">Size variants</h2>
-          <p className="text-xs text-muted-foreground">
-            One row per size. Secondary dimension and label are for non-round hardware (D-rings, badges).
-            Ligne is worked out from the primary dimension by the database.
-          </p>
+          <h2 className="text-sm font-medium tracking-wide text-foreground">{t("admin.editor.section.sizes")}</h2>
+          <p className="text-xs text-muted-foreground">{t("admin.editor.section.sizesHint")}</p>
         </div>
         {isNew || !id ? (
-          <p className="text-xs text-muted-foreground">Create the product first, then add sizes here.</p>
+          <p className="text-xs text-muted-foreground">{t("admin.editor.createFirstSizes")}</p>
         ) : (
           <SizeVariantsEditor productId={id} />
         )}
@@ -718,13 +636,11 @@ export default function AdminProductEditor() {
       {/* Colour & finish — branches on the saved material */}
       <section className="border border-border p-6 space-y-4">
         <div>
-          <h2 className="text-sm font-medium tracking-wide text-foreground">Colour & finish</h2>
-          <p className="text-xs text-muted-foreground">
-            Metal products take finishes from the CYC chart; non-metal products carry a plain colour list.
-          </p>
+          <h2 className="text-sm font-medium tracking-wide text-foreground">{t("admin.editor.section.colourFinish")}</h2>
+          <p className="text-xs text-muted-foreground">{t("admin.editor.section.colourFinishHint")}</p>
         </div>
         {isNew || !product ? (
-          <p className="text-xs text-muted-foreground">Create the product first, then set colours or finishes here.</p>
+          <p className="text-xs text-muted-foreground">{t("admin.editor.createFirstColours")}</p>
         ) : (
           <ColourFinishSection
             product={product}
@@ -737,15 +653,12 @@ export default function AdminProductEditor() {
       <AlertDialog open={confirmArchive} onOpenChange={setConfirmArchive}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Archive this product?</AlertDialogTitle>
-            <AlertDialogDescription>
-              It drops off the public site and the Designer Studio trim library. Nothing is deleted — it can be
-              restored to draft later. Your unsaved edits are saved with it.
-            </AlertDialogDescription>
+            <AlertDialogTitle>{t("admin.editor.archiveTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("admin.editor.archiveBody")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleArchive}>Archive</AlertDialogAction>
+            <AlertDialogCancel>{t("admin.common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleArchive}>{t("admin.common.archive")}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

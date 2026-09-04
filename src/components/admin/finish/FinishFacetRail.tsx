@@ -1,6 +1,8 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/features/i18n/I18nProvider";
+import { localizedName } from "@/features/admin/lib/localize";
 import {
   FINISH_AXES,
   type AxisValues,
@@ -15,22 +17,25 @@ interface Props {
   onClear: () => void;
   /** Finishes that would match if this value were (also) selected — standard faceted counting. */
   countFor: (axis: FinishAxisKey, valueId: string) => number;
+  className?: string;
 }
 
 /**
  * Filter rail for the finish picker. Rendered entirely from the axis tables;
- * nothing here knows any axis value by name.
+ * nothing here knows any axis value by name. Axis *labels* are UI strings
+ * and translated; axis *values* come from the rows' own zh columns.
  */
-export function FinishFacetRail({ axes, selected, onToggle, onClear, countFor }: Props) {
+export function FinishFacetRail({ axes, selected, onToggle, onClear, countFor, className }: Props) {
+  const { t, language } = useI18n();
   const anySelected = FINISH_AXES.some((a) => selected[a.key].length > 0);
 
   return (
-    <aside className="w-56 shrink-0 space-y-5 text-sm">
+    <aside data-testid="finish-rail" className={cn("w-56 shrink-0 space-y-5 text-sm", className)}>
       <div className="flex items-center justify-between">
-        <span className="text-xs uppercase tracking-wider text-muted-foreground">Filter</span>
+        <span className="text-xs uppercase tracking-wider text-muted-foreground">{t("admin.finish.filter")}</span>
         {anySelected && (
           <Button variant="ghost" size="sm" className="h-6 px-2 text-xs rounded-none" onClick={onClear}>
-            Clear
+            {t("admin.common.clear")}
           </Button>
         )}
       </div>
@@ -40,7 +45,7 @@ export function FinishFacetRail({ axes, selected, onToggle, onClear, countFor }:
         if (values.length === 0) return null;
         return (
           <div key={axis.key} className="space-y-1.5">
-            <div className="text-xs font-medium tracking-wide text-foreground">{axis.label}</div>
+            <div className="text-xs font-medium tracking-wide text-foreground">{t(`admin.axis.${axis.key}`)}</div>
             <ul className="space-y-1">
               {values.map((v) => {
                 const checked = selected[axis.key].includes(v.id);
@@ -55,7 +60,7 @@ export function FinishFacetRail({ axes, selected, onToggle, onClear, countFor }:
                       )}
                     >
                       <Checkbox checked={checked} onCheckedChange={() => onToggle(axis.key, v.id)} />
-                      <span className="flex-1 truncate">{v.name}</span>
+                      <span className="flex-1 truncate">{localizedName(v, language)}</span>
                       <span data-testid="facet-count" className="text-xs tabular-nums text-muted-foreground">
                         {count}
                       </span>

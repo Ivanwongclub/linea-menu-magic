@@ -37,5 +37,33 @@ export function helpers(page, base) {
       await triggerLocator.click();
       await page.getByRole("option", { name: optionName }).click();
     },
+
+    /**
+     * Dialogs in the CMS close only on a successful write, so this is a more
+     * reliable "the save landed" signal than a toast (sonner keeps toasts
+     * for ~4s, so a wait can match the previous action's toast).
+     */
+    async waitForDialogClosed(timeout = 15000) {
+      await page.getByRole("dialog").waitFor({ state: "detached", timeout });
+    },
+
+    /**
+     * dnd-kit keyboard reorder: Space picks up, arrows move, Space drops.
+     * Lets pending refetches settle first — dnd-kit cancels a drag if the
+     * sortable item list changes underneath it.
+     */
+    async keyboardReorder(handleLocator, direction = "up", steps = 1) {
+      await page.waitForLoadState("networkidle");
+      await handleLocator.scrollIntoViewIfNeeded();
+      await handleLocator.focus();
+      await page.keyboard.press("Space");
+      await page.waitForTimeout(250);
+      for (let i = 0; i < steps; i++) {
+        await page.keyboard.press(direction === "up" ? "ArrowUp" : "ArrowDown");
+        await page.waitForTimeout(250);
+      }
+      await page.keyboard.press("Space");
+      await page.waitForTimeout(250);
+    },
   };
 }

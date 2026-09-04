@@ -6,13 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,15 +17,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/features/i18n/I18nProvider";
+import { localizedName } from "@/features/admin/lib/localize";
 import { describeSupabaseError } from "@/components/admin/shared/supabaseError";
 import { useFlatCrudTable } from "@/features/admin/hooks/useFlatCrudTable";
 import {
@@ -42,12 +31,6 @@ import {
 
 const ALL = "__all__";
 
-const STATUS_LABEL: Record<string, string> = {
-  draft: "Draft",
-  active: "Active",
-  archived: "Archived",
-};
-
 /**
  * One column answers "can anyone see this?" — visibility depends on status
  * AND is_public together. Public/Private only appears on Active rows; drafts
@@ -55,21 +38,22 @@ const STATUS_LABEL: Record<string, string> = {
  * Solid = live, outlined = not yet, muted = retired.
  */
 export function StatusBadge({ status, isPublic }: { status: string; isPublic: boolean }) {
+  const { t } = useI18n();
   if (status === "active")
     return (
       <Badge className={cn("text-[10px]", !isPublic && "bg-transparent text-foreground")}>
-        Active · {isPublic ? "Public" : "Private"}
+        {t(isPublic ? "admin.status.activePublic" : "admin.status.activePrivate")}
       </Badge>
     );
   if (status === "archived")
     return (
       <Badge variant="secondary" className="text-[10px] text-muted-foreground line-through">
-        Archived
+        {t("admin.status.archived")}
       </Badge>
     );
   return (
     <Badge variant="outline" className="text-[10px]">
-      {STATUS_LABEL[status] ?? status}
+      {status === "draft" ? t("admin.status.draft") : status}
     </Badge>
   );
 }
@@ -78,6 +62,7 @@ type SupabaseError = { message: string; code?: string };
 
 export default function AdminProducts() {
   const navigate = useNavigate();
+  const { t, language } = useI18n();
   const { query, setStatus, publish } = useAdminProducts();
   const { query: familiesQuery } = useFlatCrudTable("product_families", { orderBy: "sort_order" });
   const { query: categoriesQuery } = useFlatCrudTable("product_categories", { orderBy: "sort_order" });
@@ -90,6 +75,7 @@ export default function AdminProducts() {
     () => [...(materialsQuery.data ?? [])].sort((a, b) => a.name.localeCompare(b.name)),
     [materialsQuery.data],
   );
+  const archivedSuffix = t("admin.common.archivedSuffix");
 
   const [search, setSearch] = useState("");
   const [familyId, setFamilyId] = useState(ALL);
@@ -100,7 +86,10 @@ export default function AdminProducts() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [pendingArchive, setPendingArchive] = useState<AdminProductRow[] | null>(null);
 
-  const familyName = (id: string | null) => families.find((f) => f.id === id)?.name ?? null;
+  const familyName = (id: string | null) => {
+    const f = families.find((x) => x.id === id);
+    return f ? localizedName(f, language) : null;
+  };
 
   // Category options narrow to the chosen family; archived categories stay
   // listed (marked) so legacy products still mapped to them remain findable.
@@ -116,8 +105,7 @@ export default function AdminProducts() {
       if (categoryId !== ALL && p.primary_category?.id !== categoryId) return false;
       if (status !== ALL && p.status !== status) return false;
       if (materialId !== ALL && p.material_id !== materialId) return false;
-      if (term && !p.name.toLowerCase().includes(term) && !(p.item_code ?? "").toLowerCase().includes(term))
-        return false;
+      if (term && !p.name.toLowerCase().includes(term) && !(p.item_code ?? "").toLowerCase().includes(term)) return false;
       return true;
     });
   }, [products, search, familyId, categoryId, status, materialId]);
@@ -125,7 +113,7 @@ export default function AdminProducts() {
   const selectedRows = useMemo(() => products.filter((p) => selected.has(p.id)), [products, selected]);
   const allVisibleSelected = visible.length > 0 && visible.every((p) => selected.has(p.id));
 
-  const toggleAll = () => {
+  const toggleAll = () =>
     setSelected((prev) => {
       if (allVisibleSelected) {
         const next = new Set(prev);
@@ -134,20 +122,16 @@ export default function AdminProducts() {
       }
       return new Set([...prev, ...visible.map((p) => p.id)]);
     });
-  };
-
-  const toggleOne = (id: string) => {
+  const toggleOne = (id: string) =>
     setSelected((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
       return next;
     });
-  };
-
   const clearSelection = () => setSelected(new Set());
 
-  const onError = (error: unknown) => toast.error(describeSupabaseError(error as SupabaseError));
+  const onError = (error: unknown) => toast.error(describeSupabaseError(error as SupabaseError, t));
 
   /**
    * published_needs_item_code rejects status='active' without an item_code —
@@ -166,35 +150,35 @@ export default function AdminProducts() {
     seeds: rows.filter((r) => r.slug.startsWith("sample-")),
   });
 
-  const describeSkipped = (rows: AdminProductRow[], reason: string) =>
-    `${rows.length === 1 ? "1 product" : `${rows.length} products`} skipped — ${reason}: ${rows
-      .map((r) => r.name)
-      .slice(0, 5)
-      .join(", ")}${rows.length > 5 ? ", …" : ""}`;
+  const describeSkipped = (rows: AdminProductRow[], reasonKey: string) =>
+    t(rows.length === 1 ? "admin.products.skippedOne" : "admin.products.skippedMany", {
+      count: rows.length,
+      reason: t(reasonKey),
+      names: rows.map((r) => r.name).slice(0, 5).join(", ") + (rows.length > 5 ? ", …" : ""),
+    });
+
+  const statusLabel = (s: AdminProductStatus) => t(`admin.status.${s}`);
 
   const handleSetStatus = (target: AdminProductStatus) => {
     if (selectedRows.length === 0) return;
-
     if (target === "archived") {
       setPendingArchive(selectedRows);
       return;
     }
-
     let rows = selectedRows;
     if (target === "active") {
       const { real, seeds } = splitSeeds(selectedRows);
-      if (seeds.length > 0) toast.error(describeSkipped(seeds, "placeholder seeds stay draft"));
+      if (seeds.length > 0) toast.error(describeSkipped(seeds, "admin.products.reason.seedDraft"));
       const { eligible, missing } = splitByItemCode(real);
-      if (missing.length > 0) toast.error(describeSkipped(missing, "no item code, can't be made active"));
+      if (missing.length > 0) toast.error(describeSkipped(missing, "admin.products.reason.noCodeActive"));
       if (eligible.length === 0) return;
       rows = eligible;
     }
-
     setStatus.mutate(
       { ids: rows.map((r) => r.id), status: target },
       {
         onSuccess: () => {
-          toast.success(`${rows.length} set to ${STATUS_LABEL[target]}.`);
+          toast.success(t("admin.products.setTo", { count: rows.length, status: statusLabel(target) }));
           clearSelection();
         },
         onError,
@@ -209,15 +193,14 @@ export default function AdminProducts() {
     // them in with the house products they happen to be selected alongside.
     const brandOwned = pendingArchive.filter((r) => r.brand_id);
     const house = pendingArchive.filter((r) => !r.brand_id);
-    if (brandOwned.length > 0) toast.error(describeSkipped(brandOwned, "brand-owned, not archived by us"));
+    if (brandOwned.length > 0) toast.error(describeSkipped(brandOwned, "admin.products.reason.brandOwned"));
     setPendingArchive(null);
     if (house.length === 0) return;
-
     setStatus.mutate(
       { ids: house.map((r) => r.id), status: "archived" },
       {
         onSuccess: () => {
-          toast.success(`${house.length} archived.`);
+          toast.success(t("admin.products.archivedN", { count: house.length }));
           clearSelection();
         },
         onError,
@@ -228,16 +211,15 @@ export default function AdminProducts() {
   const handlePublish = () => {
     if (selectedRows.length === 0) return;
     const { real, seeds } = splitSeeds(selectedRows);
-    if (seeds.length > 0) toast.error(describeSkipped(seeds, "placeholder seeds stay draft"));
+    if (seeds.length > 0) toast.error(describeSkipped(seeds, "admin.products.reason.seedDraft"));
     const { eligible, missing } = splitByItemCode(real);
-    if (missing.length > 0) toast.error(describeSkipped(missing, "no item code, can't be published"));
+    if (missing.length > 0) toast.error(describeSkipped(missing, "admin.products.reason.noCodePublish"));
     if (eligible.length === 0) return;
-
     publish.mutate(
       { ids: eligible.map((r) => r.id) },
       {
         onSuccess: () => {
-          toast.success(`${eligible.length} published.`);
+          toast.success(t("admin.products.publishedN", { count: eligible.length }));
           clearSelection();
         },
         onError,
@@ -251,16 +233,16 @@ export default function AdminProducts() {
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-xl font-light tracking-wide text-foreground">Products</h1>
+          <h1 className="text-xl font-light tracking-wide text-foreground">{t("admin.products.title")}</h1>
           <p className="text-sm text-muted-foreground">
             {visible.length === products.length
-              ? `${products.length} products`
-              : `${visible.length} of ${products.length} products`}
+              ? t("admin.products.count", { count: products.length })
+              : t("admin.products.countFiltered", { visible: visible.length, total: products.length })}
           </p>
         </div>
         <Button size="sm" className="rounded-none" onClick={() => navigate("/admin/products/new")}>
           <Plus className="w-3.5 h-3.5 mr-2" />
-          New product
+          {t("admin.products.new")}
         </Button>
       </div>
 
@@ -270,7 +252,7 @@ export default function AdminProducts() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
           <Input
             className="rounded-none pl-9"
-            placeholder="Name or item code"
+            placeholder={t("admin.products.search")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -283,53 +265,53 @@ export default function AdminProducts() {
           }}
         >
           <SelectTrigger className="rounded-none">
-            <SelectValue placeholder="Family" />
+            <SelectValue placeholder={t("admin.products.filter.family")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={ALL}>All families</SelectItem>
+            <SelectItem value={ALL}>{t("admin.products.allFamilies")}</SelectItem>
             {families.map((f) => (
               <SelectItem key={f.id} value={f.id}>
-                {f.name}
-                {!f.is_active ? " (archived)" : ""}
+                {localizedName(f, language)}
+                {!f.is_active ? archivedSuffix : ""}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
         <Select value={categoryId} onValueChange={setCategoryId}>
           <SelectTrigger className="rounded-none">
-            <SelectValue placeholder="Category" />
+            <SelectValue placeholder={t("admin.products.filter.category")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={ALL}>All categories</SelectItem>
+            <SelectItem value={ALL}>{t("admin.products.allCategories")}</SelectItem>
             {categoryOptions.map((c) => (
               <SelectItem key={c.id} value={c.id}>
-                {c.name}
-                {!c.is_active ? " (archived)" : ""}
+                {localizedName(c, language)}
+                {!c.is_active ? archivedSuffix : ""}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
         <Select value={status} onValueChange={setStatusFilter}>
           <SelectTrigger className="rounded-none">
-            <SelectValue placeholder="Status" />
+            <SelectValue placeholder={t("admin.products.filter.status")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={ALL}>All statuses</SelectItem>
-            <SelectItem value="draft">Draft</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="archived">Archived</SelectItem>
+            <SelectItem value={ALL}>{t("admin.products.allStatuses")}</SelectItem>
+            <SelectItem value="draft">{t("admin.status.draft")}</SelectItem>
+            <SelectItem value="active">{t("admin.status.active")}</SelectItem>
+            <SelectItem value="archived">{t("admin.status.archived")}</SelectItem>
           </SelectContent>
         </Select>
         <Select value={materialId} onValueChange={setMaterialId}>
           <SelectTrigger className="rounded-none">
-            <SelectValue placeholder="Material" />
+            <SelectValue placeholder={t("admin.products.filter.material")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={ALL}>All materials</SelectItem>
+            <SelectItem value={ALL}>{t("admin.products.allMaterials")}</SelectItem>
             {materials.map((m) => (
               <SelectItem key={m.id} value={m.id}>
-                {m.name}
-                {!m.is_active ? " (archived)" : ""}
+                {localizedName(m, language)}
+                {!m.is_active ? archivedSuffix : ""}
               </SelectItem>
             ))}
           </SelectContent>
@@ -339,25 +321,21 @@ export default function AdminProducts() {
       {/* Bulk action bar */}
       {selected.size > 0 && (
         <div className="flex flex-wrap items-center gap-2 border border-foreground bg-secondary/40 px-4 py-2">
-          <span className="text-sm text-foreground mr-2">{selected.size} selected</span>
-          <span className="text-xs uppercase tracking-wider text-muted-foreground">Set status</span>
-          <Button variant="outline" size="sm" className="rounded-none" disabled={busy} onClick={() => handleSetStatus("draft")}>
-            Draft
-          </Button>
-          <Button variant="outline" size="sm" className="rounded-none" disabled={busy} onClick={() => handleSetStatus("active")}>
-            Active
-          </Button>
-          <Button variant="outline" size="sm" className="rounded-none" disabled={busy} onClick={() => handleSetStatus("archived")}>
-            Archived
-          </Button>
+          <span className="text-sm text-foreground mr-2">{t("admin.products.selected", { count: selected.size })}</span>
+          <span className="text-xs uppercase tracking-wider text-muted-foreground">{t("admin.products.setStatus")}</span>
+          {(["draft", "active", "archived"] as AdminProductStatus[]).map((s) => (
+            <Button key={s} variant="outline" size="sm" className="rounded-none" disabled={busy} onClick={() => handleSetStatus(s)}>
+              {statusLabel(s)}
+            </Button>
+          ))}
           <span className="mx-2 h-5 w-px bg-border" />
           <Button size="sm" className="rounded-none" disabled={busy} onClick={handlePublish}>
             <Globe className="w-3.5 h-3.5 mr-2" />
-            Publish
+            {t("admin.products.publish")}
           </Button>
           <Button variant="ghost" size="sm" className="rounded-none ml-auto" onClick={clearSelection}>
             <X className="w-3.5 h-3.5 mr-1" />
-            Clear
+            {t("admin.common.clear")}
           </Button>
         </div>
       )}
@@ -367,32 +345,33 @@ export default function AdminProducts() {
           <TableHeader>
             <TableRow>
               <TableHead className="w-10">
-                <Checkbox checked={allVisibleSelected} onCheckedChange={toggleAll} aria-label="Select all" />
+                <Checkbox checked={allVisibleSelected} onCheckedChange={toggleAll} aria-label={t("admin.products.selectAll")} />
               </TableHead>
-              <TableHead>Item code</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Material</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead>{t("admin.products.col.itemCode")}</TableHead>
+              <TableHead>{t("admin.products.col.name")}</TableHead>
+              <TableHead>{t("admin.products.col.category")}</TableHead>
+              <TableHead>{t("admin.products.col.material")}</TableHead>
+              <TableHead>{t("admin.products.col.status")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {query.isLoading ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-8">
-                  Loading…
+                  {t("admin.common.loading")}
                 </TableCell>
               </TableRow>
             ) : visible.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-8">
-                  No products match these filters.
+                  {t("admin.products.empty")}
                 </TableCell>
               </TableRow>
             ) : (
               visible.map((p) => {
                 const isSelected = selected.has(p.id);
                 const family = familyName(p.primary_category?.family_id ?? null);
+                const category = p.primary_category ? localizedName(p.primary_category, language) : null;
                 return (
                   <TableRow
                     key={p.id}
@@ -404,11 +383,11 @@ export default function AdminProducts() {
                       <Checkbox
                         checked={isSelected}
                         onCheckedChange={() => toggleOne(p.id)}
-                        aria-label={`Select ${p.name}`}
+                        aria-label={t("admin.products.select", { name: p.name })}
                       />
                     </TableCell>
                     <TableCell className="font-mono text-xs">
-                      {p.item_code ?? <span className="text-muted-foreground italic">none</span>}
+                      {p.item_code ?? <span className="text-muted-foreground italic">{t("admin.products.noCode")}</span>}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
@@ -421,7 +400,7 @@ export default function AdminProducts() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="text-sm">{p.primary_category?.name ?? "—"}</div>
+                      <div className="text-sm">{category ?? "—"}</div>
                       {family && <div className="text-xs text-muted-foreground">{family}</div>}
                     </TableCell>
                     <TableCell className="text-sm">{p.material_name ?? "—"}</TableCell>
@@ -439,16 +418,12 @@ export default function AdminProducts() {
       <AlertDialog open={!!pendingArchive} onOpenChange={(open) => !open && setPendingArchive(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Archive {pendingArchive?.length ?? 0} products?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Archived products drop off the public site and the Designer Studio trim library. Nothing is
-              deleted — they can be restored to Draft or Active later. Brand-owned products in the selection
-              will be skipped.
-            </AlertDialogDescription>
+            <AlertDialogTitle>{t("admin.products.archiveTitle", { count: pendingArchive?.length ?? 0 })}</AlertDialogTitle>
+            <AlertDialogDescription>{t("admin.products.archiveBody")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmArchive}>Archive</AlertDialogAction>
+            <AlertDialogCancel>{t("admin.common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmArchive}>{t("admin.common.archive")}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -1,3 +1,5 @@
+import { useI18n } from "@/features/i18n/I18nProvider";
+import { localizedName } from "@/features/admin/lib/localize";
 import { FinishPicker } from "@/components/admin/finish/FinishPicker";
 import { ColourListEditor } from "@/components/admin/product-editor/ColourListEditor";
 import type { AdminProductDetail } from "@/features/admin/hooks/useAdminProduct";
@@ -16,37 +18,32 @@ interface Props {
  * do here always matches what a write will be allowed to do.
  */
 export function ColourFinishSection({ product, formMaterialId, materials }: Props) {
+  const { t, language } = useI18n();
   const saved = materials.find((m) => m.id === product.material_id) ?? null;
   const differs = (formMaterialId ?? null) !== (product.material_id ?? null);
 
   if (!saved) {
     return (
       <p className="text-sm text-muted-foreground" data-testid="colour-finish-no-material">
-        Set a material and save first. Metal materials get the finish picker; everything else gets a colour list.
+        {t("admin.cf.noMaterial")}
       </p>
     );
   }
+  const name = localizedName(saved, language);
 
   return (
     <div className="space-y-4">
       {differs && (
-        <p className="text-xs text-muted-foreground border border-border px-3 py-2">
-          Material change not saved yet — this section reflects the saved material ({saved.name}). Save the
-          product to switch; the database will refuse the change while finishes are still attached.
-        </p>
+        <p className="text-xs text-muted-foreground border border-border px-3 py-2">{t("admin.cf.differs", { name })}</p>
       )}
       {saved.is_metal ? (
         <div data-testid="finish-section" className="space-y-2">
-          <p className="text-xs text-muted-foreground">
-            {saved.name} is metal — finishes can be attached. Only metal products accept finishes.
-          </p>
+          <p className="text-xs text-muted-foreground">{t("admin.cf.metal", { name })}</p>
           <FinishPicker productId={product.id} defaultFinishId={product.default_finish_id} />
         </div>
       ) : (
         <div data-testid="colour-section" className="space-y-2">
-          <p className="text-xs text-muted-foreground">
-            {saved.name} is not metal — this product gets a colour list instead of finishes.
-          </p>
+          <p className="text-xs text-muted-foreground">{t("admin.cf.nonMetal", { name })}</p>
           <ColourListEditor productId={product.id} />
         </div>
       )}
