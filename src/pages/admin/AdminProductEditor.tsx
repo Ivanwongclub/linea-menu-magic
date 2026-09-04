@@ -27,6 +27,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { localizedName } from "@/features/admin/lib/localize";
 import { describeSupabaseError } from "@/components/admin/shared/supabaseError";
@@ -44,17 +45,31 @@ type Translate = (key: string, vars?: Record<string, string | number>) => string
 
 const NONE = SELECT_NONE_VALUE;
 
+/**
+ * Content-language tabs. Deliberately independent of the interface language:
+ * the header switcher changes what the UI says, never which field is being
+ * edited. Labels are autonyms, so they read the same in every UI language.
+ */
+type ContentLang = "en" | "zh-Hant" | "zh-Hans";
+const CONTENT_TABS: { value: ContentLang; label: string; nameKey: "name" | "name_zh_hant" | "name_zh_hans"; descKey: "description" | "description_zh_hant" | "description_zh_hans" }[] = [
+  { value: "en", label: "English", nameKey: "name", descKey: "description" },
+  { value: "zh-Hant", label: "繁體", nameKey: "name_zh_hant", descKey: "description_zh_hant" },
+  { value: "zh-Hans", label: "简体", nameKey: "name_zh_hans", descKey: "description_zh_hans" },
+];
+
 /* ------------------------------------------------------------------ */
 /*  Form state — strings for everything typed, parsed on save           */
 /* ------------------------------------------------------------------ */
 
 interface FormValues {
   name: string;
-  name_en: string;
+  name_zh_hant: string;
+  name_zh_hans: string;
   slug: string;
   item_code: string;
   description: string;
-  description_en: string;
+  description_zh_hant: string;
+  description_zh_hans: string;
   is_public: boolean;
   category_id: string;
   material_id: string;
@@ -76,11 +91,13 @@ interface FormValues {
 
 const EMPTY: FormValues = {
   name: "",
-  name_en: "",
+  name_zh_hant: "",
+  name_zh_hans: "",
   slug: "",
   item_code: "",
   description: "",
-  description_en: "",
+  description_zh_hant: "",
+  description_zh_hans: "",
   is_public: false,
   category_id: NONE,
   material_id: NONE,
@@ -104,11 +121,13 @@ function fromDetail(p: AdminProductDetail): FormValues {
   const num = (v: number | null) => (v === null || v === undefined ? "" : String(v));
   return {
     name: p.name ?? "",
-    name_en: p.name_en ?? "",
+    name_zh_hant: p.name_zh_hant ?? "",
+    name_zh_hans: p.name_zh_hans ?? "",
     slug: p.slug ?? "",
     item_code: p.item_code ?? "",
     description: p.description ?? "",
-    description_en: p.description_en ?? "",
+    description_zh_hant: p.description_zh_hant ?? "",
+    description_zh_hans: p.description_zh_hans ?? "",
     is_public: p.is_public,
     category_id: p.primary_category_id ?? NONE,
     material_id: p.material_id ?? NONE,
@@ -159,11 +178,18 @@ function toPayload(v: FormValues): ProductUpdate {
   const ref = (s: string) => (s === NONE || s === "" ? null : s);
   return {
     name: v.name.trim(),
-    name_en: text(v.name_en),
+    name_zh_hant: text(v.name_zh_hant),
+    name_zh_hans: text(v.name_zh_hans),
     slug: v.slug.trim(),
     item_code: text(v.item_code),
     description: text(v.description),
-    description_en: text(v.description_en),
+    description_zh_hant: text(v.description_zh_hant),
+    description_zh_hans: text(v.description_zh_hans),
+    // `name` is the English base since 20260904120000. The storefront still
+    // reads `name_en ?? name` until M5 retires the override, so keep the
+    // legacy columns in step with the base rather than letting them go stale.
+    name_en: v.name.trim(),
+    description_en: text(v.description),
     is_public: v.is_public,
     material_id: ref(v.material_id),
     attachment_id: ref(v.attachment_id),
@@ -243,6 +269,9 @@ export default function AdminProductEditor() {
   const [errors, setErrors] = useState<Partial<Record<keyof FormValues, string>>>({});
   const [slugTouched, setSlugTouched] = useState(false);
   const [confirmArchive, setConfirmArchive] = useState(false);
+  // Which language's name/description is being edited. Not derived from the
+  // UI language on purpose — switching the interface must not move the cursor.
+  const [contentLang, setContentLang] = useState<ContentLang>("en");
 
   useEffect(() => {
     if (product) setValues(fromDetail(product));
@@ -304,6 +333,8 @@ export default function AdminProductEditor() {
     const nextErrors = validate(values, { forPublish }, t);
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) {
+      // The only required content field is the English name — bring its tab forward.
+      if (nextErrors.name) setContentLang("en");
       toast.error(forPublish && nextErrors.item_code ? nextErrors.item_code : t("admin.validation.fixFields"));
       return;
     }
@@ -443,10 +474,48 @@ export default function AdminProductEditor() {
       {!isNew && status === "draft" && !isSeed && <p className="text-xs text-muted-foreground">{t("admin.editor.publishHint")}</p>}
       {!isNew && isSeed && <p className="text-xs text-muted-foreground">{t("admin.editor.seedHint")}</p>}
 
-      {/* Identity */}
-      <Section title={t("admin.editor.section.identity")} hint={t("admin.editor.section.identityHint")}>
-        {textField("name", t("admin.field.name"))}
-        {textField("name_en", t("admin.field.nameEn"))}
+      {/* Content — name and description per language, under tabs */}
+      <section className="border border-border p-6 space-y-4" data-testid="content-section">
+        <div>
+          <h2 className="text-sm font-medium tracking-wide text-foreground">{t("admin.editor.section.content")}</h2>
+          <p className="text-xs text-muted-foreground">{t("admin.editor.section.contentHint")}</p>
+        </div>
+        <Tabs value={contentLang} onValueChange={(v) => setContentLang(v as ContentLang)}>
+          <TabsList>
+            {CONTENT_TABS.map((tab) => (
+              <TabsTrigger key={tab.value} value={tab.value} data-testid={`content-tab-${tab.value}`}>
+                {tab.label}
+                {!values[tab.nameKey].trim() && (
+                  <span className="ml-1.5 text-[10px] font-normal text-muted-foreground">({t("admin.editor.tab.empty")})</span>
+                )}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          {CONTENT_TABS.map((tab) => (
+            <TabsContent key={tab.value} value={tab.value} className="pt-4 space-y-4">
+              <Field label={t("admin.field.name")} error={tab.value === "en" ? errors.name : undefined}>
+                <Input
+                  data-testid={`content-name-${tab.value}`}
+                  className="rounded-none"
+                  value={values[tab.nameKey]}
+                  onChange={(e) => set(tab.nameKey, e.target.value)}
+                />
+              </Field>
+              <Field label={t("admin.field.description")}>
+                <Textarea
+                  data-testid={`content-description-${tab.value}`}
+                  className="rounded-none min-h-[100px]"
+                  value={values[tab.descKey]}
+                  onChange={(e) => set(tab.descKey, e.target.value)}
+                />
+              </Field>
+            </TabsContent>
+          ))}
+        </Tabs>
+      </section>
+
+      {/* Identity — always visible, outside the language tabs */}
+      <Section title={t("admin.editor.section.identity")}>
         <Field
           label={t("admin.field.slug")}
           error={errors.slug}
@@ -462,12 +531,6 @@ export default function AdminProductEditor() {
           />
         </Field>
         {textField("item_code", t("admin.field.itemCode"), { hint: t("admin.field.itemCodeHint"), mono: true })}
-        <Field label={t("admin.field.description")}>
-          <Textarea className="rounded-none min-h-[100px]" value={values.description} onChange={(e) => set("description", e.target.value)} />
-        </Field>
-        <Field label={t("admin.field.descriptionEn")}>
-          <Textarea className="rounded-none min-h-[100px]" value={values.description_en} onChange={(e) => set("description_en", e.target.value)} />
-        </Field>
         <div className="flex items-start gap-3 border border-border p-3 md:col-span-2">
           <Switch checked={values.is_public} onCheckedChange={(v) => set("is_public", v)} />
           <div className="space-y-1">

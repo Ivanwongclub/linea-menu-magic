@@ -21,6 +21,9 @@ role so scenarios can assert on what was actually stored.
   prints its return value as JSON (plus any browser console errors), and
   tears the dev server down. Exit code 1 and `last-failure.png` on failure.
   `E2E_VERBOSE=1` shows the dev server output.
+- `npm run e2e:types` — regenerates `src/integrations/supabase/types.ts`
+  from the running local stack, i.e. from the repo's migrations. Run it after
+  adding a migration; it never talks to production.
 - `npm run e2e:down` — `supabase stop --no-backup` and deletes the scratch
   directory.
 
@@ -93,3 +96,4 @@ keyboard (focus the drag handle, Space, Arrow keys, Space).
 - `finish-picker-layout.mjs` — the attached list and default selector render below a viewport-bounded picker (regression for "nothing below the grid").
 - `admin-i18n.mjs` — the CMS renders in the stored language and the header switcher changes it live.
 - `finish-manager.mjs` — Phase 7: filtered bulk `is_public`, per-finish edit with locked identity, create with the standard/code rule, first-time code set then locked.
+- `product-language-tabs.mjs` — name/description under English / 繁體 / 简体 tabs, other fields always visible, header switcher leaves the active tab alone, trilingual read-back.

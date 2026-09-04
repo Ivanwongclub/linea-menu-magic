@@ -11,6 +11,7 @@
     "preview": "vite preview",
     "e2e:up": "node scripts/e2e-local/up.mjs",
     "e2e:run": "node scripts/e2e-local/run.mjs",
+    "e2e:types": "node scripts/e2e-local/types.mjs",
     "e2e:down": "node scripts/e2e-local/down.mjs"
   },
   "dependencies": {

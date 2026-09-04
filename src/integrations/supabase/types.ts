@@ -1437,6 +1437,8 @@ export type Database = {
           default_finish_id: string | null
           description: string | null
           description_en: string | null
+          description_zh_hans: string | null
+          description_zh_hant: string | null
           face_style: string | null
           hole_count: number | null
           id: string
@@ -1452,6 +1454,8 @@ export type Database = {
           moq_unit: string | null
           name: string
           name_en: string | null
+          name_zh_hans: string | null
+          name_zh_hant: string | null
           nickel_release_compliant: boolean | null
           origin: string | null
           production: Json | null
@@ -1472,6 +1476,8 @@ export type Database = {
           default_finish_id?: string | null
           description?: string | null
           description_en?: string | null
+          description_zh_hans?: string | null
+          description_zh_hant?: string | null
           face_style?: string | null
           hole_count?: number | null
           id?: string
@@ -1487,6 +1493,8 @@ export type Database = {
           moq_unit?: string | null
           name: string
           name_en?: string | null
+          name_zh_hans?: string | null
+          name_zh_hant?: string | null
           nickel_release_compliant?: boolean | null
           origin?: string | null
           production?: Json | null
@@ -1507,6 +1515,8 @@ export type Database = {
           default_finish_id?: string | null
           description?: string | null
           description_en?: string | null
+          description_zh_hans?: string | null
+          description_zh_hant?: string | null
           face_style?: string | null
           hole_count?: number | null
           id?: string
@@ -1522,6 +1532,8 @@ export type Database = {
           moq_unit?: string | null
           name?: string
           name_en?: string | null
+          name_zh_hans?: string | null
+          name_zh_hant?: string | null
           nickel_release_compliant?: boolean | null
           origin?: string | null
           production?: Json | null
