@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Supabase CLI scratch state and e2e-local failure screenshots
+supabase/.temp
+scripts/e2e-local/last-failure.png
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

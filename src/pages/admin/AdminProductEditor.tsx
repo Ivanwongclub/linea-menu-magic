@@ -33,6 +33,7 @@ import { useFlatCrudTable } from "@/features/admin/hooks/useFlatCrudTable";
 import { useAdminProduct, type AdminProductDetail, type SaveProductInput } from "@/features/admin/hooks/useAdminProduct";
 import { StatusBadge } from "@/pages/admin/AdminProducts";
 import { SizeVariantsEditor } from "@/components/admin/product-editor/SizeVariantsEditor";
+import { ColourFinishSection } from "@/components/admin/product-editor/ColourFinishSection";
 import type { Database } from "@/integrations/supabase/types";
 
 type ProductUpdate = Database["public"]["Tables"]["products"]["Update"];
@@ -528,7 +529,7 @@ export default function AdminProductEditor() {
           }
         >
           <Select value={values.material_id} onValueChange={(v) => set("material_id", v)}>
-            <SelectTrigger className="rounded-none">
+            <SelectTrigger className="rounded-none" data-testid="material-select">
               <SelectValue placeholder="Select a material" />
             </SelectTrigger>
             <SelectContent>
@@ -714,7 +715,24 @@ export default function AdminProductEditor() {
         )}
       </section>
 
-      <p className="text-xs text-muted-foreground">Colour and finish assignment is edited here in a later phase.</p>
+      {/* Colour & finish — branches on the saved material */}
+      <section className="border border-border p-6 space-y-4">
+        <div>
+          <h2 className="text-sm font-medium tracking-wide text-foreground">Colour & finish</h2>
+          <p className="text-xs text-muted-foreground">
+            Metal products take finishes from the CYC chart; non-metal products carry a plain colour list.
+          </p>
+        </div>
+        {isNew || !product ? (
+          <p className="text-xs text-muted-foreground">Create the product first, then set colours or finishes here.</p>
+        ) : (
+          <ColourFinishSection
+            product={product}
+            formMaterialId={values.material_id === NONE ? null : values.material_id}
+            materials={materialsQuery.data ?? []}
+          />
+        )}
+      </section>
 
       <AlertDialog open={confirmArchive} onOpenChange={setConfirmArchive}>
         <AlertDialogContent>
