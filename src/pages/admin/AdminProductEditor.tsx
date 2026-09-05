@@ -37,6 +37,7 @@ import { useAdminProduct, type AdminProductDetail, type SaveProductInput } from 
 import { StatusBadge } from "@/pages/admin/AdminProducts";
 import { SizeVariantsEditor } from "@/components/admin/product-editor/SizeVariantsEditor";
 import { ColourFinishSection } from "@/components/admin/product-editor/ColourFinishSection";
+import { ProductImagesEditor } from "@/components/admin/product-editor/ProductImagesEditor";
 import type { Database } from "@/integrations/supabase/types";
 
 type ProductUpdate = Database["public"]["Tables"]["products"]["Update"];
@@ -269,6 +270,7 @@ export default function AdminProductEditor() {
   const [errors, setErrors] = useState<Partial<Record<keyof FormValues, string>>>({});
   const [slugTouched, setSlugTouched] = useState(false);
   const [confirmArchive, setConfirmArchive] = useState(false);
+  const [confirmSeedPublish, setConfirmSeedPublish] = useState(false);
   // Which language's name/description is being edited. Not derived from the
   // UI language on purpose — switching the interface must not move the cursor.
   const [contentLang, setContentLang] = useState<ContentLang>("en");
@@ -364,13 +366,12 @@ export default function AdminProductEditor() {
   const isSeed = (product?.slug ?? values.slug).startsWith("sample-");
 
   const handleSave = () => commit(null, { successMessage: t(isNew ? "admin.editor.created" : "admin.editor.saved") });
-  const handlePublish = () => {
-    if (isSeed) {
-      toast.error(t("admin.editor.seedRefuse"));
-      return;
-    }
+  const publishNow = () =>
     commit({ status: "active", is_public: true }, { forPublish: true, successMessage: t("admin.editor.published") });
-  };
+  // Seeds are placeholders, but five now carry real item codes and are being
+  // published deliberately: warn and confirm rather than block. Bulk actions
+  // in the list still skip them.
+  const handlePublish = () => (isSeed ? setConfirmSeedPublish(true) : publishNow());
   const handleUnpublish = () => commit({ status: "draft" }, { successMessage: t("admin.editor.movedToDraft") });
   const handleRestore = () => commit({ status: "draft" }, { successMessage: t("admin.editor.restored") });
   const handleArchive = () => {
@@ -442,7 +443,7 @@ export default function AdminProductEditor() {
             {busy ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
             {t(isNew ? "admin.editor.createDraft" : "admin.common.save")}
           </Button>
-          {!isNew && status === "draft" && !isSeed && (
+          {!isNew && status === "draft" && (
             <Button className="rounded-none" disabled={busy} onClick={handlePublish}>
               <Globe className="w-3.5 h-3.5 mr-2" />
               {t("admin.editor.publish")}
@@ -471,8 +472,8 @@ export default function AdminProductEditor() {
         </div>
       </div>
 
-      {!isNew && status === "draft" && !isSeed && <p className="text-xs text-muted-foreground">{t("admin.editor.publishHint")}</p>}
-      {!isNew && isSeed && <p className="text-xs text-muted-foreground">{t("admin.editor.seedHint")}</p>}
+      {!isNew && status === "draft" && <p className="text-xs text-muted-foreground">{t("admin.editor.publishHint")}</p>}
+      {!isNew && isSeed && <p className="text-xs text-muted-foreground" data-testid="seed-hint">{t("admin.editor.seedHint")}</p>}
 
       {/* Content — name and description per language, under tabs */}
       <section className="border border-border p-6 space-y-4" data-testid="content-section">
@@ -539,6 +540,19 @@ export default function AdminProductEditor() {
           </div>
         </div>
       </Section>
+
+      {/* Images — need a saved product to attach to */}
+      <section className="border border-border p-6 space-y-4">
+        <div>
+          <h2 className="text-sm font-medium tracking-wide text-foreground">{t("admin.images.title")}</h2>
+          <p className="text-xs text-muted-foreground">{t("admin.images.hint")}</p>
+        </div>
+        {isNew || !id ? (
+          <p className="text-xs text-muted-foreground">{t("admin.images.createFirst")}</p>
+        ) : (
+          <ProductImagesEditor productId={id} productName={product?.name ?? values.name} />
+        )}
+      </section>
 
       {/* Classification */}
       <Section title={t("admin.editor.section.classification")}>
@@ -712,6 +726,26 @@ export default function AdminProductEditor() {
           />
         )}
       </section>
+
+      <AlertDialog open={confirmSeedPublish} onOpenChange={setConfirmSeedPublish}>
+        <AlertDialogContent data-testid="seed-publish-dialog">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("admin.editor.seedPublishTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("admin.editor.seedPublishBody")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("admin.common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setConfirmSeedPublish(false);
+                publishNow();
+              }}
+            >
+              {t("admin.editor.seedPublishConfirm")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={confirmArchive} onOpenChange={setConfirmArchive}>
         <AlertDialogContent>

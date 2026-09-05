@@ -28,7 +28,9 @@ export function prepare() {
     recursive: true,
     filter: (src) => !src.includes(`${path.sep}.temp`),
   });
-  for (const file of readdirSync(SEED_DIR).filter((f) => f.endsWith(".sql"))) {
+  // Only migration-shaped files (<14-digit timestamp>_<name>.sql) take part
+  // in the replay; anything else in seed/ (an aborted dump, notes) is ignored.
+  for (const file of readdirSync(SEED_DIR).filter((f) => /^\d{14}_.+\.sql$/.test(f))) {
     copyFileSync(path.join(SEED_DIR, file), path.join(WORK_DIR, "supabase/migrations", file));
   }
 }

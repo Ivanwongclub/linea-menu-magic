@@ -97,4 +97,7 @@ keyboard (focus the drag handle, Space, Arrow keys, Space).
 - `admin-i18n.mjs` — the CMS renders in the stored language and the header switcher changes it live.
 - `finish-manager.mjs` — Phase 7: filtered bulk `is_public`, per-finish edit with locked identity, create with the standard/code rule, first-time code set then locked.
 - `swatch-renderer.mjs` — the four nickels render on four branches of the material model (mirror / brushed / matt / sand); changing a surface axis in the manager recomputes roughness/anisotropy; hand-set values are respected until an axis changes.
+- `seed-publish.mjs` — M4 Step 0: a placeholder seed publishes from the editor after a confirmation; bulk actions still skip seeds.
+- `product-images.mjs` — Phase 8: multi-file upload through the dropzone (resized client-side, EXIF-safe), reorder, primary change, alt text, delete removes file and row; anonymous read sees the gallery.
+- `finish-swatch.mjs` — Phase 8: upload a photographed swatch on a finish, it replaces the rendered material; remove clears the column and deletes the object.
 - `product-language-tabs.mjs` — name/description under English / 繁體 / 简体 tabs, other fields always visible, header switcher leaves the active tab alone, trilingual read-back.

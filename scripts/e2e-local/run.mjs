@@ -23,7 +23,14 @@ const editor = await ensureEditor(admin);
 // Dev server against the LOCAL stack — process env beats .env in Vite.
 const dev = spawn("npm", ["run", "dev", "--", "--port", String(PORT), "--strictPort"], {
   cwd: REPO_ROOT,
-  env: { ...process.env, VITE_SUPABASE_URL: st.API_URL, VITE_SUPABASE_PUBLISHABLE_KEY: st.ANON_KEY },
+  env: {
+    ...process.env,
+    VITE_SUPABASE_URL: st.API_URL,
+    VITE_SUPABASE_PUBLISHABLE_KEY: st.ANON_KEY,
+    // The local stack's imgproxy isn't running, so render/image URLs 404 here.
+    // Serve masters directly; the transform path is a production check.
+    VITE_SUPABASE_IMAGE_TRANSFORMS: "false",
+  },
   stdio: process.env.E2E_VERBOSE ? "inherit" : "ignore",
   detached: true,
 });

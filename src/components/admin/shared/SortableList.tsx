@@ -12,6 +12,7 @@ import {
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
+  rectSortingStrategy,
   useSortable,
   arrayMove,
 } from "@dnd-kit/sortable";
@@ -46,6 +47,8 @@ interface SortableListProps<T> {
   /** Element each item renders as — "tr" for a table body, "div" (default) for a plain list. */
   as?: ElementType;
   itemClassName?: string;
+  /** "grid" for items laid out in a CSS grid (image galleries); default is a vertical list. */
+  layout?: "vertical" | "grid";
 }
 
 /**
@@ -56,7 +59,7 @@ interface SortableListProps<T> {
  * Persisting the new order is the caller's job — onReorder hands back the
  * reordered array, index position implies sort_order.
  */
-export function SortableList<T>({ items, getId, onReorder, renderItem, as, itemClassName }: SortableListProps<T>) {
+export function SortableList<T>({ items, getId, onReorder, renderItem, as, itemClassName, layout = "vertical" }: SortableListProps<T>) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -84,7 +87,7 @@ export function SortableList<T>({ items, getId, onReorder, renderItem, as, itemC
       // is invalid DOM. Portal it to <body> instead.
       accessibility={{ container: typeof document !== "undefined" ? document.body : undefined }}
     >
-      <SortableContext items={items.map(getId)} strategy={verticalListSortingStrategy}>
+      <SortableContext items={items.map(getId)} strategy={layout === "grid" ? rectSortingStrategy : verticalListSortingStrategy}>
         {items.map((item) => (
           <SortableItem key={getId(item)} id={getId(item)} as={as} className={itemClassName}>
             {(dragHandleProps) => renderItem(item, dragHandleProps)}

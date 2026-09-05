@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -120,7 +120,9 @@ function Locked({ label, value, mono }: { label: string; value: string; mono?: b
  */
 export function FinishEditDialog({ open, onOpenChange, finish, axes }: Props) {
   const { t, language } = useI18n();
-  const { create, update } = useFinishMutations();
+  const { create, update, uploadSwatch, removeSwatch } = useFinishMutations();
+  const swatchInputRef = useRef<HTMLInputElement>(null);
+  const notify = (error: unknown) => toast.error(describeSupabaseError(error as SupabaseError, t));
   const isNew = !finish;
   const codeLocked = !isNew && !!finish.cyc_code;
 
@@ -308,8 +310,68 @@ export function FinishEditDialog({ open, onOpenChange, finish, axes }: Props) {
             <Field label={t("admin.finishes.field.hex")} error={errors.hex_approx}>
               <Input data-testid="finish-hex" className="rounded-none font-mono" placeholder="#RRGGBB" value={values.hex_approx} onChange={(e) => set("hex_approx", e.target.value)} />
             </Field>
-            <Field label={t("admin.finishes.field.swatchUrl")} hint={t("admin.finishes.field.swatchUrlHint")}>
+            <Field label={t("admin.finishes.field.swatchUrl")} hint={isNew ? t("admin.finishes.swatchCreateFirst") : t("admin.finishes.swatchHint")}>
               <Input className="rounded-none" value={values.swatch_url} onChange={(e) => set("swatch_url", e.target.value)} />
+              {!isNew && finish && (
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    ref={swatchInputRef}
+                    data-testid="swatch-file"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      e.target.value = "";
+                      if (!file) return;
+                      uploadSwatch.mutate(
+                        { finishId: finish.id, file, previousUrl: values.swatch_url.trim() || null },
+                        {
+                          onSuccess: (url) => {
+                            set("swatch_url", url);
+                            toast.success(t("admin.finishes.swatchUploaded"));
+                          },
+                          onError: notify,
+                        },
+                      );
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="rounded-none"
+                    disabled={uploadSwatch.isPending || removeSwatch.isPending}
+                    onClick={() => swatchInputRef.current?.click()}
+                  >
+                    {uploadSwatch.isPending ? t("admin.common.saving") : t(values.swatch_url ? "admin.finishes.swatchReplace" : "admin.finishes.swatchUpload")}
+                  </Button>
+                  {values.swatch_url && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="rounded-none text-muted-foreground hover:text-destructive"
+                      data-testid="swatch-remove"
+                      disabled={uploadSwatch.isPending || removeSwatch.isPending}
+                      onClick={() =>
+                        removeSwatch.mutate(
+                          { finishId: finish.id, url: values.swatch_url },
+                          {
+                            onSuccess: () => {
+                              set("swatch_url", "");
+                              toast.success(t("admin.finishes.swatchRemoved"));
+                            },
+                            onError: notify,
+                          },
+                        )
+                      }
+                    >
+                      {t("admin.finishes.swatchRemove")}
+                    </Button>
+                  )}
+                </div>
+              )}
             </Field>
           </section>
 

@@ -32,6 +32,28 @@ export function helpers(page, base) {
       return page.locator("[data-sonner-toast]").allInnerTexts();
     },
 
+    /**
+     * Runs `action` and waits for a NEW toast matching `re` — one more than
+     * were on screen before. Use this when the same message can already be
+     * showing from a previous step (sonner keeps toasts ~4s).
+     */
+    async expectToast(re, action, timeout = 15000) {
+      const src = re.source;
+      const flags = re.flags;
+      const countMatching = () =>
+        page.evaluate(
+          ([s, f]) => [...document.querySelectorAll("[data-sonner-toast]")].filter((el) => new RegExp(s, f).test(el.textContent || "")).length,
+          [src, flags],
+        );
+      const before = await countMatching();
+      await action();
+      await page.waitForFunction(
+        ([s, f, n]) => [...document.querySelectorAll("[data-sonner-toast]")].filter((el) => new RegExp(s, f).test(el.textContent || "")).length > n,
+        [src, flags, before],
+        { timeout },
+      );
+    },
+
     /** Radix Select: click the trigger, then the option. */
     async selectOption(triggerLocator, optionName) {
       await triggerLocator.click();
@@ -53,13 +75,16 @@ export function helpers(page, base) {
      * sortable item list changes underneath it.
      */
     async keyboardReorder(handleLocator, direction = "up", steps = 1) {
+      // "up"/"down" for vertical lists, "left"/"right" for grids (dnd-kit
+      // moves to the nearest item in the arrow's direction).
+      const key = { up: "ArrowUp", down: "ArrowDown", left: "ArrowLeft", right: "ArrowRight" }[direction];
       await page.waitForLoadState("networkidle");
       await handleLocator.scrollIntoViewIfNeeded();
       await handleLocator.focus();
       await page.keyboard.press("Space");
       await page.waitForTimeout(250);
       for (let i = 0; i < steps; i++) {
-        await page.keyboard.press(direction === "up" ? "ArrowUp" : "ArrowDown");
+        await page.keyboard.press(key);
         await page.waitForTimeout(250);
       }
       await page.keyboard.press("Space");
