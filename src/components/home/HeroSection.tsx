@@ -135,7 +135,8 @@ const HeroSection = () => {
     touchEndX.current = e.changedTouches[0].clientX;
     const delta = touchStartX.current - touchEndX.current;
     if (Math.abs(delta) > 50) {
-      delta > 0 ? goNext() : goPrev();
+      if (delta > 0) goNext();
+      else goPrev();
     }
   }
 

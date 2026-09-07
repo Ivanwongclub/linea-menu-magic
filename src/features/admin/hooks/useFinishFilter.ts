@@ -12,9 +12,21 @@ import {
  * product editor's picker and the finish manager. Within an axis: OR.
  * Across axes: AND. Search covers cyc_code, factory_name_en, marketing_name.
  */
-export function useFinishFilter(finishes: FinishRow[]) {
+export function useFinishFilter(
+  finishes: FinishRow[],
+  /** Controlled selection (the public listing keeps it in the URL); omit for local state. */
+  controlled?: { selected: FacetSelection; onChange: (next: FacetSelection) => void },
+) {
   const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<FacetSelection>(emptySelection);
+  const [internal, setInternal] = useState<FacetSelection>(emptySelection);
+  const selected = controlled ? controlled.selected : internal;
+  const setSelected = useCallback(
+    (update: (prev: FacetSelection) => FacetSelection) => {
+      if (controlled) controlled.onChange(update(controlled.selected));
+      else setInternal(update);
+    },
+    [controlled],
+  );
 
   const term = search.trim().toLowerCase();
   const matchesSearch = useCallback(
@@ -57,9 +69,9 @@ export function useFinishFilter(finishes: FinishRow[]) {
         ...prev,
         [axis]: prev[axis].includes(id) ? prev[axis].filter((x) => x !== id) : [...prev[axis], id],
       })),
-    [],
+    [setSelected],
   );
-  const clearFacets = useCallback(() => setSelected(emptySelection()), []);
+  const clearFacets = useCallback(() => setSelected(() => emptySelection()), [setSelected]);
 
   return { search, setSearch, selected, toggleFacet, clearFacets, visible, countFor };
 }

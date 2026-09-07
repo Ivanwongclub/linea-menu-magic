@@ -117,6 +117,10 @@ export type ProductFilters = {
   industries?: string[];
   certifications?: string[];
   tags?: string[];
+  /** Finish facets from the URL: axis key → selected value codes (M4 Step 4). */
+  finishes?: Partial<Record<string, string[]>>;
+  /** Resolved by useProductFinishFacets: products with ANY of these finishes. */
+  finishIds?: string[];
   is_customizable?: boolean;
   sort?: 'name_asc' | 'name_desc';
   featured?: string;

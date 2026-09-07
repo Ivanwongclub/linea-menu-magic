@@ -14,6 +14,8 @@ import type {
 import { useCatalogueTaxonomy } from '@/features/products/hooks/useCatalogueTaxonomy';
 import { useI18n } from '@/features/i18n/I18nProvider';
 import { localizedName } from '@/features/admin/lib/localize';
+import { FinishFacetRail } from '@/components/admin/finish/FinishFacetRail';
+import type { ProductFinishFacets } from '@/features/products/hooks/useProductFinishFacets';
 
 interface Taxonomy {
   categories: ProductCategory[];
@@ -28,6 +30,8 @@ interface ProductsSidebarProps {
   setFilters: (updates: Partial<ProductFilters>) => void;
   taxonomy: Taxonomy;
   productCount: number;
+  /** Finish facets (M4 Step 4); rail shown only while the scope has metal products or a selection is active. */
+  finishFacets?: ProductFinishFacets;
 }
 
 function toggleArrayFilter(
@@ -98,6 +102,7 @@ export default function ProductsSidebar({
   setFilters,
   taxonomy,
   productCount,
+  finishFacets,
 }: ProductsSidebarProps) {
   const { t, language } = useI18n();
   const catalogue = useCatalogueTaxonomy();
@@ -292,6 +297,19 @@ export default function ProductsSidebar({
 
 
 
+
+      {finishFacets?.showRail && (
+        <div className="border-t border-border pt-4 mt-4" data-testid="finish-facets">
+          <FinishFacetRail
+            axes={finishFacets.axes}
+            selected={finishFacets.selected}
+            onToggle={finishFacets.toggle}
+            onClear={finishFacets.clear}
+            countFor={finishFacets.countFor}
+            className="w-full"
+          />
+        </div>
+      )}
 
       <div className="pt-6 pb-2 text-xs text-muted-foreground text-center">
         {productCount} product{productCount !== 1 ? 's' : ''} found

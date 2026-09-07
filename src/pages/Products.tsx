@@ -19,6 +19,8 @@ import type { Product, ProductFilters } from '@/features/products/types';
 import { useProducts } from '@/features/products/hooks/useProducts';
 import { useProductTaxonomy } from '@/features/products/hooks/useProductTaxonomy';
 import { useCatalogueTaxonomy } from '@/features/products/hooks/useCatalogueTaxonomy';
+import { useProductFinishFacets } from '@/features/products/hooks/useProductFinishFacets';
+import { FINISH_AXES, type FinishAxisKey } from '@/features/admin/hooks/useFinishes';
 import { useI18n } from '@/features/i18n/I18nProvider';
 import { localizedName } from '@/features/admin/lib/localize';
 import { useProductFiltersFromURL } from '@/features/products/hooks/useProductFiltersFromURL';
@@ -61,6 +63,7 @@ export default function Products() {
   const catalogue = useCatalogueTaxonomy();
   const { t, language } = useI18n();
   const { filters, setFilters, clearFilters } = useProductFiltersFromURL();
+  const finishFacets = useProductFinishFacets(filters, setFilters, language);
   const activeFeatured = filters.featured ?? 'all';
   const isAllProductsMode = activeFeatured === 'all';
   const currentPage = Math.max(1, filters.page ?? 1);
@@ -73,6 +76,7 @@ export default function Products() {
     totalCount: queriedTotalCount,
   } = useProducts({
     ...filters,
+    finishIds: finishFacets.finishIds,
     page: queryPage,
     pageSize: queryPageSize,
   });
@@ -182,6 +186,17 @@ export default function Products() {
       });
     });
 
+    FINISH_AXES.forEach((axis) => {
+      (filters.finishes?.[axis.key] ?? []).forEach((code) => {
+        chips.push({
+          key: `finish-${axis.key}-${code}`,
+          filterKey: 'finishes',
+          label: `${t(`admin.axis.${axis.key}`)}: ${finishFacets.labelFor(axis.key, code)}`,
+          value: `${axis.key}:${code}`,
+        });
+      });
+    });
+
     if (filters.search) {
       chips.push({
         key: 'search',
@@ -192,7 +207,7 @@ export default function Products() {
     }
 
     return chips;
-  }, [filters, taxonomy, catalogue, language, t, activeFeatured]);
+  }, [filters, taxonomy, catalogue, finishFacets, language, t, activeFeatured]);
 
   const activeFilterCount = activeChips.length;
 
@@ -203,6 +218,11 @@ export default function Products() {
     }
     if (chip.filterKey === 'search' || chip.filterKey === 'family') {
       setFilters({ [chip.filterKey]: undefined });
+      return;
+    }
+    if (chip.filterKey === 'finishes') {
+      const [axis, code] = chip.value.split(':');
+      finishFacets.toggleByCode(axis as FinishAxisKey, code);
       return;
     }
     const key = chip.filterKey as keyof typeof filters;
@@ -216,6 +236,7 @@ export default function Products() {
     setFilters,
     taxonomy,
     productCount: totalCount,
+    finishFacets,
   };
 
   return (

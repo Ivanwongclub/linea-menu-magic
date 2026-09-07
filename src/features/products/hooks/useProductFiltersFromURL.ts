@@ -11,6 +11,7 @@ const PARAM_KEYS = {
   industries: 'industry',
   certifications: 'certification',
   tags: 'tag',
+  finishes: 'finish',
   sort: 'sort',
   featured: 'featured',
   collection: 'collection',
@@ -29,6 +30,24 @@ function parseList(value: string | null): string[] | undefined {
 function serializeList(items: string[] | undefined): string | null {
   if (!items?.length) return null;
   return items.join(',');
+}
+
+/** `finish=surface:BRUSHED,base_family:NICKEL` → { surface: ['BRUSHED'], base_family: ['NICKEL'] } */
+function parseFinishes(value: string | null): ProductFilters['finishes'] {
+  if (!value) return undefined;
+  const out: Record<string, string[]> = {};
+  for (const entry of value.split(',')) {
+    const [axis, code] = entry.split(':').map((s) => s.trim());
+    if (!axis || !code) continue;
+    (out[axis] ??= []).push(code);
+  }
+  return Object.keys(out).length > 0 ? out : undefined;
+}
+
+function serializeFinishes(value: ProductFilters['finishes']): string | null {
+  if (!value) return null;
+  const entries = Object.entries(value).flatMap(([axis, codes]) => (codes ?? []).map((c) => `${axis}:${c}`));
+  return entries.length > 0 ? entries.join(',') : null;
 }
 
 function parsePage(value: string | null): number | undefined {
@@ -59,6 +78,7 @@ export function useProductFiltersFromURL(): UseProductFiltersFromURLResult {
       industries: parseList(searchParams.get(PARAM_KEYS.industries)),
       certifications: parseList(searchParams.get(PARAM_KEYS.certifications)),
       tags: parseList(searchParams.get(PARAM_KEYS.tags)),
+      finishes: parseFinishes(searchParams.get(PARAM_KEYS.finishes)),
       sort:
         sort && ['name_asc', 'name_desc'].includes(sort)
           ? sort
@@ -87,6 +107,10 @@ export function useProductFiltersFromURL(): UseProductFiltersFromURLResult {
 
           if (value === undefined || value === null) {
             next.delete(paramKey);
+          } else if (key === 'finishes') {
+            const serialized = serializeFinishes(value as ProductFilters['finishes']);
+            if (serialized) next.set(paramKey, serialized);
+            else next.delete(paramKey);
           } else if (Array.isArray(value)) {
             const serialized = serializeList(value);
             if (serialized) {

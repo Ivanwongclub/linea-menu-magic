@@ -9,7 +9,33 @@ import { useCatalogueTaxonomy } from './useCatalogueTaxonomy';
  * segment filter resolves to nothing (unknown slug, or a family with no
  * categories) so the result is "no products", not "all products".
  */
-const NO_MATCH = '__no-match__';
+export const NO_MATCH = '__no-match__';
+
+/**
+ * Segment → family → category narrow in turn (intersection across levels);
+ * several values at one level are alternatives (union within the level),
+ * the same rule as the finish facets. Returns undefined for "no category
+ * restriction", or [NO_MATCH] when the restriction resolves to nothing.
+ */
+export function resolveCategoryScope(
+  filters: Pick<ProductFilters, 'family' | 'categories' | 'segments'>,
+  categorySlugsForFamily: (slug: string) => string[],
+  categorySlugsForSegment: (segment: string) => string[],
+): string[] | undefined {
+  const explicit = normalizeList(filters.categories) ?? [];
+  const family = filters.family || undefined;
+  const segments = normalizeList(filters.segments) ?? [];
+  if (!family && segments.length === 0) return explicit.length > 0 ? explicit : undefined;
+  let pool: string[] | null = null; // null = unrestricted so far
+  if (segments.length > 0) pool = segments.flatMap((s) => categorySlugsForSegment(s));
+  if (family) {
+    const inFamily = categorySlugsForFamily(family);
+    pool = pool ? pool.filter((slug) => inFamily.includes(slug)) : inFamily;
+  }
+  if (explicit.length > 0) pool = pool ? explicit.filter((slug) => pool!.includes(slug)) : explicit;
+  const resolved = [...new Set(pool ?? [])];
+  return resolved.length > 0 ? resolved : [NO_MATCH];
+}
 
 interface UseProductsResult {
   products: Product[];
@@ -30,21 +56,24 @@ interface FilterScope {
     | 'product_materials'
     | 'product_tags'
     | 'product_industries'
-    | 'product_certifications';
+    | 'product_certifications'
+    | 'finishes';
   dimensionIdColumn: 'id';
-  dimensionFilterColumn: 'slug' | 'abbreviation';
+  dimensionFilterColumn: 'slug' | 'abbreviation' | 'id';
   mapTable:
     | 'product_category_map'
     | 'product_material_map'
     | 'product_tag_map'
     | 'product_industry_map'
-    | 'product_certification_map';
+    | 'product_certification_map'
+    | 'product_finishes';
   mapDimensionColumn:
     | 'category_id'
     | 'material_id'
     | 'tag_id'
     | 'industry_id'
-    | 'certification_id';
+    | 'certification_id'
+    | 'finish_id';
   caseInsensitive?: boolean;
 }
 
@@ -256,6 +285,15 @@ async function fetchProducts(filters: ProductFilters): Promise<QueryPayload> {
       mapDimensionColumn: 'industry_id',
     },
     {
+      // Resolved by useProductFinishFacets: a product matches if ANY attached finish is in the list.
+      values: normalizeList(filters.finishIds),
+      dimensionTable: 'finishes',
+      dimensionIdColumn: 'id',
+      dimensionFilterColumn: 'id',
+      mapTable: 'product_finishes',
+      mapDimensionColumn: 'finish_id',
+    },
+    {
       values: normalizeList(filters.certifications),
       dimensionTable: 'product_certifications',
       dimensionIdColumn: 'id',
@@ -374,23 +412,13 @@ export function useProducts(filters: ProductFilters): UseProductsResult {
   const segmentsKey = normalizeList(filters.segments)?.join(',') ?? '';
   const needsTaxonomy = Boolean(family || segmentsKey);
 
-  // Segment → family → category narrow in turn (intersection across levels);
-  // several values at one level are alternatives (union within the level),
-  // the same rule as the finish facets. Anything that resolves to no
-  // category must yield nothing, not everything — hence the sentinel.
   const resolvedCategories = useMemo<string[] | undefined>(() => {
-    const explicit = categoriesKey ? categoriesKey.split(',') : [];
-    if (!needsTaxonomy) return explicit.length > 0 ? explicit : undefined;
-    if (taxonomyLoading) return undefined;
-    let pool: string[] | null = null; // null = unrestricted so far
-    if (segmentsKey) pool = segmentsKey.split(',').flatMap((s) => categorySlugsForSegment(s));
-    if (family) {
-      const inFamily = categorySlugsForFamily(family);
-      pool = pool ? pool.filter((slug) => inFamily.includes(slug)) : inFamily;
-    }
-    if (explicit.length > 0) pool = pool ? explicit.filter((slug) => pool!.includes(slug)) : explicit;
-    const resolved = [...new Set(pool ?? [])];
-    return resolved.length > 0 ? resolved : [NO_MATCH];
+    if (needsTaxonomy && taxonomyLoading) return undefined;
+    return resolveCategoryScope(
+      { family, categories: categoriesKey ? categoriesKey.split(',') : undefined, segments: segmentsKey ? segmentsKey.split(',') : undefined },
+      categorySlugsForFamily,
+      categorySlugsForSegment,
+    );
   }, [family, categoriesKey, segmentsKey, needsTaxonomy, taxonomyLoading, categorySlugsForFamily, categorySlugsForSegment]);
 
   const normalizedFilters = useMemo<ProductFilters>(
@@ -404,6 +432,7 @@ export function useProducts(filters: ProductFilters): UseProductsResult {
       industries: normalizeList(filters.industries),
       certifications: normalizeList(filters.certifications),
       tags: normalizeList(filters.tags),
+      finishIds: normalizeList(filters.finishIds),
       page:
         typeof filters.page === 'number' && Number.isFinite(filters.page)
           ? Math.max(1, Math.trunc(filters.page))
@@ -421,6 +450,7 @@ export function useProducts(filters: ProductFilters): UseProductsResult {
       filters.industries?.join(','),
       filters.certifications?.join(','),
       filters.tags?.join(','),
+      filters.finishIds?.join(','),
       filters.is_customizable,
       filters.sort,
       filters.page,
