@@ -1,0 +1,14 @@
+item_code,slug,name,primary_category,spec.color_options,spec.finish,spec.material,spec.size,spec.tensile_strength,spec.thickness,spec.weight,production.capacity,production.lead_time,production.origin,production.sample_time
+BTN-M4H-001,btn-m4h-001,Metal 4-Hole Button,metal-shank-buttons,銀色; 金色; 古銅色; 黑鎳; 玫瑰金; 槍色,拋光,,15mm,,3mm,2.5g,"500,000 件/月",15-20 工作天,中國東莞,5-7 工作天
+BTN-P2H-002,btn-p2h-002,Resin 2-Hole Button,metal-shank-buttons,白色; 黑色; 紅色; 藍色; 綠色; 黃色; 紫色; 粉色; 灰色; 棕色,啞光,,12mm,,2.5mm,0.8g,"2,000,000 件/月",10-15 工作天,中國廣州,3-5 工作天
+BTN-POLO-001,btn-polo-001,Polo Button 10.8mm,metal-shank-buttons,自然色; 黑色; 白色; 深藍; 咖啡色,啞光,,10.8mm,,2.5mm,0.8g,"500,000 pcs/月",15-20 天,台灣,5 天
+LAC-ECO-001,eco-lace-trim,Eco Lace Trim,pp-cotton-poly-tc-webbing,Off White; Ivory; Black; Beige,Natural,Recycled Polyester,20mm width,,,8g/m,"50,000m/month",40-60 days,"Shenzhen, China",14-21 days
+HW-BUCK-001,hw-buck-001,Metal Belt Buckle,buckles-cord-locks,銀色; 金色; 黑色; 槍色; 古銅色,拉絲,,內寬40mm × 外框50mm,,4mm,45g,"50,000 件/月",18-22 工作天,中國義烏,7-10 工作天
+HW-SNAP-002,hw-snap-002,Snap Button (4-Part),snap-fasteners-jeans-buttons,金色; 銀色; 古銅色; 黑鎳; 珍珠白; 彩色烤漆,電鍍,,帽蓋15mm,,帽高6mm,3.2g (全套),"1,000,000 套/月",12-18 工作天,中國廣東,5-7 工作天
+ZIP-YKK-001,metal-zipper-puller,Metal Zipper Puller,zipper-pullers-sliders,Gold; Silver; Rose Gold; Gunmetal,Gold Plating,Zinc Alloy,25mm x 15mm,,,4.2g,"300,000 pcs/month",35-50 days,"Shenzhen, China",10-14 days
+ZIP-YKK-002,nylon-cord-puller,Nylon Cord Puller,zipper-pullers-sliders,Black; Navy; Red; White,Matte,Nylon,30mm,,,1.2g,"1,000,000 pcs/month",20-30 days,"Shenzhen, China",5-7 days
+HDW-BCK-002,plastic-side-release-buckle,Plastic Side Release Buckle,buckles-cord-locks,Black; Olive; Coyote Brown; Wolf Grey,Matte,Nylon,25mm,,,3.1g,"500,000 pcs/month",20-25 days,"Shenzhen, China",5-7 days
+BTN-M4H-002,resin-fashion-button,Resin Fashion Button,metal-shank-buttons,Marble White; Tortoise Shell; Ocean Blue; Forest Green,Polished,Polyester Resin,18mm,,,1.8g,"800,000 pcs/month",25-35 days,"Shenzhen, China",5-7 days
+OTH-MIX-001,sample-trim-collection,Sample Trim Collection,other,Assorted,Various,Mixed,Assorted,,,,N/A,N/A — sample kit,Hong Kong,3-5 days
+ZIP-M5-001,zip-m5-001,Metal Zipper #5,zipper-pullers-sliders,古銅色; 金色; 銀色; 黑鎳; 青古銅; 紅銅,仿古處理,,5號 (齒寬5mm),≥800N,,,"100,000 條/月",20-25 工作天,中國深圳,7-10 工作天
+ZIP-N3-002,zip-n3-002,Nylon Zipper #3,zipper-pullers-sliders,黑色; 白色; 深藍; 灰色; 卡其色; 軍綠,標準,,3號 (齒寬3mm),≥500N,,,"500,000 條/月",12-15 工作天,中國福建,3-5 工作天
