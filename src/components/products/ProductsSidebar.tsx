@@ -28,7 +28,6 @@ interface ProductsSidebarProps {
   setFilters: (updates: Partial<ProductFilters>) => void;
   taxonomy: Taxonomy;
   productCount: number;
-  categoryCounts?: Record<string, number>;
 }
 
 function toggleArrayFilter(
@@ -99,7 +98,6 @@ export default function ProductsSidebar({
   setFilters,
   taxonomy,
   productCount,
-  categoryCounts,
 }: ProductsSidebarProps) {
   const { t, language } = useI18n();
   const catalogue = useCatalogueTaxonomy();
@@ -138,16 +136,19 @@ export default function ProductsSidebar({
     });
   }, [setFilters]);
 
-  // Families and their categories straight from the database taxonomy.
+  // Families and their categories from the database taxonomy — only those
+  // with published products; counts are real published counts.
   const familyGroups = useMemo(
     () =>
-      catalogue.families.map((family) => ({
+      catalogue.familiesWithProducts.map((family) => ({
         slug: family.slug,
         name: localizedName(family, language),
         categories: family.categories.map((cat) => ({ ...cat, label: localizedName(cat, language) })),
       })),
-    [catalogue.families, language],
+    [catalogue.familiesWithProducts, language],
   );
+  // A filter with one option is dead UI: show segments only once a second one has families.
+  const showSegments = catalogue.segments.length > 1;
 
   const selectedSegment = filters.segments?.[0];
   const handleSegmentSelect = useCallback(
@@ -187,8 +188,9 @@ export default function ProductsSidebar({
         </div>
       </div>
 
-      {/* Segments — prominent quick filter buttons */}
-      <div className="mb-4">
+      {/* Segments — prominent quick filter buttons (hidden while only one segment has families) */}
+      {showSegments && (
+      <div className="mb-4" data-testid="segments-block">
         <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground mb-2">
           Segments
         </p>
@@ -211,6 +213,7 @@ export default function ProductsSidebar({
           })}
         </div>
       </div>
+      )}
 
       <div className="border-t border-border pt-4">
         <div className="space-y-4">
@@ -254,14 +257,19 @@ export default function ProductsSidebar({
                 {isOpen && (
                   <div className="space-y-1.5 pl-3 border-l border-border">
                     {group.categories.map((cat) => {
-                      const count = categoryCounts?.[cat.slug] ?? 0;
+                      const count = cat.product_count;
                       return (
                         <div key={cat.id} className="flex items-center gap-2">
                           <Checkbox
                             id={`cat-${cat.slug}`}
                             checked={filters.categories?.includes(cat.slug) ?? false}
                             onCheckedChange={() =>
-                              setFilters({ categories: toggleArrayFilter(filters.categories, cat.slug) })
+                              setFilters({
+                                categories: toggleArrayFilter(filters.categories, cat.slug),
+                                // a category narrows within its family; ticking one
+                                // elsewhere releases the family rather than yielding nothing
+                                ...(filters.family && filters.family !== group.slug ? { family: undefined } : {}),
+                              })
                             }
                           />
                           <label
@@ -270,9 +278,7 @@ export default function ProductsSidebar({
                           >
                             {cat.label}
                           </label>
-                          {count > 0 && (
-                            <span className="text-xs text-muted-foreground">{count}</span>
-                          )}
+                          <span className="text-xs text-muted-foreground" data-testid={`cat-count-${cat.slug}`}>{count}</span>
                         </div>
                       );
                     })}

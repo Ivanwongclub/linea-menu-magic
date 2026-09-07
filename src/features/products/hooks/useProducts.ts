@@ -374,17 +374,23 @@ export function useProducts(filters: ProductFilters): UseProductsResult {
   const segmentsKey = normalizeList(filters.segments)?.join(',') ?? '';
   const needsTaxonomy = Boolean(family || segmentsKey);
 
-  // Family and segment filters resolve to category slugs through the
-  // database taxonomy. An unknown family/segment must yield nothing, not
-  // everything — hence the sentinel.
+  // Segment → family → category narrow in turn (intersection across levels);
+  // several values at one level are alternatives (union within the level),
+  // the same rule as the finish facets. Anything that resolves to no
+  // category must yield nothing, not everything — hence the sentinel.
   const resolvedCategories = useMemo<string[] | undefined>(() => {
     const explicit = categoriesKey ? categoriesKey.split(',') : [];
     if (!needsTaxonomy) return explicit.length > 0 ? explicit : undefined;
     if (taxonomyLoading) return undefined;
-    const fromFamily = family ? categorySlugsForFamily(family) : [];
-    const fromSegments = (segmentsKey ? segmentsKey.split(',') : []).flatMap((s) => categorySlugsForSegment(s));
-    const merged = [...new Set([...explicit, ...fromFamily, ...fromSegments])];
-    return merged.length > 0 ? merged : [NO_MATCH];
+    let pool: string[] | null = null; // null = unrestricted so far
+    if (segmentsKey) pool = segmentsKey.split(',').flatMap((s) => categorySlugsForSegment(s));
+    if (family) {
+      const inFamily = categorySlugsForFamily(family);
+      pool = pool ? pool.filter((slug) => inFamily.includes(slug)) : inFamily;
+    }
+    if (explicit.length > 0) pool = pool ? explicit.filter((slug) => pool!.includes(slug)) : explicit;
+    const resolved = [...new Set(pool ?? [])];
+    return resolved.length > 0 ? resolved : [NO_MATCH];
   }, [family, categoriesKey, segmentsKey, needsTaxonomy, taxonomyLoading, categorySlugsForFamily, categorySlugsForSegment]);
 
   const normalizedFilters = useMemo<ProductFilters>(

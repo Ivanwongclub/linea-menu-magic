@@ -11,6 +11,12 @@ import { supabase } from "@/integrations/supabase/client";
  * Only active families and their active categories are returned — a
  * category whose family is inactive or unset is not part of the public
  * structure. Names are trilingual; render them through `localizedName`.
+ *
+ * `families` is the full structure (filter resolution, chips). Public menus
+ * render `familiesWithProducts`: categories with zero published products are
+ * dropped, and a family with no remaining category is dropped with them.
+ * Counts are of products the current session can see — for the anonymous
+ * storefront that is active + public.
  */
 
 export interface CatalogueCategory {
@@ -22,6 +28,8 @@ export interface CatalogueCategory {
   family_id: string | null;
   sort_order: number;
   icon_url: string | null;
+  /** Published (active + public) products mapped to this category. */
+  product_count: number;
 }
 
 export interface CatalogueFamily {
@@ -37,10 +45,32 @@ export interface CatalogueFamily {
 
 interface Raw {
   families: Omit<CatalogueFamily, "categories">[];
-  categories: CatalogueCategory[];
+  categories: Omit<CatalogueCategory, "product_count">[];
 }
 
 export const CATALOGUE_TAXONOMY_KEY = ["catalogue-taxonomy"] as const;
+export const CATALOGUE_COUNTS_KEY = ["catalogue-taxonomy", "counts"] as const;
+
+/** Distinct published products per category id, as visible to this session. */
+async function fetchPublishedCounts(): Promise<Record<string, number>> {
+  const { data, error } = await supabase
+    .from("product_category_map")
+    .select("category_id, products!inner(id)")
+    .eq("products.status", "active")
+    .eq("products.is_public", true);
+  if (error) throw error;
+  const seen = new Set<string>();
+  const counts: Record<string, number> = {};
+  for (const row of data ?? []) {
+    const productId = (row.products as { id: string } | null)?.id;
+    if (!productId) continue;
+    const key = `${row.category_id}:${productId}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    counts[row.category_id] = (counts[row.category_id] ?? 0) + 1;
+  }
+  return counts;
+}
 
 export function useCatalogueTaxonomy() {
   const query = useQuery({
@@ -63,18 +93,33 @@ export function useCatalogueTaxonomy() {
       if (c.error) throw c.error;
       return {
         families: f.data ?? [],
-        categories: (c.data ?? []).filter((row): row is CatalogueCategory => !!row.slug) as CatalogueCategory[],
+        categories: (c.data ?? []).filter((row) => !!row.slug),
       };
     },
   });
 
+  const countsQuery = useQuery({
+    queryKey: CATALOGUE_COUNTS_KEY,
+    staleTime: 60 * 1000,
+    queryFn: fetchPublishedCounts,
+  });
+
   const families = useMemo<CatalogueFamily[]>(() => {
-    const cats = query.data?.categories ?? [];
+    const counts = countsQuery.data ?? {};
+    const cats = (query.data?.categories ?? []).map((c) => ({ ...c, product_count: counts[c.id] ?? 0 }));
     return (query.data?.families ?? []).map((f) => ({
       ...f,
       categories: cats.filter((c) => c.family_id === f.id),
     }));
-  }, [query.data]);
+  }, [query.data, countsQuery.data]);
+
+  /** Public-menu view: empty categories and then empty families dropped. Empty until counts arrive, so menus never flash the full tree. */
+  const familiesWithProducts = useMemo<CatalogueFamily[]>(() => {
+    if (!countsQuery.data) return [];
+    return families
+      .map((f) => ({ ...f, categories: f.categories.filter((c) => c.product_count > 0) }))
+      .filter((f) => f.categories.length > 0);
+  }, [families, countsQuery.data]);
 
   const categories = useMemo(() => families.flatMap((f) => f.categories), [families]);
 
@@ -98,9 +143,11 @@ export function useCatalogueTaxonomy() {
 
   return {
     families,
+    familiesWithProducts,
     categories,
     segments,
     loading: query.isLoading,
+    countsLoading: countsQuery.isLoading,
     error: query.error ? (query.error as Error).message : null,
     familyBySlug,
     categoryBySlug,

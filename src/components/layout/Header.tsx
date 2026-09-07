@@ -114,10 +114,11 @@ function preloadRoute(href: string) {
 // ─── Component ─────────────────────────────────────────────────────────────────
 const Header = () => {
   const { t, language } = useI18n();
-  const { families, categories, familyOf } = useCatalogueTaxonomy();
+  // Public menu: only families/categories with published products.
+  const { familiesWithProducts: families, familyOf } = useCatalogueTaxonomy();
   // Two text columns of families; a 5×3 tile grid of categories.
   const familyColumns = [families.slice(0, Math.ceil(families.length / 2)), families.slice(Math.ceil(families.length / 2))];
-  const tiles = categories.slice(0, 15).map((cat) => ({
+  const tiles = families.flatMap((f) => f.categories).slice(0, 15).map((cat) => ({
     slug: cat.slug,
     label: localizedName(cat, language),
     img: cat.icon_url ?? FAMILY_TILE_IMAGES[familyOf(cat)?.slug ?? ""] ?? otherCategoryImg,

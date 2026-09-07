@@ -95,17 +95,6 @@ export default function Products() {
   const totalCount = isAllProductsMode ? queriedTotalCount : products.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / DEFAULT_PAGE_SIZE));
 
-  // Count products per category (from current result set)
-  const categoryCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    products.forEach((p) => {
-      p.categories?.forEach((c) => {
-        counts[c.slug] = (counts[c.slug] ?? 0) + 1;
-      });
-    });
-    return counts;
-  }, [products]);
-
   // Collect all active filter/browse labels for chip display
   const activeChips = useMemo(() => {
     const chips: { key: string; filterKey: string; label: string; value: string }[] = [];
@@ -227,7 +216,6 @@ export default function Products() {
     setFilters,
     taxonomy,
     productCount: totalCount,
-    categoryCounts,
   };
 
   return (
