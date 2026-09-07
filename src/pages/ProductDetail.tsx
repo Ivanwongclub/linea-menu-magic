@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useI18n } from '@/features/i18n/I18nProvider';
 import { localizedName, localizedDescription } from '@/features/admin/lib/localize';
+import { resolveProductMaterials } from '@/features/products/utils/productMaterial';
 import { supabase } from '@/integrations/supabase/client';
 import {
   FileDown, Box, Send, Palette, BookmarkPlus, Download,
@@ -17,15 +18,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import ProductCard from '@/components/products/ProductCard';
+import ProductGallery from '@/components/product/ProductGallery';
 import Model3DViewer from '@/components/designer-studio/Model3DViewer';
 import { useProduct } from '@/features/products/hooks/useProduct';
 import { useProducts } from '@/features/products/hooks/useProducts';
-import { getProductPlaceholderUrl } from '@/features/products/utils/productImagePlaceholder';
 import { getProductImageUrl } from '@/lib/productImage';
 import type { Product, ProductImage } from '@/features/products/types';
-import { getPdpSeed } from '@/features/products/pdpSeedData';
-import { getPdpSeedImages, getFallbackImage } from '@/features/products/pdpSeedImages';
-import { getMaterialSurfaceImage } from '@/features/products/materialSurfaces';
 
 /* ─── helpers ────────────────────────────────────────── */
 
@@ -46,93 +44,6 @@ const SECTION_IDS = {
   downloads: 'pdp-downloads',
   related: 'pdp-related',
 } as const;
-
-/* ─── Hero Gallery ───────────────────────────────────── */
-
-function HeroGallery({ images, onOpen3D, has3D }: { images: ProductImage[]; onOpen3D: () => void; has3D: boolean }) {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const activeImage = images[activeIndex] ?? images[0];
-
-  if (!images.length) {
-    return (
-      <div className="aspect-square bg-secondary flex items-center justify-center">
-        <span className="text-xs text-muted-foreground uppercase tracking-wider font-mono">No image</span>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex gap-3">
-      {/* Thumbnail rail — vertical on desktop */}
-      {(images.length > 1 || has3D) && (
-        <div className="hidden md:flex flex-col gap-2 w-16 shrink-0">
-          {images.map((img, i) => (
-            <button
-              key={img.id}
-              onClick={() => setActiveIndex(i)}
-              className={`w-16 h-16 overflow-hidden transition-all duration-200 ${
-                i === activeIndex
-                  ? 'ring-2 ring-foreground ring-offset-1 ring-offset-background'
-                  : 'opacity-60 hover:opacity-100'
-              }`}
-            >
-              <img
-                src={getProductImageUrl(img.url, 'thumb')}
-                alt={img.alt_text ?? `View ${i + 1}`}
-                className="w-full h-full object-cover"
-                loading="lazy"
-              />
-            </button>
-          ))}
-          {has3D && (
-            <button
-              onClick={onOpen3D}
-              className="w-16 h-16 flex flex-col items-center justify-center gap-1 bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <Box className="h-4 w-4" />
-              <span className="text-[8px] uppercase tracking-wider font-medium">3D</span>
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* Main image */}
-      <div className="flex-1">
-        <div className="aspect-square overflow-hidden relative group bg-secondary/30">
-          <img
-            src={getProductImageUrl(activeImage.url, 'pdp')}
-            alt={activeImage.alt_text ?? 'Product image'}
-            loading="eager"
-            fetchPriority="high"
-            decoding="async"
-            className="w-full h-full object-contain p-6 transition-transform duration-500 group-hover:scale-[1.03]"
-          />
-        </div>
-        {/* Horizontal thumbs on mobile */}
-        {images.length > 1 && (
-          <div className="flex md:hidden gap-2 mt-3 overflow-x-auto pb-1">
-            {images.map((img, i) => (
-              <button
-                key={img.id}
-                onClick={() => setActiveIndex(i)}
-                className={`shrink-0 w-14 h-14 overflow-hidden transition-all duration-200 ${
-                  i === activeIndex ? 'ring-2 ring-foreground' : 'opacity-60'
-                }`}
-              >
-                <img
-                  src={getProductImageUrl(img.url, 'thumb')}
-                  alt={img.alt_text ?? `View ${i + 1}`}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
 
 /* ─── Compact spec tile ──────────────────────────────── */
 
@@ -282,48 +193,13 @@ export default function ProductDetail() {
   // `name` is the English base; the zh columns carry the translations.
   const displayName = product ? localizedName(product, language) : '';
 
-  /* Build gallery: real DB images → seeded images → single placeholder */
-  const galleryImages = useMemo<ProductImage[]>(() => {
-    if (!product) return [];
-
-    // 1. Real DB images
-    const dbImages = [...(product.images ?? [])].sort((a, b) => a.sort_order - b.sort_order);
-    if (dbImages.length > 0) {
-      return dbImages;
-    }
-
-    // 2. Seeded images
-    const seeded = getPdpSeedImages(product.slug, product.primary_category?.slug);
-    if (seeded && seeded.length > 0) {
-      return seeded.map((url, i) => ({
-        id: `seed-img-${product.id}-${i}`,
-        url,
-        sort_order: i,
-        is_primary: i === 0,
-        alt_text: `${localizedName(product, language)} — view ${i + 1}`,
-      }));
-    }
-
-    // 3. Absolute last resort — use category images, never SVG placeholder
-    const fallbackSeeded = getPdpSeedImages(product.slug, product.primary_category?.slug);
-    if (fallbackSeeded && fallbackSeeded.length > 0) {
-      return fallbackSeeded.map((url, i) => ({
-        id: `fallback-img-${product.id}-${i}`,
-        url,
-        sort_order: i,
-        is_primary: i === 0,
-        alt_text: `${localizedName(product, language)} — view ${i + 1}`,
-      }));
-    }
-
-    return [{
-      id: `fallback-${product.id}`,
-      url: getFallbackImage(),
-      sort_order: 0,
-      is_primary: true,
-      alt_text: localizedName(product, language),
-    }];
-  }, [product, language]);
+  /* The gallery is the database, and nothing else. A product with no
+     images renders a deliberate empty state inside ProductGallery, never a
+     photograph belonging to another product. */
+  const galleryImages = useMemo<ProductImage[]>(
+    () => [...(product?.images ?? [])].sort((a, b) => a.sort_order - b.sort_order),
+    [product],
+  );
 
   const addToLibrary = useCallback(async () => {
     if (!product) return;
@@ -385,48 +261,37 @@ export default function ProductDetail() {
     );
   }
 
-  /* ── data extraction with seed fallback ── */
-  const seed = getPdpSeed(product.slug);
+  /* ── data extraction — database only, no fabricated fallbacks ──
+     A field with no value renders as absent. Item 4 replaces what is left
+     of the JSON blobs with the typed columns. */
   const tags = product.tags ?? [];
   const primaryCat = product.primary_category ?? product.categories?.[0];
   const rawSpecs = product.specifications ?? {};
   const rawProd = product.production ?? {};
 
-  const seedSpecs = seed?.specifications ?? {};
-  const seedProd = seed?.production ?? {};
-
-  const materials = product.materials ?? [];
+  const materials = resolveProductMaterials(product);
   const materialNames = materials.length
     ? materials.map((m) => m.name).join(', ')
-    : specValue(rawSpecs.material) ?? specValue(rawSpecs.Material) ?? seedSpecs.material ?? null;
-  const finish = specValue(rawSpecs.finish) ?? specValue(rawSpecs.Finish) ?? specValue(rawSpecs.plating) ?? seedSpecs.finish ?? null;
-  const size = specValue(rawSpecs.size) ?? specValue(rawSpecs.Size) ?? specValue(rawSpecs.dimensions) ?? seedSpecs.size ?? null;
-  const weight = specValue(rawSpecs.weight) ?? specValue(rawSpecs.Weight) ?? seedSpecs.weight ?? null;
-  const thickness = specValue(rawSpecs.thickness) ?? specValue(rawSpecs.Thickness) ?? seedSpecs.thickness ?? null;
-  const attachment = specValue(rawSpecs.attachment) ?? specValue(rawSpecs.construction) ?? seedSpecs.attachment ?? null;
-  const colorOptions = specValue(rawSpecs.color_options) ?? (seedSpecs.color_options ? seedSpecs.color_options.join(', ') : null);
-  const tensileStrength = specValue(rawSpecs.tensileStrength) ?? seedSpecs.tensileStrength ?? null;
+    : specValue(rawSpecs.material) ?? specValue(rawSpecs.Material) ?? null;
+  const finish = specValue(rawSpecs.finish) ?? specValue(rawSpecs.Finish) ?? specValue(rawSpecs.plating) ?? null;
+  const size = specValue(rawSpecs.size) ?? specValue(rawSpecs.Size) ?? specValue(rawSpecs.dimensions) ?? null;
+  const weight = specValue(rawSpecs.weight) ?? specValue(rawSpecs.Weight) ?? null;
+  const thickness = specValue(rawSpecs.thickness) ?? specValue(rawSpecs.Thickness) ?? null;
+  const attachment = specValue(rawSpecs.attachment) ?? specValue(rawSpecs.construction) ?? null;
+  const colorOptions = specValue(rawSpecs.color_options) ?? null;
+  const tensileStrength = specValue(rawSpecs.tensileStrength) ?? null;
 
-  const moq = specValue(rawProd.moq) ?? specValue(rawProd.MOQ) ?? specValue(rawProd.minimum_order) ?? seedProd.moq ?? null;
-  const sampleTime = specValue(rawProd.sampleTime) ?? specValue(rawProd.sample_time) ?? seedProd.sample_time ?? null;
-  const leadTime = specValue(rawProd.leadTime) ?? specValue(rawProd.lead_time) ?? seedProd.lead_time ?? null;
-  const origin = specValue(rawProd.origin) ?? specValue(rawProd.Origin) ?? seedProd.origin ?? null;
-  const capacity = specValue(rawProd.capacity) ?? specValue(rawProd.Capacity) ?? seedProd.capacity ?? null;
+  const moq = specValue(rawProd.moq) ?? specValue(rawProd.MOQ) ?? specValue(rawProd.minimum_order) ?? null;
+  const sampleTime = specValue(rawProd.sampleTime) ?? specValue(rawProd.sample_time) ?? null;
+  const leadTime = specValue(rawProd.leadTime) ?? specValue(rawProd.lead_time) ?? null;
+  const origin = specValue(rawProd.origin) ?? specValue(rawProd.Origin) ?? null;
+  const capacity = specValue(rawProd.capacity) ?? specValue(rawProd.Capacity) ?? null;
 
-  const realCerts = product.certifications ?? [];
-  const seedCerts = (seed?.certifications ?? [])
-    .filter((sc) => !realCerts.some((rc) => rc.abbreviation === sc.abbreviation))
-    .map((sc, i) => ({ id: `seed-cert-${i}`, name: sc.name, abbreviation: sc.abbreviation, logo_url: undefined }));
-  const certs = [...realCerts, ...seedCerts];
+  const certs = product.certifications ?? [];
+  const industries = product.industries ?? [];
 
-  const realIndustries = product.industries ?? [];
-  const seedIndustries = (seed?.applications?.industries ?? [])
-    .filter((si) => !realIndustries.some((ri) => ri.name.toLowerCase() === si.toLowerCase()))
-    .map((si, i) => ({ id: `seed-ind-${i}`, name: si, slug: si.toLowerCase().replace(/\s+/g, '-'), sort_order: 100 + i }));
-  const industries = [...realIndustries, ...seedIndustries];
-
-  const description = localizedDescription(product, language) ?? seed?.description ?? null;
-  const isCustomizable = product.is_customizable || (seed?.is_customizable ?? false);
+  const description = localizedDescription(product, language) ?? null;
+  const isCustomizable = product.is_customizable;
 
   // Build merged detail objects for below-fold
   const mergedSpecObj: Record<string, string> = {};
@@ -489,10 +354,13 @@ export default function ProductDetail() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
 
             {/* LEFT — Media */}
-            <HeroGallery
+            <ProductGallery
               images={galleryImages}
-              onOpen3D={() => setShow3D(true)}
+              productName={displayName}
+              itemCode={product.item_code}
+              categoryName={primaryCat?.name}
               has3D={!!product.model_url}
+              onOpen3D={() => setShow3D(true)}
             />
 
             {/* RIGHT — Compact decision panel */}
@@ -629,7 +497,7 @@ export default function ProductDetail() {
           {/* ── Overview ── */}
           <section id={SECTION_IDS.overview} className="scroll-mt-24 mb-16">
             <SectionHeading id="" title="Overview" icon={ClipboardList} />
-            <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8">
+            <div>
               <div className="space-y-4">
                 {description && (
                   <p className="text-sm text-muted-foreground leading-relaxed">
@@ -652,38 +520,6 @@ export default function ProductDetail() {
                   ))}
                 </div>
               </div>
-              {(materials.length > 0 || materialNames) && (
-                <div className="bg-foreground text-background overflow-hidden flex flex-col">
-                  {/* Material surface texture — top half */}
-                  <div className="h-28 relative overflow-hidden">
-                    <img
-                      src={getMaterialSurfaceImage(materialNames)}
-                      alt="Material surface"
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 to-transparent" />
-                  </div>
-                  {/* Content */}
-                  <div className="p-5 flex-1 flex flex-col">
-                    <h3 className="text-[10px] font-bold uppercase tracking-[0.12em] text-background/70 mb-4 pb-3 border-b border-background/20">Materials</h3>
-                    {materials.length > 0 ? (
-                      <div className="space-y-2.5 flex-1">
-                        {materials.map((m) => (
-                          <div key={m.id} className="flex items-center justify-between py-1.5 border-b border-background/10 last:border-b-0">
-                            <span className="text-sm font-medium text-background">{m.name}</span>
-                            {m.is_sustainable && (
-                              <Badge className="text-[9px] bg-background/20 text-background border-0">Eco</Badge>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    ) : materialNames ? (
-                      <p className="text-sm font-medium text-background">{materialNames}</p>
-                    ) : null}
-                  </div>
-                </div>
-              )}
             </div>
           </section>
 

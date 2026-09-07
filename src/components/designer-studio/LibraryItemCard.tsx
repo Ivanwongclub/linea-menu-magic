@@ -3,7 +3,6 @@ import { Box, Eye, Download, FileDown, Leaf, Layers } from "lucide-react";
 import type { UserLibraryItem } from "@/features/products/types";
 import type { Product } from "@/features/products/types";
 import { getProductImageUrl } from "@/lib/productImage";
-import { getPdpSeedImages } from "@/features/products/pdpSeedImages";
 import { getProductPlaceholderUrl } from "@/features/products/utils/productImagePlaceholder";
 
 interface LibraryItemCardProps {
@@ -23,9 +22,6 @@ function resolveLibraryImage(product: Product | undefined): string {
   }
 
   if (product.thumbnail_url) return product.thumbnail_url;
-
-  const seeded = getPdpSeedImages(product.slug, product.primary_category?.slug);
-  if (seeded && seeded.length > 0) return seeded[0];
 
   return getProductPlaceholderUrl(
     product.name_en ?? product.name,

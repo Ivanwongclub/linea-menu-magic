@@ -1,11 +1,13 @@
 import { ENV } from "@/config/env";
 
-export type ImageSize = 'thumb' | 'card' | 'pdp' | 'menu';
+export type ImageSize = 'thumb' | 'card' | 'pdp' | 'zoom' | 'menu';
 
 const SIZE_PARAMS: Record<ImageSize, string> = {
   thumb: 'width=400&height=400&quality=80&resize=contain',
   card: 'width=400&height=400&quality=80&resize=contain',
   pdp: 'width=800&height=800&quality=85&resize=contain',
+  // the lightbox: the stored master is 1600px on its long edge
+  zoom: 'width=1600&height=1600&quality=90&resize=contain',
   menu: 'width=320&height=320&quality=75&resize=contain',
 };
 

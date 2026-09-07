@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import type { Product } from '@/features/products/types';
 import { getProductImageUrl } from '@/lib/productImage';
 import { resolveProductImage } from '@/features/products/utils/resolveProductImage';
-import { getPdpSeedImages } from '@/features/products/pdpSeedImages';
 import { getProductPlaceholderUrl } from '@/features/products/utils/productImagePlaceholder';
 import { useI18n } from '@/features/i18n/I18nProvider';
 import { localizedName, localizedDescription } from '@/features/admin/lib/localize';
@@ -73,7 +72,7 @@ export default function ProductCard({
 
         {imageError && (
           <img
-            src={(getPdpSeedImages(product.slug, product.primary_category?.slug) ?? [])[0] ?? getProductPlaceholderUrl(displayName, product.item_code, product.primary_category?.slug, product.primary_category?.name, 400)}
+            src={getProductPlaceholderUrl(displayName, product.item_code, product.primary_category?.slug, product.primary_category?.name, 400)}
             alt={altText}
             className="absolute inset-0 w-full h-full object-contain p-3"
           />
