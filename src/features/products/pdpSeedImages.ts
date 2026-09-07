@@ -64,14 +64,58 @@ export function getFallbackImage(): string {
 }
 
 /** Category-based fallback images when no slug match exists */
+const BUTTONS = [buttonsCategory, metalButton, resinButtons];
+const BUCKLES = [hardwareCategory, beltBuckle, metalClasp];
+const HARDWARE = [hardwareCategory, metalClasp, beltBuckle];
+const ZIPPERS = [zippersCategory, metalZipper, brandedZipper];
+const LACE = [laceCategory, cottonLace];
+const LABELS = [otherCategory, wovenLabel];
+const TRIMS = [otherCategory, cottonLace, wovenLabel];
+
+/**
+ * Keyed on the product's PRIMARY category slug. M4 re-keyed this to the
+ * 25 new categories (same images — nothing regresses); the old keys stay
+ * for anything still on an old slug. M5 removes this layer entirely.
+ */
 const categoryFallbacks: Record<string, string[]> = {
-  buttons: [buttonsCategory, metalButton, resinButtons],
-  buckles: [hardwareCategory, beltBuckle, metalClasp],
-  hardware: [hardwareCategory, metalClasp, beltBuckle],
-  zippers: [zippersCategory, metalZipper, brandedZipper],
-  lace: [laceCategory, cottonLace],
-  labels: [otherCategory, wovenLabel],
-  trims: [otherCategory, cottonLace, wovenLabel],
+  // Buttons
+  'metal-shank-buttons': BUTTONS,
+  'polyester-buttons': BUTTONS,
+  'horn-shell-buttons': BUTTONS,
+  'snap-fasteners-jeans-buttons': BUTTONS,
+  // Metal & Hardware Accessories
+  'buckles-cord-locks': BUCKLES,
+  'd-rings-o-rings': HARDWARE,
+  'eyelets-rivets': HARDWARE,
+  'metal-pendants-brand-badges': HARDWARE,
+  // Zippers
+  'metal-zippers': ZIPPERS,
+  'nylon-coil-zippers': ZIPPERS,
+  'plastic-vislon-zippers': ZIPPERS,
+  'waterproof-invisible-zippers': ZIPPERS,
+  'zipper-pullers-sliders': ZIPPERS,
+  // Laces & Ribbons
+  'cotton-nylon-lace': LACE,
+  'elastic-lace-embroidered-net': LACE,
+  'satin-grosgrain-velvet-ribbons': LACE,
+  'bows-trimmings': LACE,
+  // Soft Trims — Webbing & Tape
+  'trousers-waistband-labels': LABELS,
+  'hook-and-loop': TRIMS,
+  'elastic-tape-braided-elastic': TRIMS,
+  'bias-mattress-tape': TRIMS,
+  'pp-cotton-poly-tc-webbing': TRIMS,
+  'bag-case-sofa-webbing': TRIMS,
+  'camouflage-reflective-webbing': TRIMS,
+  'traditional-jacquard-tape': TRIMS,
+  // Old slugs, kept for anything not yet remapped
+  buttons: BUTTONS,
+  buckles: BUCKLES,
+  hardware: HARDWARE,
+  zippers: ZIPPERS,
+  lace: LACE,
+  labels: LABELS,
+  trims: TRIMS,
 };
 
 export function getPdpSeedImages(slug: string, categorySlug?: string): string[] | undefined {

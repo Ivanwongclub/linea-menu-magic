@@ -3,7 +3,10 @@ export type ProductStatus = 'draft' | 'active' | 'archived';
 export type ProductCategory = {
   id: string;
   name: string;
+  name_zh_hant?: string | null;
+  name_zh_hans?: string | null;
   slug: string;
+  family_id?: string | null;
   sort_order: number;
   icon_url?: string;
 };

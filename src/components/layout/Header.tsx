@@ -13,6 +13,8 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth/AuthProvider";
 import { useI18n } from "@/features/i18n/I18nProvider";
+import { useCatalogueTaxonomy } from "@/features/products/hooks/useCatalogueTaxonomy";
+import { localizedName } from "@/features/admin/lib/localize";
 import BrandWordmark from "@/components/layout/BrandWordmark";
 import LanguageSwitcher from "@/components/layout/LanguageSwitcher";
 import aboutHeritageImg from "@/assets/about-heritage-showroom.jpg";
@@ -23,49 +25,21 @@ const buttonsCategoryImg = "/optimized/assets__products__buttons-category-480.we
 const hardwareCategoryImg = "/optimized/assets__products__hardware-category-480.webp";
 const laceImg = "/optimized/assets__products__lace-category-480.webp";
 const zippersCategoryImg = "/optimized/assets__products__zippers-category-480.webp";
-const metalButtonImg = "/optimized/assets__products__metal-button-480.webp";
-const resinButtonsImg = "/optimized/assets__products__resin-buttons-480.webp";
-const snapButtonImg = "/optimized/assets__products__snap-button-480.webp";
-const engravedButtonImg = "/optimized/assets__products__engraved-button-480.webp";
-const beltBuckleImg = "/optimized/assets__products__belt-buckle-480.webp";
-const metalClaspImg = "/optimized/assets__products__metal-clasp-480.webp";
-const metalZipperImg = "/optimized/assets__products__metal-zipper-480.webp";
 const cottonLaceImg = "/optimized/assets__products__cotton-lace-480.webp";
-const wovenLabelImg = "/optimized/assets__products__woven-label-480.webp";
 const otherCategoryImg = "/optimized/assets__products__other-category-480.webp";
-const megaButtonsImg = "/images/mega/buttons.jpg";
-const megaSnapButtonsImg = "/images/mega/snap-buttons.jpg";
-const megaJeansButtonsImg = "/images/mega/jeans-buttons.jpg";
-const megaShankButtonsImg = "/images/mega/shank-buttons.jpg";
-const megaBucklesImg = "/images/mega/buckles.jpg";
-const megaEyeletsImg = "/images/mega/eyelets.jpg";
-const megaHookEyesImg = "/images/mega/hook-eyes.jpg";
-const megaRivetsImg = "/images/mega/rivets.jpg";
-const megaZipperPullersImg = "/images/mega/zipper-pullers.jpg";
-const megaTogglesImg = "/images/mega/toggles.jpg";
-const megaCordEndsImg = "/images/mega/cord-ends.jpg";
-const megaCordStoppersImg = "/images/mega/cord-stoppers.jpg";
-const megaBeadsImg = "/images/mega/beads.jpg";
-const megaDrawcordsImg = "/images/mega/drawcords.jpg";
-const megaBadgesImg = "/images/mega/badges.jpg";
 
-const MEGA_GRID_ITEMS = [
-  { labelKey: "header.product.buttons", img: megaButtonsImg, slug: "buttons" },
-  { labelKey: "header.product.snapButtons", img: megaSnapButtonsImg, slug: "snap-buttons" },
-  { labelKey: "header.product.jeansButtons", img: megaJeansButtonsImg, slug: "jeans-buttons" },
-  { labelKey: "header.product.shankButtons", img: megaShankButtonsImg, slug: "shank-buttons" },
-  { labelKey: "header.product.buckles", img: megaBucklesImg, slug: "buckles" },
-  { labelKey: "header.product.eyelets", img: megaEyeletsImg, slug: "eyelets" },
-  { labelKey: "header.product.hookEyes", img: megaHookEyesImg, slug: "hook-eyes" },
-  { labelKey: "header.product.rivets", img: megaRivetsImg, slug: "rivets" },
-  { labelKey: "header.product.zipperPullers", img: megaZipperPullersImg, slug: "zipper-pullers" },
-  { labelKey: "header.product.toggles", img: megaTogglesImg, slug: "toggles" },
-  { labelKey: "header.product.cordEnds", img: megaCordEndsImg, slug: "cord-ends" },
-  { labelKey: "header.product.cordStoppers", img: megaCordStoppersImg, slug: "cord-stoppers" },
-  { labelKey: "header.product.beads", img: megaBeadsImg, slug: "beads" },
-  { labelKey: "header.product.drawcords", img: megaDrawcordsImg, slug: "drawcords" },
-  { labelKey: "header.product.badges", img: megaBadgesImg, slug: "badges" },
-];
+/**
+ * Mega-menu tile images by family slug, until categories carry their own
+ * icon_url. The families themselves come from the database.
+ */
+const FAMILY_TILE_IMAGES: Record<string, string> = {
+  "soft-trims-webbing-tape": cottonLaceImg,
+  "laces-ribbons": laceImg,
+  "metal-hardware-accessories": hardwareCategoryImg,
+  buttons: buttonsCategoryImg,
+  zippers: zippersCategoryImg,
+};
+
 
 
 // ─── About flat link list ──────────────────────────────────────────────────────
@@ -103,48 +77,6 @@ const ABOUT_TRUST_CARDS = [
   },
 ];
 
-// ─── Products families ─────────────────────────────────────────────────────────
-const MEGA_FAMILIES = [
-  {
-    nameKey: "header.family.hardware", slug: "hardware",
-    image: hardwareCategoryImg,
-    subcategories: [
-      { en: "Buttons", key: "header.product.buttons", image: metalButtonImg },
-      { en: "Snap Buttons", key: "header.product.snapButtons", image: snapButtonImg },
-      { en: "Jeans Buttons", key: "header.product.jeansButtons", image: engravedButtonImg },
-      { en: "Shank Buttons", key: "header.product.shankButtons", image: metalButtonImg },
-      { en: "Buckles", key: "header.product.buckles", image: beltBuckleImg },
-      { en: "Eyelets", key: "header.product.eyelets", image: otherCategoryImg },
-      { en: "Hook & Eyes", key: "header.product.hookEyes", image: metalClaspImg },
-      { en: "Rivets", key: "header.product.rivets", image: otherCategoryImg },
-      { en: "Zipper Pullers", key: "header.product.zipperPullers", image: metalZipperImg },
-      { en: "Toggles", key: "header.product.toggles", image: otherCategoryImg },
-      { en: "Cord Ends", key: "header.product.cordEnds", image: cottonLaceImg },
-      { en: "Cord Stoppers", key: "header.product.cordStoppers", image: cottonLaceImg },
-      { en: "Beads", key: "header.product.beads", image: resinButtonsImg },
-    ],
-  },
-  {
-    nameKey: "header.family.softTrims", slug: "soft-trims",
-    image: laceImg,
-    subcategories: [
-      { en: "Drawcords", key: "header.product.drawcords", image: cottonLaceImg },
-      { en: "Webbing", key: "header.product.webbing", image: laceImg },
-    ],
-  },
-  {
-    nameKey: "header.family.brandingTrims", slug: "branding-trims",
-    image: wovenLabelImg,
-    subcategories: [
-      { en: "Badges", key: "header.product.badges", image: wovenLabelImg },
-      { en: "Patches", key: "header.product.patches", image: wovenLabelImg },
-    ],
-  },
-];
-
-function slugify(name: string) {
-  return name.toLowerCase().replace(/\s+&\s+/g, "-").replace(/\s+/g, "-");
-}
 
 const NAV_LINKS: Array<{ href: string; labelKey: string; megaMenu?: "products" | "about" }> = [
   { href: "/products", labelKey: "header.nav.products", megaMenu: "products" },
@@ -181,7 +113,15 @@ function preloadRoute(href: string) {
 
 // ─── Component ─────────────────────────────────────────────────────────────────
 const Header = () => {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
+  const { families, categories, familyOf } = useCatalogueTaxonomy();
+  // Two text columns of families; a 5×3 tile grid of categories.
+  const familyColumns = [families.slice(0, Math.ceil(families.length / 2)), families.slice(Math.ceil(families.length / 2))];
+  const tiles = categories.slice(0, 15).map((cat) => ({
+    slug: cat.slug,
+    label: localizedName(cat, language),
+    img: cat.icon_url ?? FAMILY_TILE_IMAGES[familyOf(cat)?.slug ?? ""] ?? otherCategoryImg,
+  }));
   const [isMenuOpen,         setIsMenuOpen]         = useState(false);
   const [isAboutOpen,        setIsAboutOpen]        = useState(false);
   const [isProductsOpen,     setIsProductsOpen]     = useState(false);
@@ -504,69 +444,40 @@ const Header = () => {
             <div className="bg-white border-b-[3px] border-b-foreground shadow-mega">
               <div className="w-full pr-10 lg:pr-16 xl:pr-24 py-10" style={{ paddingLeft: navLeftOffset }}>
                 <div className="flex items-start gap-10">
-                  {/* Hardware column */}
-                  <div className="flex-shrink-0 min-w-0">
-                    {(() => {
-                      const hardware = MEGA_FAMILIES[0];
-                      return (
-                        <div>
+                  {/* Families and categories from the database */}
+                  {familyColumns.map((column, columnIndex) => (
+                    <div key={columnIndex} className="flex-shrink-0 min-w-0">
+                      {column.map((family) => (
+                        <div key={family.slug} className="mb-6 last:mb-0">
                           <Link
-                            to={`/products?family=${hardware.slug}`}
+                            to={`/products?family=${family.slug}`}
                             onClick={closeAllMenus}
                             className="text-[15px] font-semibold text-foreground hover:text-muted-foreground transition-colors block mb-3"
                           >
-                            {t(hardware.nameKey)}
+                            {localizedName(family, language)}
                           </Link>
                           <ul className="space-y-2">
-                            {hardware.subcategories.map((sub) => (
-                              <li key={sub.en}>
+                            {family.categories.map((cat) => (
+                              <li key={cat.slug}>
                                 <Link
-                                  to={`/products?category=${slugify(sub.en)}`}
+                                  to={`/products?category=${cat.slug}`}
                                   onClick={closeAllMenus}
                                   className="text-[14px] text-foreground hover:text-muted-foreground transition-colors duration-150 block"
                                 >
-                                  {t(sub.key)}
+                                  {localizedName(cat, language)}
                                 </Link>
                               </li>
                             ))}
                           </ul>
                         </div>
-                      );
-                    })()}
-                  </div>
-
-                  {/* Soft Trims + Branding Trims */}
-                  <div className="flex-shrink-0 min-w-0">
-                    {MEGA_FAMILIES.slice(1).map((family) => (
-                      <div key={family.slug} className="mb-6 last:mb-0">
-                        <Link
-                          to={`/products?family=${family.slug}`}
-                          onClick={closeAllMenus}
-                          className="text-[15px] font-semibold text-foreground hover:text-muted-foreground transition-colors block mb-3"
-                        >
-                          {t(family.nameKey)}
-                        </Link>
-                        <ul className="space-y-2">
-                          {family.subcategories.map((sub) => (
-                            <li key={sub.en}>
-                              <Link
-                                to={`/products?category=${slugify(sub.en)}`}
-                                onClick={closeAllMenus}
-                                className="text-[14px] text-foreground hover:text-muted-foreground transition-colors duration-150 block"
-                              >
-                                {t(sub.key)}
-                              </Link>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  ))}
 
                   {/* 5×3 product image grid */}
                   <div className="flex-shrink-0 w-[500px] flex flex-col">
                     <div className="grid grid-cols-5 gap-1.5">
-                      {MEGA_GRID_ITEMS.map((item) => (
+                      {tiles.map((item) => (
                         <Link
                           key={item.slug}
                           to={`/products?category=${item.slug}`}
@@ -576,14 +487,14 @@ const Header = () => {
                           <div className="aspect-square overflow-hidden bg-secondary rounded-sm">
                             <img
                               src={item.img}
-                              alt={t(item.labelKey)}
+                              alt={item.label}
                               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                               loading="lazy"
                               decoding="async"
                             />
                           </div>
                           <span className="mt-1 text-[9px] font-medium capitalize tracking-[0.07em] text-muted-foreground group-hover:text-foreground transition-colors text-center leading-tight px-0.5 truncate">
-                            {t(item.labelKey)}
+                            {item.label}
                           </span>
                         </Link>
                       ))}
@@ -742,7 +653,7 @@ const Header = () => {
                       </button>
                       {open && (
                         <div className="bg-secondary/40 border-t border-border">
-                          {MEGA_FAMILIES.map((family) => {
+                          {families.map((family) => {
                             const familyOpen = mobileProductFamilyOpen === family.slug;
                             return (
                               <div key={family.slug} className="border-t border-border first:border-t-0">
@@ -754,7 +665,7 @@ const Header = () => {
                                   className="w-full flex items-center justify-between text-[15px] font-semibold text-foreground hover:text-muted-foreground transition-colors py-3 px-6"
                                   aria-expanded={familyOpen}
                                 >
-                                  <span>{t(family.nameKey)}</span>
+                                  <span>{localizedName(family, language)}</span>
                                   <ChevronDown
                                     size={16}
                                     className={`transition-transform duration-200 ${familyOpen ? "rotate-180" : ""}`}
@@ -762,15 +673,15 @@ const Header = () => {
                                 </button>
                                 {familyOpen && (
                                   <ul className="bg-background border-t border-border">
-                                    {family.subcategories.map((sub) => (
-                                      <li key={sub.en}>
+                                    {family.categories.map((cat) => (
+                                      <li key={cat.slug}>
                                         <Link
-                                          to={`/products?category=${slugify(sub.en)}`}
+                                          to={`/products?category=${cat.slug}`}
                                           onClick={() => setIsMenuOpen(false)}
                                           onTouchStart={() => preloadRoute("/products")}
                                           className="block text-[14px] text-foreground hover:text-muted-foreground transition-colors py-2.5 px-9"
                                         >
-                                          {t(sub.key)}
+                                          {localizedName(cat, language)}
                                         </Link>
                                       </li>
                                     ))}

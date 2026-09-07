@@ -5,14 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ProductCard from "@/components/products/ProductCard";
 import { useProducts } from "@/features/products/hooks/useProducts";
-import { useProductTaxonomy } from "@/features/products/hooks/useProductTaxonomy";
-import { PRODUCT_FAMILIES } from "@/features/products/taxonomy";
+import { useCatalogueTaxonomy } from "@/features/products/hooks/useCatalogueTaxonomy";
+import { localizedName } from "@/features/admin/lib/localize";
 import { pickFamilyFeatured } from "@/features/products/utils/pickFamilyFeatured";
 import { useAuth } from "@/features/auth/AuthProvider";
 import { useI18n } from "@/features/i18n/I18nProvider";
 
 const DesignerStudioTrimLibrary = () => {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const { session, primaryBrand } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFamily, setActiveFamily] = useState<string | null>(null);
@@ -34,23 +34,19 @@ const DesignerStudioTrimLibrary = () => {
 
   // Single source of truth shared with the Designer Studio landing
   // Featured Trims strip — see pickFamilyFeatured().
-  const displayProducts = useMemo(() => pickFamilyFeatured(products), [products]);
-  const { categories } = useProductTaxonomy();
+  const { families } = useCatalogueTaxonomy();
+  const displayProducts = useMemo(() => pickFamilyFeatured(products, families), [products, families]);
 
-  // Build family chips from taxonomy
-  const familyChips = useMemo(() => {
-    const familyNameMap: Record<string, string> = {
-      hardware: t("header.family.hardware"),
-      "soft-trims": t("header.family.softTrims"),
-      "branding-trims": t("header.family.brandingTrims"),
-    };
-
-    return PRODUCT_FAMILIES.map((f) => ({
-      slug: f.slug,
-      name: familyNameMap[f.slug] ?? f.name,
-      count: categories.filter((c) => f.categorySlugs.includes(c.slug)).length,
-    }));
-  }, [categories, t]);
+  // Family chips from the database taxonomy, in the interface language.
+  const familyChips = useMemo(
+    () =>
+      families.map((f) => ({
+        slug: f.slug,
+        name: localizedName(f, language),
+        count: f.categories.length,
+      })),
+    [families, language],
+  );
 
   return (
     <>

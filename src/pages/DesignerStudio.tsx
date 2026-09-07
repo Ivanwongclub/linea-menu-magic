@@ -16,6 +16,7 @@ import StudioHero3D, { HERO_EDITOR_URL } from "@/components/designer-studio/Stud
 import StudioCapabilityTile from "@/components/designer-studio/StudioCapabilityTile";
 import StudioWorkflowRail from "@/components/designer-studio/StudioWorkflowRail";
 import { useProducts } from "@/features/products/hooks/useProducts";
+import { useCatalogueTaxonomy } from "@/features/products/hooks/useCatalogueTaxonomy";
 import {
   pickFamilyFeatured,
   getFamilyNameForProduct,
@@ -35,14 +36,15 @@ const trustWordmarks: { name: string; logoSrc?: string }[] = [
 ];
 
 const DesignerStudio = () => {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const { session } = useAuth();
 
   // SAME data + SAME picker as the trim library — guarantees parity.
   const { products } = useProducts({
     visibility: session ? "brand" : "public",
   });
-  const featuredProducts = pickFamilyFeatured(products);
+  const { families } = useCatalogueTaxonomy();
+  const featuredProducts = pickFamilyFeatured(products, families);
 
   const workspaceHref = session
     ? "/designer-studio/workspace?tab=library"
@@ -151,7 +153,7 @@ const DesignerStudio = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-5">
             {featuredProducts.map((p) => {
-              const family = getFamilyNameForProduct(p);
+              const family = getFamilyNameForProduct(p, families, language);
               // P18 C4: localise the displayed name — fall back en → primary name
               // (the underlying `name` field can be a non-EN locale).
               const displayName = p.name_en ?? p.name;

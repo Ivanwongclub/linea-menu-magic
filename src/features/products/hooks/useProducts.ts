@@ -2,18 +2,14 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { Product, ProductFilters } from '../types';
-import { getCategorySlugsForFamily, PRODUCT_FAMILIES } from '../taxonomy';
+import { useCatalogueTaxonomy } from './useCatalogueTaxonomy';
 
 /**
- * Temporary segment -> category-family mapping.
- * Maps approved Segment slugs to product family slugs so that
- * selecting "Fashion" shows Hardware products, etc.
+ * Sentinel category slug that can never match: used when a family or
+ * segment filter resolves to nothing (unknown slug, or a family with no
+ * categories) so the result is "no products", not "all products".
  */
-const SEGMENT_TO_FAMILIES: Record<string, string[]> = {
-  fashion: ['hardware'],
-  apparel: ['soft-trims'],
-  beauty: ['branding-trims'],
-};
+const NO_MATCH = '__no-match__';
 
 interface UseProductsResult {
   products: Product[];
@@ -69,7 +65,10 @@ function transformProduct(row: Record<string, unknown>): Product {
     .map((c) => ({
       id: c!.id as string,
       name: c!.name as string,
+      name_zh_hant: (c!.name_zh_hant as string | null) ?? null,
+      name_zh_hans: (c!.name_zh_hans as string | null) ?? null,
       slug: c!.slug as string,
+      family_id: (c!.family_id as string | null) ?? null,
       sort_order: (c!.sort_order as number) ?? 0,
       icon_url: c!.icon_url as string | undefined,
     }));
@@ -218,30 +217,14 @@ async function resolveProductSetByDimension(scope: FilterScope): Promise<Set<str
   );
 }
 
-function getEffectiveCategorySlugs(filters: ProductFilters): string[] | undefined {
-  const categories = normalizeList(filters.categories) ?? [];
-  const familyCategories = filters.family
-    ? getCategorySlugsForFamily(filters.family)
-    : [];
-
-  const segmentCategories =
-    normalizeList(filters.segments)?.flatMap((segment) => {
-      const familySlugs = SEGMENT_TO_FAMILIES[segment] ?? [];
-      return familySlugs.flatMap((familySlug) => {
-        return PRODUCT_FAMILIES.find((family) => family.slug === familySlug)?.categorySlugs ?? [];
-      });
-    }) ?? [];
-
-  const merged = [...new Set([...categories, ...familyCategories, ...segmentCategories])];
-  return merged.length > 0 ? merged : undefined;
-}
-
 async function fetchProducts(filters: ProductFilters): Promise<QueryPayload> {
   const brandScoped = filters.visibility === 'brand';
 
   const filterScopes: FilterScope[] = [
     {
-      values: getEffectiveCategorySlugs(filters),
+      // Already resolved by useProducts from the database taxonomy:
+      // explicit categories + the chosen family's + the chosen segments'.
+      values: normalizeList(filters.categories),
       dimensionTable: 'product_categories',
       dimensionIdColumn: 'id',
       dimensionFilterColumn: 'slug',
@@ -307,7 +290,7 @@ async function fetchProducts(filters: ProductFilters): Promise<QueryPayload> {
       *,
       product_category_map(
         is_primary,
-        product_categories(id, name, slug, sort_order, icon_url)
+        product_categories(id, name, name_zh_hant, name_zh_hans, slug, family_id, sort_order, icon_url)
       ),
       product_material_map(
         product_materials(id, name, slug, is_sustainable)
@@ -384,15 +367,33 @@ async function fetchProducts(filters: ProductFilters): Promise<QueryPayload> {
 }
 
 export function useProducts(filters: ProductFilters): UseProductsResult {
+  const { loading: taxonomyLoading, error: taxonomyError, categorySlugsForFamily, categorySlugsForSegment } =
+    useCatalogueTaxonomy();
+  const family = filters.family || undefined;
+  const categoriesKey = normalizeList(filters.categories)?.join(',') ?? '';
+  const segmentsKey = normalizeList(filters.segments)?.join(',') ?? '';
+  const needsTaxonomy = Boolean(family || segmentsKey);
+
+  // Family and segment filters resolve to category slugs through the
+  // database taxonomy. An unknown family/segment must yield nothing, not
+  // everything — hence the sentinel.
+  const resolvedCategories = useMemo<string[] | undefined>(() => {
+    const explicit = categoriesKey ? categoriesKey.split(',') : [];
+    if (!needsTaxonomy) return explicit.length > 0 ? explicit : undefined;
+    if (taxonomyLoading) return undefined;
+    const fromFamily = family ? categorySlugsForFamily(family) : [];
+    const fromSegments = (segmentsKey ? segmentsKey.split(',') : []).flatMap((s) => categorySlugsForSegment(s));
+    const merged = [...new Set([...explicit, ...fromFamily, ...fromSegments])];
+    return merged.length > 0 ? merged : [NO_MATCH];
+  }, [family, categoriesKey, segmentsKey, needsTaxonomy, taxonomyLoading, categorySlugsForFamily, categorySlugsForSegment]);
+
   const normalizedFilters = useMemo<ProductFilters>(
     () => ({
       visibility: filters.visibility,
-      family: filters.family,
       is_customizable: filters.is_customizable,
       sort: filters.sort,
       search: filters.search?.trim() || undefined,
-      categories: normalizeList(filters.categories),
-      segments: normalizeList(filters.segments),
+      categories: resolvedCategories,
       materials: normalizeList(filters.materials),
       industries: normalizeList(filters.industries),
       certifications: normalizeList(filters.certifications),
@@ -409,9 +410,7 @@ export function useProducts(filters: ProductFilters): UseProductsResult {
     [
       filters.visibility,
       filters.search,
-      filters.family,
-      filters.categories?.join(','),
-      filters.segments?.join(','),
+      resolvedCategories?.join(','),
       filters.materials?.join(','),
       filters.industries?.join(','),
       filters.certifications?.join(','),
@@ -423,16 +422,18 @@ export function useProducts(filters: ProductFilters): UseProductsResult {
     ]
   );
 
+  const ready = !needsTaxonomy || !taxonomyLoading;
   const query = useQuery<QueryPayload, Error>({
     queryKey: ['products', normalizedFilters],
     queryFn: () => fetchProducts(normalizedFilters),
     placeholderData: (previous) => previous,
+    enabled: ready,
   });
 
   return {
     products: query.data?.products ?? [],
-    loading: query.isLoading,
-    error: query.error?.message ?? null,
+    loading: query.isLoading || !ready,
+    error: query.error?.message ?? taxonomyError,
     totalCount: query.data?.totalCount ?? 0,
   };
 }

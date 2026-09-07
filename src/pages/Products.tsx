@@ -16,10 +16,11 @@ import ProductsSidebar from '@/components/products/ProductsSidebar';
 import ProductCard from '@/components/products/ProductCard';
 import type { ViewMode } from '@/components/products/ProductCard';
 import type { Product, ProductFilters } from '@/features/products/types';
-import { PRODUCT_FAMILIES } from '@/features/products/taxonomy';
-
 import { useProducts } from '@/features/products/hooks/useProducts';
 import { useProductTaxonomy } from '@/features/products/hooks/useProductTaxonomy';
+import { useCatalogueTaxonomy } from '@/features/products/hooks/useCatalogueTaxonomy';
+import { useI18n } from '@/features/i18n/I18nProvider';
+import { localizedName } from '@/features/admin/lib/localize';
 import { useProductFiltersFromURL } from '@/features/products/hooks/useProductFiltersFromURL';
 
 // ─── Curated Browse Data (seeded, CMS-ready) ────────────
@@ -57,6 +58,8 @@ function matchesFeatured(product: Product, featured: string): boolean {
 
 export default function Products() {
   const taxonomy = useProductTaxonomy();
+  const catalogue = useCatalogueTaxonomy();
+  const { t, language } = useI18n();
   const { filters, setFilters, clearFilters } = useProductFiltersFromURL();
   const activeFeatured = filters.featured ?? 'all';
   const isAllProductsMode = activeFeatured === 'all';
@@ -120,21 +123,21 @@ export default function Products() {
 
     // Sidebar filters as chips
     if (filters.family) {
-      const fam = PRODUCT_FAMILIES.find((f) => f.slug === filters.family);
+      const fam = catalogue.familyBySlug(filters.family);
       chips.push({
         key: `fam-${filters.family}`,
         filterKey: 'family',
-        label: fam?.name ?? filters.family,
+        label: fam ? localizedName(fam, language) : filters.family,
         value: filters.family,
       });
     }
 
     filters.categories?.forEach((slug) => {
-      const cat = taxonomy.categories.find((c) => c.slug === slug);
+      const cat = catalogue.categoryBySlug(slug);
       chips.push({
         key: `cat-${slug}`,
         filterKey: 'categories',
-        label: cat?.name ?? slug,
+        label: cat ? localizedName(cat, language) : slug,
         value: slug,
       });
     });
@@ -143,7 +146,7 @@ export default function Products() {
       chips.push({
         key: `seg-${slug}`,
         filterKey: 'segments',
-        label: slug,
+        label: t(`catalogue.segment.${slug}`),
         value: slug,
       });
     });
@@ -200,7 +203,7 @@ export default function Products() {
     }
 
     return chips;
-  }, [filters, taxonomy, activeFeatured]);
+  }, [filters, taxonomy, catalogue, language, t, activeFeatured]);
 
   const activeFilterCount = activeChips.length;
 

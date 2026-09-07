@@ -11,10 +11,9 @@ import type {
   ProductCertification,
   ProductTag,
 } from '@/features/products/types';
-import {
-  PRODUCT_FAMILIES,
-  PRODUCT_SEGMENTS,
-} from '@/features/products/taxonomy';
+import { useCatalogueTaxonomy } from '@/features/products/hooks/useCatalogueTaxonomy';
+import { useI18n } from '@/features/i18n/I18nProvider';
+import { localizedName } from '@/features/admin/lib/localize';
 
 interface Taxonomy {
   categories: ProductCategory[];
@@ -102,12 +101,11 @@ export default function ProductsSidebar({
   productCount,
   categoryCounts,
 }: ProductsSidebarProps) {
+  const { t, language } = useI18n();
+  const catalogue = useCatalogueTaxonomy();
   const [localSearch, setLocalSearch] = useState(filters.search ?? '');
-  const [openFamilies, setOpenFamilies] = useState<Record<string, boolean>>({
-    hardware: true,
-    'soft-trims': true,
-    'branding-trims': true,
-  });
+  // Families default open; only an explicit collapse is remembered.
+  const [openFamilies, setOpenFamilies] = useState<Record<string, boolean>>({});
   const debouncedSearch = useDebouncedValue(localSearch, 300);
   const lastPushed = useRef(filters.search ?? '');
 
@@ -140,15 +138,16 @@ export default function ProductsSidebar({
     });
   }, [setFilters]);
 
-  // Group categories by family for structured display
-  const familyGroups = useMemo(() => {
-    return PRODUCT_FAMILIES.map((family) => ({
-      ...family,
-      categories: taxonomy.categories.filter((cat) =>
-        family.categorySlugs.includes(cat.slug)
-      ),
-    }));
-  }, [taxonomy.categories]);
+  // Families and their categories straight from the database taxonomy.
+  const familyGroups = useMemo(
+    () =>
+      catalogue.families.map((family) => ({
+        slug: family.slug,
+        name: localizedName(family, language),
+        categories: family.categories.map((cat) => ({ ...cat, label: localizedName(cat, language) })),
+      })),
+    [catalogue.families, language],
+  );
 
   const selectedSegment = filters.segments?.[0];
   const handleSegmentSelect = useCallback(
@@ -194,19 +193,19 @@ export default function ProductsSidebar({
           Segments
         </p>
         <div className="grid grid-cols-3 gap-2">
-          {PRODUCT_SEGMENTS.map((segment) => {
-            const isActive = selectedSegment === segment.slug;
+          {catalogue.segments.map((segment) => {
+            const isActive = selectedSegment === segment;
             return (
               <button
-                key={segment.slug}
-                onClick={() => handleSegmentSelect(segment.slug)}
+                key={segment}
+                onClick={() => handleSegmentSelect(segment)}
                 className={`h-8 rounded-[var(--radius)] text-[11px] font-semibold tracking-[0.04em] border transition-colors ${
                   isActive
                     ? 'bg-foreground text-background border-foreground'
                     : 'bg-background text-foreground border-border hover:border-foreground/40'
                 }`}
               >
-                {segment.name}
+                {t(`catalogue.segment.${segment}`)}
               </button>
             );
           })}
@@ -269,7 +268,7 @@ export default function ProductsSidebar({
                             htmlFor={`cat-${cat.slug}`}
                             className="text-sm text-foreground cursor-pointer flex-1"
                           >
-                            {cat.name}
+                            {cat.label}
                           </label>
                           {count > 0 && (
                             <span className="text-xs text-muted-foreground">{count}</span>

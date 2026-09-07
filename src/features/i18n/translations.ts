@@ -11,6 +11,9 @@ export const translations: Record<AppLanguage, TranslationMap> = {
     "i18n.en": "English",
     "i18n.zhHant": "Traditional Chinese",
     "i18n.zhHans": "Simplified Chinese",
+    "catalogue.segment.apparel": "Apparel",
+    "catalogue.segment.beauty": "Beauty",
+    "catalogue.segment.material": "Material",
 
     "app.error.title": "Something went wrong.",
     "app.error.body": "Please refresh the page. If the problem persists, contact support.",
@@ -393,6 +396,9 @@ export const translations: Record<AppLanguage, TranslationMap> = {
     "i18n.en": "英文",
     "i18n.zhHant": "繁體中文",
     "i18n.zhHans": "簡體中文",
+    "catalogue.segment.apparel": "服裝",
+    "catalogue.segment.beauty": "美妝",
+    "catalogue.segment.material": "物料",
 
     "app.error.title": "發生錯誤。",
     "app.error.body": "請重新整理頁面。如問題持續，請聯絡我們。",
@@ -709,6 +715,9 @@ export const translations: Record<AppLanguage, TranslationMap> = {
     "i18n.en": "英文",
     "i18n.zhHant": "繁体中文",
     "i18n.zhHans": "简体中文",
+    "catalogue.segment.apparel": "服装",
+    "catalogue.segment.beauty": "美妆",
+    "catalogue.segment.material": "物料",
 
     "app.error.title": "发生错误。",
     "app.error.body": "请刷新页面。如问题持续，请联系我们。",
