@@ -5,10 +5,11 @@ import { useAuth } from '@/features/auth/AuthProvider';
 import { useI18n } from '@/features/i18n/I18nProvider';
 import { localizedName, localizedDescription } from '@/features/admin/lib/localize';
 import { resolveProductMaterials } from '@/features/products/utils/productMaterial';
+import { buildSpecRows, formatLeadTime, formatMoq } from '@/features/products/utils/productSpecs';
 import { supabase } from '@/integrations/supabase/client';
 import {
   FileDown, Box, Send, Palette, BookmarkPlus, Download,
-  ShieldCheck, Factory, ArrowRight, Layers, ClipboardList,
+  ShieldCheck, ArrowRight, Layers, ClipboardList,
   Package, Cpu, Globe, ChevronRight,
 } from 'lucide-react';
 import PageBreadcrumb from '@/components/ui/PageBreadcrumb';
@@ -25,21 +26,11 @@ import { useProducts } from '@/features/products/hooks/useProducts';
 import { getProductImageUrl } from '@/lib/productImage';
 import type { Product, ProductImage } from '@/features/products/types';
 
-/* ─── helpers ────────────────────────────────────────── */
-
-function specValue(v: unknown): string | null {
-  if (v == null || v === '') return null;
-  if (Array.isArray(v)) return v.join(', ');
-  return String(v);
-}
-
 /* ─── Section nav items ─────────────────────────────── */
 
 const SECTION_IDS = {
   overview: 'pdp-overview',
   specs: 'pdp-specs',
-  production: 'pdp-production',
-  compliance: 'pdp-compliance',
   applications: 'pdp-applications',
   downloads: 'pdp-downloads',
   related: 'pdp-related',
@@ -99,21 +90,6 @@ function SectionNav({ sections }: { sections: { id: string; label: string }[] })
         </div>
       </div>
     </nav>
-  );
-}
-
-/* ─── SpecLine for below-fold detail ─────────────────── */
-
-function SpecLine({ label, value, icon: Icon }: { label: string; value: string | null | undefined; icon?: React.ElementType }) {
-  if (!value) return null;
-  return (
-    <div className="flex items-start gap-3 py-2.5 border-b border-border/30 last:border-b-0">
-      {Icon && <Icon className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />}
-      <div className="flex-1 flex justify-between items-baseline gap-3 min-w-0">
-        <dt className="text-[11px] text-muted-foreground uppercase tracking-[0.08em] shrink-0">{label}</dt>
-        <dd className="text-[13px] font-medium text-foreground text-right truncate">{value}</dd>
-      </div>
-    </div>
   );
 }
 
@@ -186,7 +162,7 @@ export default function ProductDetail() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { session, primaryBrand } = useAuth();
-  const { language } = useI18n();
+  const { t, language } = useI18n();
   const isStudioContext = location.pathname.startsWith('/designer-studio');
   const { product, loading, error } = useProduct(slug ?? '');
   const [show3D, setShow3D] = useState(false);
@@ -261,65 +237,27 @@ export default function ProductDetail() {
     );
   }
 
-  /* ── data extraction — database only, no fabricated fallbacks ──
-     A field with no value renders as absent. Item 4 replaces what is left
-     of the JSON blobs with the typed columns. */
+  /* ── data extraction — the typed columns, nothing else ──
+     The JSON `specifications` / `production` blobs are no longer read.
+     Their contents were exported to reports/M5-legacy-spec-blobs.csv
+     before item 3; re-entering them through the CMS is a content task. */
   const tags = product.tags ?? [];
   const primaryCat = product.primary_category ?? product.categories?.[0];
-  const rawSpecs = product.specifications ?? {};
-  const rawProd = product.production ?? {};
 
   const materials = resolveProductMaterials(product);
-  const materialNames = materials.length
-    ? materials.map((m) => m.name).join(', ')
-    : specValue(rawSpecs.material) ?? specValue(rawSpecs.Material) ?? null;
-  const finish = specValue(rawSpecs.finish) ?? specValue(rawSpecs.Finish) ?? specValue(rawSpecs.plating) ?? null;
-  const size = specValue(rawSpecs.size) ?? specValue(rawSpecs.Size) ?? specValue(rawSpecs.dimensions) ?? null;
-  const weight = specValue(rawSpecs.weight) ?? specValue(rawSpecs.Weight) ?? null;
-  const thickness = specValue(rawSpecs.thickness) ?? specValue(rawSpecs.Thickness) ?? null;
-  const attachment = specValue(rawSpecs.attachment) ?? specValue(rawSpecs.construction) ?? null;
-  const colorOptions = specValue(rawSpecs.color_options) ?? null;
-  const tensileStrength = specValue(rawSpecs.tensileStrength) ?? null;
+  const materialNames = materials.length ? materials.map((m) => localizedName(m, language)).join(', ') : null;
+  const attachmentName = product.attachment ? localizedName(product.attachment, language) : null;
+  const moq = formatMoq(product);
+  const leadTime = formatLeadTime(product, t);
 
-  const moq = specValue(rawProd.moq) ?? specValue(rawProd.MOQ) ?? specValue(rawProd.minimum_order) ?? null;
-  const sampleTime = specValue(rawProd.sampleTime) ?? specValue(rawProd.sample_time) ?? null;
-  const leadTime = specValue(rawProd.leadTime) ?? specValue(rawProd.lead_time) ?? null;
-  const origin = specValue(rawProd.origin) ?? specValue(rawProd.Origin) ?? null;
-  const capacity = specValue(rawProd.capacity) ?? specValue(rawProd.Capacity) ?? null;
-
+  const specRows = buildSpecRows(product, language, t);
+  const standards = product.compliance_standards ?? [];
   const certs = product.certifications ?? [];
+  const hasCompliance = standards.length > 0 || certs.length > 0;
   const industries = product.industries ?? [];
 
   const description = localizedDescription(product, language) ?? null;
   const isCustomizable = product.is_customizable;
-
-  // Build merged detail objects for below-fold
-  const mergedSpecObj: Record<string, string> = {};
-  if (materialNames) mergedSpecObj['material'] = materialNames;
-  if (finish) mergedSpecObj['finish'] = finish;
-  if (size) mergedSpecObj['size'] = size;
-  if (weight) mergedSpecObj['weight'] = weight;
-  if (thickness) mergedSpecObj['thickness'] = thickness;
-  if (attachment) mergedSpecObj['attachment'] = attachment;
-  if (colorOptions) mergedSpecObj['color_options'] = colorOptions;
-  if (tensileStrength) mergedSpecObj['tensile_strength'] = tensileStrength;
-  for (const [k, v] of Object.entries(rawSpecs)) {
-    const sv = specValue(v);
-    if (sv && !mergedSpecObj[k]) mergedSpecObj[k] = sv;
-  }
-  const allSpecEntries = Object.entries(mergedSpecObj);
-
-  const mergedProdObj: Record<string, string> = {};
-  if (moq) mergedProdObj['moq'] = moq;
-  if (sampleTime) mergedProdObj['sample_time'] = sampleTime;
-  if (leadTime) mergedProdObj['lead_time'] = leadTime;
-  if (origin) mergedProdObj['origin'] = origin;
-  if (capacity) mergedProdObj['capacity'] = capacity;
-  for (const [k, v] of Object.entries(rawProd)) {
-    const sv = specValue(v);
-    if (sv && !mergedProdObj[k]) mergedProdObj[k] = sv;
-  }
-  const allProductionEntries = Object.entries(mergedProdObj);
 
   const libraryHref = isStudioContext ? '/designer-studio/trim-library' : '/products';
   const libraryLabel = isStudioContext ? 'Designer Studio' : 'Trim Library';
@@ -335,9 +273,7 @@ export default function ProductDetail() {
 
   const navSections = [
     { id: SECTION_IDS.overview, label: 'Overview' },
-    ...(allSpecEntries.length > 0 ? [{ id: SECTION_IDS.specs, label: 'Specifications' }] : []),
-    ...(allProductionEntries.length > 0 ? [{ id: SECTION_IDS.production, label: 'Production' }] : []),
-    ...(certs.length > 0 ? [{ id: SECTION_IDS.compliance, label: 'Compliance' }] : []),
+    ...(specRows.length > 0 || hasCompliance ? [{ id: SECTION_IDS.specs, label: 'Specifications' }] : []),
     ...(industries.length > 0 ? [{ id: SECTION_IDS.applications, label: 'Applications' }] : []),
     ...(hasDownloads ? [{ id: SECTION_IDS.downloads, label: 'Downloads' }] : []),
     { id: SECTION_IDS.related, label: 'Related' },
@@ -409,13 +345,14 @@ export default function ProductDetail() {
               )}
 
               {/* Compact key specs — 2-column grid tiles */}
+              {/* Above-fold scan. Size and finish are omitted: they get their
+                  own controls in items 5 and 6, where a value belongs to a
+                  chosen variant rather than to the product. */}
               <div className="grid grid-cols-2 gap-x-6 gap-y-0 border-t border-border/50 mb-4">
-                <SpecTile label="Material" value={materialNames} />
-                <SpecTile label="Finish" value={finish} />
-                <SpecTile label="Size" value={size} />
-                <SpecTile label="Attachment" value={attachment} />
-                <SpecTile label="MOQ" value={moq} />
-                <SpecTile label="Lead Time" value={leadTime} />
+                <SpecTile label={t('product.spec.material')} value={materialNames} />
+                <SpecTile label={t('product.spec.attachment')} value={attachmentName} />
+                <SpecTile label={t('product.spec.moq')} value={moq} />
+                <SpecTile label={t('product.spec.leadTime')} value={leadTime} />
               </div>
 
               {/* Compliance inline */}
@@ -496,7 +433,7 @@ export default function ProductDetail() {
 
           {/* ── Overview ── */}
           <section id={SECTION_IDS.overview} className="scroll-mt-24 mb-16">
-            <SectionHeading id="" title="Overview" icon={ClipboardList} />
+            <SectionHeading id="" title={t('product.section.overview')} icon={ClipboardList} />
             <div>
               <div className="space-y-4">
                 {description && (
@@ -504,14 +441,13 @@ export default function ProductDetail() {
                     {description}
                   </p>
                 )}
+                {/* Item code, MOQ and lead time only: everything else lives in
+                    the specification table below and is not repeated here. */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-6">
                   {[
-                    { l: 'Material', v: materialNames },
-                    { l: 'Finish', v: finish },
-                    { l: 'Size', v: size },
-                    { l: 'Weight', v: weight },
-                    { l: 'MOQ', v: moq },
-                    { l: 'Lead Time', v: leadTime },
+                    { l: t('product.spec.itemCode'), v: product.item_code },
+                    { l: t('product.spec.moq'), v: moq },
+                    { l: t('product.spec.leadTime'), v: leadTime },
                   ].filter(item => item.v).map(item => (
                     <div key={item.l} className="bg-background border border-border p-3">
                       <p className="text-[10px] uppercase tracking-[0.1em] text-muted-foreground font-medium mb-1">{item.l}</p>
@@ -524,89 +460,65 @@ export default function ProductDetail() {
           </section>
 
           {/* ── Technical Specifications ── */}
-          {allSpecEntries.length > 0 && (
+          {(specRows.length > 0 || hasCompliance) && (
             <section id={SECTION_IDS.specs} className="scroll-mt-24 mb-16">
-              <SectionHeading id="" title="Technical Specifications" icon={Cpu} />
-              <div className="border-2 border-foreground">
-                <div className="grid grid-cols-1 sm:grid-cols-2">
-                  {allSpecEntries.map(([key, val], idx) => (
+              <SectionHeading id="" title={t('product.section.specifications')} icon={Cpu} />
+              {specRows.length > 0 && (
+                <dl data-testid="spec-table" className="border-2 border-foreground grid grid-cols-1 sm:grid-cols-2">
+                  {specRows.map((row, idx) => (
                     <div
-                      key={key}
+                      key={row.key}
+                      data-testid={`spec-row-${row.key}`}
                       className={`flex justify-between items-baseline gap-4 px-4 py-3.5 ${
-                        idx < allSpecEntries.length - (allSpecEntries.length % 2 === 0 ? 2 : 1) ? 'border-b border-foreground/15' : ''
-                      } ${idx % 2 === 0 && allSpecEntries.length > 1 ? 'sm:border-r sm:border-foreground/15' : ''}`}
+                        idx < specRows.length - (specRows.length % 2 === 0 ? 2 : 1) ? 'border-b border-foreground/15' : ''
+                      } ${idx % 2 === 0 && specRows.length > 1 ? 'sm:border-r sm:border-foreground/15' : ''}`}
                     >
-                      <dt className="text-[11px] text-foreground/60 font-medium uppercase tracking-[0.08em]">
-                        {key.replace(/_/g, ' ')}
-                      </dt>
-                      <dd className="text-[13px] font-semibold text-foreground text-right">{val}</dd>
+                      <dt className="text-[11px] text-foreground/60 font-medium uppercase tracking-[0.08em]">{row.label}</dt>
+                      <dd className="text-[13px] font-medium text-foreground text-right">{row.value}</dd>
                     </div>
                   ))}
-                </div>
-              </div>
-            </section>
-          )}
+                </dl>
+              )}
 
-          {/* ── Production & Ordering ── */}
-          {allProductionEntries.length > 0 && (
-            <section id={SECTION_IDS.production} className="scroll-mt-24 mb-16">
-              <SectionHeading id="" title="Production & Ordering" icon={Factory} />
-              <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
-                <div className="border-2 border-foreground">
-                  <div className="grid grid-cols-1 sm:grid-cols-2">
-                    {allProductionEntries.map(([key, val], idx) => (
-                      <div
-                        key={key}
-                        className={`flex justify-between items-baseline gap-4 px-4 py-3.5 ${
-                          idx < allProductionEntries.length - (allProductionEntries.length % 2 === 0 ? 2 : 1) ? 'border-b border-foreground/15' : ''
-                        } ${idx % 2 === 0 && allProductionEntries.length > 1 ? 'sm:border-r sm:border-foreground/15' : ''}`}
-                      >
-                        <dt className="text-[11px] text-foreground/60 font-medium uppercase tracking-[0.08em]">
-                          {key.replace(/_/g, ' ')}
-                        </dt>
-                        <dd className="text-[13px] font-semibold text-foreground text-right">{val}</dd>
+              {/* Two systems, labelled apart: M1 compliance standards, and the
+                  older certifications six products still carry (ruling 3). */}
+              {hasCompliance && (
+                <div className={`space-y-3 ${specRows.length > 0 ? 'mt-6' : ''}`}>
+                  {standards.length > 0 && (
+                    <div className="flex items-start gap-3 flex-wrap">
+                      <span className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground pt-1 shrink-0">
+                        {t('product.spec.standards')}
+                      </span>
+                      <div data-testid="spec-standards" className="flex gap-2 flex-wrap">
+                        {standards.map((std) => (
+                          <Badge key={std.id} variant="outline" className="text-[10px] uppercase tracking-[0.06em]">
+                            {localizedName(std, language)}
+                          </Badge>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  )}
+                  {certs.length > 0 && (
+                    <div className="flex items-start gap-3 flex-wrap">
+                      <span className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground pt-1 shrink-0">
+                        {t('product.spec.certifications')}
+                      </span>
+                      <div data-testid="spec-certifications" className="flex gap-2 flex-wrap">
+                        {certs.map((c) => (
+                          <Tooltip key={c.id}>
+                            <TooltipTrigger asChild>
+                              <span className="text-[10px] font-medium uppercase tracking-[0.06em] text-muted-foreground border border-border px-2 py-1 cursor-default hover:text-foreground hover:border-foreground transition-colors">
+                                {c.abbreviation || c.name}
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent><p className="text-xs">{c.name}</p></TooltipContent>
+                          </Tooltip>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-                {isCustomizable && (
-                  <div className="bg-foreground text-primary-foreground p-6 flex flex-col justify-between">
-                    <div>
-                      <Palette className="h-5 w-5 mb-3 opacity-60" />
-                      <h4 className="text-xs font-semibold uppercase tracking-[0.1em] mb-2">Customization Available</h4>
-                      <p className="text-xs opacity-70 leading-relaxed">
-                        Custom finishes, sizes, colors, and branding options available. Contact us for a tailored specification.
-                      </p>
-                    </div>
-                    <Button variant="secondary" size="sm" className="mt-4 gap-1.5 w-full">
-                      <Send className="h-3.5 w-3.5" />
-                      Request Custom Quote
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </section>
-          )}
-
-          {/* ── Compliance & Certifications ── */}
-          {certs.length > 0 && (
-            <section id={SECTION_IDS.compliance} className="scroll-mt-24 mb-16">
-              <SectionHeading id="" title="Compliance & Certifications" icon={ShieldCheck} />
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {certs.map((c) => (
-                  <div key={c.id} className="border border-border p-4 flex items-start gap-3">
-                    {c.logo_url ? (
-                      <img src={c.logo_url} alt={c.name} className="h-8 w-8 object-contain shrink-0 mt-0.5" />
-                    ) : (
-                      <ShieldCheck className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
-                    )}
-                    <div>
-                      <p className="text-sm font-medium text-foreground">{c.abbreviation || c.name}</p>
-                      {c.abbreviation && <p className="text-xs text-muted-foreground mt-0.5">{c.name}</p>}
-                    </div>
-                  </div>
-                ))}
-              </div>
+              )}
             </section>
           )}
 
