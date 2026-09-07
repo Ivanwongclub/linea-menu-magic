@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 import { useI18n } from "@/features/i18n/I18nProvider";
+import { useCatalogueTaxonomy } from "@/features/products/hooks/useCatalogueTaxonomy";
 
 import buttonsImage from "@/assets/products/buttons-category.jpg";
 import zippersImage from "@/assets/products/zippers-category.jpg";
@@ -10,15 +11,17 @@ import otherImage from "@/assets/products/other-category.jpg";
 
 interface Category {
   id: string;
+  /** Database family this tile opens; none = the full listing. */
+  family?: string;
   titleKey: string;
   image: string;
 }
 
 const categories: Category[] = [
-  { id: "buttons", titleKey: "home.products.buttons", image: buttonsImage },
-  { id: "hardware", titleKey: "home.products.metalHardware", image: hardwareImage },
-  { id: "zippers", titleKey: "home.products.zippers", image: zippersImage },
-  { id: "lace", titleKey: "home.products.laceTrimming", image: laceImage },
+  { id: "buttons", family: "buttons", titleKey: "home.products.buttons", image: buttonsImage },
+  { id: "hardware", family: "metal-hardware-accessories", titleKey: "home.products.metalHardware", image: hardwareImage },
+  { id: "zippers", family: "zippers", titleKey: "home.products.zippers", image: zippersImage },
+  { id: "lace", family: "laces-ribbons", titleKey: "home.products.laceTrimming", image: laceImage },
   { id: "other", titleKey: "home.products.other", image: otherImage },
 ];
 
@@ -36,10 +39,12 @@ const CategoryCard = ({
   className?: string;
 }) => {
   const { t } = useI18n();
+  const { marketingHref } = useCatalogueTaxonomy();
 
   return (
     <Link
-      to={`/products#${category.id}`}
+      to={marketingHref({ family: category.family })}
+      data-testid={`home-category-${category.id}`}
       className={`group relative overflow-hidden rounded-[var(--radius)] hover-img-zoom transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.19,1,0.22,1)] ${
         gridVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
       } ${className}`}

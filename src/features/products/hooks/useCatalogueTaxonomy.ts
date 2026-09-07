@@ -136,6 +136,28 @@ export function useCatalogueTaxonomy() {
     (slug: string) => familyBySlug(slug)?.categories.map((c) => c.slug) ?? [],
     [familyBySlug],
   );
+  /**
+   * Marketing links (footer, home tiles, hero CTAs) target a family or a
+   * category. While that target has no published products the link goes to
+   * the full listing rather than an empty result; `undefined` means the
+   * counts are not in yet.
+   */
+  const marketingHref = useCallback(
+    (target: { family?: string; category?: string }): string => {
+      if (!countsQuery.data) return "/products";
+      if (target.category) {
+        const cat = categories.find((c) => c.slug === target.category);
+        return cat && cat.product_count > 0 ? `/products?category=${cat.slug}` : "/products";
+      }
+      if (target.family) {
+        const fam = familiesWithProducts.find((f) => f.slug === target.family);
+        return fam ? `/products?family=${fam.slug}` : "/products";
+      }
+      return "/products";
+    },
+    [countsQuery.data, categories, familiesWithProducts],
+  );
+
   const categorySlugsForSegment = useCallback(
     (segment: string) => families.filter((f) => f.segment === segment).flatMap((f) => f.categories.map((c) => c.slug)),
     [families],
@@ -154,5 +176,6 @@ export function useCatalogueTaxonomy() {
     familyOf,
     categorySlugsForFamily,
     categorySlugsForSegment,
+    marketingHref,
   };
 }

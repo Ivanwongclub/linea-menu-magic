@@ -1,10 +1,25 @@
 import { Link } from "react-router-dom";
 import { useCookieContext } from "@/features/cookies/CookieProvider";
 import { useI18n } from "@/features/i18n/I18nProvider";
+import { useCatalogueTaxonomy } from "@/features/products/hooks/useCatalogueTaxonomy";
+
+/** Product column: each entry is a database family; "other" is the full listing. */
+const PRODUCT_LINKS: { family?: string; key: string }[] = [
+  { family: "buttons", key: "footer.products.buttons" },
+  { family: "zippers", key: "footer.products.zippers" },
+  { family: "laces-ribbons", key: "footer.products.laceTrim" },
+  { family: "metal-hardware-accessories", key: "footer.products.metalHardware" },
+  { key: "footer.products.other" },
+];
 
 const Footer = () => {
   const { resetConsent, openCustomise } = useCookieContext();
   const { t } = useI18n();
+  const { familiesWithProducts, countsLoading } = useCatalogueTaxonomy();
+  // A family with nothing published is left out rather than linked to an empty page.
+  const productLinks = PRODUCT_LINKS.filter(
+    (l) => !l.family || countsLoading || familiesWithProducts.some((f) => f.slug === l.family),
+  ).map((l) => ({ ...l, to: l.family ? `/products?family=${l.family}` : "/products" }));
 
   return (
     <footer className="w-full bg-foreground text-background pt-16 pb-8">
@@ -52,13 +67,7 @@ const Footer = () => {
               {t("footer.products.title")}
             </h4>
             <ul className="space-y-3">
-              {[
-                { to: "/products#buttons", key: "footer.products.buttons" },
-                { to: "/products#zippers", key: "footer.products.zippers" },
-                { to: "/products#lace", key: "footer.products.laceTrim" },
-                { to: "/products#hardware", key: "footer.products.metalHardware" },
-                { to: "/products#other", key: "footer.products.other" },
-              ].map(link => (
+              {productLinks.map(link => (
                 <li key={link.to}>
                   <Link to={link.to} className="text-sm text-white/65 hover:text-white hover:underline transition-colors duration-150">
                     {t(link.key)}

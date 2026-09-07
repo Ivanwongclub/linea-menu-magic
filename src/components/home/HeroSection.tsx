@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useI18n } from "@/features/i18n/I18nProvider";
+import { useCatalogueTaxonomy } from "@/features/products/hooks/useCatalogueTaxonomy";
 
 import buttonsCategoryImg from "@/assets/products/buttons-category.jpg";
 import hardwareCategoryImg from "@/assets/products/hardware-category.jpg";
@@ -15,7 +16,7 @@ const slides = [
     labelKey: "home.hero.slide1.label",
     titleKey: "home.hero.slide1.title",
     titleAccentKey: "home.hero.slide1.accent",
-    ctaUrl: "/products?category=buttons",
+    cta: { family: "buttons" },
     image: buttonsCategoryImg,
     bgColor: "#EDE8DF",
     textColor: "#1a1a1a",
@@ -25,7 +26,7 @@ const slides = [
     labelKey: "home.hero.slide2.label",
     titleKey: "home.hero.slide2.title",
     titleAccentKey: "home.hero.slide2.accent",
-    ctaUrl: "/products?category=hardware",
+    cta: { family: "metal-hardware-accessories" },
     image: hardwareCategoryImg,
     bgColor: "#E0DDD8",
     textColor: "#1a1a1a",
@@ -35,7 +36,7 @@ const slides = [
     labelKey: "home.hero.slide3.label",
     titleKey: "home.hero.slide3.title",
     titleAccentKey: "home.hero.slide3.accent",
-    ctaUrl: "/products?category=webbing",
+    cta: { family: "soft-trims-webbing-tape" },
     image: otherCategoryImg,
     bgColor: "#E4DDD4",
     textColor: "#1a1a1a",
@@ -45,7 +46,7 @@ const slides = [
     labelKey: "home.hero.slide4.label",
     titleKey: "home.hero.slide4.title",
     titleAccentKey: "home.hero.slide4.accent",
-    ctaUrl: "/products?category=zipper-pullers",
+    cta: { category: "zipper-pullers-sliders" },
     image: zippersCategoryImg,
     bgColor: "#D8D5D0",
     textColor: "#1a1a1a",
@@ -55,7 +56,7 @@ const slides = [
     labelKey: "home.hero.slide5.label",
     titleKey: "home.hero.slide5.title",
     titleAccentKey: "home.hero.slide5.accent",
-    ctaUrl: "/products",
+    cta: { family: "laces-ribbons" },
     image: laceCategoryImg,
     bgColor: "#EAE6E0",
     textColor: "#1a1a1a",
@@ -64,6 +65,7 @@ const slides = [
 
 const HeroSection = () => {
   const { t } = useI18n();
+  const { marketingHref } = useCatalogueTaxonomy();
   const [current, setCurrent] = useState(0);
   const [prev, setPrev] = useState<number | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -267,7 +269,7 @@ const HeroSection = () => {
                     }}
                   >
                     <Link
-                      to={slide.ctaUrl}
+                      to={marketingHref(slide.cta)}
                       className="inline-flex items-center gap-3 text-sm font-medium uppercase tracking-[0.1em] border-2 px-8 py-3 transition-all duration-200 hover:gap-5"
                       style={{
                         color: slide.textColor,
@@ -376,7 +378,7 @@ const HeroSection = () => {
                   }}
                 >
                   <Link
-                    to={slide.ctaUrl}
+                    to={marketingHref(slide.cta)}
                     className="inline-flex items-center gap-3 text-sm font-medium uppercase tracking-[0.1em] border-2 px-6 py-2.5"
                     style={{
                       color: slide.textColor,
