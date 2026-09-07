@@ -357,7 +357,11 @@ async function fetchProducts(filters: ProductFilters): Promise<QueryPayload> {
 
   if (filters.search) {
     const term = `%${filters.search}%`;
-    query = query.or(`name.ilike.${term},name_en.ilike.${term},item_code.ilike.${term}`);
+    // Search the trilingual columns, not the retired `name_en` override:
+    // a buyer browsing in Chinese searches in Chinese.
+    query = query.or(
+      `name.ilike.${term},name_zh_hant.ilike.${term},name_zh_hans.ilike.${term},item_code.ilike.${term}`,
+    );
   }
 
   if (filters.is_customizable !== undefined) {

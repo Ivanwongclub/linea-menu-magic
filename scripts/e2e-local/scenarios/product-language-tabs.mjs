@@ -54,7 +54,8 @@ export default async function ({ page, admin, editor, h }) {
   assert.equal(saved.name_zh_hans, "魔术贴样品");
   assert.equal(saved.description_zh_hant, "繁體描述");
   assert.equal(saved.description_zh_hans, null);
-  assert.equal(saved.name_en, saved.name, "legacy override kept in step with the English base");
+  assert.equal(saved.name_en, null, "M5 Step 2: the legacy override is cleared on save, not maintained");
+  assert.equal(saved.description_en, null, "same for the description override");
 
   // Reload: tabs no longer marked empty, values persist
   await page.reload({ waitUntil: "networkidle" });

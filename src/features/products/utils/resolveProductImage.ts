@@ -27,7 +27,8 @@ export function resolveProductImage(
   if (seeded && seeded.length > 0) return seeded[0];
 
   return getProductPlaceholderUrl(
-    product.name_en ?? product.name,
+    // `name` is the English base; the placeholder is generated art, not copy.
+    product.name,
     product.item_code,
     product.primary_category?.slug,
     product.primary_category?.name,

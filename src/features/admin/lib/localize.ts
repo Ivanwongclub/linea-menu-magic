@@ -17,6 +17,24 @@ export function localizedName(row: Trilingual, language: AppLanguage): string {
   return row.name;
 }
 
+interface TrilingualText {
+  description?: string | null;
+  description_zh_hant?: string | null;
+  description_zh_hans?: string | null;
+}
+
+/**
+ * Body text in the current UI language, with the same fallback chain as
+ * `localizedName`. Returns undefined when nothing is written, so callers
+ * can omit the block rather than render an empty paragraph.
+ */
+export function localizedDescription(row: TrilingualText, language: AppLanguage): string | undefined {
+  const en = row.description || undefined;
+  if (language === "zh-Hant") return row.description_zh_hant || row.description_zh_hans || en;
+  if (language === "zh-Hans") return row.description_zh_hans || row.description_zh_hant || en;
+  return en;
+}
+
 interface FinishNames {
   marketing_name: string;
   marketing_name_zh_hant?: string | null;

@@ -186,11 +186,14 @@ function toPayload(v: FormValues): ProductUpdate {
     description: text(v.description),
     description_zh_hant: text(v.description_zh_hant),
     description_zh_hans: text(v.description_zh_hans),
-    // `name` is the English base since 20260904120000. The storefront still
-    // reads `name_en ?? name` until M5 retires the override, so keep the
-    // legacy columns in step with the base rather than letting them go stale.
-    name_en: v.name.trim(),
-    description_en: text(v.description),
+    // M5 Step 2 retired the legacy overrides: the storefront reads
+    // `name`/`name_zh_hant`/`name_zh_hans` through `localizedName`. The
+    // columns stay (dropping them is a separate decision) but are cleared
+    // on save, so nothing downstream can read a stale duplicate of a name
+    // that has since changed. Verified before the change: `name_en` matched
+    // `name` on all 48 rows that had it, and `description_en` was empty.
+    name_en: null,
+    description_en: null,
     is_public: v.is_public,
     material_id: ref(v.material_id),
     attachment_id: ref(v.attachment_id),

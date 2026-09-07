@@ -21,6 +21,7 @@ import {
   pickFamilyFeatured,
   getFamilyNameForProduct,
 } from "@/features/products/utils/pickFamilyFeatured";
+import { localizedName } from "@/features/admin/lib/localize";
 import { getProductImageUrl } from "@/lib/productImage";
 import { resolveProductImage } from "@/features/products/utils/resolveProductImage";
 
@@ -154,9 +155,9 @@ const DesignerStudio = () => {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-5">
             {featuredProducts.map((p) => {
               const family = getFamilyNameForProduct(p, families, language);
-              // P18 C4: localise the displayed name — fall back en → primary name
-              // (the underlying `name` field can be a non-EN locale).
-              const displayName = p.name_en ?? p.name;
+              // `name` is the English base since the trilingual migration;
+              // the zh columns carry the translations.
+              const displayName = localizedName(p, language);
               const editorUrl = p.model_url
                 ? `/designer-studio/editor?model=${encodeURIComponent(p.model_url)}&name=${encodeURIComponent(displayName)}&slug=${encodeURIComponent(p.slug)}`
                 : null;

@@ -6,6 +6,8 @@ import { getProductImageUrl } from '@/lib/productImage';
 import { resolveProductImage } from '@/features/products/utils/resolveProductImage';
 import { getPdpSeedImages } from '@/features/products/pdpSeedImages';
 import { getProductPlaceholderUrl } from '@/features/products/utils/productImagePlaceholder';
+import { useI18n } from '@/features/i18n/I18nProvider';
+import { localizedName, localizedDescription } from '@/features/admin/lib/localize';
 
 type ViewMode = 'grid' | 'list';
 
@@ -31,6 +33,8 @@ export default function ProductCard({
   onAddToLibrary,
   isInLibrary,
 }: ProductCardProps) {
+  const { language } = useI18n();
+  const displayName = localizedName(product, language);
   const rawUrl = resolveProductImage(product, isHeroLayout ? 'full' : 'thumb');
   const imageUrl = getProductImageUrl(rawUrl, isHeroLayout ? 'pdp' : 'card');
   const isAboveFold = index < 2;
@@ -57,7 +61,7 @@ export default function ProductCard({
   const extraTagCount = tags.length - 2;
   const certs = product.certifications ?? [];
 
-  const altText = `${product.name_en ?? product.name}${product.primary_category ? ` — ${product.primary_category.name}` : ''}`;
+  const altText = `${displayName}${product.primary_category ? ` — ${product.primary_category.name}` : ''}`;
 
   return (
     <div className="group bg-card border border-border rounded-[var(--radius)] overflow-hidden cursor-pointer hover-card transition-[border-color] duration-200 hover:border-foreground">
@@ -69,7 +73,7 @@ export default function ProductCard({
 
         {imageError && (
           <img
-            src={(getPdpSeedImages(product.slug, product.primary_category?.slug) ?? [])[0] ?? getProductPlaceholderUrl(product.name_en ?? product.name, product.item_code, product.primary_category?.slug, product.primary_category?.name, 400)}
+            src={(getPdpSeedImages(product.slug, product.primary_category?.slug) ?? [])[0] ?? getProductPlaceholderUrl(displayName, product.item_code, product.primary_category?.slug, product.primary_category?.name, 400)}
             alt={altText}
             className="absolute inset-0 w-full h-full object-contain p-3"
           />
@@ -128,7 +132,7 @@ export default function ProductCard({
         {onQuickView && (
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); onQuickView(product); }}
-            aria-label={`Quick view ${product.name_en ?? product.name}`}
+            aria-label={`Quick view ${displayName}`}
             className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 translate-y-2 group-hover:translate-y-0 focus-visible:translate-y-0 transition-[opacity,transform] duration-[420ms] ease-[cubic-bezier(0.19,1,0.22,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--foreground))] focus-visible:ring-offset-2"
           >
             <span className="inline-flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-foreground border border-border text-xs font-medium px-3 py-1.5 rounded-[var(--radius)]">
@@ -157,7 +161,7 @@ export default function ProductCard({
             </span>
           )}
           <p className="text-sm font-medium text-[hsl(var(--foreground))] line-clamp-2 leading-snug">
-            {product.name_en ?? product.name}
+            {displayName}
           </p>
           {product.item_code && (
             <p className="text-[10px] text-[hsl(var(--muted-foreground))] font-mono mt-1">
@@ -204,7 +208,10 @@ function ProductCardFeatured({
   isFeatured?: boolean;
   prioritize?: boolean;
 }) {
-  const altText = `${product.name_en ?? product.name}${product.primary_category ? ` — ${product.primary_category.name}` : ''}`;
+  const { language } = useI18n();
+  const displayName = localizedName(product, language);
+  const description = localizedDescription(product, language);
+  const altText = `${displayName}${product.primary_category ? ` — ${product.primary_category.name}` : ''}`;
   const certs = product.certifications ?? [];
 
   return (
@@ -247,16 +254,16 @@ function ProductCardFeatured({
           </span>
         )}
         <p className="text-lg font-semibold text-[hsl(var(--foreground))] leading-snug mb-1">
-          {product.name_en ?? product.name}
+          {displayName}
         </p>
         {product.item_code && (
           <p className="text-[10px] text-[hsl(var(--muted-foreground))] font-mono mb-3">
             {product.item_code}
           </p>
         )}
-        {(product.description_en || product.description) && (
+        {description && (
           <p className="text-xs text-[hsl(var(--muted-foreground))] leading-relaxed line-clamp-3 mb-3">
-            {product.description_en ?? product.description}
+            {description}
           </p>
         )}
         {/* Material pills */}
@@ -295,6 +302,8 @@ function ProductCardList({
   onQuickView?: (product: Product) => void;
   isFeatured?: boolean;
 }) {
+  const { language } = useI18n();
+  const displayName = localizedName(product, language);
   const tags = product.tags ?? [];
   const imageUrl = resolveProductImage(product, 'thumb');
 
@@ -303,7 +312,7 @@ function ProductCardList({
       <div className="relative h-16 w-16 shrink-0 bg-secondary rounded-[var(--radius)] overflow-hidden">
         <img
           src={imageUrl}
-          alt={`${product.name_en ?? product.name}${product.primary_category ? ` — ${product.primary_category.name}` : ''}`}
+          alt={`${displayName}${product.primary_category ? ` — ${product.primary_category.name}` : ''}`}
           width={64}
           height={64}
           className="absolute inset-0 h-full w-full object-cover"
@@ -313,7 +322,7 @@ function ProductCardList({
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium text-foreground truncate">
-            {product.name_en ?? product.name}
+            {displayName}
           </p>
           {tags.slice(0, 2).map((tag) => (
             <span key={tag.id} className="shrink-0 bg-foreground text-background text-[9px] font-medium uppercase tracking-[0.04em] px-1.5 py-0.5 rounded-[var(--radius)]">

@@ -2,6 +2,8 @@ import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useParams, Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '@/features/auth/AuthProvider';
+import { useI18n } from '@/features/i18n/I18nProvider';
+import { localizedName, localizedDescription } from '@/features/admin/lib/localize';
 import { supabase } from '@/integrations/supabase/client';
 import {
   FileDown, Box, Send, Palette, BookmarkPlus, Download,
@@ -273,9 +275,12 @@ export default function ProductDetail() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { session, primaryBrand } = useAuth();
+  const { language } = useI18n();
   const isStudioContext = location.pathname.startsWith('/designer-studio');
   const { product, loading, error } = useProduct(slug ?? '');
   const [show3D, setShow3D] = useState(false);
+  // `name` is the English base; the zh columns carry the translations.
+  const displayName = product ? localizedName(product, language) : '';
 
   /* Build gallery: real DB images → seeded images → single placeholder */
   const galleryImages = useMemo<ProductImage[]>(() => {
@@ -295,7 +300,7 @@ export default function ProductDetail() {
         url,
         sort_order: i,
         is_primary: i === 0,
-        alt_text: `${product.name_en ?? product.name} — view ${i + 1}`,
+        alt_text: `${localizedName(product, language)} — view ${i + 1}`,
       }));
     }
 
@@ -307,7 +312,7 @@ export default function ProductDetail() {
         url,
         sort_order: i,
         is_primary: i === 0,
-        alt_text: `${product.name_en ?? product.name} — view ${i + 1}`,
+        alt_text: `${localizedName(product, language)} — view ${i + 1}`,
       }));
     }
 
@@ -316,9 +321,9 @@ export default function ProductDetail() {
       url: getFallbackImage(),
       sort_order: 0,
       is_primary: true,
-      alt_text: product.name_en ?? product.name,
+      alt_text: localizedName(product, language),
     }];
-  }, [product]);
+  }, [product, language]);
 
   const addToLibrary = useCallback(async () => {
     if (!product) return;
@@ -420,7 +425,7 @@ export default function ProductDetail() {
     .map((si, i) => ({ id: `seed-ind-${i}`, name: si, slug: si.toLowerCase().replace(/\s+/g, '-'), sort_order: 100 + i }));
   const industries = [...realIndustries, ...seedIndustries];
 
-  const description = product.description_en ?? product.description ?? seed?.description ?? null;
+  const description = localizedDescription(product, language) ?? seed?.description ?? null;
   const isCustomizable = product.is_customizable || (seed?.is_customizable ?? false);
 
   // Build merged detail objects for below-fold
@@ -458,7 +463,7 @@ export default function ProductDetail() {
     { label: 'Home', href: '/' },
     { label: libraryLabel, href: libraryHref },
     ...(primaryCat ? [{ label: primaryCat.name, href: `${libraryHref}${isStudioContext ? '' : `?category=${primaryCat.slug}`}` }] : []),
-    { label: product.name_en ?? product.name },
+    { label: displayName },
   ];
 
   const hasDownloads = !!product.model_url;
@@ -475,7 +480,7 @@ export default function ProductDetail() {
 
   return (
     <>
-        <PageBreadcrumb segments={breadcrumbSegments} title={product.name_en ?? product.name} />
+        <PageBreadcrumb segments={breadcrumbSegments} title={displayName} />
 
         {/* ════════════════════════════════════════════════
             HERO — Above the fold (compact & balanced)
@@ -512,7 +517,7 @@ export default function ProductDetail() {
                   )}
                 </div>
                 <h1 className="text-2xl lg:text-3xl font-semibold tracking-tight text-foreground leading-tight mb-2">
-                  {product.name_en ?? product.name}
+                  {displayName}
                 </h1>
                 <div className="flex items-center gap-2 flex-wrap">
                   {tags.map((t) => (
@@ -819,7 +824,7 @@ export default function ProductDetail() {
       {product.model_url && (
         <Dialog open={show3D} onOpenChange={setShow3D}>
           <DialogContent className="max-w-3xl h-[70vh]">
-            <DialogTitle>3D Model — {product.name_en ?? product.name}</DialogTitle>
+            <DialogTitle>3D Model — {displayName}</DialogTitle>
             <div className="flex-1 min-h-0">
               <Model3DViewer hasModel modelUrl={product.model_url} />
             </div>
