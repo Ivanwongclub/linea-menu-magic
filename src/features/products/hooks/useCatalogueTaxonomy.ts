@@ -41,18 +41,25 @@ export interface CatalogueFamily {
   segment: string;
   sort_order: number;
   categories: CatalogueCategory[];
+  /** Distinct published products across the family's categories. */
+  product_count: number;
 }
 
 interface Raw {
-  families: Omit<CatalogueFamily, "categories">[];
+  families: Omit<CatalogueFamily, "categories" | "product_count">[];
   categories: Omit<CatalogueCategory, "product_count">[];
+}
+
+interface Membership {
+  category_id: string;
+  product_id: string;
 }
 
 export const CATALOGUE_TAXONOMY_KEY = ["catalogue-taxonomy"] as const;
 export const CATALOGUE_COUNTS_KEY = ["catalogue-taxonomy", "counts"] as const;
 
-/** Distinct published products per category id, as visible to this session. */
-async function fetchPublishedCounts(): Promise<Record<string, number>> {
+/** (category, product) pairs for published products, as visible to this session — deduplicated. */
+async function fetchPublishedMembership(): Promise<Membership[]> {
   const { data, error } = await supabase
     .from("product_category_map")
     .select("category_id, products!inner(id)")
@@ -60,16 +67,16 @@ async function fetchPublishedCounts(): Promise<Record<string, number>> {
     .eq("products.is_public", true);
   if (error) throw error;
   const seen = new Set<string>();
-  const counts: Record<string, number> = {};
+  const rows: Membership[] = [];
   for (const row of data ?? []) {
     const productId = (row.products as { id: string } | null)?.id;
     if (!productId) continue;
     const key = `${row.category_id}:${productId}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    counts[row.category_id] = (counts[row.category_id] ?? 0) + 1;
+    rows.push({ category_id: row.category_id, product_id: productId });
   }
-  return counts;
+  return rows;
 }
 
 export function useCatalogueTaxonomy() {
@@ -101,16 +108,20 @@ export function useCatalogueTaxonomy() {
   const countsQuery = useQuery({
     queryKey: CATALOGUE_COUNTS_KEY,
     staleTime: 60 * 1000,
-    queryFn: fetchPublishedCounts,
+    queryFn: fetchPublishedMembership,
   });
 
   const families = useMemo<CatalogueFamily[]>(() => {
-    const counts = countsQuery.data ?? {};
-    const cats = (query.data?.categories ?? []).map((c) => ({ ...c, product_count: counts[c.id] ?? 0 }));
-    return (query.data?.families ?? []).map((f) => ({
-      ...f,
-      categories: cats.filter((c) => c.family_id === f.id),
-    }));
+    const membership = countsQuery.data ?? [];
+    const byCategory: Record<string, number> = {};
+    for (const m of membership) byCategory[m.category_id] = (byCategory[m.category_id] ?? 0) + 1;
+    const cats = (query.data?.categories ?? []).map((c) => ({ ...c, product_count: byCategory[c.id] ?? 0 }));
+    return (query.data?.families ?? []).map((f) => {
+      const categories = cats.filter((c) => c.family_id === f.id);
+      const catIds = new Set(categories.map((c) => c.id));
+      const products = new Set(membership.filter((m) => catIds.has(m.category_id)).map((m) => m.product_id));
+      return { ...f, categories, product_count: products.size };
+    });
   }, [query.data, countsQuery.data]);
 
   /** Public-menu view: empty categories and then empty families dropped. Empty until counts arrive, so menus never flash the full tree. */

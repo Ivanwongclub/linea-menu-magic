@@ -73,6 +73,9 @@ function SectionHeading({
   );
 }
 
+/** Above this many visible categories, families start collapsed. */
+const COLLAPSE_THRESHOLD = 10;
+
 const hasActiveFilters = (filters: ProductFilters): boolean =>
   !!(
     filters.search ||
@@ -148,10 +151,19 @@ export default function ProductsSidebar({
       catalogue.familiesWithProducts.map((family) => ({
         slug: family.slug,
         name: localizedName(family, language),
+        productCount: family.product_count,
         categories: family.categories.map((cat) => ({ ...cat, label: localizedName(cat, language) })),
       })),
     [catalogue.familiesWithProducts, language],
   );
+  // A long list collapses by default so the column stays navigable; the
+  // family in play (filtered, or holding a ticked category) stays open.
+  const totalCategories = familyGroups.reduce((n, g) => n + g.categories.length, 0);
+  const collapseByDefault = totalCategories > COLLAPSE_THRESHOLD;
+  const defaultOpen = (group: (typeof familyGroups)[number]) =>
+    !collapseByDefault ||
+    filters.family === group.slug ||
+    group.categories.some((c) => filters.categories?.includes(c.slug));
   // A filter with one option is dead UI: show segments only once a second one has families.
   const showSegments = catalogue.segments.length > 1;
 
@@ -225,7 +237,7 @@ export default function ProductsSidebar({
           {familyGroups.map((group) => {
             if (group.categories.length === 0) return null;
             const isActiveFamily = filters.family === group.slug;
-            const isOpen = openFamilies[group.slug] ?? true;
+            const isOpen = openFamilies[group.slug] ?? defaultOpen(group);
             return (
               <div key={group.slug}>
                 <div className="flex items-center justify-between mb-1.5">
@@ -243,6 +255,9 @@ export default function ProductsSidebar({
                     }`}
                   >
                     {group.name}
+                    <span className="ml-1.5 text-xs font-normal text-muted-foreground" data-testid={`family-count-${group.slug}`}>
+                      {group.productCount}
+                    </span>
                   </button>
                   <button
                     onClick={() =>
@@ -253,6 +268,8 @@ export default function ProductsSidebar({
                     }
                     className="p-1 text-muted-foreground hover:text-foreground transition-colors"
                     aria-label={`${isOpen ? 'Collapse' : 'Expand'} ${group.name}`}
+                    aria-expanded={isOpen}
+                    data-testid={`family-toggle-${group.slug}`}
                   >
                     <ChevronDown
                       className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}

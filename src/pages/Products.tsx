@@ -287,7 +287,13 @@ export default function Products() {
         <section className="px-6 lg:px-8 pb-24">
           <div className="max-w-7xl mx-auto flex items-start gap-10">
             {/* Desktop Sidebar */}
-            <aside className="hidden lg:flex lg:flex-col w-[240px] flex-shrink-0 sticky top-[80px] self-start pb-8">
+            {/* Sticky column bounded to the viewport with its own scroll, so the
+                finish rail at the bottom is reachable without scrolling the page
+                past the whole category list (same fix as the CMS finish picker). */}
+            <aside
+              data-testid="products-sidebar"
+              className="hidden lg:block w-[240px] flex-shrink-0 sticky top-[80px] self-start max-h-[calc(100vh-80px)] overflow-y-auto overscroll-contain pb-8 pr-2"
+            >
               <ProductsSidebar {...sidebarProps} />
             </aside>
 

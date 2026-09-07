@@ -134,9 +134,12 @@ export default async function ({ page, base, admin, status, h }) {
 
     /* ---- sidebar: database structure, empty families/categories hidden, real counts ---- */
     const sidebar = page.locator("aside");
-    for (const f of visibleFamilies) await sidebar.getByRole("button", { name: f.name, exact: true }).waitFor();
+    // the family row button reads "<name> <count>" since the M4 close-out
+    const esc = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const famButton = (name) => sidebar.getByRole("button", { name: new RegExp(`^${esc(name)}(\\s?\\d+)?$`) });
+    for (const f of visibleFamilies) await famButton(f.name).waitFor();
     for (const f of hiddenFamilies) {
-      assert.equal(await sidebar.getByRole("button", { name: f.name, exact: true }).count(), 0, `empty family ${f.slug} is hidden`);
+      assert.equal(await famButton(f.name).count(), 0, `empty family ${f.slug} is hidden`);
     }
     const shownCounts = {};
     for (const c of famCats) {
@@ -168,7 +171,7 @@ export default async function ({ page, base, admin, status, h }) {
     }
 
     /* ---- family filter resolves through the database; a category NARROWS within it ---- */
-    await sidebar.getByRole("button", { name: fam.name, exact: true }).click();
+    await famButton(fam.name).click();
     await page.waitForURL((u) => u.searchParams.get("family") === fam.slug);
     await countText(expectedFamily).waitFor({ timeout: 20000 });
     await page.getByText(fam.name, { exact: true }).first().waitFor(); // chip carries the database name
@@ -208,7 +211,7 @@ export default async function ({ page, base, admin, status, h }) {
     await page.addInitScript(() => window.localStorage.setItem("wincyc.language", "zh-Hant"));
     await page.goto(`${base}/products`);
     const zhFam = visibleFamilies.find((f) => f.name_zh_hant) ?? fam;
-    await sidebar.getByRole("button", { name: zhFam.name_zh_hant, exact: true }).waitFor({ timeout: 20000 });
+    await famButton(zhFam.name_zh_hant).waitFor({ timeout: 20000 });
     if (cat.name_zh_hant) await sidebar.locator(`label[for="cat-${cat.slug}"]`).filter({ hasText: cat.name_zh_hant }).waitFor();
     out.zhHant = { family: zhFam.name_zh_hant, category: cat.name_zh_hant ?? null };
 
