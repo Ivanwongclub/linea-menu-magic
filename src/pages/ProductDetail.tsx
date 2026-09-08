@@ -20,6 +20,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import ProductCard from '@/components/products/ProductCard';
 import ProductGallery from '@/components/product/ProductGallery';
+import SizeSelector from '@/components/product/SizeSelector';
 import Model3DViewer from '@/components/designer-studio/Model3DViewer';
 import { useProduct } from '@/features/products/hooks/useProduct';
 import { useProducts } from '@/features/products/hooks/useProducts';
@@ -96,6 +97,7 @@ function SectionNav({ sections }: { sections: { id: string; label: string }[] })
 /* ─── Related products ───────────────────────────────── */
 
 function RelatedProducts({ product }: { product: Product }) {
+  const { t } = useI18n();
   const categorySlug = product.primary_category?.slug ?? product.categories?.[0]?.slug;
   const { products } = useProducts({ categories: categorySlug ? [categorySlug] : undefined });
   const related = useMemo(() => products.filter((p) => p.id !== product.id).slice(0, 6), [products, product.id]);
@@ -109,7 +111,7 @@ function RelatedProducts({ product }: { product: Product }) {
               <div className="w-8 h-8 bg-foreground flex items-center justify-center mb-3">
                 <Layers className="h-4 w-4 text-background" />
               </div>
-              <h2 className="text-sm font-bold uppercase tracking-[0.1em] text-foreground">Related Trims</h2>
+              <h2 className="text-sm font-bold uppercase tracking-[0.1em] text-foreground">{t('product.section.related')}</h2>
             </div>
           {categorySlug && (
             <Link
@@ -166,6 +168,7 @@ export default function ProductDetail() {
   const isStudioContext = location.pathname.startsWith('/designer-studio');
   const { product, loading, error } = useProduct(slug ?? '');
   const [show3D, setShow3D] = useState(false);
+  const [sizeId, setSizeId] = useState<string | null>(null);
   // `name` is the English base; the zh columns carry the translations.
   const displayName = product ? localizedName(product, language) : '';
 
@@ -191,18 +194,18 @@ export default function ProductDetail() {
       .eq('product_id', product.id)
       .maybeSingle();
     if (existing) {
-      toast.info('Already in your library');
+      toast.info(t('product.toast.alreadyInLibrary'));
       return;
     }
     const { error: insertError } = await supabase
       .from('user_library_items')
       .insert({ team_id: primaryBrand.id, product_id: product.id });
     if (insertError) {
-      toast.error('Could not add to library');
+      toast.error(t('product.toast.couldNotAdd'));
       return;
     }
-    toast.success(`${product.name} added to your library`);
-  }, [product, session, primaryBrand, navigate, location.pathname]);
+    toast.success(t('product.toast.added', { name: localizedName(product, language) }));
+  }, [product, session, primaryBrand, navigate, location.pathname, t, language]);
 
   // Complete a pending add-library intent after login
   useEffect(() => {
@@ -224,13 +227,13 @@ export default function ProductDetail() {
   if (error || !product) {
     return (
       <div className="section-inner py-24 text-center">
-        <h1 className="text-xl font-semibold mb-2">Product not found</h1>
-        <p className="text-sm text-muted-foreground mb-6">
-          The product you're looking for doesn't exist or has been removed.
-        </p>
+        <h1 className="text-xl font-semibold mb-2">{t('product.notFound.title')}</h1>
+        <p className="text-sm text-muted-foreground mb-6">{t('product.notFound.body')}</p>
         <Button variant="outline" asChild>
           <Link to={isStudioContext ? '/designer-studio/trim-library' : '/products'}>
-            Back to {isStudioContext ? 'Designer Studio' : 'Trim Library'}
+            {t('product.notFound.back', {
+              place: isStudioContext ? t('header.nav.designerStudio') : t('product.breadcrumb.trimLibrary'),
+            })}
           </Link>
         </Button>
       </div>
@@ -259,11 +262,20 @@ export default function ProductDetail() {
   const description = localizedDescription(product, language) ?? null;
   const isCustomizable = product.is_customizable;
 
+  // Derived, not stored in an effect: the chosen size, else the default the
+  // CMS flagged, else the first. Weight and thickness follow this variant.
+  const sizeVariants = product.size_variants ?? [];
+  const selectedSize =
+    sizeVariants.find((v) => v.id === sizeId) ??
+    sizeVariants.find((v) => v.is_default) ??
+    sizeVariants[0] ??
+    null;
+
   const libraryHref = isStudioContext ? '/designer-studio/trim-library' : '/products';
-  const libraryLabel = isStudioContext ? 'Designer Studio' : 'Trim Library';
+  const libraryLabel = isStudioContext ? t('header.nav.designerStudio') : t('product.breadcrumb.trimLibrary');
 
   const breadcrumbSegments = [
-    { label: 'Home', href: '/' },
+    { label: t('footer.nav.home'), href: '/' },
     { label: libraryLabel, href: libraryHref },
     ...(primaryCat ? [{ label: primaryCat.name, href: `${libraryHref}${isStudioContext ? '' : `?category=${primaryCat.slug}`}` }] : []),
     { label: displayName },
@@ -272,11 +284,11 @@ export default function ProductDetail() {
   const hasDownloads = !!product.model_url;
 
   const navSections = [
-    { id: SECTION_IDS.overview, label: 'Overview' },
-    ...(specRows.length > 0 || hasCompliance ? [{ id: SECTION_IDS.specs, label: 'Specifications' }] : []),
-    ...(industries.length > 0 ? [{ id: SECTION_IDS.applications, label: 'Applications' }] : []),
-    ...(hasDownloads ? [{ id: SECTION_IDS.downloads, label: 'Downloads' }] : []),
-    { id: SECTION_IDS.related, label: 'Related' },
+    { id: SECTION_IDS.overview, label: t('product.nav.overview') },
+    ...(specRows.length > 0 || hasCompliance ? [{ id: SECTION_IDS.specs, label: t('product.nav.specifications') }] : []),
+    ...(industries.length > 0 ? [{ id: SECTION_IDS.applications, label: t('product.nav.applications') }] : []),
+    ...(hasDownloads ? [{ id: SECTION_IDS.downloads, label: t('product.nav.downloads') }] : []),
+    { id: SECTION_IDS.related, label: t('product.nav.related') },
   ];
 
   return (
@@ -331,7 +343,7 @@ export default function ProductDetail() {
                   ))}
                   {isCustomizable && (
                     <Badge variant="secondary" className="text-[10px] uppercase tracking-[0.06em] gap-1">
-                      <Palette className="h-3 w-3" /> Customizable
+                      <Palette className="h-3 w-3" /> {t('product.badge.customizable')}
                     </Badge>
                   )}
                 </div>
@@ -372,6 +384,8 @@ export default function ProductDetail() {
                 </div>
               )}
 
+              <SizeSelector variants={sizeVariants} selected={selectedSize} onSelect={setSizeId} />
+
               {/* CTAs */}
               <div className="space-y-3 mt-auto">
                 <Button
@@ -382,7 +396,7 @@ export default function ProductDetail() {
                 >
                   <Link to={`/contact?product=${encodeURIComponent(product.slug)}`}>
                     <Send className="h-4 w-4" />
-                    Request Quote
+                    {t('product.cta.requestQuote')}
                   </Link>
                 </Button>
 
@@ -392,7 +406,7 @@ export default function ProductDetail() {
                       to={`/designer-studio/editor?model=${encodeURIComponent(product.model_url)}&name=${encodeURIComponent(product.item_code || product.name)}&slug=${encodeURIComponent(product.slug)}`}
                     >
                       <Palette className="h-4 w-4" />
-                      Customize in 3D Editor
+                      {t('product.cta.customise3D')}
                     </Link>
                   </Button>
                 )}
@@ -400,18 +414,18 @@ export default function ProductDetail() {
                 <div className="grid gap-2 grid-cols-2">
                   <Button variant="ghost" size="sm" className="gap-1.5 text-[11px] h-9" onClick={addToLibrary}>
                     <BookmarkPlus className="h-3.5 w-3.5" />
-                    Add to My Library
+                    {t('product.cta.addToLibrary')}
                   </Button>
                   {product.model_url ? (
                     <Button variant="ghost" size="sm" className="gap-1.5 text-[11px] h-9" onClick={() => setShow3D(true)}>
                       <Box className="h-3.5 w-3.5" />
-                      View 3D Model
+                      {t('product.cta.view3D')}
                     </Button>
                   ) : (
                     <Button variant="ghost" size="sm" className="gap-1.5 text-[11px] h-9" asChild>
                       <Link to={`/contact?product=${encodeURIComponent(product.slug)}`}>
                         <Send className="h-3.5 w-3.5" />
-                        Enquire
+                        {t('product.cta.enquire')}
                       </Link>
                     </Button>
                   )}
@@ -525,7 +539,7 @@ export default function ProductDetail() {
           {/* ── Applications & Segments ── */}
           {industries.length > 0 && (
             <section id={SECTION_IDS.applications} className="scroll-mt-24 mb-16">
-              <SectionHeading id="" title="Applications & End Uses" icon={Layers} />
+              <SectionHeading id="" title={t('product.section.applications')} icon={Layers} />
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {industries.map((ind) => (
                   <Link
@@ -544,12 +558,12 @@ export default function ProductDetail() {
           {/* ── Downloads & Resources ── */}
           {hasDownloads && (
             <section id={SECTION_IDS.downloads} className="scroll-mt-24 mb-16">
-              <SectionHeading id="" title="Downloads & Resources" icon={Download} />
+              <SectionHeading id="" title={t('product.section.downloads')} icon={Download} />
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <button className="border border-border p-5 text-left hover:border-foreground hover:bg-secondary/30 transition-all duration-200 group">
                   <FileDown className="h-5 w-5 text-muted-foreground group-hover:text-foreground mb-3 transition-colors" />
-                  <p className="text-sm font-medium text-foreground">Spec Sheet</p>
-                  <p className="text-xs text-muted-foreground mt-1">Technical specification PDF</p>
+                  <p className="text-sm font-medium text-foreground">{t('product.downloads.specSheet')}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{t('product.downloads.specSheetHint')}</p>
                 </button>
                 {product.model_url && (
                   <button
@@ -557,8 +571,8 @@ export default function ProductDetail() {
                     className="border border-border p-5 text-left hover:border-foreground hover:bg-secondary/30 transition-all duration-200 group"
                   >
                     <Box className="h-5 w-5 text-muted-foreground group-hover:text-foreground mb-3 transition-colors" />
-                    <p className="text-sm font-medium text-foreground">3D Model</p>
-                    <p className="text-xs text-muted-foreground mt-1">View or download OBJ file</p>
+                    <p className="text-sm font-medium text-foreground">{t('product.downloads.model3d')}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{t('product.downloads.model3dHint')}</p>
                   </button>
                 )}
               </div>
@@ -572,7 +586,7 @@ export default function ProductDetail() {
       {product.model_url && (
         <Dialog open={show3D} onOpenChange={setShow3D}>
           <DialogContent className="max-w-3xl h-[70vh]">
-            <DialogTitle>3D Model — {displayName}</DialogTitle>
+            <DialogTitle>{t('product.dialog.model3d', { name: displayName })}</DialogTitle>
             <div className="flex-1 min-h-0">
               <Model3DViewer hasModel modelUrl={product.model_url} />
             </div>
