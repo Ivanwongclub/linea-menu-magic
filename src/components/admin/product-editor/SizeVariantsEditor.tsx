@@ -153,7 +153,12 @@ export function SizeVariantsEditor({ productId }: { productId: string }) {
           <TableHeader>
             <TableRow>
               <TableHead className="w-8" />
-              <TableHead>{t("admin.sizes.primary")}</TableHead>
+              <TableHead>
+                {t("admin.sizes.primary")}
+                <span className="block font-normal normal-case tracking-normal text-[11px] leading-snug text-muted-foreground mt-0.5 max-w-[16rem]">
+                  {t("admin.sizes.primaryHint")}
+                </span>
+              </TableHead>
               <TableHead>{t("admin.sizes.secondary")}</TableHead>
               <TableHead>{t("admin.sizes.label")}</TableHead>
               <TableHead className="text-muted-foreground">{t("admin.sizes.ligne")}</TableHead>

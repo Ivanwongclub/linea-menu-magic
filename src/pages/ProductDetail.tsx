@@ -21,6 +21,7 @@ import { Badge } from '@/components/ui/badge';
 import ProductCard from '@/components/products/ProductCard';
 import ProductGallery from '@/components/product/ProductGallery';
 import SizeSelector from '@/components/product/SizeSelector';
+import ProductColourFinish from '@/components/product/ProductColourFinish';
 import Model3DViewer from '@/components/designer-studio/Model3DViewer';
 import { useProduct } from '@/features/products/hooks/useProduct';
 import { useProducts } from '@/features/products/hooks/useProducts';
@@ -385,6 +386,8 @@ export default function ProductDetail() {
               )}
 
               <SizeSelector variants={sizeVariants} selected={selectedSize} onSelect={setSizeId} />
+
+              <ProductColourFinish product={product} />
 
               {/* CTAs */}
               <div className="space-y-3 mt-auto">

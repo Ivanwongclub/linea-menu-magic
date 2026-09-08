@@ -184,6 +184,7 @@ export const adminTranslations: Record<AppLanguage, Record<string, string>> = {
 
     // sizes
     "admin.sizes.primary": "Primary (mm)",
+    "admin.sizes.primaryHint": "Buttons are specified in lignes: 24L = 15.24 mm. Enter the exact millimetre value, since 15 is an approximation.",
     "admin.sizes.secondary": "Secondary (mm)",
     "admin.sizes.label": "Label",
     "admin.sizes.ligne": "Ligne",
@@ -585,6 +586,7 @@ export const adminTranslations: Record<AppLanguage, Record<string, string>> = {
     "admin.validation.fixFields": "請修正標示的欄位。",
 
     "admin.sizes.primary": "主尺寸（mm）",
+    "admin.sizes.primaryHint": "鈕扣以萊尼為單位：24L = 15.24 mm。請輸入精確毫米值，15 只是約數。",
     "admin.sizes.secondary": "第二尺寸（mm）",
     "admin.sizes.label": "標籤",
     "admin.sizes.ligne": "萊尼",
@@ -975,6 +977,7 @@ export const adminTranslations: Record<AppLanguage, Record<string, string>> = {
     "admin.validation.fixFields": "请修正标示的字段。",
 
     "admin.sizes.primary": "主尺寸（mm）",
+    "admin.sizes.primaryHint": "纽扣以莱尼为单位：24L = 15.24 mm。请输入精确毫米值，15 只是约数。",
     "admin.sizes.secondary": "第二尺寸（mm）",
     "admin.sizes.label": "标签",
     "admin.sizes.ligne": "莱尼",
