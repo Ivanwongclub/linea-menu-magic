@@ -7,7 +7,7 @@ this is an index, not a decision log.
 | Phase | Contents | Status |
 |---|---|---|
 | 1 | Schema, RLS, roles | **Done** |
-| 2 | Editor shell, route, lazy load, catalogue entry | Not started |
+| 2 | Editor shell, route, lazy load, catalogue entry | **Done** |
 | 3 | Finish picker integration | Not started |
 | 4 | Text: content, font, straight and circular layout | Not started |
 | 5 | Direct manipulation: drag to position, size, curve | Not started |
@@ -101,3 +101,79 @@ surfaces (CMS, spec sheets, quote responses).
    segment is always `brand_id` or the owner's uid) is app-enforced at
    upload time, and this is the standard Supabase pattern for path-scoped
    buckets.
+
+## Phase 2 — done (2026-09-17)
+
+Files:
+
+- `supabase/migrations/20260917150000_phase2_retire_editor_sessions.sql` —
+  drops `editor_sessions` (policies/grants cascade with it); adds
+  `products.model_storage_path`.
+- `package.json` / `package-lock.json` — `three` → `^0.161.0` (was pinned
+  below r161, which is where `MeshPhysicalMaterial.anisotropy` landed —
+  E0 §7), `@types/three` to match, `three-mesh-bvh@^0.9.15`,
+  `three-bvh-csg@0.0.17` (exact — `^0.0.18` needs `three>=0.179`, E0 §7),
+  `zustand@^5.0.15`.
+- Deleted `public/3d-editor/` (the vanilla iframe app) and
+  `src/pages/DesignerStudioEditor.tsx`.
+- `src/App.tsx` — routes `/designer-studio/editor/new` and
+  `/designer-studio/editor/:designId`, both on one lazy chunk
+  (`src/features/editor/EditorRoute.tsx`); bare `/designer-studio/editor`
+  redirects to `/new`, mapping legacy `?slug=` to `?product=`.
+- `src/components/designer-studio/StudioHero3D.tsx` — CTA now points at
+  `/designer-studio/editor/new?product=metal-button`.
+- `src/features/editor/**` (new) — the editor feature: `EditorRoute.tsx`;
+  `pages/EditorNewPage.tsx` (product → local state if anonymous, or create
+  a `designs` row and move to `/:designId` if signed in, claiming any
+  sessionStorage draft); `pages/EditorDesignPage.tsx` (loads an existing
+  design); `store/useEditorStore.ts` (zustand — size variant + finish
+  selection); `hooks/useEditorProduct.ts` (editor-scoped product read,
+  independent of the storefront's `useProduct`); `hooks/useDesignerStaffStatus.ts`;
+  `lib/anonymousDraft.ts` (sessionStorage); `components/EditorShell.tsx`,
+  `EditorViewport.tsx`, `EditorModel.tsx`, `StudioEnvironment.tsx`
+  (`RoomEnvironment` + `PMREMGenerator`, never a drei `preset`),
+  `MeasurementLine.tsx`, `EditorPanel.tsx` (PRODUCT/FINISH/BRANDING/OUTPUT),
+  `SignInBanner.tsx`.
+- `src/features/admin/hooks/useProductModel.ts` (new) and
+  `src/components/admin/product-editor/ProductModelEditor.tsx` (new) — the
+  CMS `.obj` upload, mirroring `ProductImagesEditor`.
+- `src/pages/admin/AdminProductEditor.tsx` — wires in `ProductModelEditor`.
+  **Outside this phase's listed edit scope** (only `src/components/admin/
+  product-editor/` and `src/features/admin/hooks/` were named) but the page
+  that composes those sections is the only place the new field could be
+  rendered from — R5 is otherwise unsatisfiable. One import + one `<section>` added.
+- `scripts/e2e-local/scenarios/editor-shell.mjs` (new) — R8's four proofs.
+- `docs/3d-editor/STATUS.md` — this file.
+
+### Rulings that shaped Phase 2
+
+R1–R9 are recorded in the migration file's header comment and in the
+commit; not duplicated here.
+
+### Open questions from this phase, with a recommendation each
+
+1. **i18n was skipped for all new UI.** `src/features/i18n/` (translation
+   dictionaries) wasn't in this phase's scope, so every new string — the
+   editor panel, the sign-in banner, the CMS model field — is hardcoded
+   English, unlike the rest of the admin/storefront UI. *Recommend* adding
+   `adminTranslations.ts` and the storefront dictionary to a near-term
+   phase's edit scope before this surface grows further.
+2. **Non-metal "default" colour.** `product_colours` has no `is_default`
+   flag (unlike size variants and finishes), so the editor shows the first
+   row by `sort_order`. *Recommend confirming* this matches the storefront's
+   own default-colour logic (`ProductColourFinish.tsx`, not read this
+   phase) rather than picking a second convention.
+3. **`anisotropyRotation` is fixed at 0.** Axis-design §4's `brushDirection`
+   isn't defined anywhere as a concrete value — there's no geometry/UV
+   mapping yet to derive it from. *Recommend* deriving it once surface-follow
+   geometry exists (Phase 5/6), not guessing a value now.
+4. **OBJ scale is forced, not trusted.** "1 scene unit = 1mm" is
+   implemented by rescaling the loaded model's horizontal bounding-box
+   extent to the selected variant's `size_primary_mm`, since E0 confirmed
+   the bundled sample OBJs aren't consistently authored to real-world
+   units. *Recommend keeping this* unless/until every uploaded model is
+   guaranteed mm-scale at the source.
+5. **`draft_recipe` is written once, at creation.** Changing the size
+   selector afterward updates local/zustand state only — it does not
+   patch the `designs` row. *Recommend confirming* this is acceptable
+   until Phase 8 (autosave) lands, rather than adding an interim write path.

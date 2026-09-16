@@ -30,7 +30,7 @@ const loadNews = () => import("./pages/News");
 const loadNewsDetail = () => import("./pages/NewsDetail");
 const loadDesignerStudio = () => import("./pages/DesignerStudio");
 const loadDesignerStudioTrimLibrary = () => import("./pages/DesignerStudioTrimLibrary");
-const loadDesignerStudioEditor = () => import("./pages/DesignerStudioEditor");
+const loadEditorRoute = () => import("./features/editor/EditorRoute");
 const loadDesignerStudioWorkspace = () => import("./pages/DesignerStudioWorkspace");
 const loadComposerPage = () => import("./features/designer/pages/ComposerPage");
 const loadPresentationPage = () => import("./features/designer/pages/PresentationPage");
@@ -58,7 +58,7 @@ const News = lazy(loadNews);
 const NewsDetail = lazy(loadNewsDetail);
 const DesignerStudio = lazy(loadDesignerStudio);
 const DesignerStudioTrimLibrary = lazy(loadDesignerStudioTrimLibrary);
-const DesignerStudioEditor = lazy(loadDesignerStudioEditor);
+const EditorRoute = lazy(loadEditorRoute);
 const DesignerStudioWorkspace = lazy(loadDesignerStudioWorkspace);
 const ComposerPage = lazy(loadComposerPage);
 const PresentationPage = lazy(loadPresentationPage);
@@ -161,6 +161,15 @@ function WorkspaceRedirect() {
   return <Navigate to={`/designer-studio/workspace${search}${hash}`} replace />;
 }
 
+/** Bare `/designer-studio/editor` → `/new`, mapping the legacy `?slug=` to `?product=` (R3). */
+function EditorBareRedirect() {
+  const { search } = useLocation();
+  const params = new URLSearchParams(search);
+  const product = params.get("product") ?? params.get("slug");
+  const qs = product ? `?product=${encodeURIComponent(product)}` : "";
+  return <Navigate to={`/designer-studio/editor/new${qs}`} replace />;
+}
+
 function RouteAndNetworkWarmup() {
   useEffect(() => {
     const href = new URL(ENV.SUPABASE_URL).origin;
@@ -243,7 +252,9 @@ const App = () => (
                     <Route path="/designer-studio" element={withRouteSuspense(<DesignerStudio />)} />
                     <Route path="/designer-studio/trim-library" element={withRouteSuspense(<DesignerStudioTrimLibrary />)} />
                     <Route path="/designer-studio/login" element={withRouteSuspense(<DesignerStudioLogin />)} />
-                    <Route path="/designer-studio/editor" element={withRouteSuspense(<DesignerStudioEditor />)} />
+                    <Route path="/designer-studio/editor" element={<EditorBareRedirect />} />
+                    <Route path="/designer-studio/editor/new" element={withRouteSuspense(<EditorRoute />)} />
+                    <Route path="/designer-studio/editor/:designId" element={withRouteSuspense(<EditorRoute />)} />
                     <Route path="/designer-studio/products/:slug" element={withRouteSuspense(<ProductDetail />)} />
                     <Route
                       path="/designer-studio/workspace"

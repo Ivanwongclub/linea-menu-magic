@@ -6,12 +6,9 @@ import { useI18n } from "@/features/i18n/I18nProvider";
 
 const Model3DViewer = lazy(() => import("@/components/designer-studio/Model3DViewer"));
 
-// P19: hero points at the actual button OBJ (was /models/d-ring-buckle.obj which
-// is a D-ring shape, not a button). P18 B2: `color` is the polished-brass tone the
-// editor applies on deep-link so the customise experience opens in the same family
-// as what the hero renders.
-export const HERO_EDITOR_URL =
-  "/designer-studio/editor?model=/models/Polo_Button_10.8.obj&product=metal-button&name=Button&color=%23C9A961";
+// Phase 2: the CTA opens the real editor at its product slug — the editor
+// loads the model, size and default finish itself (R3).
+export const HERO_EDITOR_URL = "/designer-studio/editor/new?product=metal-button";
 
 export default function StudioHero3D() {
   const { t } = useI18n();

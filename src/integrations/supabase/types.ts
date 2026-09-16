@@ -612,33 +612,6 @@ export type Database = {
           },
         ]
       }
-      editor_sessions: {
-        Row: {
-          created_at: string
-          id: string
-          model_url: string
-          product_name: string
-          product_slug: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          model_url: string
-          product_name: string
-          product_slug?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          model_url?: string
-          product_name?: string
-          product_slug?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
       finish_base_families: {
         Row: {
           code: string
@@ -1739,6 +1712,7 @@ export type Database = {
           lead_time_min_days: number | null
           logo_customisable: boolean
           material_id: string | null
+          model_storage_path: string | null
           model_url: string | null
           moq_qty: number | null
           moq_unit: string | null
@@ -1778,6 +1752,7 @@ export type Database = {
           lead_time_min_days?: number | null
           logo_customisable?: boolean
           material_id?: string | null
+          model_storage_path?: string | null
           model_url?: string | null
           moq_qty?: number | null
           moq_unit?: string | null
@@ -1817,6 +1792,7 @@ export type Database = {
           lead_time_min_days?: number | null
           logo_customisable?: boolean
           material_id?: string | null
+          model_storage_path?: string | null
           model_url?: string | null
           moq_qty?: number | null
           moq_unit?: string | null

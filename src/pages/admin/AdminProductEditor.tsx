@@ -38,6 +38,7 @@ import { StatusBadge } from "@/pages/admin/AdminProducts";
 import { SizeVariantsEditor } from "@/components/admin/product-editor/SizeVariantsEditor";
 import { ColourFinishSection } from "@/components/admin/product-editor/ColourFinishSection";
 import { ProductImagesEditor } from "@/components/admin/product-editor/ProductImagesEditor";
+import { ProductModelEditor } from "@/components/admin/product-editor/ProductModelEditor";
 import type { Database } from "@/integrations/supabase/types";
 
 type ProductUpdate = Database["public"]["Tables"]["products"]["Update"];
@@ -554,6 +555,19 @@ export default function AdminProductEditor() {
           <p className="text-xs text-muted-foreground">{t("admin.images.createFirst")}</p>
         ) : (
           <ProductImagesEditor productId={id} productName={product?.name ?? values.name} />
+        )}
+      </section>
+
+      {/* 3D model — Phase 2 (docs/3d-editor/STATUS.md) */}
+      <section className="border border-border p-6 space-y-4">
+        <div>
+          <h2 className="text-sm font-medium tracking-wide text-foreground">3D model (.obj)</h2>
+          <p className="text-xs text-muted-foreground">Used by the Designer Studio editor. One file per product.</p>
+        </div>
+        {isNew || !id ? (
+          <p className="text-xs text-muted-foreground">{t("admin.images.createFirst")}</p>
+        ) : (
+          <ProductModelEditor productId={id} modelStoragePath={product?.model_storage_path ?? null} />
         )}
       </section>
 
