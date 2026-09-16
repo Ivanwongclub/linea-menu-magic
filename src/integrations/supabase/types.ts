@@ -182,6 +182,50 @@ export type Database = {
           },
         ]
       }
+      design_assets: {
+        Row: {
+          brand_id: string | null
+          created_at: string
+          id: string
+          kind: string
+          mime_type: string | null
+          original_filename: string | null
+          owner_id: string
+          size_bytes: number | null
+          storage_path: string
+        }
+        Insert: {
+          brand_id?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          mime_type?: string | null
+          original_filename?: string | null
+          owner_id: string
+          size_bytes?: number | null
+          storage_path: string
+        }
+        Update: {
+          brand_id?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          mime_type?: string | null
+          original_filename?: string | null
+          owner_id?: string
+          size_bytes?: number | null
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_assets_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       design_exports: {
         Row: {
           created_at: string
@@ -298,6 +342,63 @@ export type Database = {
           },
         ]
       }
+      design_quotes: {
+        Row: {
+          design_id: string
+          design_version_id: string
+          id: string
+          notes: string | null
+          quantity: number | null
+          requested_at: string
+          requested_by: string
+          responded_at: string | null
+          responded_by: string | null
+          response_notes: string | null
+          status: string
+        }
+        Insert: {
+          design_id: string
+          design_version_id: string
+          id?: string
+          notes?: string | null
+          quantity?: number | null
+          requested_at?: string
+          requested_by: string
+          responded_at?: string | null
+          responded_by?: string | null
+          response_notes?: string | null
+          status?: string
+        }
+        Update: {
+          design_id?: string
+          design_version_id?: string
+          id?: string
+          notes?: string | null
+          quantity?: number | null
+          requested_at?: string
+          requested_by?: string
+          responded_at?: string | null
+          responded_by?: string | null
+          response_notes?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_quotes_design_id_fkey"
+            columns: ["design_id"]
+            isOneToOne: false
+            referencedRelation: "designs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_quotes_design_version_id_fkey"
+            columns: ["design_version_id"]
+            isOneToOne: false
+            referencedRelation: "design_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       design_sessions: {
         Row: {
           background_image_height: number | null
@@ -339,6 +440,177 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      design_shares: {
+        Row: {
+          can_edit: boolean
+          created_at: string
+          created_by: string
+          design_id: string
+          id: string
+          shared_with_user_id: string
+        }
+        Insert: {
+          can_edit?: boolean
+          created_at?: string
+          created_by: string
+          design_id: string
+          id?: string
+          shared_with_user_id: string
+        }
+        Update: {
+          can_edit?: boolean
+          created_at?: string
+          created_by?: string
+          design_id?: string
+          id?: string
+          shared_with_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_shares_design_id_fkey"
+            columns: ["design_id"]
+            isOneToOne: false
+            referencedRelation: "designs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      design_versions: {
+        Row: {
+          author_kind: string
+          created_at: string
+          created_by: string
+          design_id: string
+          id: string
+          label: string | null
+          recipe: Json
+          snapshot: Json
+          thumbnail_url: string | null
+          version_number: number
+        }
+        Insert: {
+          author_kind: string
+          created_at?: string
+          created_by: string
+          design_id: string
+          id?: string
+          label?: string | null
+          recipe: Json
+          snapshot: Json
+          thumbnail_url?: string | null
+          version_number: number
+        }
+        Update: {
+          author_kind?: string
+          created_at?: string
+          created_by?: string
+          design_id?: string
+          id?: string
+          label?: string | null
+          recipe?: Json
+          snapshot?: Json
+          thumbnail_url?: string | null
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_versions_design_id_fkey"
+            columns: ["design_id"]
+            isOneToOne: false
+            referencedRelation: "designs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      designer_staff: {
+        Row: {
+          granted_at: string
+          user_id: string
+        }
+        Insert: {
+          granted_at?: string
+          user_id: string
+        }
+        Update: {
+          granted_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      designs: {
+        Row: {
+          brand_id: string | null
+          created_at: string
+          current_version_id: string | null
+          draft_recipe: Json | null
+          draft_updated_at: string | null
+          id: string
+          name: string
+          owner_id: string
+          product_id: string | null
+          source_asset_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          brand_id?: string | null
+          created_at?: string
+          current_version_id?: string | null
+          draft_recipe?: Json | null
+          draft_updated_at?: string | null
+          id?: string
+          name: string
+          owner_id: string
+          product_id?: string | null
+          source_asset_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          brand_id?: string | null
+          created_at?: string
+          current_version_id?: string | null
+          draft_recipe?: Json | null
+          draft_updated_at?: string | null
+          id?: string
+          name?: string
+          owner_id?: string
+          product_id?: string | null
+          source_asset_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "designs_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "designs_current_version_id_fkey"
+            columns: ["current_version_id"]
+            isOneToOne: false
+            referencedRelation: "design_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "designs_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "designs_source_asset_id_fkey"
+            columns: ["source_asset_id"]
+            isOneToOne: false
+            referencedRelation: "design_assets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       editor_sessions: {
         Row: {
@@ -505,6 +777,9 @@ export type Database = {
           created_at: string
           id: string
           is_active: boolean
+          max_deboss_depth_mm: number | null
+          min_deboss_depth_mm: number | null
+          min_feature_mm: number | null
           name: string
           name_zh_hans: string | null
           name_zh_hant: string | null
@@ -515,6 +790,9 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
+          max_deboss_depth_mm?: number | null
+          min_deboss_depth_mm?: number | null
+          min_feature_mm?: number | null
           name: string
           name_zh_hans?: string | null
           name_zh_hant?: string | null
@@ -525,6 +803,9 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
+          max_deboss_depth_mm?: number | null
+          min_deboss_depth_mm?: number | null
+          min_feature_mm?: number | null
           name?: string
           name_zh_hans?: string | null
           name_zh_hant?: string | null
@@ -1668,8 +1949,20 @@ export type Database = {
         Args: { _brand_id: string; _user_id: string }
         Returns: boolean
       }
+      user_has_brand_role: {
+        Args: {
+          _brand_id: string
+          _roles: Database["public"]["Enums"]["brand_role"][]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       user_has_brand_text: {
         Args: { _brand_text: string; _user_id: string }
+        Returns: boolean
+      }
+      user_has_design_share: {
+        Args: { _design_id: string; _user_id: string }
         Returns: boolean
       }
       user_is_brand_manager_or_owner: {
@@ -1677,6 +1970,7 @@ export type Database = {
         Returns: boolean
       }
       user_is_catalogue_editor: { Args: { _user_id: string }; Returns: boolean }
+      user_is_designer_staff: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       brand_role: "member" | "manager" | "owner"
