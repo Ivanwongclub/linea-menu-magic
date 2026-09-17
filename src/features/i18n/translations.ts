@@ -466,6 +466,9 @@ export const translations: Record<AppLanguage, TranslationMap> = {
     "editor.branding.textSize": "Text size",
     "editor.branding.delete": "Delete text",
     "editor.branding.reorder": "Drag to reorder",
+    "editor.branding.layout": "Layout",
+    "editor.branding.layoutStraight": "Straight",
+    "editor.branding.layoutCircular": "Circular",
   },
 
   "zh-Hant": {
@@ -863,6 +866,9 @@ export const translations: Record<AppLanguage, TranslationMap> = {
     "editor.branding.textSize": "文字大小",
     "editor.branding.delete": "刪除文字",
     "editor.branding.reorder": "拖曳以重新排序",
+    "editor.branding.layout": "排列",
+    "editor.branding.layoutStraight": "直線",
+    "editor.branding.layoutCircular": "環形",
   },
 
   "zh-Hans": {
@@ -1260,5 +1266,8 @@ export const translations: Record<AppLanguage, TranslationMap> = {
     "editor.branding.textSize": "文字大小",
     "editor.branding.delete": "删除文字",
     "editor.branding.reorder": "拖动以重新排序",
+    "editor.branding.layout": "排列",
+    "editor.branding.layoutStraight": "直线",
+    "editor.branding.layoutCircular": "环形",
   },
 };

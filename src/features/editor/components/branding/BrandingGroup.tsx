@@ -7,10 +7,15 @@ import { useI18n } from "@/features/i18n/I18nProvider";
 import { cn } from "@/lib/utils";
 import { useEditorStore } from "../../store/useEditorStore";
 import { BUNDLED_FONTS } from "../../lib/fonts";
-import { newTextLayer, type TextLayer } from "../../lib/recipe";
+import { newTextLayer, type TextLayer, type TextLayout } from "../../lib/recipe";
 import { MmField } from "./MmField";
 
 const FIELD_LABEL = "text-[11px] uppercase tracking-[0.12em] text-muted-foreground";
+
+const LAYOUTS: { value: TextLayout; label: string }[] = [
+  { value: "straight", label: "editor.branding.layoutStraight" },
+  { value: "circle", label: "editor.branding.layoutCircular" },
+];
 
 function LayerRow({ layer, selected }: { layer: TextLayer; selected: boolean }) {
   const { t } = useI18n();
@@ -85,6 +90,32 @@ function LayerEditor({ layer }: { layer: TextLayer }) {
           onChange={(e) => updateLayer(layer.id, { content: { value: e.target.value } })}
           className="w-full border-b border-border bg-transparent py-1 text-base tracking-wide text-foreground outline-none focus:border-foreground transition-colors"
         />
+      </div>
+      <div className="space-y-1.5">
+        <span id={`layout-${layer.id}`} className={FIELD_LABEL}>
+          {t("editor.branding.layout")}
+        </span>
+        <div role="radiogroup" aria-labelledby={`layout-${layer.id}`} className="grid grid-cols-2 border border-border" data-testid="text-layer-layout">
+          {LAYOUTS.map(({ value, label }) => {
+            const active = layer.placement.layout === value;
+            return (
+              <button
+                key={value}
+                type="button"
+                role="radio"
+                aria-checked={active}
+                data-value={value}
+                onClick={() => updateLayer(layer.id, { placement: { layout: value } })}
+                className={cn(
+                  "py-1.5 text-xs tracking-[0.05em] transition-colors",
+                  active ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {t(label)}
+              </button>
+            );
+          })}
+        </div>
       </div>
       <div className="grid grid-cols-[1fr_7rem] gap-4">
         <div className="space-y-1 min-w-0">

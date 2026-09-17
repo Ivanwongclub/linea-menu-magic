@@ -7,7 +7,8 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { newTextLayer, normalizeRecipe, scaleLayers, applyLayerPatch } from "../../../src/features/editor/lib/recipe.ts";
-import { layoutText, unitScale } from "../../../src/features/editor/lib/textLayout.ts";
+import { layoutText, letterSpacingForSpan, textArc, unitScale } from "../../../src/features/editor/lib/textLayout.ts";
+import * as THREE from "three";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const font = JSON.parse(readFileSync(path.join(ROOT, "public/fonts/poppins-semibold.typeface.json"), "utf8"));
@@ -63,4 +64,48 @@ test("straight layout: centred, advances + spacing, clockwise rotation", () => {
   const rotated = layoutText(font, applyLayerPatch(layer, { placement: { rotation_deg: 90 } }));
   close(rotated[0].y, total / 2 - adv[0] / 2, 1e-12, "90° clockwise puts the first glyph on top");
   close(rotated[0].rotationZ, -Math.PI / 2, 1e-12, "three.js rotation is counter-clockwise");
+});
+
+const circle = (value, direction, arc, extra = {}) =>
+  applyLayerPatch(newTextLayer("c", 10.8, value), {
+    style: { text_size_mm: 1, letter_spacing_mm: 0.05 },
+    placement: { layout: "circle", radius_mm: 3.63, arc_position_deg: arc, direction, ...extra },
+  });
+
+test("circle cw at 0°: centred on 12 o'clock, span from advances, glyph tops outward", () => {
+  const layer = circle("POLO", "cw", 0);
+  const glyphs = layoutText(font, layer);
+  const s = unitScale(font, 1);
+  const adv = [..."POLO"].map((c) => font.glyphs[c].ha * s);
+  const spanDeg = ((adv.reduce((a, b) => a + b, 0) + 3 * 0.05) / 3.63) * (180 / Math.PI);
+  close(textArc(font, layer).spanDeg, spanDeg, 1e-9, "span");
+  close(glyphs[0].angleDeg, 360 - spanDeg / 2 + (adv[0] / 2 / 3.63) * (180 / Math.PI), 1e-9, "first glyph angle");
+  for (const g of glyphs) {
+    close(Math.hypot(g.x, g.y), 3.63, 1e-12, "radius");
+    const up = new THREE.Vector3(0, 1, 0).applyAxisAngle(new THREE.Vector3(0, 0, 1), g.rotationZ);
+    close(up.dot(new THREE.Vector3(g.x, g.y, 0).normalize()), 1, 1e-12, "glyph up points outward");
+  }
+  assert.ok(glyphs[0].x < glyphs[3].x, "reads left to right across the top");
+});
+
+test("circle ccw at 180°: reads left to right along the bottom, tops inward, no mirroring", () => {
+  const glyphs = layoutText(font, circle("POLO", "ccw", 180));
+  for (let i = 1; i < glyphs.length; i++) assert.ok(glyphs[i].x > glyphs[i - 1].x, "x increases in glyph order");
+  for (const g of glyphs) {
+    assert.ok(g.y < 0, "on the bottom arc");
+    const up = new THREE.Vector3(0, 1, 0).applyAxisAngle(new THREE.Vector3(0, 0, 1), g.rotationZ);
+    close(up.dot(new THREE.Vector3(g.x, g.y, 0).normalize()), -1, 1e-12, "glyph up points to the centre");
+    const m = new THREE.Matrix4().compose(new THREE.Vector3(g.x, g.y, 0), new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), g.rotationZ), new THREE.Vector3(1, 1, 1));
+    assert.ok(m.determinant() > 0, "determinant > 0");
+  }
+});
+
+test("preserve radius: more text widens the span; a wider span spaces letters, radius fixed (C7)", () => {
+  const four = circle("POLO", "cw", 0);
+  const five = circle("POLOS", "cw", 0);
+  assert.ok(textArc(font, five).spanDeg > textArc(font, four).spanDeg);
+  const spacing = letterSpacingForSpan(font, four, 90);
+  const widened = applyLayerPatch(four, { style: { letter_spacing_mm: spacing } });
+  close(textArc(font, widened).spanDeg, 90, 1e-9, "span after widening");
+  assert.equal(widened.placement.radius_mm, 3.63);
 });

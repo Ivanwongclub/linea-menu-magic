@@ -20,7 +20,7 @@ this is an index, not a decision log.
 | 4d | CMS branding group marks; recovered radius / angles / relief stored in raw units (§4.2) | **Done** |
 | 4e | Ruler toggle, buyer scope, replaces the measurement line (§2) | **Done** |
 | 4f | Recipe v2, store / autosave / anonymous draft for layers; add text, layer list, straight layout | **Done** |
-| 4g | Circular layout, per-glyph placement, reversed text without mirroring (§5) | Not started |
+| 4g | Circular layout, per-glyph placement, reversed text without mirroring (§5) | **Done** |
 | 4h | Hybrid numeric / slider controls in "Position and curve" (§3) | Not started |
 | 4i | Drag handles on the model, one shared state (§3) | Not started |
 | 4j | Catalogue branding defaults: marked groups hidden, text lands on recovered placement; ruler branding radius and edge margin | Not started |
@@ -1516,3 +1516,72 @@ Files:
 - **An RLS-filtered update is a failed save.** PostgREST returns no error for
   an update whose `USING` clause matches no row, so autosave selects the id
   back and treats an empty result as a failure.
+
+## Phase 4g — done (2026-09-18)
+
+Circular layout and per-glyph placement, per reports/E1-plan-integration.md
+§5 row 4g, C7, §3.3, §6 R2; rulings §5.
+
+Files:
+
+- `src/features/editor/lib/textLayout.ts` — `layout: circle`. Each glyph's
+  centre sits at its own angle on `radius_mm` (the cap-height midline), with
+  its own tangent orientation. `cw`: tops outward, the angle increases in
+  glyph order, rotation −θ. `ccw`: tops inward, the angle decreases in glyph
+  order, rotation π − θ, so bottom text reads left to right. No scale is
+  involved at all. `textArc` derives span, start and end from advances and
+  letter spacing (C7; nothing stored). `letterSpacingForSpan` is the
+  preserve-radius policy (widening the span spaces the letters, radius
+  fixed), ready for 4h's range control. `normalizeDeg`.
+- `src/features/editor/components/branding/TextLayerMeshes.tsx` — `conform`:
+  per glyph, a raycast along −Z (the face normal) from above the part with
+  three-mesh-bvh's `acceleratedRaycast` (a `MeshBVH` built once per
+  geometry), landing on the hit and turning the glyph's +Z to the hit normal
+  (a quaternion, `tilt × spin`). x and y stay exactly the layout's; the
+  0.02 mm lift is along the face normal. No hit → the flat face plane. The
+  report now reads glyph positions back from the world matrices three.js
+  renders with, plus each glyph's world up-z and whether it conformed; a
+  `useFrame` keeps `data-glyph-screen-x` on the canvas (glyph centres in
+  canvas px) whenever the camera or layout changes.
+- `src/features/editor/components/branding/BrandingGroup.tsx` — Layout
+  switch, Straight / Circular.
+- `src/features/i18n/translations.ts` — `editor.branding.layout`,
+  `.layoutStraight`, `.layoutCircular`, × 3 locales.
+- `scripts/e2e-local/scenarios/circular-text.mjs` (new) — the panel's
+  Circular switch → read-back `layout: circle` at the fallbacks (radius
+  0.35 × 10.8, cw, 0°); radius 3.63 cw at 0° → every rendered glyph's centre
+  angle matches `layoutText` ± 0.01° and radius ± 0.001 mm, all conformed and
+  facing out; ccw at 180° → same checks, bottom arc, and screen x strictly
+  increasing in glyph order from the home camera; minimum world determinant
+  > 0 for cw, ccw and after the edit; typing "POLOS" → read-back `radius_mm`
+  exactly 3.63, arc position unchanged, span grown.
+- `scripts/e2e-local/unit/text-layout.test.mjs` — circle cw/ccw placement,
+  glyph up direction, determinant, preserve-radius span.
+- `docs/3d-editor/STATUS.md` — this file.
+
+### Rulings
+
+- **Radius and direction are staged, not typed, in `circular-text.mjs`.**
+  There is no radius, arc-position or direction control until 4h's
+  "Position and curve" disclosure (and no placeholder before it), so the
+  scenario writes those two placements into `draft_recipe` and reloads; the
+  layout switch and the added character go through the UI.
+- **Defaults are E1 §3.3's fallbacks** (0.35 × face diameter, 0°, cw, 12%
+  cap height); 4j swaps in the recovered values.
+
+### Open questions from 4f–4g, with a recommendation each
+
+1. **Glyphs render on top of the Polo's existing lettering.** Until 4j hides
+   the marked groups, conform lands new glyphs on the old relief's tops.
+   *Recommend* no interim workaround; 4j's hidden groups fix it at source.
+2. **A buyer can't make bottom-arc text in 4g.** Direction is stored and
+   rendered, but its control belongs in 4h's disclosure. *Recommend* adding a
+   Top / Bottom arc switch (`cw` / `ccw`) to that disclosure in 4h rather than
+   to the main panel, since it is a placement choice, not content.
+3. **The preview slab is 0.05 mm in the part's own material.** It reads as
+   faint relief. *Recommend* keeping it until Phase 5 replaces it with the
+   layer's real emboss/deboss, rather than inventing a print colour that
+   Phase 6's fill would then contradict.
+4. **The shell height fix (81 px header) is a hard-coded layout constant.**
+   *Recommend* a shared CSS variable for the header height when the site
+   layout is next in scope, so the editor shell can't drift from it again.

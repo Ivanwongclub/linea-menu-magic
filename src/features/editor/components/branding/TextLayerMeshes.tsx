@@ -1,5 +1,7 @@
-import { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
 import type { Font } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import { loadBundledFont } from "../../lib/fonts";
@@ -15,9 +17,14 @@ export interface GlyphReport {
   layerId: string;
   index: number;
   char: string;
+  /** World position of the glyph centre — the face frame, since the model sits at the origin unrotated by any parent. */
   x: number;
   y: number;
   z: number;
+  /** World-space z of the glyph's own +Z axis: 1 on a flat face, less where conform tilted it. */
+  upZ: number;
+  /** Whether the conform raycast found the surface under this glyph. */
+  conformed: boolean;
 }
 
 export interface TextSceneReport {
@@ -42,6 +49,19 @@ interface TextLayerMeshesProps {
 }
 
 const geometries = new Map<string, THREE.BufferGeometry>();
+
+const Z = new THREE.Vector3(0, 0, 1);
+
+/** Accelerated raycasts on the part (E1 §6 R2); the BVH is built once per geometry. */
+function prepareRaycast(model: THREE.Object3D): void {
+  model.traverse((o) => {
+    const mesh = o as THREE.Mesh;
+    if (!mesh.isMesh) return;
+    const geometry = mesh.geometry as THREE.BufferGeometry & { boundsTree?: MeshBVH };
+    if (!geometry.boundsTree) geometry.boundsTree = new MeshBVH(geometry);
+    mesh.raycast = acceleratedRaycast;
+  });
+}
 
 /**
  * One glyph at cap height 1 with its origin at the advance midpoint and the
@@ -71,6 +91,9 @@ function glyphGeometry(fontKey: string, font: Font, char: string): THREE.BufferG
 export function TextLayerMeshes({ layers, model, faceZ, material, onReport }: TextLayerMeshesProps) {
   const [fonts, setFonts] = useState<Record<string, Font>>({});
   const group = useMemo(() => new THREE.Group(), []);
+  const lastCamera = useRef(new THREE.Matrix4());
+  const layoutVersion = useRef(0);
+  const projectedVersion = useRef(-1);
 
   const fontKeys = useMemo(() => [...new Set(layers.map((l) => l.content.font.key))].sort().join("|"), [layers]);
 
@@ -92,6 +115,14 @@ export function TextLayerMeshes({ layers, model, faceZ, material, onReport }: Te
   useLayoutEffect(() => {
     group.clear();
     const glyphs: GlyphReport[] = [];
+    const raycaster = new THREE.Raycaster();
+    raycaster.firstHitOnly = true;
+    const normal = new THREE.Vector3();
+    const tilt = new THREE.Quaternion();
+    const spin = new THREE.Quaternion();
+    const up = new THREE.Vector3();
+    let raycastReady = false;
+
     for (const layer of layers) {
       const font = fonts[layer.content.font.key];
       if (!layer.visible || !font) continue;
@@ -100,13 +131,47 @@ export function TextLayerMeshes({ layers, model, faceZ, material, onReport }: Te
         const char = glyphChar(metrics, placed.char);
         if (!char.trim()) continue;
         const mesh = new THREE.Mesh(glyphGeometry(layer.content.font.key, font, char), material);
-        mesh.position.set(placed.x, placed.y, faceZ + GLYPH_LIFT_MM);
-        mesh.rotation.set(0, 0, placed.rotationZ);
+        spin.setFromAxisAngle(Z, placed.rotationZ);
+        let z = faceZ;
+        let conformed = false;
+        if (layer.placement.conform) {
+          // conform (E1 §6 R2): per glyph, cast along −normal of the face
+          // from above the part, land on the surface and turn the glyph's
+          // +Z to the hit normal. x and y stay the layout's exactly; the
+          // orientation is a rotation only, so no mirroring can arise.
+          if (!raycastReady) {
+            model.updateWorldMatrix(true, true);
+            prepareRaycast(model);
+            raycastReady = true;
+          }
+          raycaster.set(new THREE.Vector3(placed.x, placed.y, faceZ + 1), new THREE.Vector3(0, 0, -1));
+          const hit = raycaster.intersectObject(model, true)[0];
+          if (hit?.face) {
+            normal.copy(hit.face.normal).transformDirection(hit.object.matrixWorld);
+            if (normal.z < 0) normal.negate();
+            z = hit.point.z;
+            conformed = true;
+            tilt.setFromUnitVectors(Z, normal);
+            spin.premultiply(tilt);
+          }
+        }
+        mesh.position.set(placed.x, placed.y, z + GLYPH_LIFT_MM);
+        mesh.quaternion.copy(spin);
         mesh.scale.set(layer.style.text_size_mm, layer.style.text_size_mm, 1);
-        mesh.userData = { glyph: true, layerId: layer.id, index: placed.index };
+        mesh.userData = { layerId: layer.id, index: placed.index, char, conformed };
         group.add(mesh);
-        glyphs.push({ layerId: layer.id, index: placed.index, char, x: placed.x, y: placed.y, z: mesh.position.z });
       }
+    }
+    layoutVersion.current++;
+
+    // Read back from the world matrices three.js will render with, not from the layout's own numbers.
+    group.updateWorldMatrix(true, true);
+    const position = new THREE.Vector3();
+    for (const mesh of group.children) {
+      position.setFromMatrixPosition(mesh.matrixWorld);
+      up.set(0, 0, 1).transformDirection(mesh.matrixWorld);
+      const { layerId, index, char, conformed } = mesh.userData;
+      glyphs.push({ layerId, index, char, x: position.x, y: position.y, z: position.z, upZ: up.z, conformed });
     }
 
     if (!onReport) return;
@@ -119,6 +184,21 @@ export function TextLayerMeshes({ layers, model, faceZ, material, onReport }: Te
     }
     onReport({ glyphMeshCount: group.children.length, minWorldDeterminant, glyphs });
   }, [group, layers, model, fonts, faceZ, material, onReport]);
+
+  // Screen x of each glyph centre, in canvas CSS px, kept on the canvas
+  // element whenever the camera or the layout changes — the e2e reading-
+  // direction check (4g) needs the projection the buyer actually sees.
+  useFrame(({ camera, size, gl }) => {
+    if (camera.matrixWorld.equals(lastCamera.current) && projectedVersion.current === layoutVersion.current) return;
+    lastCamera.current.copy(camera.matrixWorld);
+    projectedVersion.current = layoutVersion.current;
+    const p = new THREE.Vector3();
+    const xs = group.children.map((child) => {
+      child.getWorldPosition(p).project(camera);
+      return ((p.x + 1) / 2) * size.width;
+    });
+    gl.domElement.dataset.glyphScreenX = JSON.stringify(xs);
+  });
 
   return <primitive object={group} />;
 }
