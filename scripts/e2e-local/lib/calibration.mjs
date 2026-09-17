@@ -1,10 +1,11 @@
-// Shared fixtures and measurement for render calibration (Phase 3b/3c):
+// Shared fixtures and measurement for render calibration (Phases 3b–3d):
 // the flat disc model, the swatch-measurement CSV, a studio product set up
 // for the editor route, and pixel statistics on the rendered canvas.
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
 import { REPO_ROOT } from "./stack.mjs";
+import { linearToLab, rgb255ToLinear } from "./colour.mjs";
 
 const require = createRequire(path.join(REPO_ROOT, "package.json"));
 export const sharp = require("sharp");
@@ -100,6 +101,7 @@ export async function faceStats(buffer) {
   const ry = (box.maxY - box.minY) * 0.3;
   const ch = [[], [], []];
   const lum = [];
+  const lightness = [];
   for (let y = Math.floor(ey - ry); y <= ey + ry; y++) {
     for (let x = Math.floor(ex - rx); x <= ex + rx; x++) {
       if (((x - ex) / rx) ** 2 + ((y - ey) / ry) ** 2 > 1) continue;
@@ -108,15 +110,26 @@ export async function faceStats(buffer) {
       ch[1].push(p[1]);
       ch[2].push(p[2]);
       lum.push(0.2126 * p[0] + 0.7152 * p[1] + 0.0722 * p[2]);
+      lightness.push(lightnessOf(p));
     }
   }
   const pct = (arr, q) => [...arr].sort((a, b) => a - b)[Math.floor((arr.length - 1) * q)];
+  const cut = pct(lum, 0.98);
+  const top = lum.flatMap((l, i) => (l >= cut ? [i] : []));
   return {
     median: ch.map((a) => pct(a, 0.5)),
+    /** Per-channel mean, 0–255 unrounded: finer than the median for near-neutral hue. */
+    mean: ch.map((a) => a.reduce((sum, v) => sum + v, 0) / a.length),
+    /** Per-channel median of the pixels at or above the p98 luminance. */
+    highlight: ch.map((a) => pct(top.map((i) => a[i]), 0.5)),
     lumP02: pct(lum, 0.02),
     lumP98: pct(lum, 0.98),
+    /** CIE L* of the p98 pixel lightness — the highlight. */
+    lightnessP98: pct(lightness, 0.98),
   };
 }
+
+const lightnessOf = (rgb) => linearToLab(rgb255ToLinear(rgb))[0];
 
 /** Median of a 5×5 patch at the image centre. */
 export async function centrePixel(buffer) {
@@ -251,7 +264,7 @@ export async function pickProducts(admin) {
 }
 
 export const FINISH_AXES_SELECT =
-  "id, cyc_code, marketing_name, is_public, coating_id, base_color_hex, metalness, roughness, anisotropy, clearcoat, clearcoat_roughness, two_tone, " +
+  "id, cyc_code, marketing_name, is_public, coating_id, base_color_hex, metalness, roughness, anisotropy, clearcoat, clearcoat_roughness, two_tone, oxide_color_hex, " +
   "base_family:finish_base_families!base_family_id(code), surface:finish_surfaces!surface_id(code), " +
   "tone:finish_tones!tone_id(code), effect:finish_effects!effect_id(code), tint:finish_tints!tint_id(code), coating:finish_coatings!coating_id(code)";
 

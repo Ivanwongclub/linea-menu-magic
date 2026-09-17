@@ -10,7 +10,8 @@ this is an index, not a decision log.
 | 2 | Editor shell, route, lazy load, catalogue entry | **Done** |
 | 3 | Finish picker integration | **Done** |
 | 3b | Physically correct plated rendering | **Done** |
-| 3c | Procedural studio, antique two-tone, painted finishes and per-family calibration from `wincyc-swatch-measurements.csv` | **Done** — 3-series calibration closed |
+| 3c | Procedural studio, antique two-tone, painted finishes and per-family calibration from `wincyc-swatch-measurements.csv` | **Done** — family calibration superseded by 3d |
+| 3d | Hue-only family calibration, physical lightness, chart oxide L* | **Done** — 3-series closed |
 | 4 | Text: content, font, straight and circular layout | Not started |
 | 5 | Direct manipulation: drag to position, size, curve | Not started |
 | 6 | Emboss and deboss via CSG in a worker | Not started |
@@ -450,7 +451,7 @@ revisits the provisional plated offsets — from
    *Recommend* leaving it — it is CMS-editable data and R4 only asked for
    painted rows to keep theirs — unless WIN-CYC wants the two unified.
 
-## Phase 3c — done (2026-09-17) · 3-series calibration closed
+## Phase 3c — done (2026-09-17)
 
 Files:
 
@@ -555,9 +556,10 @@ neutral reference (0.6) whose brightness comes from the WIN-CYC chart itself
 (CYC-0046, CYC-0048, CYC-0049 via the TIN family fit) — the chart
 measurement is the named source.
 
-### Per-family calibration (R4)
+### Per-family calibration (R4) — superseded by Phase 3d
 
-Applied last in the plated model: desaturate toward Rec.709 luminance by
+Kept for the record; the saturation/value/offset model and the values below
+were replaced by 3d's hue-only calibration (see Phase 3d). Applied last in the plated model: desaturate toward Rec.709 luminance by
 *saturation*, scale by *value*, multiply by the offset. Fitted in
 `calibrate/fit-families.mjs` from glare-free chart rows († = no glare-free
 rows; fitted to glare rows). R4 asks for ≤ 8, not the minimum, and the
@@ -666,3 +668,101 @@ enamel (CYC-0112) and, in place of gloss red enamel, **metallic red
    page. *Recommend* moving the bake into the
    Phase 6 CSG worker when it exists.
 
+## Phase 3d — done (2026-09-17) · 3-series closed
+
+Supersedes 3c's per-family calibration (saturation / value / offset). Rulings
+R1–R9 are in the migration header and the commit.
+
+Files:
+
+- `supabase/migrations/20260917230000_phase3d_hue_only_calibration.sql` —
+  `finish_family_calibration` loses saturation/offsets/ΔE and gains
+  `hue_shift_deg`, `chroma_scale` (≤ 1), `oxide_l`, `residual_hue_deg`,
+  `residual_l`; `finishes.oxide_color_hex`; CIELAB helpers
+  (`finish_linear_to_lab`, `finish_lab_to_linear`, `finish_lab_in_gamut`);
+  `finish_plated_material()` / `finish_derive()` / trigger / recompute
+  rewritten; the 108 plated rows recomputed (asserted), painted rows untouched.
+- `src/features/finishes/metalReflectance.ts` — mirrors the new calibration
+  step and the oxide colour; `FAMILY_CALIBRATION` emitted by `calibrate/refit.mjs`.
+- `src/features/products/hooks/useProduct.ts` — transform forwards `base_color_hex` (R7).
+- `scripts/e2e-local/calibrate/fit-families.mjs` — rewritten: R2 row
+  selection, hue step (FIT), NICKEL chroma, oxide L*, APPLY, ONLY probing.
+- `scripts/e2e-local/calibrate/refit.mjs` — now emits the TS block and SQL
+  values from `reports/3d-family-fit.json`.
+- `scripts/e2e-local/lib/calibration.mjs` — `faceStats` adds per-channel mean,
+  highlight RGB and p98 L*; select adds `oxide_color_hex`.
+- `scripts/e2e-local/lib/colour.mjs` — `hueOf`, `hueDifference`.
+- `scripts/e2e-local/scenarios/family-calibration.mjs` — R5 assertions; ΔE dropped.
+- `scripts/e2e-local/scenarios/render-calibration.mjs` — parity incl.
+  `oxide_color_hex`; sheet → `reports/3d-materials.png`.
+- `reports/3d-family-fit.json`, `reports/3d-materials.png`.
+  (`reports/3c-family-fit.json`, `3c-materials.png` kept as the 3c record.)
+
+### Model
+
+After F0 / blend / variant / gun-metal bias / tone / tint (unchanged from 3c):
+scale by `value` (1 except TIN), then in CIELAB (D65) keep L*, multiply chroma
+by `chroma_scale`, add `hue_shift_deg` to the hue angle, and if the result
+leaves linear sRGB [0,1], bisect chroma down (20 steps). L* is never moved.
+Oxide (two-tone rows): L* = max(15, `oxide_l`), buffed hue, chroma scaled by
+L*ₒₓ / L*buffed; `oxide_l` null → buffed × 0.25 as in 3c.
+
+### Fit
+
+Rows (R2): glare-free, MATT/SAND/BRUSHED if any, else all glare-free (literal
+reading — CIRCLE_BRUSHED not counted as BRUSHED). Rendered colour = per-channel
+mean of the disc face (the median quantises near-neutral hue). Hue is stepped
+on the measured error (secant, else half step) and re-rendered to
+convergence — predicting through the transfer overshoots because PBR Neutral
+is cross-channel. NICKEL's chroma is the largest 0.05 step keeping the
+bright-nickel highlight ≥ 240 predicted. GUN_METAL sits on 8-bit hex plateaus;
+−2.5 (`#5B5D61`) was found by probing (`ONLY=GUN_METAL`). Oxide L* = chart
+median L* of the family's glare-free two-tone rows, floored at 15.
+
+| Family | Rows | Hue shift | Chroma | Value | Oxide L* | Hue residual | L* − physical | Highlight L* |
+|---|---|---|---|---|---|---|---|---|
+| ALLOY | 2 | 58.25 | 1 | 1 | 15 | 0.03 | 0.05 | 91.4 |
+| ANTI_BRASS | 1 | 23 | 1 | 1 | 15 | 0.17 | 0.15 | 49.7 |
+| ANTI_COPPER | 4 | −25.25 | 1 | 1 | 15 | 0.05 | 0.08 | 79.8 |
+| ANTI_SILVER | 2 | 172 | 1 | 1 | 20.74 | 1.38 | 0.08 | 95.0 |
+| BLACK_COPPER | 3 | −139.75 | 1 | 1 | 15 | 0.46 | 0.22 | 85.9 |
+| BRASS | 3 | 15.25 | 1 | 1 | — | 0.10 | 0.10 | 85.8 |
+| GOLD | 4 | 26.25 | 1 | 1 | 15 | 0.03 | 0.17 | 84.4 |
+| GUN_METAL | 1 | −2.5 | 1 | 1 | 15 | 4.28 | −0.17 | 19.9 |
+| LIGHT_GOLD | 3 | 16 | 1 | 1 | — | 0.09 | −0.08 | 87.3 |
+| NICKEL | 2 | −166.5 | 0.35 | 1 | 15 | 6.65 | −0.11 | 73.4 |
+| RED_COPPER | 2 | −1.5 | 1 | 1 | — | 0.13 | −0.01 | 86.7 |
+| ROSE_GOLD | 1 | −87.5 | 1 | 1 | — | 0.37 | 0.02 | 81.1 |
+| RUSTY_STEEL | 1 | −14.75 | 1 | 1 | — | 2.40 | 0.04 | 51.2 |
+| STAINLESS_STEEL | 0 | 0 (R4) | 1 | 1 | — | not fitted | 0.02 | 94.9 |
+| TIN | 0 | 0 (R4) | 1 | 0.1432 | 17.81 | not fitted | 0.18 | 47.2 |
+
+"L* − physical" compares the rendered median L* with the same rows predicted
+at zero rotation through the measured transfer; the scenario also asserts each
+row's base-colour L* equals its physical L* (< 0.05). Studio, calibrated bright
+nickel: surround 48 (≤ 80), highlight 239 (≥ 237). Reference-F0 studio check
+(render-calibration): 50 / 238.
+
+**Stainless steel:** physical iron, no fit; the only chart row (CYC-0086) is
+glare-flagged — the swatch needs re-photographing.
+
+### Open questions from this phase, with a recommendation each
+
+1. **Hue from dark mirror photos moves metals off their own colour.** Chart
+   chroma is 0.7–8 for every plated family, so its hue is the room's tint as
+   much as the metal's: gold and brushed gold render lime, rose gold mauve,
+   anti brass olive-green, nickel faintly blue (see `reports/3d-materials.png`).
+   *Recommend* fitting hue only where chart chroma ≥ ~5 (RED_COPPER, BRASS,
+   ROSE_GOLD's row) and leaving the rest physical, or fitting from
+   re-photographed swatches under neutral light.
+2. **`oxide_color_hex` is not yet rendered.** `lib/twoTone.ts` still mixes to
+   base × 0.25; wiring it needs `useFinishOptions`, `EditorModel` and
+   `twoTone.ts` (outside this phase's scope). *Recommend* a small follow-up
+   passing it as the oxide uniform.
+3. **`types.ts` is stale** for `finish_family_calibration` and
+   `finishes.oxide_color_hex`. *Recommend* `npm run e2e:types` in the next
+   phase with it in scope.
+4. **R7 forwards the field but the storefront swatch component wasn't read.**
+   `ProductFinish` (`products/types.ts`, out of scope) lacks
+   `base_color_hex`; widened locally in `useProduct`. *Recommend* adding it to
+   the type and confirming the storefront swatch prefers it.

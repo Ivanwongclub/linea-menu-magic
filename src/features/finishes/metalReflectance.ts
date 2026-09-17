@@ -1,8 +1,8 @@
 /**
- * Plated-finish material model (Phases 3b and 3c).
+ * Plated-finish material model (Phases 3b, 3c and 3d).
  *
  * The database is the source of truth — `finish_plated_material()` in
- * supabase/migrations/20260917210000_phase3c_painted_antique_calibration.sql
+ * supabase/migrations/20260917230000_phase3d_hue_only_calibration.sql
  * — and this module mirrors it so the numbers are readable in one place and
  * `render-calibration.mjs` can assert the two agree row for row. Change both
  * together; FAMILY_CALIBRATION must equal the `finish_family_calibration` seed.
@@ -66,7 +66,7 @@ export const BASE_FAMILY: Record<string, BaseRecipe> = {
 export const GUN_METAL_COOL_BIAS: LinearRGB = [0.96, 1.0, 1.08];
 export const GUN_METAL_ROUGHNESS_FLOOR = 0.15;
 
-/** Antique two-tone (R2). */
+/** Antique two-tone (3c R2; oxide lightness 3d R3). */
 export const TWO_TONE_TONES = new Set(["ANTI", "ANCIENT", "DEEP", "DARK"]);
 export const TWO_TONE_FAMILIES = new Set(["ANTI_BRASS", "ANTI_COPPER", "ANTI_SILVER", "BLACK_COPPER"]);
 export const TWO_TONE_BUFFED_ROUGHNESS = 0.3;
@@ -84,30 +84,49 @@ export const OFFSETS: Record<string, LinearRGB> = {
   GUN_METAL: [0.72, 0.74, 0.78],
 };
 
+/**
+ * Per-family calibration (Phase 3d, superseding 3c's saturation/value fit).
+ *
+ *   hue_shift  degrees added to the CIELAB hue angle of the linear base
+ *              colour (D65). L* is untouched, so the metal's reflectance —
+ *              and its lightness under the studio — stays physical (R1).
+ *   chroma_scale ≤ 1: chroma is never raised (R1). Below 1 only where a
+ *              stated studio target needs it; a rotation that leaves the
+ *              sRGB gamut is also pulled back by reducing chroma only.
+ *   value      a linear scale before the rotation. 1 for every family except
+ *              TIN, whose brightness is 3c's chart-derived reference (R4).
+ *   oxide_l    two-tone rows: the oxide layer's L*, from the chart, floored at
+ *              OXIDE_L_FLOOR (R3). Null → the 3c oxide (buffed × 0.25).
+ */
 export interface FamilyCalibration {
-  saturation: number;
+  hue_shift: number;
+  chroma_scale: number;
   value: number;
-  offset: LinearRGB;
+  oxide_l: number | null;
 }
 
-/** Fitted per family (Phase 3c R4) — see STATUS.md for rows used and residuals. */
+export const OXIDE_L_FLOOR = 15;
+/** 3c's oxide: buffed base × this, used where a family has no chart oxide L*. */
+export const OXIDE_FACTOR = 0.25;
+
+/** Fitted per family (Phase 3d) — see STATUS.md for rows used and residuals. */
 /* BEGIN FAMILY_CALIBRATION (generated from the fit) */
 export const FAMILY_CALIBRATION: Record<string, FamilyCalibration> = {
-  LIGHT_GOLD: { saturation: 0.4, value: 0.1242, offset: [1, 1, 1] },
-  ALLOY: { saturation: 0.9, value: 0.0609, offset: [1, 1, 1] },
-  GOLD: { saturation: 0.5, value: 0.0235, offset: [1, 1, 1] },
-  TIN: { saturation: 1, value: 0.1432, offset: [1, 1, 1] },
-  GUN_METAL: { saturation: 1, value: 0.2786, offset: [1, 1, 1] },
-  NICKEL: { saturation: 0.2, value: 0.1077, offset: [1, 1, 1] },
-  ROSE_GOLD: { saturation: 0.3, value: 0.1077, offset: [1, 1, 1] },
-  BRASS: { saturation: 0.25, value: 0.0934, offset: [1, 1, 1] },
-  ANTI_BRASS: { saturation: 1, value: 0.0153, offset: [1, 1, 1] },
-  ANTI_SILVER: { saturation: 1, value: 0.089, offset: [1, 1, 1] },
-  STAINLESS_STEEL: { saturation: 1, value: 0.1816, offset: [1, 1, 1] },
-  RUSTY_STEEL: { saturation: 1, value: 0.3064, offset: [1, 1, 1] },
-  BLACK_COPPER: { saturation: 0, value: 0.0638, offset: [1, 1, 1.05] },
-  RED_COPPER: { saturation: 0.9, value: 0.058, offset: [1, 1, 1] },
-  ANTI_COPPER: { saturation: 1, value: 0.01, offset: [1, 1, 1] },
+  ALLOY: { hue_shift: 58.25, chroma_scale: 1, value: 1, oxide_l: 15 },
+  ANTI_BRASS: { hue_shift: 23, chroma_scale: 1, value: 1, oxide_l: 15 },
+  ANTI_COPPER: { hue_shift: -25.25, chroma_scale: 1, value: 1, oxide_l: 15 },
+  ANTI_SILVER: { hue_shift: 172, chroma_scale: 1, value: 1, oxide_l: 20.74 },
+  BLACK_COPPER: { hue_shift: -139.75, chroma_scale: 1, value: 1, oxide_l: 15 },
+  BRASS: { hue_shift: 15.25, chroma_scale: 1, value: 1, oxide_l: null },
+  GOLD: { hue_shift: 26.25, chroma_scale: 1, value: 1, oxide_l: 15 },
+  GUN_METAL: { hue_shift: -2.5, chroma_scale: 1, value: 1, oxide_l: 15 },
+  LIGHT_GOLD: { hue_shift: 16, chroma_scale: 1, value: 1, oxide_l: null },
+  NICKEL: { hue_shift: -166.5, chroma_scale: 0.35, value: 1, oxide_l: 15 },
+  RED_COPPER: { hue_shift: -1.5, chroma_scale: 1, value: 1, oxide_l: null },
+  ROSE_GOLD: { hue_shift: -87.5, chroma_scale: 1, value: 1, oxide_l: null },
+  RUSTY_STEEL: { hue_shift: -14.75, chroma_scale: 1, value: 1, oxide_l: null },
+  STAINLESS_STEEL: { hue_shift: 0, chroma_scale: 1, value: 1, oxide_l: null },
+  TIN: { hue_shift: 0, chroma_scale: 1, value: 0.1432, oxide_l: 17.81 },
 };
 /* END FAMILY_CALIBRATION */
 
@@ -160,6 +179,8 @@ export interface PlatedMaterial {
   clearcoat: number;
   clearcoat_roughness: number;
   two_tone: boolean;
+  /** Two-tone rows only; null otherwise. */
+  oxide_color_hex: string | null;
 }
 
 /** Linear base colour before the sRGB conversion — the calibration harness fits against this. */
@@ -180,10 +201,70 @@ export function platedLinear(axes: PlatedAxes, calibration: Record<string, Famil
   }
   const cal = calibration[axes.base_family ?? ""];
   if (cal) {
-    const d = desaturateScale(c, cal.saturation, cal.value);
-    c = [d[0] * cal.offset[0], d[1] * cal.offset[1], d[2] * cal.offset[2]];
+    if (cal.value !== 1) c = [c[0] * cal.value, c[1] * cal.value, c[2] * cal.value];
+    if (cal.hue_shift !== 0 || cal.chroma_scale !== 1) {
+      const [l, a, b] = linearToLab(c);
+      const h = Math.atan2(b, a) + (cal.hue_shift * Math.PI) / 180;
+      const chroma = Math.sqrt(a * a + b * b) * cal.chroma_scale;
+      c = inGamutAtChroma(l, chroma, h);
+    }
   }
   return c;
+}
+
+/** Linear base colour of the oxide layer of a two-tone row (R3). */
+export function oxideLinear(axes: PlatedAxes, calibration: Record<string, FamilyCalibration> = FAMILY_CALIBRATION): LinearRGB {
+  const buffed = platedLinear(axes, calibration);
+  const oxideL = calibration[axes.base_family ?? ""]?.oxide_l;
+  if (oxideL == null) return [buffed[0] * OXIDE_FACTOR, buffed[1] * OXIDE_FACTOR, buffed[2] * OXIDE_FACTOR];
+  const [l, a, b] = linearToLab(buffed);
+  const target = Math.max(OXIDE_L_FLOOR, oxideL);
+  // Chroma scales with lightness, as the 3c oxide (a linear scale) did.
+  const chroma = l > 0 ? (Math.sqrt(a * a + b * b) * target) / l : 0;
+  return inGamutAtChroma(target, chroma, Math.atan2(b, a));
+}
+
+/* CIELAB (D65), the same matrices as scripts/e2e-local/lib/colour.mjs and the SQL mirror. */
+const labF = (t: number) => (t > 216 / 24389 ? Math.cbrt(t) : ((24389 / 27) * t + 16) / 116);
+const labFInv = (f: number) => (f > 6 / 29 ? f * f * f : (116 * f - 16) / (24389 / 27));
+
+export function linearToLab(c: LinearRGB): LinearRGB {
+  const x = 0.4124564 * c[0] + 0.3575761 * c[1] + 0.1804375 * c[2];
+  const y = 0.2126729 * c[0] + 0.7151522 * c[1] + 0.072175 * c[2];
+  const z = 0.0193339 * c[0] + 0.119192 * c[1] + 0.9503041 * c[2];
+  const fx = labF(x / 0.95047);
+  const fy = labF(y);
+  const fz = labF(z / 1.08883);
+  return [116 * fy - 16, 500 * (fx - fy), 200 * (fy - fz)];
+}
+
+export function labToLinear([l, a, b]: LinearRGB): LinearRGB {
+  const fy = (l + 16) / 116;
+  const x = labFInv(fy + a / 500) * 0.95047;
+  const y = labFInv(fy);
+  const z = labFInv(fy - b / 200) * 1.08883;
+  return [
+    3.2404542 * x - 1.5371385 * y - 0.4985314 * z,
+    -0.969266 * x + 1.8760108 * y + 0.041556 * z,
+    0.0556434 * x - 0.2040259 * y + 1.0572252 * z,
+  ];
+}
+
+const inGamut = (c: LinearRGB) => c.every((v) => v >= 0 && v <= 1);
+
+/** L*, hue fixed; the largest chroma ≤ `chroma` that stays in gamut (20-step bisection). */
+function inGamutAtChroma(l: number, chroma: number, h: number): LinearRGB {
+  const at = (k: number) => labToLinear([l, chroma * k * Math.cos(h), chroma * k * Math.sin(h)]);
+  const full = at(1);
+  if (inGamut(full)) return full;
+  let lo = 0;
+  let hi = 1;
+  for (let i = 0; i < 20; i++) {
+    const mid = (lo + hi) / 2;
+    if (inGamut(at(mid))) lo = mid;
+    else hi = mid;
+  }
+  return at(lo);
 }
 
 /** Plated finishes only (coating null). Unknown base families fall back to nickel. */
@@ -202,5 +283,6 @@ export function derivePlatedMaterial(axes: PlatedAxes, calibration?: Record<stri
     clearcoat: coated ? CLEARCOAT.clearcoat : 0,
     clearcoat_roughness: coated ? CLEARCOAT.clearcoatRoughness : 0,
     two_tone: twoTone,
+    oxide_color_hex: twoTone ? linearToSrgbHex(oxideLinear(axes, calibration)) : null,
   };
 }

@@ -1,4 +1,4 @@
-// Render calibration (Phase 3b, revised 3c).
+// Render calibration (Phase 3b, revised 3c and 3d).
 //
 // 1. Procedural studio: a bright nickel flat disc at reference F0 (RTR4, before
 //    family calibration) reads surround ≤ #505050 and highlight ≥ #EDEDED in
@@ -7,8 +7,9 @@
 //    within ±3/255.
 // 3. Database derivation == src/features/finishes/metalReflectance.ts on every
 //    plated row; painted rows take their base colour from the chart CSV and
-//    their roughness / clearcoat / metalness from the coating table.
-// 4. Twelve finishes on the lettered Polo button → reports/3c-materials.png,
+//    their roughness / clearcoat / metalness from the coating table and no
+//    oxide colour.
+// 4. Twelve finishes on the lettered Polo button → reports/3d-materials.png,
 //    each beside its chart swatch, for human review; relief visible in each.
 // 5. No viewport toolbar; three-quarter camera filling ~60%.
 import assert from "node:assert/strict";
@@ -81,6 +82,7 @@ export default async function ({ page, base, admin, h }) {
       clearcoat: f.clearcoat,
       clearcoat_roughness: f.clearcoat_roughness,
       two_tone: f.two_tone,
+      oxide_color_hex: f.oxide_color_hex,
     };
     return JSON.stringify(expected) !== JSON.stringify(stored);
   });
@@ -94,6 +96,7 @@ export default async function ({ page, base, admin, h }) {
     assert.equal(f.roughness, c.roughness, `${f.cyc_code} roughness from ${f.coating.code}`);
     assert.equal(f.clearcoat, c.clearcoat, `${f.cyc_code} clearcoat from ${f.coating.code}`);
     assert.equal(f.two_tone, false);
+    assert.equal(f.oxide_color_hex, null, `${f.cyc_code} painted rows have no oxide layer`);
   }
   const antique = plated.filter((f) => f.two_tone).length;
 
@@ -202,11 +205,11 @@ export default async function ({ page, base, admin, h }) {
   await sharp({ create: { width: TILE_W * COLS, height: (TILE_H + LABEL_H) * rows, channels: 3, background: "#FFFFFF" } })
     .composite(composites)
     .png()
-    .toFile(path.join(REPO_ROOT, "reports/3c-materials.png"));
+    .toFile(path.join(REPO_ROOT, "reports/3d-materials.png"));
 
   for (const t of tiles) {
     assert.ok(t.detail > flatDetail * 3, `${t.code}: relief detail ${t.detail.toFixed(2)} vs flat disc ${flatDetail.toFixed(2)}`);
   }
-  out.sheet = { file: "reports/3c-materials.png", detail: Object.fromEntries(tiles.map((t) => [t.code, +t.detail.toFixed(1)])) };
+  out.sheet = { file: "reports/3d-materials.png", detail: Object.fromEntries(tiles.map((t) => [t.code, +t.detail.toFixed(1)])) };
   return out;
 }

@@ -1,0 +1,1338 @@
+{
+  "studio": {
+    "code": "CYC-0001",
+    "axes": {
+      "base_family": "NICKEL",
+      "surface": null,
+      "tone": null,
+      "effect": null,
+      "tint": null
+    },
+    "surroundLum": 48,
+    "highlightLum": 239,
+    "highlightTransfer": [
+      1.8953589005873839,
+      1.9108054254389037,
+      1.8973164033561976
+    ]
+  },
+  "families": [
+    {
+      "family": "ALLOY",
+      "rows": 2,
+      "glareOnly": false,
+      "preferredSurfaces": false,
+      "exempt": null,
+      "codes": [
+        "CYC-0088",
+        "CYC-0089"
+      ],
+      "chartMedianLab": [
+        11.35,
+        -0.04,
+        -3.13
+      ],
+      "renderedMedianLab": [
+        73.08,
+        -0.1,
+        -7.42
+      ],
+      "hueDiff": 0.03,
+      "hueError": -0.025,
+      "appliedHueShift": 58.25,
+      "appliedChromaScale": 1,
+      "appliedOxideL": 15,
+      "physicalL": 73.03,
+      "highlightL": 91.43,
+      "current": {
+        "hue_shift": 58.25,
+        "chroma_scale": 1,
+        "value": 1,
+        "oxide_l": 15
+      },
+      "samples": [
+        {
+          "code": "CYC-0088",
+          "axes": {
+            "base_family": "ALLOY",
+            "surface": null,
+            "tone": "MEDIUM",
+            "effect": null,
+            "tint": null
+          },
+          "chartHex": "#25272A",
+          "renderedHex": "#969CA8",
+          "renderedLab": [
+            64.339,
+            -0.061,
+            -6.677
+          ],
+          "highlightL": 91.4,
+          "transfer": [
+            0.6686602438105065,
+            0.6709902754032214,
+            0.6747234916261547
+          ]
+        },
+        {
+          "code": "CYC-0089",
+          "axes": {
+            "base_family": "ALLOY",
+            "surface": null,
+            "tone": "DEEP",
+            "effect": null,
+            "tint": null
+          },
+          "chartHex": "#13161B",
+          "renderedHex": "#C3CCDB",
+          "renderedLab": [
+            81.828,
+            -0.143,
+            -8.172
+          ],
+          "highlightL": 91.46,
+          "transfer": [
+            0.797222880089581,
+            0.8065552343890056,
+            0.8236115991444682
+          ]
+        }
+      ],
+      "lightnessDiff": 0.05
+    },
+    {
+      "family": "ANTI_BRASS",
+      "rows": 1,
+      "glareOnly": false,
+      "preferredSurfaces": true,
+      "exempt": null,
+      "codes": [
+        "CYC-0059"
+      ],
+      "chartMedianLab": [
+        18.68,
+        -1.59,
+        3.07
+      ],
+      "renderedMedianLab": [
+        49.67,
+        -14.81,
+        28.78
+      ],
+      "hueDiff": 0.17,
+      "hueError": 0.171,
+      "appliedHueShift": 23,
+      "appliedChromaScale": 1,
+      "appliedOxideL": 15,
+      "physicalL": 49.52,
+      "highlightL": 49.67,
+      "current": {
+        "hue_shift": 23,
+        "chroma_scale": 1,
+        "value": 1,
+        "oxide_l": 15
+      },
+      "samples": [
+        {
+          "code": "CYC-0059",
+          "axes": {
+            "base_family": "ANTI_BRASS",
+            "surface": "BRUSHED",
+            "tone": null,
+            "effect": null,
+            "tint": null
+          },
+          "chartHex": "#2D2E29",
+          "renderedHex": "#6E7C44",
+          "renderedLab": [
+            49.675,
+            -14.806,
+            28.783
+          ],
+          "highlightL": 49.67,
+          "transfer": [
+            0.2682231267947302,
+            0.29076193124888533,
+            0.21429243647432214
+          ]
+        }
+      ],
+      "lightnessDiff": 0.15
+    },
+    {
+      "family": "ANTI_COPPER",
+      "rows": 4,
+      "glareOnly": false,
+      "preferredSurfaces": false,
+      "exempt": null,
+      "codes": [
+        "CYC-0079",
+        "CYC-0069",
+        "CYC-0031",
+        "CYC-0081"
+      ],
+      "chartMedianLab": [
+        7.98,
+        0.6,
+        0.26
+      ],
+      "renderedMedianLab": [
+        67.1,
+        18.76,
+        8.07
+      ],
+      "hueDiff": 0.05,
+      "hueError": 0.049,
+      "appliedHueShift": -25.25,
+      "appliedChromaScale": 1,
+      "appliedOxideL": 15,
+      "physicalL": 67.02,
+      "highlightL": 79.82,
+      "current": {
+        "hue_shift": -25.25,
+        "chroma_scale": 1,
+        "value": 1,
+        "oxide_l": 15
+      },
+      "samples": [
+        {
+          "code": "CYC-0079",
+          "axes": {
+            "base_family": "ANTI_COPPER",
+            "surface": null,
+            "tone": null,
+            "effect": null,
+            "tint": "CHOCOLATE"
+          },
+          "chartHex": "#17181A",
+          "renderedHex": "#D68982",
+          "renderedLab": [
+            64.825,
+            28.495,
+            16.126
+          ],
+          "highlightL": 76.07,
+          "transfer": [
+            0.8738498820265345,
+            0.81552700417443,
+            0.8135385378035837
+          ]
+        },
+        {
+          "code": "CYC-0069",
+          "axes": {
+            "base_family": "ANTI_COPPER",
+            "surface": null,
+            "tone": null,
+            "effect": null,
+            "tint": "GUN_METAL"
+          },
+          "chartHex": "#2D2F33",
+          "renderedHex": "#C8A0A2",
+          "renderedLab": [
+            69.367,
+            15.176,
+            4.554
+          ],
+          "highlightL": 83.58,
+          "transfer": [
+            0.8789969528660438,
+            0.843161209225261,
+            0.8447049272381415
+          ]
+        },
+        {
+          "code": "CYC-0031",
+          "axes": {
+            "base_family": "ANTI_COPPER",
+            "surface": "CIRCLE_BRUSHED",
+            "tone": null,
+            "effect": null,
+            "tint": null
+          },
+          "chartHex": "#23130F",
+          "renderedHex": "#905F5E",
+          "renderedLab": [
+            45.529,
+            19.859,
+            8.777
+          ],
+          "highlightL": 45.53,
+          "transfer": [
+            0.3246567419775552,
+            0.2475082968205378,
+            0.24616139407410206
+          ]
+        },
+        {
+          "code": "CYC-0081",
+          "axes": {
+            "base_family": "ANTI_COPPER",
+            "surface": null,
+            "tone": null,
+            "effect": "STONE_WASH",
+            "tint": null
+          },
+          "chartHex": "#15110E",
+          "renderedHex": "#E5B4B3",
+          "renderedLab": [
+            77.505,
+            17.664,
+            7.364
+          ],
+          "highlightL": 85.47,
+          "transfer": [
+            0.8397151275307237,
+            0.7943168223345082,
+            0.7936863657080149
+          ]
+        }
+      ],
+      "lightnessDiff": 0.08
+    },
+    {
+      "family": "ANTI_SILVER",
+      "rows": 2,
+      "glareOnly": false,
+      "preferredSurfaces": false,
+      "exempt": null,
+      "codes": [
+        "CYC-0092",
+        "CYC-0091"
+      ],
+      "chartMedianLab": [
+        20.74,
+        0.01,
+        -0.68
+      ],
+      "renderedMedianLab": [
+        87.47,
+        -0.06,
+        -3.75
+      ],
+      "hueDiff": 1.38,
+      "hueError": 1.383,
+      "appliedHueShift": 172,
+      "appliedChromaScale": 1,
+      "appliedOxideL": 20.74,
+      "physicalL": 87.39,
+      "highlightL": 95.04,
+      "current": {
+        "hue_shift": 172,
+        "chroma_scale": 1,
+        "value": 1,
+        "oxide_l": 20.74
+      },
+      "samples": [
+        {
+          "code": "CYC-0092",
+          "axes": {
+            "base_family": "ANTI_SILVER",
+            "surface": null,
+            "tone": "IMT",
+            "effect": null,
+            "tint": null
+          },
+          "chartHex": "#2A2B2A",
+          "renderedHex": "#D4D9E2",
+          "renderedLab": [
+            86.445,
+            0.182,
+            -4.908
+          ],
+          "highlightL": 94.36,
+          "transfer": [
+            0.7951094071337658,
+            0.8002347601069272,
+            0.8112078830543052
+          ]
+        },
+        {
+          "code": "CYC-0091",
+          "axes": {
+            "base_family": "ANTI_SILVER",
+            "surface": null,
+            "tone": null,
+            "effect": null,
+            "tint": null
+          },
+          "chartHex": "#39393C",
+          "renderedHex": "#DBDEE3",
+          "renderedLab": [
+            88.494,
+            -0.3,
+            -2.59
+          ],
+          "highlightL": 95.72,
+          "transfer": [
+            0.7982896916033048,
+            0.802341440905752,
+            0.8079621481535729
+          ]
+        }
+      ],
+      "lightnessDiff": 0.08
+    },
+    {
+      "family": "BLACK_COPPER",
+      "rows": 3,
+      "glareOnly": false,
+      "preferredSurfaces": false,
+      "exempt": null,
+      "codes": [
+        "CYC-0045",
+        "CYC-0044",
+        "CYC-0135"
+      ],
+      "chartMedianLab": [
+        8.66,
+        -0.12,
+        -4.61
+      ],
+      "renderedMedianLab": [
+        77.66,
+        -0.67,
+        -19.43
+      ],
+      "hueDiff": 0.46,
+      "hueError": 0.463,
+      "appliedHueShift": -139.75,
+      "appliedChromaScale": 1,
+      "appliedOxideL": 15,
+      "physicalL": 77.44,
+      "highlightL": 85.94,
+      "current": {
+        "hue_shift": -139.75,
+        "chroma_scale": 1,
+        "value": 1,
+        "oxide_l": 15
+      },
+      "samples": [
+        {
+          "code": "CYC-0045",
+          "axes": {
+            "base_family": "BLACK_COPPER",
+            "surface": null,
+            "tone": "IMT",
+            "effect": null,
+            "tint": null
+          },
+          "chartHex": "#070C14",
+          "renderedHex": "#A9BDE0",
+          "renderedLab": [
+            76.268,
+            0.827,
+            -19.65
+          ],
+          "highlightL": 85.24,
+          "transfer": [
+            0.80384491489948,
+            0.8177093731407362,
+            0.852533222507359
+          ]
+        },
+        {
+          "code": "CYC-0044",
+          "axes": {
+            "base_family": "BLACK_COPPER",
+            "surface": null,
+            "tone": null,
+            "effect": null,
+            "tint": null
+          },
+          "chartHex": "#17191C",
+          "renderedHex": "#AAC2E4",
+          "renderedLab": [
+            77.657,
+            -0.665,
+            -19.431
+          ],
+          "highlightL": 85.94,
+          "transfer": [
+            0.7926599152900135,
+            0.8087470126782754,
+            0.8426875645237865
+          ]
+        },
+        {
+          "code": "CYC-0135",
+          "axes": {
+            "base_family": "BLACK_COPPER",
+            "surface": null,
+            "tone": null,
+            "effect": "SPECKLE",
+            "tint": null
+          },
+          "chartHex": "#0D1B25",
+          "renderedHex": "#AAC2E4",
+          "renderedLab": [
+            77.657,
+            -0.665,
+            -19.431
+          ],
+          "highlightL": 85.94,
+          "transfer": [
+            0.7926599152900135,
+            0.8087470126782754,
+            0.8426875645237865
+          ]
+        }
+      ],
+      "lightnessDiff": 0.22
+    },
+    {
+      "family": "BRASS",
+      "rows": 3,
+      "glareOnly": false,
+      "preferredSurfaces": true,
+      "exempt": null,
+      "codes": [
+        "CYC-0053",
+        "CYC-0012",
+        "CYC-0011"
+      ],
+      "chartMedianLab": [
+        22.04,
+        -2.1,
+        5.86
+      ],
+      "renderedMedianLab": [
+        78.84,
+        -11.54,
+        32.34
+      ],
+      "hueDiff": 0.1,
+      "hueError": 0.098,
+      "appliedHueShift": 15.25,
+      "appliedChromaScale": 1,
+      "appliedOxideL": null,
+      "physicalL": 78.74,
+      "highlightL": 85.77,
+      "current": {
+        "hue_shift": 15.25,
+        "chroma_scale": 1,
+        "value": 1,
+        "oxide_l": null
+      },
+      "samples": [
+        {
+          "code": "CYC-0053",
+          "axes": {
+            "base_family": "BRASS",
+            "surface": "MATT",
+            "tone": null,
+            "effect": null,
+            "tint": null
+          },
+          "chartHex": "#333537",
+          "renderedHex": "#C4C886",
+          "renderedLab": [
+            78.844,
+            -11.543,
+            32.337
+          ],
+          "highlightL": 85.77,
+          "transfer": [
+            0.7474662634891025,
+            0.7560588864136323,
+            0.6365762763817285
+          ]
+        },
+        {
+          "code": "CYC-0012",
+          "axes": {
+            "base_family": "BRASS",
+            "surface": "MATT",
+            "tone": null,
+            "effect": null,
+            "tint": null
+          },
+          "chartHex": "#3E3E34",
+          "renderedHex": "#C4C886",
+          "renderedLab": [
+            78.844,
+            -11.543,
+            32.337
+          ],
+          "highlightL": 85.77,
+          "transfer": [
+            0.7474662634891025,
+            0.7560588864136323,
+            0.6365762763817285
+          ]
+        },
+        {
+          "code": "CYC-0011",
+          "axes": {
+            "base_family": "BRASS",
+            "surface": "BRUSHED",
+            "tone": null,
+            "effect": null,
+            "tint": null
+          },
+          "chartHex": "#24251C",
+          "renderedHex": "#767941",
+          "renderedLab": [
+            49.5,
+            -10.274,
+            30.337
+          ],
+          "highlightL": 49.68,
+          "transfer": [
+            0.27949553888247397,
+            0.2853603436306323,
+            0.21121149056191685
+          ]
+        }
+      ],
+      "lightnessDiff": 0.1
+    },
+    {
+      "family": "GOLD",
+      "rows": 4,
+      "glareOnly": false,
+      "preferredSurfaces": true,
+      "exempt": null,
+      "codes": [
+        "CYC-0030",
+        "CYC-0026",
+        "CYC-0100",
+        "CYC-0015"
+      ],
+      "chartMedianLab": [
+        28.19,
+        -1.36,
+        2.6
+      ],
+      "renderedMedianLab": [
+        79.8,
+        -20.78,
+        39.74
+      ],
+      "hueDiff": 0.03,
+      "hueError": 0.034,
+      "appliedHueShift": 26.25,
+      "appliedChromaScale": 1,
+      "appliedOxideL": 15,
+      "physicalL": 79.62,
+      "highlightL": 84.37,
+      "current": {
+        "hue_shift": 26.25,
+        "chroma_scale": 1,
+        "value": 1,
+        "oxide_l": 15
+      },
+      "samples": [
+        {
+          "code": "CYC-0030",
+          "axes": {
+            "base_family": "GOLD",
+            "surface": "SAND",
+            "tone": "IMT",
+            "effect": null,
+            "tint": null
+          },
+          "chartHex": "#424444",
+          "renderedHex": "#B7CF76",
+          "renderedLab": [
+            79.537,
+            -21.785,
+            41.495
+          ],
+          "highlightL": 81.83,
+          "transfer": [
+            0.7515310228374139,
+            0.8116833328716245,
+            0.6268403675783725
+          ]
+        },
+        {
+          "code": "CYC-0026",
+          "axes": {
+            "base_family": "GOLD",
+            "surface": "BRUSHED",
+            "tone": "IMT",
+            "effect": null,
+            "tint": null
+          },
+          "chartHex": "#2F2314",
+          "renderedHex": "#687A30",
+          "renderedLab": [
+            48.355,
+            -18.449,
+            37.494
+          ],
+          "highlightL": 48.36,
+          "transfer": [
+            0.25869664351329735,
+            0.2869612622288933,
+            0.19562454514881072
+          ]
+        },
+        {
+          "code": "CYC-0100",
+          "axes": {
+            "base_family": "GOLD",
+            "surface": "MATT",
+            "tone": null,
+            "effect": null,
+            "tint": null
+          },
+          "chartHex": "#424239",
+          "renderedHex": "#BAD07B",
+          "renderedLab": [
+            80.053,
+            -20.783,
+            39.737
+          ],
+          "highlightL": 86.9,
+          "transfer": [
+            0.7259614517109392,
+            0.7741628806556012,
+            0.6211223324721648
+          ]
+        },
+        {
+          "code": "CYC-0015",
+          "axes": {
+            "base_family": "GOLD",
+            "surface": "MATT",
+            "tone": null,
+            "effect": null,
+            "tint": null
+          },
+          "chartHex": "#636E71",
+          "renderedHex": "#BAD07B",
+          "renderedLab": [
+            80.053,
+            -20.783,
+            39.737
+          ],
+          "highlightL": 86.9,
+          "transfer": [
+            0.7259614517109392,
+            0.7741628806556012,
+            0.6211223324721648
+          ]
+        }
+      ],
+      "lightnessDiff": 0.17
+    },
+    {
+      "family": "GUN_METAL",
+      "rows": 1,
+      "glareOnly": false,
+      "preferredSurfaces": true,
+      "exempt": null,
+      "codes": [
+        "CYC-0029"
+      ],
+      "chartMedianLab": [
+        4.99,
+        -0.08,
+        -1.98
+      ],
+      "renderedMedianLab": [
+        17.68,
+        0.14,
+        -3.89
+      ],
+      "hueDiff": 4.28,
+      "hueError": -4.279,
+      "appliedHueShift": -2.5,
+      "appliedChromaScale": 1,
+      "appliedOxideL": 15,
+      "physicalL": 17.85,
+      "highlightL": 19.89,
+      "current": {
+        "hue_shift": -2.5,
+        "chroma_scale": 1,
+        "value": 1,
+        "oxide_l": 15
+      },
+      "samples": [
+        {
+          "code": "CYC-0029",
+          "axes": {
+            "base_family": "GUN_METAL",
+            "surface": "SAND",
+            "tone": null,
+            "effect": null,
+            "tint": null
+          },
+          "chartHex": "#0F1114",
+          "renderedHex": "#292B31",
+          "renderedLab": [
+            17.676,
+            0.14,
+            -3.893
+          ],
+          "highlightL": 19.89,
+          "transfer": [
+            0.5649309143891226,
+            0.5655948031698608,
+            0.5671488242951684
+          ]
+        }
+      ],
+      "lightnessDiff": -0.17
+    },
+    {
+      "family": "LIGHT_GOLD",
+      "rows": 3,
+      "glareOnly": false,
+      "preferredSurfaces": true,
+      "exempt": null,
+      "codes": [
+        "CYC-0024",
+        "CYC-0023",
+        "CYC-0018"
+      ],
+      "chartMedianLab": [
+        25.33,
+        -0.42,
+        1.31
+      ],
+      "renderedMedianLab": [
+        80.28,
+        -8.55,
+        26.94
+      ],
+      "hueDiff": 0.09,
+      "hueError": -0.086,
+      "appliedHueShift": 16,
+      "appliedChromaScale": 1,
+      "appliedOxideL": null,
+      "physicalL": 80.36,
+      "highlightL": 87.27,
+      "current": {
+        "hue_shift": 16,
+        "chroma_scale": 1,
+        "value": 1,
+        "oxide_l": null
+      },
+      "samples": [
+        {
+          "code": "CYC-0024",
+          "axes": {
+            "base_family": "LIGHT_GOLD",
+            "surface": "MATT",
+            "tone": "IMT",
+            "effect": null,
+            "tint": null
+          },
+          "chartHex": "#3E3C36",
+          "renderedHex": "#CACA95",
+          "renderedLab": [
+            80.279,
+            -8.554,
+            26.94
+          ],
+          "highlightL": 87.27,
+          "transfer": [
+            0.761961305241431,
+            0.761961305241431,
+            0.6577294323360048
+          ]
+        },
+        {
+          "code": "CYC-0023",
+          "axes": {
+            "base_family": "LIGHT_GOLD",
+            "surface": "BRUSHED",
+            "tone": "IMT",
+            "effect": null,
+            "tint": null
+          },
+          "chartHex": "#4D5356",
+          "renderedHex": "#7C7C4E",
+          "renderedLab": [
+            50.979,
+            -7.571,
+            25.15
+          ],
+          "highlightL": 50.98,
+          "transfer": [
+            0.29076193124888533,
+            0.29076193124888533,
+            0.2256387560452991
+          ]
+        },
+        {
+          "code": "CYC-0018",
+          "axes": {
+            "base_family": "LIGHT_GOLD",
+            "surface": "MATT",
+            "tone": "LIGHT",
+            "effect": null,
+            "tint": null
+          },
+          "chartHex": "#2D2928",
+          "renderedHex": "#E0DFA5",
+          "renderedLab": [
+            87.671,
+            -8.568,
+            28.754
+          ],
+          "highlightL": 92.59,
+          "transfer": [
+            0.8097954482732347,
+            0.8061888726433797,
+            0.6806102110069745
+          ]
+        }
+      ],
+      "lightnessDiff": -0.08
+    },
+    {
+      "family": "NICKEL",
+      "rows": 2,
+      "glareOnly": false,
+      "preferredSurfaces": true,
+      "exempt": null,
+      "codes": [
+        "CYC-0040",
+        "CYC-0028"
+      ],
+      "chartMedianLab": [
+        16.29,
+        0.44,
+        -4.02
+      ],
+      "renderedMedianLab": [
+        68.73,
+        0.75,
+        -3.26
+      ],
+      "hueDiff": 6.65,
+      "hueError": -6.652,
+      "appliedHueShift": -166.5,
+      "appliedChromaScale": 0.35,
+      "appliedOxideL": 15,
+      "physicalL": 68.84,
+      "highlightL": 73.4,
+      "current": {
+        "hue_shift": -166.5,
+        "chroma_scale": 0.35,
+        "value": 1,
+        "oxide_l": 15
+      },
+      "samples": [
+        {
+          "code": "CYC-0040",
+          "axes": {
+            "base_family": "NICKEL",
+            "surface": "MATT",
+            "tone": "DARK",
+            "effect": null,
+            "tint": null
+          },
+          "chartHex": "#1E222C",
+          "renderedHex": "#A4A5AB",
+          "renderedLab": [
+            67.984,
+            0.72,
+            -3.156
+          ],
+          "highlightL": 74.87,
+          "transfer": [
+            0.6835218628563258,
+            0.6856118472821634,
+            0.6964099553399301
+          ]
+        },
+        {
+          "code": "CYC-0028",
+          "axes": {
+            "base_family": "NICKEL",
+            "surface": "SAND",
+            "tone": null,
+            "effect": null,
+            "tint": null
+          },
+          "chartHex": "#2E2F30",
+          "renderedHex": "#A8A9B0",
+          "renderedLab": [
+            69.486,
+            0.772,
+            -3.367
+          ],
+          "highlightL": 71.92,
+          "transfer": [
+            0.7166962374276774,
+            0.7193769737815641,
+            0.733402940646053
+          ]
+        }
+      ],
+      "lightnessDiff": -0.11
+    },
+    {
+      "family": "RED_COPPER",
+      "rows": 2,
+      "glareOnly": false,
+      "preferredSurfaces": false,
+      "exempt": null,
+      "codes": [
+        "CYC-0075",
+        "CYC-0133"
+      ],
+      "chartMedianLab": [
+        16.27,
+        5.05,
+        6.38
+      ],
+      "renderedMedianLab": [
+        70.06,
+        13.48,
+        16.96
+      ],
+      "hueDiff": 0.13,
+      "hueError": 0.129,
+      "appliedHueShift": -1.5,
+      "appliedChromaScale": 1,
+      "appliedOxideL": null,
+      "physicalL": 70.07,
+      "highlightL": 86.69,
+      "current": {
+        "hue_shift": -1.5,
+        "chroma_scale": 1,
+        "value": 1,
+        "oxide_l": null
+      },
+      "samples": [
+        {
+          "code": "CYC-0075",
+          "axes": {
+            "base_family": "RED_COPPER",
+            "surface": null,
+            "tone": null,
+            "effect": null,
+            "tint": "ORANGE"
+          },
+          "chartHex": "#352320",
+          "renderedHex": "#CF9B80",
+          "renderedLab": [
+            68.337,
+            15.757,
+            22.132
+          ],
+          "highlightL": 84.72,
+          "transfer": [
+            0.6664893093835376,
+            0.6769973921770785,
+            0.6942060243078532
+          ]
+        },
+        {
+          "code": "CYC-0133",
+          "axes": {
+            "base_family": "RED_COPPER",
+            "surface": null,
+            "tone": null,
+            "effect": "OXIDE",
+            "tint": null
+          },
+          "chartHex": "#30281F",
+          "renderedHex": "#CCA89B",
+          "renderedLab": [
+            71.783,
+            11.2,
+            11.781
+          ],
+          "highlightL": 88.65,
+          "transfer": [
+            0.6759677645332608,
+            0.6785238435202697,
+            0.6817743004945562
+          ]
+        }
+      ],
+      "lightnessDiff": -0.01
+    },
+    {
+      "family": "ROSE_GOLD",
+      "rows": 1,
+      "glareOnly": false,
+      "preferredSurfaces": true,
+      "exempt": null,
+      "codes": [
+        "CYC-0021"
+      ],
+      "chartMedianLab": [
+        28.14,
+        6.61,
+        -0.95
+      ],
+      "renderedMedianLab": [
+        76.41,
+        23.12,
+        -3.47
+      ],
+      "hueDiff": 0.37,
+      "hueError": 0.374,
+      "appliedHueShift": -87.5,
+      "appliedChromaScale": 1,
+      "appliedOxideL": null,
+      "physicalL": 76.39,
+      "highlightL": 81.08,
+      "current": {
+        "hue_shift": -87.5,
+        "chroma_scale": 1,
+        "value": 1,
+        "oxide_l": null
+      },
+      "samples": [
+        {
+          "code": "CYC-0021",
+          "axes": {
+            "base_family": "ROSE_GOLD",
+            "surface": "MATT",
+            "tone": null,
+            "effect": null,
+            "tint": null
+          },
+          "chartHex": "#4C3F44",
+          "renderedHex": "#E4AEC4",
+          "renderedLab": [
+            76.41,
+            23.118,
+            -3.47
+          ],
+          "highlightL": 81.08,
+          "transfer": [
+            0.8153377800499592,
+            0.6938195289543023,
+            0.7383198392806795
+          ]
+        }
+      ],
+      "lightnessDiff": 0.02
+    },
+    {
+      "family": "RUSTY_STEEL",
+      "rows": 1,
+      "glareOnly": false,
+      "preferredSurfaces": false,
+      "exempt": null,
+      "codes": [
+        "CYC-0105"
+      ],
+      "chartMedianLab": [
+        4.96,
+        -0.3,
+        -1.38
+      ],
+      "renderedMedianLab": [
+        26.91,
+        -0.25,
+        -0.96
+      ],
+      "hueDiff": 2.4,
+      "hueError": 2.398,
+      "appliedHueShift": -14.75,
+      "appliedChromaScale": 1,
+      "appliedOxideL": null,
+      "physicalL": 26.87,
+      "highlightL": 51.2,
+      "current": {
+        "hue_shift": -14.75,
+        "chroma_scale": 1,
+        "value": 1,
+        "oxide_l": null
+      },
+      "samples": [
+        {
+          "code": "CYC-0105",
+          "axes": {
+            "base_family": "RUSTY_STEEL",
+            "surface": null,
+            "tone": null,
+            "effect": null,
+            "tint": null
+          },
+          "chartHex": "#0F1113",
+          "renderedHex": "#3E4041",
+          "renderedLab": [
+            26.906,
+            -0.251,
+            -0.965
+          ],
+          "highlightL": 51.2,
+          "transfer": [
+            0.8897183186889774,
+            0.888908604361665,
+            0.8880170000581207
+          ]
+        }
+      ],
+      "lightnessDiff": 0.04
+    },
+    {
+      "family": "STAINLESS_STEEL",
+      "rows": 1,
+      "glareOnly": true,
+      "preferredSurfaces": false,
+      "exempt": "physical iron/steel, no fit; swatch CYC-0086 needs re-photographing (R4)",
+      "codes": [
+        "CYC-0086"
+      ],
+      "chartMedianLab": [
+        22.42,
+        1.33,
+        -0.94
+      ],
+      "renderedMedianLab": [
+        65.3,
+        0.36,
+        -0.99
+      ],
+      "hueDiff": 34.34,
+      "hueError": 34.335,
+      "appliedHueShift": 0,
+      "appliedChromaScale": 1,
+      "appliedOxideL": null,
+      "physicalL": 65.28,
+      "highlightL": 94.85,
+      "current": {
+        "hue_shift": 0,
+        "chroma_scale": 1,
+        "value": 1,
+        "oxide_l": null
+      },
+      "samples": [
+        {
+          "code": "CYC-0086",
+          "axes": {
+            "base_family": "STAINLESS_STEEL",
+            "surface": null,
+            "tone": null,
+            "effect": null,
+            "tint": null
+          },
+          "chartHex": "#373537",
+          "renderedHex": "#9E9EA0",
+          "renderedLab": [
+            65.301,
+            0.365,
+            -0.988
+          ],
+          "highlightL": 94.85,
+          "transfer": [
+            0.6793268147763833,
+            0.6793268147763833,
+            0.6800428013026021
+          ]
+        }
+      ],
+      "lightnessDiff": 0.02
+    },
+    {
+      "family": "TIN",
+      "rows": 3,
+      "glareOnly": false,
+      "preferredSurfaces": false,
+      "exempt": "3c chart-derived value kept (R4)",
+      "codes": [
+        "CYC-0048",
+        "CYC-0046",
+        "CYC-0049"
+      ],
+      "chartMedianLab": [
+        17.81,
+        -0.36,
+        -1.37
+      ],
+      "renderedMedianLab": [
+        23.66,
+        0,
+        0
+      ],
+      "hueDiff": 75.4,
+      "hueError": 75.4,
+      "appliedHueShift": 0,
+      "appliedChromaScale": 1,
+      "appliedOxideL": 17.81,
+      "physicalL": 23.48,
+      "highlightL": 47.24,
+      "current": {
+        "hue_shift": 0,
+        "chroma_scale": 1,
+        "value": 0.1432,
+        "oxide_l": 17.81
+      },
+      "samples": [
+        {
+          "code": "CYC-0048",
+          "axes": {
+            "base_family": "TIN",
+            "surface": null,
+            "tone": "ANTI",
+            "effect": null,
+            "tint": null
+          },
+          "chartHex": "#2A2C2C",
+          "renderedHex": "#353535",
+          "renderedLab": [
+            22.077,
+            0,
+            0
+          ],
+          "highlightL": 36.57,
+          "transfer": [
+            0.8696608043423082,
+            0.8696608043423082,
+            0.8696608043423082
+          ]
+        },
+        {
+          "code": "CYC-0046",
+          "axes": {
+            "base_family": "TIN",
+            "surface": null,
+            "tone": null,
+            "effect": null,
+            "tint": null
+          },
+          "chartHex": "#5A5C5E",
+          "renderedHex": "#383838",
+          "renderedLab": [
+            23.662,
+            0,
+            0
+          ],
+          "highlightL": 47.24,
+          "transfer": [
+            0.9245190521175202,
+            0.9245190521175202,
+            0.9245190521175202
+          ]
+        },
+        {
+          "code": "CYC-0049",
+          "axes": {
+            "base_family": "TIN",
+            "surface": null,
+            "tone": null,
+            "effect": "CONTRAST",
+            "tint": null
+          },
+          "chartHex": "#121315",
+          "renderedHex": "#383838",
+          "renderedLab": [
+            23.662,
+            0,
+            0
+          ],
+          "highlightL": 47.24,
+          "transfer": [
+            0.9245190521175202,
+            0.9245190521175202,
+            0.9245190521175202
+          ]
+        }
+      ],
+      "lightnessDiff": 0.18
+    }
+  ]
+}

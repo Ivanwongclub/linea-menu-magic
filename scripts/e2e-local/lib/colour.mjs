@@ -103,3 +103,15 @@ export const median = (values) => {
 };
 
 export const medianLab = (labs) => [0, 1, 2].map((i) => median(labs.map((l) => l[i])));
+
+/** CIELAB hue angle in degrees, [0, 360). */
+export const hueOf = ([, a, b]) => {
+  const d = (Math.atan2(b, a) * 180) / Math.PI;
+  return d < 0 ? d + 360 : d;
+};
+
+/** Smallest absolute difference between two hue angles, degrees. */
+export const hueDifference = (h1, h2) => {
+  const d = Math.abs(h1 - h2) % 360;
+  return d > 180 ? 360 - d : d;
+};
