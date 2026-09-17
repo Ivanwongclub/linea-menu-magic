@@ -17,6 +17,10 @@ export interface AxisName {
  * feed `useFinishFilter`/`FinishFacetRail`/`FinishSwatchGrid` unchanged.
  */
 export type PickerFinish = FinishRow & {
+  /** Phase 3b columns (20260917180000) — typed here until types.ts is regenerated. */
+  base_color_hex: string | null;
+  clearcoat: number;
+  clearcoat_roughness: number;
   process: AxisName | null;
   base_family: AxisName | null;
   surface: AxisName | null;

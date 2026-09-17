@@ -1,10 +1,10 @@
 /**
  * Finish swatch renderer — a standalone module.
  *
- * Renders a finish from the three-parameter material model on `finishes`
- * (metalness, roughness, anisotropy — derived from the chart axes by
- * 20260904150000_finish_material_params.sql) plus `hex_approx`, as a
- * deterministic SVG. Used by the admin picker and finish manager; M4/M5 and
+ * Renders a finish from the material model on `finishes` (metalness,
+ * roughness, anisotropy, base_color_hex — derived in the database by
+ * 20260917180000_phase3b_metal_reflectance.sql, the same columns the 3D
+ * editor reads) as a deterministic SVG. Used by the admin picker and finish manager; M4/M5 and
  * the 3D editor's PBR presets read the same three columns.
  *
  * What it is NOT: a flat hex block, or a "shiny gradient". Measured against
@@ -14,17 +14,20 @@
  *
  *   mirror   roughness <= 0.15, metal     dark body, one narrow hard highlight
  *   brushed  anisotropy >= 0.5            highlight smeared into a directional band + streaks
- *   matt     roughness >= 0.6             near-flat field, no highlight point
- *   sand     roughness >= 0.9, metal      fine stochastic grain, no highlight
+ *   matt     roughness >= 0.5             near-flat field, no highlight point
+ *   sand     roughness >= 0.65, metal     fine stochastic grain, no highlight
  *   soft     everything between           broad soft highlight sized by roughness
  *   gloss    roughness <= 0.15, non-metal painted body with a white highlight
  *
- * hex_approx is the material's colour (albedo), not the photographed value;
- * the body tone is derived from it through the model above.
+ * base_color_hex is the material's colour (measured F0 for plating; the
+ * painted colour for paint), not the photographed value; the body tone is
+ * derived from it through the model above. hex_approx is the fallback for
+ * rows read without the Phase 3b column.
  */
 
 export interface FinishMaterial {
   hex_approx: string | null;
+  base_color_hex?: string | null;
   metalness: number;
   roughness: number;
   anisotropy: number;
@@ -59,10 +62,10 @@ export function describeFinishSurface(m: FinishMaterial): SurfaceKind {
   const metal = clamp01(m.metalness);
   const rough = clamp01(m.roughness);
   const aniso = clamp01(m.anisotropy);
-  if (rough >= 0.9 && metal >= 0.5) return "sand";
+  if (rough >= 0.65 && metal >= 0.5) return "sand";
   if (aniso >= 0.5) return "brushed";
   if (rough <= 0.15) return metal >= 0.5 ? "mirror" : "gloss";
-  if (rough >= 0.6) return "matt";
+  if (rough >= 0.5) return "matt";
   return "soft";
 }
 
@@ -81,7 +84,8 @@ export function finishSwatchSvg(m: FinishMaterial): string {
   const metal = clamp01(m.metalness);
   const rough = clamp01(m.roughness);
   const aniso = clamp01(m.anisotropy);
-  const base = hexToRgb(m.hex_approx);
+  const colour = m.base_color_hex ?? m.hex_approx;
+  const base = hexToRgb(colour);
   const kind = describeFinishSurface(m);
 
   // --- body: what the field of the sample looks like away from the highlight
@@ -128,7 +132,7 @@ export function finishSwatchSvg(m: FinishMaterial): string {
 
   if (kind === "sand") {
     // Fine stochastic grain, no specular point.
-    const seed = seedFrom(m.hex_approx);
+    const seed = seedFrom(colour);
     defs.push(
       `<filter id="g" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="${seed}" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="table" tableValues="0 0.9"/></feComponentTransfer></filter>`,
     );

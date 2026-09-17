@@ -7,6 +7,7 @@ import { useI18n } from "@/features/i18n/I18nProvider";
 import { FinishSwatch } from "@/features/finishes/FinishSwatch";
 import { FinishSelectionPicker } from "@/features/finishes/FinishSelectionPicker";
 import { finishAxisLine, finishMarketingName } from "@/features/finishes/finishAxisLine";
+import { tradeLigne } from "../lib/ligne";
 import type { PickerFinish } from "../hooks/useFinishOptions";
 import type { AutosaveStatus } from "../hooks/useAutosaveDraft";
 import type { EditorColour, EditorProduct, EditorSizeVariant } from "../hooks/useEditorProduct";
@@ -37,7 +38,7 @@ function formatSize(v: EditorSizeVariant): string {
   if (v.size_label) return v.size_label;
   const mm = Number(v.size_primary_mm.toFixed(2));
   // Ligne is a button measurement — suppressed on labelled, non-round hardware (R3).
-  const ligne = !v.size_label && v.size_ligne != null ? ` (${Number(v.size_ligne.toFixed(1))}L)` : "";
+  const ligne = !v.size_label && v.size_ligne != null ? ` (${tradeLigne(v.size_ligne)}L)` : "";
   return `${mm}mm${ligne}`;
 }
 

@@ -9,6 +9,8 @@ this is an index, not a decision log.
 | 1 | Schema, RLS, roles | **Done** |
 | 2 | Editor shell, route, lazy load, catalogue entry | **Done** |
 | 3 | Finish picker integration | **Done** |
+| 3b | Physically correct plated rendering | **Done** |
+| 3c | Painted-finish calibration from `wincyc-swatch-measurements.csv` | Pending |
 | 4 | Text: content, font, straight and circular layout | Not started |
 | 5 | Direct manipulation: drag to position, size, curve | Not started |
 | 6 | Emboss and deboss via CSG in a worker | Not started |
@@ -276,3 +278,174 @@ behaviour against the local stack in a later phase will need to do the same.
    already-mounted page. *Recommend* addressing this when Phase 9 adds a
    design list (the first UI that could navigate between two designs
    without a full remount).
+
+## Phase 3b — done (2026-09-17)
+
+Files:
+
+- `supabase/migrations/20260917180000_phase3b_metal_reflectance.sql` —
+  `finishes.base_color_hex`, `clearcoat`, `clearcoat_roughness`; new
+  `finish_metal_f0()`, `finish_linear_to_srgb_hex()`,
+  `finish_plated_material()`; `finishes_derive_material()` rewritten to
+  route plated rows (coating null) to the new model and painted rows to the
+  unchanged `finish_material_params()` with `base_color_hex = hex_approx`;
+  all 108 plated rows recomputed. `hex_approx` is not rewritten.
+- `src/features/finishes/metalReflectance.ts` (new) — TS mirror of the
+  tables and derivation.
+- `src/features/finishes/swatch.ts`, `FinishSwatch.tsx` — the SVG swatch
+  reads `base_color_hex` (falls back to `hex_approx`); surface thresholds
+  moved to the new roughness scale (matt ≥ 0.5, sand ≥ 0.65).
+- `src/features/editor/lib/renderSettings.ts` (new) — tone mapping,
+  exposure, HDRI path and rotation, camera constants.
+- `src/features/editor/lib/prepareModel.ts` (new) — smooth normals for
+  normal-less OBJs (weld + `computeVertexNormals`); decorated-face rotation.
+- `src/features/editor/lib/ligne.ts` (new) — trade-size ligne display.
+- `src/features/editor/components/EditorModel.tsx` — material from the new
+  columns (incl. clearcoat); orientation by rotation; projected-box framing;
+  material swaps no longer rebuild the object (so no camera jump);
+  `ContactShadows`.
+- `src/features/editor/components/EditorViewport.tsx` — drei `Environment
+  files="/env/studio.hdr"`, background off, fixed rotation; `gl` =
+  NeutralToneMapping / sRGB / exposure; transparent canvas over the
+  `bg-secondary` token. `StudioEnvironment.tsx` (RoomEnvironment) deleted.
+- `EditorPanel.tsx`, `MeasurementLine.tsx` — ligne via `tradeLigne`.
+- `src/features/editor/hooks/useFinishOptions.ts` — `PickerFinish` gains
+  the three new columns (typed locally; see open question 1).
+- `package.json` / lockfile — `three` and `@types/three` `^0.161.0` →
+  `^0.162.0`, the first release with `NeutralToneMapping` (and
+  `Scene.environmentRotation`); `three-bvh-csg@0.0.17` allows `>=0.151`.
+- `scripts/e2e-local/scenarios/render-calibration.mjs` (new) — R6.
+- `scripts/e2e-local/scenarios/swatch-renderer.mjs` — expected derived
+  values updated to the new surface table.
+- `reports/3b-materials.png` — six plated finishes on the lettered Polo
+  button, for human review.
+
+### Rendering pipeline
+
+| Setting | Value |
+|---|---|
+| Output colour space | sRGB |
+| Tone mapping | Khronos PBR Neutral (three r162 `NeutralToneMapping`) |
+| Exposure | 1.0 |
+| Environment | `public/env/studio.hdr`, background off, Y rotation 160° |
+| Non-metal material | dielectric, roughness 0.5 |
+| Camera | elevation 30°, azimuth −25°, projected box fills 60% of the limiting dimension |
+
+Calibration (through the real editor route, 5×5 median at the centre):
+`#808080` → (128,127,128); `#C0392B` → (193,56,43). Rotation was chosen by
+sweeping 0–360° in 30° then 150–180° in 5° on a bright nickel disc: 160°
+reflects the cyclorama's curve as a soft diagonal gradient; 150° shows a
+flat's hard edge; ≥170° goes flat white; 0–90° reflects the dark floor. At
+160° the camera-facing disc happens to receive unit irradiance, which is
+why exposure lands at exactly 1.0.
+
+### F0 table (linear RGB)
+
+Source: Real-Time Rendering 4th ed., Table 9.2, after Hoffman, "Physics and
+Math of Shading", SIGGRAPH 2015.
+
+| Metal | R | G | B |
+|---|---|---|---|
+| Gold | 1.000 | 0.782 | 0.344 |
+| Silver | 0.972 | 0.960 | 0.915 |
+| Copper | 0.955 | 0.638 | 0.538 |
+| Nickel | 0.660 | 0.609 | 0.526 |
+| Brass (C260) | 0.910 | 0.778 | 0.423 |
+| Iron / steel | 0.562 | 0.565 | 0.578 |
+| Tin | 0.673 | 0.637 | 0.585 — **placeholder** (platinum's F0; tin is not in the table) |
+| Zinc | 0.664 | 0.824 | 0.850 |
+| Aluminium | 0.913 | 0.922 | 0.924 |
+
+### Base family mapping
+
+| Base family | Metal | Blend / variant |
+|---|---|---|
+| NICKEL | nickel | — |
+| GUN_METAL | nickel | black |
+| GOLD | gold | — |
+| LIGHT_GOLD | gold | → silver, t = 0.35 |
+| ROSE_GOLD | gold | → copper, t = 0.5 |
+| BRASS | brass | — |
+| ANTI_BRASS | brass | anti |
+| RED_COPPER | copper | — |
+| ANTI_COPPER | copper | anti |
+| BLACK_COPPER | copper | black |
+| TIN | tin | — |
+| ANTI_SILVER | silver | anti |
+| ALLOY | zinc | — |
+| STAINLESS_STEEL | iron | — |
+| RUSTY_STEEL | iron | anti (rust hue not modelled) |
+
+Variants desaturate toward Rec.709 luminance, then scale: **anti** =
+saturation 0.9 × value 0.18; **black** = saturation 0 × value 0.13. First
+pass (0.6/0.45, 0.4/0.28) rendered anti brass olive-grey and gun metal
+mid-grey; the factors were reset against the chart's photographed
+`hex_approx` for CYC-0057 (`#6B6247`) and CYC-0004 (`#4C5155`).
+
+### Offsets (per-channel multipliers on linear RGB, tone then tint)
+
+| Code | Axis | R | G | B |
+|---|---|---|---|---|
+| IMT | tone | 0.95 | 0.95 | 0.92 |
+| DARK | tone | 0.40 | 0.40 | 0.40 |
+| LIGHT | tone | 1.10 | 1.10 | 1.10 |
+| MEDIUM | tone | 0.70 | 0.70 | 0.70 |
+| DEEP | tone | 0.55 | 0.55 | 0.55 |
+| ANTI | tone | 0.20 | 0.19 | 0.17 |
+| ANCIENT | tone | 0.17 | 0.15 | 0.12 |
+| JAPAN | tint | 0.92 | 0.88 | 0.80 |
+| COFFEE | tint | 0.88 | 0.72 | 0.56 |
+| CHOCOLATE | tint | 0.78 | 0.60 | 0.46 |
+| PINK | tint | 1.06 | 0.86 | 0.90 |
+| ORANGE | tint | 1.10 | 0.84 | 0.60 |
+| GUN_METAL | tint | 0.72 | 0.74 | 0.78 |
+
+Surface: BRIGHT 0.06/0 · BRUSHED 0.35/0.8 · CIRCLE_BRUSHED 0.35/0.8 · MATT
+0.55/0 · SAND 0.70/0 · null → BRIGHT. Clearcoat 1.0 / 0.1 for effect
+ENAMEL_DIP — the taxonomy has no separate plated-lacquer code (無叻 "no
+lacquer" is constant across the chart). Every other effect is ignored for
+plated rows. Metalness 1. All offsets and variant factors are provisional
+until 3c.
+
+### Lettering orientation
+
+The Polo OBJ is Y-up with its relief on +Y and winding consistent with its
+normals (15 783 of 15 788 faces), so the mirrored read wasn't inside-out
+geometry. Orientation is now a rotation that brings the part's thinnest
+axis, on its denser side, to +Z (`decoratedFaceRotation`); rendered, "EST."
+and "POLO" read the right way round. No negative scale anywhere.
+
+### Pending — Phase 3c
+
+Painted finishes (coating not null, 27 rows) still use
+`finish_material_params()` and `hex_approx`. 3c calibrates them — and
+revisits the provisional plated offsets — from
+`docs/3d-editor/wincyc-swatch-measurements.csv`.
+
+### Open questions from this phase, with a recommendation each
+
+1. **`types.ts` not regenerated.** `src/integrations/supabase/types.ts` was
+   outside this phase's scope, so the three new columns are typed locally
+   (`PickerFinish`, optional `FinishMaterial.base_color_hex`). *Recommend*
+   running `npm run e2e:types` in the next phase that has it in scope.
+2. **Storefront swatches still read `hex_approx`.** `useProduct`'s explicit
+   finish column list (outside scope) doesn't select `base_color_hex`, so
+   the public product page's swatches keep the old colour while the CMS and
+   editor use the new one. *Recommend* adding the column to that select so
+   all three surfaces agree, per R4's intent.
+3. **Tin F0 is a placeholder.** *Recommend* taking a measured value in 3c
+   (or from a spectral n/k source) rather than keeping platinum's.
+4. **Polished red copper reads pale salmon, not orange-brown.** That is
+   copper's measured F0 reflecting a white cyclorama — physically right,
+   but further from the chart photo (`#B4714B`) than the other five.
+   *Recommend* judging it on the contact sheet; if it reads wrong to
+   WIN-CYC, 3c's measurements are the place to fix it, not a hand-tuned F0.
+5. **`public/models/Polo_Button_10.8.obj` was read outside scope.** The
+   calibration scenario needs a lettered model and it is the only one in
+   the repo; I inspected its axis extents, normals and winding with a
+   script. *Recommend* moving a copy under `scripts/e2e-local/fixtures/` so
+   the scenario doesn't depend on a public asset.
+6. **Plated `hex_approx` diverges from `base_color_hex`.** The filter rail
+   and any other `hex_approx` consumer keep the chart-photo colour.
+   *Recommend* leaving it — it is CMS-editable data and R4 only asked for
+   painted rows to keep theirs — unless WIN-CYC wants the two unified.

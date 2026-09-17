@@ -14,7 +14,7 @@ interface Props {
  * took without inspecting pixels.
  */
 export function FinishSwatch({ finish, className, style, title }: Props) {
-  const key = `${finish.hex_approx}|${finish.metalness}|${finish.roughness}|${finish.anisotropy}|${finish.swatch_url ?? ""}`;
+  const key = `${finish.base_color_hex ?? finish.hex_approx}|${finish.metalness}|${finish.roughness}|${finish.anisotropy}|${finish.swatch_url ?? ""}`;
   const bg = useMemo(() => finishSwatchStyle(finish), [key]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <div

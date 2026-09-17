@@ -15,8 +15,8 @@ export default async function ({ page, admin, editor, base, h }) {
   const byCode = Object.fromEntries(nickels.map((n) => [n.cyc_code, n]));
   assert.deepEqual(
     CODES.map((c) => [byCode[c].metalness, byCode[c].roughness, byCode[c].anisotropy]),
-    [[1, 0.08, 0], [1, 0.35, 0.85], [1, 0.7, 0], [1, 0.95, 0]],
-    "derived columns match the reference table",
+    [[1, 0.06, 0], [1, 0.35, 0.8], [1, 0.55, 0], [1, 0.7, 0]],
+    "derived columns match the Phase 3b surface table",
   );
 
   await h.login(editor);
@@ -55,7 +55,7 @@ export default async function ({ page, admin, editor, base, h }) {
   await h.waitForDialogClosed();
 
   let { data: after } = await admin.from("finishes").select("roughness, anisotropy, metalness").eq("cyc_code", "CYC-0003").single();
-  assert.deepEqual([after.metalness, after.roughness, after.anisotropy], [1, 0.35, 0.85], "MATT → BRUSHED recomputed on UPDATE");
+  assert.deepEqual([after.metalness, after.roughness, after.anisotropy], [1, 0.35, 0.8], "MATT → BRUSHED recomputed on UPDATE");
   await page.waitForFunction(() => document.querySelector('[data-testid="finish-row"] [data-surface]')?.getAttribute("data-surface") === "brushed");
 
   // and back, so the chart is left as it was
@@ -65,7 +65,7 @@ export default async function ({ page, admin, editor, base, h }) {
   await page.getByRole("dialog").getByRole("button", { name: "Save", exact: true }).click();
   await h.waitForDialogClosed();
   ({ data: after } = await admin.from("finishes").select("roughness, anisotropy").eq("cyc_code", "CYC-0003").single());
-  assert.deepEqual([after.roughness, after.anisotropy], [0.7, 0], "BRUSHED → MATT recomputed");
+  assert.deepEqual([after.roughness, after.anisotropy], [0.55, 0], "BRUSHED → MATT recomputed");
 
   /* ---- a hand-set value is respected; a later axis change re-derives ---- */
   await admin.from("finishes").update({ roughness: 0.5 }).eq("cyc_code", "CYC-0003");
@@ -76,10 +76,10 @@ export default async function ({ page, admin, editor, base, h }) {
   assert.equal(after.roughness, 0.5, "no-op axis write leaves the hand-set value");
   await admin.from("finishes").update({ surface_id: byCode["CYC-0002"].surface_id }).eq("cyc_code", "CYC-0003"); // real axis change → re-derived
   ({ data: after } = await admin.from("finishes").select("roughness, anisotropy").eq("cyc_code", "CYC-0003").single());
-  assert.deepEqual([after.roughness, after.anisotropy], [0.35, 0.85], "axis change re-derives over a hand-set value");
+  assert.deepEqual([after.roughness, after.anisotropy], [0.35, 0.8], "axis change re-derives over a hand-set value");
   await admin.from("finishes").update({ surface_id: byCode["CYC-0003"].surface_id }).eq("cyc_code", "CYC-0003");
   ({ data: after } = await admin.from("finishes").select("roughness, anisotropy").eq("cyc_code", "CYC-0003").single());
-  assert.deepEqual([after.roughness, after.anisotropy], [0.7, 0]);
+  assert.deepEqual([after.roughness, after.anisotropy], [0.55, 0]);
 
   return { nickels: nickels.map((n) => [n.cyc_code, n.metalness, n.roughness, n.anisotropy]), surfaces, screenshots: shots };
 }

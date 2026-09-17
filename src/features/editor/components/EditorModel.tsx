@@ -1,10 +1,18 @@
-import { useEffect, useMemo, type RefObject } from "react";
+import { useEffect, useLayoutEffect, useMemo, type RefObject } from "react";
 import { useLoader, useThree } from "@react-three/fiber";
+import { ContactShadows } from "@react-three/drei";
 import * as THREE from "three";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import type { EditorColour } from "../hooks/useEditorProduct";
 import type { PickerFinish } from "../hooks/useFinishOptions";
+import { decoratedFaceRotation, withSmoothNormals } from "../lib/prepareModel";
+import {
+  CAMERA_AZIMUTH_DEG,
+  CAMERA_ELEVATION_DEG,
+  NON_METAL_ROUGHNESS,
+  TARGET_VIEWPORT_FILL,
+} from "../lib/renderSettings";
 
 interface EditorModelProps {
   url: string;
@@ -16,102 +24,162 @@ interface EditorModelProps {
   controlsRef: RefObject<OrbitControlsImpl>;
 }
 
-const TARGET_VIEWPORT_FILL = 0.6;
-
 /**
- * BRUSHED runs linear along the model's local X axis, which is already
- * three.js's zero-rotation tangent default — no rotation needed. Every
- * other surface (including CIRCLE_BRUSHED, a radial pattern no single
- * linear angle can express without per-vertex tangent data) gets the same
- * neutral value; a true radial mapping is Phase 6+ geometry work (R6).
+ * BRUSHED runs linear along the model's local X axis, which is three.js's
+ * zero-rotation tangent default. CIRCLE_BRUSHED is radial — no single
+ * angle expresses it without per-vertex tangents — and every other surface
+ * is isotropic, so all resolve to 0 today (R6, Phase 3).
  */
 function anisotropyRotationForSurface(_surfaceCode: string | undefined): number {
   return 0;
 }
 
 /**
- * `MeshPhysicalMaterial` driven directly by the finish row's PBR columns
- * (axis-design §4) — no hand-tuned presets. A non-metal product renders its
- * colour instead; there is no PBR data for a plain colourway, so metalness
- * is 0 and roughness a plain mid default.
+ * `MeshPhysicalMaterial` straight from the finish row (Phase 3b R3/R4): the
+ * database derives base colour from measured metal F0, roughness and
+ * anisotropy from the surface, clearcoat from enamel-dip. A non-metal
+ * product renders its colour as a plain dielectric.
  */
 export function EditorModel({ url, sizePrimaryMm, isMetal, finish, colour, controlsRef }: EditorModelProps) {
   const obj = useLoader(OBJLoader, url);
-  const { camera } = useThree();
+  const { camera, size: viewport } = useThree();
 
   const material = useMemo(() => {
     if (isMetal && finish) {
       return new THREE.MeshPhysicalMaterial({
-        color: finish.hex_approx ?? "#9a9a9a",
+        color: finish.base_color_hex ?? finish.hex_approx ?? "#9a9a9a",
         metalness: finish.metalness,
         roughness: finish.roughness,
         anisotropy: finish.anisotropy,
         anisotropyRotation: anisotropyRotationForSurface(finish.surface?.code),
+        clearcoat: finish.clearcoat ?? 0,
+        clearcoatRoughness: finish.clearcoat_roughness ?? 0,
       });
     }
     return new THREE.MeshPhysicalMaterial({
       color: colour?.hex ?? "#9a9a9a",
       metalness: 0,
-      roughness: 0.5,
+      roughness: NON_METAL_ROUGHNESS,
     });
   }, [isMetal, finish, colour]);
 
   useEffect(() => () => material.dispose(), [material]);
 
-  const model = useMemo(() => {
-    const clone = obj.clone(true);
-    clone.traverse((child) => {
-      if ((child as THREE.Mesh).isMesh) {
-        (child as THREE.Mesh).material = material;
-      }
+  // Geometry prep is per loaded file: smooth normals where missing, then the
+  // rotation that brings the decorated face to +Z.
+  const prepared = useMemo(() => {
+    const group = obj.clone(true);
+    group.traverse((child) => {
+      const mesh = child as THREE.Mesh;
+      if (mesh.isMesh) mesh.geometry = withSmoothNormals(mesh.geometry);
     });
+    group.quaternion.copy(decoratedFaceRotation(group));
+    return group;
+  }, [obj]);
 
-    // 1 scene unit = 1mm: scale the loaded geometry's horizontal extent to
-    // the selected variant's real measurement, regardless of the source
-    // file's own units (architecture Part 6 / R6, Phase 2).
+  // Material is assigned separately so changing the finish never rebuilds
+  // the object — which would re-run framing and yank the camera.
+  const model = useMemo(() => {
+    const clone = prepared.clone(true);
+
+    // 1 scene unit = 1mm: the face (now in XY) spans the variant's real size.
     const rawBox = new THREE.Box3().setFromObject(clone);
-    const size = rawBox.getSize(new THREE.Vector3());
-    const rawDiameter = Math.max(size.x, size.z);
+    const rawSize = rawBox.getSize(new THREE.Vector3());
+    const rawDiameter = Math.max(rawSize.x, rawSize.y);
     if (rawDiameter > 0 && sizePrimaryMm > 0) {
       clone.scale.setScalar(sizePrimaryMm / rawDiameter);
     }
 
-    // Recenter so the bounding box sits at the origin — camera framing below
-    // targets (0,0,0), and this replaces drei's <Center> so the box used for
-    // framing matches the box actually rendered, with no wrapper offset.
     const scaledBox = new THREE.Box3().setFromObject(clone);
     clone.position.sub(scaledBox.getCenter(new THREE.Vector3()));
-
     return clone;
-  }, [obj, material, sizePrimaryMm]);
+  }, [prepared, sizePrimaryMm]);
 
-  // R1: frame by bounding sphere on every new model so it fills ~60% of the
-  // viewport, three-quarter view, decorated (+Z) face toward the camera.
-  // `saveState()` makes this the OrbitControls "home" — double-click reset
-  // returns here rather than an arbitrary earlier position.
+  useLayoutEffect(() => {
+    model.traverse((child) => {
+      const mesh = child as THREE.Mesh;
+      if (mesh.isMesh) mesh.material = material;
+    });
+  }, [model, material]);
+
+  const bounds = useMemo(() => new THREE.Box3().setFromObject(model), [model]);
+
+  // Frame on load (R1, Phase 3): three-quarter view, distance solved so the
+  // projected bounding box fills TARGET_VIEWPORT_FILL of the limiting
+  // viewport dimension. saveState() makes this the double-click home.
   useEffect(() => {
-    const sphere = new THREE.Box3().setFromObject(model).getBoundingSphere(new THREE.Sphere());
     const perspective = camera as THREE.PerspectiveCamera;
-    const fov = THREE.MathUtils.degToRad(perspective.fov ?? 35);
-    const distance = sphere.radius > 0 ? sphere.radius / (TARGET_VIEWPORT_FILL * Math.tan(fov / 2)) : 60;
-    const elevation = THREE.MathUtils.degToRad(30);
-    const azimuth = THREE.MathUtils.degToRad(-25);
-
-    camera.position.set(
-      distance * Math.cos(elevation) * Math.sin(azimuth),
-      distance * Math.sin(elevation),
-      distance * Math.cos(elevation) * Math.cos(azimuth),
+    const center = bounds.getCenter(new THREE.Vector3());
+    const elevation = THREE.MathUtils.degToRad(CAMERA_ELEVATION_DEG);
+    const azimuth = THREE.MathUtils.degToRad(CAMERA_AZIMUTH_DEG);
+    const direction = new THREE.Vector3(
+      Math.cos(elevation) * Math.sin(azimuth),
+      Math.sin(elevation),
+      Math.cos(elevation) * Math.cos(azimuth),
     );
-    camera.lookAt(sphere.center);
-    perspective.updateProjectionMatrix?.();
+    const corners = [0, 1, 2, 3, 4, 5, 6, 7].map(
+      (i) =>
+        new THREE.Vector3(
+          i & 1 ? bounds.max.x : bounds.min.x,
+          i & 2 ? bounds.max.y : bounds.min.y,
+          i & 4 ? bounds.max.z : bounds.min.z,
+        ),
+    );
+
+    let distance = Math.max(bounds.getSize(new THREE.Vector3()).length(), 1) * 2;
+    const ndc = new THREE.Vector3();
+    for (let i = 0; i < 6; i++) {
+      camera.position.copy(center).addScaledVector(direction, distance);
+      camera.lookAt(center);
+      camera.updateMatrixWorld();
+      perspective.updateProjectionMatrix();
+      let minX = Infinity;
+      let maxX = -Infinity;
+      let minY = Infinity;
+      let maxY = -Infinity;
+      for (const c of corners) {
+        ndc.copy(c).project(camera);
+        minX = Math.min(minX, ndc.x);
+        maxX = Math.max(maxX, ndc.x);
+        minY = Math.min(minY, ndc.y);
+        maxY = Math.max(maxY, ndc.y);
+      }
+      const fill = Math.max(maxX - minX, maxY - minY) / 2;
+      if (fill <= 0) break;
+      distance *= fill / TARGET_VIEWPORT_FILL;
+    }
+    camera.position.copy(center).addScaledVector(direction, distance);
+    camera.lookAt(center);
+    perspective.near = distance / 100;
+    perspective.far = distance * 100;
+    perspective.updateProjectionMatrix();
 
     const controls = controlsRef.current;
     if (controls) {
-      controls.target.copy(sphere.center);
+      controls.target.copy(center);
+      controls.minDistance = distance * 0.35;
+      controls.maxDistance = distance * 3;
       controls.update();
       controls.saveState();
     }
-  }, [model, camera, controlsRef]);
+  }, [bounds, camera, controlsRef, viewport.width, viewport.height]);
 
-  return <primitive object={model} />;
+  const size = bounds.getSize(new THREE.Vector3());
+  const footprint = Math.max(size.x, size.z) * 2.5;
+
+  return (
+    <>
+      <primitive object={model} />
+      <ContactShadows
+        key={`${sizePrimaryMm}-${url}`}
+        position={[0, bounds.min.y - 0.01, 0]}
+        scale={footprint}
+        far={size.y}
+        blur={2.4}
+        opacity={0.45}
+        resolution={512}
+        frames={1}
+      />
+    </>
+  );
 }

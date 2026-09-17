@@ -1,14 +1,14 @@
 import { Suspense, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
+import { Environment, OrbitControls } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { Box } from "lucide-react";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { supabase } from "@/integrations/supabase/client";
-import { StudioEnvironment } from "./StudioEnvironment";
 import { EditorModel } from "./EditorModel";
 import type { EditorColour } from "../hooks/useEditorProduct";
 import type { PickerFinish } from "../hooks/useFinishOptions";
+import { ENVIRONMENT_ROTATION_Y, GL_SETTINGS, STUDIO_HDRI } from "../lib/renderSettings";
 
 interface EditorViewportProps {
   modelStoragePath: string | null;
@@ -60,22 +60,24 @@ export function EditorViewport({ modelStoragePath, sizePrimaryMm, isMetal, finis
 
   const url = supabase.storage.from("product-models").getPublicUrl(modelStoragePath).data.publicUrl;
 
+  // Transparent canvas over the site's secondary token: the backdrop is the
+  // design system's own colour, never tone-mapped (R2).
   return (
-    <div className="relative flex-1 bg-secondary/20">
+    <div className="relative flex-1 bg-secondary" data-testid="editor-viewport">
       <Suspense fallback={<ViewportFallback />}>
         <Canvas
           camera={{ fov: 35, position: [20, 20, 60] }}
           dpr={[1, 2]}
+          gl={GL_SETTINGS}
           onDoubleClick={() => controlsRef.current?.reset()}
         >
-          <StudioEnvironment />
+          <Environment files={STUDIO_HDRI} background={false} environmentRotation={[0, ENVIRONMENT_ROTATION_Y, 0]} />
           <EditorModel url={url} sizePrimaryMm={sizePrimaryMm} isMetal={isMetal} finish={finish} colour={colour} controlsRef={controlsRef} />
           <OrbitControls
             ref={controlsRef}
+            makeDefault
             enableDamping
             dampingFactor={0.08}
-            minDistance={sizePrimaryMm * 0.8 || 5}
-            maxDistance={sizePrimaryMm * 12 || 400}
             autoRotate={autoRotate}
             autoRotateSpeed={0.6}
             onStart={() => setAutoRotate(false)}
