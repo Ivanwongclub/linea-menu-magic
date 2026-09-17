@@ -22,7 +22,7 @@ this is an index, not a decision log.
 | 4f | Recipe v2, store / autosave / anonymous draft for layers; add text, layer list, straight layout | **Done** |
 | 4g | Circular layout, per-glyph placement, reversed text without mirroring (§5) | **Done** |
 | 4h | Hybrid numeric / slider controls in "Position and curve" (§3); ruler label layout, camera read-back, CMS preview fixes | **Done** |
-| 4i | Drag handles on the model, one shared state (§3) | Not started |
+| 4i | Drag handles on the model, one shared state (§3); undo / redo | **Done** |
 | 4j | Catalogue branding defaults: marked groups hidden, text lands on recovered placement; ruler branding radius and edge margin | Not started |
 | 5 | Relief: emboss/deboss per layer, depth, bevel, manufacturing warning strip with WIN-CYC thresholds | Not started |
 | 6 | Fill picker on deboss layers; occlusion bake moves to a worker | Not started |
@@ -1734,4 +1734,73 @@ Files:
 4. **Angle slider domains** (−180…180 top, 0…360 bottom). Typed values
    outside them are kept. *Recommend* keeping this until 4i's on-model arc
    handle makes the slider secondary.
+
+### Phase 4h rulings on the above (2026-09-18, given in the 4i–4j task)
+
+- **Q3 ruled: text size stays inside "Position and curve".**
+- **Q4 ruled: the angle slider domains are kept** (−180…180 top, 0…360 bottom).
+- **R4 finding accepted: the four-icon toolbar is external**; nothing in the
+  repo changes for it.
+- **Q1 / Q2 (camera, production preview) stay unreproduced**; the camera
+  direction read-back and the production-build preview scenario remain in
+  the suite as the guard.
+
+## Phase 4i — done (2026-09-18)
+
+Drag handles and undo per reports/E1-plan-integration.md §5 row 4i; rulings
+§3; v3-review §1 and §10 (undo, touch).
+
+Files:
+
+- `src/features/editor/lib/recipeHistory.ts` (new) — whole-recipe snapshot
+  history, 50 entries: commit (a live edit that returns to its start is no
+  entry), discrete actions, undo, redo, can-undo / can-redo.
+- `src/features/editor/store/useEditorStore.ts` — history fields; `commit`,
+  `beginDrag`, `endDrag` (commit + flush), `undo`, `redo`; discrete actions
+  (add, delete, reorder, variant / finish / colour, ruler) commit themselves;
+  `updateLayer` stays a live edit.
+- `src/features/editor/hooks/useAutosaveDraft.ts` — holds writes while a drag
+  is in progress and writes at once on pointer-up (one write per drag).
+  Also fixes a race found by the undo scenario: an edit back to the last
+  saved state made while a write was in flight (an undo) was never written.
+- `src/features/editor/lib/handleGeometry.ts` (new) — handle positions (arc
+  knob on the arc position, inside the letters; ring grab opposite the text;
+  move handle at the straight text's centre) and drag maths from the
+  pointer-down state (radius by change in distance, arc position by
+  continuous turn, centre by travel).
+- `src/features/editor/components/branding/Handles.tsx` (new) —
+  `HandleProjector` (in the canvas: projects the selected layer's handles
+  each frame straight onto the SVG, and raycasts the pointer onto the face
+  plane z = face top) and `HandlesOverlay` (SVG over the canvas: ring with a
+  28 px hit stroke, 28 px knob and move handle, `touch-action: none`; drags
+  write the store live, hold autosave, commit on pointer-up).
+- `src/features/editor/components/EditorViewport.tsx` — mounts handles for
+  the selected layer only (none with `?calibration=1`); idle rotation stops
+  once a layer is selected.
+- `src/features/editor/components/EditorModel.tsx` — reports the face top.
+- `src/features/editor/lib/rulerLabelLayout.ts` — `layoutLabels`: N labels,
+  each stepped to the nearest free slot clear of earlier labels and of
+  obstacles; `layoutRulerLabels` takes the handles' rects as obstacles.
+- `src/features/editor/components/RulerOverlay.tsx` — labels avoid the handles.
+- `src/features/editor/components/controls/*` — `onCommit` (blur, Enter,
+  arrow step) and `onDragStart` / `onDragEnd`; the field carries its stored
+  value as `data-value`.
+- `src/features/editor/components/branding/PositionAndCurve.tsx`,
+  `BrandingGroup.tsx` — every control commits; Undo / Redo buttons in the
+  BRANDING header (really disabled); Cmd/Ctrl+Z and Shift+Cmd/Ctrl+Z,
+  blurring a focused field first so its edit is its own entry. No Reset.
+- `src/features/editor/pages/EditorDesignPage.tsx` — drag state to autosave.
+- `src/features/i18n/translations.ts` — `editor.branding.undo` / `.redo`,
+  `editor.handles.*` (3), × 3.
+- `scripts/e2e-local/scenarios/drag-handles.mjs` (new) — handles only for
+  the selected layer, hit areas ≥ 24 px; radius ring dragged 40 px outward:
+  field grows mid-drag, no write mid-drag, exactly one PATCH after
+  pointer-up, read-back = field to 1e-6, glyphs moved; arc knob drag (one
+  write, radius untouched); undo by keyboard and button, redo by keyboard and
+  button (read-backs), disabled states; a typed edit is one entry; touch drag
+  (CDP touch events, `pointerType` touch) with one write; ruler labels clear
+  of the handles; straight move handle (read-back = fields).
+- `scripts/e2e-local/unit/drag-handles.test.mjs` (new) — handle maths,
+  obstacle avoidance, history.
+- `docs/3d-editor/STATUS.md` — this file.
 

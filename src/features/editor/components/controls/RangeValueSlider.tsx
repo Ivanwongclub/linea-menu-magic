@@ -13,6 +13,9 @@ export interface RangeValueSliderProps {
   unit: ValueUnit;
   /** Always `low <= high`. */
   onChange: (low: number, high: number) => void;
+  onCommit?: () => void;
+  onDragStart?: () => void;
+  onDragEnd?: () => void;
   /** Field labels in reading order; `swapInputs` puts `high` first (e.g. start/end of counter-clockwise text). */
   lowLabel: string;
   highLabel: string;
@@ -28,7 +31,7 @@ const FIELD_LABEL = "text-[11px] uppercase tracking-[0.12em] text-muted-foregrou
  * dragging the band between them moves both, keeping the width. The two
  * numeric fields are authoritative, as in `ValueSlider`.
  */
-export function RangeValueSlider({ id, label, low, high, min, max, unit, onChange, lowLabel, highLabel, swapInputs = false, step, testId }: RangeValueSliderProps) {
+export function RangeValueSlider({ id, label, low, high, min, max, unit, onChange, onCommit, onDragStart, onDragEnd, lowLabel, highLabel, swapInputs = false, step, testId }: RangeValueSliderProps) {
   const snap = step ?? (unit === "mm" ? 0.01 : 0.1);
   const { trackRef, valueAt } = useTrackPointer(min, max, snap);
   const lowPct = percentOf(low, min, max);
@@ -39,12 +42,14 @@ export function RangeValueSlider({ id, label, low, high, min, max, unit, onChang
     event.stopPropagation();
     const target = event.currentTarget;
     target.setPointerCapture(event.pointerId);
+    onDragStart?.();
     const startValue = valueAt(event.clientX);
     const move = (e: globalThis.PointerEvent) => apply(valueAt(e.clientX), startValue);
     const end = () => {
       target.removeEventListener("pointermove", move);
       target.removeEventListener("pointerup", end);
       target.removeEventListener("pointercancel", end);
+      onDragEnd?.();
     };
     target.addEventListener("pointermove", move);
     target.addEventListener("pointerup", end);
@@ -54,6 +59,14 @@ export function RangeValueSlider({ id, label, low, high, min, max, unit, onChang
 
   const setLow = (value: number) => onChange(Math.min(value, high), high);
   const setHigh = (value: number) => onChange(low, Math.max(value, low));
+  const stepLow = (value: number) => {
+    setLow(value);
+    onCommit?.();
+  };
+  const stepHigh = (value: number) => {
+    setHigh(value);
+    onCommit?.();
+  };
 
   const onTrackDown = (event: PointerEvent<HTMLDivElement>) => {
     const at = valueAt(event.clientX);
@@ -80,7 +93,7 @@ export function RangeValueSlider({ id, label, low, high, min, max, unit, onChang
       <label htmlFor={`${id}-low`} className={FIELD_LABEL}>
         {lowLabel}
       </label>
-      <PrecisionNumberInput id={`${id}-low`} testId={`${testId}-low-input`} value={low} unit={unit} onChange={(v) => onChange(Math.min(v, high), high)} />
+      <PrecisionNumberInput id={`${id}-low`} testId={`${testId}-low-input`} value={low} unit={unit} onChange={(v) => onChange(Math.min(v, high), high)} onCommit={onCommit} />
     </div>
   );
   const highInput = (
@@ -88,7 +101,7 @@ export function RangeValueSlider({ id, label, low, high, min, max, unit, onChang
       <label htmlFor={`${id}-high`} className={FIELD_LABEL}>
         {highLabel}
       </label>
-      <PrecisionNumberInput id={`${id}-high`} testId={`${testId}-high-input`} value={high} unit={unit} onChange={(v) => onChange(low, Math.max(v, low))} />
+      <PrecisionNumberInput id={`${id}-high`} testId={`${testId}-high-input`} value={high} unit={unit} onChange={(v) => onChange(low, Math.max(v, low))} onCommit={onCommit} />
     </div>
   );
 
@@ -119,8 +132,8 @@ export function RangeValueSlider({ id, label, low, high, min, max, unit, onChang
           className="absolute top-1/2 h-1.5 -translate-y-1/2 cursor-grab touch-none bg-foreground active:cursor-grabbing"
           style={{ left: `${lowPct}%`, width: `${Math.max(0, highPct - lowPct)}%` }}
         />
-        <Handle percent={lowPct} value={low} min={min} max={max} unit={unit} label={lowLabel} testId={`${testId}-low-handle`} onStep={setLow} onPointerDown={(e) => drag(e, (v) => setLow(v))} />
-        <Handle percent={highPct} value={high} min={min} max={max} unit={unit} label={highLabel} testId={`${testId}-high-handle`} onStep={setHigh} onPointerDown={(e) => drag(e, (v) => setHigh(v))} />
+        <Handle percent={lowPct} value={low} min={min} max={max} unit={unit} label={lowLabel} testId={`${testId}-low-handle`} onStep={stepLow} onPointerDown={(e) => drag(e, (v) => setLow(v))} />
+        <Handle percent={highPct} value={high} min={min} max={max} unit={unit} label={highLabel} testId={`${testId}-high-handle`} onStep={stepHigh} onPointerDown={(e) => drag(e, (v) => setHigh(v))} />
       </Track>
     </div>
   );

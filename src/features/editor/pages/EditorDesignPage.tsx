@@ -82,7 +82,9 @@ export function EditorDesignPage({ designId }: { designId: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product?.id, designQuery.data?.id]);
 
-  const saveStatus = useAutosaveDraft(designQuery.data ? designId : null, recipe, hydratedFor);
+  const dragging = useEditorStore((s) => s.dragging);
+  const flushSeq = useEditorStore((s) => s.flushSeq);
+  const saveStatus = useAutosaveDraft(designQuery.data ? designId : null, recipe, hydratedFor, { paused: dragging, flushSeq });
 
   if (authLoading) {
     return <LoadingShell />;

@@ -34,6 +34,8 @@ interface EditorModelProps {
   onModelSizeMm?: (mm: number) => void;
   /** Reports the model-local bounds (already × factor × variantScale, i.e. in mm) for the ruler (Phase 4e, C4). */
   onRulerMeasurements?: (measurements: RulerMeasurements) => void;
+  /** The face top in the face frame, mm — the plane the on-model handles drag on (4i). */
+  onFaceZ?: (z: number) => void;
   /** The recipe's text layers, drawn on the face — siblings of the model, never inside its measured bounds. */
   layers: TextLayer[];
   onTextReport?: (report: TextSceneReport) => void;
@@ -77,6 +79,7 @@ export function EditorModel({
   controlsRef,
   onModelSizeMm,
   onRulerMeasurements,
+  onFaceZ,
   layers,
   onTextReport,
 }: EditorModelProps) {
@@ -161,6 +164,10 @@ export function EditorModel({
   // Camera rotation never touches it (spec §22): the camera is never an
   // ancestor of `model` when this runs.
   const bounds = useMemo(() => new THREE.Box3().setFromObject(model), [model]);
+
+  useEffect(() => {
+    onFaceZ?.(bounds.max.z);
+  }, [bounds, onFaceZ]);
 
   useEffect(() => {
     if (!onRulerMeasurements) return;

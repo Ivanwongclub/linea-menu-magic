@@ -44,6 +44,11 @@ export function PositionAndCurve({ layer, faceDiameterMm }: { layer: TextLayer; 
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const updateLayer = useEditorStore((s) => s.updateLayer);
+  const commit = useEditorStore((s) => s.commit);
+  const beginDrag = useEditorStore((s) => s.beginDrag);
+  const endDrag = useEditorStore((s) => s.endDrag);
+  // Every control: live edits, one undo entry per committed edit or drag (4i).
+  const history = { onCommit: commit, onDragStart: beginDrag, onDragEnd: endDrag };
   const metrics = useFontMetrics(layer.content.font.key);
   const p = layer.placement;
   const d = faceDiameterMm;
@@ -103,7 +108,10 @@ export function PositionAndCurve({ layer, faceDiameterMm }: { layer: TextLayer; 
                       role="radio"
                       aria-checked={arc === option.value}
                       data-value={option.value}
-                      onClick={() => placement({ direction: option.direction, arc_position_deg: option.arcPosition })}
+                      onClick={() => {
+                        placement({ direction: option.direction, arc_position_deg: option.arcPosition });
+                        commit();
+                      }}
                       className={cn(
                         "py-1.5 text-xs tracking-[0.05em] transition-colors",
                         arc === option.value ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground",
@@ -115,6 +123,7 @@ export function PositionAndCurve({ layer, faceDiameterMm }: { layer: TextLayer; 
                 </div>
               </div>
               <ValueSlider
+                {...history}
                 id={id("radius")}
                 testId="pc-radius"
                 label={t("editor.branding.radius")}
@@ -127,6 +136,7 @@ export function PositionAndCurve({ layer, faceDiameterMm }: { layer: TextLayer; 
                 onChange={(radius_mm) => placement({ radius_mm })}
               />
               <RangeValueSlider
+                {...history}
                 id={id("arc-range")}
                 testId="pc-arc-range"
                 label={t("editor.branding.startEnd")}
@@ -141,6 +151,7 @@ export function PositionAndCurve({ layer, faceDiameterMm }: { layer: TextLayer; 
                 onChange={onRange}
               />
               <ValueSlider
+                {...history}
                 id={id("arc-position")}
                 testId="pc-arc-position"
                 label={t("editor.branding.arcPosition")}
@@ -154,6 +165,7 @@ export function PositionAndCurve({ layer, faceDiameterMm }: { layer: TextLayer; 
           ) : (
             <>
               <ValueSlider
+                {...history}
                 id={id("centre-x")}
                 testId="pc-centre-x"
                 label={t("editor.branding.centreX")}
@@ -164,6 +176,7 @@ export function PositionAndCurve({ layer, faceDiameterMm }: { layer: TextLayer; 
                 onChange={(x) => placement({ centre_mm: { x, y: p.centre_mm.y } })}
               />
               <ValueSlider
+                {...history}
                 id={id("centre-y")}
                 testId="pc-centre-y"
                 label={t("editor.branding.centreY")}
@@ -174,6 +187,7 @@ export function PositionAndCurve({ layer, faceDiameterMm }: { layer: TextLayer; 
                 onChange={(y) => placement({ centre_mm: { x: p.centre_mm.x, y } })}
               />
               <ValueSlider
+                {...history}
                 id={id("rotation")}
                 testId="pc-rotation"
                 label={t("editor.branding.rotation")}
@@ -186,6 +200,7 @@ export function PositionAndCurve({ layer, faceDiameterMm }: { layer: TextLayer; 
             </>
           )}
           <ValueSlider
+            {...history}
             id={id("text-size")}
             testId="pc-text-size"
             label={t("editor.branding.textSize")}
@@ -198,6 +213,7 @@ export function PositionAndCurve({ layer, faceDiameterMm }: { layer: TextLayer; 
             onChange={(text_size_mm) => style({ text_size_mm })}
           />
           <ValueSlider
+            {...history}
             id={id("letter-spacing")}
             testId="pc-letter-spacing"
             label={t("editor.branding.letterSpacing")}
@@ -208,6 +224,7 @@ export function PositionAndCurve({ layer, faceDiameterMm }: { layer: TextLayer; 
             onChange={(letter_spacing_mm) => style({ letter_spacing_mm })}
           />
           <ValueSlider
+            {...history}
             id={id("baseline")}
             testId="pc-baseline"
             label={t("editor.branding.baselineOffset")}

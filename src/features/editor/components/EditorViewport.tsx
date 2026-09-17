@@ -16,6 +16,8 @@ import type { PickerFinish } from "../hooks/useFinishOptions";
 import { GL_SETTINGS } from "../lib/renderSettings";
 import { ProceduralStudio } from "./ProceduralStudio";
 import { CameraReport } from "./CameraReport";
+import { HandleProjector, HandlesOverlay, newHandleBridge, newHandleElements } from "./branding/Handles";
+import { useEditorStore } from "../store/useEditorStore";
 
 interface EditorViewportProps {
   modelStoragePath: string | null;
@@ -122,6 +124,11 @@ export function EditorViewport({
   const [rulerMeasurements, setRulerMeasurements] = useState<RulerMeasurements | null>(null);
   const [textReport, setTextReport] = useState<TextSceneReport | null>(null);
   const rulerLabels = useRef<RulerLabelElements>({ diameter: null, thickness: null });
+  const [faceZ, setFaceZ] = useState<number | null>(null);
+  const handleBridge = useRef(newHandleBridge());
+  const handleElements = useRef(newHandleElements());
+  const selectedLayerId = useEditorStore((s) => s.selectedLayerId);
+  const selectedLayer = layers.find((l) => l.id === selectedLayerId) ?? null;
   // Calibration screenshots composite any DOM over the canvas; `?calibration=1` hides the viewport chrome.
   const calibration = useSearchParams()[0].get("calibration") === "1";
 
@@ -167,21 +174,29 @@ export function EditorViewport({
             controlsRef={controlsRef}
             onModelSizeMm={setModelSizeMm}
             onRulerMeasurements={ruler ? setRulerMeasurements : undefined}
+            onFaceZ={setFaceZ}
             layers={layers}
             onTextReport={setTextReport}
           />
-          {ruler && rulerMeasurements && <RulerOverlay measurements={rulerMeasurements} labels={rulerLabels} />}
+          {ruler && rulerMeasurements && <RulerOverlay measurements={rulerMeasurements} labels={rulerLabels} obstacles={handleBridge} />}
+          {!calibration && faceZ != null && (
+            <HandleProjector layer={selectedLayer} faceZ={faceZ} bridge={handleBridge} elements={handleElements} />
+          )}
           <OrbitControls
             ref={controlsRef}
             makeDefault
             enableDamping
             dampingFactor={0.08}
-            autoRotate={autoRotate}
+            // Selecting a layer is an interaction too: nothing turns under a handle drag (4i).
+            autoRotate={autoRotate && !selectedLayerId}
             autoRotateSpeed={0.6}
             onStart={() => setAutoRotate(false)}
           />
         </Canvas>
       </Suspense>
+      {!calibration && faceZ != null && selectedLayer && (
+        <HandlesOverlay key={selectedLayer.id} layer={selectedLayer} bridge={handleBridge} elements={handleElements} />
+      )}
       {ruler && rulerMeasurements && (
         <RulerLabels measurements={rulerMeasurements} sizeLigne={sizeLigne} sizeLabel={sizeLabel} labels={rulerLabels} />
       )}

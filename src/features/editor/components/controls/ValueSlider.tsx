@@ -12,6 +12,11 @@ export interface ValueSliderProps {
   max: number;
   unit: ValueUnit;
   onChange: (value: number) => void;
+  /** 4i history: a finished field edit or key step. */
+  onCommit?: () => void;
+  /** 4i: a pointer drag starts / ends (autosave holds, then flushes once). */
+  onDragStart?: () => void;
+  onDragEnd?: () => void;
   hardMin?: number;
   hardMax?: number;
   exclusiveMin?: boolean;
@@ -28,7 +33,7 @@ const FIELD_LABEL = "text-[11px] uppercase tracking-[0.12em] text-muted-foregrou
  * the handle with a vertical marker line through the track. One value, one
  * `onChange` — no local copy to drift.
  */
-export function ValueSlider({ id, label, value, min, max, unit, onChange, hardMin, hardMax, exclusiveMin, step, testId }: ValueSliderProps) {
+export function ValueSlider({ id, label, value, min, max, unit, onChange, onCommit, onDragStart, onDragEnd, hardMin, hardMax, exclusiveMin, step, testId }: ValueSliderProps) {
   const snap = step ?? (unit === "mm" ? 0.01 : 0.1);
   const { trackRef, valueAt } = useTrackPointer(min, max, snap);
   const percent = percentOf(value, min, max);
@@ -44,12 +49,14 @@ export function ValueSlider({ id, label, value, min, max, unit, onChange, hardMi
     event.stopPropagation();
     const target = event.currentTarget;
     target.setPointerCapture(event.pointerId);
+    onDragStart?.();
     commit(valueAt(event.clientX));
     const move = (e: globalThis.PointerEvent) => commit(valueAt(e.clientX));
     const end = () => {
       target.removeEventListener("pointermove", move);
       target.removeEventListener("pointerup", end);
       target.removeEventListener("pointercancel", end);
+      onDragEnd?.();
     };
     target.addEventListener("pointermove", move);
     target.addEventListener("pointerup", end);
@@ -71,6 +78,7 @@ export function ValueSlider({ id, label, value, min, max, unit, onChange, hardMi
           max={hardMax}
           exclusiveMin={exclusiveMin}
           onChange={onChange}
+          onCommit={onCommit}
         />
       </div>
       <Track
@@ -94,7 +102,10 @@ export function ValueSlider({ id, label, value, min, max, unit, onChange, hardMi
           unit={unit}
           label={label}
           testId={`${testId}-handle`}
-          onStep={commit}
+          onStep={(next) => {
+            commit(next);
+            onCommit?.();
+          }}
           onPointerDown={startDrag}
         />
       </Track>

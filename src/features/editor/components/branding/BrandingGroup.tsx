@@ -1,11 +1,12 @@
 import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Plus, X } from "lucide-react";
+import { useEffect, type ReactNode } from "react";
+import { GripVertical, Plus, Redo2, Undo2, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { cn } from "@/lib/utils";
-import { useEditorStore } from "../../store/useEditorStore";
+import { selectCanRedo, selectCanUndo, useEditorStore } from "../../store/useEditorStore";
 import { BUNDLED_FONTS } from "../../lib/fonts";
 import { newTextLayer, type TextLayer, type TextLayout } from "../../lib/recipe";
 import { PositionAndCurve } from "./PositionAndCurve";
@@ -74,6 +75,7 @@ function LayerRow({ layer, selected }: { layer: TextLayer; selected: boolean }) 
 function LayerEditor({ layer, faceDiameterMm }: { layer: TextLayer; faceDiameterMm: number }) {
   const { t } = useI18n();
   const updateLayer = useEditorStore((s) => s.updateLayer);
+  const commit = useEditorStore((s) => s.commit);
 
   return (
     <div className="space-y-4 pt-1" data-testid="text-layer-editor">
@@ -88,6 +90,7 @@ function LayerEditor({ layer, faceDiameterMm }: { layer: TextLayer; faceDiameter
           spellCheck={false}
           value={layer.content.value}
           onChange={(e) => updateLayer(layer.id, { content: { value: e.target.value } })}
+          onBlur={commit}
           className="w-full border-b border-border bg-transparent py-1 text-base tracking-wide text-foreground outline-none focus:border-foreground transition-colors"
         />
       </div>
@@ -105,7 +108,10 @@ function LayerEditor({ layer, faceDiameterMm }: { layer: TextLayer; faceDiameter
                 role="radio"
                 aria-checked={active}
                 data-value={value}
-                onClick={() => updateLayer(layer.id, { placement: { layout: value } })}
+                onClick={() => {
+                  updateLayer(layer.id, { placement: { layout: value } });
+                  commit();
+                }}
                 className={cn(
                   "py-1.5 text-xs tracking-[0.05em] transition-colors",
                   active ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground",
@@ -123,7 +129,10 @@ function LayerEditor({ layer, faceDiameterMm }: { layer: TextLayer; faceDiameter
         </span>
         <Select
           value={layer.content.font.key}
-          onValueChange={(key) => updateLayer(layer.id, { content: { font: { source: "bundled", key } } })}
+          onValueChange={(key) => {
+            updateLayer(layer.id, { content: { font: { source: "bundled", key } } });
+            commit();
+          }}
         >
           <SelectTrigger
             aria-labelledby={`font-${layer.id}`}
@@ -146,10 +155,59 @@ function LayerEditor({ layer, faceDiameterMm }: { layer: TextLayer; faceDiameter
   );
 }
 
+function HistoryButton({
+  testId,
+  label,
+  disabled,
+  onClick,
+  children,
+}: {
+  testId: string;
+  label: string;
+  disabled: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      data-testid={testId}
+      aria-label={label}
+      title={label}
+      disabled={disabled}
+      onClick={onClick}
+      className="flex h-7 w-7 items-center justify-center text-foreground transition-colors hover:bg-secondary disabled:pointer-events-none disabled:text-muted-foreground/40"
+    >
+      {children}
+    </button>
+  );
+}
+
+/**
+ * Cmd/Ctrl+Z and Shift+Cmd/Ctrl+Z (4i R2), anywhere in the editor. A focused
+ * field is blurred first so its edit commits as its own entry, then undone.
+ */
+function useUndoShortcuts() {
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (!(event.metaKey || event.ctrlKey) || event.altKey || event.key.toLowerCase() !== "z") return;
+      event.preventDefault();
+      const active = document.activeElement as HTMLElement | null;
+      if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA")) active.blur();
+      const { undo, redo } = useEditorStore.getState();
+      if (event.shiftKey) redo();
+      else undo();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+}
+
 /**
  * BRANDING (v3-review §3): the text and its font are panel-first; spatial
  * values sit behind "Position and curve" (4h) and arrive on the model in 4i. Emboss/deboss and fill are absent
- * until their phases (rulings §6) — no placeholder controls.
+ * until their phases (rulings §6) — no placeholder controls. Undo / redo
+ * (4i) cover every recipe change on this page.
  */
 export function BrandingGroup({ faceDiameterMm }: { faceDiameterMm: number }) {
   const { t } = useI18n();
@@ -157,6 +215,11 @@ export function BrandingGroup({ faceDiameterMm }: { faceDiameterMm: number }) {
   const selectedLayerId = useEditorStore((s) => s.selectedLayerId);
   const addLayer = useEditorStore((s) => s.addLayer);
   const moveLayer = useEditorStore((s) => s.moveLayer);
+  const undo = useEditorStore((s) => s.undo);
+  const redo = useEditorStore((s) => s.redo);
+  const canUndo = useEditorStore(selectCanUndo);
+  const canRedo = useEditorStore(selectCanRedo);
+  useUndoShortcuts();
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -173,8 +236,16 @@ export function BrandingGroup({ faceDiameterMm }: { faceDiameterMm: number }) {
 
   return (
     <div className="border border-border p-4 space-y-3" data-testid="branding-group">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <h3 className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">{t("editor.panel.branding")}</h3>
+        <div className="ml-auto flex items-center">
+          <HistoryButton testId="undo" label={t("editor.branding.undo")} disabled={!canUndo} onClick={undo}>
+            <Undo2 className="w-3.5 h-3.5" strokeWidth={1.5} />
+          </HistoryButton>
+          <HistoryButton testId="redo" label={t("editor.branding.redo")} disabled={!canRedo} onClick={redo}>
+            <Redo2 className="w-3.5 h-3.5" strokeWidth={1.5} />
+          </HistoryButton>
+        </div>
         <button
           type="button"
           data-testid="add-text"

@@ -7,6 +7,8 @@ export interface PrecisionNumberInputProps {
   value: number;
   unit: ValueUnit;
   onChange: (value: number) => void;
+  /** A finished edit — blur, Enter, or an arrow-key step (4i: one undo entry each). */
+  onCommit?: () => void;
   /** Hard limits on what can be stored — not the slider's range. */
   min?: number;
   max?: number;
@@ -29,6 +31,7 @@ export function PrecisionNumberInput({
   value,
   unit,
   onChange,
+  onCommit,
   min,
   max,
   exclusiveMin = false,
@@ -54,12 +57,17 @@ export function PrecisionNumberInput({
     Number.isFinite(next) && (min === undefined || (exclusiveMin ? next > min : next >= min)) && (max === undefined || next <= max);
 
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      onCommit?.();
+      return;
+    }
     if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
     event.preventDefault();
     const next = stepValue(value, arrowDirection(event.key) * keyStep(unit, event));
     const bounded = exclusiveMin && min !== undefined && next <= min ? value : clamp(next, min, max);
     if (bounded === value) return;
     onChange(bounded);
+    onCommit?.();
     if (draft !== null) setDraft(bounded.toFixed(dp.focused));
   };
 
@@ -69,6 +77,8 @@ export function PrecisionNumberInput({
         ref={inputRef}
         id={id}
         data-testid={testId}
+        // The stored value, unrounded — what the field is showing a rounding of.
+        data-value={value}
         aria-label={ariaLabel}
         aria-labelledby={ariaLabelledBy}
         inputMode="decimal"
@@ -79,7 +89,10 @@ export function PrecisionNumberInput({
           selectOnFocus.current = true;
           setDraft(value.toFixed(dp.focused));
         }}
-        onBlur={() => setDraft(null)}
+        onBlur={() => {
+          setDraft(null);
+          onCommit?.();
+        }}
         onKeyDown={onKeyDown}
         onChange={(e) => {
           setDraft(e.target.value);

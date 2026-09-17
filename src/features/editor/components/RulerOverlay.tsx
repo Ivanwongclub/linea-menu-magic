@@ -3,7 +3,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { Line } from "@react-three/drei";
 import { Vector3, type Group } from "three";
 import { tradeLigne } from "../lib/ligne";
-import { layoutRulerLabels, type DimensionLine, type Point } from "../lib/rulerLabelLayout";
+import { layoutRulerLabels, type DimensionLine, type Point, type Rect } from "../lib/rulerLabelLayout";
 import type { RulerMeasurements } from "./EditorModel";
 
 /** The DOM label elements (rendered by `RulerLabels` outside the canvas) this overlay positions each frame. */
@@ -15,6 +15,8 @@ export interface RulerLabelElements {
 interface RulerOverlayProps {
   measurements: RulerMeasurements;
   labels: MutableRefObject<RulerLabelElements>;
+  /** Screen rects the labels must keep clear of — the on-model handles (4i). */
+  obstacles?: MutableRefObject<{ rects: Rect[] }>;
 }
 
 /** Render layer the ruler lives on exclusively (C5) — never layer 0. */
@@ -42,7 +44,7 @@ export function diameterLabel(mm: number, sizeLigne: number | null, sizeLabel: s
  * pushed apart when they would overlap. Each label carries the projected line
  * it belongs to (`data-line`) for the e2e no-overlap check.
  */
-export function RulerOverlay({ measurements, labels }: RulerOverlayProps) {
+export function RulerOverlay({ measurements, labels, obstacles }: RulerOverlayProps) {
   const { camera, size } = useThree();
   const groupRef = useRef<Group>(null);
 
@@ -107,7 +109,7 @@ export function RulerOverlay({ measurements, labels }: RulerOverlayProps) {
     const d = line(diameterLinePoints, diameter);
     const t = line(thicknessPoints, thickness);
     const centre = project([(minX + maxX) / 2, centerY, centerZ]);
-    const placed = layoutRulerLabels(d, t, centre);
+    const placed = layoutRulerLabels(d, t, centre, obstacles?.current.rects ?? []);
     const key = JSON.stringify(placed);
     if (key === last.current) return;
     last.current = key;

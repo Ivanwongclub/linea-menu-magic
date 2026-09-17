@@ -51,23 +51,53 @@ export function besideLine(line: DimensionLine, centre: Point, gap = LABEL_GAP_P
   return { x, y: mid.y - line.height / 2, width: line.width, height: line.height };
 }
 
+export interface LabelItem {
+  line: DimensionLine;
+  /** `below`: centred under a horizontal line (beside it if the line runs vertically). `beside`: away from the centre. */
+  place: "below" | "beside";
+}
+
 /**
- * Places every label, then resolves collisions in order: each later label is
- * pushed vertically away from any earlier one it overlaps (in the direction
- * its own centre already lies), repeating until nothing overlaps.
+ * Places each label against its own line, then — in order — moves it to the
+ * nearest free slot: stepped away along its line's normal side (down for a
+ * label below, then up; up and down beside) until it overlaps neither an
+ * earlier label nor an obstacle (the on-model handles, 4i). Falls back to
+ * the first slot when nothing within reach is free.
  */
-export function layoutRulerLabels(diameter: DimensionLine, thickness: DimensionLine, centre: Point): { diameter: Rect; thickness: Rect } {
-  const d = runsHorizontally(diameter) ? belowLine(diameter) : besideLine(diameter, centre);
-  const t = besideLine(thickness, centre);
-  const placed: Rect[] = [d];
-  for (const rect of [t]) {
-    for (let guard = 0; guard < 8; guard++) {
-      const hit = placed.find((other) => rectsOverlap(rect, other));
-      if (!hit) break;
-      const down = rect.y + rect.height / 2 >= hit.y + hit.height / 2;
-      rect.y = down ? hit.y + hit.height + LABEL_GAP_PX : hit.y - rect.height - LABEL_GAP_PX;
+export function layoutLabels(items: LabelItem[], centre: Point, obstacles: Rect[] = []): Rect[] {
+  const placed: Rect[] = [];
+  for (const { line, place } of items) {
+    const base = place === "below" && runsHorizontally(line) ? belowLine(line) : besideLine(line, centre);
+    const step = base.height + LABEL_GAP_PX;
+    const offsets = place === "below" ? [0, 1, 2, 3, 4, -1, -2, -3, -4] : [0, -1, 1, -2, 2, -3, 3, -4, 4];
+    const blocked = (r: Rect) => placed.some((o) => rectsOverlap(r, o)) || obstacles.some((o) => rectsOverlap(r, o));
+    let chosen = base;
+    for (const k of offsets) {
+      const candidate = { ...base, y: base.y + k * step };
+      if (!blocked(candidate)) {
+        chosen = candidate;
+        break;
+      }
     }
-    placed.push(rect);
+    placed.push(chosen);
   }
+  return placed;
+}
+
+/** The product's two dimensions (4e/4h). */
+export function layoutRulerLabels(
+  diameter: DimensionLine,
+  thickness: DimensionLine,
+  centre: Point,
+  obstacles: Rect[] = [],
+): { diameter: Rect; thickness: Rect } {
+  const [d, t] = layoutLabels(
+    [
+      { line: diameter, place: "below" },
+      { line: thickness, place: "beside" },
+    ],
+    centre,
+    obstacles,
+  );
   return { diameter: d, thickness: t };
 }
