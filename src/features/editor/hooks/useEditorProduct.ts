@@ -127,3 +127,10 @@ export function useEditorProductById(productId: string | null) {
   });
   return { ...query, data: query.data ? transform(query.data, language) : query.data };
 }
+
+/** Variant switch ratio for layer scaling (C10): new variant mm / current variant mm, 1 when either is unknown. */
+export function variantRatio(product: EditorProduct, fromId: string | null, toId: string): number {
+  const from = product.size_variants.find((v) => v.id === fromId)?.size_primary_mm ?? 0;
+  const to = product.size_variants.find((v) => v.id === toId)?.size_primary_mm ?? 0;
+  return from > 0 && to > 0 ? to / from : 1;
+}

@@ -9,6 +9,8 @@ import type { PickerFinish } from "../hooks/useFinishOptions";
 import { decoratedFaceRotation, withSmoothNormals } from "../lib/prepareModel";
 import { bakeOcclusion } from "../lib/ambientOcclusion";
 import { applyTwoTone } from "../lib/twoTone";
+import type { TextLayer } from "../lib/recipe";
+import { TextLayerMeshes, type TextSceneReport } from "./branding/TextLayerMeshes";
 import {
   CAMERA_AZIMUTH_DEG,
   CAMERA_ELEVATION_DEG,
@@ -32,6 +34,9 @@ interface EditorModelProps {
   onModelSizeMm?: (mm: number) => void;
   /** Reports the model-local bounds (already × factor × variantScale, i.e. in mm) for the ruler (Phase 4e, C4). */
   onRulerMeasurements?: (measurements: RulerMeasurements) => void;
+  /** The recipe's text layers, drawn on the face — siblings of the model, never inside its measured bounds. */
+  layers: TextLayer[];
+  onTextReport?: (report: TextSceneReport) => void;
 }
 
 export interface RulerMeasurements {
@@ -72,6 +77,8 @@ export function EditorModel({
   controlsRef,
   onModelSizeMm,
   onRulerMeasurements,
+  layers,
+  onTextReport,
 }: EditorModelProps) {
   const obj = useLoader(OBJLoader, url);
   const { camera, size: viewport } = useThree();
@@ -236,6 +243,7 @@ export function EditorModel({
   return (
     <>
       <primitive object={model} />
+      <TextLayerMeshes layers={layers} model={model} faceZ={bounds.max.z} material={material} onReport={onTextReport} />
       <ContactShadows
         key={`${renderedSizeMm}-${url}`}
         position={[0, bounds.min.y - 0.01, 0]}

@@ -175,7 +175,7 @@ export default async function ({ page, base, admin, h }) {
   try {
     await page.goto(base, { waitUntil: "domcontentloaded" });
     await h.dismissCookies();
-    const canvas = await openEditor(page, `${base}/designer-studio/editor/new?product=${metal.slug}`);
+    const canvas = await openEditor(page, `${base}/designer-studio/editor/new?product=${metal.slug}&calibration=1`);
 
     await pickFinish(page, STUDIO_CODE);
     const s = await faceStats(await canvas.screenshot());

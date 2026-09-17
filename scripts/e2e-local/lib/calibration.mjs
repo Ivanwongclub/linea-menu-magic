@@ -69,24 +69,19 @@ export async function pixels(buffer) {
   return { info, at };
 }
 
-/** Bounding box of pixels that differ from the backdrop (corner) colour by more than `threshold`. */
-// Phase 4e adds a permanent corner UI fixture to the editor viewport (the
-// ruler toggle, `bottom-3 right-3`) that composites into a canvas-element
-// screenshot like any other overlapping DOM node (the same effect the CMS
-// two-point scenario hit with a toast). It never sits within camera framing's
-// own margin around the subject, so excluding this corner is safe for every
-// existing calibration target.
-const UI_CORNER_FRACTION = 0.15;
-
+/**
+ * Bounding box of pixels that differ from the backdrop colour by more
+ * than `threshold`. Scenarios open the editor with `?calibration=1`, which
+ * hides all viewport chrome, so the whole screenshot is scanned.
+ */
 export async function subjectBox(buffer, threshold = 24) {
   const { info, at } = await pixels(buffer);
-  const bg = at(2, 2);
-  const cornerX = info.width * (1 - UI_CORNER_FRACTION);
-  const cornerY = info.height * (1 - UI_CORNER_FRACTION);
+  // Left edge, mid-height: the site header's drop shadow darkens the top rows
+  // once no banner sits between it and the canvas.
+  const bg = at(2, Math.floor(info.height / 2));
   let minX = info.width, maxX = -1, minY = info.height, maxY = -1;
   for (let y = 0; y < info.height; y++) {
     for (let x = 0; x < info.width; x++) {
-      if (x >= cornerX && y >= cornerY) continue; // the ruler toggle's corner
       const p = at(x, y);
       if (Math.max(Math.abs(p[0] - bg[0]), Math.abs(p[1] - bg[1]), Math.abs(p[2] - bg[2])) > threshold) {
         if (x < minX) minX = x;
@@ -184,6 +179,10 @@ export async function subjectFill(buffer) {
  * home and lets damping settle. Returns the canvas locator.
  */
 export async function openEditor(page, url) {
+  // The 3b–4.0 baselines were measured on a 920 × 599 canvas (1280 × 720 page,
+  // sign-in banner showing). `?calibration=1` hides the banner, so the page
+  // height is pinned to give the same canvas.
+  await page.setViewportSize({ width: 1280, height: 680 });
   await page.evaluate(() => window.sessionStorage.clear()).catch(() => {});
   await page.goto(url, { waitUntil: "networkidle" });
   const canvas = page.getByTestId("editor-viewport").locator("canvas");

@@ -8,6 +8,7 @@ import { FinishSwatch } from "@/features/finishes/FinishSwatch";
 import { FinishSelectionPicker } from "@/features/finishes/FinishSelectionPicker";
 import { finishAxisLine, finishMarketingName } from "@/features/finishes/finishAxisLine";
 import { tradeLigne } from "../lib/ligne";
+import { BrandingGroup } from "./branding/BrandingGroup";
 import type { PickerFinish } from "../hooks/useFinishOptions";
 import type { AutosaveStatus } from "../hooks/useAutosaveDraft";
 import type { EditorColour, EditorProduct, EditorSizeVariant } from "../hooks/useEditorProduct";
@@ -61,8 +62,8 @@ export function EditorPanel({
   return (
     <div className="w-full lg:w-[360px] shrink-0 border-l border-border bg-background overflow-y-auto" data-testid="editor-panel">
       {saveStatus && saveStatus !== "idle" && (
-        <div className="px-4 py-1.5 border-b border-border text-[11px] text-muted-foreground text-right" data-testid="autosave-status">
-          {saveStatus === "saving" ? t("editor.autosave.saving") : t("editor.autosave.saved")}
+        <div className="px-4 py-1.5 border-b border-border text-[11px] text-muted-foreground text-right" data-testid="autosave-status" data-status={saveStatus}>
+          {saveStatus === "saving" ? t("editor.autosave.saving") : saveStatus === "error" ? t("editor.autosave.notSaved") : t("editor.autosave.saved")}
         </div>
       )}
       <div className="p-4 space-y-4">
@@ -129,7 +130,7 @@ export function EditorPanel({
           </PanelGroup>
         )}
 
-        <PanelGroup title={t("editor.panel.branding")} />
+        <BrandingGroup faceDiameterMm={product.size_variants.find((v) => v.id === sizeVariantId)?.size_primary_mm ?? product.size_variants[0]?.size_primary_mm ?? 10} />
         <PanelGroup title={t("editor.panel.output")} />
       </div>
 

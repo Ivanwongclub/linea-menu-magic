@@ -15,7 +15,10 @@ interface EditorShellProps {
  */
 export function EditorShell({ banner, viewport, panel }: EditorShellProps) {
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)]">
+    // The site header is fixed at 5rem + its 1px border at every width; 4rem
+    // left the viewport's bottom edge below the fold, and a canvas screenshot
+    // scrolled under the header.
+    <div className="flex flex-col h-[calc(100vh-5rem-1px)]">
       {banner}
       <div className="flex flex-1 min-h-0 flex-col lg:flex-row">
         <div className="flex flex-col flex-1 min-h-0">{viewport}</div>

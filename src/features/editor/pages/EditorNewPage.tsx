@@ -1,15 +1,17 @@
 import { useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Box } from "lucide-react";
 import { useAuth } from "@/features/auth/AuthProvider";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { supabase } from "@/integrations/supabase/client";
-import { useEditorProductBySlug, type EditorProduct } from "../hooks/useEditorProduct";
+import type { Json } from "@/integrations/supabase/types";
+import { useEditorProductBySlug, variantRatio, type EditorProduct } from "../hooks/useEditorProduct";
 import { useFinishOptions, type PickerFinish } from "../hooks/useFinishOptions";
 import { useDesignerStaffStatus } from "../hooks/useDesignerStaffStatus";
 import { useCatalogueEditorStatus } from "@/features/admin/hooks/useCatalogueEditorStatus";
 import { useEditorStore } from "../store/useEditorStore";
 import { readAnonymousDraft, writeAnonymousDraft, clearAnonymousDraft } from "../lib/anonymousDraft";
+import { emptyRecipe, type DraftRecipe } from "../lib/recipe";
 import { EditorShell } from "../components/EditorShell";
 import { EditorViewport } from "../components/EditorViewport";
 import { EditorPanel } from "../components/EditorPanel";
@@ -21,6 +23,28 @@ function defaultSizeVariantId(product: EditorProduct): string | null {
 
 function defaultColourId(product: EditorProduct): string | null {
   return product.colours[0]?.id ?? null;
+}
+
+function defaultRecipe(product: EditorProduct): DraftRecipe {
+  return {
+    ...emptyRecipe(),
+    size_variant_id: defaultSizeVariantId(product),
+    finish_id: product.default_finish_id,
+    colour_id: defaultColourId(product),
+  };
+}
+
+/** The anonymous draft's recipe, with any id it never chose filled from the product's defaults. */
+function startingRecipe(product: EditorProduct): DraftRecipe {
+  const draft = readAnonymousDraft(product.slug)?.recipe;
+  const defaults = defaultRecipe(product);
+  if (!draft) return defaults;
+  return {
+    ...draft,
+    size_variant_id: draft.size_variant_id ?? defaults.size_variant_id,
+    finish_id: draft.finish_id ?? defaults.finish_id,
+    colour_id: draft.colour_id ?? defaults.colour_id,
+  };
 }
 
 function LoadingShell() {
@@ -43,16 +67,17 @@ function LoadingShell() {
 export function EditorNewPage({ productSlug }: { productSlug: string | null }) {
   const navigate = useNavigate();
   const { t } = useI18n();
+  const calibration = useSearchParams()[0].get("calibration") === "1";
   const { session, user, primaryBrand, loading: authLoading } = useAuth();
   const { isStaff, loading: staffLoading } = useDesignerStaffStatus();
   const { isEditor: isCatalogueEditor } = useCatalogueEditorStatus();
   const { data: product, isLoading, error } = useEditorProductBySlug(productSlug);
   const { data: finishOptions = [] } = useFinishOptions(product?.id ?? null, product?.is_metal ?? false);
 
-  const sizeVariantId = useEditorStore((s) => s.sizeVariantId);
-  const finishId = useEditorStore((s) => s.finishId);
-  const colourId = useEditorStore((s) => s.colourId);
-  const ruler = useEditorStore((s) => s.ruler);
+  const recipe = useEditorStore((s) => s.recipe);
+  const hydratedFor = useEditorStore((s) => s.hydratedFor);
+  const { size_variant_id: sizeVariantId, finish_id: finishId, colour_id: colourId } = recipe;
+  const ruler = recipe.view.ruler;
   const setSizeVariantId = useEditorStore((s) => s.setSizeVariantId);
   const setColourId = useEditorStore((s) => s.setColourId);
   const setFinishId = useEditorStore((s) => s.setFinishId);
@@ -65,19 +90,14 @@ export function EditorNewPage({ productSlug }: { productSlug: string | null }) {
   useEffect(() => {
     if (!product || initializedFor.current === product.id) return;
     initializedFor.current = product.id;
-    const draft = readAnonymousDraft(product.slug);
-    initialize({
-      sizeVariantId: draft?.sizeVariantId ?? defaultSizeVariantId(product),
-      finishId: draft?.finishId ?? product.default_finish_id,
-      colourId: draft?.colourId ?? defaultColourId(product),
-      ruler: draft?.ruler ?? false,
-    });
+    initialize(startingRecipe(product), `new:${product.slug}`);
   }, [product, initialize]);
 
+  // Only once the store holds this product's recipe — never a previous page's.
   useEffect(() => {
-    if (session || !product) return;
-    writeAnonymousDraft({ productSlug: product.slug, sizeVariantId, finishId, colourId, ruler });
-  }, [session, product, sizeVariantId, finishId, colourId, ruler]);
+    if (session || !product || hydratedFor !== `new:${product.slug}`) return;
+    writeAnonymousDraft({ productSlug: product.slug, recipe });
+  }, [session, product, hydratedFor, recipe]);
 
   useEffect(() => {
     if (!session || !user || !product || authLoading || staffLoading || createStarted.current) return;
@@ -86,7 +106,6 @@ export function EditorNewPage({ productSlug }: { productSlug: string | null }) {
     // copy as anonymous, not a created-then-orphaned design.
     if (product.model_scale_status !== "confirmed") return;
     createStarted.current = true;
-    const draft = readAnonymousDraft(product.slug);
     const brand_id = isStaff ? null : primaryBrand?.id ?? null;
     supabase
       .from("designs")
@@ -96,12 +115,8 @@ export function EditorNewPage({ productSlug }: { productSlug: string | null }) {
         brand_id,
         owner_id: user.id,
         status: "draft",
-        draft_recipe: {
-          size_variant_id: draft?.sizeVariantId ?? defaultSizeVariantId(product),
-          finish_id: draft?.finishId ?? product.default_finish_id,
-          colour_id: draft?.colourId ?? defaultColourId(product),
-          view: { ruler: draft?.ruler ?? false },
-        },
+        // Verbatim (collision 23): text layers and view state survive the claim.
+        draft_recipe: startingRecipe(product) as unknown as Json,
       })
       .select("id")
       .single()
@@ -166,7 +181,7 @@ export function EditorNewPage({ productSlug }: { productSlug: string | null }) {
 
   return (
     <EditorShell
-      banner={!session ? <SignInBanner /> : undefined}
+      banner={!session && !calibration ? <SignInBanner /> : undefined}
       viewport={
         <EditorViewport
           modelStoragePath={product.model_storage_path}
@@ -183,13 +198,14 @@ export function EditorNewPage({ productSlug }: { productSlug: string | null }) {
           isCatalogueEditor={isCatalogueEditor}
           ruler={ruler}
           onRulerToggle={() => setRuler(!ruler)}
+          layers={recipe.layers}
         />
       }
       panel={
         <EditorPanel
           product={product}
           sizeVariantId={sizeVariantId}
-          onSizeVariantChange={setSizeVariantId}
+          onSizeVariantChange={(id) => setSizeVariantId(id, variantRatio(product, sizeVariantId, id))}
           finishOptions={finishOptions}
           selectedFinish={selectedFinish}
           onSelectFinish={(f) => setFinishId(f.id)}

@@ -19,7 +19,7 @@ this is an index, not a decision log.
 | 4c | CMS model preview; two-point calibration | **Done** |
 | 4d | CMS branding group marks; recovered radius / angles / relief stored in raw units (§4.2) | **Done** |
 | 4e | Ruler toggle, buyer scope, replaces the measurement line (§2) | **Done** |
-| 4f | Recipe v2, store / autosave / anonymous draft for layers; add text, layer list, straight layout | Not started |
+| 4f | Recipe v2, store / autosave / anonymous draft for layers; add text, layer list, straight layout | **Done** |
 | 4g | Circular layout, per-glyph placement, reversed text without mirroring (§5) | Not started |
 | 4h | Hybrid numeric / slider controls in "Position and curve" (§3) | Not started |
 | 4i | Drag handles on the model, one shared state (§3) | Not started |
@@ -1417,3 +1417,102 @@ R1–R5 are given directly in the 4e task; recorded here as implemented. R6's
    toggles) are not implemented.** E1 §5 row 4e scopes this to diameter and
    thickness only. *Recommend* treating the fuller settings panel as Phase 11
    scope, alongside the rest of that phase's full ruler.
+
+### Phase 4e rulings on the above (2026-09-18, given in the 4f task)
+
+- **Q1 ruled: a calibration query flag.** Calibration screenshots open the
+  editor with `?calibration=1`, which hides all viewport chrome (the ruler
+  toggle, the sign-in banner); `subjectBox`'s corner exclusion is removed.
+  Future viewport chrome must honour the flag.
+- **Q2 ruled: the mesh-count check stands as proven by `data-model-size-mm`.**
+- **Q3 ruled: ruler settings (spec §19–21) are Phase 11.**
+
+## Phase 4f — done (2026-09-18)
+
+Recipe v2, text layers and straight layout, per
+reports/E1-plan-integration.md §5 row 4f, collisions 20–27, §3.3, C3, C10.
+
+Files:
+
+- `src/features/editor/lib/recipe.ts` (new) — `DraftRecipe` v2 and
+  `TextLayer` per §3.3; `normalizeRecipe` (absent version = v1 → `layers: []`,
+  ruler off, collision 27); `newTextLayer` with the §3.3 fallbacks (12% /
+  0.35 × face diameter, cw, conform); `scaleLayers` for a variant switch
+  (C10: centre, radius, text size, letter spacing and baseline offset scale;
+  angles don't; relief doesn't exist yet). No imports, so node tests load it.
+- `src/features/editor/lib/textLayout.ts` (new) — per-glyph layout from
+  typeface-JSON advances (no kerning, E1 §6 R1); `text_size_mm` is cap height.
+- `src/features/editor/lib/fonts.ts` (new) — the two bundled fonts, fetched
+  from `public/fonts/` on first use and cached; never in the JS bundle.
+- `public/fonts/` (new) — `poppins-semibold` (the site face) and
+  `dm-serif-display`, both SIL OFL 1.1, converted offline with opentype.js to
+  typeface JSON, Latin-1 (191 glyphs), with `capHeight` from OS/2; licence
+  files beside each JSON.
+- `src/features/editor/store/useEditorStore.ts` — `recipe`, `selectedLayerId`,
+  `hydratedFor`; `initialize(recipe, hydratedFor)` replaces everything
+  (collision 21); layer actions; the three setters stay as thin wrappers, with
+  `setSizeVariantId(id, ratio)` scaling layers.
+- `src/features/editor/lib/anonymousDraft.ts` — `{ productSlug, recipe }`;
+  the pre-4f three-id shape is read forward (collision 22).
+- `src/features/editor/hooks/useAutosaveDraft.ts` — hydration gated on
+  `hydratedFor === designId` (collision 24); `lastSaved` advances only on a
+  landed write, and an update that returns no row (RLS-filtered) counts as a
+  failure → status `error` (collision 25).
+- `src/features/editor/hooks/useEditorProduct.ts` — `variantRatio`.
+- `src/features/editor/pages/EditorNewPage.tsx` — initialises from the
+  anonymous draft's recipe; mirrors the recipe to sessionStorage only once
+  hydrated for this product; the claim inserts the recipe verbatim
+  (collision 23); `?calibration=1` hides the sign-in banner.
+- `src/features/editor/pages/EditorDesignPage.tsx` — `normalizeRecipe` on
+  load; autosaves the whole recipe.
+- `src/features/editor/components/EditorPanel.tsx` — BRANDING is the new
+  group; "Not saved" status line.
+- `src/features/editor/components/branding/BrandingGroup.tsx` (new) — Add
+  text; layer rows (content preview, select, delete, dnd-kit drag reorder
+  with keyboard support); selected layer: Text, Font, Text size. No relief or
+  fill controls (rulings §6).
+- `src/features/editor/components/branding/MmField.tsx` (new) — mm at 2 dp,
+  3 dp while focused, unrounded write (C3).
+- `src/features/editor/components/branding/TextLayerMeshes.tsx` (new) — one
+  `TextGeometry` mesh per glyph (cached per font × character at cap height 1,
+  scaled `(size, size, 1)`), lifted 0.02 mm, a 0.05 mm preview slab in the
+  part's own material until Phase 5; a sibling of the model, so ruler and
+  `data-model-size-mm` bounds are unchanged. Reports glyph count, glyph
+  positions and the minimum world determinant.
+- `src/features/editor/components/EditorModel.tsx` — renders the text layers.
+- `src/features/editor/components/EditorViewport.tsx` — `data-glyph-count`,
+  `data-glyphs`, `data-min-world-determinant`; `?calibration=1` hides the
+  ruler toggle.
+- `src/features/editor/components/EditorShell.tsx` — height
+  `100vh − 5rem − 1px`: the fixed site header is 81 px at every width, so
+  `4rem` left the viewport's bottom 17 px (the ruler toggle) below the fold.
+- `src/features/i18n/translations.ts` — `editor.autosave.notSaved`,
+  `editor.branding.*` (9 keys), × 3 locales.
+- `scripts/e2e-local/lib/calibration.mjs` — corner exclusion removed;
+  `openEditor` pins the page to 1280 × 680 so the canvas stays the
+  baselines' 920 × 599 without the banner; `subjectBox` samples the backdrop
+  at mid-height, below the site header's drop shadow (which reaches the
+  canvas once no banner separates them). Model pixels are identical to HEAD.
+- `scripts/e2e-local/scenarios/render-calibration.mjs`,
+  `scripts/e2e-local/calibrate/fit-families.mjs` — `&calibration=1`.
+- `scripts/e2e-local/scenarios/text-layer.mjs` (new) — anon "POLO" (4
+  glyphs) → sign in → claim read-back `layers[0].content.value = "POLO"`,
+  `recipe_version 2`; "WINCYC" autosave read-back; reload → 6 glyph meshes;
+  text size 3 dp focused / 2 dp at rest, unrounded 1.2345 stored; font
+  read-back; second layer drag-reordered and deleted (read-backs); variant
+  switch scales size and radius, not angles; forced RLS denial (design
+  reassigned to another owner) → "Not saved", row unchanged, then saves once
+  restored; a v1 row opens with no layers, writes nothing on open, and saves
+  as v2 with `layers: []` on its first change.
+- `scripts/e2e-local/unit/text-layout.test.mjs` (new) — font subset and
+  licence, v1 normalisation, §3.3 fallbacks, C10 scaling, straight layout.
+- `docs/3d-editor/STATUS.md` — this file.
+
+### Rulings
+
+- **The determinant check covers the model and the glyphs, not drei's
+  ContactShadows.** drei draws its shadow quad with `scale (1, −1, 1)`; it is
+  a texture plane, not part geometry, and isn't ours to change.
+- **An RLS-filtered update is a failed save.** PostgREST returns no error for
+  an update whose `USING` clause matches no row, so autosave selects the id
+  back and treats an empty result as a failure.

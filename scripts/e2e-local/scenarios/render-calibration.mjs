@@ -124,7 +124,7 @@ export default async function ({ page, base, admin, h }) {
   try {
     // explicit values take the trigger's hand-set path; restored below
     await admin.from("finishes").update({ base_color_hex: referenceNickel }).eq("id", nickel.id);
-    const canvas = await openEditor(page, `${base}/designer-studio/editor/new?product=${metal.slug}`);
+    const canvas = await openEditor(page, `${base}/designer-studio/editor/new?product=${metal.slug}&calibration=1`);
     const stats = await faceStats(await canvas.screenshot());
     out.studio = { surroundLum: Math.round(stats.lumP02), highlightLum: Math.round(stats.lumP98), referenceNickel };
     assert.ok(stats.lumP02 <= 0x50, `surround-facing region ${stats.lumP02.toFixed(0)} should be ≤ #505050`);
@@ -146,7 +146,7 @@ export default async function ({ page, base, admin, h }) {
     out.calibration = {};
     for (const hex of ["#808080", "#C0392B"]) {
       await admin.from("product_colours").update({ hex }).eq("id", stagedDisc.colourId);
-      const canvas = await openEditor(page, `${base}/designer-studio/editor/new?product=${nonMetal.slug}`);
+      const canvas = await openEditor(page, `${base}/designer-studio/editor/new?product=${nonMetal.slug}&calibration=1`);
       const shot = await canvas.screenshot();
       const got = await centrePixel(shot);
       const want = hexToRgb255(hex);
@@ -173,7 +173,7 @@ export default async function ({ page, base, admin, h }) {
   });
   const tiles = [];
   try {
-    const canvas = await openEditor(page, `${base}/designer-studio/editor/new?product=${metal.slug}`);
+    const canvas = await openEditor(page, `${base}/designer-studio/editor/new?product=${metal.slug}&calibration=1`);
     for (const s of sheetRows) {
       await pickFinish(page, s.code);
       // antique finishes bake occlusion on first use

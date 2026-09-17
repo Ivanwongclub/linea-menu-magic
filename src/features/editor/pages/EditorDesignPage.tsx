@@ -4,7 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth/AuthProvider";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { supabase } from "@/integrations/supabase/client";
-import { useEditorProductById } from "../hooks/useEditorProduct";
+import { useEditorProductById, variantRatio } from "../hooks/useEditorProduct";
+import { normalizeRecipe } from "../lib/recipe";
 import { useFinishOptions, type PickerFinish } from "../hooks/useFinishOptions";
 import { useAutosaveDraft } from "../hooks/useAutosaveDraft";
 import { useCatalogueEditorStatus } from "@/features/admin/hooks/useCatalogueEditorStatus";
@@ -16,7 +17,8 @@ import { EditorPanel } from "../components/EditorPanel";
 interface DesignRow {
   id: string;
   product_id: string | null;
-  draft_recipe: { size_variant_id?: string; finish_id?: string; colour_id?: string; view?: { ruler?: boolean } } | null;
+  /** Any stored version; `normalizeRecipe` reads a v1 row as `layers: []`, ruler off (collision 27). */
+  draft_recipe: unknown;
 }
 
 async function fetchDesign(designId: string): Promise<DesignRow | null> {
@@ -53,10 +55,10 @@ export function EditorDesignPage({ designId }: { designId: string }) {
   const { data: finishOptions = [] } = useFinishOptions(product?.id ?? null, product?.is_metal ?? false);
   const { isEditor: isCatalogueEditor } = useCatalogueEditorStatus();
 
-  const sizeVariantId = useEditorStore((s) => s.sizeVariantId);
-  const finishId = useEditorStore((s) => s.finishId);
-  const colourId = useEditorStore((s) => s.colourId);
-  const ruler = useEditorStore((s) => s.ruler);
+  const recipe = useEditorStore((s) => s.recipe);
+  const hydratedFor = useEditorStore((s) => s.hydratedFor);
+  const { size_variant_id: sizeVariantId, finish_id: finishId, colour_id: colourId } = recipe;
+  const ruler = recipe.view.ruler;
   const setSizeVariantId = useEditorStore((s) => s.setSizeVariantId);
   const setFinishId = useEditorStore((s) => s.setFinishId);
   const setColourId = useEditorStore((s) => s.setColourId);
@@ -65,24 +67,22 @@ export function EditorDesignPage({ designId }: { designId: string }) {
 
   useEffect(() => {
     if (!product || !designQuery.data) return;
-    const recipe = designQuery.data.draft_recipe ?? {};
-    initialize({
-      sizeVariantId: recipe.size_variant_id ?? product.size_variants.find((v) => v.is_default)?.id ?? product.size_variants[0]?.id ?? null,
-      finishId: recipe.finish_id ?? product.default_finish_id,
-      colourId: recipe.colour_id ?? product.colours[0]?.id ?? null,
-      ruler: recipe.view?.ruler ?? false,
-    });
+    const stored = normalizeRecipe(designQuery.data.draft_recipe);
+    initialize(
+      {
+        ...stored,
+        size_variant_id: stored.size_variant_id ?? product.size_variants.find((v) => v.is_default)?.id ?? product.size_variants[0]?.id ?? null,
+        finish_id: stored.finish_id ?? product.default_finish_id,
+        colour_id: stored.colour_id ?? product.colours[0]?.id ?? null,
+      },
+      designId,
+    );
     // Read once at load; re-running on every field change would stomp the
     // buyer's in-progress local selections.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product?.id, designQuery.data?.id]);
 
-  const saveStatus = useAutosaveDraft(designQuery.data ? designId : null, {
-    size_variant_id: sizeVariantId,
-    finish_id: finishId,
-    colour_id: colourId,
-    view: { ruler },
-  });
+  const saveStatus = useAutosaveDraft(designQuery.data ? designId : null, recipe, hydratedFor);
 
   if (authLoading) {
     return <LoadingShell />;
@@ -134,13 +134,14 @@ export function EditorDesignPage({ designId }: { designId: string }) {
           isCatalogueEditor={isCatalogueEditor}
           ruler={ruler}
           onRulerToggle={() => setRuler(!ruler)}
+          layers={recipe.layers}
         />
       }
       panel={
         <EditorPanel
           product={product}
           sizeVariantId={sizeVariantId}
-          onSizeVariantChange={setSizeVariantId}
+          onSizeVariantChange={(id) => setSizeVariantId(id, variantRatio(product, sizeVariantId, id))}
           finishOptions={finishOptions}
           selectedFinish={selectedFinish}
           onSelectFinish={(f) => setFinishId(f.id)}

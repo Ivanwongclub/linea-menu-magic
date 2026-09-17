@@ -3,10 +3,12 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { Box } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { EditorModel, type RulerMeasurements } from "./EditorModel";
+import type { TextSceneReport } from "./branding/TextLayerMeshes";
+import type { TextLayer } from "../lib/recipe";
 import { RulerOverlay } from "./RulerOverlay";
 import { RulerToggle } from "./RulerToggle";
 import type { EditorColour } from "../hooks/useEditorProduct";
@@ -29,6 +31,7 @@ interface EditorViewportProps {
   isCatalogueEditor: boolean;
   ruler: boolean;
   onRulerToggle: () => void;
+  layers: TextLayer[];
 }
 
 function ViewportFallback() {
@@ -110,11 +113,15 @@ export function EditorViewport({
   isCatalogueEditor,
   ruler,
   onRulerToggle,
+  layers,
 }: EditorViewportProps) {
   const controlsRef = useRef<OrbitControlsImpl>(null);
   const [autoRotate, setAutoRotate] = useState(true);
   const [modelSizeMm, setModelSizeMm] = useState<number | null>(null);
   const [rulerMeasurements, setRulerMeasurements] = useState<RulerMeasurements | null>(null);
+  const [textReport, setTextReport] = useState<TextSceneReport | null>(null);
+  // Calibration screenshots composite any DOM over the canvas; `?calibration=1` hides the viewport chrome.
+  const calibration = useSearchParams()[0].get("calibration") === "1";
 
   if (!modelStoragePath) {
     return <EmptyModelState />;
@@ -133,6 +140,10 @@ export function EditorViewport({
       className="relative flex-1 bg-secondary"
       data-testid="editor-viewport"
       data-model-size-mm={modelSizeMm != null ? modelSizeMm.toFixed(2) : undefined}
+      // Scene read-backs for the text scenarios: the rendered glyphs and the no-mirroring check.
+      data-glyph-count={textReport?.glyphMeshCount}
+      data-min-world-determinant={textReport?.minWorldDeterminant}
+      data-glyphs={textReport ? JSON.stringify(textReport.glyphs) : undefined}
     >
       <Suspense fallback={<ViewportFallback />}>
         <Canvas
@@ -153,6 +164,8 @@ export function EditorViewport({
             controlsRef={controlsRef}
             onModelSizeMm={setModelSizeMm}
             onRulerMeasurements={ruler ? setRulerMeasurements : undefined}
+            layers={layers}
+            onTextReport={setTextReport}
           />
           {ruler && rulerMeasurements && <RulerOverlay measurements={rulerMeasurements} sizeLigne={sizeLigne} sizeLabel={sizeLabel} />}
           <OrbitControls
@@ -166,7 +179,7 @@ export function EditorViewport({
           />
         </Canvas>
       </Suspense>
-      <RulerToggle active={ruler} onToggle={onRulerToggle} />
+      {!calibration && <RulerToggle active={ruler} onToggle={onRulerToggle} />}
     </div>
   );
 }
