@@ -13,15 +13,32 @@ this is an index, not a decision log.
 | 3c | Procedural studio, antique two-tone, painted finishes and per-family calibration from `wincyc-swatch-measurements.csv` | **Done** — family calibration superseded by 3d |
 | 3d | Hue-only family calibration, physical lightness, chart oxide L* | **Done** — fit superseded by 3e where gated |
 | 3e | Chroma-gated hue calibration, oxide colour rendered | **Done** — 3-series closed |
-| 4 | Text: content, font, straight and circular layout | Not started |
-| 5 | Direct manipulation: drag to position, size, curve | Not started |
-| 6 | Emboss and deboss via CSG in a worker | Not started |
-| 7 | Fill on deboss layers | Not started |
-| 8 | Save, autosave, version history, restore | Not started |
-| 9 | Archive, share, design list | Not started |
-| 10 | Quote flow and spec sheet | Not started |
-| 11 | Upload path: OBJ, scene tree, cleanup | Not started |
-| 12 | Export OBJ / GLB / STL | Not started |
+| 4.0 | Carried finish items: rose gold blend t = 0.7 toward copper; antique buffed layer at 0.7 × physical L* | **Done** |
+| 4a | `products` scale columns + reset trigger; CMS raw bounds, proposal, confirm / known-dimension calibration (units §1.1) | **Done** |
+| 4b | Editor uses stored factor (force-rescale removed, §1.3); buyer refusal for unconfirmed scale (§1.2); e2e staging confirmed | Not started |
+| 4c | CMS model preview; two-point calibration | Not started |
+| 4d | CMS branding group marks; recovered radius / angles / relief stored in raw units (§4.2) | Not started |
+| 4e | Ruler toggle, buyer scope, replaces the measurement line (§2) | Not started |
+| 4f | Recipe v2, store / autosave / anonymous draft for layers; add text, layer list, straight layout | Not started |
+| 4g | Circular layout, per-glyph placement, reversed text without mirroring (§5) | Not started |
+| 4h | Hybrid numeric / slider controls in "Position and curve" (§3) | Not started |
+| 4i | Drag handles on the model, one shared state (§3) | Not started |
+| 4j | Catalogue branding defaults: marked groups hidden, text lands on recovered placement; ruler branding radius and edge margin | Not started |
+| 5 | Relief: emboss/deboss per layer, depth, bevel, manufacturing warning strip with WIN-CYC thresholds | Not started |
+| 6 | Fill picker on deboss layers; occlusion bake moves to a worker | Not started |
+| 7 | Versions: named saves, snapshot, reload | Not started |
+| 8 | Shares | Not started |
+| 9 | Quote request and staff queue | Not started |
+| 10 | Spec sheet PDF, recovered values labelled (§4.3) | Not started |
+| 11 | Upload path: scene tree, viewport selection, hover, hide/isolate, first-import dialog, full units and scale, calibration, full ruler, branding analysis and recovery, fit policies | Not started |
+| 12 | Bake and export: boolean, cleanup, bake scale, OBJ mm, GLB metres, STL (§1.5) | Not started |
+
+Phases 4–12 follow `wincyc-3d-editor-units-and-recovery-rulings.md` §7 (§ refs
+above are to that document); Phase 4's units, their e2e proofs and open
+questions are in `reports/E1-plan-integration.md` §5. Autosave already landed in
+Phase 3 (R7). Archive and the design list (old Phase 9) have no row in §7 —
+see E1 open question 4. Later references in this file to "Phase 5/6/8/9" were
+written against the previous numbering.
 
 ## Phase 1 — done (2026-09-17)
 
@@ -871,3 +888,135 @@ rather than pink-copper — see open question 1.
    darker than 15, so the floor sets the oxide nearly everywhere (ANTI_SILVER
    20.74, TIN 17.81 excepted). *Recommend* leaving it; the recesses read dark
    on the sheet.
+
+## Phase 4.0 — done (2026-09-18)
+
+Carried finish items from reports/E1-plan-integration.md §5 (unit 4.0), §8
+rulings. Physical-model changes only; `finish_family_calibration`'s values
+are untouched.
+
+Files:
+
+- `supabase/migrations/20260918100000_phase4_0_carried_finish_items.sql` —
+  `finish_plated_material()`: ROSE_GOLD's gold→copper blend moves t 0.5 → 0.7
+  (3e open question 1); two-tone rows' buffed layer darkens to L* = 0.7 ×
+  physical, chroma scaled in the same proportion, hue kept — scale-invariant,
+  so the oxide layer's own chart-derived target L* is unaffected. The 108
+  plated rows recomputed (count asserted); painted rows untouched.
+- `src/features/finishes/metalReflectance.ts` — `BASE_FAMILY.ROSE_GOLD.blend.t`
+  → 0.7; `physicalPlatedLinear` (the pre-darkening physical colour, exported
+  for calibration checks) and `platedLinear` (the stored colour: physical
+  plus the two-tone darkening) split out; `isTwoTonePlated` and
+  `TWO_TONE_BUFFED_L_SCALE` exported. `oxideLinear` unchanged — its
+  buffed/target-L* ratio math is invariant to the darkening.
+- `scripts/e2e-local/scenarios/family-calibration.mjs` — asserts ROSE_GOLD's
+  stored rows match the TS mirror at t 0.7; two-tone rows' base L* = 0.7 ×
+  physical ± 0.05, non-two-tone rows still equal physical; the oxide layer
+  still hits its calibration target L* after the buffed darkening.
+- `scripts/e2e-local/scenarios/render-calibration.mjs` — DB/TS parity check
+  (unchanged logic) now covers both changes; contact sheet →
+  `reports/4-materials.png` (the same 3e twelve cells).
+- `reports/4-materials.png`.
+- `docs/3d-editor/STATUS.md` — this file.
+
+### Rulings
+
+R1/R2 are given directly in reports/E1-plan-integration.md §5 row 4.0 and
+recorded in the migration's header comment; not duplicated here.
+
+### Open questions from this phase
+
+None — 3e open question 1 (rose gold hue) is closed by R1.
+
+## Phase 4a — done (2026-09-18)
+
+`products` scale schema and CMS confirmation, per
+reports/E1-plan-integration.md §3.1, §5 (unit 4a) and
+wincyc-3d-editor-units-and-recovery-rulings.md §1. Two-point calibration and
+the 3D preview are Phase 4c — no placeholder was added for them (rulings §6).
+
+Files:
+
+- `supabase/migrations/20260918110000_phase4a_model_scale.sql` — `products`
+  gains `model_scale_factor`, `model_scale_status`
+  (`confirmed`/`unconfirmed`, default `unconfirmed`), `model_scale_method`
+  (`unit_mm`/`known_dimension`/`two_point`), `model_scale_reference_variant_id`,
+  `model_raw_bounds` (jsonb: raw AABB, face axis, primary raw dimension),
+  `model_scale_confirmed_at`/`_by`, `model_branding_groups` (Phase 4d),
+  `model_branding_reference` (Phase 4d); check constraints; a
+  before-update-of-`model_storage_path` trigger resets confirmation/method/
+  marks on a new or removed file (collision 13); `design_versions.snapshot`'s
+  comment extended to name the scale fields a version now needs to freeze
+  (collision 11). **Deviation from E1 §3.1 as written** — see Q1 below.
+- `src/integrations/supabase/types.ts` — regenerated (`npm run e2e:types`).
+- `src/features/admin/lib/objBounds.ts` (new) — `OBJLoader.parse` on raw
+  text (no viewer): raw AABB, face axis (the thinnest extent) and primary raw
+  dimension (E1 collision 4); `proposeScaleFactor` (C2: 1 within 2%, else
+  `referenceMm / primaryRawMm`, unrounded).
+- `src/features/admin/hooks/useProductModel.ts` — upload parses the file
+  after a successful storage write and includes `model_raw_bounds` in the
+  same row update as `model_storage_path` (collision 12); new
+  `useProductModelScale` — the product's scale state, its size variants, and
+  the two write paths (`confirmUnitScale`, `calibrateKnownDimension`).
+- `src/components/admin/product-editor/ProductModelEditor.tsx` — scale panel:
+  raw dimensions, reference-variant picker (Q2: defaults to the default
+  variant), the C2 proposal with its residual or full-precision factor,
+  Confirm / Calibrate by known dimension / leave unconfirmed, "Scale:
+  Confirmed"/"Scale: Unconfirmed" status (spec §8). Fully localised (Q6).
+- `src/features/i18n/adminTranslations.ts` — `admin.model.scale.*`, 19 keys
+  × 3 languages.
+- `scripts/e2e-local/scenarios/cms-model-scale.mjs` (new) — uploads the Polo
+  fixture to a product with a 15.00 mm and a 10.8 mm size variant: proposal 1
+  → Confirm → read-back `confirmed`/`1`/`unit_mm`; replace the file →
+  read-back `unconfirmed`, factor null, branding groups `[]`; switch the
+  reference variant to 10.8 mm → proposal ≈ 0.720193 at full precision →
+  Calibrate by known dimension → read-back `confirmed`/`0.720193 ± 1e-6`/
+  `known_dimension`.
+- `docs/3d-editor/STATUS.md` — this file.
+
+### Rulings
+
+R1–R5 are given directly in reports/E1-plan-integration.md's task and §3.1,
+and recorded in the migration's header comment; not duplicated here, except:
+
+- **Q1 (calibration surface).** Ruled: the CMS only. `ProductModelEditor` is
+  the one write path; the buyer editor (Phase 4b) will show catalogue
+  editors a link back here rather than its own controls.
+- **Q2 (reference variant).** Ruled: `model_scale_reference_variant_id`
+  defaults to the product's default (`is_default`) size variant, editable in
+  the scale panel's picker before confirming or calibrating.
+- **Q6 (admin i18n).** Ruled in scope: the scale panel has no hardcoded
+  English — every string is in `adminTranslations.ts` across all three
+  languages.
+
+### Open questions from this phase, with a recommendation each
+
+1. **`model_scale_reference_variant_id` is not a foreign key, contrary to
+   E1 §3.1's literal SQL.** Verified live against the local stack: with the
+   FK in place, `products` has two relationship paths to
+   `product_size_variants` (the existing `product_size_variants.product_id`
+   and the new column), and PostgREST returns `300 Multiple Choices` for
+   every existing unqualified `product_size_variants(...)` embed — including
+   the buyer editor's own product query, which then shows "Product not
+   found" for every product. None of the affected call sites
+   (`useEditorProduct.ts`, the storefront product hook, other CMS queries)
+   were in this phase's edit scope. *Recommend* keeping the plain-uuid
+   column with the compensating delete trigger (as shipped) rather than
+   qualifying every embed with an explicit FK-name hint across files this
+   phase couldn't touch; a future phase with those files in scope could
+   requalify the embeds and restore the formal FK if the guarantee is worth
+   it.
+2. **Confirmed rows have no re-calibrate path in the panel.** Once
+   `model_scale_status = 'confirmed'`, the panel only displays the stored
+   factor/method — there's no button to redo the confirmation with a
+   different variant or method short of replacing the file (which resets
+   it). *Recommend* deciding in Phase 4c whether re-calibration belongs
+   alongside two-point calibration, since it's the same "already confirmed"
+   state that needs a way back in.
+3. **`model_raw_bounds` parse failures are a hard upload error.** If
+   `OBJLoader.parse` throws on a malformed file, the storage object is
+   already written (recoverable orphan, matching the upload/remove pattern)
+   but the row update is not attempted. *Recommend* confirming this is the
+   wanted failure mode — the alternative is writing the row with
+   `model_raw_bounds: null` and surfacing the scale panel's "raw bounds
+   unavailable" state instead of a toast error.

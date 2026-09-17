@@ -1799,6 +1799,15 @@ export type Database = {
           lead_time_min_days: number | null
           logo_customisable: boolean
           material_id: string | null
+          model_branding_groups: Json
+          model_branding_reference: Json | null
+          model_raw_bounds: Json | null
+          model_scale_confirmed_at: string | null
+          model_scale_confirmed_by: string | null
+          model_scale_factor: number | null
+          model_scale_method: string | null
+          model_scale_reference_variant_id: string | null
+          model_scale_status: string
           model_storage_path: string | null
           model_url: string | null
           moq_qty: number | null
@@ -1839,6 +1848,15 @@ export type Database = {
           lead_time_min_days?: number | null
           logo_customisable?: boolean
           material_id?: string | null
+          model_branding_groups?: Json
+          model_branding_reference?: Json | null
+          model_raw_bounds?: Json | null
+          model_scale_confirmed_at?: string | null
+          model_scale_confirmed_by?: string | null
+          model_scale_factor?: number | null
+          model_scale_method?: string | null
+          model_scale_reference_variant_id?: string | null
+          model_scale_status?: string
           model_storage_path?: string | null
           model_url?: string | null
           moq_qty?: number | null
@@ -1879,6 +1897,15 @@ export type Database = {
           lead_time_min_days?: number | null
           logo_customisable?: boolean
           material_id?: string | null
+          model_branding_groups?: Json
+          model_branding_reference?: Json | null
+          model_raw_bounds?: Json | null
+          model_scale_confirmed_at?: string | null
+          model_scale_confirmed_by?: string | null
+          model_scale_factor?: number | null
+          model_scale_method?: string | null
+          model_scale_reference_variant_id?: string | null
+          model_scale_status?: string
           model_storage_path?: string | null
           model_url?: string | null
           moq_qty?: number | null
