@@ -23,6 +23,8 @@ import ProductGallery from '@/components/product/ProductGallery';
 import SizeSelector from '@/components/product/SizeSelector';
 import ProductColourFinish from '@/components/product/ProductColourFinish';
 import Model3DViewer from '@/components/designer-studio/Model3DViewer';
+import { ThreeDBadge } from '@/components/products/ThreeDBadge';
+import { editorUrlForProduct, is3DReady } from '@/features/products/utils/model3d';
 import { useProduct } from '@/features/products/hooks/useProduct';
 import { useProducts } from '@/features/products/hooks/useProducts';
 import { getProductImageUrl } from '@/lib/productImage';
@@ -283,6 +285,7 @@ export default function ProductDetail() {
   ];
 
   const hasDownloads = !!product.model_url;
+  const ready3D = is3DReady(product);
 
   const navSections = [
     { id: SECTION_IDS.overview, label: t('product.nav.overview') },
@@ -332,6 +335,7 @@ export default function ProductDetail() {
                       <span className="text-[11px] font-mono text-muted-foreground">{product.item_code}</span>
                     </>
                   )}
+                  {ready3D && <ThreeDBadge />}
                 </div>
                 <h1 className="text-2xl lg:text-3xl font-semibold tracking-tight text-foreground leading-tight mb-2">
                   {displayName}
@@ -403,13 +407,12 @@ export default function ProductDetail() {
                   </Link>
                 </Button>
 
-                {product.model_url && (
-                  <Button variant="outline" size="lg" className="w-full gap-2 h-11 text-sm" asChild>
-                    <Link
-                      to={`/designer-studio/editor?model=${encodeURIComponent(product.model_url)}&name=${encodeURIComponent(product.item_code || product.name)}&slug=${encodeURIComponent(product.slug)}`}
-                    >
+                {/* 5b R1: the editor entry is offered only where it will open. */}
+                {ready3D && (
+                  <Button variant="outline" size="lg" className="w-full gap-2 h-11 text-sm" asChild data-testid="product-design-3d">
+                    <Link to={editorUrlForProduct(product.slug)}>
                       <Palette className="h-4 w-4" />
-                      {t('product.cta.customise3D')}
+                      {t('product.cta.designIn3D')}
                     </Link>
                   </Button>
                 )}

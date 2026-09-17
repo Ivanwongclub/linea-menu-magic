@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { Box, Eye, Download, FileDown, Leaf, Layers } from "lucide-react";
+import { Eye, Download, FileDown, Leaf, Layers } from "lucide-react";
 import type { UserLibraryItem } from "@/features/products/types";
 import type { Product } from "@/features/products/types";
 import { getProductImageUrl } from "@/lib/productImage";
 import { getProductPlaceholderUrl } from "@/features/products/utils/productImagePlaceholder";
+import { is3DReady } from "@/features/products/utils/model3d";
+import { ThreeDBadge } from "@/components/products/ThreeDBadge";
 
 interface LibraryItemCardProps {
   item: UserLibraryItem;
@@ -102,13 +104,8 @@ const LibraryItemCard = ({
           </div>
         )}
 
-        {/* 3D / OBJ badge (top-right) */}
-        {item.product?.model_url && (
-          <div className="absolute top-2 right-2 bg-background/90 backdrop-blur-sm text-foreground text-[9px] font-medium uppercase tracking-[0.18em] px-2 py-0.5 border border-border flex items-center gap-1">
-            <Box className="w-2.5 h-2.5" strokeWidth={1.5} />
-            3D
-          </div>
-        )}
+        {/* 3D badge (top-right), on the same rule as every other surface (5b R1). */}
+        {is3DReady(item.product) && <ThreeDBadge className="absolute top-2 right-2 z-20" />}
 
         {/* Sustainability cert badge (bottom-right) — matching ProductCard */}
         {certs.length > 0 && (

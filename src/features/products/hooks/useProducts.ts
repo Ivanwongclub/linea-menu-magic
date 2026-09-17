@@ -146,6 +146,8 @@ function transformProduct(row: Record<string, unknown>): Product {
     production: row.production as Record<string, unknown> | undefined,
     thumbnail_url: row.thumbnail_url as string | undefined,
     model_url: row.model_url as string | undefined,
+    model_storage_path: (row.model_storage_path as string | null) ?? null,
+    model_scale_status: (row.model_scale_status as string | null) ?? null,
     sort_order: row.sort_order as number,
     created_at: row.created_at as string,
     updated_at: row.updated_at as string,

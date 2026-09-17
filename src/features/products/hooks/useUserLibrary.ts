@@ -36,6 +36,7 @@ export function useUserLibrary(teamId: string): UseUserLibraryResult {
           id, item_code, name, name_en,
           slug, description,
           thumbnail_url, model_url,
+          model_storage_path, model_scale_status,
           is_customizable, is_public, status,
           specifications, production, sort_order,
           created_at, updated_at,

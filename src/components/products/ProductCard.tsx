@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Sparkles, Heart, Eye, Leaf, Box } from 'lucide-react';
+import { Sparkles, Heart, Eye, Leaf } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { Product } from '@/features/products/types';
 import { getProductImageUrl } from '@/lib/productImage';
@@ -7,6 +7,8 @@ import { resolveProductImage } from '@/features/products/utils/resolveProductIma
 import { getProductPlaceholderUrl } from '@/features/products/utils/productImagePlaceholder';
 import { useI18n } from '@/features/i18n/I18nProvider';
 import { localizedName, localizedDescription } from '@/features/admin/lib/localize';
+import { is3DReady } from '@/features/products/utils/model3d';
+import { ThreeDBadge } from './ThreeDBadge';
 
 type ViewMode = 'grid' | 'list';
 
@@ -107,13 +109,8 @@ export default function ProductCard({
           </div>
         )}
 
-        {/* 3D / OBJ badge (top-right) */}
-        {product.model_url && (
-          <div className="absolute top-2.5 right-2.5 bg-white/90 backdrop-blur-sm text-[hsl(var(--foreground))] text-[9px] font-medium uppercase tracking-[0.08em] px-2 py-0.5 rounded-[var(--radius)] border border-[hsl(var(--border))] flex items-center gap-1 z-20">
-            <Box className="w-2.5 h-2.5" />
-            3D
-          </div>
-        )}
+        {/* 3D badge (top-right): a confirmed model, i.e. one the editor will open (5b R1). */}
+        {is3DReady(product) && <ThreeDBadge className="absolute top-2.5 right-2.5 z-20" />}
 
         {/* Sustainability leaf badge (bottom-right) */}
         {certs.length > 0 && (
@@ -233,6 +230,8 @@ function ProductCardFeatured({
           className={`absolute inset-0 w-full h-full object-cover object-center transition-all duration-500 ease-out group-hover:scale-[1.04] ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
         />
 
+        {is3DReady(product) && <ThreeDBadge className="absolute top-2.5 right-2.5 z-20" />}
+
         {certs.length > 0 && (
           <div className="absolute bottom-2 right-2 z-10">
             <div className="bg-white/85 backdrop-blur-sm rounded-[var(--radius)] px-1.5 py-0.5 flex items-center gap-1">
@@ -328,6 +327,7 @@ function ProductCardList({
               {tag.name}
             </span>
           ))}
+          {is3DReady(product) && <ThreeDBadge className="shrink-0" />}
         </div>
         <p className="text-[10px] text-muted-foreground mt-0.5">
           {product.primary_category?.name}

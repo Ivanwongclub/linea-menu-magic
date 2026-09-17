@@ -222,6 +222,8 @@ function transformProduct(row: Row, defaultFinishId: string | null): Product {
     production: row.production as Record<string, unknown> | undefined,
     thumbnail_url: str(row.thumbnail_url),
     model_url: str(row.model_url),
+    model_storage_path: (row.model_storage_path as string | null) ?? null,
+    model_scale_status: (row.model_scale_status as string | null) ?? null,
     sort_order: num(row.sort_order),
     created_at: row.created_at as string,
     updated_at: row.updated_at as string,

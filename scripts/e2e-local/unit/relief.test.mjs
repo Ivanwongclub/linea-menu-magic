@@ -94,10 +94,12 @@ test("R3: the strip's checks, and what a null threshold means", () => {
   assert.deepEqual(manufacturingWarnings(measures, blank, 7.5), []);
   assert.deepEqual(manufacturingWarnings(measures, null, 7.5), []);
 
-  // Too deep, the other way round.
+  // Too deep, the other way round — a recess tolerance, so engraved only (5b R3).
   const deep = [{ layer: { ...layer, relief: { type: "deboss", depth_mm: 0.8, bevel_mm: 0.05 } }, strokeMm: 0.5 }];
   assert.deepEqual(manufacturingWarnings(deep, process, 7.5).map((w) => w.kind), ["depthMax"]);
   assert.equal(manufacturingWarnings(deep, process, 7.5)[0].key, "editor.manufacturing.engraveDepthMax");
+  const proud = [{ layer: { ...layer, relief: { type: "emboss", depth_mm: 0.8, bevel_mm: 0.05 } }, strokeMm: 0.5 }];
+  assert.deepEqual(manufacturingWarnings(proud, process, 7.5), [], "a raised layer is not held to the maximum recess depth");
 
   // Edge margin is geometry, not a process tolerance: it is checked either way.
   const outward = [{ layer: { ...layer, placement: { ...layer.placement, radius_mm: 7.3 } }, strokeMm: 0.5 }];

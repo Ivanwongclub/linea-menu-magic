@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { model3DState, type Model3DState } from "@/features/products/utils/model3d";
 
 export type AdminProductStatus = "draft" | "active" | "archived";
 
@@ -16,6 +17,8 @@ export interface AdminProductRow {
   material_name: string | null;
   primary_category: { id: string; name: string; family_id: string | null } | null;
   updated_at: string;
+  /** 5b R2: does this row have a model, and has its scale been confirmed? */
+  model_3d: Model3DState;
 }
 
 interface RawRow {
@@ -28,6 +31,8 @@ interface RawRow {
   brand_id: string | null;
   material_id: string | null;
   updated_at: string;
+  model_storage_path: string | null;
+  model_scale_status: string | null;
   brands: { id: string; name: string } | null;
   material: { id: string; name: string } | null;
   product_category_map: {
@@ -56,6 +61,7 @@ export function useAdminProducts() {
         .select(
           `
           id, item_code, name, slug, status, is_public, brand_id, material_id, updated_at,
+          model_storage_path, model_scale_status,
           brands:brand_id ( id, name ),
           material:material_id ( id, name ),
           product_category_map ( is_primary, product_categories ( id, name, family_id ) )
@@ -86,6 +92,7 @@ export function useAdminProducts() {
           material_name: row.material?.name ?? null,
           primary_category: primary,
           updated_at: row.updated_at,
+          model_3d: model3DState(row),
         });
       }
       return [...byId.values()];

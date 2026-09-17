@@ -148,7 +148,10 @@ export type Product = {
   /** @deprecated untyped blob, replaced by the typed columns below. */
   production?: Record<string, unknown>;
   thumbnail_url?: string;
+  /** @deprecated legacy public URL; 3D-readiness is `model_storage_path` + `model_scale_status` (5b R1). */
   model_url?: string;
+  model_storage_path?: string | null;
+  model_scale_status?: string | null;
   sort_order: number;
   created_at: string;
   updated_at: string;

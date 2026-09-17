@@ -24,6 +24,7 @@ import {
 import { localizedName } from "@/features/admin/lib/localize";
 import { getProductImageUrl } from "@/lib/productImage";
 import { resolveProductImage } from "@/features/products/utils/resolveProductImage";
+import { editorUrlForProduct, is3DReady } from "@/features/products/utils/model3d";
 
 const REVEAL_BASE = "transition-all duration-700 ease-[cubic-bezier(0.19,1,0.22,1)]";
 
@@ -158,9 +159,9 @@ const DesignerStudio = () => {
               // `name` is the English base since the trilingual migration;
               // the zh columns carry the translations.
               const displayName = localizedName(p, language);
-              const editorUrl = p.model_url
-                ? `/designer-studio/editor?model=${encodeURIComponent(p.model_url)}&name=${encodeURIComponent(displayName)}&slug=${encodeURIComponent(p.slug)}`
-                : null;
+              // 5b R1: only a confirmed model gets an editor entry — never a
+              // disabled button on a product that cannot be opened.
+              const editorUrl = is3DReady(p) ? editorUrlForProduct(p.slug) : null;
               // P18 C3: same fallback chain the Trim Library uses, via the shared util.
               const imageSrc = getProductImageUrl(resolveProductImage(p, 'thumb'), 'card');
               return (
@@ -190,8 +191,8 @@ const DesignerStudio = () => {
                       </Link>
                       {editorUrl && (
                         <Link to={editorUrl}>
-                          <Button size="sm" className="text-[10px] uppercase tracking-[0.12em] h-7 px-3">
-                            Open in Editor
+                          <Button size="sm" className="text-[10px] uppercase tracking-[0.12em] h-7 px-3" data-testid="studio-open-editor">
+                            {t("product.cta.designIn3D")}
                           </Button>
                         </Link>
                       )}

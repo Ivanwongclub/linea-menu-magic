@@ -23,6 +23,7 @@ import { useI18n } from "@/features/i18n/I18nProvider";
 import { localizedName } from "@/features/admin/lib/localize";
 import { describeSupabaseError } from "@/components/admin/shared/supabaseError";
 import { useFlatCrudTable } from "@/features/admin/hooks/useFlatCrudTable";
+import type { Model3DState } from "@/features/products/utils/model3d";
 import {
   useAdminProducts,
   type AdminProductRow,
@@ -37,6 +38,32 @@ const ALL = "__all__";
  * and archived products are never public, so the word would carry nothing.
  * Solid = live, outlined = not yet, muted = retired.
  */
+/**
+ * 5b R2: which products the editor can actually open. "Unconfirmed" is the
+ * state staff need to see — a model is uploaded but nobody has confirmed its
+ * scale, so buyers get the awaiting-setup screen instead of the editor.
+ */
+export function Model3DBadge({ state }: { state: Model3DState }) {
+  const { t } = useI18n();
+  if (state === "ready")
+    return (
+      <Badge className="text-[10px]" data-testid="admin-3d-state" data-state={state}>
+        {t("admin.model3d.ready")}
+      </Badge>
+    );
+  if (state === "unconfirmed")
+    return (
+      <Badge variant="outline" className="text-[10px]" data-testid="admin-3d-state" data-state={state}>
+        {t("admin.model3d.unconfirmed")}
+      </Badge>
+    );
+  return (
+    <span className="text-xs text-muted-foreground" data-testid="admin-3d-state" data-state={state}>
+      {t("admin.model3d.none")}
+    </span>
+  );
+}
+
 export function StatusBadge({ status, isPublic }: { status: string; isPublic: boolean }) {
   const { t } = useI18n();
   if (status === "active")
@@ -82,6 +109,7 @@ export default function AdminProducts() {
   const [categoryId, setCategoryId] = useState(ALL);
   const [status, setStatusFilter] = useState(ALL);
   const [materialId, setMaterialId] = useState(ALL);
+  const [model3d, setModel3d] = useState<string>(ALL);
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [pendingArchive, setPendingArchive] = useState<AdminProductRow[] | null>(null);
@@ -105,10 +133,11 @@ export default function AdminProducts() {
       if (categoryId !== ALL && p.primary_category?.id !== categoryId) return false;
       if (status !== ALL && p.status !== status) return false;
       if (materialId !== ALL && p.material_id !== materialId) return false;
+      if (model3d !== ALL && p.model_3d !== model3d) return false;
       if (term && !p.name.toLowerCase().includes(term) && !(p.item_code ?? "").toLowerCase().includes(term)) return false;
       return true;
     });
-  }, [products, search, familyId, categoryId, status, materialId]);
+  }, [products, search, familyId, categoryId, status, materialId, model3d]);
 
   const selectedRows = useMemo(() => products.filter((p) => selected.has(p.id)), [products, selected]);
   const allVisibleSelected = visible.length > 0 && visible.every((p) => selected.has(p.id));
@@ -247,7 +276,7 @@ export default function AdminProducts() {
       </div>
 
       {/* Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-2">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
           <Input
@@ -302,6 +331,17 @@ export default function AdminProducts() {
             <SelectItem value="archived">{t("admin.status.archived")}</SelectItem>
           </SelectContent>
         </Select>
+        <Select value={model3d} onValueChange={setModel3d}>
+          <SelectTrigger className="rounded-none" data-testid="admin-filter-3d">
+            <SelectValue placeholder={t("admin.products.filter.model3d")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>{t("admin.products.all3d")}</SelectItem>
+            <SelectItem value="ready">{t("admin.model3d.ready")}</SelectItem>
+            <SelectItem value="unconfirmed">{t("admin.model3d.unconfirmed")}</SelectItem>
+            <SelectItem value="none">{t("admin.model3d.none")}</SelectItem>
+          </SelectContent>
+        </Select>
         <Select value={materialId} onValueChange={setMaterialId}>
           <SelectTrigger className="rounded-none">
             <SelectValue placeholder={t("admin.products.filter.material")} />
@@ -351,19 +391,20 @@ export default function AdminProducts() {
               <TableHead>{t("admin.products.col.name")}</TableHead>
               <TableHead>{t("admin.products.col.category")}</TableHead>
               <TableHead>{t("admin.products.col.material")}</TableHead>
+              <TableHead>{t("admin.products.col.model3d")}</TableHead>
               <TableHead>{t("admin.products.col.status")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {query.isLoading ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-8">
+                <TableCell colSpan={7} className="text-center text-sm text-muted-foreground py-8">
                   {t("admin.common.loading")}
                 </TableCell>
               </TableRow>
             ) : visible.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-8">
+                <TableCell colSpan={7} className="text-center text-sm text-muted-foreground py-8">
                   {t("admin.products.empty")}
                 </TableCell>
               </TableRow>
@@ -404,6 +445,9 @@ export default function AdminProducts() {
                       {family && <div className="text-xs text-muted-foreground">{family}</div>}
                     </TableCell>
                     <TableCell className="text-sm">{p.material_name ?? "—"}</TableCell>
+                    <TableCell>
+                      <Model3DBadge state={p.model_3d} />
+                    </TableCell>
                     <TableCell>
                       <StatusBadge status={p.status} isPublic={p.is_public} />
                     </TableCell>

@@ -95,11 +95,14 @@ export function manufacturingWarnings(
         limitMm: process.min_deboss_depth_mm,
       });
     }
-    if (process?.max_deboss_depth_mm != null && relief.depth_mm > process.max_deboss_depth_mm) {
+    // 5b R3 (Phase 5 Q1): the maximum is how deep a recess may be cut — it
+    // says nothing about how proud a raised layer may stand, so it is checked
+    // on engraved layers only.
+    if (deboss && process?.max_deboss_depth_mm != null && relief.depth_mm > process.max_deboss_depth_mm) {
       out.push({
         layerId: layer.id,
         kind: "depthMax",
-        key: deboss ? "editor.manufacturing.engraveDepthMax" : "editor.manufacturing.embossHeightMax",
+        key: "editor.manufacturing.engraveDepthMax",
         valueMm: relief.depth_mm,
         limitMm: process.max_deboss_depth_mm,
       });

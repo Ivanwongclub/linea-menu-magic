@@ -26,6 +26,7 @@ this is an index, not a decision log.
 | 4j | Catalogue branding defaults: marked groups hidden, text lands on recovered placement; ruler branding radius and edge margin | **Done** |
 | 4k | Add logo: SVG upload, validation, `design_assets`, logo layers | **Done** — Phase 4 closed |
 | 5 | Relief: emboss/deboss per layer, depth, bevel, manufacturing warning strip with WIN-CYC thresholds | **Done** |
+| 5b | 3D-ready badges and editor entry, admin 3D column, Phase 5 close-out, deck shots | **Done** |
 | 6 | Fill picker on deboss layers; occlusion bake moves to a worker | Not started |
 | 7 | Versions: named saves, snapshot, reload | Not started |
 | 8 | Shares | Not started |
@@ -2177,3 +2178,92 @@ Per-vertex bending for both is still Phase 11's.
   shared.
 - **4k Q4 — only the first fill is honoured.** Ruled: Phase 6's fill picker
   maps an SVG's colours onto finishes.
+
+## Unit 5b — done (2026-09-18)
+
+Making the 3D work visible: which products can be opened in the editor, said
+the same way on every surface, plus Phase 5's two open items and the deck's
+missing frames.
+
+Files:
+
+- `src/features/products/utils/model3d.ts` (new) — the one readiness rule
+  (R1): `model_storage_path` set **and** `model_scale_status = 'confirmed'`.
+  `model3DState` (`ready` / `unconfirmed` / `none`), `is3DReady`, and
+  `editorUrlForProduct`, so no surface can invent its own answer. The legacy
+  `model_url` is explicitly not part of it — it never meant the scale was known.
+- `src/components/products/ThreeDBadge.tsx` (new) — the one mark, in site
+  tokens, with the localised title behind it.
+- `src/features/products/types.ts`, `hooks/useProducts.ts`, `hooks/useProduct.ts`,
+  `hooks/useUserLibrary.ts` — the two model columns are carried through to the
+  card, the detail page and the studio library (the library query had to name
+  them; the other two select `*`).
+- `src/components/products/ProductCard.tsx` — the grid, featured and list
+  cards use the shared badge on the readiness rule; the old `model_url` chip
+  (which claimed 3D for models the editor refuses) is gone.
+- `src/components/designer-studio/LibraryItemCard.tsx` — same swap, so the
+  trim library and the workspace library carry one mark between them.
+- `src/pages/ProductDetail.tsx` — the badge beside the item code, and
+  "Design in 3D" only on a ready product, pointing at the Phase 2 route
+  (`/designer-studio/editor/new?product=<slug>`) instead of the retired
+  `?model=` URL. Nothing is rendered disabled.
+- `src/pages/DesignerStudio.tsx` — the featured strip's editor button follows
+  the same rule and the same route.
+- `src/features/admin/hooks/useAdminProducts.ts`, `src/pages/admin/AdminProducts.tsx`
+  — R2: a `3D` column (Ready / Unconfirmed / None) and a filter beside the
+  existing four, so staff can find the seeded products still lacking a model
+  or a confirmed scale.
+- `src/features/editor/lib/manufacturing.ts` — R3: `max_deboss_depth_mm` is a
+  recess tolerance, so it is checked on engraved layers only (Phase 5 Q1).
+- `src/features/i18n/translations.ts`, `adminTranslations.ts` — 8 keys × 3
+  locales (`product.cta.designIn3D`, `product.badge.threeDReady`, the admin
+  column, filter and three states); `editor.manufacturing.embossHeightMax`
+  removed with the check it belonged to.
+- `scripts/e2e-local/scenarios/product-3d-badge.mjs` (new) — R5's proofs.
+- `scripts/e2e-local/unit/relief.test.mjs` — a raised layer is no longer held
+  to the maximum recess depth.
+- `scripts/e2e-local/deck/shots.mjs`, `reports/deck/**` — R4: `23-relief-raised`
+  (with the ruler's emboss-height callout), `24-relief-engraved`,
+  `25-manufacturing-strip` (0.6 mm text against a 0.20 mm minimum feature),
+  and the mobile frames `15b-mobile-finish-sheet` and `15c-mobile-text-layer`
+  at 390 × 844. The thresholds are staged only for the strip shot, so the
+  frames before it show the strip as a buyer sees it when nothing is wrong,
+  and they are restored with everything else.
+- `docs/3d-editor/STATUS.md` — this file.
+
+### Rulings
+
+- **Readiness is a product fact, not a role fact.** A brand-private product
+  behaves exactly like a house one within its brand: RLS decides who sees the
+  row at all, and the badge and the entry then follow the same two columns.
+- **No disabled entry.** A product that cannot be opened shows nothing —
+  a greyed "Design in 3D" would be a promise the editor refuses to keep.
+- **The trim library and the catalogue share one card.** Both render
+  `ProductCard`, so the badge could not drift between them even by accident.
+
+### Phase 5 rulings recorded (R6)
+
+- **Phase 5 Q1 — `max_deboss_depth_mm` on raised layers.** Ruled: engraved
+  only. Implemented in `manufacturing.ts`; the emboss-maximum message is gone.
+- **Phase 5 Q2 — the stroke measure reads ~2–3% wide.** Ruled: kept as it is;
+  the half-cell slack stays and no threshold padding was added.
+- **Phase 5 Q3 — an engraved recess is not in the occlusion bake.** Ruled:
+  Phase 6, with the worker bake (E1 §6 R6/R9).
+- **Phase 5 Q4 — the strip when nothing is wrong.** Ruled: it stays silent
+  and keeps its line, so the viewport never jumps.
+
+### Open questions from this unit, with a recommendation each
+
+1. **Older studio surfaces still read `model_url`.** `LibraryTable`,
+   `ProductQuickView` and `QuickRFQDialog` (none in this unit's scope) still
+   show a 3D mark or viewer from the legacy column. *Recommend* a small sweep
+   in Phase 7 that points them at `is3DReady` too, or retires them with the
+   old viewer.
+2. **The product page still offers the legacy "View 3D" dialog** on
+   `model_url`, beside the new entry. *Recommend* removing it when Phase 10's
+   spec sheet lands and the editor is the only viewer, rather than changing
+   two things at once now.
+3. **`reports/deck/` has no trim frames** (`21..-trim-*`): the fixtures
+   directory carries no `.obj` files in this checkout, so the deck skips them
+   and says so in `manifest.json`. *Recommend* adding the real trims before
+   the deck is shown, not test geometry.

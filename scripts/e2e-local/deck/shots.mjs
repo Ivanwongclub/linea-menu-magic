@@ -210,6 +210,18 @@ export default async function ({ page, base, admin, editor, h, outDir }) {
     await admin.from("designs").delete().eq("owner_id", editor.userId);
     await admin.from("design_assets").delete().eq("owner_id", editor.userId);
 
+    // Phase 5's strip reads WIN-CYC's own tolerances, which the local stack
+    // ships null. The deck stands them up for the shot and puts them back.
+    const { data: processesBefore } = await admin.from("finish_processes").select("id, min_feature_mm, min_deboss_depth_mm, max_deboss_depth_mm");
+    restores.push(async () => {
+      for (const row of processesBefore ?? []) {
+        await admin
+          .from("finish_processes")
+          .update({ min_feature_mm: row.min_feature_mm, min_deboss_depth_mm: row.min_deboss_depth_mm, max_deboss_depth_mm: row.max_deboss_depth_mm })
+          .eq("id", row.id);
+      }
+    });
+
     const button = await stage({
       product: products[0],
       name: POLO_NAME,
@@ -346,6 +358,67 @@ export default async function ({ page, base, admin, editor, h, outDir }) {
     await shot("13-layers-list", "Three layers: reorder, delete, undo and redo — every change is one entry.", 4);
 
     /* ---------------------------------------------------------------- *
+     * Phase 5 — relief and the manufacturing strip
+     * ---------------------------------------------------------------- */
+    // Back on the first text layer, which sits on the face where the
+    // factory's own lettering was.
+    // The logo is a sheet over the middle of the face; it has had its own
+    // shot (12) and would hide the letters these three are about.
+    await page.locator('[data-testid="text-layer-row"]').nth(1).getByTestId("text-layer-delete").click();
+    await waitForLogos(0);
+    const brandLayer = page.locator('[data-testid="text-layer-row"]').first();
+    await brandLayer.getByTestId("text-layer-select").click();
+    const reliefRow = () => page.locator('[data-testid="layer-relief"]').first();
+    const setDepth = async (mm) => {
+      const input = reliefRow().getByTestId("relief-depth-input");
+      await input.fill(String(mm));
+      await input.blur();
+      await page.waitForTimeout(900);
+    };
+    await reliefRow().locator('[data-value="emboss"]').click();
+    await setDepth(0.3);
+    await page.getByTestId("ruler-toggle").click();
+    await page.getByTestId("ruler-relief-label").waitFor({ timeout: 20000 });
+    await page.waitForFunction(() => document.querySelector('[data-testid="ruler-relief-label"]')?.style.visibility === "visible", null, { timeout: 20000 });
+    await settle({ home: false });
+    await shot("23-relief-raised", "Raised relief: the letters stand 0.30 mm proud, with the ruler calling the height out along the surface normal.", 5);
+
+    await reliefRow().locator('[data-value="deboss"]').click();
+    await setDepth(0.25);
+    await page.waitForFunction(() => {
+      const reliefs = JSON.parse(document.querySelector('[data-testid="editor-viewport"]')?.getAttribute("data-reliefs") ?? "[]");
+      return reliefs.some((r) => r.type === "deboss" && r.floorMm != null);
+    }, null, { timeout: 30000 });
+    await settle({ home: false });
+    await shot("24-relief-engraved", "Engraved: the same layer cut 0.25 mm into the face, floor and walls carved through a stencil — no boolean until the bake.", 5);
+    await page.getByTestId("ruler-toggle").click();
+
+    // The thresholds go in here, not earlier: the strip is silent while
+    // nothing is wrong, which is what the shots before this one show. The
+    // finish rows (and their process) are fetched once per page, so the
+    // editor is reloaded to read them.
+    await admin.from("finish_processes").update({ min_feature_mm: 0.2, min_deboss_depth_mm: 0.15, max_deboss_depth_mm: 0.5 }).not("id", "is", null);
+    await page.reload({ waitUntil: "networkidle" });
+    await settle();
+    await page.getByTestId("text-layer-select").first().click();
+    // 0.6 mm text against a 0.20 mm minimum feature: the strip says so, live.
+    // The disclosure belongs to the selected layer, so it needs opening again.
+    const openPositionAndCurve = async () => {
+      if (await page.getByTestId("pc-text-size-input").count()) return;
+      await page.getByTestId("position-and-curve-toggle").click();
+      await page.getByTestId("pc-text-size-input").waitFor({ timeout: 20000 });
+    };
+    await openPositionAndCurve();
+    await page.getByTestId("pc-text-size-input").fill("0.6");
+    await page.getByTestId("pc-text-size-input").blur();
+    await page.waitForFunction(() => document.querySelector('[data-testid="manufacturing-strip"]')?.getAttribute("data-warning-count") !== "0", null, { timeout: 30000 });
+    await settle({ home: false });
+    await shot("25-manufacturing-strip", "The manufacturing strip: 0.6 mm text is thinner than roll plating's 0.20 mm minimum, said in the buyer's own units.", 5);
+    await page.getByTestId("pc-text-size-input").fill("1.3");
+    await page.getByTestId("pc-text-size-input").blur();
+    await page.waitForTimeout(900);
+
+    /* ---------------------------------------------------------------- *
      * per-trim shots (R1/R2: one per OBJ in fixtures/trims)
      * ---------------------------------------------------------------- */
     let index = 21;
@@ -429,6 +502,27 @@ export default async function ({ page, base, admin, editor, h, outDir }) {
     await page.getByTestId("position-and-curve-toggle").click().catch(() => {});
     await page.waitForTimeout(600);
     await shot("15-mobile", "390 px: the viewport keeps its height and the panel stacks under it, controls and all.", 4);
+
+    await page.getByRole("button", { name: /change finish/i }).click();
+    await page.getByTestId("finish-swatch").first().waitFor({ timeout: 20000 });
+    await page.waitForTimeout(800);
+    await shot("15b-mobile-finish-sheet", "390 px: the finish picker as a full-height sheet, the chart's axes and swatches under a thumb.", 4);
+    await page.keyboard.press("Escape");
+    // The sheet's overlay swallows clicks until it is really gone.
+    await page.locator('[role="dialog"]').waitFor({ state: "detached", timeout: 15000 }).catch(async () => {
+      await page.locator('[role="dialog"] button[aria-label], [role="dialog"] button:has(svg)').first().click().catch(() => {});
+    });
+    await page.waitForTimeout(600);
+
+    // This is a fresh design (the mobile block re-enters at /editor/new), so
+    // the layer the shot is about is added here.
+    await page.getByTestId("add-text").click();
+    await page.getByTestId("text-layer-content").fill("BRAND");
+    await page.getByTestId("text-layer-content").blur();
+    await waitForGlyphs(5);
+    await page.locator('[data-testid="layer-relief"]').first().scrollIntoViewIfNeeded();
+    await page.waitForTimeout(800);
+    await shot("15c-mobile-text-layer", "390 px: a text layer with its relief — raised or engraved and the depth — on the row itself.", 5);
     await page.setViewportSize(DESKTOP);
 
     /* ---------------------------------------------------------------- *
@@ -451,14 +545,6 @@ export default async function ({ page, base, admin, editor, h, outDir }) {
       skipped.push("00-finishes-contact-sheet.png: no reports/*-materials.png to copy");
     }
 
-    // Phase 5 hasn't been built: its three shots have nothing to photograph.
-    for (const [file, what] of [
-      ["23-relief-raised", "raised relief with its callout"],
-      ["24-relief-engraved", "engraved relief"],
-      ["25-manufacturing-strip", "the manufacturing warning strip"],
-    ]) {
-      skipped.push(`${file}.png: ${what} ships with Phase 5 (emboss/deboss, depth, thresholds), which is not built yet`);
-    }
     if (!trimFiles.length) skipped.push("21..-trim-<name>.png: scripts/e2e-local/fixtures/trims/ has no .obj files");
 
     manifest.sort((a, b) => a.filename.localeCompare(b.filename));
