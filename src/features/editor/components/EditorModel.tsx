@@ -7,7 +7,8 @@ import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import type { EditorColour } from "../hooks/useEditorProduct";
 import type { PickerFinish } from "../hooks/useFinishOptions";
 import { decoratedFaceRotation, withSmoothNormals } from "../lib/prepareModel";
-import { bakeOcclusion } from "../lib/ambientOcclusion";
+import { bakeOcclusion, occlusionKey } from "../lib/ambientOcclusion";
+import { useEditorStore } from "../store/useEditorStore";
 import { applyTwoTone } from "../lib/twoTone";
 import type { TextLayer } from "../lib/recipe";
 import { TextLayerMeshes, type TextSceneReport } from "./branding/TextLayerMeshes";
@@ -36,6 +37,12 @@ interface EditorModelProps {
   onRulerMeasurements?: (measurements: RulerMeasurements) => void;
   /** The face top in the face frame, mm — the plane the on-model handles drag on (4i). */
   onFaceZ?: (z: number) => void;
+  /** OBJ group indices (file order) of the product's marked branding (4d). */
+  markedGroupIndices: number[];
+  /** Hide the marked groups — the buyer view (4j); staff may show them. */
+  hideMarked: boolean;
+  /** Reports how many of the model's meshes are drawn, and how many it has. */
+  onMeshCount?: (drawn: number, total: number) => void;
   /** The recipe's text layers, drawn on the face — siblings of the model, never inside its measured bounds. */
   layers: TextLayer[];
   onTextReport?: (report: TextSceneReport) => void;
@@ -80,6 +87,9 @@ export function EditorModel({
   onModelSizeMm,
   onRulerMeasurements,
   onFaceZ,
+  markedGroupIndices,
+  hideMarked,
+  onMeshCount,
   layers,
   onTextReport,
 }: EditorModelProps) {
@@ -123,10 +133,16 @@ export function EditorModel({
     return group;
   }, [obj]);
 
-  // Baked once per file, and only once an antique finish needs it.
+  const markedKey = [...markedGroupIndices].sort((a, b) => a - b).join(",");
+  const hiddenIndices = useMemo(() => (hideMarked && markedKey ? markedKey.split(",").map(Number) : []), [hideMarked, markedKey]);
+
+  // Baked once per file and hidden set, and only once an antique finish
+  // needs it; hidden groups are out of the BVH (collision 9).
   useMemo(() => {
-    if (twoTone) bakeOcclusion(prepared, url);
-  }, [prepared, url, twoTone]);
+    if (!twoTone) return;
+    const groups = prepared.children.filter((c) => (c as THREE.Mesh).isMesh);
+    bakeOcclusion(prepared, occlusionKey(url, hiddenIndices), new Set(hiddenIndices.map((i) => groups[i]).filter(Boolean)));
+  }, [prepared, url, twoTone, hiddenIndices]);
 
   // Material is assigned separately so changing the finish never rebuilds
   // the object — which would re-run framing and yank the camera.
@@ -156,6 +172,42 @@ export function EditorModel({
       if (mesh.isMesh) mesh.material = material;
     });
   }, [model, material]);
+
+  // The buyer view (4j): marked branding groups are not drawn. The rotation
+  // was already computed on the full model (collision 10), and the framing
+  // and ruler bounds below stay the full model's, so showing the original
+  // lettering never moves the camera.
+  useLayoutEffect(() => {
+    const hidden = new Set(hiddenIndices);
+    const groups = model.children.filter((c) => (c as THREE.Mesh).isMesh);
+    groups.forEach((mesh, index) => {
+      mesh.visible = !hidden.has(index);
+    });
+    onMeshCount?.(groups.filter((m) => m.visible).length, groups.length);
+  }, [model, hiddenIndices, onMeshCount]);
+
+  // Where the model sits, for Add text's recovered defaults (4j, C8): the
+  // raw → face transform applied above and the marked glyphs' face-frame centres.
+  const setModelFrame = useEditorStore((s) => s.setModelFrame);
+  useEffect(() => {
+    model.updateWorldMatrix(true, true);
+    const groups = model.children.filter((c) => (c as THREE.Mesh).isMesh);
+    const centre = new THREE.Vector3();
+    const markedGlyphCentres = (markedKey ? markedKey.split(",").map(Number) : [])
+      .map((i) => groups[i])
+      .filter(Boolean)
+      .map((mesh) => {
+        new THREE.Box3().setFromObject(mesh).getCenter(centre);
+        return [centre.x, centre.y] as [number, number];
+      });
+    const q = model.quaternion;
+    setModelFrame({
+      productKey: url,
+      transform: { quaternion: [q.x, q.y, q.z, q.w], scale: model.scale.x, offset: [model.position.x, model.position.y, model.position.z] },
+      markedGlyphCentres,
+    });
+    return () => setModelFrame(null);
+  }, [model, url, markedKey, setModelFrame]);
 
   // C4: local-model bounds only (never the world-space, camera-attached
   // scene) — `model` has its own calibrated scale/orientation baked in and

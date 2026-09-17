@@ -1,4 +1,4 @@
-import { Suspense, useRef, useState } from "react";
+import { Suspense, useCallback, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
@@ -9,8 +9,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { EditorModel, type RulerMeasurements } from "./EditorModel";
 import type { TextSceneReport } from "./branding/TextLayerMeshes";
 import type { TextLayer } from "../lib/recipe";
-import { RulerLabels, RulerOverlay, type RulerLabelElements } from "./RulerOverlay";
+import { RulerLabels, RulerOverlay, newRulerLabelElements } from "./RulerOverlay";
 import { RulerToggle } from "./RulerToggle";
+import { OriginalLetteringToggle } from "./OriginalLetteringToggle";
 import type { EditorColour } from "../hooks/useEditorProduct";
 import type { PickerFinish } from "../hooks/useFinishOptions";
 import { GL_SETTINGS } from "../lib/renderSettings";
@@ -35,6 +36,10 @@ interface EditorViewportProps {
   ruler: boolean;
   onRulerToggle: () => void;
   layers: TextLayer[];
+  /** The product's marked branding groups (4d); hidden in the buyer view (4j). */
+  markedGroupIndices: number[];
+  /** Catalogue editors and designer staff may show the original lettering. */
+  canShowOriginal: boolean;
 }
 
 function ViewportFallback() {
@@ -117,17 +122,23 @@ export function EditorViewport({
   ruler,
   onRulerToggle,
   layers,
+  markedGroupIndices,
+  canShowOriginal,
 }: EditorViewportProps) {
   const controlsRef = useRef<OrbitControlsImpl>(null);
   const [autoRotate, setAutoRotate] = useState(true);
   const [modelSizeMm, setModelSizeMm] = useState<number | null>(null);
   const [rulerMeasurements, setRulerMeasurements] = useState<RulerMeasurements | null>(null);
   const [textReport, setTextReport] = useState<TextSceneReport | null>(null);
-  const rulerLabels = useRef<RulerLabelElements>({ diameter: null, thickness: null });
+  const rulerLabels = useRef(newRulerLabelElements());
   const [faceZ, setFaceZ] = useState<number | null>(null);
+  const [showOriginal, setShowOriginal] = useState(false);
+  const [meshCount, setMeshCount] = useState<{ drawn: number; total: number } | null>(null);
+  const onMeshCount = useCallback((drawn: number, total: number) => setMeshCount({ drawn, total }), []);
   const handleBridge = useRef(newHandleBridge());
   const handleElements = useRef(newHandleElements());
   const selectedLayerId = useEditorStore((s) => s.selectedLayerId);
+  const modelFrame = useEditorStore((s) => s.modelFrame);
   const selectedLayer = layers.find((l) => l.id === selectedLayerId) ?? null;
   // Calibration screenshots composite any DOM over the canvas; `?calibration=1` hides the viewport chrome.
   const calibration = useSearchParams()[0].get("calibration") === "1";
@@ -151,6 +162,12 @@ export function EditorViewport({
       data-model-size-mm={modelSizeMm != null ? modelSizeMm.toFixed(2) : undefined}
       // Scene read-backs for the text scenarios: the rendered glyphs and the no-mirroring check.
       data-glyph-count={textReport?.glyphMeshCount}
+      // Drawn part meshes vs the file's groups: the buyer view hides the marked branding (4j).
+      data-model-mesh-count={meshCount?.drawn}
+      data-face-z={faceZ ?? undefined}
+      // Face-frame centres of the marked branding groups (4j): what Add text's arc position is derived from.
+      data-marked-centres={modelFrame?.markedGlyphCentres.length ? JSON.stringify(modelFrame.markedGlyphCentres.map(([x, y]) => [+x.toFixed(4), +y.toFixed(4)])) : undefined}
+      data-model-mesh-total={meshCount?.total}
       data-min-world-determinant={textReport?.minWorldDeterminant}
       data-glyphs={textReport ? JSON.stringify(textReport.glyphs) : undefined}
     >
@@ -175,10 +192,13 @@ export function EditorViewport({
             onModelSizeMm={setModelSizeMm}
             onRulerMeasurements={ruler ? setRulerMeasurements : undefined}
             onFaceZ={setFaceZ}
+            markedGroupIndices={markedGroupIndices}
+            hideMarked={!(canShowOriginal && showOriginal)}
+            onMeshCount={onMeshCount}
             layers={layers}
             onTextReport={setTextReport}
           />
-          {ruler && rulerMeasurements && <RulerOverlay measurements={rulerMeasurements} labels={rulerLabels} obstacles={handleBridge} />}
+          {ruler && rulerMeasurements && <RulerOverlay measurements={rulerMeasurements} labels={rulerLabels} obstacles={handleBridge} layer={selectedLayer} faceZ={faceZ ?? rulerMeasurements.maxZ} />}
           {!calibration && faceZ != null && (
             <HandleProjector layer={selectedLayer} faceZ={faceZ} bridge={handleBridge} elements={handleElements} />
           )}
@@ -198,9 +218,16 @@ export function EditorViewport({
         <HandlesOverlay key={selectedLayer.id} layer={selectedLayer} bridge={handleBridge} elements={handleElements} />
       )}
       {ruler && rulerMeasurements && (
-        <RulerLabels measurements={rulerMeasurements} sizeLigne={sizeLigne} sizeLabel={sizeLabel} labels={rulerLabels} />
+        <RulerLabels measurements={rulerMeasurements} sizeLigne={sizeLigne} sizeLabel={sizeLabel} labels={rulerLabels} layer={selectedLayer} />
       )}
-      {!calibration && <RulerToggle active={ruler} onToggle={onRulerToggle} />}
+      {!calibration && (
+        <div className="absolute bottom-3 right-3 z-10 flex items-center gap-2">
+          {canShowOriginal && markedGroupIndices.length > 0 && (
+            <OriginalLetteringToggle active={showOriginal} onToggle={() => setShowOriginal((v) => !v)} />
+          )}
+          <RulerToggle active={ruler} onToggle={onRulerToggle} />
+        </div>
+      )}
     </div>
   );
 }

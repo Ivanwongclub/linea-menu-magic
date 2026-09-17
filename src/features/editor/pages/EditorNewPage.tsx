@@ -199,6 +199,8 @@ export function EditorNewPage({ productSlug }: { productSlug: string | null }) {
           ruler={ruler}
           onRulerToggle={() => setRuler(!ruler)}
           layers={recipe.layers}
+          markedGroupIndices={product.model_branding_group_indices}
+          canShowOriginal={isCatalogueEditor || isStaff}
         />
       }
       panel={

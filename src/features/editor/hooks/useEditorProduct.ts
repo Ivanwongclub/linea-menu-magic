@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import type { AppLanguage } from "@/features/i18n/translations";
+import type { BrandingReferenceRaw } from "../lib/recoveredPlacement";
 
 export interface EditorSizeVariant {
   id: string;
@@ -28,6 +29,10 @@ export interface EditorProduct {
   model_scale_status: "confirmed" | "unconfirmed";
   model_scale_factor: number | null;
   model_scale_reference_variant_id: string | null;
+  /** OBJ group indices (file order) the CMS marked as the factory lettering (4d) — hidden for buyers (4j). */
+  model_branding_group_indices: number[];
+  /** Raw units, raw frame (E1 §3.2); null when none was stored (C9). */
+  model_branding_reference: BrandingReferenceRaw | null;
   is_metal: boolean;
   default_finish_id: string | null;
   size_variants: EditorSizeVariant[];
@@ -54,6 +59,7 @@ export function localized(language: AppLanguage, en: string, hant: string | null
 const EDITOR_PRODUCT_SELECT = `
   id, slug, name, name_zh_hant, name_zh_hans, item_code, model_storage_path, default_finish_id,
   model_scale_status, model_scale_factor, model_scale_reference_variant_id,
+  model_branding_groups, model_branding_reference,
   material:product_materials!material_id ( is_metal ),
   product_size_variants ( id, size_label, size_ligne, size_primary_mm, is_default, sort_order ),
   product_colours ( id, name, name_zh_hant, name_zh_hans, hex, sort_order )
@@ -89,6 +95,10 @@ function transform(row: Row, language: AppLanguage): EditorProduct {
     model_scale_status: (row.model_scale_status as "confirmed" | "unconfirmed" | null) ?? "unconfirmed",
     model_scale_factor: row.model_scale_factor != null ? Number(row.model_scale_factor) : null,
     model_scale_reference_variant_id: (row.model_scale_reference_variant_id as string | null) ?? null,
+    model_branding_group_indices: Array.isArray(row.model_branding_groups)
+      ? (row.model_branding_groups as Row[]).map((m) => Number(m.index)).filter((i) => Number.isInteger(i) && i >= 0)
+      : [],
+    model_branding_reference: (row.model_branding_reference as BrandingReferenceRaw | null) ?? null,
     is_metal: !!(row.material as Row | null)?.is_metal,
     default_finish_id: (row.default_finish_id as string | null) ?? null,
     size_variants: sizeVariants,

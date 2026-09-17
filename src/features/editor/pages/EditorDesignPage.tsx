@@ -8,6 +8,7 @@ import { useEditorProductById, variantRatio } from "../hooks/useEditorProduct";
 import { normalizeRecipe } from "../lib/recipe";
 import { useFinishOptions, type PickerFinish } from "../hooks/useFinishOptions";
 import { useAutosaveDraft } from "../hooks/useAutosaveDraft";
+import { useDesignerStaffStatus } from "../hooks/useDesignerStaffStatus";
 import { useCatalogueEditorStatus } from "@/features/admin/hooks/useCatalogueEditorStatus";
 import { useEditorStore } from "../store/useEditorStore";
 import { EditorShell } from "../components/EditorShell";
@@ -54,6 +55,7 @@ export function EditorDesignPage({ designId }: { designId: string }) {
   const { data: product, isLoading: productLoading } = useEditorProductById(designQuery.data?.product_id ?? null);
   const { data: finishOptions = [] } = useFinishOptions(product?.id ?? null, product?.is_metal ?? false);
   const { isEditor: isCatalogueEditor } = useCatalogueEditorStatus();
+  const { isStaff } = useDesignerStaffStatus();
 
   const recipe = useEditorStore((s) => s.recipe);
   const hydratedFor = useEditorStore((s) => s.hydratedFor);
@@ -137,6 +139,8 @@ export function EditorDesignPage({ designId }: { designId: string }) {
           ruler={ruler}
           onRulerToggle={() => setRuler(!ruler)}
           layers={recipe.layers}
+          markedGroupIndices={product.model_branding_group_indices}
+          canShowOriginal={isCatalogueEditor || isStaff}
         />
       }
       panel={

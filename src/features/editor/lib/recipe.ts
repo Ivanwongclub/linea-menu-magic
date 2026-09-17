@@ -31,12 +31,22 @@ export interface TextLayer {
     baseline_offset_mm: number;
     conform: boolean;
   };
-  /** Phase 5. */
-  relief: null;
+  /**
+   * Phase 5 renders and edits it. 4j fills it only from a recovered
+   * reference (the factory's own relief, physical mm — C10 never scales it).
+   */
+  relief: TextRelief | null;
   /** Phase 6. */
   fill: null;
-  /** §4.1 labels; an absent key means `user`. */
-  provenance?: Record<string, "recovered" | "user">;
+  /** §4.1 labels; an absent key means `user`. Keys are the field names (`radius_mm`, `depth_mm`, …). */
+  provenance?: Record<string, Provenance>;
+}
+
+export type Provenance = "recovered" | "user";
+
+export interface TextRelief {
+  type: "emboss" | "deboss";
+  depth_mm: number;
 }
 
 export interface DraftRecipe {
@@ -85,9 +95,22 @@ export function normalizeRecipe(raw: unknown): DraftRecipe {
   };
 }
 
-/** Fallback defaults (E1 §3.3 table); recovered values replace these in 4j. */
-export function newTextLayer(id: string, faceDiameterMm: number, value = ""): TextLayer {
-  return {
+/** The recovered placement a new layer starts from (4j, C8); every field it sets is labelled `recovered`. */
+export interface LayerDefaults {
+  centre_mm: { x: number; y: number };
+  radius_mm: number;
+  arc_position_deg: number;
+  direction: TextDirection;
+  text_size_mm: number | null;
+  relief: TextRelief | null;
+}
+
+/**
+ * Fallback defaults (E1 §3.3 table) — straight, centred, 12% cap height —
+ * or, given recovered `defaults`, a circle where the factory lettering was.
+ */
+export function newTextLayer(id: string, faceDiameterMm: number, value = "", defaults: LayerDefaults | null = null): TextLayer {
+  const layer: TextLayer = {
     id,
     kind: "text",
     visible: true,
@@ -106,6 +129,48 @@ export function newTextLayer(id: string, faceDiameterMm: number, value = ""): Te
     relief: null,
     fill: null,
   };
+  if (!defaults) return layer;
+  const provenance: Record<string, Provenance> = {
+    centre_mm: "recovered",
+    radius_mm: "recovered",
+    arc_position_deg: "recovered",
+    direction: "recovered",
+  };
+  layer.placement = {
+    ...layer.placement,
+    layout: "circle",
+    centre_mm: defaults.centre_mm,
+    radius_mm: defaults.radius_mm,
+    arc_position_deg: defaults.arc_position_deg,
+    direction: defaults.direction,
+  };
+  if (defaults.text_size_mm != null && defaults.text_size_mm > 0) {
+    layer.style = { ...layer.style, text_size_mm: defaults.text_size_mm };
+    provenance.text_size_mm = "recovered";
+  }
+  if (defaults.relief) {
+    layer.relief = defaults.relief;
+    provenance.depth_mm = "recovered";
+  }
+  layer.provenance = provenance;
+  return layer;
+}
+
+/** A recovered field the buyer changes becomes `user` (§4.1); untouched ones keep their label. */
+function markEdited(layer: TextLayer, patch: LayerPatch): TextLayer["provenance"] {
+  if (!layer.provenance) return layer.provenance;
+  let next = layer.provenance;
+  const edited = (key: string, before: unknown, after: unknown) => {
+    if (after === undefined || next[key] !== "recovered" || JSON.stringify(before) === JSON.stringify(after)) return;
+    next = { ...next, [key]: "user" };
+  };
+  for (const [key, value] of Object.entries(patch.placement ?? {})) {
+    edited(key, layer.placement[key as keyof TextLayer["placement"]], value);
+  }
+  for (const [key, value] of Object.entries(patch.style ?? {})) {
+    edited(key, layer.style[key as keyof TextLayer["style"]], value);
+  }
+  return next;
 }
 
 export function applyLayerPatch(layer: TextLayer, patch: LayerPatch): TextLayer {
@@ -115,6 +180,7 @@ export function applyLayerPatch(layer: TextLayer, patch: LayerPatch): TextLayer 
     content: { ...layer.content, ...patch.content },
     style: { ...layer.style, ...patch.style },
     placement: { ...layer.placement, ...patch.placement },
+    ...(layer.provenance ? { provenance: markEdited(layer, patch) } : {}),
   };
 }
 

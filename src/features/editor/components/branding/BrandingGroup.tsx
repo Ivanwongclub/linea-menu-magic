@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { selectCanRedo, selectCanUndo, useEditorStore } from "../../store/useEditorStore";
 import { BUNDLED_FONTS } from "../../lib/fonts";
 import { newTextLayer, type TextLayer, type TextLayout } from "../../lib/recipe";
+import { recoveredDefaults, type BrandingReferenceRaw } from "../../lib/recoveredPlacement";
 import { PositionAndCurve } from "./PositionAndCurve";
 
 const FIELD_LABEL = "text-[11px] uppercase tracking-[0.12em] text-muted-foreground";
@@ -209,11 +210,21 @@ function useUndoShortcuts() {
  * until their phases (rulings §6) — no placeholder controls. Undo / redo
  * (4i) cover every recipe change on this page.
  */
-export function BrandingGroup({ faceDiameterMm }: { faceDiameterMm: number }) {
+export function BrandingGroup({
+  faceDiameterMm,
+  reference,
+  scaleFactor,
+}: {
+  faceDiameterMm: number;
+  /** The product's recovered branding (raw units, C8); null → E1 §3.3 fallbacks. */
+  reference: BrandingReferenceRaw | null;
+  scaleFactor: number | null;
+}) {
   const { t } = useI18n();
   const layers = useEditorStore((s) => s.recipe.layers);
   const selectedLayerId = useEditorStore((s) => s.selectedLayerId);
   const addLayer = useEditorStore((s) => s.addLayer);
+  const modelFrame = useEditorStore((s) => s.modelFrame);
   const moveLayer = useEditorStore((s) => s.moveLayer);
   const undo = useEditorStore((s) => s.undo);
   const redo = useEditorStore((s) => s.redo);
@@ -249,7 +260,17 @@ export function BrandingGroup({ faceDiameterMm }: { faceDiameterMm: number }) {
         <button
           type="button"
           data-testid="add-text"
-          onClick={() => addLayer(newTextLayer(crypto.randomUUID(), faceDiameterMm))}
+          onClick={() =>
+            // 4j: where the factory lettering was, once the model is on screen; E1 §3.3 fallbacks otherwise.
+            addLayer(
+              newTextLayer(
+                crypto.randomUUID(),
+                faceDiameterMm,
+                "",
+                recoveredDefaults(reference, modelFrame?.transform ?? null, scaleFactor, modelFrame?.markedGlyphCentres ?? []),
+              ),
+            )
+          }
           className="flex items-center gap-1 text-xs tracking-[0.05em] text-foreground underline-offset-4 hover:underline"
         >
           <Plus className="w-3.5 h-3.5" strokeWidth={1.5} />

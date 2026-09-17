@@ -10,7 +10,8 @@ interface RulerToggleProps {
 /**
  * One corner control (E1 collision 17 / Phase 3 R2: a single tool, not a
  * floating toolbar), off by default. Lives over the viewport, not the panel
- * — `ruler-buyer.mjs` asserts it's absent from `editor-panel`.
+ * — `ruler-buyer.mjs` asserts it's absent from `editor-panel`. Positioned by
+ * the viewport's bottom-right control row.
  */
 export function RulerToggle({ active, onToggle }: RulerToggleProps) {
   const { t } = useI18n();
@@ -21,7 +22,7 @@ export function RulerToggle({ active, onToggle }: RulerToggleProps) {
       aria-pressed={active}
       onClick={onToggle}
       className={cn(
-        "absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1.5 text-xs tracking-wide border transition-colors",
+        "flex items-center gap-1.5 px-2.5 py-1.5 text-xs tracking-wide border transition-colors",
         active ? "bg-foreground text-background border-foreground" : "bg-background/90 text-foreground border-border hover:border-foreground/50",
       )}
     >

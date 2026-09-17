@@ -23,7 +23,7 @@ this is an index, not a decision log.
 | 4g | Circular layout, per-glyph placement, reversed text without mirroring (§5) | **Done** |
 | 4h | Hybrid numeric / slider controls in "Position and curve" (§3); ruler label layout, camera read-back, CMS preview fixes | **Done** |
 | 4i | Drag handles on the model, one shared state (§3); undo / redo | **Done** |
-| 4j | Catalogue branding defaults: marked groups hidden, text lands on recovered placement; ruler branding radius and edge margin | Not started |
+| 4j | Catalogue branding defaults: marked groups hidden, text lands on recovered placement; ruler branding radius and edge margin | **Done** |
 | 5 | Relief: emboss/deboss per layer, depth, bevel, manufacturing warning strip with WIN-CYC thresholds | Not started |
 | 6 | Fill picker on deboss layers; occlusion bake moves to a worker | Not started |
 | 7 | Versions: named saves, snapshot, reload | Not started |
@@ -1803,4 +1803,107 @@ Files:
 - `scripts/e2e-local/unit/drag-handles.test.mjs` (new) — handle maths,
   obstacle avoidance, history.
 - `docs/3d-editor/STATUS.md` — this file.
+
+## Phase 4j — done (2026-09-18)
+
+Catalogue branding defaults per reports/E1-plan-integration.md §5 row 4j,
+collisions 9–10, C8, C9; rulings §4; the 4d direction ruling.
+
+Files:
+
+- `src/features/editor/lib/recoveredPlacement.ts` (new) — the product's
+  reference (raw units, raw frame) → a new layer's placement: raw → face
+  transform, centre / radius / text size at factor × variant scale and relief
+  at the factor alone (physical, C10); direction and arc position from the
+  reference, or — when the recovered arc covers most of the circle — `cw` at
+  the midpoint of the widest cluster of marked glyphs (4d ruling). Null for
+  no reference, a low-confidence one or an unconfirmed factor (C9), which
+  leaves E1 §3.3's fallbacks.
+- `src/features/editor/lib/recipe.ts` — `newTextLayer` takes those defaults
+  and labels each field `recovered`; editing one makes that field `user`
+  (§4.1) and leaves the others; `relief` is typed (Phase 5 renders it).
+- `src/features/editor/hooks/useEditorProduct.ts` — reads
+  `model_branding_groups` and `model_branding_reference`.
+- `src/features/editor/components/EditorModel.tsx` — marked groups are not
+  drawn in the buyer view; the rotation is still computed on the full model
+  and the framing and ruler bounds are still the full model's (collision 10),
+  so showing the lettering never moves the camera; the occlusion bake gets
+  the hidden meshes as exclusions and a cache key that includes them
+  (collision 9); reports the drawn / total mesh counts and the model frame.
+- `src/features/editor/lib/ambientOcclusion.ts` — `occlusionKey`, exclusions,
+  and a per-key attribute cache, so toggling the lettering re-applies a bake.
+- `src/features/editor/components/branding/TextLayerMeshes.tsx` — conform
+  lands on the first *drawn* surface, never on a hidden group.
+- `src/features/editor/components/OriginalLetteringToggle.tsx` (new),
+  `EditorViewport.tsx` — "Show original lettering" for catalogue editors and
+  designer staff, beside the ruler toggle; scene read-backs
+  `data-model-mesh-count` / `-total`, `data-face-z`, `data-marked-centres`.
+- `src/features/editor/components/CameraReport.tsx` — also
+  `data-view-projection`, so a scenario can project face-frame points onto
+  its own screenshot.
+- `src/features/editor/lib/layerMeasurements.ts` (new),
+  `components/RulerOverlay.tsx` — the selected layer's branding radius,
+  letter height and edge margin (face radius − radius − text size / 2), drawn
+  on the face opposite the text, their labels laid out with the product's two
+  through one `layoutLabels` call (no overlap, handles avoided).
+- `src/features/editor/components/branding/BrandingGroup.tsx`,
+  `EditorPanel.tsx`, both pages — Add text uses the recovered defaults; the
+  staff toggle is wired from `useCatalogueEditorStatus` / `useDesignerStaffStatus`.
+- `src/features/i18n/translations.ts` — `editor.ruler.*` (3) and
+  `editor.viewport.showOriginal`, × 3.
+- `scripts/e2e-local/scenarios/branding-defaults.mjs` (new) — buyer sees 5 of
+  33 meshes and no toggle; staff toggle draws 33 and back with the camera home
+  unchanged; Add text read-back `radius_mm` = 5.048 raw × 0.720193 ± 0.01,
+  text size and relief at the factor, `provenance` recovered on each, `cw` at
+  the widest glyph cluster (recomputed in the scenario from the scene's
+  reported centres), and an edited radius becomes `user` while the rest stay;
+  the ruler's three layer dimensions with the edge-margin formula and no label
+  overlapping another label or a handle; the anti-brass oxide check below.
+- `scripts/e2e-local/scenarios/cms-two-point.mjs` — waits for the preview's
+  `data-state="ready"` instead of a fixed 3 s, and clicks through the canvas
+  element so the box is resolved at click time. It had begun to flake: the
+  preview now mounts sooner (4h preloads its chunk), so the scenario reached
+  the clicks while the page below was still settling and every click landed
+  off the model.
+- `scripts/e2e-local/unit/branding-defaults.test.mjs` (new) — the transform,
+  the conversions, the cluster ruling, the C9 fallbacks, provenance, and the
+  ruler dimensions.
+- `docs/3d-editor/STATUS.md` — this file.
+
+### Deviation from E1 §5 row 4j: how the anti-brass check is measured
+
+E1 asks for "oxide mean in the former lettering zone within 5 L* of the
+surrounding face". The studio lights the disc with a strong radial gradient —
+measured on this render, 61 L* at radius 2.8 mm falling to 39 L* at 4.4 mm —
+so comparing the lettering ring with the bands immediately inside and outside
+it measures that gradient, not the oxide: the blank face reads 5.1 L* apart
+by that definition. A bake that still carried the lettering would show as an
+*angular* pattern at letter spacing, so the scenario asserts:
+
+- the ring's high-frequency variation (each 3° bin minus a ±15° moving
+  average, which removes the studio's own gradient): **1.23 L\* RMS** against
+  **1.03** on a control ring of the same width on blank face;
+- the two rings' means within 5 L* (56.06 vs 56.82);
+- and, as a positive control, the same measurement with the lettering drawn:
+  **12.26 L\* RMS** — ten times the blank face, so the check can see lettering.
+
+### Open questions from 4i–4j, with a recommendation each
+
+1. **The recovered default lands on the Polo's "EST. 1967" arc, not "POLO".**
+   The 4d ruling picks the widest cluster (8 glyphs over 60°, midpoint 140°)
+   over the top lettering (4 glyphs over 44°). It is the ruling applied
+   faithfully, but the buyer's text starts on the lower right. *Recommend*
+   preferring the cluster nearest 0° when two clusters are within ~20° of
+   each other in extent, if the top arc is meant to win.
+2. **Relief is stored but not rendered.** 4j writes `relief` from the
+   reference; Phase 5 renders it, so the preview slab still shows. *Recommend*
+   leaving it — the value is the factory's and worth carrying now.
+3. **Toggling the original lettering re-bakes the occlusion** (~1 s on the
+   Polo) the first time each way; both directions are then cached for the
+   session. *Recommend* leaving it until Phase 6 moves the bake to a worker
+   (§6 R6).
+4. **Handles have no hover or focus affordance on touch.** They are sized for
+   a finger (28 px) and drag correctly, but there is no press state.
+   *Recommend* adding one when Phase 5's relief controls bring another pass
+   over the on-model UI.
 

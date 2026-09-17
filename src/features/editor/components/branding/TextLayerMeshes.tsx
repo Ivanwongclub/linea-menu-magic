@@ -116,7 +116,6 @@ export function TextLayerMeshes({ layers, model, faceZ, material, onReport }: Te
     group.clear();
     const glyphs: GlyphReport[] = [];
     const raycaster = new THREE.Raycaster();
-    raycaster.firstHitOnly = true;
     const normal = new THREE.Vector3();
     const tilt = new THREE.Quaternion();
     const spin = new THREE.Quaternion();
@@ -145,7 +144,8 @@ export function TextLayerMeshes({ layers, model, faceZ, material, onReport }: Te
             raycastReady = true;
           }
           raycaster.set(new THREE.Vector3(placed.x, placed.y, faceZ + 1), new THREE.Vector3(0, 0, -1));
-          const hit = raycaster.intersectObject(model, true)[0];
+          // Hidden groups (the buyer view, 4j) are not surface: land on what is drawn.
+          const hit = raycaster.intersectObject(model, true).find((h) => h.object.visible);
           if (hit?.face) {
             normal.copy(hit.face.normal).transformDirection(hit.object.matrixWorld);
             if (normal.z < 0) normal.negate();

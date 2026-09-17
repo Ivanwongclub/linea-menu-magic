@@ -488,6 +488,10 @@ export const translations: Record<AppLanguage, TranslationMap> = {
     "editor.handles.radius": "Drag to change the radius",
     "editor.handles.arcPosition": "Drag to move the text along the arc",
     "editor.handles.move": "Drag to move the text",
+    "editor.ruler.brandingRadius": "Radius {value}",
+    "editor.ruler.letterHeight": "Letter height {value}",
+    "editor.ruler.edgeMargin": "Edge margin {value}",
+    "editor.viewport.showOriginal": "Show original lettering",
   },
 
   "zh-Hant": {
@@ -907,6 +911,10 @@ export const translations: Record<AppLanguage, TranslationMap> = {
     "editor.handles.radius": "拖曳以更改半徑",
     "editor.handles.arcPosition": "拖曳以沿弧線移動文字",
     "editor.handles.move": "拖曳以移動文字",
+    "editor.ruler.brandingRadius": "半徑 {value}",
+    "editor.ruler.letterHeight": "字高 {value}",
+    "editor.ruler.edgeMargin": "邊距 {value}",
+    "editor.viewport.showOriginal": "顯示原有字樣",
   },
 
   "zh-Hans": {
@@ -1326,5 +1334,9 @@ export const translations: Record<AppLanguage, TranslationMap> = {
     "editor.handles.radius": "拖动以更改半径",
     "editor.handles.arcPosition": "拖动以沿弧线移动文字",
     "editor.handles.move": "拖动以移动文字",
+    "editor.ruler.brandingRadius": "半径 {value}",
+    "editor.ruler.letterHeight": "字高 {value}",
+    "editor.ruler.edgeMargin": "边距 {value}",
+    "editor.viewport.showOriginal": "显示原有字样",
   },
 };

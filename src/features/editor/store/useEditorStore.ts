@@ -1,6 +1,18 @@
 import { create } from "zustand";
 import { applyLayerPatch, emptyRecipe, scaleLayers, type DraftRecipe, type LayerPatch, type TextLayer } from "../lib/recipe";
+import type { FaceTransform } from "../lib/recoveredPlacement";
 import { applyDiscrete, canRedo, canUndo, commitHistory, redoHistory, startHistory, undoHistory, type History } from "../lib/recipeHistory";
+
+/**
+ * Where the loaded model sits (4j): the raw → face transform `EditorModel`
+ * applied and the face-frame centres of the marked branding glyphs. Runtime
+ * only, never saved; null until a model is on screen.
+ */
+export interface ModelFrame {
+  productKey: string;
+  transform: FaceTransform;
+  markedGlyphCentres: [number, number][];
+}
 
 /**
  * Local editor state: one `DraftRecipe` (E1 collision 20) — the same shape
@@ -29,6 +41,7 @@ interface EditorState {
   dragging: boolean;
   /** Bumped on pointer-up: autosave writes at once instead of debouncing. */
   flushSeq: number;
+  modelFrame: ModelFrame | null;
   initialize: (recipe: DraftRecipe, hydratedFor: string) => void;
   /** `ratio` = new variant mm / old variant mm; layers scale with the product (C10). */
   setSizeVariantId: (id: string, ratio?: number) => void;
@@ -46,6 +59,7 @@ interface EditorState {
   endDrag: () => void;
   undo: () => void;
   redo: () => void;
+  setModelFrame: (frame: ModelFrame | null) => void;
 }
 
 const history = (s: EditorState): History => ({ recipe: s.recipe, past: s.past, future: s.future, checkpoint: s.checkpoint });
@@ -59,6 +73,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   hydratedFor: null,
   dragging: false,
   flushSeq: 0,
+  modelFrame: null,
   initialize: (recipe, hydratedFor) => set({ ...startHistory(recipe), dragging: false, selectedLayerId: null, hydratedFor }),
   setSizeVariantId: (id, ratio = 1) =>
     set((s) => discrete(s, (r) => ({ ...r, size_variant_id: id, layers: scaleLayers(r.layers, ratio) }))),
@@ -97,6 +112,7 @@ export const useEditorStore = create<EditorState>((set) => ({
       const h = redoHistory(history(s));
       return { ...h, selectedLayerId: keepSelection(s, h.recipe) };
     }),
+  setModelFrame: (modelFrame) => set({ modelFrame }),
 }));
 
 export const selectCanUndo = (s: EditorState) => canUndo(history(s));

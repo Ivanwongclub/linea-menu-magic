@@ -100,9 +100,10 @@ export default async function ({ page, admin, editor, h }) {
     const canvas = page.getByTestId("model-preview-canvas").locator("canvas");
     await canvas.waitFor({ timeout: 15000 });
     await canvas.scrollIntoViewIfNeeded();
-    await page.waitForTimeout(3000); // let the lazy chunk and the OBJ finish loading into the scene
+    // The preview says when the model is drawn (4h); a fixed wait flaked under load.
+    await page.waitForFunction(() => document.querySelector('[data-testid="model-preview-canvas"]')?.dataset.state === "ready", null, { timeout: 30000 });
+    await page.waitForTimeout(500);
 
-    const box = await canvas.boundingBox();
     const shot = await canvas.screenshot();
     const subject = await findSubject(shot);
 
@@ -117,8 +118,11 @@ export default async function ({ page, admin, editor, h }) {
       for (const inset of [0.5, 1, 1.5, 2, 3, 4]) {
         const col = Math.round(edgeCol + sign * inset);
         const row = subject.rowsAt(col);
-        const point = { x: box.x + col + 0.5, y: box.y + row + 0.5 };
-        await page.mouse.click(point.x, point.y);
+        // Click through the element, so the box is resolved at click time:
+        // a late layout shift under the canvas used to move it after
+        // `boundingBox()` was read, and every click missed the model.
+        const point = { x: col + 0.5, y: row + 0.5 };
+        await canvas.click({ position: point });
         const matched = await page
           .getByTestId(testId)
           .filter({ hasText: wantText })

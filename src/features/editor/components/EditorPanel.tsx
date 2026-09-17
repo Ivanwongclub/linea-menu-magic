@@ -130,7 +130,10 @@ export function EditorPanel({
           </PanelGroup>
         )}
 
-        <BrandingGroup faceDiameterMm={product.size_variants.find((v) => v.id === sizeVariantId)?.size_primary_mm ?? product.size_variants[0]?.size_primary_mm ?? 10} />
+        <BrandingGroup
+          reference={product.model_branding_reference}
+          scaleFactor={product.model_scale_factor}
+          faceDiameterMm={product.size_variants.find((v) => v.id === sizeVariantId)?.size_primary_mm ?? product.size_variants[0]?.size_primary_mm ?? 10} />
         <PanelGroup title={t("editor.panel.output")} />
       </div>
 
