@@ -7,6 +7,8 @@ import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import type { EditorColour } from "../hooks/useEditorProduct";
 import type { PickerFinish } from "../hooks/useFinishOptions";
 import { decoratedFaceRotation, withSmoothNormals } from "../lib/prepareModel";
+import { bakeOcclusion } from "../lib/ambientOcclusion";
+import { applyTwoTone } from "../lib/twoTone";
 import {
   CAMERA_AZIMUTH_DEG,
   CAMERA_ELEVATION_DEG,
@@ -35,18 +37,20 @@ function anisotropyRotationForSurface(_surfaceCode: string | undefined): number 
 }
 
 /**
- * `MeshPhysicalMaterial` straight from the finish row (Phase 3b R3/R4): the
- * database derives base colour from measured metal F0, roughness and
- * anisotropy from the surface, clearcoat from enamel-dip. A non-metal
- * product renders its colour as a plain dielectric.
+ * `MeshPhysicalMaterial` straight from the finish row: the database derives
+ * base colour, metalness, roughness, anisotropy and clearcoat (3b/3c). An
+ * antique finish (`two_tone`) mixes buffed metal and oxide by baked occlusion.
+ * A non-metal product renders its colour as a plain dielectric.
  */
 export function EditorModel({ url, sizePrimaryMm, isMetal, finish, colour, controlsRef }: EditorModelProps) {
   const obj = useLoader(OBJLoader, url);
   const { camera, size: viewport } = useThree();
 
+  const twoTone = !!(isMetal && finish?.two_tone);
+
   const material = useMemo(() => {
     if (isMetal && finish) {
-      return new THREE.MeshPhysicalMaterial({
+      const m = new THREE.MeshPhysicalMaterial({
         color: finish.base_color_hex ?? finish.hex_approx ?? "#9a9a9a",
         metalness: finish.metalness,
         roughness: finish.roughness,
@@ -55,6 +59,8 @@ export function EditorModel({ url, sizePrimaryMm, isMetal, finish, colour, contr
         clearcoat: finish.clearcoat ?? 0,
         clearcoatRoughness: finish.clearcoat_roughness ?? 0,
       });
+      if (finish.two_tone) applyTwoTone(m);
+      return m;
     }
     return new THREE.MeshPhysicalMaterial({
       color: colour?.hex ?? "#9a9a9a",
@@ -76,6 +82,11 @@ export function EditorModel({ url, sizePrimaryMm, isMetal, finish, colour, contr
     group.quaternion.copy(decoratedFaceRotation(group));
     return group;
   }, [obj]);
+
+  // Baked once per file, and only once an antique finish needs it.
+  useMemo(() => {
+    if (twoTone) bakeOcclusion(prepared, url);
+  }, [prepared, url, twoTone]);
 
   // Material is assigned separately so changing the finish never rebuilds
   // the object — which would re-run framing and yank the camera.

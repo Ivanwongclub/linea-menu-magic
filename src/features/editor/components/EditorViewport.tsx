@@ -1,6 +1,6 @@
 import { Suspense, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
-import { Environment, OrbitControls } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { Box } from "lucide-react";
 import { useI18n } from "@/features/i18n/I18nProvider";
@@ -8,7 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { EditorModel } from "./EditorModel";
 import type { EditorColour } from "../hooks/useEditorProduct";
 import type { PickerFinish } from "../hooks/useFinishOptions";
-import { ENVIRONMENT_ROTATION_Y, GL_SETTINGS, STUDIO_HDRI } from "../lib/renderSettings";
+import { GL_SETTINGS } from "../lib/renderSettings";
+import { ProceduralStudio } from "./ProceduralStudio";
 
 interface EditorViewportProps {
   modelStoragePath: string | null;
@@ -71,7 +72,7 @@ export function EditorViewport({ modelStoragePath, sizePrimaryMm, isMetal, finis
           gl={GL_SETTINGS}
           onDoubleClick={() => controlsRef.current?.reset()}
         >
-          <Environment files={STUDIO_HDRI} background={false} environmentRotation={[0, ENVIRONMENT_ROTATION_Y, 0]} />
+          <ProceduralStudio />
           <EditorModel url={url} sizePrimaryMm={sizePrimaryMm} isMetal={isMetal} finish={finish} colour={colour} controlsRef={controlsRef} />
           <OrbitControls
             ref={controlsRef}

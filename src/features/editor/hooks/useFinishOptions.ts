@@ -17,10 +17,6 @@ export interface AxisName {
  * feed `useFinishFilter`/`FinishFacetRail`/`FinishSwatchGrid` unchanged.
  */
 export type PickerFinish = FinishRow & {
-  /** Phase 3b columns (20260917180000) — typed here until types.ts is regenerated. */
-  base_color_hex: string | null;
-  clearcoat: number;
-  clearcoat_roughness: number;
   process: AxisName | null;
   base_family: AxisName | null;
   surface: AxisName | null;
@@ -35,10 +31,10 @@ const AXIS_NAME_COLS = "name, name_zh_hant, name_zh_hans";
 
 const FINISH_OPTION_SELECT = `
   *,
-  process:finish_processes!process_id ( ${AXIS_NAME_COLS} ),
-  base_family:finish_base_families!base_family_id ( ${AXIS_NAME_COLS} ),
+  process:finish_processes!process_id ( ${AXIS_NAME_COLS}, code ),
+  base_family:finish_base_families!base_family_id ( ${AXIS_NAME_COLS}, code ),
   surface:finish_surfaces!surface_id ( ${AXIS_NAME_COLS}, code ),
-  tone:finish_tones!tone_id ( ${AXIS_NAME_COLS} ),
+  tone:finish_tones!tone_id ( ${AXIS_NAME_COLS}, code ),
   effect:finish_effects!effect_id ( ${AXIS_NAME_COLS} ),
   tint:finish_tints!tint_id ( ${AXIS_NAME_COLS} ),
   coating:finish_coatings!coating_id ( ${AXIS_NAME_COLS} ),

@@ -711,6 +711,42 @@ export type Database = {
         }
         Relationships: []
       }
+      finish_family_calibration: {
+        Row: {
+          base_family_code: string
+          note: string | null
+          offset_b: number
+          offset_g: number
+          offset_r: number
+          residual_de2000: number | null
+          rows_used: number
+          saturation: number
+          value: number
+        }
+        Insert: {
+          base_family_code: string
+          note?: string | null
+          offset_b?: number
+          offset_g?: number
+          offset_r?: number
+          residual_de2000?: number | null
+          rows_used?: number
+          saturation?: number
+          value?: number
+        }
+        Update: {
+          base_family_code?: string
+          note?: string | null
+          offset_b?: number
+          offset_g?: number
+          offset_r?: number
+          residual_de2000?: number | null
+          rows_used?: number
+          saturation?: number
+          value?: number
+        }
+        Relationships: []
+      }
       finish_patterns: {
         Row: {
           code: string
@@ -819,6 +855,39 @@ export type Database = {
         }
         Relationships: []
       }
+      finish_swatch_measurements: {
+        Row: {
+          chart_page: string
+          cyc_code: string
+          glare_flag: boolean
+          hex_srgb: string
+          lum_p10: number
+          lum_p90: number
+          name_en: string
+          notes: string | null
+        }
+        Insert: {
+          chart_page: string
+          cyc_code: string
+          glare_flag: boolean
+          hex_srgb: string
+          lum_p10: number
+          lum_p90: number
+          name_en: string
+          notes?: string | null
+        }
+        Update: {
+          chart_page?: string
+          cyc_code?: string
+          glare_flag?: boolean
+          hex_srgb?: string
+          lum_p10?: number
+          lum_p90?: number
+          name_en?: string
+          notes?: string | null
+        }
+        Relationships: []
+      }
       finish_tints: {
         Row: {
           code: string
@@ -888,8 +957,11 @@ export type Database = {
       finishes: {
         Row: {
           anisotropy: number
+          base_color_hex: string | null
           base_family_id: string | null
           chart_page: string | null
+          clearcoat: number
+          clearcoat_roughness: number
           coating_id: string | null
           created_at: string
           cyc_code: string | null
@@ -915,12 +987,16 @@ export type Database = {
           swatch_url: string | null
           tint_id: string | null
           tone_id: string | null
+          two_tone: boolean
           updated_at: string
         }
         Insert: {
           anisotropy: number
+          base_color_hex?: string | null
           base_family_id?: string | null
           chart_page?: string | null
+          clearcoat?: number
+          clearcoat_roughness?: number
           coating_id?: string | null
           created_at?: string
           cyc_code?: string | null
@@ -946,12 +1022,16 @@ export type Database = {
           swatch_url?: string | null
           tint_id?: string | null
           tone_id?: string | null
+          two_tone?: boolean
           updated_at?: string
         }
         Update: {
           anisotropy?: number
+          base_color_hex?: string | null
           base_family_id?: string | null
           chart_page?: string | null
+          clearcoat?: number
+          clearcoat_roughness?: number
           coating_id?: string | null
           created_at?: string
           cyc_code?: string | null
@@ -977,6 +1057,7 @@ export type Database = {
           swatch_url?: string | null
           tint_id?: string | null
           tone_id?: string | null
+          two_tone?: boolean
           updated_at?: string
         }
         Relationships: [
@@ -1908,6 +1989,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      finish_derive: {
+        Args: { p: Database["public"]["Tables"]["finishes"]["Row"] }
+        Returns: Record<string, unknown>
+      }
+      finish_linear_to_srgb_hex: {
+        Args: { p_b: number; p_g: number; p_r: number }
+        Returns: string
+      }
       finish_material_params: {
         Args: {
           p_base_family: string
@@ -1921,6 +2010,25 @@ export type Database = {
         }
         Returns: Record<string, unknown>
       }
+      finish_metal_f0: {
+        Args: { p_metal: string }
+        Returns: Record<string, unknown>
+      }
+      finish_painted_material: {
+        Args: { p_coating: string; p_cyc_code: string; p_hex_approx: string }
+        Returns: Record<string, unknown>
+      }
+      finish_plated_material: {
+        Args: {
+          p_base_family: string
+          p_effect: string
+          p_surface: string
+          p_tint: string
+          p_tone: string
+        }
+        Returns: Record<string, unknown>
+      }
+      finish_recompute_materials: { Args: never; Returns: number }
       user_has_brand: {
         Args: { _brand_id: string; _user_id: string }
         Returns: boolean

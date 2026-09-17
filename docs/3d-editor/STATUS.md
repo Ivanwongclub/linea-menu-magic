@@ -10,7 +10,7 @@ this is an index, not a decision log.
 | 2 | Editor shell, route, lazy load, catalogue entry | **Done** |
 | 3 | Finish picker integration | **Done** |
 | 3b | Physically correct plated rendering | **Done** |
-| 3c | Painted-finish calibration from `wincyc-swatch-measurements.csv` | Pending |
+| 3c | Procedural studio, antique two-tone, painted finishes and per-family calibration from `wincyc-swatch-measurements.csv` | **Done** — 3-series calibration closed |
 | 4 | Text: content, font, straight and circular layout | Not started |
 | 5 | Direct manipulation: drag to position, size, curve | Not started |
 | 6 | Emboss and deboss via CSG in a worker | Not started |
@@ -449,3 +449,220 @@ revisits the provisional plated offsets — from
    and any other `hex_approx` consumer keep the chart-photo colour.
    *Recommend* leaving it — it is CMS-editable data and R4 only asked for
    painted rows to keep theirs — unless WIN-CYC wants the two unified.
+
+## Phase 3c — done (2026-09-17) · 3-series calibration closed
+
+Files:
+
+- `supabase/migrations/20260917210000_phase3c_painted_antique_calibration.sql`
+  — `finish_swatch_measurements` (the CSV, 135 rows) and
+  `finish_family_calibration` (fitted values + residuals), both staff-read /
+  service-role-write; `finishes.two_tone`; `finish_metal_f0()` gains `tin`
+  (chart-referenced) and `black_nickel`; `finish_plated_material()` rewritten
+  (antique families use the bare metal, antique tones skip their offset,
+  gun-metal cool bias and roughness floor, family calibration last);
+  `finish_painted_material()` new; `finish_derive()` shared by the trigger
+  and `finish_recompute_materials()` (service role only); all 135 rows
+  recomputed. `hex_approx` untouched.
+- `src/integrations/supabase/types.ts` — regenerated (`npm run e2e:types`).
+- `src/features/products/hooks/useProduct.ts` — select adds `base_color_hex`.
+- `src/features/finishes/metalReflectance.ts` — mirrors the 3c plated
+  derivation; `FAMILY_CALIBRATION` generated from the fit.
+- `src/features/editor/lib/studioEnvironment.ts`,
+  `components/ProceduralStudio.tsx` (new) — the procedural studio.
+  `public/env/studio.hdr` deleted.
+- `src/features/editor/lib/ambientOcclusion.ts`, `lib/twoTone.ts` (new) —
+  baked occlusion (three-mesh-bvh) and the buffed/oxide shader mix.
+- `src/features/editor/components/EditorModel.tsx`, `EditorViewport.tsx`,
+  `lib/renderSettings.ts`, `hooks/useFinishOptions.ts` — studio, two-tone,
+  exposure 0.92, non-metal roughness 0.3, axis codes for tone/process/family.
+- `scripts/e2e-local/lib/colour.mjs` (new) — sRGB/Lab, CIEDE2000 (checked
+  against Sharma et al.'s test pairs), Neutral tone map forward and inverse.
+- `scripts/e2e-local/lib/calibration.mjs` (new) — shared disc fixture,
+  CSV reader, staging, in-page finish picking, pixel statistics.
+- `scripts/e2e-local/calibrate/fit-families.mjs`, `refit.mjs` (new) — the
+  per-family measurement / fit harness.
+- `scripts/e2e-local/fixtures/Polo_Button_10.8.obj` — copied from
+  `public/models/`; scenarios no longer read the public asset.
+- `scripts/e2e-local/scenarios/render-calibration.mjs` — rewritten for 3c.
+- `scripts/e2e-local/scenarios/family-calibration.mjs` (new) — asserts every
+  family ≤ ΔE2000 8 and refreshes `reports/3c-family-fit.json`.
+- `reports/3c-materials.png`, `reports/3c-family-fit.json`.
+
+### Procedural studio (R1)
+
+Built in `lib/studioEnvironment.ts`, baked once through `PMREMGenerator`
+(σ 0.02). Directions: elevation above the horizon, azimuth from +Z toward +X
+(−X is the viewer's left). Softboxes fall off by smoothstep over `feather` of
+each half-extent.
+
+| Element | Elevation | Azimuth | Size (°) | Radiance | Feather |
+|---|---|---|---|---|---|
+| Surround | — | — | full sphere | 0.17 | — |
+| Key (above-left) | 40° | −50° | 70 × 55 | 10.5 | 0.6 |
+| Fill (right, low) | −28° | 64° | 80 × 90 | 8.5 | 1.0 |
+| Rim (top-back) | 55° | 180° | 90 × 8 | 3.0 | 0.5 |
+
+Exposure 0.92; non-metal roughness 0.3. Found by sweep (≈ 40 configurations
+through the editor route). The fill's position is what makes it work: a
+flat disc facing +Z under the three-quarter camera reflects *down-right-front*,
+so the fill's falloff has to cross that direction to give the gradient —
+and the same crossing gives a dielectric the ~4% specular PBR Neutral tone
+mapping assumes, which is what brings #C0392B's blue channel within tolerance.
+A dimmer fill (4) under a brighter key reproduced grey but crushed #C0392B's
+blue by 5–7; a fill brighter than the key passed but broke "weaker fill".
+
+Results (render-calibration.mjs):
+
+| Check | Target | Result |
+|---|---|---|
+| Reference nickel disc, surround-facing (luminance p2) | ≤ #505050 (80) | 50 |
+| Reference nickel disc, highlight (luminance p98) | ≥ #EDEDED (237) | 238 |
+| Adjacent-pixel luminance step on the face (p99.5, from the sweep — not asserted) | smooth | 2 |
+| #808080 disc centre | ±3 | (128,128,128) |
+| #C0392B disc centre | ±3 | (192,58,45) |
+| Model fill | ~0.6 | 0.56 |
+
+The studio checks use nickel's reference F0 (`#D4CDC0`), not the calibrated
+NICKEL family — see open question 1.
+
+### Antique two-tone (R2)
+
+`two_tone` = tone in (ANTI, ANCIENT, DEEP, DARK) or base family in
+(ANTI_BRASS, ANTI_COPPER, ANTI_SILVER, BLACK_COPPER) — 38 rows. Occlusion:
+32 cosine-weighted rays per unique vertex (position + normal), reach 8% of the
+part's largest dimension, one BVH over all groups, cached per model URL.
+Mix: smoothstep(0.08, 0.45, occlusion) between buffed (base_color_hex, row
+roughness; 0.30 when surface is null) and oxide (base × 0.25, roughness 0.55).
+Antique families take the bare metal's F0; antique tones don't apply their
+multiplier (the mix is the darkening).
+
+### Gun metal (R3)
+
+| Value | Setting |
+|---|---|
+| Reference F0 | `black_nickel` = nickel's luminance (0.6139) × 0.18 = 0.1105, neutral — no published F0 for black-nickel electroplate |
+| Cool bias | × (0.96, 1.00, 1.08) |
+| Roughness floor | 0.15 |
+| Family calibration | value 0.2786 — ΔE2000 0.25 |
+
+### Tin (R4)
+
+No visible-range optical constants for tin were found in the references
+checked: refractiveindex.info's Sn datasets (Golovashkin & Motulevich 1964)
+start at 730 nm, and physicallybased.info has no tin. Tin is therefore a
+neutral reference (0.6) whose brightness comes from the WIN-CYC chart itself
+(CYC-0046, CYC-0048, CYC-0049 via the TIN family fit) — the chart
+measurement is the named source.
+
+### Per-family calibration (R4)
+
+Applied last in the plated model: desaturate toward Rec.709 luminance by
+*saturation*, scale by *value*, multiply by the offset. Fitted in
+`calibrate/fit-families.mjs` from glare-free chart rows († = no glare-free
+rows; fitted to glare rows). R4 asks for ≤ 8, not the minimum, and the
+unconstrained fit reaches ΔE ≈ 1 by greying gold and brass to neutral; the
+fit therefore keeps saturation and offsets as close to 1 as possible subject
+to a predicted ΔE ≤ 6, then measures the real residual by re-rendering.
+All residuals below are measured, not predicted.
+
+| Family | Rows | Saturation | Value | Offset R·G·B | Chart median Lab | Rendered median Lab | ΔE2000 |
+|---|---|---|---|---|---|---|---|
+| ALLOY | 2 | 0.9 | 0.0609 | 1 · 1 · 1 | 11.3, -0.0, -3.1 | 11.3, -4.3, -2.2 | 5.65 |
+| ANTI_BRASS | 10 | 1 | 0.0153 | 1 · 1 · 1 | 12.9, -0.1, 3.1 | 4.3, -0.1, 5.3 | 5.66 |
+| ANTI_COPPER | 4 | 1 | 0.01 | 1 · 1 · 1 | 8.0, 0.6, 0.3 | 1.6, 1.5, 1.8 | 4.24 |
+| ANTI_SILVER | 2 | 1 | 0.089 | 1 · 1 · 1 | 20.7, 0.0, -0.7 | 21.0, -0.5, 2.0 | 2.68 |
+| BLACK_COPPER | 3 | 0 | 0.0638 | 1 · 1 · 1.05 | 8.7, -0.1, -4.6 | 9.8, 0.5, -1.4 | 3.11 |
+| BRASS | 11 | 0.25 | 0.0934 | 1 · 1 · 1 | 18.3, -1.1, -0.4 | 20.8, -0.4, 4.1 | 4.62 |
+| GOLD | 10 | 0.5 | 0.0235 | 1 · 1 · 1 | 13.7, -0.7, 4.1 | 5.2, 0.1, 5.3 | 5.52 |
+| GUN_METAL | 3 | 1 | 0.2786 | 1 · 1 · 1 | 5.0, -0.1, -2.0 | 5.4, -0.1, -2.1 | 0.25 |
+| LIGHT_GOLD | 7 | 0.4 | 0.1242 | 1 · 1 · 1 | 25.3, -0.4, -0.1 | 27.7, -0.1, 6.1 | 5.81 |
+| NICKEL | 4 | 0.2 | 0.1077 | 1 · 1 · 1 | 12.9, 0.3, -3.8 | 13.6, -0.4, 1.0 | 4.67 |
+| RED_COPPER | 2 | 0.9 | 0.058 | 1 · 1 · 1 | 16.3, 5.0, 6.4 | 13.5, 7.9, 11.7 | 4.7 |
+| ROSE_GOLD | 4 | 0.3 | 0.1077 | 1 · 1 · 1 | 19.0, 2.5, -0.2 | 22.0, 0.8, 5.2 | 6.09 |
+| RUSTY_STEEL | 1 | 1 | 0.3064 | 1 · 1 · 1 | 5.0, -0.3, -1.4 | 6.8, 0.5, -1.3 | 1.63 |
+| STAINLESS_STEEL † | 1 | 1 | 0.1816 | 1 · 1 · 1 | 22.4, 1.3, -0.9 | 28.0, 0.2, -0.6 | 4.39 |
+| TIN | 3 | 1 | 0.1432 | 1 · 1 · 1 | 17.8, -0.4, -1.4 | 24.0, 0.0, 0.0 | 4.54 |
+
+Unchanged from 3b and still provisional: tone multipliers IMT (0.95, 0.95,
+0.92), LIGHT 1.10, MEDIUM 0.70; tints as in the 3b table; RUSTY_STEEL keeps
+the anti variant (saturation 0.9 × value 0.18) before its calibration.
+
+### Painted finishes (R5)
+
+Base colour = the chart's `hex_srgb`; glare rows (marked) are used as
+measured, per R5 — CYC-0110, 0118, 0120, 0124, 0127, 0128, 0129, 0130.
+Coating → roughness: GLOSS_ENAMEL 0.15 + clearcoat 1 · MATT_ENAMEL 0.60 ·
+RUBBER 0.85 · PEARL 0.30 · EP 0.30 · GLITTER 0.40 · VELVET 0.95 · EPOXY 0.05
++ clearcoat 1 · CERAMIC 0.20 · METALLIC 0.30 (metalness 0.6). Clearcoat
+roughness 0.10 where clearcoat is 1 (R5 doesn't state it; matches 3b's
+enamel-dip). Metalness 0 otherwise; patterns don't change the material.
+
+| Code | Chart name | Coating | base_color_hex | Metalness | Roughness | Clearcoat | Glare |
+|---|---|---|---|---|---|---|---|
+| CYC-0027 | HP IMT BRUSHED GOLD MACL | MATT_ENAMEL | `#47321A` | 0 | 0.6 | 0 |  |
+| CYC-0106 | WHITE ENAMEL | GLOSS_ENAMEL | `#C1BFC6` | 0 | 0.15 | 1 |  |
+| CYC-0107 | MATT WHITE ENAMEL | MATT_ENAMEL | `#CBCCD4` | 0 | 0.6 | 0 |  |
+| CYC-0108 | RUBBER WHITE | RUBBER | `#C8CCD3` | 0 | 0.85 | 0 |  |
+| CYC-0109 | PEARL WHITE | PEARL | `#BEC6DB` | 0 | 0.3 | 0 |  |
+| CYC-0110 | SPRAY DOT ENAMEL | GLOSS_ENAMEL | `#CCD9EF` | 0 | 0.15 | 1 | yes |
+| CYC-0111 | BLACK ENAMEL | GLOSS_ENAMEL | `#040403` | 0 | 0.15 | 1 |  |
+| CYC-0112 | MATT BLACK ENAMEL | MATT_ENAMEL | `#121212` | 0 | 0.6 | 0 |  |
+| CYC-0113 | RUBBER BLACK | RUBBER | `#0D0E0F` | 0 | 0.85 | 0 |  |
+| CYC-0114 | PEARL BLACK | PEARL | `#04080B` | 0 | 0.3 | 0 |  |
+| CYC-0115 | GRADIENT ENAMEL | GLOSS_ENAMEL | `#282E35` | 0 | 0.15 | 1 |  |
+| CYC-0116 | EP BLACK | EP | `#060604` | 0 | 0.3 | 0 |  |
+| CYC-0117 | MATT EP BLACK | EP | `#0B0C0B` | 0 | 0.3 | 0 |  |
+| CYC-0118 | SCREEN PRINT ENAMEL | GLOSS_ENAMEL | `#131416` | 0 | 0.15 | 1 | yes |
+| CYC-0119 | RAINDROP ENAMEL | GLOSS_ENAMEL | `#11151B` | 0 | 0.15 | 1 |  |
+| CYC-0120 | CRACKED ENAMEL | GLOSS_ENAMEL | `#192129` | 0 | 0.15 | 1 | yes |
+| CYC-0121 | METALLIC SILVER | METALLIC | `#544948` | 0.6 | 0.3 | 0 |  |
+| CYC-0122 | VELVET ENAMEL | VELVET | `#0C0C0C` | 0 | 0.95 | 0 |  |
+| CYC-0123 | METALLIC RED | METALLIC | `#170507` | 0.6 | 0.3 | 0 |  |
+| CYC-0125 | IMT LEATHER ENAMEL | GLOSS_ENAMEL | `#22272D` | 0 | 0.15 | 1 |  |
+| CYC-0126 | WHITE GLITTER | GLITTER | `#302B25` | 0 | 0.4 | 0 |  |
+| CYC-0127 | GOLD GLITTER | GLITTER | `#34291D` | 0 | 0.4 | 0 | yes |
+| CYC-0128 | STONE WASH ENAMEL | GLOSS_ENAMEL | `#A9ADB6` | 0 | 0.15 | 1 | yes |
+| CYC-0129 | TEA GOLD ENAMEL | GLOSS_ENAMEL | `#3C3D35` | 0 | 0.15 | 1 | yes |
+| CYC-0130 | ANTI GOLD ENAMEL | GLOSS_ENAMEL | `#333327` | 0 | 0.15 | 1 | yes |
+| CYC-0131 | BLUE CERAMIC | CERAMIC | `#001D60` | 0 | 0.2 | 0 |  |
+| CYC-0132 | ENAMEL EPOXY | EPOXY | `#1C1E1E` | 0 | 0.05 | 1 |  |
+
+### Contact sheet (R7)
+
+`reports/3c-materials.png`: the 3b six plus anti copper (CYC-0076), rose gold
+(CYC-0019), brushed gold (CYC-0014), gloss black enamel (CYC-0111), matt black
+enamel (CYC-0112) and, in place of gloss red enamel, **metallic red
+(CYC-0123)** — the chart has no red enamel. Each cell shows the chart swatch
+(`chart*` = glare row) beside the render.
+
+### Open questions from this phase, with a recommendation each
+
+1. **Calibrated metals render near-black, gold included.** The chart
+   swatches are mirror plates photographed in a dark room, so their medians
+   are dark and nearly neutral (HP GOLD `#171817`); matching a flat disc to
+   them drives every family's value to 0.01–0.3 × F0. ΔE ≤ 8 holds, but the
+   contact sheet shows gold, nickel and copper as dark plates, and the R1
+   highlight target (met at reference F0) is no longer reached by calibrated
+   nickel. *Recommend* calibrating plated families against each swatch's
+   highlight (`lum_p90`), or keeping F0 physical and fitting only hue — the
+   median of a mirror photo measures the room, not the metal.
+2. **ΔE2000 is forgiving at very low lightness.** ANTI_BRASS renders L 4.3
+   against the chart's 12.9 and still scores 5.66; ANTI_COPPER hit the
+   fit's value floor (0.01). *Recommend* adding a lightness-difference
+   ceiling alongside ΔE if these families are refit.
+3. **No gloss red enamel exists on the chart.** The sheet uses metallic red
+   (CYC-0123). *Recommend* confirming with WIN-CYC whether a red enamel code
+   should be added or the sheet slot changed.
+4. **Stainless steel has no glare-free chart row** (CYC-0086 is flagged);
+   it is fitted to that glare row. *Recommend* a re-photographed swatch.
+5. **`useProduct` selects `base_color_hex` but doesn't pass it on.** Its
+   `transformProduct` maps finish fields explicitly and was outside this
+   phase's "select lists only" scope, so storefront swatches still render
+   from `hex_approx`. *Recommend* forwarding the field in the transform.
+6. **Occlusion is baked on the main thread.** Bake time wasn't measured;
+   the Polo button (~17k unique vertices × 32 rays) renders within the
+   scenario's timeouts, but a denser staff upload (Phase 11) could stall the
+   page. *Recommend* moving the bake into the
+   Phase 6 CSG worker when it exists.
+

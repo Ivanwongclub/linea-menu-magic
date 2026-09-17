@@ -64,7 +64,7 @@ const PRODUCT_SELECT = `
     sort_order,
     finishes(
       id, cyc_code, marketing_name, marketing_name_zh_hant, marketing_name_zh_hans,
-      factory_name_en, hex_approx, swatch_url, is_public, is_standard,
+      factory_name_en, hex_approx, base_color_hex, swatch_url, is_public, is_standard,
       metalness, roughness, anisotropy, sort_order
     )
   )

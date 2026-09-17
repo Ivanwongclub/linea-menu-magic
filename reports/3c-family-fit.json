@@ -1,0 +1,1643 @@
+[
+  {
+    "family": "NICKEL",
+    "rows": 4,
+    "glareFallback": false,
+    "codes": [
+      "CYC-0040",
+      "CYC-0001",
+      "CYC-0028",
+      "CYC-0050"
+    ],
+    "measuredDeltaE": 4.67,
+    "chartMedianLab": [
+      12.92,
+      0.27,
+      -3.82
+    ],
+    "renderedMedianLab": [
+      13.56,
+      -0.37,
+      1.01
+    ],
+    "current": {
+      "saturation": 0.2,
+      "value": 0.1077,
+      "offset": [
+        1,
+        1,
+        1
+      ]
+    },
+    "samples": [
+      {
+        "code": "CYC-0040",
+        "axes": {
+          "base_family": "NICKEL",
+          "surface": "MATT",
+          "tone": "DARK",
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#1E222C",
+        "renderedHex": "#191917",
+        "transfer": [
+          0.5689345421902297,
+          0.5784031695403477,
+          0.576549975191888
+        ]
+      },
+      {
+        "code": "CYC-0001",
+        "axes": {
+          "base_family": "NICKEL",
+          "surface": null,
+          "tone": null,
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#1E2125",
+        "renderedHex": "#2D2D2C",
+        "transfer": [
+          0.9617040113380655,
+          0.9777093972466417,
+          0.988509974989857
+        ]
+      },
+      {
+        "code": "CYC-0028",
+        "axes": {
+          "base_family": "NICKEL",
+          "surface": "SAND",
+          "tone": null,
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#2E2F30",
+        "renderedHex": "#181816",
+        "transfer": [
+          0.5504713922614067,
+          0.5596327422827263,
+          0.5579145203259708
+        ]
+      },
+      {
+        "code": "CYC-0050",
+        "axes": {
+          "base_family": "NICKEL",
+          "surface": null,
+          "tone": null,
+          "effect": "BLACK_COVER",
+          "tint": null
+        },
+        "chartHex": "#13151B",
+        "renderedHex": "#2D2D2C",
+        "transfer": [
+          0.9617040113380655,
+          0.9777093972466417,
+          0.988509974989857
+        ]
+      }
+    ]
+  },
+  {
+    "family": "GUN_METAL",
+    "rows": 3,
+    "glareFallback": false,
+    "codes": [
+      "CYC-0004",
+      "CYC-0034",
+      "CYC-0029"
+    ],
+    "measuredDeltaE": 0.25,
+    "chartMedianLab": [
+      4.99,
+      -0.08,
+      -1.98
+    ],
+    "renderedMedianLab": [
+      5.39,
+      -0.08,
+      -2.07
+    ],
+    "current": {
+      "saturation": 1,
+      "value": 0.2786,
+      "offset": [
+        1,
+        1,
+        1
+      ]
+    },
+    "samples": [
+      {
+        "code": "CYC-0004",
+        "axes": {
+          "base_family": "GUN_METAL",
+          "surface": null,
+          "tone": null,
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#0D1324",
+        "renderedHex": "#101215",
+        "transfer": [
+          0.9742576382681614,
+          0.9634603997700338,
+          0.9357104318249517
+        ]
+      },
+      {
+        "code": "CYC-0034",
+        "axes": {
+          "base_family": "GUN_METAL",
+          "surface": null,
+          "tone": "ANCIENT",
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#05090C",
+        "renderedHex": "#111316",
+        "transfer": [
+          1.0133240455281691,
+          1.0022434251944325,
+          0.9734524182606117
+        ]
+      },
+      {
+        "code": "CYC-0029",
+        "axes": {
+          "base_family": "GUN_METAL",
+          "surface": "SAND",
+          "tone": null,
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#0F1114",
+        "renderedHex": "#06080C",
+        "transfer": [
+          0.5775893676065479,
+          0.5742047486083429,
+          0.5692157820089083
+        ]
+      }
+    ]
+  },
+  {
+    "family": "GOLD",
+    "rows": 10,
+    "glareFallback": false,
+    "codes": [
+      "CYC-0013",
+      "CYC-0030",
+      "CYC-0026",
+      "CYC-0093",
+      "CYC-0094",
+      "CYC-0035",
+      "CYC-0096",
+      "CYC-0100",
+      "CYC-0015",
+      "CYC-0066"
+    ],
+    "measuredDeltaE": 5.52,
+    "chartMedianLab": [
+      13.66,
+      -0.73,
+      4.1
+    ],
+    "renderedMedianLab": [
+      5.18,
+      0.14,
+      5.29
+    ],
+    "current": {
+      "saturation": 0.5,
+      "value": 0.0235,
+      "offset": [
+        1,
+        1,
+        1
+      ]
+    },
+    "samples": [
+      {
+        "code": "CYC-0013",
+        "axes": {
+          "base_family": "GOLD",
+          "surface": null,
+          "tone": null,
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#171817",
+        "renderedHex": "#181309",
+        "transfer": [
+          1.2935485131574995,
+          1.3308238067578944,
+          1.5597742547980062
+        ]
+      },
+      {
+        "code": "CYC-0030",
+        "axes": {
+          "base_family": "GOLD",
+          "surface": "SAND",
+          "tone": "IMT",
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#424444",
+        "renderedHex": "#0F0B01",
+        "transfer": [
+          0.5679209678476822,
+          0.5651717148182362,
+          0.5484100325964768
+        ]
+      },
+      {
+        "code": "CYC-0026",
+        "axes": {
+          "base_family": "GOLD",
+          "surface": "BRUSHED",
+          "tone": "IMT",
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#2F2314",
+        "renderedHex": "#040300",
+        "transfer": [
+          0.06056256671551397,
+          0.051697186888340754,
+          0
+        ]
+      },
+      {
+        "code": "CYC-0093",
+        "axes": {
+          "base_family": "GOLD",
+          "surface": null,
+          "tone": "ANTI",
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#232019",
+        "renderedHex": "#151106",
+        "transfer": [
+          1.0775115083341076,
+          1.1242180000683364,
+          1.2735490384416335
+        ]
+      },
+      {
+        "code": "CYC-0094",
+        "axes": {
+          "base_family": "GOLD",
+          "surface": null,
+          "tone": "ANCIENT",
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#1F1E1A",
+        "renderedHex": "#151106",
+        "transfer": [
+          1.0775115083341076,
+          1.1242180000683364,
+          1.2735490384416335
+        ]
+      },
+      {
+        "code": "CYC-0035",
+        "axes": {
+          "base_family": "GOLD",
+          "surface": null,
+          "tone": "ANCIENT",
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#232115",
+        "renderedHex": "#151106",
+        "transfer": [
+          1.0775115083341076,
+          1.1242180000683364,
+          1.2735490384416335
+        ]
+      },
+      {
+        "code": "CYC-0096",
+        "axes": {
+          "base_family": "GOLD",
+          "surface": null,
+          "tone": null,
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#574F41",
+        "renderedHex": "#181309",
+        "transfer": [
+          1.2935485131574995,
+          1.3308238067578944,
+          1.5597742547980062
+        ]
+      },
+      {
+        "code": "CYC-0100",
+        "axes": {
+          "base_family": "GOLD",
+          "surface": "MATT",
+          "tone": null,
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#424239",
+        "renderedHex": "#0F0A02",
+        "transfer": [
+          0.6640056876423294,
+          0.6618044433516278,
+          0.7347526191560128
+        ]
+      },
+      {
+        "code": "CYC-0015",
+        "axes": {
+          "base_family": "GOLD",
+          "surface": "MATT",
+          "tone": null,
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#636E71",
+        "renderedHex": "#0F0A02",
+        "transfer": [
+          0.6640056876423294,
+          0.6618044433516278,
+          0.7347526191560128
+        ]
+      },
+      {
+        "code": "CYC-0066",
+        "axes": {
+          "base_family": "GOLD",
+          "surface": null,
+          "tone": null,
+          "effect": "STONE_WASH",
+          "tint": null
+        },
+        "chartHex": "#1F201F",
+        "renderedHex": "#181309",
+        "transfer": [
+          1.2935485131574995,
+          1.3308238067578944,
+          1.5597742547980062
+        ]
+      }
+    ]
+  },
+  {
+    "family": "ROSE_GOLD",
+    "rows": 4,
+    "glareFallback": false,
+    "codes": [
+      "CYC-0019",
+      "CYC-0103",
+      "CYC-0007",
+      "CYC-0021"
+    ],
+    "measuredDeltaE": 6.09,
+    "chartMedianLab": [
+      18.97,
+      2.55,
+      -0.19
+    ],
+    "renderedMedianLab": [
+      22,
+      0.77,
+      5.23
+    ],
+    "current": {
+      "saturation": 0.3,
+      "value": 0.1077,
+      "offset": [
+        1,
+        1,
+        1
+      ]
+    },
+    "samples": [
+      {
+        "code": "CYC-0019",
+        "axes": {
+          "base_family": "ROSE_GOLD",
+          "surface": null,
+          "tone": null,
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#221918",
+        "renderedHex": "#3B362F",
+        "transfer": [
+          0.9410450266640581,
+          0.9572866529612196,
+          0.9552574525067955
+        ]
+      },
+      {
+        "code": "CYC-0103",
+        "axes": {
+          "base_family": "ROSE_GOLD",
+          "surface": null,
+          "tone": "IMT",
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#4B4949",
+        "renderedHex": "#39342D",
+        "transfer": [
+          0.9521477427033987,
+          0.9686583439378355,
+          0.9733679684519051
+        ]
+      },
+      {
+        "code": "CYC-0007",
+        "axes": {
+          "base_family": "ROSE_GOLD",
+          "surface": null,
+          "tone": "IMT",
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#161617",
+        "renderedHex": "#39342D",
+        "transfer": [
+          0.9521477427033987,
+          0.9686583439378355,
+          0.9733679684519051
+        ]
+      },
+      {
+        "code": "CYC-0021",
+        "axes": {
+          "base_family": "ROSE_GOLD",
+          "surface": "MATT",
+          "tone": null,
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#4C3F44",
+        "renderedHex": "#27221A",
+        "transfer": [
+          0.5755851588725589,
+          0.5841923912070747,
+          0.5758491068204258
+        ]
+      }
+    ]
+  },
+  {
+    "family": "ANTI_BRASS",
+    "rows": 10,
+    "glareFallback": false,
+    "codes": [
+      "CYC-0057",
+      "CYC-0058",
+      "CYC-0063",
+      "CYC-0067",
+      "CYC-0062",
+      "CYC-0056",
+      "CYC-0032",
+      "CYC-0059",
+      "CYC-0060",
+      "CYC-0061"
+    ],
+    "measuredDeltaE": 5.66,
+    "chartMedianLab": [
+      12.9,
+      -0.06,
+      3.06
+    ],
+    "renderedMedianLab": [
+      4.3,
+      -0.15,
+      5.35
+    ],
+    "current": {
+      "saturation": 1,
+      "value": 0.0153,
+      "offset": [
+        1,
+        1,
+        1
+      ]
+    },
+    "samples": [
+      {
+        "code": "CYC-0057",
+        "axes": {
+          "base_family": "ANTI_BRASS",
+          "surface": null,
+          "tone": null,
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#25211B",
+        "renderedHex": "#130F03",
+        "transfer": [
+          1.2691645888615335,
+          1.3387302164775094,
+          1.8648416583648033
+        ]
+      },
+      {
+        "code": "CYC-0058",
+        "axes": {
+          "base_family": "ANTI_BRASS",
+          "surface": null,
+          "tone": null,
+          "effect": null,
+          "tint": "JAPAN"
+        },
+        "chartHex": "#27231D",
+        "renderedHex": "#130F02",
+        "transfer": [
+          1.2298458129142062,
+          1.3382496598610658,
+          1.9021181892974495
+        ]
+      },
+      {
+        "code": "CYC-0063",
+        "axes": {
+          "base_family": "ANTI_BRASS",
+          "surface": null,
+          "tone": null,
+          "effect": null,
+          "tint": "COFFEE"
+        },
+        "chartHex": "#272828",
+        "renderedHex": "#140E02",
+        "transfer": [
+          1.325195326537763,
+          1.5906569922323726,
+          2.7173116989963573
+        ]
+      },
+      {
+        "code": "CYC-0067",
+        "axes": {
+          "base_family": "ANTI_BRASS",
+          "surface": null,
+          "tone": null,
+          "effect": null,
+          "tint": "CHOCOLATE"
+        },
+        "chartHex": "#23211D",
+        "renderedHex": "#130C02",
+        "transfer": [
+          1.4505873690782944,
+          1.8086860791036026,
+          3.3080316335607813
+        ]
+      },
+      {
+        "code": "CYC-0062",
+        "axes": {
+          "base_family": "ANTI_BRASS",
+          "surface": null,
+          "tone": null,
+          "effect": null,
+          "tint": "GUN_METAL"
+        },
+        "chartHex": "#161715",
+        "renderedHex": "#0F0B02",
+        "transfer": [
+          1.3983810243090358,
+          1.4290417096651487,
+          1.950890450561487
+        ]
+      },
+      {
+        "code": "CYC-0056",
+        "axes": {
+          "base_family": "ANTI_BRASS",
+          "surface": null,
+          "tone": "DARK",
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#0F1011",
+        "renderedHex": "#130F03",
+        "transfer": [
+          1.2691645888615335,
+          1.3387302164775094,
+          1.8648416583648033
+        ]
+      },
+      {
+        "code": "CYC-0032",
+        "axes": {
+          "base_family": "ANTI_BRASS",
+          "surface": "CIRCLE_BRUSHED",
+          "tone": null,
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#1F1A14",
+        "renderedHex": "#030200",
+        "transfer": [
+          0.06540120309175555,
+          0.05099836744944092,
+          0
+        ]
+      },
+      {
+        "code": "CYC-0059",
+        "axes": {
+          "base_family": "ANTI_BRASS",
+          "surface": "BRUSHED",
+          "tone": null,
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#2D2E29",
+        "renderedHex": "#030200",
+        "transfer": [
+          0.06540120309175555,
+          0.05099836744944092,
+          0
+        ]
+      },
+      {
+        "code": "CYC-0060",
+        "axes": {
+          "base_family": "ANTI_BRASS",
+          "surface": "BRIGHT",
+          "tone": null,
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#312E28",
+        "renderedHex": "#151104",
+        "transfer": [
+          1.4524364092778927,
+          1.5397812143885483,
+          2.153517207828501
+        ]
+      },
+      {
+        "code": "CYC-0061",
+        "axes": {
+          "base_family": "ANTI_BRASS",
+          "surface": null,
+          "tone": null,
+          "effect": "DISTRESS",
+          "tint": null
+        },
+        "chartHex": "#0B0B0A",
+        "renderedHex": "#130F03",
+        "transfer": [
+          1.2691645888615335,
+          1.3387302164775094,
+          1.8648416583648033
+        ]
+      }
+    ]
+  },
+  {
+    "family": "ANTI_COPPER",
+    "rows": 4,
+    "glareFallback": false,
+    "codes": [
+      "CYC-0079",
+      "CYC-0069",
+      "CYC-0031",
+      "CYC-0081"
+    ],
+    "measuredDeltaE": 4.19,
+    "chartMedianLab": [
+      7.98,
+      0.6,
+      0.26
+    ],
+    "renderedMedianLab": [
+      1.6,
+      1.34,
+      1.76
+    ],
+    "current": {
+      "saturation": 1,
+      "value": 0.01,
+      "offset": [
+        1,
+        1,
+        1
+      ]
+    },
+    "samples": [
+      {
+        "code": "CYC-0079",
+        "axes": {
+          "base_family": "ANTI_COPPER",
+          "surface": null,
+          "tone": null,
+          "effect": null,
+          "tint": "CHOCOLATE"
+        },
+        "chartHex": "#17181A",
+        "renderedHex": "#0E0501",
+        "transfer": [
+          1.476667400559211,
+          2.1227503519068596,
+          2.7928642366672487
+        ]
+      },
+      {
+        "code": "CYC-0069",
+        "axes": {
+          "base_family": "ANTI_COPPER",
+          "surface": null,
+          "tone": null,
+          "effect": null,
+          "tint": "GUN_METAL"
+        },
+        "chartHex": "#2D2F33",
+        "renderedHex": "#090402",
+        "transfer": [
+          1.7412658307581725,
+          2.2145448052505734,
+          2.3468341834551834
+        ]
+      },
+      {
+        "code": "CYC-0031",
+        "axes": {
+          "base_family": "ANTI_COPPER",
+          "surface": "CIRCLE_BRUSHED",
+          "tone": null,
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#23130F",
+        "renderedHex": "#020100",
+        "transfer": [
+          0.06356586042907593,
+          0.047574762311730016,
+          0
+        ]
+      },
+      {
+        "code": "CYC-0081",
+        "axes": {
+          "base_family": "ANTI_COPPER",
+          "surface": null,
+          "tone": null,
+          "effect": "STONE_WASH",
+          "tint": null
+        },
+        "chartHex": "#15110E",
+        "renderedHex": "#0E0602",
+        "transfer": [
+          1.4275018887710944,
+          1.7339126805088843,
+          1.8305306630950429
+        ]
+      }
+    ]
+  },
+  {
+    "family": "RED_COPPER",
+    "rows": 2,
+    "glareFallback": false,
+    "codes": [
+      "CYC-0075",
+      "CYC-0133"
+    ],
+    "measuredDeltaE": 4.7,
+    "chartMedianLab": [
+      16.27,
+      5.05,
+      6.38
+    ],
+    "renderedMedianLab": [
+      13.47,
+      7.94,
+      11.7
+    ],
+    "current": {
+      "saturation": 0.9,
+      "value": 0.058,
+      "offset": [
+        1,
+        1,
+        1
+      ]
+    },
+    "samples": [
+      {
+        "code": "CYC-0075",
+        "axes": {
+          "base_family": "RED_COPPER",
+          "surface": null,
+          "tone": null,
+          "effect": null,
+          "tint": "ORANGE"
+        },
+        "chartHex": "#352320",
+        "renderedHex": "#351F0E",
+        "transfer": [
+          0.9867899357426215,
+          1.1324493372231377,
+          1.2927956611537177
+        ]
+      },
+      {
+        "code": "CYC-0133",
+        "axes": {
+          "base_family": "RED_COPPER",
+          "surface": null,
+          "tone": null,
+          "effect": "OXIDE",
+          "tint": null
+        },
+        "chartHex": "#30281F",
+        "renderedHex": "#2E1D16",
+        "transfer": [
+          1.0227493535556202,
+          1.073332676095283,
+          1.1150188170039466
+        ]
+      }
+    ]
+  },
+  {
+    "family": "LIGHT_GOLD",
+    "rows": 7,
+    "glareFallback": false,
+    "codes": [
+      "CYC-0102",
+      "CYC-0022",
+      "CYC-0024",
+      "CYC-0023",
+      "CYC-0097",
+      "CYC-0016",
+      "CYC-0018"
+    ],
+    "measuredDeltaE": 5.81,
+    "chartMedianLab": [
+      25.33,
+      -0.42,
+      -0.14
+    ],
+    "renderedMedianLab": [
+      27.66,
+      -0.11,
+      6.11
+    ],
+    "current": {
+      "saturation": 0.4,
+      "value": 0.1242,
+      "offset": [
+        1,
+        1,
+        1
+      ]
+    },
+    "samples": [
+      {
+        "code": "CYC-0102",
+        "axes": {
+          "base_family": "LIGHT_GOLD",
+          "surface": null,
+          "tone": "IMT",
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#484949",
+        "renderedHex": "#454138",
+        "transfer": [
+          0.9293282349500239,
+          0.9268197040593008,
+          0.9336173461520216
+        ]
+      },
+      {
+        "code": "CYC-0022",
+        "axes": {
+          "base_family": "LIGHT_GOLD",
+          "surface": null,
+          "tone": "IMT",
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#151615",
+        "renderedHex": "#454138",
+        "transfer": [
+          0.9293282349500239,
+          0.9268197040593008,
+          0.9336173461520216
+        ]
+      },
+      {
+        "code": "CYC-0024",
+        "axes": {
+          "base_family": "LIGHT_GOLD",
+          "surface": "MATT",
+          "tone": "IMT",
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#3E3C36",
+        "renderedHex": "#2E2A20",
+        "transfer": [
+          0.5692156406620565,
+          0.5667407220637076,
+          0.5642320188374856
+        ]
+      },
+      {
+        "code": "CYC-0023",
+        "axes": {
+          "base_family": "LIGHT_GOLD",
+          "surface": "BRUSHED",
+          "tone": "IMT",
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#4D5356",
+        "renderedHex": "#0F0C04",
+        "transfer": [
+          0.16343516391512913,
+          0.16368420178787452,
+          0.16358236864629244
+        ]
+      },
+      {
+        "code": "CYC-0097",
+        "axes": {
+          "base_family": "LIGHT_GOLD",
+          "surface": null,
+          "tone": "LIGHT",
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#454B4D",
+        "renderedHex": "#4D4941",
+        "transfer": [
+          0.9204397763179933,
+          0.9182967588862206,
+          0.9314592226709876
+        ]
+      },
+      {
+        "code": "CYC-0016",
+        "axes": {
+          "base_family": "LIGHT_GOLD",
+          "surface": null,
+          "tone": "LIGHT",
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#111215",
+        "renderedHex": "#4D4941",
+        "transfer": [
+          0.9204397763179933,
+          0.9182967588862206,
+          0.9314592226709876
+        ]
+      },
+      {
+        "code": "CYC-0018",
+        "axes": {
+          "base_family": "LIGHT_GOLD",
+          "surface": "MATT",
+          "tone": "LIGHT",
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#2D2928",
+        "renderedHex": "#343027",
+        "transfer": [
+          0.5723972909807972,
+          0.5705097562304816,
+          0.5715020303800868
+        ]
+      }
+    ]
+  },
+  {
+    "family": "BLACK_COPPER",
+    "rows": 3,
+    "glareFallback": false,
+    "codes": [
+      "CYC-0045",
+      "CYC-0044",
+      "CYC-0135"
+    ],
+    "measuredDeltaE": 3.11,
+    "chartMedianLab": [
+      8.66,
+      -0.12,
+      -4.61
+    ],
+    "renderedMedianLab": [
+      9.84,
+      0.52,
+      -1.38
+    ],
+    "current": {
+      "saturation": 0,
+      "value": 0.0638,
+      "offset": [
+        1,
+        1,
+        1.05
+      ]
+    },
+    "samples": [
+      {
+        "code": "CYC-0045",
+        "axes": {
+          "base_family": "BLACK_COPPER",
+          "surface": null,
+          "tone": "IMT",
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#070C14",
+        "renderedHex": "#19191B",
+        "transfer": [
+          0.933632435800607,
+          0.933632435800607,
+          0.91710525713193
+        ]
+      },
+      {
+        "code": "CYC-0044",
+        "axes": {
+          "base_family": "BLACK_COPPER",
+          "surface": null,
+          "tone": null,
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#17191C",
+        "renderedHex": "#1B1B1D",
+        "transfer": [
+          0.9401186237338991,
+          0.9401186237338991,
+          0.9237105911134423
+        ]
+      },
+      {
+        "code": "CYC-0135",
+        "axes": {
+          "base_family": "BLACK_COPPER",
+          "surface": null,
+          "tone": null,
+          "effect": "SPECKLE",
+          "tint": null
+        },
+        "chartHex": "#0D1B25",
+        "renderedHex": "#1B1B1D",
+        "transfer": [
+          0.9401186237338991,
+          0.9401186237338991,
+          0.9237105911134423
+        ]
+      }
+    ]
+  },
+  {
+    "family": "ANTI_SILVER",
+    "rows": 2,
+    "glareFallback": false,
+    "codes": [
+      "CYC-0092",
+      "CYC-0091"
+    ],
+    "measuredDeltaE": 2.68,
+    "chartMedianLab": [
+      20.74,
+      0.01,
+      -0.68
+    ],
+    "renderedMedianLab": [
+      20.97,
+      -0.45,
+      1.99
+    ],
+    "current": {
+      "saturation": 1,
+      "value": 0.089,
+      "offset": [
+        1,
+        1,
+        1
+      ]
+    },
+    "samples": [
+      {
+        "code": "CYC-0092",
+        "axes": {
+          "base_family": "ANTI_SILVER",
+          "surface": null,
+          "tone": "IMT",
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#2A2B2A",
+        "renderedHex": "#32312D",
+        "transfer": [
+          0.8572542281206297,
+          0.8534002561099023,
+          0.8648744951266121
+        ]
+      },
+      {
+        "code": "CYC-0091",
+        "axes": {
+          "base_family": "ANTI_SILVER",
+          "surface": null,
+          "tone": null,
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#39393C",
+        "renderedHex": "#343432",
+        "transfer": [
+          0.8540437403489247,
+          0.8647192871032863,
+          0.8772375778772535
+        ]
+      }
+    ]
+  },
+  {
+    "family": "ALLOY",
+    "rows": 2,
+    "glareFallback": false,
+    "codes": [
+      "CYC-0088",
+      "CYC-0089"
+    ],
+    "measuredDeltaE": 5.65,
+    "chartMedianLab": [
+      11.35,
+      -0.04,
+      -3.13
+    ],
+    "renderedMedianLab": [
+      11.33,
+      -4.33,
+      -2.19
+    ],
+    "current": {
+      "saturation": 0.9,
+      "value": 0.0609,
+      "offset": [
+        1,
+        1,
+        1
+      ]
+    },
+    "samples": [
+      {
+        "code": "CYC-0088",
+        "axes": {
+          "base_family": "ALLOY",
+          "surface": null,
+          "tone": "MEDIUM",
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#25272A",
+        "renderedHex": "#131E1E",
+        "transfer": [
+          1.1188025275355176,
+          1.1074543529740934,
+          1.0767568192837815
+        ]
+      },
+      {
+        "code": "CYC-0089",
+        "axes": {
+          "base_family": "ALLOY",
+          "surface": null,
+          "tone": "DEEP",
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#13161B",
+        "renderedHex": "#182224",
+        "transfer": [
+          0.9275197256657605,
+          0.9020776916843871,
+          0.9090829385177356
+        ]
+      }
+    ]
+  },
+  {
+    "family": "TIN",
+    "rows": 3,
+    "glareFallback": false,
+    "codes": [
+      "CYC-0048",
+      "CYC-0046",
+      "CYC-0049"
+    ],
+    "measuredDeltaE": 4.54,
+    "chartMedianLab": [
+      17.81,
+      -0.36,
+      -1.37
+    ],
+    "renderedMedianLab": [
+      23.97,
+      0,
+      0
+    ],
+    "current": {
+      "saturation": 1,
+      "value": 0.1432,
+      "offset": [
+        1,
+        1,
+        1
+      ]
+    },
+    "samples": [
+      {
+        "code": "CYC-0048",
+        "axes": {
+          "base_family": "TIN",
+          "surface": null,
+          "tone": "ANTI",
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#2A2C2C",
+        "renderedHex": "#343434",
+        "transfer": [
+          0.8627096317223699,
+          0.8627096317223699,
+          0.8627096317223699
+        ]
+      },
+      {
+        "code": "CYC-0046",
+        "axes": {
+          "base_family": "TIN",
+          "surface": null,
+          "tone": null,
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#5A5C5E",
+        "renderedHex": "#393939",
+        "transfer": [
+          0.9417504295490363,
+          0.9417504295490363,
+          0.9417504295490363
+        ]
+      },
+      {
+        "code": "CYC-0049",
+        "axes": {
+          "base_family": "TIN",
+          "surface": null,
+          "tone": null,
+          "effect": "CONTRAST",
+          "tint": null
+        },
+        "chartHex": "#121315",
+        "renderedHex": "#393939",
+        "transfer": [
+          0.9417504295490363,
+          0.9417504295490363,
+          0.9417504295490363
+        ]
+      }
+    ]
+  },
+  {
+    "family": "BRASS",
+    "rows": 11,
+    "glareFallback": false,
+    "codes": [
+      "CYC-0051",
+      "CYC-0064",
+      "CYC-0065",
+      "CYC-0068",
+      "CYC-0010",
+      "CYC-0053",
+      "CYC-0012",
+      "CYC-0011",
+      "CYC-0134",
+      "CYC-0055",
+      "CYC-0054"
+    ],
+    "measuredDeltaE": 4.49,
+    "chartMedianLab": [
+      18.29,
+      -1.06,
+      -0.39
+    ],
+    "renderedMedianLab": [
+      20.47,
+      0.26,
+      3.67
+    ],
+    "current": {
+      "saturation": 0.25,
+      "value": 0.0934,
+      "offset": [
+        1,
+        1,
+        1
+      ]
+    },
+    "samples": [
+      {
+        "code": "CYC-0051",
+        "axes": {
+          "base_family": "BRASS",
+          "surface": null,
+          "tone": null,
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#2A2D30",
+        "renderedHex": "#34312C",
+        "transfer": [
+          0.9567511770613282,
+          0.9474498899900535,
+          0.9835025215376428
+        ]
+      },
+      {
+        "code": "CYC-0064",
+        "axes": {
+          "base_family": "BRASS",
+          "surface": null,
+          "tone": null,
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#424443",
+        "renderedHex": "#34312C",
+        "transfer": [
+          0.9567511770613282,
+          0.9474498899900535,
+          0.9835025215376428
+        ]
+      },
+      {
+        "code": "CYC-0065",
+        "axes": {
+          "base_family": "BRASS",
+          "surface": null,
+          "tone": null,
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#3A3D3D",
+        "renderedHex": "#34312C",
+        "transfer": [
+          0.9567511770613282,
+          0.9474498899900535,
+          0.9835025215376428
+        ]
+      },
+      {
+        "code": "CYC-0068",
+        "axes": {
+          "base_family": "BRASS",
+          "surface": null,
+          "tone": null,
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#493E3A",
+        "renderedHex": "#34312C",
+        "transfer": [
+          0.9567511770613282,
+          0.9474498899900535,
+          0.9835025215376428
+        ]
+      },
+      {
+        "code": "CYC-0010",
+        "axes": {
+          "base_family": "BRASS",
+          "surface": null,
+          "tone": null,
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#212628",
+        "renderedHex": "#34312C",
+        "transfer": [
+          0.9567511770613282,
+          0.9474498899900535,
+          0.9835025215376428
+        ]
+      },
+      {
+        "code": "CYC-0053",
+        "axes": {
+          "base_family": "BRASS",
+          "surface": "MATT",
+          "tone": null,
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#333537",
+        "renderedHex": "#211E17",
+        "transfer": [
+          0.5751756629145846,
+          0.5689606279030095,
+          0.5736293702038825
+        ]
+      },
+      {
+        "code": "CYC-0012",
+        "axes": {
+          "base_family": "BRASS",
+          "surface": "MATT",
+          "tone": null,
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#3E3E34",
+        "renderedHex": "#211E17",
+        "transfer": [
+          0.5751756629145846,
+          0.5689606279030095,
+          0.5736293702038825
+        ]
+      },
+      {
+        "code": "CYC-0011",
+        "axes": {
+          "base_family": "BRASS",
+          "surface": "BRUSHED",
+          "tone": null,
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#24251C",
+        "renderedHex": "#080602",
+        "transfer": [
+          0.15371125899014415,
+          0.1518813136163074,
+          0.1525765390110071
+        ]
+      },
+      {
+        "code": "CYC-0134",
+        "axes": {
+          "base_family": "BRASS",
+          "surface": null,
+          "tone": null,
+          "effect": "BLACK_COVER",
+          "tint": null
+        },
+        "chartHex": "#090D0D",
+        "renderedHex": "#34312C",
+        "transfer": [
+          0.9567511770613282,
+          0.9474498899900535,
+          0.9835025215376428
+        ]
+      },
+      {
+        "code": "CYC-0055",
+        "axes": {
+          "base_family": "BRASS",
+          "surface": null,
+          "tone": null,
+          "effect": "BLACK_COVER",
+          "tint": null
+        },
+        "chartHex": "#312B2D",
+        "renderedHex": "#34312C",
+        "transfer": [
+          0.9567511770613282,
+          0.9474498899900535,
+          0.9835025215376428
+        ]
+      },
+      {
+        "code": "CYC-0054",
+        "axes": {
+          "base_family": "BRASS",
+          "surface": null,
+          "tone": null,
+          "effect": "OXIDE",
+          "tint": null
+        },
+        "chartHex": "#17181B",
+        "renderedHex": "#34312C",
+        "transfer": [
+          0.9567511770613282,
+          0.9474498899900535,
+          0.9835025215376428
+        ]
+      }
+    ]
+  },
+  {
+    "family": "STAINLESS_STEEL",
+    "rows": 1,
+    "glareFallback": true,
+    "codes": [
+      "CYC-0086"
+    ],
+    "measuredDeltaE": 4.39,
+    "chartMedianLab": [
+      22.42,
+      1.33,
+      -0.94
+    ],
+    "renderedMedianLab": [
+      28.01,
+      0.22,
+      -0.61
+    ],
+    "current": {
+      "saturation": 1,
+      "value": 0.1816,
+      "offset": [
+        1,
+        1,
+        1
+      ]
+    },
+    "samples": [
+      {
+        "code": "CYC-0086",
+        "axes": {
+          "base_family": "STAINLESS_STEEL",
+          "surface": null,
+          "tone": null,
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#373537",
+        "renderedHex": "#424243",
+        "transfer": [
+          0.925739927830537,
+          0.9208244945854193,
+          0.9158164456046226
+        ]
+      }
+    ]
+  },
+  {
+    "family": "RUSTY_STEEL",
+    "rows": 1,
+    "glareFallback": false,
+    "codes": [
+      "CYC-0105"
+    ],
+    "measuredDeltaE": 1.63,
+    "chartMedianLab": [
+      4.96,
+      -0.3,
+      -1.38
+    ],
+    "renderedMedianLab": [
+      6.84,
+      0.49,
+      -1.33
+    ],
+    "current": {
+      "saturation": 1,
+      "value": 0.3064,
+      "offset": [
+        1,
+        1,
+        1
+      ]
+    },
+    "samples": [
+      {
+        "code": "CYC-0105",
+        "axes": {
+          "base_family": "RUSTY_STEEL",
+          "surface": null,
+          "tone": null,
+          "effect": null,
+          "tint": null
+        },
+        "chartHex": "#0F1113",
+        "renderedHex": "#151517",
+        "transfer": [
+          1.1168890024666622,
+          1.1115519409306465,
+          1.1226131562528414
+        ]
+      }
+    ]
+  }
+]
