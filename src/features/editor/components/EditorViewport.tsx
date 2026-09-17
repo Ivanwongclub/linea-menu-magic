@@ -6,7 +6,9 @@ import { Box } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { supabase } from "@/integrations/supabase/client";
-import { EditorModel } from "./EditorModel";
+import { EditorModel, type RulerMeasurements } from "./EditorModel";
+import { RulerOverlay } from "./RulerOverlay";
+import { RulerToggle } from "./RulerToggle";
 import type { EditorColour } from "../hooks/useEditorProduct";
 import type { PickerFinish } from "../hooks/useFinishOptions";
 import { GL_SETTINGS } from "../lib/renderSettings";
@@ -18,11 +20,15 @@ interface EditorViewportProps {
   scaleFactor: number | null;
   variantScale: number;
   sizePrimaryMm: number;
+  sizeLigne: number | null;
+  sizeLabel: string | null;
   isMetal: boolean;
   finish: PickerFinish | null;
   colour: EditorColour | null;
   productId: string;
   isCatalogueEditor: boolean;
+  ruler: boolean;
+  onRulerToggle: () => void;
 }
 
 function ViewportFallback() {
@@ -95,15 +101,20 @@ export function EditorViewport({
   scaleFactor,
   variantScale,
   sizePrimaryMm,
+  sizeLigne,
+  sizeLabel,
   isMetal,
   finish,
   colour,
   productId,
   isCatalogueEditor,
+  ruler,
+  onRulerToggle,
 }: EditorViewportProps) {
   const controlsRef = useRef<OrbitControlsImpl>(null);
   const [autoRotate, setAutoRotate] = useState(true);
   const [modelSizeMm, setModelSizeMm] = useState<number | null>(null);
+  const [rulerMeasurements, setRulerMeasurements] = useState<RulerMeasurements | null>(null);
 
   if (!modelStoragePath) {
     return <EmptyModelState />;
@@ -141,7 +152,9 @@ export function EditorViewport({
             colour={colour}
             controlsRef={controlsRef}
             onModelSizeMm={setModelSizeMm}
+            onRulerMeasurements={ruler ? setRulerMeasurements : undefined}
           />
+          {ruler && rulerMeasurements && <RulerOverlay measurements={rulerMeasurements} sizeLigne={sizeLigne} sizeLabel={sizeLabel} />}
           <OrbitControls
             ref={controlsRef}
             makeDefault
@@ -153,6 +166,7 @@ export function EditorViewport({
           />
         </Canvas>
       </Suspense>
+      <RulerToggle active={ruler} onToggle={onRulerToggle} />
     </div>
   );
 }

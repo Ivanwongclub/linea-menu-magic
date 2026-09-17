@@ -3,8 +3,9 @@
 // A metal product's "Change finish" sheet lists only its attached public
 // finishes (not every public finish); picking one updates
 // draft_recipe.finish_id (checked signed in, where autosave writes it
-// back); a non-metal product shows COLOUR instead; the measurement line is
-// present in both cases; no floating toolbar exists.
+// back); a non-metal product shows COLOUR instead; the ruler toggle is
+// present in both cases (collision 18 — replaces the old measurement line
+// assertion); no floating toolbar exists.
 //
 // The local seed (migrations only — see docs/3d-editor/STATUS.md's M4 note)
 // carries zero public finishes, zero product_finishes attachments and no
@@ -112,7 +113,7 @@ export default async function ({ page, base, admin, editor, h }) {
       .insert({ product_id: colourProduct.id, name: "E2E Seed Colour", hex: "#334455", sort_order: 0 });
     if (colourInsert.error) throw new Error(colourInsert.error.message);
 
-    // Seed: a size variant for each — the measurement line needs one, and
+    // Seed: a size variant for each — the ruler needs one, and
     // Phase 4b's buyer refusal needs a confirmed scale's reference variant.
     const sizeInsert = await admin
       .from("product_size_variants")
@@ -128,14 +129,14 @@ export default async function ({ page, base, admin, editor, h }) {
     await publish(admin, metalProduct, metalModelPath, metalVariantId);
     await publish(admin, colourProduct, colourModelPath, colourVariantId);
 
-    /* ---- metal product: FINISH group, attached-only picker, measurement line, no toolbar ---- */
+    /* ---- metal product: FINISH group, attached-only picker, ruler toggle, no toolbar ---- */
     await page.goto(`${base}/designer-studio/editor/new?product=${metalProduct.slug}`, { waitUntil: "networkidle" });
     await page.locator("canvas").first().waitFor({ timeout: 20000 });
     const panel = page.getByTestId("editor-panel");
     await panel.waitFor({ timeout: 10000 });
     assert.match(await panel.innerText(), /Finish/i);
     assert.equal(await page.getByTestId("viewport-toolbar").count(), 0, "no floating viewport toolbar");
-    assert.match(await page.locator("body").innerText(), /\d+(\.\d+)?\s*mm/, "measurement line is present");
+    assert.equal(await page.getByTestId("ruler-toggle").count(), 1, "ruler toggle is present (collision 18)");
 
     await page.getByRole("button", { name: /change finish/i }).click();
     const grid = page.locator('[data-testid="finish-swatch"]');
@@ -155,7 +156,7 @@ export default async function ({ page, base, admin, editor, h }) {
     assert.match(colourPanelText, /Colour/i);
     assert.doesNotMatch(colourPanelText, /^Finish$/m);
     assert.ok(await page.getByTestId("colour-swatch").first().count(), "colour swatches render");
-    assert.match(await page.locator("body").innerText(), /\d+(\.\d+)?\s*mm/, "measurement line is present");
+    assert.equal(await page.getByTestId("ruler-toggle").count(), 1, "ruler toggle is present (collision 18)");
 
     /* ---- signed in: selecting a finish updates draft_recipe.finish_id ---- */
     await admin.from("designs").delete().eq("product_id", metalProduct.id).eq("owner_id", editor.userId);

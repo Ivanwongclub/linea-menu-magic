@@ -12,7 +12,6 @@ import { useEditorStore } from "../store/useEditorStore";
 import { readAnonymousDraft, writeAnonymousDraft, clearAnonymousDraft } from "../lib/anonymousDraft";
 import { EditorShell } from "../components/EditorShell";
 import { EditorViewport } from "../components/EditorViewport";
-import { MeasurementLine } from "../components/MeasurementLine";
 import { EditorPanel } from "../components/EditorPanel";
 import { SignInBanner } from "../components/SignInBanner";
 
@@ -53,9 +52,11 @@ export function EditorNewPage({ productSlug }: { productSlug: string | null }) {
   const sizeVariantId = useEditorStore((s) => s.sizeVariantId);
   const finishId = useEditorStore((s) => s.finishId);
   const colourId = useEditorStore((s) => s.colourId);
+  const ruler = useEditorStore((s) => s.ruler);
   const setSizeVariantId = useEditorStore((s) => s.setSizeVariantId);
   const setColourId = useEditorStore((s) => s.setColourId);
   const setFinishId = useEditorStore((s) => s.setFinishId);
+  const setRuler = useEditorStore((s) => s.setRuler);
   const initialize = useEditorStore((s) => s.initialize);
 
   const initializedFor = useRef<string | null>(null);
@@ -69,13 +70,14 @@ export function EditorNewPage({ productSlug }: { productSlug: string | null }) {
       sizeVariantId: draft?.sizeVariantId ?? defaultSizeVariantId(product),
       finishId: draft?.finishId ?? product.default_finish_id,
       colourId: draft?.colourId ?? defaultColourId(product),
+      ruler: draft?.ruler ?? false,
     });
   }, [product, initialize]);
 
   useEffect(() => {
     if (session || !product) return;
-    writeAnonymousDraft({ productSlug: product.slug, sizeVariantId, finishId, colourId });
-  }, [session, product, sizeVariantId, finishId, colourId]);
+    writeAnonymousDraft({ productSlug: product.slug, sizeVariantId, finishId, colourId, ruler });
+  }, [session, product, sizeVariantId, finishId, colourId, ruler]);
 
   useEffect(() => {
     if (!session || !user || !product || authLoading || staffLoading || createStarted.current) return;
@@ -98,6 +100,7 @@ export function EditorNewPage({ productSlug }: { productSlug: string | null }) {
           size_variant_id: draft?.sizeVariantId ?? defaultSizeVariantId(product),
           finish_id: draft?.finishId ?? product.default_finish_id,
           colour_id: draft?.colourId ?? defaultColourId(product),
+          view: { ruler: draft?.ruler ?? false },
         },
       })
       .select("id")
@@ -171,22 +174,16 @@ export function EditorNewPage({ productSlug }: { productSlug: string | null }) {
           scaleFactor={product.model_scale_factor}
           variantScale={variantScale}
           sizePrimaryMm={selectedSize?.size_primary_mm ?? 0}
+          sizeLigne={selectedSize?.size_ligne ?? null}
+          sizeLabel={selectedSize?.size_label ?? null}
           isMetal={product.is_metal}
           finish={selectedFinish}
           colour={selectedColour}
           productId={product.id}
           isCatalogueEditor={isCatalogueEditor}
+          ruler={ruler}
+          onRulerToggle={() => setRuler(!ruler)}
         />
-      }
-      measurement={
-        selectedSize ? (
-          <MeasurementLine
-            productName={product.name}
-            sizePrimaryMm={selectedSize.size_primary_mm}
-            sizeLigne={selectedSize.size_ligne}
-            sizeLabel={selectedSize.size_label}
-          />
-        ) : undefined
       }
       panel={
         <EditorPanel

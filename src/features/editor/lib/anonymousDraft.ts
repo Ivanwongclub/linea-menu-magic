@@ -5,6 +5,8 @@ export interface AnonymousDraft {
   sizeVariantId: string | null;
   finishId: string | null;
   colourId: string | null;
+  /** Off by default; carried through the claim on sign-in (Phase 4e R1). */
+  ruler?: boolean;
 }
 
 /** Per-viewer convenience only — never read back by anything but this browser. */

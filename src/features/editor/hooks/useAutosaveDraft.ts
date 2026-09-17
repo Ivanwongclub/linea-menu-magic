@@ -7,6 +7,8 @@ export interface DraftRecipe {
   size_variant_id: string | null;
   finish_id: string | null;
   colour_id: string | null;
+  /** `view.ruler` (Phase 4e R1) — off by default; absent on a pre-4e row reads as off. */
+  view?: { ruler: boolean };
 }
 
 const DEBOUNCE_MS = 2000;

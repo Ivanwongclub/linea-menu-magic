@@ -11,13 +11,12 @@ import { useCatalogueEditorStatus } from "@/features/admin/hooks/useCatalogueEdi
 import { useEditorStore } from "../store/useEditorStore";
 import { EditorShell } from "../components/EditorShell";
 import { EditorViewport } from "../components/EditorViewport";
-import { MeasurementLine } from "../components/MeasurementLine";
 import { EditorPanel } from "../components/EditorPanel";
 
 interface DesignRow {
   id: string;
   product_id: string | null;
-  draft_recipe: { size_variant_id?: string; finish_id?: string; colour_id?: string } | null;
+  draft_recipe: { size_variant_id?: string; finish_id?: string; colour_id?: string; view?: { ruler?: boolean } } | null;
 }
 
 async function fetchDesign(designId: string): Promise<DesignRow | null> {
@@ -57,9 +56,11 @@ export function EditorDesignPage({ designId }: { designId: string }) {
   const sizeVariantId = useEditorStore((s) => s.sizeVariantId);
   const finishId = useEditorStore((s) => s.finishId);
   const colourId = useEditorStore((s) => s.colourId);
+  const ruler = useEditorStore((s) => s.ruler);
   const setSizeVariantId = useEditorStore((s) => s.setSizeVariantId);
   const setFinishId = useEditorStore((s) => s.setFinishId);
   const setColourId = useEditorStore((s) => s.setColourId);
+  const setRuler = useEditorStore((s) => s.setRuler);
   const initialize = useEditorStore((s) => s.initialize);
 
   useEffect(() => {
@@ -69,6 +70,7 @@ export function EditorDesignPage({ designId }: { designId: string }) {
       sizeVariantId: recipe.size_variant_id ?? product.size_variants.find((v) => v.is_default)?.id ?? product.size_variants[0]?.id ?? null,
       finishId: recipe.finish_id ?? product.default_finish_id,
       colourId: recipe.colour_id ?? product.colours[0]?.id ?? null,
+      ruler: recipe.view?.ruler ?? false,
     });
     // Read once at load; re-running on every field change would stomp the
     // buyer's in-progress local selections.
@@ -79,6 +81,7 @@ export function EditorDesignPage({ designId }: { designId: string }) {
     size_variant_id: sizeVariantId,
     finish_id: finishId,
     colour_id: colourId,
+    view: { ruler },
   });
 
   if (authLoading) {
@@ -122,22 +125,16 @@ export function EditorDesignPage({ designId }: { designId: string }) {
           scaleFactor={product.model_scale_factor}
           variantScale={variantScale}
           sizePrimaryMm={selectedSize?.size_primary_mm ?? 0}
+          sizeLigne={selectedSize?.size_ligne ?? null}
+          sizeLabel={selectedSize?.size_label ?? null}
           isMetal={product.is_metal}
           finish={selectedFinish}
           colour={selectedColour}
           productId={product.id}
           isCatalogueEditor={isCatalogueEditor}
+          ruler={ruler}
+          onRulerToggle={() => setRuler(!ruler)}
         />
-      }
-      measurement={
-        selectedSize ? (
-          <MeasurementLine
-            productName={product.name}
-            sizePrimaryMm={selectedSize.size_primary_mm}
-            sizeLigne={selectedSize.size_ligne}
-            sizeLabel={selectedSize.size_label}
-          />
-        ) : undefined
       }
       panel={
         <EditorPanel

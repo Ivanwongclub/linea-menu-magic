@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
-import { parseObjFileRawBounds, type ModelRawBounds } from "@/features/admin/lib/objBounds";
+import { parseObjFileRawBounds, parseObjRawBounds, type ModelRawBounds } from "@/features/admin/lib/objBounds";
 import type { BrandingMark, BrandingReference } from "@/features/admin/lib/brandingRecovery";
 
 const BUCKET = "product-models";
@@ -218,7 +218,25 @@ export function useProductModelScale(productId: string) {
     onSuccess: () => invalidate(queryClient, productId),
   });
 
-  return { scale, variants, confirmUnitScale, calibrateKnownDimension, calibrateTwoPoint, markUnconfirmed };
+  /**
+   * Phase 4e R3: a product uploaded before 4a has `model_storage_path` but
+   * no `model_raw_bounds` (never parsed). Downloads the already-stored file
+   * and parses it in place — no re-upload, so it never touches
+   * `model_storage_path` and never trips `products_reset_model_scale`.
+   */
+  const measureExistingFile = useMutation({
+    mutationFn: async (path: string) => {
+      const { data, error: downloadError } = await supabase.storage.from(BUCKET).download(path);
+      if (downloadError) throw downloadError;
+      const rawBounds = parseObjRawBounds(await data.text());
+      const { error } = await supabase.from("products").update({ model_raw_bounds: rawBounds }).eq("id", productId);
+      if (error) throw error;
+      return rawBounds;
+    },
+    onSuccess: () => invalidate(queryClient, productId),
+  });
+
+  return { scale, variants, confirmUnitScale, calibrateKnownDimension, calibrateTwoPoint, markUnconfirmed, measureExistingFile };
 }
 
 export interface ProductBranding {

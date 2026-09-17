@@ -11,6 +11,11 @@
 //      band, shown at full precision (≈ 0.720193) → Calibrate by known
 //      dimension, 10.8 → read-back: confirmed / factor 0.720193 ± 1e-6 /
 //      method known_dimension / reference variant the 10.8 mm row.
+//   4. Phase 4e R3: a product uploaded before 4a has a storage path but no
+//      `model_raw_bounds` — simulated here by nulling it directly (not via
+//      re-upload, which would just re-run 4a's own parse). "Measure file"
+//      appears only then; clicking it parses the already-stored file in
+//      place (no re-upload) and the scale panel appears.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { POLO_OBJ } from "../lib/calibration.mjs";
@@ -120,10 +125,37 @@ export default async function ({ page, admin, editor, h }) {
       `factor ${afterCalibrate.model_scale_factor} should be 0.720193 ± 1e-6`,
     );
 
+    /* ---- 4. pre-4a upload (raw bounds null) → Measure file, no re-upload ---- */
+    const pathBeforeMeasure = afterCalibrate.model_storage_path;
+    const preExisting = await admin
+      .from("products")
+      .update({ model_raw_bounds: null, model_scale_status: "unconfirmed", model_scale_factor: null, model_scale_method: null })
+      .eq("id", product.id);
+    if (preExisting.error) throw new Error(preExisting.error.message);
+
+    await h.openProduct(product.id);
+    assert.equal(await page.getByTestId("model-scale-panel").count(), 0, "no scale panel while raw bounds are null (no placeholder either)");
+    const measureButton = page.getByTestId("model-measure-file");
+    await measureButton.waitFor({ timeout: 10000 });
+    await measureButton.click();
+    await h.waitForToast(/Raw dimensions read/i);
+
+    const afterMeasure = await readProduct();
+    assert.equal(afterMeasure.model_storage_path, pathBeforeMeasure, "measuring never re-uploads the file");
+    assert.ok(afterMeasure.model_raw_bounds, "raw bounds parsed from the stored file");
+    assert.ok(
+      Math.abs(afterMeasure.model_raw_bounds.primary_raw - PRIMARY_RAW) < 1e-3,
+      "raw primary dimension parsed from the stored file matches the Polo's",
+    );
+
+    await page.getByTestId("model-scale-panel").waitFor({ timeout: 10000 });
+    assert.equal(await page.getByTestId("model-measure-file").count(), 0, "the action disappears once bounds exist");
+
     return {
       afterConfirm: { status: afterConfirm.model_scale_status, factor: Number(afterConfirm.model_scale_factor), method: afterConfirm.model_scale_method },
       afterReplace: { status: afterReplace.model_scale_status, factor: afterReplace.model_scale_factor, groups: afterReplace.model_branding_groups },
       afterCalibrate: { status: afterCalibrate.model_scale_status, factor: Number(afterCalibrate.model_scale_factor), method: afterCalibrate.model_scale_method },
+      afterMeasure: { primaryRaw: afterMeasure.model_raw_bounds.primary_raw, pathUnchanged: afterMeasure.model_storage_path === pathBeforeMeasure },
     };
   } finally {
     await cleanup();

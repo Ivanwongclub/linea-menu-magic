@@ -40,7 +40,7 @@ const METHOD_KEY: Record<ScaleMethod, string> = {
 export function ProductModelEditor({ productId, modelStoragePath }: { productId: string; modelStoragePath: string | null }) {
   const { t } = useI18n();
   const { upload, remove } = useProductModel(productId);
-  const { scale, variants, confirmUnitScale, calibrateKnownDimension, calibrateTwoPoint, markUnconfirmed } = useProductModelScale(productId);
+  const { scale, variants, confirmUnitScale, calibrateKnownDimension, calibrateTwoPoint, markUnconfirmed, measureExistingFile } = useProductModelScale(productId);
   const inputRef = useRef<HTMLInputElement>(null);
   const busy = upload.isPending || remove.isPending;
 
@@ -117,6 +117,24 @@ export function ProductModelEditor({ productId, modelStoragePath }: { productId:
             <span className="text-sm text-foreground truncate font-mono">{modelStoragePath.split("/").pop()}</span>
           </div>
           <div className="flex items-center gap-1 shrink-0">
+            {!scale.isLoading && !rawBounds && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs"
+                disabled={measureExistingFile.isPending}
+                data-testid="model-measure-file"
+                onClick={() =>
+                  measureExistingFile.mutate(modelStoragePath, {
+                    onSuccess: () => toast.success(t("admin.model.scale.measured")),
+                    onError,
+                  })
+                }
+              >
+                {measureExistingFile.isPending && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                {t("admin.model.scale.measureFile")}
+              </Button>
+            )}
             <Button variant="ghost" size="sm" className="h-7 text-xs" disabled={busy} onClick={() => inputRef.current?.click()}>
               Replace
             </Button>

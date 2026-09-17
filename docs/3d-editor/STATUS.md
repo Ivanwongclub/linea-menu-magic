@@ -18,7 +18,7 @@ this is an index, not a decision log.
 | 4b | Editor uses stored factor (force-rescale removed, §1.3); buyer refusal for unconfirmed scale (§1.2); e2e staging confirmed | **Done** |
 | 4c | CMS model preview; two-point calibration | **Done** |
 | 4d | CMS branding group marks; recovered radius / angles / relief stored in raw units (§4.2) | **Done** |
-| 4e | Ruler toggle, buyer scope, replaces the measurement line (§2) | Not started |
+| 4e | Ruler toggle, buyer scope, replaces the measurement line (§2) | **Done** |
 | 4f | Recipe v2, store / autosave / anonymous draft for layers; add text, layer list, straight layout | Not started |
 | 4g | Circular layout, per-glyph placement, reversed text without mirroring (§5) | Not started |
 | 4h | Hybrid numeric / slider controls in "Position and curve" (§3) | Not started |
@@ -1287,3 +1287,133 @@ R1–R7 are given in the 4d task; recorded here as implemented:
    picking. *Recommend* adding viewport click-to-mark in Phase 11's scene
    tree, where selection gets its own mode, rather than overloading the CMS
    preview's click now.
+
+### Phase 4e rulings on the above (2026-09-18)
+
+Given directly in the 4e task, closing this phase's three open questions:
+
+- **Q1 ruled: relief is per addendum §14 (surface to surface), 0.30 on the
+  Polo.** E1's 0.5 ± 0.1 is corrected to that definition; `cms-branding-marks.mjs`
+  keeps asserting 0.30 ± 0.1.
+- **R2's per-glyph radial scoring is ratified** as the text-path fit model —
+  not a local interpretation pending confirmation.
+- **Q2 ruled: one reference per product, not one per arc.** When Phase 4j
+  needs a default and the marked groups don't share one reading direction (the
+  Polo's top/bottom mix), it defaults to clockwise and the largest angular
+  cluster, rather than this phase splitting into separate top/bottom
+  references. No schema change follows from this — `model_branding_reference`
+  stays singular.
+- **Q3 ruled: click-to-mark is deferred to Phase 11.** The CMS group list
+  stays the only way to mark groups through this phase.
+
+## Phase 4e — done (2026-09-18)
+
+Ruler toggle (buyer scope) and "Measure file" (CMS), per
+reports/E1-plan-integration.md §5 row 4e, collisions 16–19, C4, C5.
+
+Files:
+
+- `src/features/editor/components/MeasurementLine.tsx` — **deleted**
+  (collision 16); its content (`tradeLigne`, R3 label suppression) moves into
+  the ruler overlay's diameter label, unchanged.
+- `src/features/editor/components/EditorShell.tsx` — the `measurement` slot
+  is gone; the shell is `banner` / `viewport` / `panel` only.
+- `src/features/editor/components/RulerToggle.tsx` (new) — the one corner
+  control (collision 17: a single tool, not a toolbar), off by default, in
+  the viewport, never the panel.
+- `src/features/editor/components/RulerOverlay.tsx` (new) — diameter (the
+  larger in-face axis, with the ligne suffix per the trade-size rule) and
+  thickness, from `EditorModel`'s own model-local bounds × factor ×
+  variantScale (C4) — never a fresh `Box3` on the attached scene. Lines are
+  drei's `Line` (`Line2`/`LineMaterial`, screen-space pixel width by default)
+  with small end-tick marks; labels are drei's `Html` (CSS px, real DOM — so
+  already outside any WebGL raycast/bake/export by construction). The whole
+  group and its `Line2` children go on render layer 1: the main camera
+  enables layer 1 so it's visible, but `ContactShadows`' own orthographic
+  shadow camera and the default `Raycaster` both stay on layer 0 by
+  three.js's own default, excluding the ruler from both (C5) without extra
+  plumbing. Line children get a no-op `raycast` as a second guard. Never
+  geometry — nothing here is added to the measured model.
+- `src/features/editor/components/EditorModel.tsx` — new
+  `onRulerMeasurements` callback (diameter, thickness, min/max per axis in
+  mm) fired from the same `bounds` the camera-framing effect already
+  computes; `onModelSizeMm` (Phase 4b) is unchanged.
+- `src/features/editor/components/EditorViewport.tsx` — owns
+  `RulerMeasurements` state, mounts `RulerOverlay` only while `ruler` is true
+  and measurements have arrived, renders `RulerToggle` unconditionally
+  wherever the canvas renders.
+- `src/features/editor/store/useEditorStore.ts` — `ruler: boolean` + `setRuler`,
+  included in `initialize`.
+- `src/features/editor/lib/anonymousDraft.ts` — `AnonymousDraft.ruler`.
+- `src/features/editor/hooks/useAutosaveDraft.ts` — `DraftRecipe.view?.ruler`;
+  an absent `view` (every pre-4e row) reads as off.
+- `src/features/editor/pages/EditorNewPage.tsx` / `EditorDesignPage.tsx` —
+  read `ruler` from the anonymous draft / `draft_recipe.view.ruler` on load,
+  write it on every change (anonymous: sessionStorage; signed-in: autosave),
+  and the signed-in claim writes `view: { ruler }` from the anonymous draft
+  into the new design's `draft_recipe` at creation.
+- `src/features/i18n/translations.ts` — `editor.ruler.toggle`, × 3 locales.
+- `src/features/admin/hooks/useProductModel.ts` — `measureExistingFile`
+  (Phase 4e R3): downloads the already-stored `.obj` and parses it in place
+  with `objBounds.ts`, writing `model_raw_bounds` without touching
+  `model_storage_path` — so it never trips `products_reset_model_scale`.
+- `src/components/admin/product-editor/ProductModelEditor.tsx` — "Measure
+  file" beside Replace/Remove, shown only when a model exists and
+  `model_raw_bounds` is null (no placeholder otherwise); once it succeeds the
+  existing scale panel appears unchanged.
+- `src/features/i18n/adminTranslations.ts` — `admin.model.scale.measureFile` /
+  `.measured`, × 3 locales.
+- `scripts/e2e-local/lib/calibration.mjs` — `subjectBox` excludes the
+  bottom-right 15% corner of the screenshot before scanning for non-background
+  pixels (see Q1 below).
+- `scripts/e2e-local/scenarios/ruler-buyer.mjs` (new) — every read-back E1
+  lists.
+- `scripts/e2e-local/scenarios/finish-picker.mjs` — the two
+  `/\d+(\.\d+)?\s*mm/` body-text assertions (collision 18, now vacuous) are
+  replaced with `ruler-toggle` presence checks; its staging's two-write split
+  (path, then scale) is unchanged from 4b.
+- `scripts/e2e-local/scenarios/cms-model-scale.mjs` — a fourth case: null out
+  `model_raw_bounds` directly (simulating a pre-4a upload) → no scale panel →
+  "Measure file" → read-back bounds parsed, `model_storage_path` unchanged.
+- `docs/3d-editor/STATUS.md` — this file.
+
+### Rulings
+
+R1–R5 are given directly in the 4e task; recorded here as implemented. R6's
+4d corrections are recorded above, in Phase 4d's own section.
+
+- **Diameter axis.** `RulerOverlay` draws the diameter line along whichever
+  in-face axis (`x` or `y`) is actually larger, matching `diameterMm =
+  max(sizeX, sizeY)` — for a round part the two are equal in practice, but
+  the line and the label always describe the same measurement.
+- **Layers, not conditional rendering, keep the ruler out of bakes/raycasts.**
+  Three.js's own defaults (camera, `Raycaster`, and any freshly constructed
+  camera such as `ContactShadows`' shadow camera, all start on layer 0 only)
+  do the exclusion; the ruler group only needs to opt itself onto layer 1 and
+  the main camera to opt into seeing it.
+
+### Open questions from this phase, with a recommendation each
+
+1. **A permanent corner UI element breaks canvas-screenshot calibration.**
+   The ruler toggle is the second time a viewport overlay has leaked into a
+   `canvas.screenshot()` (the first was a toast, in `cms-two-point.mjs`,
+   Phase 4c) — a `canvas` element screenshot composites whatever is drawn on
+   top of it on the page, DOM or WebGL. `subjectBox`'s new corner exclusion
+   fixes today's case (`render-calibration.mjs`, `family-calibration.mjs`)
+   but is specific to where this one button sits. *Recommend* that any future
+   permanent viewport chrome (Phase 4h/4i's controls, Phase 11's toolbar)
+   check against the calibration suite before landing, since nothing
+   currently guards this class of regression generically.
+2. **"Canvas mesh count unchanged" was proven indirectly.** No hook exists to
+   count meshes in the live R3F scene from Playwright; `ruler-buyer.mjs`
+   instead asserts `data-model-size-mm` (derived from `EditorModel`'s own
+   mesh bounds) is bit-identical with the ruler on and off. *Recommend*
+   accepting this as sufficient — the ruler's only three.js objects are
+   `Line2` instances added as siblings of, never children of, the measured
+   model, so there is no code path by which they could change its mesh
+   count — rather than adding a scene-introspection hook solely for this
+   assertion.
+3. **Ruler settings (spec §19–21: scope, mode, precision, extension-line
+   toggles) are not implemented.** E1 §5 row 4e scopes this to diameter and
+   thickness only. *Recommend* treating the fuller settings panel as Phase 11
+   scope, alongside the rest of that phase's full ruler.

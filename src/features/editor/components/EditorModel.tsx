@@ -30,6 +30,19 @@ interface EditorModelProps {
   controlsRef: RefObject<OrbitControlsImpl>;
   /** Reports the rendered primary dimension in mm, for the viewport's `data-model-size-mm`. */
   onModelSizeMm?: (mm: number) => void;
+  /** Reports the model-local bounds (already × factor × variantScale, i.e. in mm) for the ruler (Phase 4e, C4). */
+  onRulerMeasurements?: (measurements: RulerMeasurements) => void;
+}
+
+export interface RulerMeasurements {
+  diameterMm: number;
+  thicknessMm: number;
+  minX: number;
+  maxX: number;
+  minY: number;
+  maxY: number;
+  minZ: number;
+  maxZ: number;
 }
 
 /**
@@ -48,7 +61,18 @@ function anisotropyRotationForSurface(_surfaceCode: string | undefined): number 
  * antique finish (`two_tone`) mixes buffed metal and oxide by baked occlusion.
  * A non-metal product renders its colour as a plain dielectric.
  */
-export function EditorModel({ url, scaleFactor, variantScale, sizePrimaryMm, isMetal, finish, colour, controlsRef, onModelSizeMm }: EditorModelProps) {
+export function EditorModel({
+  url,
+  scaleFactor,
+  variantScale,
+  sizePrimaryMm,
+  isMetal,
+  finish,
+  colour,
+  controlsRef,
+  onModelSizeMm,
+  onRulerMeasurements,
+}: EditorModelProps) {
   const obj = useLoader(OBJLoader, url);
   const { camera, size: viewport } = useThree();
 
@@ -123,7 +147,28 @@ export function EditorModel({ url, scaleFactor, variantScale, sizePrimaryMm, isM
     });
   }, [model, material]);
 
+  // C4: local-model bounds only (never the world-space, camera-attached
+  // scene) — `model` has its own calibrated scale/orientation baked in and
+  // no ancestor transform yet, so this is the same union of local mesh
+  // bounds × factor × variantScale the ruling asks for, already in mm.
+  // Camera rotation never touches it (spec §22): the camera is never an
+  // ancestor of `model` when this runs.
   const bounds = useMemo(() => new THREE.Box3().setFromObject(model), [model]);
+
+  useEffect(() => {
+    if (!onRulerMeasurements) return;
+    const size = bounds.getSize(new THREE.Vector3());
+    onRulerMeasurements({
+      diameterMm: Math.max(size.x, size.y),
+      thicknessMm: size.z,
+      minX: bounds.min.x,
+      maxX: bounds.max.x,
+      minY: bounds.min.y,
+      maxY: bounds.max.y,
+      minZ: bounds.min.z,
+      maxZ: bounds.max.z,
+    });
+  }, [bounds, onRulerMeasurements]);
 
   // Frame on load (R1, Phase 3): three-quarter view, distance solved so the
   // projected bounding box fills TARGET_VIEWPORT_FILL of the limiting

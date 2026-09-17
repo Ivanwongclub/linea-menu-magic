@@ -444,6 +444,8 @@ export const adminTranslations: Record<AppLanguage, Record<string, string>> = {
     "admin.model.scale.methodKnownDimension": "known-dimension calibration",
     "admin.model.scale.methodTwoPoint": "two-point calibration",
     "admin.model.scale.noVariants": "Add a size variant to confirm this model's scale.",
+    "admin.model.scale.measureFile": "Measure file",
+    "admin.model.scale.measured": "Raw dimensions read from the stored file.",
 
     // model scale — CMS preview and two-point calibration (Phase 4c)
     "admin.model.scale.showPreview": "Show 3D preview",
@@ -903,6 +905,8 @@ export const adminTranslations: Record<AppLanguage, Record<string, string>> = {
     "admin.model.scale.methodKnownDimension": "已知尺寸校準",
     "admin.model.scale.methodTwoPoint": "兩點校準",
     "admin.model.scale.noVariants": "請先新增尺寸版本，才能確認此模型的比例。",
+    "admin.model.scale.measureFile": "量測檔案",
+    "admin.model.scale.measured": "已從已儲存的檔案讀取原始尺寸。",
 
     "admin.model.scale.showPreview": "顯示 3D 預覽",
     "admin.model.scale.hidePreview": "隱藏 3D 預覽",
@@ -1360,6 +1364,8 @@ export const adminTranslations: Record<AppLanguage, Record<string, string>> = {
     "admin.model.scale.methodKnownDimension": "已知尺寸校准",
     "admin.model.scale.methodTwoPoint": "两点校准",
     "admin.model.scale.noVariants": "请先添加尺寸版本，才能确认此模型的比例。",
+    "admin.model.scale.measureFile": "测量文件",
+    "admin.model.scale.measured": "已从已保存的文件读取原始尺寸。",
 
     "admin.model.scale.showPreview": "显示 3D 预览",
     "admin.model.scale.hidePreview": "隐藏 3D 预览",
