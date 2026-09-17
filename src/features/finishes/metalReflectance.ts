@@ -3,6 +3,7 @@
  *
  * The database is the source of truth — `finish_plated_material()` in
  * supabase/migrations/20260917230000_phase3d_hue_only_calibration.sql
+ * (values: 20260918090000_phase3e_chroma_gated_calibration.sql)
  * — and this module mirrors it so the numbers are readable in one place and
  * `render-calibration.mjs` can assert the two agree row for row. Change both
  * together; FAMILY_CALIBRATION must equal the `finish_family_calibration` seed.
@@ -85,14 +86,15 @@ export const OFFSETS: Record<string, LinearRGB> = {
 };
 
 /**
- * Per-family calibration (Phase 3d, superseding 3c's saturation/value fit).
+ * Per-family calibration (Phase 3d, superseding 3c's saturation/value fit;
+ * 3e: hue fitted only where the chart's median C* ≥ 7, otherwise physical).
  *
  *   hue_shift  degrees added to the CIELAB hue angle of the linear base
  *              colour (D65). L* is untouched, so the metal's reflectance —
  *              and its lightness under the studio — stays physical (R1).
- *   chroma_scale ≤ 1: chroma is never raised (R1). Below 1 only where a
- *              stated studio target needs it; a rotation that leaves the
- *              sRGB gamut is also pulled back by reducing chroma only.
+ *   chroma_scale ≤ 1: chroma is never raised (R1); 1 for every family since
+ *              3e. A rotation that leaves the sRGB gamut is pulled back by
+ *              reducing chroma only.
  *   value      a linear scale before the rotation. 1 for every family except
  *              TIN, whose brightness is 3c's chart-derived reference (R4).
  *   oxide_l    two-tone rows: the oxide layer's L*, from the chart, floored at
@@ -109,22 +111,22 @@ export const OXIDE_L_FLOOR = 15;
 /** 3c's oxide: buffed base × this, used where a family has no chart oxide L*. */
 export const OXIDE_FACTOR = 0.25;
 
-/** Fitted per family (Phase 3d) — see STATUS.md for rows used and residuals. */
+/** Per family (Phase 3d, chroma-gated in 3e) — see STATUS.md for which families are fitted. */
 /* BEGIN FAMILY_CALIBRATION (generated from the fit) */
 export const FAMILY_CALIBRATION: Record<string, FamilyCalibration> = {
-  ALLOY: { hue_shift: 58.25, chroma_scale: 1, value: 1, oxide_l: 15 },
-  ANTI_BRASS: { hue_shift: 23, chroma_scale: 1, value: 1, oxide_l: 15 },
-  ANTI_COPPER: { hue_shift: -25.25, chroma_scale: 1, value: 1, oxide_l: 15 },
-  ANTI_SILVER: { hue_shift: 172, chroma_scale: 1, value: 1, oxide_l: 20.74 },
-  BLACK_COPPER: { hue_shift: -139.75, chroma_scale: 1, value: 1, oxide_l: 15 },
-  BRASS: { hue_shift: 15.25, chroma_scale: 1, value: 1, oxide_l: null },
-  GOLD: { hue_shift: 26.25, chroma_scale: 1, value: 1, oxide_l: 15 },
-  GUN_METAL: { hue_shift: -2.5, chroma_scale: 1, value: 1, oxide_l: 15 },
-  LIGHT_GOLD: { hue_shift: 16, chroma_scale: 1, value: 1, oxide_l: null },
-  NICKEL: { hue_shift: -166.5, chroma_scale: 0.35, value: 1, oxide_l: 15 },
+  ALLOY: { hue_shift: 0, chroma_scale: 1, value: 1, oxide_l: 15 },
+  ANTI_BRASS: { hue_shift: 0, chroma_scale: 1, value: 1, oxide_l: 15 },
+  ANTI_COPPER: { hue_shift: -12.5, chroma_scale: 1, value: 1, oxide_l: 15 },
+  ANTI_SILVER: { hue_shift: 0, chroma_scale: 1, value: 1, oxide_l: 20.74 },
+  BLACK_COPPER: { hue_shift: 0, chroma_scale: 1, value: 1, oxide_l: 15 },
+  BRASS: { hue_shift: 0, chroma_scale: 1, value: 1, oxide_l: null },
+  GOLD: { hue_shift: 0, chroma_scale: 1, value: 1, oxide_l: 15 },
+  GUN_METAL: { hue_shift: 0, chroma_scale: 1, value: 1, oxide_l: 15 },
+  LIGHT_GOLD: { hue_shift: 0, chroma_scale: 1, value: 1, oxide_l: null },
+  NICKEL: { hue_shift: 0, chroma_scale: 1, value: 1, oxide_l: 15 },
   RED_COPPER: { hue_shift: -1.5, chroma_scale: 1, value: 1, oxide_l: null },
-  ROSE_GOLD: { hue_shift: -87.5, chroma_scale: 1, value: 1, oxide_l: null },
-  RUSTY_STEEL: { hue_shift: -14.75, chroma_scale: 1, value: 1, oxide_l: null },
+  ROSE_GOLD: { hue_shift: 0, chroma_scale: 1, value: 1, oxide_l: null },
+  RUSTY_STEEL: { hue_shift: 0, chroma_scale: 1, value: 1, oxide_l: null },
   STAINLESS_STEEL: { hue_shift: 0, chroma_scale: 1, value: 1, oxide_l: null },
   TIN: { hue_shift: 0, chroma_scale: 1, value: 0.1432, oxide_l: 17.81 },
 };

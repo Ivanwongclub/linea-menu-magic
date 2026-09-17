@@ -1,19 +1,21 @@
 import * as THREE from "three";
 
 /**
- * Antique two-tone (Phase 3c R2). High points are buffed metal — the
- * finish's own base colour and roughness — and recesses are oxide: the same
- * base × OXIDE_FACTOR at OXIDE_ROUGHNESS, mixed per fragment by the baked
- * `occlusion` attribute (lib/ambientOcclusion.ts). A mesh without the
- * attribute reads occlusion 0, i.e. buffed everywhere.
+ * Antique two-tone (Phase 3c R2, oxide colour 3e R2). High points are buffed
+ * metal — the finish's own base colour and roughness — and recesses are oxide:
+ * the row's `oxide_color_hex` (chart L*, derived in the database) at
+ * OXIDE_ROUGHNESS, mixed per fragment by the baked `occlusion` attribute
+ * (lib/ambientOcclusion.ts). A mesh without the attribute reads occlusion 0,
+ * i.e. buffed everywhere. A row without an oxide colour falls back to
+ * base × OXIDE_FACTOR, the 3c oxide.
  */
 export const OXIDE_FACTOR = 0.25;
 export const OXIDE_ROUGHNESS = 0.55;
 /** Occlusion below the first edge is fully buffed, above the second fully oxide. */
 export const OXIDE_RAMP: [number, number] = [0.08, 0.45];
 
-export function applyTwoTone(material: THREE.MeshPhysicalMaterial): void {
-  const oxide = material.color.clone().multiplyScalar(OXIDE_FACTOR);
+export function applyTwoTone(material: THREE.MeshPhysicalMaterial, oxideColorHex?: string | null): void {
+  const oxide = oxideColorHex ? new THREE.Color(oxideColorHex) : material.color.clone().multiplyScalar(OXIDE_FACTOR);
   material.onBeforeCompile = (shader) => {
     shader.uniforms.oxideColor = { value: oxide };
     shader.uniforms.oxideRoughness = { value: OXIDE_ROUGHNESS };

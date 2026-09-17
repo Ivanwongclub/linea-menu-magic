@@ -79,6 +79,10 @@ export type ProductFinish = {
   marketing_name_zh_hans?: string | null;
   factory_name_en: string;
   hex_approx: string | null;
+  /** Derived material colour; the swatch prefers it over hex_approx. */
+  base_color_hex: string | null;
+  /** Two-tone rows: the oxide layer's colour; null otherwise. */
+  oxide_color_hex: string | null;
   swatch_url?: string | null;
   is_public: boolean;
   is_standard: boolean;

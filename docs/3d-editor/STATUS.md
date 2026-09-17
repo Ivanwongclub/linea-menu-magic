@@ -11,7 +11,8 @@ this is an index, not a decision log.
 | 3 | Finish picker integration | **Done** |
 | 3b | Physically correct plated rendering | **Done** |
 | 3c | Procedural studio, antique two-tone, painted finishes and per-family calibration from `wincyc-swatch-measurements.csv` | **Done** — family calibration superseded by 3d |
-| 3d | Hue-only family calibration, physical lightness, chart oxide L* | **Done** — 3-series closed |
+| 3d | Hue-only family calibration, physical lightness, chart oxide L* | **Done** — fit superseded by 3e where gated |
+| 3e | Chroma-gated hue calibration, oxide colour rendered | **Done** — 3-series closed |
 | 4 | Text: content, font, straight and circular layout | Not started |
 | 5 | Direct manipulation: drag to position, size, curve | Not started |
 | 6 | Emboss and deboss via CSG in a worker | Not started |
@@ -668,7 +669,7 @@ enamel (CYC-0112) and, in place of gloss red enamel, **metallic red
    page. *Recommend* moving the bake into the
    Phase 6 CSG worker when it exists.
 
-## Phase 3d — done (2026-09-17) · 3-series closed
+## Phase 3d — done (2026-09-17)
 
 Supersedes 3c's per-family calibration (saturation / value / offset). Rulings
 R1–R9 are in the migration header and the commit.
@@ -719,6 +720,9 @@ bright-nickel highlight ≥ 240 predicted. GUN_METAL sits on 8-bit hex plateaus;
 −2.5 (`#5B5D61`) was found by probing (`ONLY=GUN_METAL`). Oxide L* = chart
 median L* of the family's glare-free two-tone rows, floored at 15.
 
+Superseded by Phase 3e: the gate returns every family except ANTI_COPPER and
+RED_COPPER to physical hue, and NICKEL / GUN_METAL to shift 0, chroma 1.
+
 | Family | Rows | Hue shift | Chroma | Value | Oxide L* | Hue residual | L* − physical | Highlight L* |
 |---|---|---|---|---|---|---|---|---|
 | ALLOY | 2 | 58.25 | 1 | 1 | 15 | 0.03 | 0.05 | 91.4 |
@@ -766,3 +770,104 @@ glare-flagged — the swatch needs re-photographing.
    `ProductFinish` (`products/types.ts`, out of scope) lacks
    `base_color_hex`; widened locally in `useProduct`. *Recommend* adding it to
    the type and confirming the storefront swatch prefers it.
+
+## Phase 3e — done (2026-09-18) · 3-series closed
+
+Supersedes 3d's hue fit wherever the chroma gate rules it out. Rulings in the
+migration header and the commit.
+
+Files:
+
+- `supabase/migrations/20260918090000_phase3e_chroma_gated_calibration.sql` —
+  `finish_family_calibration.chart_chroma`; values rewritten; the 108 plated
+  rows recomputed (count asserted), painted rows untouched. Derivation
+  unchanged from 3d.
+- `src/features/finishes/metalReflectance.ts` — `FAMILY_CALIBRATION` regenerated.
+- `src/features/editor/lib/twoTone.ts` — oxide is the row's `oxide_color_hex`
+  (fallback base × 0.25 only when null).
+- `src/features/editor/components/EditorModel.tsx` — passes
+  `oxide_color_hex` to `applyTwoTone`. `useFinishOptions` selects `*`, so the
+  column reaches `PickerFinish` through the regenerated `Row` type; no change.
+- `src/integrations/supabase/types.ts` — regenerated.
+- `src/features/products/types.ts` — `ProductFinish` gains `base_color_hex`,
+  `oxide_color_hex`.
+- `src/features/products/hooks/useProduct.ts` — selects and forwards both;
+  local type widening removed.
+- `scripts/e2e-local/calibrate/fit-families.mjs` — CIRCLE_BRUSHED counts as
+  BRUSHED; hue gate; physical-hue prediction through the stored 8-bit hex;
+  nickel chroma fit removed; output `reports/3e-family-fit.json`.
+- `scripts/e2e-local/calibrate/refit.mjs` — reads the 3e report, emits `chart_chroma`.
+- `scripts/e2e-local/scenarios/family-calibration.mjs` — gated assertions (below).
+- `scripts/e2e-local/scenarios/render-calibration.mjs` — sheet → `reports/3e-materials.png`.
+- `reports/3e-family-fit.json`, `reports/3e-materials.png`.
+
+### Gate
+
+Hue is fitted only when the median CIELAB C* of the family's R2 rows
+(glare-free; MATT / SAND / BRUSHED / CIRCLE_BRUSHED preferred) is **≥ 7**.
+Ruled 7, not the brief's 5: at 5, GOLD (C* 5.23) and ROSE_GOLD (6.68) passed
+and their fits (+26.25°, −87.25°) rendered gold lime and rose gold mauve,
+failing the contact-sheet ruling. Below the gate: hue shift 0, chroma 1.
+
+**Fitted:** ANTI_COPPER, RED_COPPER.
+**Physical:** ALLOY, ANTI_BRASS, ANTI_SILVER, BLACK_COPPER, BRASS, GOLD,
+GUN_METAL, LIGHT_GOLD, NICKEL, ROSE_GOLD, RUSTY_STEEL, STAINLESS_STEEL (R4,
+glare-only), TIN (R4, value 0.1432 kept).
+
+| Family | Chart C* | Hue | Shift | Hue vs chart | Hue vs physical | L* − physical | Highlight L* | Oxide L* |
+|---|---|---|---|---|---|---|---|---|
+| ALLOY | 3.13 | physical | 0 | — | 0 | 0 | 93.3 | 15 |
+| ANTI_BRASS | 4.29 | physical | 0 | — | 0 | 0 | 49.5 | 15 |
+| ANTI_COPPER | 9.30 | fitted | −12.5 | 1.09 | — | 0.07 | 45.5 | 15 |
+| ANTI_SILVER | 1.42 | physical | 0 | — | 0 | 0 | 96.5 | 20.74 |
+| BLACK_COPPER | 4.61 | physical | 0 | — | 0 | 0 | 86.2 | 15 |
+| BRASS | 6.36 | physical | 0 | — | 0 | 0 | 85.0 | — |
+| GOLD | 5.23 | physical | 0 | — | 0 | 0 | 82.7 | 15 |
+| GUN_METAL | 1.99 | physical | 0 | — | 0 | 0 | 19.9 | 15 |
+| LIGHT_GOLD | 3.08 | physical | 0 | — | 0 | 0 | 86.0 | — |
+| NICKEL | 4.07 | physical | 0 | — | 0 | 0 | 73.6 | 15 |
+| RED_COPPER | 8.67 | fitted | −1.5 | 0.13 | — | 0.30 | 86.7 | — |
+| ROSE_GOLD | 6.68 | physical | 0 | — | 0 | 0 | 81.8 | — |
+| RUSTY_STEEL | 1.41 | physical | 0 | — | n/a (rendered C* 0.8) | 0 | 51.3 | — |
+| STAINLESS_STEEL | 1.63 | physical | 0 | — | 0.01 | 0 | 94.9 | — |
+| TIN | 1.37 | physical | 0 | — | n/a (rendered C* 0) | 0 | 47.2 | 17.81 |
+
+`family-calibration.mjs` asserts: fitted families ≤ 8° from the chart;
+physical families have shift 0, chroma 1, and rendered hue within 1° of the
+physical prediction (the same rows at zero shift through the measured transfer
+and the stored 8-bit hex — skipped where rendered C* < 1, where hue is
+undefined); every family's L* within 5 of physical and each base colour's L*
+equal to physical; GOLD / LIGHT_GOLD highlight ≥ 70; calibrated bright nickel
+surround ≤ 80 and highlight ≥ 237 (50 / 238). At zero shift the physical-hue
+check mostly confirms the prediction reproduces the render; the shift/chroma
+assertions carry the ruling.
+
+### Storefront swatch (R4)
+
+`ProductFinish` now carries `base_color_hex` and is forwarded by `useProduct`.
+The storefront component is `src/components/product/ProductColourFinish.tsx`
+(singular `product/`, outside this phase's read scope; `src/components/products/`
+has no swatch component). It imports the shared swatch module, whose
+`finishSwatchSvg` / `FinishSwatch` use `base_color_hex ?? hex_approx`; that the
+component passes the finish object through unmodified is not verified here.
+
+### Contact sheet (R6)
+
+`reports/3e-materials.png`: gold and brushed gold read gold; nickel neutral
+(physical nickel, slightly warm); anti brass warm bronze with dark oxide in the
+recesses; anti copper copper with dark recesses. Rose gold reads peach-gold
+rather than pink-copper — see open question 1.
+
+### Open questions from this phase, with a recommendation each
+
+1. **Rose gold is peach-gold, not pink-copper.** Physical rose gold is 3b's
+   gold → copper blend at t = 0.5. *Recommend* raising the blend toward copper
+   (t ≈ 0.7) as a physical-model change, judged on the sheet, rather than a
+   chart hue fit.
+2. **Storefront swatch component not read.** *Recommend* granting read access
+   to `src/components/product/ProductColourFinish.tsx` to confirm it passes the
+   `ProductFinish` object to the shared swatch without remapping colour fields.
+3. **Oxide L* floors at 15 for most families.** Every chart antique median is
+   darker than 15, so the floor sets the oxide nearly everywhere (ANTI_SILVER
+   20.74, TIN 17.81 excepted). *Recommend* leaving it; the recesses read dark
+   on the sheet.

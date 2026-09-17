@@ -59,7 +59,7 @@ export function EditorModel({ url, sizePrimaryMm, isMetal, finish, colour, contr
         clearcoat: finish.clearcoat ?? 0,
         clearcoatRoughness: finish.clearcoat_roughness ?? 0,
       });
-      if (finish.two_tone) applyTwoTone(m);
+      if (finish.two_tone) applyTwoTone(m, finish.oxide_color_hex);
       return m;
     }
     return new THREE.MeshPhysicalMaterial({

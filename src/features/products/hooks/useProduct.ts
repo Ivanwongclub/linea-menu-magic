@@ -64,7 +64,7 @@ const PRODUCT_SELECT = `
     sort_order,
     finishes(
       id, cyc_code, marketing_name, marketing_name_zh_hant, marketing_name_zh_hans,
-      factory_name_en, hex_approx, base_color_hex, swatch_url, is_public, is_standard,
+      factory_name_en, hex_approx, base_color_hex, oxide_color_hex, swatch_url, is_public, is_standard,
       metalness, roughness, anisotropy, sort_order
     )
   )
@@ -168,9 +168,7 @@ function transformProduct(row: Row, defaultFinishId: string | null): Product {
 
   // A null embed means the finish is not public and this viewer may not see
   // it. Attachment order ties often, so fall back to the finish's own order.
-  // base_color_hex isn't on ProductFinish yet; forwarded so the storefront
-  // swatch (which prefers it over hex_approx) matches the CMS and editor.
-  type AttachedFinish = ProductFinish & { base_color_hex: string | null; finish_sort_order: number };
+  type AttachedFinish = ProductFinish & { finish_sort_order: number };
   const finishes: ProductFinish[] = rows(row.product_finishes)
     .flatMap<AttachedFinish>((pf) => {
       const f = pf.finishes as Row | null;
@@ -184,6 +182,7 @@ function transformProduct(row: Row, defaultFinishId: string | null): Product {
         factory_name_en: f.factory_name_en as string,
         hex_approx: (f.hex_approx as string | null) ?? null,
         base_color_hex: (f.base_color_hex as string | null) ?? null,
+        oxide_color_hex: (f.oxide_color_hex as string | null) ?? null,
         swatch_url: (f.swatch_url as string | null) ?? null,
         is_public: (f.is_public as boolean) ?? false,
         is_standard: (f.is_standard as boolean) ?? false,

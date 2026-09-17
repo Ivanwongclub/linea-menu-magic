@@ -1,18 +1,19 @@
-// Emits the calibration as it was measured in reports/3d-family-fit.json —
+// Emits the calibration as it was measured in reports/3e-family-fit.json —
 // the applied values and their residuals — as the TS FAMILY_CALIBRATION block
-// (metalReflectance.ts) and the SQL values list (the 3d migration). No
+// (metalReflectance.ts) and the SQL values list (the calibration migration). No
 // rendering; run fit-families.mjs (without FIT) first so the residuals are
 // measured at the applied values.
 //   node scripts/e2e-local/calibrate/refit.mjs
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { REPO_ROOT } from "../lib/stack.mjs";
+import { familyNote } from "./fit-families.mjs";
 
-const { families } = JSON.parse(readFileSync(path.join(REPO_ROOT, "reports/3d-family-fit.json"), "utf8"));
+const { families } = JSON.parse(readFileSync(path.join(REPO_ROOT, "reports/3e-family-fit.json"), "utf8"));
 const TIN_VALUE = 0.1432; // 3c chart-derived, kept (R4)
 
 const rows = families.map((f) => {
-  const hueFitted = !f.exempt && !f.glareOnly;
+  const hueFitted = f.hueFitted;
   return {
     family: f.family,
     hue_shift: f.appliedHueShift,
@@ -22,7 +23,8 @@ const rows = families.map((f) => {
     rows: hueFitted ? f.rows : 0,
     residual_hue: hueFitted ? f.hueDiff : null,
     residual_l: f.lightnessDiff,
-    note: f.exempt ?? (f.glareOnly ? "only glare chart rows; no hue adjustment (R2)" : null),
+    chart_chroma: f.chartChroma ?? null,
+    note: familyNote(f),
   };
 });
 
@@ -34,6 +36,6 @@ console.log("};");
 console.log("/* END FAMILY_CALIBRATION */\n");
 console.log(
   rows
-    .map((r) => `  (${[r.family, r.hue_shift, r.chroma_scale, r.value, r.oxide_l, r.rows, r.residual_hue, r.residual_l, r.note].map(sqlText).join(", ")})`)
+    .map((r) => `  (${[r.family, r.hue_shift, r.chroma_scale, r.value, r.oxide_l, r.rows, r.residual_hue, r.residual_l, r.chart_chroma, r.note].map(sqlText).join(", ")})`)
     .join(",\n") + ";",
 );

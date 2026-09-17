@@ -714,35 +714,38 @@ export type Database = {
       finish_family_calibration: {
         Row: {
           base_family_code: string
+          chart_chroma: number | null
+          chroma_scale: number
+          hue_shift_deg: number
           note: string | null
-          offset_b: number
-          offset_g: number
-          offset_r: number
-          residual_de2000: number | null
+          oxide_l: number | null
+          residual_hue_deg: number | null
+          residual_l: number | null
           rows_used: number
-          saturation: number
           value: number
         }
         Insert: {
           base_family_code: string
+          chart_chroma?: number | null
+          chroma_scale?: number
+          hue_shift_deg?: number
           note?: string | null
-          offset_b?: number
-          offset_g?: number
-          offset_r?: number
-          residual_de2000?: number | null
+          oxide_l?: number | null
+          residual_hue_deg?: number | null
+          residual_l?: number | null
           rows_used?: number
-          saturation?: number
           value?: number
         }
         Update: {
           base_family_code?: string
+          chart_chroma?: number | null
+          chroma_scale?: number
+          hue_shift_deg?: number
           note?: string | null
-          offset_b?: number
-          offset_g?: number
-          offset_r?: number
-          residual_de2000?: number | null
+          oxide_l?: number | null
+          residual_hue_deg?: number | null
+          residual_l?: number | null
           rows_used?: number
-          saturation?: number
           value?: number
         }
         Relationships: []
@@ -978,6 +981,7 @@ export type Database = {
           marketing_name_zh_hant: string | null
           metalness: number
           notes: string | null
+          oxide_color_hex: string | null
           pattern_id: string | null
           process_id: string | null
           roughness: number
@@ -1013,6 +1017,7 @@ export type Database = {
           marketing_name_zh_hant?: string | null
           metalness: number
           notes?: string | null
+          oxide_color_hex?: string | null
           pattern_id?: string | null
           process_id?: string | null
           roughness: number
@@ -1048,6 +1053,7 @@ export type Database = {
           marketing_name_zh_hant?: string | null
           metalness?: number
           notes?: string | null
+          oxide_color_hex?: string | null
           pattern_id?: string | null
           process_id?: string | null
           roughness?: number
@@ -1991,6 +1997,18 @@ export type Database = {
     Functions: {
       finish_derive: {
         Args: { p: Database["public"]["Tables"]["finishes"]["Row"] }
+        Returns: Record<string, unknown>
+      }
+      finish_lab_in_gamut: {
+        Args: { p_chroma: number; p_h: number; p_l: number }
+        Returns: Record<string, unknown>
+      }
+      finish_lab_to_linear: {
+        Args: { p_a: number; p_b: number; p_l: number }
+        Returns: Record<string, unknown>
+      }
+      finish_linear_to_lab: {
+        Args: { p_b: number; p_g: number; p_r: number }
         Returns: Record<string, unknown>
       }
       finish_linear_to_srgb_hex: {

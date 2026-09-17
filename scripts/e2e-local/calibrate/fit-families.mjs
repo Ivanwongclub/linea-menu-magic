@@ -1,11 +1,11 @@
 // Per-family calibration of plated finishes against the WIN-CYC chart
-// (Phase 3d, superseding 3c's saturation/value fit). Run through the harness:
+// (Phase 3d, chroma-gated in 3e). Run through the harness:
 //
 //   npm run e2e:run -- calibrate/fit-families.mjs
 //
 // Lightness is physical (R1): nothing here fits L*. For every plated base
 // family it renders the R2 rows — glare-free chart rows, MATT / SAND / BRUSHED
-// surfaces preferred — as flat 15mm discs through the real editor route under
+// (incl. CIRCLE_BRUSHED) surfaces preferred — as flat 15mm discs through the real editor route under
 // the procedural studio (a flat disc has no occlusion, so two-tone rows render
 // their buffed layer), and records:
 //   hue       rendered vs chart median hue angle (CIELAB); rendered colour is
@@ -16,12 +16,16 @@
 //   highlight median of each disc's p98 L*
 // plus a bright-nickel (CYC-0001) disc for the studio targets.
 //
-// FIT=1 steps each family's hue shift on its measured hue error (stepHue),
-// sets NICKEL's chroma scale from the bright-nickel highlight through the
-// measured transfer A = inverseNeutral(rendered) / base, and takes the
-// two-tone oxide L* from the chart (R3). APPLY=1 writes the fit to finish_family_calibration and
-// recomputes the rows, so a second run measures the real residuals.
-// Writes reports/3d-family-fit.json.
+// Hue gate (3e R1): only families whose R2 rows have a median chart C* ≥ 7
+// are hue-fitted; the rest keep physical hue and chroma (shift 0, scale 1) —
+// a near-neutral dark mirror photo records the room's tint, not the metal's.
+// For those, the physical hue is the same rows predicted at zero shift
+// through the measured transfer A = inverseNeutral(rendered) / base.
+//
+// FIT=1 steps each gated-in family's hue shift on its measured hue error
+// (stepHue) and takes the two-tone oxide L* from the chart. APPLY=1 writes the
+// fit to finish_family_calibration and recomputes the rows, so a second run
+// measures the real residuals. Writes reports/3e-family-fit.json.
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { REPO_ROOT } from "../lib/stack.mjs";
@@ -41,7 +45,6 @@ import {
   hexToRgb255,
   rgb255ToLinear,
   linearToLab,
-  linearToRgb255,
   medianLab,
   median,
   neutralToneMap,
@@ -50,11 +53,11 @@ import {
   hueOf,
   hueDifference,
 } from "../lib/colour.mjs";
-import { platedLinear, FAMILY_CALIBRATION, OXIDE_L_FLOOR, TWO_TONE_FAMILIES, TWO_TONE_TONES } from "../../../src/features/finishes/metalReflectance.ts";
+import { platedLinear, linearToSrgbHex, FAMILY_CALIBRATION, OXIDE_L_FLOOR, TWO_TONE_FAMILIES, TWO_TONE_TONES } from "../../../src/features/finishes/metalReflectance.ts";
 
-export const OUT = path.join(REPO_ROOT, "reports/3d-family-fit.json");
+export const OUT = path.join(REPO_ROOT, "reports/3e-family-fit.json");
 export const STUDIO_CODE = "CYC-0001";
-const PREFERRED_SURFACES = new Set(["MATT", "SAND", "BRUSHED"]);
+const PREFERRED_SURFACES = new Set(["MATT", "SAND", "BRUSHED", "CIRCLE_BRUSHED"]);
 /** R4: no fit. */
 export const EXEMPT = {
   STAINLESS_STEEL: "physical iron/steel, no fit; swatch CYC-0086 needs re-photographing (R4)",
@@ -67,7 +70,8 @@ const calibrationFor = (family, patch, base = FAMILY_CALIBRATION) => ({
 });
 
 export function predictLab(row, calibration) {
-  const base = platedLinear(row.axes, calibration);
+  // through the 8-bit hex the database stores — it moves near-neutral hue by degrees
+  const base = rgb255ToLinear(hexToRgb255(linearToSrgbHex(platedLinear(row.axes, calibration))));
   const pre = row.transfer.map((a, c) => a * base[c]);
   return linearToLab(neutralToneMap(pre));
 }
@@ -95,28 +99,8 @@ export function stepHue(current, error, previous) {
   return Math.round(signedHue(next, 0) * 4) / 4;
 }
 
-/** Studio target (R5): bright nickel's highlight luminance, with a margin for prediction error. */
-export const STUDIO_HIGHLIGHT = 0xed;
-const HIGHLIGHT_MARGIN = 3;
-const luma = (rgb) => 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
-
-export function predictHighlight(studioRow, calibration) {
-  const base = platedLinear(studioRow.axes, calibration);
-  return luma(linearToRgb255(neutralToneMap(studioRow.highlightTransfer.map((a, c) => a * base[c]))));
-}
-
-/**
- * R1 lets chroma only fall. A hue rotation can move bright nickel's highlight
- * below the studio target (a blue highlight has less luma at the same L*);
- * take the largest chroma scale, in 0.05 steps, that keeps it.
- */
-export function fitNickelChroma(hue_shift, studioRow) {
-  for (let k = 20; k >= 0; k--) {
-    const chroma_scale = k / 20;
-    const predicted = predictHighlight(studioRow, calibrationFor("NICKEL", { hue_shift, chroma_scale }));
-    if (predicted >= STUDIO_HIGHLIGHT + HIGHLIGHT_MARGIN || k === 0) return { chroma_scale, predictedHighlight: +predicted.toFixed(1) };
-  }
-}
+/** 3e R1: hue is fitted only when the R2 rows' median chart C* reaches this (ruled 7, up from 5: gold 5.2 and rose gold 6.7 fitted to lime and mauve). */
+export const HUE_GATE = 7;
 
 /** R3: oxide L* = chart median L* of the family's glare-free two-tone rows, floored. */
 export function fitOxide(finishRows, measurements) {
@@ -129,6 +113,14 @@ export function fitOxide(finishRows, measurements) {
   const l = median(clean.map((f) => hexToLab(measurements.get(f.cyc_code).hex_srgb)[0]));
   return +Math.max(OXIDE_L_FLOOR, l).toFixed(2);
 }
+
+export const familyNote = (r) =>
+  r.exempt ??
+  (r.glareOnly
+    ? "only glare chart rows; physical hue"
+    : r.hueFitted
+      ? null
+      : `chart C* ${r.chartChroma} < ${HUE_GATE}; physical hue and chroma (3e R1)`);
 
 export default async function ({ page, base, admin, h }) {
   const fit = process.env.FIT === "1";
@@ -187,14 +179,7 @@ export default async function ({ page, base, admin, h }) {
 
     await pickFinish(page, STUDIO_CODE);
     const s = await faceStats(await canvas.screenshot());
-    const studioBase = rgb255ToLinear(hexToRgb255(studioRow.base_color_hex));
-    studio = {
-      code: STUDIO_CODE,
-      axes: axesOf(studioRow),
-      surroundLum: Math.round(s.lumP02),
-      highlightLum: Math.round(s.lumP98),
-      highlightTransfer: inverseNeutralToneMap(rgb255ToLinear(s.highlight)).map((p, c) => (studioBase[c] > 1e-6 ? p / studioBase[c] : 0)),
-    };
+    studio = { code: STUDIO_CODE, surroundLum: Math.round(s.lumP02), highlightLum: Math.round(s.lumP98) };
 
     for (const group of selection) {
       const rows = [];
@@ -217,17 +202,24 @@ export default async function ({ page, base, admin, h }) {
       const chartMedian = medianLab(rows.map((r) => hexToLab(r.chartHex)));
       const renderedMedian = medianLab(rows.map((r) => r.renderedLab));
       const exempt = EXEMPT[group.family] ?? null;
+      const chartChroma = median(rows.map((r) => Math.hypot(...hexToLab(r.chartHex).slice(1))));
+      const hueFitted = !exempt && !group.glareOnly && chartChroma >= HUE_GATE;
+      const physicalMedian = predictedMedianLab(rows, calibrationFor(group.family, { hue_shift: 0, chroma_scale: 1 }));
       const entry = {
         family: group.family,
         rows: rows.length,
         glareOnly: group.glareOnly,
         preferredSurfaces: group.preferredSurfaces,
         exempt,
+        chartChroma: +chartChroma.toFixed(2),
+        hueFitted,
         codes: rows.map((r) => r.code),
         chartMedianLab: chartMedian.map((v) => +v.toFixed(2)),
         renderedMedianLab: renderedMedian.map((v) => +v.toFixed(2)),
         hueDiff: +hueDifference(hueOf(renderedMedian), hueOf(chartMedian)).toFixed(2),
         hueError: +signedHue(hueOf(chartMedian), hueOf(renderedMedian)).toFixed(3),
+        renderedChroma: +Math.hypot(renderedMedian[1], renderedMedian[2]).toFixed(2),
+        physicalHueDiff: +hueDifference(hueOf(renderedMedian), hueOf(physicalMedian)).toFixed(2),
         appliedHueShift: Number(applied.get(group.family)?.hue_shift_deg ?? 0),
         appliedChromaScale: Number(applied.get(group.family)?.chroma_scale ?? 1),
         appliedOxideL: applied.get(group.family)?.oxide_l == null ? null : Number(applied.get(group.family).oxide_l),
@@ -239,10 +231,7 @@ export default async function ({ page, base, admin, h }) {
       entry.lightnessDiff = +(renderedMedian[0] - entry.physicalL).toFixed(2);
       if (fit) {
         const hue = { hue_shift: 0, chroma_scale: 1 };
-        if (!exempt && !group.glareOnly) {
-          hue.hue_shift = stepHue(entry.appliedHueShift, entry.hueError, previous.get(group.family));
-          if (group.family === "NICKEL") Object.assign(hue, fitNickelChroma(hue.hue_shift, studio));
-        }
+        if (hueFitted) hue.hue_shift = stepHue(entry.appliedHueShift, entry.hueError, previous.get(group.family));
         const keep = group.family === "TIN" ? FAMILY_CALIBRATION.TIN.value : 1;
         entry.fit = { ...hue, value: keep, oxide_l: fitOxide(group.all, measurements) };
       }
@@ -263,13 +252,13 @@ export default async function ({ page, base, admin, h }) {
       chroma_scale: r.fit.chroma_scale,
       value: r.fit.value,
       oxide_l: r.fit.oxide_l,
-      rows_used: r.glareOnly || r.exempt ? 0 : r.rows,
-      note: r.exempt ?? (r.glareOnly ? "only glare chart rows; no hue adjustment (R2)" : null),
+      rows_used: r.hueFitted ? r.rows : 0,
+      note: familyNote(r),
     }));
     const up = await admin.from("finish_family_calibration").upsert(rows);
     if (up.error) throw new Error(up.error.message);
     const re = await admin.rpc("finish_recompute_materials");
     if (re.error) throw new Error(re.error.message);
   }
-  return { families: results.length, studio, out: "reports/3d-family-fit.json" };
+  return { families: results.length, studio, out: "reports/3e-family-fit.json" };
 }
