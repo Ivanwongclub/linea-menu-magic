@@ -13,7 +13,7 @@ import assert from "node:assert/strict";
 
 const TINY_OBJ = "o cube\nv 0 0 0\nv 1 0 0\nv 1 1 0\nv 0 1 0\nf 1 2 3 4\n";
 
-async function publish(admin, product, modelPath) {
+async function publish(admin, product, modelPath, referenceVariantId) {
   const uploaded = await admin.storage
     .from("product-models")
     .upload(modelPath, new Blob([TINY_OBJ], { type: "model/obj" }), { upsert: true, contentType: "model/obj" });
@@ -24,6 +24,16 @@ async function publish(admin, product, modelPath) {
     .update({ model_storage_path: modelPath, status: "active", is_public: true, brand_id: null, item_code: itemCode })
     .eq("id", product.id);
   if (error) throw new Error(error.message);
+  // Separate update: `products_reset_model_scale` fires before update OF
+  // `model_storage_path` and clobbers scale fields set in the same statement.
+  // TINY_OBJ's primary raw dimension is 1 unit; the size variant is 15mm —
+  // the buyer refusal (Phase 4b) needs a confirmed scale, and its exact
+  // value is irrelevant to this scenario's assertions.
+  const { error: scaleError } = await admin
+    .from("products")
+    .update({ model_scale_status: "confirmed", model_scale_factor: 15, model_scale_method: "unit_mm", model_scale_reference_variant_id: referenceVariantId })
+    .eq("id", product.id);
+  if (scaleError) throw new Error(scaleError.message);
 }
 
 async function restoreProduct(admin, product, modelPath) {
@@ -35,6 +45,10 @@ async function restoreProduct(admin, product, modelPath) {
       is_public: product.is_public,
       brand_id: product.brand_id,
       item_code: product.item_code,
+      model_scale_status: product.model_scale_status ?? "unconfirmed",
+      model_scale_factor: product.model_scale_factor ?? null,
+      model_scale_method: product.model_scale_method ?? null,
+      model_scale_reference_variant_id: product.model_scale_reference_variant_id ?? null,
     })
     .eq("id", product.id);
   await admin.storage.from("product-models").remove([modelPath]);
@@ -43,7 +57,11 @@ async function restoreProduct(admin, product, modelPath) {
 export default async function ({ page, base, admin, editor, h }) {
   const { data: products, error } = await admin
     .from("products")
-    .select("id, slug, item_code, model_storage_path, status, is_public, brand_id, material:product_materials!material_id(is_metal)")
+    .select(
+      "id, slug, item_code, model_storage_path, status, is_public, brand_id, " +
+        "model_scale_status, model_scale_factor, model_scale_method, model_scale_reference_variant_id, " +
+        "material:product_materials!material_id(is_metal)",
+    )
     .limit(300);
   if (error) throw new Error(error.message);
 
@@ -94,15 +112,21 @@ export default async function ({ page, base, admin, editor, h }) {
       .insert({ product_id: colourProduct.id, name: "E2E Seed Colour", hex: "#334455", sort_order: 0 });
     if (colourInsert.error) throw new Error(colourInsert.error.message);
 
-    // Seed: a size variant for each — the measurement line needs one.
-    const sizeInsert = await admin.from("product_size_variants").insert([
-      { product_id: metalProduct.id, size_label: "E2E Seed Size", size_primary_mm: 15, is_default: true, sort_order: 0 },
-      { product_id: colourProduct.id, size_label: "E2E Seed Size", size_primary_mm: 15, is_default: true, sort_order: 0 },
-    ]);
+    // Seed: a size variant for each — the measurement line needs one, and
+    // Phase 4b's buyer refusal needs a confirmed scale's reference variant.
+    const sizeInsert = await admin
+      .from("product_size_variants")
+      .insert([
+        { product_id: metalProduct.id, size_label: "E2E Seed Size", size_primary_mm: 15, is_default: true, sort_order: 0 },
+        { product_id: colourProduct.id, size_label: "E2E Seed Size", size_primary_mm: 15, is_default: true, sort_order: 0 },
+      ])
+      .select("id, product_id");
     if (sizeInsert.error) throw new Error(sizeInsert.error.message);
+    const metalVariantId = sizeInsert.data.find((v) => v.product_id === metalProduct.id).id;
+    const colourVariantId = sizeInsert.data.find((v) => v.product_id === colourProduct.id).id;
 
-    await publish(admin, metalProduct, metalModelPath);
-    await publish(admin, colourProduct, colourModelPath);
+    await publish(admin, metalProduct, metalModelPath, metalVariantId);
+    await publish(admin, colourProduct, colourModelPath, colourVariantId);
 
     /* ---- metal product: FINISH group, attached-only picker, measurement line, no toolbar ---- */
     await page.goto(`${base}/designer-studio/editor/new?product=${metalProduct.slug}`, { waitUntil: "networkidle" });

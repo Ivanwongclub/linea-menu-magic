@@ -18,12 +18,18 @@ import {
 
 interface EditorModelProps {
   url: string;
-  /** Real-world size of the selected variant — scales the model so 1 scene unit = 1mm. */
+  /** `products.model_scale_factor` — mm per raw OBJ unit at the reference variant (E1 collision 1). */
+  scaleFactor: number;
+  /** `variantMm / referenceMm` — a product-size change, not a unit reinterpretation (E1 collision 3). */
+  variantScale: number;
+  /** Real-world size of the selected variant. Kept for the ruler (Phase 4e) — not used for scaling. */
   sizePrimaryMm: number;
   isMetal: boolean;
   finish: PickerFinish | null;
   colour: EditorColour | null;
   controlsRef: RefObject<OrbitControlsImpl>;
+  /** Reports the rendered primary dimension in mm, for the viewport's `data-model-size-mm`. */
+  onModelSizeMm?: (mm: number) => void;
 }
 
 /**
@@ -42,7 +48,7 @@ function anisotropyRotationForSurface(_surfaceCode: string | undefined): number 
  * antique finish (`two_tone`) mixes buffed metal and oxide by baked occlusion.
  * A non-metal product renders its colour as a plain dielectric.
  */
-export function EditorModel({ url, sizePrimaryMm, isMetal, finish, colour, controlsRef }: EditorModelProps) {
+export function EditorModel({ url, scaleFactor, variantScale, sizePrimaryMm, isMetal, finish, colour, controlsRef, onModelSizeMm }: EditorModelProps) {
   const obj = useLoader(OBJLoader, url);
   const { camera, size: viewport } = useThree();
 
@@ -90,21 +96,25 @@ export function EditorModel({ url, sizePrimaryMm, isMetal, finish, colour, contr
 
   // Material is assigned separately so changing the finish never rebuilds
   // the object — which would re-run framing and yank the camera.
-  const model = useMemo(() => {
+  const { model, renderedSizeMm } = useMemo(() => {
     const clone = prepared.clone(true);
 
-    // 1 scene unit = 1mm: the face (now in XY) spans the variant's real size.
+    // Stored scale, never a force-rescale (E1 collision 1): factor is mm per
+    // raw unit at the reference variant, and variantScale carries any other
+    // variant's product-size change (collision 3).
     const rawBox = new THREE.Box3().setFromObject(clone);
     const rawSize = rawBox.getSize(new THREE.Vector3());
-    const rawDiameter = Math.max(rawSize.x, rawSize.y);
-    if (rawDiameter > 0 && sizePrimaryMm > 0) {
-      clone.scale.setScalar(sizePrimaryMm / rawDiameter);
-    }
+    const scale = scaleFactor * variantScale;
+    clone.scale.setScalar(scale);
 
     const scaledBox = new THREE.Box3().setFromObject(clone);
     clone.position.sub(scaledBox.getCenter(new THREE.Vector3()));
-    return clone;
-  }, [prepared, sizePrimaryMm]);
+    return { model: clone, renderedSizeMm: Math.max(rawSize.x, rawSize.y) * scale };
+  }, [prepared, scaleFactor, variantScale]);
+
+  useEffect(() => {
+    onModelSizeMm?.(renderedSizeMm);
+  }, [renderedSizeMm, onModelSizeMm]);
 
   useLayoutEffect(() => {
     model.traverse((child) => {
@@ -182,7 +192,7 @@ export function EditorModel({ url, sizePrimaryMm, isMetal, finish, colour, contr
     <>
       <primitive object={model} />
       <ContactShadows
-        key={`${sizePrimaryMm}-${url}`}
+        key={`${renderedSizeMm}-${url}`}
         position={[0, bounds.min.y - 0.01, 0]}
         scale={footprint}
         far={size.y}

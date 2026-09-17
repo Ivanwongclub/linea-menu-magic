@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEditorProductById } from "../hooks/useEditorProduct";
 import { useFinishOptions, type PickerFinish } from "../hooks/useFinishOptions";
 import { useAutosaveDraft } from "../hooks/useAutosaveDraft";
+import { useCatalogueEditorStatus } from "@/features/admin/hooks/useCatalogueEditorStatus";
 import { useEditorStore } from "../store/useEditorStore";
 import { EditorShell } from "../components/EditorShell";
 import { EditorViewport } from "../components/EditorViewport";
@@ -51,6 +52,7 @@ export function EditorDesignPage({ designId }: { designId: string }) {
 
   const { data: product, isLoading: productLoading } = useEditorProductById(designQuery.data?.product_id ?? null);
   const { data: finishOptions = [] } = useFinishOptions(product?.id ?? null, product?.is_metal ?? false);
+  const { isEditor: isCatalogueEditor } = useCatalogueEditorStatus();
 
   const sizeVariantId = useEditorStore((s) => s.sizeVariantId);
   const finishId = useEditorStore((s) => s.finishId);
@@ -107,16 +109,24 @@ export function EditorDesignPage({ designId }: { designId: string }) {
   const selectedFinish: PickerFinish | null =
     finishOptions.find((f) => f.id === finishId) ?? finishOptions.find((f) => f.id === product.default_finish_id) ?? finishOptions[0] ?? null;
   const selectedColour = product.colours.find((c) => c.id === colourId) ?? product.colours[0] ?? null;
+  const referenceVariant = product.size_variants.find((v) => v.id === product.model_scale_reference_variant_id) ?? null;
+  const referenceMm = referenceVariant?.size_primary_mm ?? selectedSize?.size_primary_mm ?? 1;
+  const variantScale = selectedSize && referenceMm > 0 ? selectedSize.size_primary_mm / referenceMm : 1;
 
   return (
     <EditorShell
       viewport={
         <EditorViewport
           modelStoragePath={product.model_storage_path}
+          scaleStatus={product.model_scale_status}
+          scaleFactor={product.model_scale_factor}
+          variantScale={variantScale}
           sizePrimaryMm={selectedSize?.size_primary_mm ?? 0}
           isMetal={product.is_metal}
           finish={selectedFinish}
           colour={selectedColour}
+          productId={product.id}
+          isCatalogueEditor={isCatalogueEditor}
         />
       }
       measurement={

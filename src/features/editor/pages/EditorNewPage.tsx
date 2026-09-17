@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEditorProductBySlug, type EditorProduct } from "../hooks/useEditorProduct";
 import { useFinishOptions, type PickerFinish } from "../hooks/useFinishOptions";
 import { useDesignerStaffStatus } from "../hooks/useDesignerStaffStatus";
+import { useCatalogueEditorStatus } from "@/features/admin/hooks/useCatalogueEditorStatus";
 import { useEditorStore } from "../store/useEditorStore";
 import { readAnonymousDraft, writeAnonymousDraft, clearAnonymousDraft } from "../lib/anonymousDraft";
 import { EditorShell } from "../components/EditorShell";
@@ -45,6 +46,7 @@ export function EditorNewPage({ productSlug }: { productSlug: string | null }) {
   const { t } = useI18n();
   const { session, user, primaryBrand, loading: authLoading } = useAuth();
   const { isStaff, loading: staffLoading } = useDesignerStaffStatus();
+  const { isEditor: isCatalogueEditor } = useCatalogueEditorStatus();
   const { data: product, isLoading, error } = useEditorProductBySlug(productSlug);
   const { data: finishOptions = [] } = useFinishOptions(product?.id ?? null, product?.is_metal ?? false);
 
@@ -77,6 +79,10 @@ export function EditorNewPage({ productSlug }: { productSlug: string | null }) {
 
   useEffect(() => {
     if (!session || !user || !product || authLoading || staffLoading || createStarted.current) return;
+    // Buyer refusal (E1 collision 6): an unconfirmed model never gets a
+    // `designs` row — signed-in visits to /new see the same awaiting-setup
+    // copy as anonymous, not a created-then-orphaned design.
+    if (product.model_scale_status !== "confirmed") return;
     createStarted.current = true;
     const draft = readAnonymousDraft(product.slug);
     const brand_id = isStaff ? null : primaryBrand?.id ?? null;
@@ -140,9 +146,10 @@ export function EditorNewPage({ productSlug }: { productSlug: string | null }) {
     );
   }
 
-  // Signed-in visits to /new always create a design and move on — this
-  // page never renders the live editor for a signed-in user.
-  if (session) {
+  // Signed-in visits to /new create a design and move on, but only once the
+  // model's scale is confirmed — an unconfirmed product falls through to the
+  // same awaiting-setup viewport an anonymous visitor sees (E1 collision 6).
+  if (session && product.model_scale_status === "confirmed") {
     return <LoadingShell />;
   }
 
@@ -150,17 +157,25 @@ export function EditorNewPage({ productSlug }: { productSlug: string | null }) {
   const selectedFinish: PickerFinish | null =
     finishOptions.find((f) => f.id === finishId) ?? finishOptions.find((f) => f.id === product.default_finish_id) ?? finishOptions[0] ?? null;
   const selectedColour = product.colours.find((c) => c.id === colourId) ?? product.colours[0] ?? null;
+  const referenceVariant = product.size_variants.find((v) => v.id === product.model_scale_reference_variant_id) ?? null;
+  const referenceMm = referenceVariant?.size_primary_mm ?? selectedSize?.size_primary_mm ?? 1;
+  const variantScale = selectedSize && referenceMm > 0 ? selectedSize.size_primary_mm / referenceMm : 1;
 
   return (
     <EditorShell
-      banner={<SignInBanner />}
+      banner={!session ? <SignInBanner /> : undefined}
       viewport={
         <EditorViewport
           modelStoragePath={product.model_storage_path}
+          scaleStatus={product.model_scale_status}
+          scaleFactor={product.model_scale_factor}
+          variantScale={variantScale}
           sizePrimaryMm={selectedSize?.size_primary_mm ?? 0}
           isMetal={product.is_metal}
           finish={selectedFinish}
           colour={selectedColour}
+          productId={product.id}
+          isCatalogueEditor={isCatalogueEditor}
         />
       }
       measurement={

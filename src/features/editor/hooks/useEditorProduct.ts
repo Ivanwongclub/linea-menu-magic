@@ -25,6 +25,9 @@ export interface EditorProduct {
   name: string;
   item_code: string;
   model_storage_path: string | null;
+  model_scale_status: "confirmed" | "unconfirmed";
+  model_scale_factor: number | null;
+  model_scale_reference_variant_id: string | null;
   is_metal: boolean;
   default_finish_id: string | null;
   size_variants: EditorSizeVariant[];
@@ -50,6 +53,7 @@ export function localized(language: AppLanguage, en: string, hant: string | null
  */
 const EDITOR_PRODUCT_SELECT = `
   id, slug, name, name_zh_hant, name_zh_hans, item_code, model_storage_path, default_finish_id,
+  model_scale_status, model_scale_factor, model_scale_reference_variant_id,
   material:product_materials!material_id ( is_metal ),
   product_size_variants ( id, size_label, size_ligne, size_primary_mm, is_default, sort_order ),
   product_colours ( id, name, name_zh_hant, name_zh_hans, hex, sort_order )
@@ -82,6 +86,9 @@ function transform(row: Row, language: AppLanguage): EditorProduct {
     name: localized(language, row.name as string, row.name_zh_hant, row.name_zh_hans),
     item_code: row.item_code as string,
     model_storage_path: (row.model_storage_path as string | null) ?? null,
+    model_scale_status: (row.model_scale_status as "confirmed" | "unconfirmed" | null) ?? "unconfirmed",
+    model_scale_factor: row.model_scale_factor != null ? Number(row.model_scale_factor) : null,
+    model_scale_reference_variant_id: (row.model_scale_reference_variant_id as string | null) ?? null,
     is_metal: !!(row.material as Row | null)?.is_metal,
     default_finish_id: (row.default_finish_id as string | null) ?? null,
     size_variants: sizeVariants,

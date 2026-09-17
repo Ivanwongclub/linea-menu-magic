@@ -3,6 +3,7 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { Box } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { EditorModel } from "./EditorModel";
@@ -13,10 +14,15 @@ import { ProceduralStudio } from "./ProceduralStudio";
 
 interface EditorViewportProps {
   modelStoragePath: string | null;
+  scaleStatus: "confirmed" | "unconfirmed";
+  scaleFactor: number | null;
+  variantScale: number;
   sizePrimaryMm: number;
   isMetal: boolean;
   finish: PickerFinish | null;
   colour: EditorColour | null;
+  productId: string;
+  isCatalogueEditor: boolean;
 }
 
 function ViewportFallback() {
@@ -46,17 +52,65 @@ function EmptyModelState() {
 }
 
 /**
+ * A model exists but its scale isn't confirmed (units rulings §1.2): same
+ * empty-state shape as no model at all, no canvas either way. Catalogue
+ * editors — the only role that can write the CMS's scale panel (Q1) — get a
+ * link back to it; everyone else (buyer, designer staff who aren't catalogue
+ * editors) sees the plain copy.
+ */
+function AwaitingSetupState({ productId, isCatalogueEditor }: { productId: string; isCatalogueEditor: boolean }) {
+  const { t } = useI18n();
+  return (
+    <div className="flex-1 flex items-center justify-center px-6" data-testid="editor-awaiting-setup">
+      <div className="max-w-sm text-center space-y-4">
+        <div className="mx-auto w-12 h-12 flex items-center justify-center border border-foreground">
+          <Box className="w-5 h-5" strokeWidth={1.5} />
+        </div>
+        <div className="space-y-1">
+          <h2 className="text-base font-light tracking-wide text-foreground">{t("editor.viewport.awaitingSetupTitle")}</h2>
+          <p className="text-sm text-muted-foreground">{t("editor.viewport.awaitingSetupBody")}</p>
+        </div>
+        {isCatalogueEditor && (
+          <Link
+            to={`/admin/products/${productId}`}
+            className="inline-block text-xs uppercase tracking-[0.1em] underline underline-offset-4"
+          >
+            {t("editor.viewport.awaitingSetupCmsLink")}
+          </Link>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/**
  * R2: no floating toolbar over the viewport — tools arrive with their
  * phases. R1: idle auto-rotate until the first pointer/wheel interaction,
  * then it stops for good; double-click re-frames via the camera's saved
  * state (set on model load in `EditorModel`).
  */
-export function EditorViewport({ modelStoragePath, sizePrimaryMm, isMetal, finish, colour }: EditorViewportProps) {
+export function EditorViewport({
+  modelStoragePath,
+  scaleStatus,
+  scaleFactor,
+  variantScale,
+  sizePrimaryMm,
+  isMetal,
+  finish,
+  colour,
+  productId,
+  isCatalogueEditor,
+}: EditorViewportProps) {
   const controlsRef = useRef<OrbitControlsImpl>(null);
   const [autoRotate, setAutoRotate] = useState(true);
+  const [modelSizeMm, setModelSizeMm] = useState<number | null>(null);
 
   if (!modelStoragePath) {
     return <EmptyModelState />;
+  }
+
+  if (scaleStatus !== "confirmed" || scaleFactor == null) {
+    return <AwaitingSetupState productId={productId} isCatalogueEditor={isCatalogueEditor} />;
   }
 
   const url = supabase.storage.from("product-models").getPublicUrl(modelStoragePath).data.publicUrl;
@@ -64,7 +118,11 @@ export function EditorViewport({ modelStoragePath, sizePrimaryMm, isMetal, finis
   // Transparent canvas over the site's secondary token: the backdrop is the
   // design system's own colour, never tone-mapped (R2).
   return (
-    <div className="relative flex-1 bg-secondary" data-testid="editor-viewport">
+    <div
+      className="relative flex-1 bg-secondary"
+      data-testid="editor-viewport"
+      data-model-size-mm={modelSizeMm != null ? modelSizeMm.toFixed(2) : undefined}
+    >
       <Suspense fallback={<ViewportFallback />}>
         <Canvas
           camera={{ fov: 35, position: [20, 20, 60] }}
@@ -73,7 +131,17 @@ export function EditorViewport({ modelStoragePath, sizePrimaryMm, isMetal, finis
           onDoubleClick={() => controlsRef.current?.reset()}
         >
           <ProceduralStudio />
-          <EditorModel url={url} sizePrimaryMm={sizePrimaryMm} isMetal={isMetal} finish={finish} colour={colour} controlsRef={controlsRef} />
+          <EditorModel
+            url={url}
+            scaleFactor={scaleFactor}
+            variantScale={variantScale}
+            sizePrimaryMm={sizePrimaryMm}
+            isMetal={isMetal}
+            finish={finish}
+            colour={colour}
+            controlsRef={controlsRef}
+            onModelSizeMm={setModelSizeMm}
+          />
           <OrbitControls
             ref={controlsRef}
             makeDefault

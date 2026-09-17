@@ -6,6 +6,7 @@ import path from "node:path";
 import { createRequire } from "node:module";
 import { REPO_ROOT } from "./stack.mjs";
 import { linearToLab, rgb255ToLinear } from "./colour.mjs";
+import { parseObjRawBounds } from "../../../src/features/admin/lib/objBounds.ts";
 
 const require = createRequire(path.join(REPO_ROOT, "package.json"));
 export const sharp = require("sharp");
@@ -201,6 +202,12 @@ export async function pickFinish(page, cycCode) {
 /**
  * Publishes `product` with `modelPath` as its model and a 15mm size variant,
  * attaches `finishIds` (made public). Returns a restore function.
+ *
+ * Phase 4b (E1 collision 8): the buyer editor now refuses an unconfirmed
+ * model, so every staged product also gets a confirmed scale. The factor is
+ * derived from the staged file's own raw bounds (`parseObjRawBounds`) against
+ * the 15mm variant, so the rendered size is exactly what the old force-rescale
+ * produced — the 3b–4.0 pixel baselines hold unchanged.
  */
 export async function stageProduct(admin, product, { modelPath, modelBody, finishIds = [], defaultFinishId = null, colourHex = null }) {
   const up = await admin.storage.from("product-models").upload(modelPath, modelBody, { upsert: true, contentType: "model/obj" });
@@ -213,7 +220,8 @@ export async function stageProduct(admin, product, { modelPath, modelBody, finis
       .insert(finishIds.map((id, i) => ({ product_id: product.id, finish_id: id, sort_order: 900 + i })));
     if (attach.error) throw new Error(attach.error.message);
   }
-  const size = await admin.from("product_size_variants").insert({ product_id: product.id, size_primary_mm: 15, sort_order: 900 });
+  const variantMm = 15;
+  const size = await admin.from("product_size_variants").insert({ product_id: product.id, size_primary_mm: variantMm, sort_order: 900 }).select("id").single();
   if (size.error) throw new Error(size.error.message);
   let colourId = null;
   if (colourHex) {
@@ -221,6 +229,11 @@ export async function stageProduct(admin, product, { modelPath, modelBody, finis
     if (c.error) throw new Error(c.error.message);
     colourId = c.data.id;
   }
+
+  const text = await bodyToText(modelBody);
+  const rawBounds = parseObjRawBounds(text);
+  const scaleFactor = variantMm / rawBounds.primary_raw;
+
   const pub = await admin
     .from("products")
     .update({
@@ -234,6 +247,21 @@ export async function stageProduct(admin, product, { modelPath, modelBody, finis
     .eq("id", product.id);
   if (pub.error) throw new Error(pub.error.message);
 
+  // Separate update: `products_reset_model_scale` (Phase 4a) fires before
+  // update OF `model_storage_path` and clobbers any scale fields set in the
+  // *same* statement back to unconfirmed (collision 13's reset is by design)
+  // — confirming has to be its own write, after the file is in place.
+  const confirmScale = await admin
+    .from("products")
+    .update({
+      model_scale_status: "confirmed",
+      model_scale_factor: scaleFactor,
+      model_scale_method: "known_dimension",
+      model_scale_reference_variant_id: size.data.id,
+    })
+    .eq("id", product.id);
+  if (confirmScale.error) throw new Error(confirmScale.error.message);
+
   const restore = async () => {
     await admin.from("products").update({ default_finish_id: product.default_finish_id }).eq("id", product.id);
     if (finishIds.length) {
@@ -244,17 +272,39 @@ export async function stageProduct(admin, product, { modelPath, modelBody, finis
     await admin.from("product_size_variants").delete().eq("product_id", product.id).eq("sort_order", 900);
     await admin
       .from("products")
-      .update({ model_storage_path: product.model_storage_path, status: product.status, is_public: product.is_public, brand_id: product.brand_id, item_code: product.item_code })
+      .update({
+        model_storage_path: product.model_storage_path,
+        status: product.status,
+        is_public: product.is_public,
+        brand_id: product.brand_id,
+        item_code: product.item_code,
+        model_scale_status: product.model_scale_status ?? "unconfirmed",
+        model_scale_factor: product.model_scale_factor ?? null,
+        model_scale_method: product.model_scale_method ?? null,
+        model_scale_reference_variant_id: product.model_scale_reference_variant_id ?? null,
+      })
       .eq("id", product.id);
     await admin.storage.from("product-models").remove([modelPath]);
   };
   return { restore, colourId };
 }
 
+/** Reads a storage `.upload()` body (Buffer, Blob, or string) as UTF-8 text. */
+async function bodyToText(body) {
+  if (typeof body === "string") return body;
+  if (Buffer.isBuffer(body)) return body.toString("utf8");
+  if (typeof body.text === "function") return body.text();
+  throw new Error("unsupported model body type for raw-bounds parsing");
+}
+
 export async function pickProducts(admin) {
   const { data, error } = await admin
     .from("products")
-    .select("id, slug, item_code, model_storage_path, status, is_public, brand_id, default_finish_id, material:product_materials!material_id(is_metal)")
+    .select(
+      "id, slug, item_code, model_storage_path, status, is_public, brand_id, default_finish_id, " +
+        "model_scale_status, model_scale_factor, model_scale_method, model_scale_reference_variant_id, " +
+        "material:product_materials!material_id(is_metal)",
+    )
     .order("slug")
     .limit(300);
   if (error) throw new Error(error.message);
