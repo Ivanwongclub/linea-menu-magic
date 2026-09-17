@@ -4,6 +4,7 @@ export interface AnonymousDraft {
   productSlug: string;
   sizeVariantId: string | null;
   finishId: string | null;
+  colourId: string | null;
 }
 
 /** Per-viewer convenience only — never read back by anything but this browser. */

@@ -8,7 +8,7 @@ this is an index, not a decision log.
 |---|---|---|
 | 1 | Schema, RLS, roles | **Done** |
 | 2 | Editor shell, route, lazy load, catalogue entry | **Done** |
-| 3 | Finish picker integration | Not started |
+| 3 | Finish picker integration | **Done** |
 | 4 | Text: content, font, straight and circular layout | Not started |
 | 5 | Direct manipulation: drag to position, size, curve | Not started |
 | 6 | Emboss and deboss via CSG in a worker | Not started |
@@ -177,3 +177,102 @@ commit; not duplicated here.
    selector afterward updates local/zustand state only — it does not
    patch the `designs` row. *Recommend confirming* this is acceptable
    until Phase 8 (autosave) lands, rather than adding an interim write path.
+   **Superseded by Phase 3 R7** — autosave now covers size/finish/colour.
+
+## Phase 3 — done (2026-09-17)
+
+Files:
+
+- `src/features/editor/hooks/useEditorProduct.ts` — rewritten: drops the
+  finish embed (moved to `useFinishOptions`), adds trilingual localisation
+  for product name and colour names via the current `useI18n` language.
+- `src/features/editor/hooks/useFinishOptions.ts` (new) — R4's source
+  rule: the product's attached public finishes via `product_finishes`, or
+  every public finish if none are attached. Returns each row shaped as the
+  raw `finishes` `Row` plus all 8 axis tables' names nested alongside the
+  existing `*_id` columns, so it satisfies `FinishRow` structurally and
+  feeds `useFinishFilter`/`FinishFacetRail`/`FinishSwatchGrid` unchanged.
+- `src/features/editor/hooks/useAutosaveDraft.ts` (new) — R7: signed-in
+  designs write `draft_recipe` + `draft_updated_at`, debounced 2s. Assumes
+  one design per mount (no design-switching UI exists yet to invalidate that).
+- `src/features/editor/store/useEditorStore.ts` — adds `colourId`.
+- `src/features/editor/components/EditorModel.tsx` — camera framing (R1:
+  bounding-sphere fit to ~60% of the viewport, three-quarter view,
+  `controls.saveState()` so double-click reset returns here); drops drei's
+  `<Center>` for manual recentring (so the framed box matches the rendered
+  one exactly); `anisotropyRotationForSurface()` (R6).
+- `src/features/editor/components/EditorViewport.tsx` — R1 auto-rotate
+  (stops for good on first `OrbitControls` interaction) and double-click
+  reframe; damping and zoom limits; i18n. No toolbar was added in Phase 2
+  to remove — R2 is met by not adding one now, while wiring camera controls.
+- `src/features/editor/components/EditorPanel.tsx` — rewritten: FINISH
+  (metal) or COLOUR (non-metal) group, "Change finish" side sheet, quiet
+  autosave indicator in the header, i18n throughout, R3's ligne-suppression
+  fix (keyed on `size_label`, not `size_ligne` nullity — the generated
+  column is never actually null).
+- `src/features/editor/components/MeasurementLine.tsx` — same ligne fix.
+- `src/features/editor/components/SignInBanner.tsx` — i18n.
+- `src/features/editor/pages/EditorNewPage.tsx` / `EditorDesignPage.tsx` —
+  wire the finish/colour picker props, `colourId`, autosave, i18n.
+- `src/features/finishes/FinishSelectionPicker.tsx` (new) — the extracted
+  selection-mode picker: `FinishFacetRail` + `FinishSwatchGrid` +
+  `useFinishFilter`, composed non-mutating (`onSelect`, no
+  `product_finishes` write).
+- `src/features/finishes/finishAxisLine.ts` (new) — localised axis-line
+  and marketing-name formatting, shared by the panel summary and (via the
+  type it exports) the picker.
+- `src/features/i18n/translations.ts` — ~24 new `editor.*` keys × 3
+  locales (en, zh-Hant, zh-Hans), covering every string introduced in
+  Phase 2 and Phase 3.
+- `scripts/e2e-local/scenarios/finish-picker.mjs` (new) — R9's five
+  proofs; also seeds public finishes, a `product_finishes` attachment, a
+  colour and a size variant, none of which exist in the migrations-only
+  local seed (see the note below).
+- `scripts/e2e-local/scenarios/editor-shell.mjs` — one assertion loosened:
+  the second panel group is FINISH or COLOUR depending on the picked
+  product's material, not always FINISH.
+- `docs/3d-editor/STATUS.md` — this file.
+
+### The local seed has no public finishes, no attachments, no non-metal colours, no size variants
+
+Confirmed live against the reset stack: `finishes.is_public` is `false`
+for every one of the 135 rows the migrations insert, no product has a
+`product_finishes` row, no non-metal product has `product_colours`, and no
+product has a `product_size_variants` row at all. E0's "35 of 135 public"
+and the M4 memory note's "65 house products" describe *production*, which
+this stack can't reach (no snapshot — see `verify-writes-on-local-stack`
+memory). `finish-picker.mjs` seeds and tears down exactly what it needs
+rather than assuming any of this exists; anything testing finish/colour/size
+behaviour against the local stack in a later phase will need to do the same.
+
+### Open questions from this phase, with a recommendation each
+
+1. **Camera "decorated face toward camera" assumes +Z is the front.**
+   Nothing in this phase's scope (the sample OBJs under `public/models/`
+   weren't read) confirms every model is authored with the decorated face
+   on +Z. *Recommend* a per-product or per-file front-axis hint if staff
+   uploads (Phase 11) turn out inconsistent, rather than assuming the
+   convention holds.
+2. **`anisotropyRotationForSurface` returns 0 for both BRUSHED and
+   CIRCLE_BRUSHED.** BRUSHED's "linear along local X" *is* three.js's
+   zero-rotation tangent default, so there's no numeric difference yet —
+   the function exists so a real per-vertex radial mapping for
+   CIRCLE_BRUSHED has a named seam to land in later, rather than a bare
+   inline `0`. *Recommend* revisiting once Phase 6 introduces real
+   geometry/UV work.
+3. **COLOUR's default-selection logic still isn't verified against the
+   storefront.** `src/components/product/ProductColourFinish.tsx` (the
+   component R5 asks to match) is outside every phase's scope so far.
+   *Recommend* granting read access to it in whichever phase next touches
+   colour selection, or confirming by other means that "first by
+   `sort_order`" is in fact its rule.
+4. **"Process filter" in R4's prop list.** Implemented as: the picker's
+   internal `FinishFacetRail` covers all 8 axes, including process, rather
+   than a distinct prop the parent passes in. *Recommend confirming* this
+   reading — the alternative is a dedicated `processFilter` prop that
+   pre-narrows the list before the sheet opens.
+5. **`useAutosaveDraft` assumes one design per mount.** Its hydration
+   guard resets only on first mount, not on `designId` changing under an
+   already-mounted page. *Recommend* addressing this when Phase 9 adds a
+   design list (the first UI that could navigate between two designs
+   without a full remount).

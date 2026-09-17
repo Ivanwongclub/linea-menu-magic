@@ -58,7 +58,11 @@ export default async function ({ page, base, admin, editor, h }) {
     const panelText = await panel.innerText();
     assert.ok(panelText.includes(product.name), "PRODUCT group shows the product name");
     assert.ok(panelText.includes(itemCode), "PRODUCT group shows the item code");
-    assert.ok(/Product/i.test(panelText) && /Finish/i.test(panelText) && /Branding/i.test(panelText) && /Output/i.test(panelText), "all four groups render");
+    // Phase 3: the second group is FINISH for a metal product, COLOUR otherwise.
+    assert.ok(
+      /Product/i.test(panelText) && (/Finish/i.test(panelText) || /Colour/i.test(panelText)) && /Branding/i.test(panelText) && /Output/i.test(panelText),
+      "all four groups render",
+    );
 
     /* ---- bare /editor redirects, mapping legacy ?slug= to ?product= ---- */
     await page.goto(`${base}/designer-studio/editor?slug=${product.slug}`, { waitUntil: "networkidle" });
