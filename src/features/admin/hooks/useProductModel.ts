@@ -65,8 +65,10 @@ export function useProductModel(productId: string) {
       try {
         rawBounds = await parseObjFileRawBounds(file);
       } catch (err) {
-        // The storage object is already written (recoverable orphan); the row
-        // is left untouched rather than referencing a file with no bounds.
+        // Unreadable geometry means the file itself is unusable — delete the
+        // upload rather than leave an orphan, and leave the row untouched
+        // (4a Q3, ruled in 4c).
+        await supabase.storage.from(BUCKET).remove([path]);
         throw new Error(`Uploaded, but couldn't read its geometry: ${err instanceof Error ? err.message : String(err)}`);
       }
 
@@ -178,5 +180,41 @@ export function useProductModelScale(productId: string) {
     onSuccess: () => invalidate(queryClient, productId),
   });
 
-  return { scale, variants, confirmUnitScale, calibrateKnownDimension };
+  /**
+   * Phase 4c two-point calibration (spec §17): `measuredRaw` is the raycast
+   * distance between the two picked points, in raw OBJ units. Never rounds
+   * the stored factor (C2/C3).
+   */
+  const calibrateTwoPoint = useMutation({
+    mutationFn: async ({ knownMm, measuredRaw, referenceVariantId }: { knownMm: number; measuredRaw: number; referenceVariantId: string }) => {
+      const factor = knownMm / measuredRaw;
+      const { error } = await supabase
+        .from("products")
+        .update({
+          model_scale_factor: factor,
+          model_scale_status: "confirmed",
+          model_scale_method: "two_point",
+          model_scale_reference_variant_id: referenceVariantId,
+          ...(await confirmedByFields()),
+        })
+        .eq("id", productId);
+      if (error) throw error;
+      return factor;
+    },
+    onSuccess: () => invalidate(queryClient, productId),
+  });
+
+  /** The re-calibration path (4a Q2): back to `unconfirmed` without touching the file. */
+  const markUnconfirmed = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("products")
+        .update({ model_scale_status: "unconfirmed", model_scale_confirmed_at: null, model_scale_confirmed_by: null })
+        .eq("id", productId);
+      if (error) throw error;
+    },
+    onSuccess: () => invalidate(queryClient, productId),
+  });
+
+  return { scale, variants, confirmUnitScale, calibrateKnownDimension, calibrateTwoPoint, markUnconfirmed };
 }
