@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState, type DragEvent } from "react";
+import { useEffect, useRef, useState, type DragEvent } from "react";
 import { toast } from "sonner";
 import { Box, CheckCircle2, Loader2, Trash2, UploadCloud } from "lucide-react";
 import * as THREE from "three";
@@ -13,10 +13,9 @@ import { useProductModel, useProductModelScale, type ScaleMethod } from "@/featu
 import { proposeScaleFactor } from "@/features/admin/lib/objBounds";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { ProductBrandingMarks } from "./ProductBrandingMarks";
+import { ProductModelPreviewSlot, preloadProductModelPreview } from "./ProductModelPreviewSlot";
+import type { BrandingReference } from "@/features/admin/lib/brandingRecovery";
 
-// R15: the R3F chunk never loads with the rest of the admin bundle — only
-// once the panel's preview is opened.
-const ProductModelPreview = lazy(() => import("./ProductModelPreview"));
 
 const METHOD_KEY: Record<ScaleMethod, string> = {
   unit_mm: "admin.model.scale.methodUnitMm",
@@ -54,6 +53,8 @@ export function ProductModelEditor({ productId, modelStoragePath }: { productId:
   const [pointB, setPointB] = useState<THREE.Vector3 | null>(null);
   const [twoPointMm, setTwoPointMm] = useState("");
   const [brandingMarked, setBrandingMarked] = useState<number[]>([]);
+  const [brandingResult, setBrandingResult] = useState<BrandingReference | null>(null);
+  const [previewAsBuyer, setPreviewAsBuyer] = useState(false);
   const measuredRaw = pointA && pointB ? pointA.distanceTo(pointB) : null;
 
   const variantOptions = variants.data ?? [];
@@ -107,6 +108,9 @@ export function ProductModelEditor({ productId, modelStoragePath }: { productId:
 
   const confirmed = scale.data?.model_scale_status === "confirmed";
   const modelUrl = modelStoragePath ? supabase.storage.from("product-models").getPublicUrl(modelStoragePath).data.publicUrl : null;
+  useEffect(() => {
+    if (modelUrl) preloadProductModelPreview();
+  }, [modelUrl]);
 
   return (
     <div className="space-y-4" data-testid="model-section">
@@ -226,19 +230,19 @@ export function ProductModelEditor({ productId, modelStoragePath }: { productId:
           </Button>
 
           {previewOpen && modelUrl && (
-            <Suspense fallback={<div className="h-[38rem] max-w-3xl mx-auto flex items-center justify-center text-xs text-muted-foreground border border-border">{t("admin.model.scale.previewLoading")}</div>}>
-              <ProductModelPreview
-                url={modelUrl}
-                picking={twoPointMode}
-                highlightIndices={brandingMarked}
-                pointA={pointA}
-                pointB={pointB}
-                onPick={(point) => {
-                  if (!pointA) setPointA(point);
-                  else if (!pointB) setPointB(point);
-                }}
-              />
-            </Suspense>
+            <ProductModelPreviewSlot
+              url={modelUrl}
+              picking={twoPointMode}
+              highlightIndices={brandingMarked}
+              hideHighlighted={previewAsBuyer}
+              reference={brandingResult}
+              pointA={pointA}
+              pointB={pointB}
+              onPick={(point) => {
+                if (!pointA) setPointA(point);
+                else if (!pointB) setPointB(point);
+              }}
+            />
           )}
 
           {confirmed ? (
@@ -490,6 +494,12 @@ export function ProductModelEditor({ productId, modelStoragePath }: { productId:
           marked={brandingMarked}
           onMarkedChange={setBrandingMarked}
           onOpen={() => setPreviewOpen(true)}
+          onResultChange={setBrandingResult}
+          previewAsBuyer={previewAsBuyer}
+          onPreviewAsBuyerChange={(on) => {
+            setPreviewAsBuyer(on);
+            if (on) setPreviewOpen(true);
+          }}
         />
       )}
     </div>

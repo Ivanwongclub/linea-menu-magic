@@ -1,7 +1,8 @@
 // Usage: node scripts/e2e-local/run.mjs scenarios/<name>.mjs
 // Boots the app against the local stack, drives a scenario through a real
 // browser, and prints what the scenario returns. Non-zero exit on failure.
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
+import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { chromium } from "playwright";
@@ -20,20 +21,42 @@ const st = readStatus();
 const admin = adminClient(st);
 const editor = await ensureEditor(admin);
 
-// Dev server against the LOCAL stack — process env beats .env in Vite.
-const dev = spawn("npm", ["run", "dev", "--", "--port", String(PORT), "--strictPort"], {
-  cwd: REPO_ROOT,
-  env: {
-    ...process.env,
-    VITE_SUPABASE_URL: st.API_URL,
-    VITE_SUPABASE_PUBLISHABLE_KEY: st.ANON_KEY,
-    // The local stack's imgproxy isn't running, so render/image URLs 404 here.
-    // Serve masters directly; the transform path is a production check.
-    VITE_SUPABASE_IMAGE_TRANSFORMS: "false",
+// Against the LOCAL stack — process env beats .env in Vite. `E2E_BUILD=1`
+// serves a production build (`vite build` + `vite preview`) instead of the
+// dev server, for failures that only exist once chunks are split and minified.
+const appEnv = {
+  ...process.env,
+  VITE_SUPABASE_URL: st.API_URL,
+  VITE_SUPABASE_PUBLISHABLE_KEY: st.ANON_KEY,
+  // The local stack's imgproxy isn't running, so render/image URLs 404 here.
+  // Serve masters directly; the transform path is a production check.
+  VITE_SUPABASE_IMAGE_TRANSFORMS: "false",
+};
+const buildMode = process.env.E2E_BUILD === "1";
+const outDir = path.join(os.tmpdir(), "linea-e2e-build");
+if (buildMode) {
+  const built = spawnSync("npx", ["vite", "build", "--outDir", outDir, "--emptyOutDir"], {
+    cwd: REPO_ROOT,
+    env: appEnv,
+    stdio: process.env.E2E_VERBOSE ? "inherit" : "ignore",
+  });
+  if (built.status !== 0) {
+    console.error("vite build failed");
+    process.exit(1);
+  }
+}
+const dev = spawn(
+  "npx",
+  buildMode
+    ? ["vite", "preview", "--outDir", outDir, "--port", String(PORT), "--strictPort"]
+    : ["vite", "--port", String(PORT), "--strictPort"],
+  {
+    cwd: REPO_ROOT,
+    env: appEnv,
+    stdio: process.env.E2E_VERBOSE ? "inherit" : "ignore",
+    detached: true,
   },
-  stdio: process.env.E2E_VERBOSE ? "inherit" : "ignore",
-  detached: true,
-});
+);
 const killDev = () => {
   try {
     process.kill(-dev.pid, "SIGTERM");

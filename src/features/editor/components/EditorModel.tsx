@@ -81,7 +81,7 @@ export function EditorModel({
   onTextReport,
 }: EditorModelProps) {
   const obj = useLoader(OBJLoader, url);
-  const { camera, size: viewport } = useThree();
+  const { camera, gl, size: viewport } = useThree();
 
   const twoTone = !!(isMetal && finish?.two_tone);
 
@@ -223,6 +223,7 @@ export function EditorModel({
     }
     camera.position.copy(center).addScaledVector(direction, distance);
     camera.lookAt(center);
+    gl.domElement.dataset.cameraHome = `${direction.x.toFixed(3)},${direction.y.toFixed(3)},${direction.z.toFixed(3)}`;
     perspective.near = distance / 100;
     perspective.far = distance * 100;
     perspective.updateProjectionMatrix();
@@ -235,7 +236,7 @@ export function EditorModel({
       controls.update();
       controls.saveState();
     }
-  }, [bounds, camera, controlsRef, viewport.width, viewport.height]);
+  }, [bounds, camera, gl, controlsRef, viewport.width, viewport.height]);
 
   const size = bounds.getSize(new THREE.Vector3());
   const footprint = Math.max(size.x, size.z) * 2.5;

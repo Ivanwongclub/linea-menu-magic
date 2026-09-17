@@ -132,7 +132,9 @@ export default async function ({ page, base, admin, editor, h }) {
     assert.equal(await page.getByTestId("text-layer-row").first().getAttribute("data-selected"), "true", "the new layer is selected");
     await page.getByTestId("text-layer-content").fill("POLO");
     assert.equal(await glyphCount(4), 4, "anonymous POLO renders 4 glyph meshes");
-    const sizeText = await page.getByTestId("text-layer-size").inputValue();
+    // Text size sits behind "Position and curve" since 4h.
+    await page.getByTestId("position-and-curve-toggle").click();
+    const sizeText = await page.getByTestId("pc-text-size-input").inputValue();
     assert.match(sizeText, /^1\.30$/, `text size shows 12% of 10.8 mm at 2 dp, got ${sizeText}`);
     const minDetAnon = Number(await viewport().getAttribute("data-min-world-determinant"));
     assert.ok(minDetAnon > 0, `no mirrored object in the scene (min det ${minDetAnon})`);
@@ -164,7 +166,8 @@ export default async function ({ page, base, admin, editor, h }) {
 
     /* ---- font and text size: precision per C3, unrounded in the recipe ---- */
     await page.getByTestId("text-layer-select").first().click();
-    const sizeField = page.getByTestId("text-layer-size");
+    await page.getByTestId("position-and-curve-toggle").click();
+    const sizeField = page.getByTestId("pc-text-size-input");
     await sizeField.click();
     assert.match(await sizeField.inputValue(), /^\d+\.\d{3}$/, "3 dp while focused");
     await sizeField.fill("1.2345");

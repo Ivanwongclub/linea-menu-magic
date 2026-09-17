@@ -8,7 +8,9 @@
 // independently of the ruler, so it staying identical with the ruler on and
 // off is the same guarantee (no app hook exists to count scene meshes
 // directly, and adding one solely for this assertion isn't worth the extra
-// production surface).
+// production surface). 4h (R2): while the idle rotation turns the camera,
+// the two labels never overlap, the diameter label sits centred below its
+// line and the thickness label beside its own.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { POLO_OBJ } from "../lib/calibration.mjs";
@@ -106,6 +108,35 @@ export default async function ({ page, base, admin, editor, h }) {
     const thicknessText = await page.getByTestId("ruler-thickness-label").innerText();
     assert.match(thicknessText, /\d+(\.\d+)?\s*mm/, `thickness label should show a value, got: ${thicknessText}`);
 
+    /* ---- R2 (4h): labels never overlap, each placed against its own line, sampled while the camera turns ---- */
+    const layoutSamples = [];
+    await page.waitForFunction(() => document.querySelector('[data-testid="ruler-thickness-label"]')?.style.visibility === "visible", null, { timeout: 10000 });
+    for (let i = 0; i < 8; i++) {
+      const sample = await page.evaluate(() => {
+        const layer = document.querySelector('[data-testid="ruler-labels"]').getBoundingClientRect();
+        const read = (id) => {
+          const el = document.querySelector(`[data-testid="${id}"]`);
+          const r = el.getBoundingClientRect();
+          return { x: r.left - layer.left, y: r.top - layer.top, width: r.width, height: r.height, line: JSON.parse(el.dataset.line) };
+        };
+        return { diameter: read("ruler-diameter-label"), thickness: read("ruler-thickness-label") };
+      });
+      const { diameter: d, thickness: t } = sample;
+      const overlap = d.x < t.x + t.width && t.x < d.x + d.width && d.y < t.y + t.height && t.y < d.y + d.height;
+      assert.ok(!overlap, `sample ${i}: diameter and thickness labels overlap ${JSON.stringify(sample)}`);
+      const dl = d.line;
+      if (Math.abs(dl.a.x - dl.b.x) >= Math.abs(dl.a.y - dl.b.y)) {
+        assert.ok(d.y >= Math.max(dl.a.y, dl.b.y) - 1, `sample ${i}: diameter label below its line`);
+        assert.ok(Math.abs(d.x + d.width / 2 - (dl.a.x + dl.b.x) / 2) <= 1.5, `sample ${i}: diameter label centred on its line`);
+      }
+      const tl = t.line;
+      const besideLeft = t.x + t.width <= Math.min(tl.a.x, tl.b.x) + 1;
+      const besideRight = t.x >= Math.max(tl.a.x, tl.b.x) - 1;
+      assert.ok(besideLeft || besideRight, `sample ${i}: thickness label beside its line, not on it ${JSON.stringify(t)}`);
+      layoutSamples.push({ diameterTop: Math.round(d.y), thicknessLeft: Math.round(t.x) });
+      await page.waitForTimeout(350);
+    }
+
     const sizeAfterRuler = await viewport.getAttribute("data-model-size-mm");
     assert.equal(sizeAfterRuler, sizeBeforeRuler, "the overlay is not geometry — the model's own measured size is unchanged");
 
@@ -151,6 +182,7 @@ export default async function ({ page, base, admin, editor, h }) {
     return {
       designId,
       sizeUnchangedByRuler: sizeAfterRuler === sizeBeforeRuler,
+      labelSamples: layoutSamples.length,
       claimedRuler: claimed.draft_recipe?.view?.ruler,
       savedRuler: saved.draft_recipe?.view?.ruler,
     };

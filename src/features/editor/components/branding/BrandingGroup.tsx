@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { useEditorStore } from "../../store/useEditorStore";
 import { BUNDLED_FONTS } from "../../lib/fonts";
 import { newTextLayer, type TextLayer, type TextLayout } from "../../lib/recipe";
-import { MmField } from "./MmField";
+import { PositionAndCurve } from "./PositionAndCurve";
 
 const FIELD_LABEL = "text-[11px] uppercase tracking-[0.12em] text-muted-foreground";
 
@@ -71,7 +71,7 @@ function LayerRow({ layer, selected }: { layer: TextLayer; selected: boolean }) 
   );
 }
 
-function LayerEditor({ layer }: { layer: TextLayer }) {
+function LayerEditor({ layer, faceDiameterMm }: { layer: TextLayer; faceDiameterMm: number }) {
   const { t } = useI18n();
   const updateLayer = useEditorStore((s) => s.updateLayer);
 
@@ -117,51 +117,38 @@ function LayerEditor({ layer }: { layer: TextLayer }) {
           })}
         </div>
       </div>
-      <div className="grid grid-cols-[1fr_7rem] gap-4">
-        <div className="space-y-1 min-w-0">
-          <span id={`font-${layer.id}`} className={FIELD_LABEL}>
-            {t("editor.branding.font")}
-          </span>
-          <Select
-            value={layer.content.font.key}
-            onValueChange={(key) => updateLayer(layer.id, { content: { font: { source: "bundled", key } } })}
+      <div className="space-y-1 min-w-0">
+        <span id={`font-${layer.id}`} className={FIELD_LABEL}>
+          {t("editor.branding.font")}
+        </span>
+        <Select
+          value={layer.content.font.key}
+          onValueChange={(key) => updateLayer(layer.id, { content: { font: { source: "bundled", key } } })}
+        >
+          <SelectTrigger
+            aria-labelledby={`font-${layer.id}`}
+            data-testid="text-layer-font"
+            className="h-8 rounded-none border-0 border-b border-border px-0 shadow-none focus:ring-0 focus:border-foreground"
           >
-            <SelectTrigger
-              aria-labelledby={`font-${layer.id}`}
-              data-testid="text-layer-font"
-              className="h-8 rounded-none border-0 border-b border-border px-0 shadow-none focus:ring-0 focus:border-foreground"
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="rounded-none">
-              {BUNDLED_FONTS.map((f) => (
-                <SelectItem key={f.key} value={f.key} className="rounded-none">
-                  {f.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-1">
-          <label htmlFor={`size-${layer.id}`} className={FIELD_LABEL}>
-            {t("editor.branding.textSize")}
-          </label>
-          <MmField
-            id={`size-${layer.id}`}
-            testId="text-layer-size"
-            value={layer.style.text_size_mm}
-            onChange={(text_size_mm) => updateLayer(layer.id, { style: { text_size_mm } })}
-            className="h-8"
-          />
-        </div>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="rounded-none">
+            {BUNDLED_FONTS.map((f) => (
+              <SelectItem key={f.key} value={f.key} className="rounded-none">
+                {f.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
+      <PositionAndCurve layer={layer} faceDiameterMm={faceDiameterMm} />
     </div>
   );
 }
 
 /**
  * BRANDING (v3-review §3): the text and its font are panel-first; spatial
- * values arrive on the model in 4h/4i. Emboss/deboss and fill are absent
+ * values sit behind "Position and curve" (4h) and arrive on the model in 4i. Emboss/deboss and fill are absent
  * until their phases (rulings §6) — no placeholder controls.
  */
 export function BrandingGroup({ faceDiameterMm }: { faceDiameterMm: number }) {
@@ -213,7 +200,7 @@ export function BrandingGroup({ faceDiameterMm }: { faceDiameterMm: number }) {
         </DndContext>
       )}
 
-      {selected && <LayerEditor key={selected.id} layer={selected} />}
+      {selected && <LayerEditor key={selected.id} layer={selected} faceDiameterMm={faceDiameterMm} />}
     </div>
   );
 }

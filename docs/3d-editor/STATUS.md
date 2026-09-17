@@ -21,7 +21,7 @@ this is an index, not a decision log.
 | 4e | Ruler toggle, buyer scope, replaces the measurement line (§2) | **Done** |
 | 4f | Recipe v2, store / autosave / anonymous draft for layers; add text, layer list, straight layout | **Done** |
 | 4g | Circular layout, per-glyph placement, reversed text without mirroring (§5) | **Done** |
-| 4h | Hybrid numeric / slider controls in "Position and curve" (§3) | Not started |
+| 4h | Hybrid numeric / slider controls in "Position and curve" (§3); ruler label layout, camera read-back, CMS preview fixes | **Done** |
 | 4i | Drag handles on the model, one shared state (§3) | Not started |
 | 4j | Catalogue branding defaults: marked groups hidden, text lands on recovered placement; ruler branding radius and edge margin | Not started |
 | 5 | Relief: emboss/deboss per layer, depth, bevel, manufacturing warning strip with WIN-CYC thresholds | Not started |
@@ -1585,3 +1585,153 @@ Files:
 4. **The shell height fix (81 px header) is a hard-coded layout constant.**
    *Recommend* a shared CSS variable for the header height when the site
    layout is next in scope, so the editor shell can't drift from it again.
+
+### Phase 4f–4g rulings on the above (2026-09-18, given in the 4h task)
+
+- **Q2 ruled: a Top / Bottom arc switch inside "Position and curve".** Top =
+  `cw` at 0°, Bottom = `ccw` at 180°; one click sets both fields.
+- **Q4 ruled: the header height is a CSS variable** (`--site-header-height`
+  in `src/index.css`), used by `EditorShell`.
+- Q1 (glyphs over the existing lettering) and Q3 (the 0.05 mm preview slab)
+  received no ruling; their recommendations stand (4j and Phase 5 fix them).
+
+## Phase 4h — done (2026-09-18)
+
+Hybrid controls per reports/E1-plan-integration.md §5 row 4h, C3, C7;
+rulings §3; plus corrections R2–R8 given with the task.
+
+Files:
+
+- `src/features/editor/components/controls/precision.ts` (new) — C3 display
+  precision (mm 2 dp / 3 dp focused; ° 1 dp / 2 dp focused) and key steps
+  (0.01 / Shift 0.1 / Alt 0.001 mm; 0.1 / 1 / 0.01°), noise-free stepping.
+- `src/features/editor/components/controls/PrecisionNumberInput.tsx` (new) —
+  the authoritative field; ArrowUp/Down steps; typed values written
+  unrounded; select-all on focus. Replaces `branding/MmField.tsx` (deleted).
+- `src/features/editor/components/controls/SliderTrack.tsx` (new) — track,
+  handle (`role="slider"`, arrow-key steps), value badge above the handle
+  kept inside the track, vertical marker line, pointer → value with snap.
+- `src/features/editor/components/controls/ValueSlider.tsx`,
+  `RangeValueSlider.tsx` (new) — addendum §34. The range form: dragging a
+  handle moves that end, dragging the band moves both; its two badges hang
+  apart so they never overlap.
+- `src/features/editor/components/branding/PositionAndCurve.tsx` (new) —
+  the disclosure. Circle: Top/Bottom arc, radius, start/end (C7: stored
+  midpoint; widening the range sets `letter_spacing_mm` through
+  `letterSpacingForSpan`, radius fixed; the band moves `arc_position_deg`),
+  arc position. Straight: centre X/Y, rotation. Both: text size, letter
+  spacing, baseline offset. Angle sliders run −180…180 on the top arc and
+  0…360 on the bottom arc so neither straddles the slider's ends. No
+  emboss/deboss controls.
+- `src/features/editor/hooks/useFontMetrics.ts` (new) — the bundled font's
+  advances for the panel's span maths.
+- `src/features/editor/components/branding/BrandingGroup.tsx` — text size
+  moved into the disclosure; Font full width.
+- `src/features/editor/components/EditorPanel.tsx` — below `lg` the panel is
+  capped at 60% of the shell height and scrolls, so an open disclosure can't
+  squeeze the viewport to nothing; no horizontal overflow.
+- `src/features/editor/components/EditorViewport.tsx` — `min-h-0` on the
+  viewport (a resized canvas kept its old pixel height and overlapped the
+  panel at 390 px); `CameraReport`; ruler labels rendered as DOM.
+- `src/features/editor/lib/rulerLabelLayout.ts` (new),
+  `src/features/editor/components/RulerOverlay.tsx` — R2: labels are placed
+  per frame in screen space: diameter centred below its horizontal line
+  (beside it when the part is taller than wide), thickness beside its own
+  line away from the model, then pushed apart on collision. The thickness
+  line moved to the right side so the two dimensions never share a corner.
+  Each label carries its projected line (`data-line`). Only the product's
+  diameter and thickness are shown; layers have no measurements yet.
+- `src/features/editor/components/CameraReport.tsx` (new),
+  `EditorModel.tsx` — R3 read-back: `data-camera-direction` (live) and
+  `data-camera-home` (framed) on the canvas. Framing itself is unchanged —
+  see the camera finding below.
+- `src/features/editor/components/EditorShell.tsx`, `src/index.css` — R7:
+  `h-[calc(100vh-var(--site-header-height))]`.
+- `src/components/admin/product-editor/ProductModelPreviewSlot.tsx` (new),
+  `ProductModelEditor.tsx` — R5 (see finding below): chunk preloaded once a
+  model exists; an error boundary around the lazy preview and its canvas;
+  Retry (reloads the page for a failed chunk, remounts otherwise); a load
+  past 15 s offers Retry.
+- `src/components/admin/product-editor/ProductModelPreview.tsx` — R6: marked
+  groups tinted with `--primary` (was amber `#d97706`); "Preview as buyer"
+  hides them; the recovered ring (full circle, lettering arc, start dot)
+  drawn in a sibling group with the model's own transform; a "Loading
+  model…" overlay until the OBJ is drawn; scene read-back
+  (`data-state`, `data-ring`, `data-meshes`, `data-tinted`, `data-hidden`).
+- `src/components/admin/product-editor/ProductBrandingMarks.tsx` — R6: marked
+  rows in `bg-primary` (was `bg-amber-100`); "Preview as buyer" switch; the
+  result is one sentence ("Lettering found on a 3.6 mm ring, 1.2 mm tall,
+  raised 0.2 mm. Buyers' text will start here." at the Polo's factor; raw
+  units before the scale is confirmed), a confidence line only when not
+  high, the numbers behind a Details disclosure.
+- `src/features/i18n/translations.ts` — `editor.branding.*` 14 keys × 3.
+- `src/features/i18n/adminTranslations.ts` — `admin.model.preview.*` 4 keys,
+  `admin.model.branding.*` 10 keys, × 3.
+- `scripts/e2e-local/run.mjs` — `E2E_BUILD=1` serves `vite build` +
+  `vite preview` instead of the dev server.
+- `scripts/e2e-local/scenarios/hybrid-controls.mjs` (new) — camera home and
+  initial direction; straight vs circle controls, no relief controls; type
+  radius 4 → glyphs at 4.000 live + read-back; ArrowUp / Shift / Alt =
+  +0.01 / +0.1 / +0.001 mm and +0.1 / +1 / +0.01° (read-backs); widen range
+  → spacing up, radius fixed (read-back); band drag → arc position moves,
+  spacing fixed; slider drag → field shows the stored value; Bottom arc →
+  `ccw` 180°; 390 px stacked, no horizontal overflow.
+- `scripts/e2e-local/scenarios/cms-preview-build.mjs` (new, `E2E_BUILD=1`) —
+  production build: preview reaches ready; failed chunk → message + Retry,
+  page intact, recovers; hung OBJ → "Loading model…".
+- `scripts/e2e-local/scenarios/ruler-buyer.mjs` — no-overlap and
+  label-against-line assertions over 8 samples while the camera turns.
+- `scripts/e2e-local/scenarios/cms-branding-marks.mjs` — sentence, confidence
+  line, collapsed Details, ring shown, 28 tinted, buyer preview hides 28.
+- `scripts/e2e-local/scenarios/text-layer.mjs` — text size via the disclosure.
+- `scripts/e2e-local/scenarios/render-calibration.mjs` — camera home
+  direction asserted against the baseline.
+- `scripts/e2e-local/unit/hybrid-controls.test.mjs` (new) — key steps,
+  precision, label layout and collision.
+- `docs/3d-editor/STATUS.md` — this file.
+
+### Findings
+
+- **R4 toolbar — not in this repo.** No component renders a select / T /
+  pencil / comment toolbar on the editor routes: `index.html` loads only
+  `/src/main.tsx`; `App.tsx` mounts no toolbar globally (only
+  `ComposerPage` and `BrochureViewer` mount toolbars, on their own routes);
+  `lovable-tagger` runs in development only and adds attributes, not UI; and
+  headless Chromium against both the dev server and a production build
+  shows no such element. It is external — the hosting preview's
+  visual-edit overlay or a browser extension. Nothing was changed for it.
+- **R5 CMS preview — the reported hang did not reproduce locally.** Against
+  a production build the preview loaded in < 1 s, including with a
+  throttled network, a hidden/re-shown preview and the branding-toggle
+  path. What the build did show: a failed preview chunk (a stale deploy
+  serves HTML for it) crashed the whole admin page to the app error screen,
+  and a slow or hung OBJ left a blank grey frame with no indicator. "Loading
+  preview…" can only persist while the chunk request itself never settles.
+  All three are now handled (preload, boundary + Retry, 15 s slow notice,
+  model-loading overlay) and proven in `cms-preview-build.mjs`.
+- **R3 camera — framing matched the baseline on every path tried.**
+  Elevation 30°, azimuth −25° and the fill solve are unchanged since
+  Phase 3; anonymous and signed-in loads at 1280 × 720, 1600 × 1000 and
+  390 × 844, with and without text layers and the ruler, all opened on the
+  three-quarter view with the decorated face toward the camera
+  (render-calibration fill 0.559 against the 0.56 baseline). The regression is now guarded: home
+  and initial direction are read back and asserted.
+
+### Open questions from this phase, with a recommendation each
+
+1. **Where the camera regression was seen.** Not reproduced on the seeds or
+   the Polo. *Recommend* sending the product slug, viewport size and a
+   screenshot; a production model whose decorated side has less geometry
+   than its back would fool `decoratedFaceRotation`'s density test, which
+   the new direction read-back can confirm in minutes.
+2. **The production preview hang.** *Recommend* capturing the browser
+   console and Network tab for the stuck `ProductModelPreview-*.js` request
+   on production; if it is pending forever, the host (CDN/SW) is at fault and
+   the new 15 s Retry is the mitigation.
+3. **Text size moved behind the disclosure.** E1 lists it there; a buyer
+   who never opens it keeps the 12% default. *Recommend* keeping it there
+   until 4j's recovered size lands, then reviewing with real buyers.
+4. **Angle slider domains** (−180…180 top, 0…360 bottom). Typed values
+   outside them are kept. *Recommend* keeping this until 4i's on-model arc
+   handle makes the slider secondary.
+

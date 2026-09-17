@@ -13,7 +13,8 @@
 // 4. Twelve finishes on the lettered Polo button → reports/4-materials.png
 //    (the same 3e twelve cells), each beside its chart swatch, for human
 //    review; relief visible in each.
-// 5. No viewport toolbar; three-quarter camera filling ~60%.
+// 5. No viewport toolbar; three-quarter camera filling ~60% (baseline 0.56),
+//    home direction elevation 30° / azimuth −25° read back from the canvas (4h).
 import assert from "node:assert/strict";
 import { readFileSync, mkdirSync } from "node:fs";
 import path from "node:path";
@@ -158,6 +159,11 @@ export default async function ({ page, base, admin, h }) {
         out.fill = +(await subjectFill(shot)).toFixed(3);
         flatDetail = await centralDetail(shot);
         assert.ok(out.fill >= 0.5 && out.fill <= 0.72, `model fills ${out.fill} of the viewport, want ~0.6`);
+        // 4h R3: the framed direction is the baseline's three-quarter view, decorated face (+Z) toward the camera.
+        const home = (await canvas.getAttribute("data-camera-home")).split(",").map(Number);
+        const want = [Math.cos(Math.PI / 6) * Math.sin((-25 * Math.PI) / 180), 0.5, Math.cos(Math.PI / 6) * Math.cos((-25 * Math.PI) / 180)];
+        home.forEach((v, i) => assert.ok(Math.abs(v - want[i]) <= 0.002, `camera home ${home} vs baseline ${want}`));
+        out.cameraHome = home;
       }
     }
   } finally {

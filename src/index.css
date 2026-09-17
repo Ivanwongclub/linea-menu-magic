@@ -50,6 +50,10 @@
 
     --radius: 0.25rem;
 
+    /* The fixed site header (Header.tsx: h-20 + 1px bottom border) at every
+       width. Full-height surfaces under it (EditorShell) subtract this. */
+    --site-header-height: calc(5rem + 1px);
+
     /* Heritage — warm ivory for history/milestone sections */
     --color-heritage-bg: 40 20% 97%;
 

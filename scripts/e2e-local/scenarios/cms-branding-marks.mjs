@@ -8,6 +8,11 @@
 //      [{index 5..32, name object_6..33}], a reference with radius_raw
 //      5.04 ± 0.05, relief_raw within tolerance (see below), confidence not
 //      low, origin recovered-from-geometry; the result block shows it.
+//      4h (R6): the result reads as one sentence at the stored factor, with
+//      confidence shown only when not high and the numbers behind Details;
+//      the preview draws the recovered ring and tints the marked groups in
+//      the --primary token; "Preview as buyer" hides all 28 (5 body groups
+//      left drawn) and turning it off shows them again.
 //   3. Clear them (click, shift-click), mark two body groups (object_1,
 //      object_3) → Analyse → read-back: 2 marks, reference null; the panel
 //      shows the one-line low-confidence notice (C9).
@@ -108,6 +113,47 @@ export default async function ({ page, admin, editor, h }) {
     const result = panel.getByTestId("model-branding-result");
     await result.waitFor({ timeout: 10000 });
     assert.equal(await result.getAttribute("data-confidence"), ref.confidence);
+
+    // 4h R6: one sentence at the stored factor; confidence only when not high; raw numbers behind Details.
+    const mm1 = (raw) => (raw * POLO_FACTOR).toFixed(1);
+    const sentence = await panel.getByTestId("model-branding-sentence").innerText();
+    const expectedSentence =
+      `Lettering found on a ${mm1(ref.radius_raw)} mm ring, ${mm1(ref.text_height_raw)} mm tall, ` +
+      `${ref.relief_raw > 0 ? "raised" : "recessed"} ${mm1(Math.abs(ref.relief_raw))} mm. Buyers' text will start here.`;
+    assert.equal(sentence, expectedSentence);
+    assert.equal(
+      await panel.getByTestId("model-branding-confidence-line").count(),
+      ref.confidence === "high" ? 0 : 1,
+      `confidence line only when not high (${ref.confidence})`,
+    );
+    const details = panel.getByTestId("model-branding-details");
+    assert.equal(await details.getAttribute("open"), null, "raw numbers start collapsed");
+    await details.locator("summary").click();
+
+    // The preview draws the recovered ring and tints the 28 marked groups in the site token.
+    const preview = page.getByTestId("model-preview-canvas");
+    await page.waitForFunction(
+      () => {
+        const el = document.querySelector('[data-testid="model-preview-canvas"]');
+        return el?.dataset.state === "ready" && el.dataset.ring === "shown" && el.dataset.tinted === "28";
+      },
+      null,
+      { timeout: 30000 },
+    );
+    assert.equal(await preview.getAttribute("data-hidden"), "0", "all groups visible before the buyer preview");
+    const tint = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--primary").trim());
+    assert.ok(tint.length > 0, "the tint comes from the --primary token");
+
+    // "Preview as buyer" hides the marked groups; off shows them again.
+    const buyerToggle = panel.getByTestId("model-branding-buyer-preview");
+    await buyerToggle.click();
+    await page.waitForFunction(() => document.querySelector('[data-testid="model-preview-canvas"]')?.dataset.hidden === "28", null, { timeout: 10000 });
+    assert.equal(await preview.getAttribute("data-tinted"), "0", "buyer preview: no marked group drawn");
+    const buyerMeshes = Number(await preview.getAttribute("data-meshes")) - Number(await preview.getAttribute("data-hidden"));
+    assert.equal(buyerMeshes, 5, "buyer preview shows the 5 body groups");
+    await buyerToggle.click();
+    await page.waitForFunction(() => document.querySelector('[data-testid="model-preview-canvas"]')?.dataset.hidden === "0", null, { timeout: 10000 });
+
     const radiusText = await panel.getByTestId("model-branding-radius").innerText();
     assert.match(radiusText, /raw .* mm/, `radius shows raw and mm: ${radiusText}`);
     const mm = Number(radiusText.match(/([\d.]+) mm/)[1]);
@@ -139,6 +185,7 @@ export default async function ({ page, admin, editor, h }) {
         confidence: ref.confidence,
         fit_rms_raw: ref.fit_rms_raw,
         direction: ref.direction,
+        sentence: expectedSentence,
       },
       body: { marks: body.model_branding_groups.length, reference: body.model_branding_reference },
     };

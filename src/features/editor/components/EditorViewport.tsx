@@ -9,12 +9,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { EditorModel, type RulerMeasurements } from "./EditorModel";
 import type { TextSceneReport } from "./branding/TextLayerMeshes";
 import type { TextLayer } from "../lib/recipe";
-import { RulerOverlay } from "./RulerOverlay";
+import { RulerLabels, RulerOverlay, type RulerLabelElements } from "./RulerOverlay";
 import { RulerToggle } from "./RulerToggle";
 import type { EditorColour } from "../hooks/useEditorProduct";
 import type { PickerFinish } from "../hooks/useFinishOptions";
 import { GL_SETTINGS } from "../lib/renderSettings";
 import { ProceduralStudio } from "./ProceduralStudio";
+import { CameraReport } from "./CameraReport";
 
 interface EditorViewportProps {
   modelStoragePath: string | null;
@@ -120,6 +121,7 @@ export function EditorViewport({
   const [modelSizeMm, setModelSizeMm] = useState<number | null>(null);
   const [rulerMeasurements, setRulerMeasurements] = useState<RulerMeasurements | null>(null);
   const [textReport, setTextReport] = useState<TextSceneReport | null>(null);
+  const rulerLabels = useRef<RulerLabelElements>({ diameter: null, thickness: null });
   // Calibration screenshots composite any DOM over the canvas; `?calibration=1` hides the viewport chrome.
   const calibration = useSearchParams()[0].get("calibration") === "1";
 
@@ -137,7 +139,7 @@ export function EditorViewport({
   // design system's own colour, never tone-mapped (R2).
   return (
     <div
-      className="relative flex-1 bg-secondary"
+      className="relative flex-1 min-h-0 overflow-hidden bg-secondary"
       data-testid="editor-viewport"
       data-model-size-mm={modelSizeMm != null ? modelSizeMm.toFixed(2) : undefined}
       // Scene read-backs for the text scenarios: the rendered glyphs and the no-mirroring check.
@@ -153,6 +155,7 @@ export function EditorViewport({
           onDoubleClick={() => controlsRef.current?.reset()}
         >
           <ProceduralStudio />
+          <CameraReport />
           <EditorModel
             url={url}
             scaleFactor={scaleFactor}
@@ -167,7 +170,7 @@ export function EditorViewport({
             layers={layers}
             onTextReport={setTextReport}
           />
-          {ruler && rulerMeasurements && <RulerOverlay measurements={rulerMeasurements} sizeLigne={sizeLigne} sizeLabel={sizeLabel} />}
+          {ruler && rulerMeasurements && <RulerOverlay measurements={rulerMeasurements} labels={rulerLabels} />}
           <OrbitControls
             ref={controlsRef}
             makeDefault
@@ -179,6 +182,9 @@ export function EditorViewport({
           />
         </Canvas>
       </Suspense>
+      {ruler && rulerMeasurements && (
+        <RulerLabels measurements={rulerMeasurements} sizeLigne={sizeLigne} sizeLabel={sizeLabel} labels={rulerLabels} />
+      )}
       {!calibration && <RulerToggle active={ruler} onToggle={onRulerToggle} />}
     </div>
   );

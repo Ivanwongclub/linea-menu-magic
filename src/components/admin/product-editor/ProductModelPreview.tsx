@@ -1,10 +1,12 @@
-import { Suspense, useEffect, useMemo, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useLoader, useThree, type ThreeEvent } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
+import { Line, OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 import { decoratedFaceRotation, withSmoothNormals } from "@/features/editor/lib/prepareModel";
+import type { BrandingReference } from "@/features/admin/lib/brandingRecovery";
+import { useI18n } from "@/features/i18n/I18nProvider";
 
 const FOV_DEG = 40;
 // Straight on: a 3/4 view foreshortens whichever screen axis isn't facing the
@@ -12,6 +14,19 @@ const FOV_DEG = 40;
 // on-screen measurement of whatever the two clicked points actually are.
 const CAMERA_DIRECTION = new THREE.Vector3(0, 0, 1);
 const VIEWPORT_FILL = 0.95;
+
+/** A site colour token (`--primary: 0 0% 4%`) as a three.js colour — three's HSL parser wants commas. */
+function tokenColour(name: string, fallback: string): string {
+  const raw = typeof document === "undefined" ? "" : getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const parts = raw.split(/\s+/);
+  return parts.length === 3 ? `hsl(${parts.join(", ")})` : fallback;
+}
+
+export interface PreviewSceneReport {
+  meshes: number;
+  tinted: number;
+  hidden: number;
+}
 
 /** Every mesh vertex's world position — used to fit the camera to the model's actual silhouette, not its AABB's corners (a round part reaches nowhere near its box's diagonal). */
 function worldVertices(group: THREE.Object3D): THREE.Vector3[] {
@@ -77,6 +92,10 @@ interface ProductModelPreviewProps {
   picking: boolean;
   /** OBJ group indices (file order) drawn in the highlight colour — the CMS branding marks. */
   highlightIndices?: number[];
+  /** "Preview as buyer": the marked groups are hidden instead of tinted (4j's buyer view, previewed). */
+  hideHighlighted?: boolean;
+  /** The recovered text path, drawn as a ring on the face with its start marked. */
+  reference?: BrandingReference | null;
   pointA: THREE.Vector3 | null;
   pointB: THREE.Vector3 | null;
   onPick: (point: THREE.Vector3) => void;
@@ -86,14 +105,22 @@ function PreviewModel({
   url,
   picking,
   highlightIndices,
+  hideHighlighted,
+  reference,
   onPick,
   controlsRef,
+  onReady,
+  onReport,
 }: {
   url: string;
   picking: boolean;
   highlightIndices: number[];
+  hideHighlighted: boolean;
+  reference: BrandingReference | null;
   onPick: (point: THREE.Vector3) => void;
   controlsRef: React.RefObject<OrbitControlsImpl>;
+  onReady: () => void;
+  onReport: (report: PreviewSceneReport) => void;
 }) {
   const obj = useLoader(OBJLoader, url);
   const { camera } = useThree();
@@ -111,7 +138,7 @@ function PreviewModel({
   }, [obj]);
 
   const material = useMemo(() => new THREE.MeshStandardMaterial({ color: "#9a9a9a", roughness: 0.6, metalness: 0.1 }), []);
-  const highlight = useMemo(() => new THREE.MeshStandardMaterial({ color: "#d97706", roughness: 0.5, metalness: 0.1 }), []);
+  const highlight = useMemo(() => new THREE.MeshStandardMaterial({ color: tokenColour("--primary", "#0a0a0a"), roughness: 0.5, metalness: 0.1 }), []);
   useEffect(
     () => () => {
       material.dispose();
@@ -123,12 +150,20 @@ function PreviewModel({
   useEffect(() => {
     const marked = new Set(highlightKey ? highlightKey.split(",").map(Number) : []);
     // Direct mesh children in file order — the same indexing as `model_branding_groups`.
-    prepared.children
-      .filter((child) => (child as THREE.Mesh).isMesh)
-      .forEach((child, index) => {
-        (child as THREE.Mesh).material = marked.has(index) ? highlight : material;
-      });
-  }, [prepared, material, highlight, highlightKey]);
+    const meshes = prepared.children.filter((child) => (child as THREE.Mesh).isMesh) as THREE.Mesh[];
+    let tinted = 0;
+    let hidden = 0;
+    meshes.forEach((mesh, index) => {
+      const isMarked = marked.has(index);
+      mesh.material = isMarked ? highlight : material;
+      mesh.visible = !(isMarked && hideHighlighted);
+      if (isMarked && mesh.visible) tinted++;
+      if (!mesh.visible) hidden++;
+    });
+    onReport({ meshes: meshes.length, tinted, hidden });
+  }, [prepared, material, highlight, highlightKey, hideHighlighted, onReport]);
+
+  useEffect(() => onReady(), [prepared, onReady]);
 
   // Frames the model to fill most of the preview, whatever its real size —
   // a fixed camera distance would render a small button as a speck (and
@@ -150,14 +185,62 @@ function PreviewModel({
   }, [prepared, camera, controlsRef]);
 
   return (
-    <primitive
-      object={prepared}
-      onClick={(e: ThreeEvent<MouseEvent>) => {
-        if (!picking) return;
-        e.stopPropagation();
-        onPick(e.point.clone());
-      }}
-    />
+    <>
+      {reference && reference.radius_raw > 0 && <RecoveredRing reference={reference} prepared={prepared} />}
+      <primitive
+        object={prepared}
+        onClick={(e: ThreeEvent<MouseEvent>) => {
+          if (!picking) return;
+          e.stopPropagation();
+          onPick(e.point.clone());
+        }}
+      />
+    </>
+  );
+}
+
+/**
+ * The recovered text path (§3.2, raw OBJ frame) as a ring on the face: the
+ * full circle faint, the lettering's arc solid, a dot where buyers' text
+ * starts. Drawn in a sibling group carrying the model's own rotation and
+ * recentring — never inside it, where it would shift the mesh indexing.
+ */
+function RecoveredRing({ reference, prepared }: { reference: BrandingReference; prepared: THREE.Group }) {
+  const { circle, arc, start } = useMemo(() => {
+    const normal = new THREE.Vector3(...reference.face_normal_raw).normalize();
+    const up = new THREE.Vector3(...reference.angle_zero_raw).normalize();
+    const right = new THREE.Vector3().crossVectors(up, normal).normalize();
+    // Lifted off the relief tops so the ring isn't buried in the lettering.
+    const centre = new THREE.Vector3(...reference.centre_raw).addScaledVector(normal, (reference.relief_raw ?? 0) + reference.radius_raw * 0.02);
+    const at = (deg: number): [number, number, number] => {
+      const a = THREE.MathUtils.degToRad(deg);
+      const p = centre
+        .clone()
+        .addScaledVector(right, reference.radius_raw * Math.sin(a))
+        .addScaledVector(up, reference.radius_raw * Math.cos(a));
+      return [p.x, p.y, p.z];
+    };
+    // The covered arc runs clockwise from the lower-numbered reading end.
+    const from = reference.direction === "cw" ? reference.start_angle_deg : reference.end_angle_deg;
+    const to = reference.direction === "cw" ? reference.end_angle_deg : reference.start_angle_deg;
+    const span = (((to - from) % 360) + 360) % 360;
+    const circlePoints = Array.from({ length: 97 }, (_, i) => at((i / 96) * 360));
+    const arcPoints = Array.from({ length: 49 }, (_, i) => at(from + (i / 48) * span));
+    return { circle: circlePoints, arc: arcPoints, start: at(reference.start_angle_deg) };
+  }, [reference]);
+  const colour = useMemo(() => tokenColour("--background", "#ffffff"), []);
+  const outline = useMemo(() => tokenColour("--primary", "#0a0a0a"), []);
+
+  return (
+    <group quaternion={prepared.quaternion} position={prepared.position} renderOrder={10}>
+      <Line points={circle} color={colour} lineWidth={1} transparent opacity={0.6} depthTest={false} />
+      <Line points={arc} color={outline} lineWidth={5} depthTest={false} />
+      <Line points={arc} color={colour} lineWidth={3} depthTest={false} />
+      <mesh position={start} renderOrder={11}>
+        <sphereGeometry args={[reference.radius_raw * 0.05, 16, 16]} />
+        <meshBasicMaterial color={outline} depthTest={false} />
+      </mesh>
+    </group>
   );
 }
 
@@ -170,20 +253,56 @@ function PointMarker({ point }: { point: THREE.Vector3 }) {
   );
 }
 
-export default function ProductModelPreview({ url, picking, highlightIndices = [], pointA, pointB, onPick }: ProductModelPreviewProps) {
+export default function ProductModelPreview({
+  url,
+  picking,
+  highlightIndices = [],
+  hideHighlighted = false,
+  reference = null,
+  pointA,
+  pointB,
+  onPick,
+}: ProductModelPreviewProps) {
+  const { t } = useI18n();
   const controlsRef = useRef<OrbitControlsImpl>(null);
+  const [ready, setReady] = useState(false);
+  const [report, setReport] = useState<PreviewSceneReport | null>(null);
+  const markReady = useMemo(() => () => setReady(true), []);
   return (
-    <div className="h-[38rem] max-w-3xl mx-auto border border-border bg-secondary" data-testid="model-preview-canvas">
+    <div
+      className="relative h-[38rem] max-w-3xl mx-auto border border-border bg-secondary"
+      data-testid="model-preview-canvas"
+      data-state={ready ? "ready" : "loading"}
+      data-ring={reference && reference.radius_raw > 0 ? "shown" : "none"}
+      data-meshes={report?.meshes}
+      data-tinted={report?.tinted}
+      data-hidden={report?.hidden}
+    >
       <Canvas camera={{ fov: FOV_DEG, position: [0, 0, 25] }}>
         <ambientLight intensity={0.6} />
         <directionalLight position={[5, 10, 7]} intensity={1} />
         <Suspense fallback={null}>
-          <PreviewModel url={url} picking={picking} highlightIndices={highlightIndices} onPick={onPick} controlsRef={controlsRef} />
+          <PreviewModel
+            url={url}
+            picking={picking}
+            highlightIndices={highlightIndices}
+            hideHighlighted={hideHighlighted}
+            reference={reference}
+            onPick={onPick}
+            controlsRef={controlsRef}
+            onReady={markReady}
+            onReport={setReport}
+          />
         </Suspense>
         {pointA && <PointMarker point={pointA} />}
         {pointB && <PointMarker point={pointB} />}
         <OrbitControls ref={controlsRef} makeDefault />
       </Canvas>
+      {!ready && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-xs text-muted-foreground" data-testid="model-preview-model-loading">
+          {t("admin.model.preview.modelLoading")}
+        </div>
+      )}
     </div>
   );
 }

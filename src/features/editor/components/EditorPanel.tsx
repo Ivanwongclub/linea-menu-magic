@@ -60,7 +60,7 @@ export function EditorPanel({
   const [pickerOpen, setPickerOpen] = useState(false);
 
   return (
-    <div className="w-full lg:w-[360px] shrink-0 border-l border-border bg-background overflow-y-auto" data-testid="editor-panel">
+    <div className="w-full max-h-[60%] lg:max-h-none lg:w-[360px] shrink-0 border-t lg:border-t-0 lg:border-l border-border bg-background overflow-y-auto overflow-x-hidden" data-testid="editor-panel">
       {saveStatus && saveStatus !== "idle" && (
         <div className="px-4 py-1.5 border-b border-border text-[11px] text-muted-foreground text-right" data-testid="autosave-status" data-status={saveStatus}>
           {saveStatus === "saving" ? t("editor.autosave.saving") : saveStatus === "error" ? t("editor.autosave.notSaved") : t("editor.autosave.saved")}
