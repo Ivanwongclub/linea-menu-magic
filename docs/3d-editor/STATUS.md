@@ -34,6 +34,12 @@ this is an index, not a decision log.
 | 11 | Upload path: scene tree, viewport selection, hover, hide/isolate, first-import dialog, full units and scale, calibration, full ruler, branding analysis and recovery, fit policies | Not started |
 | 12 | Bake and export: boolean, cleanup, bake scale, OBJ mm, GLB metres, STL (§1.5) | Not started |
 
+Deck screenshots (not part of the test suite): `npm run deck:shots` stages
+the Polo as "Metal Shank Button" on the local stack, drives the real UI and
+writes `reports/deck/*.png` (1440 × 900 at device scale 2, plus a 390 px
+shot) with `reports/deck/manifest.json` — script in
+`scripts/e2e-local/deck/`.
+
 Phases 4–12 follow `wincyc-3d-editor-units-and-recovery-rulings.md` §7 (§ refs
 above are to that document); Phase 4's units, their e2e proofs and open
 questions are in `reports/E1-plan-integration.md` §5. Autosave already landed in

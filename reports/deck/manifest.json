@@ -1,0 +1,136 @@
+{
+  "shots": [
+    {
+      "filename": "00-finishes-contact-sheet.png",
+      "description": "Twelve finishes on the same part, each beside its chart swatch (from reports/4-materials.png).",
+      "phase": 4,
+      "stddev": 60.12
+    },
+    {
+      "filename": "01-catalogue-entry.png",
+      "description": "Designer Studio: the way into the editor from the catalogue.",
+      "phase": 2,
+      "stddev": 44.87
+    },
+    {
+      "filename": "02-editor-first-open.png",
+      "description": "Metal Shank Button: the editor as it opens — product, finish, branding and output.",
+      "phase": 2,
+      "stddev": 45.11
+    },
+    {
+      "filename": "03-finish-sheet.png",
+      "description": "The finish picker: the WIN-CYC chart filtered by axis — Brushed and Nickel ticked.",
+      "phase": 3,
+      "stddev": 102.39
+    },
+    {
+      "filename": "04-finish-gold.png",
+      "description": "Gold plating rendered from the finish's measured reflectance, not a guessed colour.",
+      "phase": 3,
+      "stddev": 50.56
+    },
+    {
+      "filename": "05-finish-anti-brass.png",
+      "description": "Anti brass: an antique two-tone, oxide in the recesses from a baked occlusion pass.",
+      "phase": 3,
+      "stddev": 54.56
+    },
+    {
+      "filename": "06-ruler-on.png",
+      "description": "The ruler: diameter and thickness measured off the model itself, in millimetres.",
+      "phase": 4,
+      "stddev": 55.57
+    },
+    {
+      "filename": "07-add-text.png",
+      "description": "Add text: the layer lands where the factory's own branding was, with its handles on the model.",
+      "phase": 4,
+      "stddev": 55.97
+    },
+    {
+      "filename": "08-position-curve.png",
+      "description": "Position and curve: every spatial value as a number and a slider, the number authoritative.",
+      "phase": 4,
+      "stddev": 56.03
+    },
+    {
+      "filename": "09-text-bottom-arc.png",
+      "description": "The bottom arc: text reads left to right along the inside of the circle, never mirrored.",
+      "phase": 4,
+      "stddev": 56.25
+    },
+    {
+      "filename": "10-straight-text.png",
+      "description": "Straight layout: the same layer, laid flat across the face.",
+      "phase": 4,
+      "stddev": 55.09
+    },
+    {
+      "filename": "11-ruler-layer.png",
+      "description": "The ruler follows the selected layer: letter height and the margin left to the edge.",
+      "phase": 4,
+      "stddev": 55.43
+    },
+    {
+      "filename": "12-logo-layer.png",
+      "description": "Add logo: an uploaded SVG becomes engravable outlines, holes and all.",
+      "phase": 4,
+      "stddev": 54.35
+    },
+    {
+      "filename": "13-layers-list.png",
+      "description": "Three layers: reorder, delete, undo and redo — every change is one entry.",
+      "phase": 4,
+      "stddev": 55.42
+    },
+    {
+      "filename": "14-anonymous-banner.png",
+      "description": "Anonymous buyer: the editor works before sign-in, with the banner offering to save the design.",
+      "phase": 2,
+      "stddev": 43.36
+    },
+    {
+      "filename": "15-mobile.png",
+      "description": "390 px: the viewport keeps its height and the panel stacks under it, controls and all.",
+      "phase": 4,
+      "stddev": 45.97
+    },
+    {
+      "filename": "16-cms-upload.png",
+      "description": "The CMS: one .obj per product, its raw dimensions read on upload and its scale confirmed.",
+      "phase": 4,
+      "stddev": 23.18
+    },
+    {
+      "filename": "17-cms-preview-ring.png",
+      "description": "The recovered text path drawn on the model: radius, arc and where buyers' text will start.",
+      "phase": 4,
+      "stddev": 65.5
+    },
+    {
+      "filename": "18-cms-preview-buyer.png",
+      "description": "Preview as buyer: the factory lettering hidden, which is what the buyer starts from.",
+      "phase": 4,
+      "stddev": 61.73
+    },
+    {
+      "filename": "19-cms-two-point.png",
+      "description": "Two-point calibration: click two points whose real distance is known and the scale follows.",
+      "phase": 4,
+      "stddev": 65.46
+    },
+    {
+      "filename": "20-cms-groups.png",
+      "description": "Marking the factory lettering: 28 groups, analysed into one sentence a person can check.",
+      "phase": 4,
+      "stddev": 82.42
+    }
+  ],
+  "skipped": [
+    "23-relief-raised.png: raised relief with its callout ships with Phase 5 (emboss/deboss, depth, thresholds), which is not built yet",
+    "24-relief-engraved.png: engraved relief ships with Phase 5 (emboss/deboss, depth, thresholds), which is not built yet",
+    "25-manufacturing-strip.png: the manufacturing warning strip ships with Phase 5 (emboss/deboss, depth, thresholds), which is not built yet",
+    "21..-trim-<name>.png: scripts/e2e-local/fixtures/trims/ has no .obj files"
+  ]
+}
