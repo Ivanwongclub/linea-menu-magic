@@ -3,16 +3,22 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
 import type { Font } from "three/examples/jsm/loaders/FontLoader.js";
-import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import { loadBundledFont } from "../../lib/fonts";
 import { glyphChar, layoutText, type TypefaceMetrics } from "../../lib/textLayout";
-import { isLogoLayer, isTextLayer, logoHeightMm, type Layer, type LogoLayer } from "../../lib/recipe";
-import { buildLogoGeometry, parseLogoSvg, type LogoArtwork } from "../../lib/logoGeometry";
+import { isLogoLayer, isTextLayer, layerRelief, logoHeightMm, type Layer, type LayerRelief, type LogoLayer } from "../../lib/recipe";
+import { logoOutlines, parseLogoSvg, type LogoArtwork } from "../../lib/logoGeometry";
+import { glyphOutlines } from "../../lib/glyphOutlines";
+import { clonePatched } from "../../lib/shaderPatch";
+import {
+  openingGeometry,
+  raisedGeometry,
+  recessFloorGeometry,
+  recessWallGeometry,
+  type ReliefOutline,
+} from "../../lib/reliefGeometry";
 
-/** Glyph bases sit this far above the face so they never share a plane with it (E1 §6 R3). */
-export const GLYPH_LIFT_MM = 0.02;
-/** A thin slab until Phase 5 gives a layer real relief. */
-export const GLYPH_PREVIEW_THICKNESS_MM = 0.05;
+/** Draw order: the part, then each recess's stencil mask, its depth punch, and its interior. */
+const ORDER = { mask: 1, punch: 2, interior: 3 } as const;
 
 export interface GlyphReport {
   layerId: string;
@@ -38,7 +44,7 @@ export interface LogoReport {
   measuredHeightMm: number;
   /** Triangle area, mm² — less than width × height exactly when the artwork's holes were cut. */
   areaMm2: number;
-  /** Which way the first triangle faces along the face normal: must be +1, or the logo is culled. */
+  /** Which way the artwork faces along the face normal: must be +1, or the logo is culled. */
   facing: number;
   x: number;
   y: number;
@@ -46,10 +52,32 @@ export interface LogoReport {
   conformed: boolean;
 }
 
+/** What each layer's relief actually became on screen (Phase 5 R7 reads this back). */
+export interface ReliefReport {
+  layerId: string;
+  type: LayerRelief["type"];
+  depthMm: number;
+  bevelMm: number;
+  /** Glyphs (or the logo) carrying relief. */
+  pieces: number;
+  /** Raised: how far the extrusion's top stands above the surface, along the layer's own normal. */
+  heightMm: [number, number] | null;
+  /** Engraved: how far the recess floor lies below the surface. */
+  floorMm: [number, number] | null;
+  /** Engraved: wall meshes drawn, and the span of normal they cover. */
+  wallMeshes: number;
+  wallSpanMm: [number, number] | null;
+  /** Engraved: opening masks (one stencil mask + one depth punch per piece). */
+  openingMeshes: number;
+  /** Where the ruler's relief callout starts, and the normal it runs along (R4). */
+  anchor: { x: number; y: number; z: number; nx: number; ny: number; nz: number } | null;
+}
+
 export interface TextSceneReport {
   glyphMeshCount: number;
   logoMeshCount: number;
   logos: LogoReport[];
+  reliefs: ReliefReport[];
   /**
    * Smallest world-matrix determinant over the model and every glyph — never
    * ≤ 0 (no mirroring, rulings §5). drei's ContactShadows draws its shadow
@@ -67,13 +95,40 @@ interface BrandingMeshesProps {
   model: THREE.Object3D;
   /** Top of the face in the model's frame, mm. */
   faceZ: number;
-  material: THREE.Material;
+  material: THREE.MeshPhysicalMaterial;
   onReport?: (report: TextSceneReport) => void;
 }
 
-const geometries = new Map<string, THREE.BufferGeometry>();
 /** Parsed artwork per SVG source, so a width change doesn't re-parse. */
 const artworks = new Map<string, LogoArtwork | null>();
+
+/**
+ * Built relief geometry, keyed by everything it depends on. Dragging position
+ * never rebuilds; changing size, depth or bevel does. The whole cache is
+ * dropped once it grows past a slider's worth of intermediate values.
+ */
+const geometries = new Map<string, THREE.BufferGeometry>();
+const GEOMETRY_CACHE_LIMIT = 300;
+/** Keys the layout being built has already taken — never evicted under it. */
+const inUse = new Set<string>();
+
+function cached(key: string, build: () => THREE.BufferGeometry): THREE.BufferGeometry {
+  inUse.add(key);
+  const hit = geometries.get(key);
+  if (hit) return hit;
+  if (geometries.size >= GEOMETRY_CACHE_LIMIT) {
+    for (const [cachedKey, geometry] of geometries) {
+      if (inUse.has(cachedKey)) continue;
+      geometry.dispose();
+      geometries.delete(cachedKey);
+    }
+  }
+  const built = build();
+  geometries.set(key, built);
+  return built;
+}
+
+const reliefKey = (relief: LayerRelief) => `${relief.type}:${relief.depth_mm}:${relief.bevel_mm}`;
 
 /** Summed triangle area of a flat geometry, for the holes read-back. */
 function triangleArea(geometry: THREE.BufferGeometry): number {
@@ -143,34 +198,65 @@ function prepareRaycast(model: THREE.Object3D): void {
   });
 }
 
-/**
- * One glyph at cap height 1 with its origin at the advance midpoint and the
- * cap-height midline, so a mesh's position is the layout's glyph centre and
- * `scale (size, size, 1)` sizes it without touching thickness.
- */
-function glyphGeometry(fontKey: string, font: Font, char: string): THREE.BufferGeometry {
-  const key = `${fontKey}:${char}`;
-  let geometry = geometries.get(key);
-  if (!geometry) {
-    const data = font.data as unknown as TypefaceMetrics;
-    const cap = data.capHeight && data.capHeight > 0 ? data.capHeight : data.resolution * 0.7;
-    geometry = new TextGeometry(char, {
-      font,
-      size: data.resolution / cap,
-      height: GLYPH_PREVIEW_THICKNESS_MM,
-      curveSegments: 6,
-      bevelEnabled: false,
-    });
-    geometry.translate(-(data.glyphs[char]?.ha ?? 0) / cap / 2, -0.5, 0);
-    geometries.set(key, geometry);
-  }
-  return geometry;
+/** Writes 1 into the stencil wherever the opening is the frontmost thing on screen. */
+function maskMaterial(): THREE.Material {
+  return new THREE.MeshBasicMaterial({
+    colorWrite: false,
+    depthWrite: false,
+    polygonOffset: true,
+    polygonOffsetFactor: -1,
+    polygonOffsetUnits: -4,
+    stencilWrite: true,
+    stencilRef: 1,
+    stencilFunc: THREE.AlwaysStencilFunc,
+    stencilZPass: THREE.ReplaceStencilOp,
+  });
 }
 
 /**
- * The recipe's layers in the face frame: text as one mesh per glyph, a logo
- * as one `ShapeGeometry` from its SVG (4k). Geometry only for display —
- * never part of the measured model.
+ * Pushes the depth inside the opening to the far plane, so the recess — which
+ * lies behind the surface that was already drawn there — can be depth-sorted
+ * among its own faces instead of being rejected by the part in front of it.
+ */
+function punchMaterial(): THREE.Material {
+  return new THREE.ShaderMaterial({
+    vertexShader: `void main() {
+	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+	gl_Position.z = gl_Position.w;
+}`,
+    fragmentShader: "void main() { gl_FragColor = vec4( 0.0 ); }",
+    colorWrite: false,
+    depthWrite: true,
+    depthFunc: THREE.AlwaysDepth,
+    stencilWrite: true,
+    stencilRef: 1,
+    stencilFunc: THREE.EqualStencilFunc,
+    stencilZPass: THREE.KeepStencilOp,
+  });
+}
+
+/** The recess's own surfaces: the part's material, drawn only through the opening. */
+function interiorMaterial(material: THREE.MeshPhysicalMaterial): THREE.MeshPhysicalMaterial {
+  const clone = clonePatched(material);
+  clone.side = THREE.FrontSide;
+  clone.stencilWrite = true;
+  clone.stencilRef = 1;
+  clone.stencilFunc = THREE.EqualStencilFunc;
+  clone.stencilZPass = THREE.KeepStencilOp;
+  return clone;
+}
+
+interface ReliefMaterials {
+  mask: THREE.Material;
+  punch: THREE.Material;
+  interior: THREE.MeshPhysicalMaterial;
+}
+
+/**
+ * The recipe's layers in the face frame: text as one group per glyph, a logo
+ * as one group, each carrying the layer's relief — a raised extrusion, or an
+ * opening mask, a depth punch, and the recess's walls and floor as their own
+ * meshes (R2). Geometry only for display — never part of the measured model.
  */
 export function BrandingMeshes({ layers, logoSources, model, faceZ, material, onReport }: BrandingMeshesProps) {
   const [fonts, setFonts] = useState<Record<string, Font>>({});
@@ -178,6 +264,19 @@ export function BrandingMeshes({ layers, logoSources, model, faceZ, material, on
   const lastCamera = useRef(new THREE.Matrix4());
   const layoutVersion = useRef(0);
   const projectedVersion = useRef(-1);
+
+  const materials: ReliefMaterials = useMemo(
+    () => ({ mask: maskMaterial(), punch: punchMaterial(), interior: interiorMaterial(material) }),
+    [material],
+  );
+  useEffect(
+    () => () => {
+      materials.mask.dispose();
+      materials.punch.dispose();
+      materials.interior.dispose();
+    },
+    [materials],
+  );
 
   const fontKeys = useMemo(() => [...new Set(layers.filter(isTextLayer).map((l) => l.content.font.key))].sort().join("|"), [layers]);
 
@@ -198,6 +297,7 @@ export function BrandingMeshes({ layers, logoSources, model, faceZ, material, on
 
   useLayoutEffect(() => {
     group.clear();
+    inUse.clear();
     const glyphs: GlyphReport[] = [];
     const raycaster = new THREE.Raycaster();
     const normal = new THREE.Vector3();
@@ -207,6 +307,7 @@ export function BrandingMeshes({ layers, logoSources, model, faceZ, material, on
     let raycastReady = false;
 
     const logos: LogoReport[] = [];
+    const reliefs = new Map<string, ReliefReport>();
     const built: THREE.BufferGeometry[] = [];
 
     /** The highest surface under a set of face-frame points (a logo's footprint). */
@@ -243,15 +344,78 @@ export function BrandingMeshes({ layers, logoSources, model, faceZ, material, on
       return { z: hit.point.z, conformed: true };
     };
 
+    const report = (layer: Layer, relief: LayerRelief): ReliefReport => {
+      let entry = reliefs.get(layer.id);
+      if (!entry) {
+        entry = {
+          layerId: layer.id,
+          type: relief.type,
+          depthMm: relief.depth_mm,
+          bevelMm: relief.bevel_mm,
+          pieces: 0,
+          heightMm: null,
+          floorMm: null,
+          wallMeshes: 0,
+          wallSpanMm: null,
+          openingMeshes: 0,
+          anchor: null,
+        };
+        reliefs.set(layer.id, entry);
+      }
+      return entry;
+    };
+
+    const span = (current: [number, number] | null, low: number, high: number): [number, number] =>
+      current ? [Math.min(current[0], low), Math.max(current[1], high)] : [low, high];
+
+    /**
+     * One piece of a layer — a glyph or a logo — as a group standing on the
+     * surface, oriented to its normal, carrying the relief itself.
+     */
+    const piece = (layer: Layer, relief: LayerRelief, outlines: ReliefOutline[], key: string): THREE.Group => {
+      const holder = new THREE.Group();
+      const entry = report(layer, relief);
+      entry.pieces++;
+      if (relief.type === "emboss") {
+        const geometry = cached(`${key}|${reliefKey(relief)}|raised`, () => raisedGeometry(outlines, relief));
+        geometry.computeBoundingBox();
+        const box = geometry.boundingBox as THREE.Box3;
+        entry.heightMm = span(entry.heightMm, box.max.z, box.max.z);
+        holder.add(new THREE.Mesh(geometry, material));
+        return holder;
+      }
+      const opening = cached(`${key}|${reliefKey(relief)}|opening`, () => openingGeometry(outlines));
+      const walls = cached(`${key}|${reliefKey(relief)}|walls`, () => recessWallGeometry(outlines, relief));
+      const floor = cached(`${key}|${reliefKey(relief)}|floor`, () => recessFloorGeometry(outlines, relief));
+      const mask = new THREE.Mesh(opening, materials.mask);
+      mask.renderOrder = ORDER.mask;
+      const punch = new THREE.Mesh(opening, materials.punch);
+      punch.renderOrder = ORDER.punch;
+      const wallMesh = new THREE.Mesh(walls, materials.interior);
+      wallMesh.renderOrder = ORDER.interior;
+      const floorMesh = new THREE.Mesh(floor, materials.interior);
+      floorMesh.renderOrder = ORDER.interior;
+      holder.add(mask, punch, wallMesh, floorMesh);
+      floor.computeBoundingBox();
+      walls.computeBoundingBox();
+      const floorBox = floor.boundingBox as THREE.Box3;
+      const wallBox = walls.boundingBox as THREE.Box3;
+      entry.floorMm = span(entry.floorMm, floorBox.min.z, floorBox.min.z);
+      entry.wallSpanMm = span(entry.wallSpanMm, wallBox.min.z, wallBox.max.z);
+      entry.wallMeshes++;
+      entry.openingMeshes += 2;
+      return holder;
+    };
+
     for (const layer of layers) {
       if (!layer.visible) continue;
+      const relief = layerRelief(layer);
       if (isLogoLayer(layer)) {
         const source = logoSources[layer.id];
         const artwork = source ? logoArtwork(source) : null;
         if (!artwork) continue;
-        const geometry = buildLogoGeometry(artwork, layer.content.width_mm);
-        built.push(geometry);
-        const mesh = new THREE.Mesh(geometry, material);
+        const outlines = logoOutlines(artwork, layer.content.width_mm);
+        const holder = piece(layer, relief, outlines, `logo|${logoKey(source)}|${layer.content.width_mm}`);
         spin.setFromAxisAngle(Z, -layer.placement.rotation_deg * DEG);
         const { x, y } = layer.placement.centre_mm;
         // A logo is one flat sheet, not a row of small glyphs: tilting it to
@@ -262,25 +426,27 @@ export function BrandingMeshes({ layers, logoSources, model, faceZ, material, on
         const placed = layer.placement.conform
           ? surfaceUnder(footprint(layer.content.width_mm, logoHeightMm(layer), x, y, layer.placement.rotation_deg))
           : { z: faceZ, conformed: false };
-        mesh.position.set(x, y, placed.z + GLYPH_LIFT_MM);
-        mesh.quaternion.copy(spin);
-        mesh.userData = { logo: layer.id, conformed: placed.conformed };
-        group.add(mesh);
-        geometry.computeBoundingBox();
-        const box = geometry.boundingBox as THREE.Box3;
-        const area = triangleArea(geometry);
-        const facing = frontFacing(geometry);
+        holder.position.set(x, y, placed.z);
+        holder.quaternion.copy(spin);
+        holder.userData = { logo: layer.id, conformed: placed.conformed };
+        group.add(holder);
+        // The artwork's own footprint, measured off a flat copy: what the logo
+        // covers on the face is the same whichever way its relief runs.
+        const flat = openingGeometry(outlines);
+        built.push(flat);
+        flat.computeBoundingBox();
+        const box = flat.boundingBox as THREE.Box3;
         logos.push({
           layerId: layer.id,
           widthMm: layer.content.width_mm,
           heightMm: logoHeightMm(layer),
           measuredWidthMm: box.max.x - box.min.x,
           measuredHeightMm: box.max.y - box.min.y,
-          areaMm2: area,
-          facing,
+          areaMm2: triangleArea(flat),
+          facing: frontFacing(flat),
           x,
           y,
-          z: placed.z + GLYPH_LIFT_MM,
+          z: placed.z,
           conformed: placed.conformed,
         });
         continue;
@@ -292,7 +458,10 @@ export function BrandingMeshes({ layers, logoSources, model, faceZ, material, on
       for (const placed of layoutText(metrics, layer)) {
         const char = glyphChar(metrics, placed.char);
         if (!char.trim()) continue;
-        const mesh = new THREE.Mesh(glyphGeometry(layer.content.font.key, font, char), material);
+        const size = layer.style.text_size_mm;
+        const outlines = glyphOutlines(font, char, size);
+        if (outlines.length === 0) continue;
+        const holder = piece(layer, relief, outlines, `glyph|${layer.content.font.key}|${char}|${size}`);
         spin.setFromAxisAngle(Z, placed.rotationZ);
         let z = faceZ;
         let conformed = false;
@@ -305,11 +474,10 @@ export function BrandingMeshes({ layers, logoSources, model, faceZ, material, on
           z = landed.z;
           conformed = landed.conformed;
         }
-        mesh.position.set(placed.x, placed.y, z + GLYPH_LIFT_MM);
-        mesh.quaternion.copy(spin);
-        mesh.scale.set(layer.style.text_size_mm, layer.style.text_size_mm, 1);
-        mesh.userData = { layerId: layer.id, index: placed.index, char, conformed };
-        group.add(mesh);
+        holder.position.set(placed.x, placed.y, z);
+        holder.quaternion.copy(spin);
+        holder.userData = { layerId: layer.id, index: placed.index, char, conformed };
+        group.add(holder);
       }
     }
     layoutVersion.current++;
@@ -317,10 +485,14 @@ export function BrandingMeshes({ layers, logoSources, model, faceZ, material, on
     // Read back from the world matrices three.js will render with, not from the layout's own numbers.
     group.updateWorldMatrix(true, true);
     const position = new THREE.Vector3();
-    for (const mesh of group.children) {
-      position.setFromMatrixPosition(mesh.matrixWorld);
-      up.set(0, 0, 1).transformDirection(mesh.matrixWorld);
-      const { layerId, index, char, conformed } = mesh.userData;
+    for (const holder of group.children) {
+      position.setFromMatrixPosition(holder.matrixWorld);
+      up.set(0, 0, 1).transformDirection(holder.matrixWorld);
+      const { layerId, logo, index, char, conformed } = holder.userData;
+      const entry = reliefs.get(layerId ?? logo ?? "");
+      if (entry && !entry.anchor) {
+        entry.anchor = { x: position.x, y: position.y, z: position.z, nx: up.x, ny: up.y, nz: up.z };
+      }
       if (!layerId) continue;
       glyphs.push({ layerId, index, char, x: position.x, y: position.y, z: position.z, upZ: up.z, conformed });
     }
@@ -332,13 +504,20 @@ export function BrandingMeshes({ layers, logoSources, model, faceZ, material, on
         minWorldDeterminant = Math.min(minWorldDeterminant, o.matrixWorld.determinant());
       });
     }
-    onReport?.({ glyphMeshCount: group.children.length - logos.length, logoMeshCount: logos.length, logos, minWorldDeterminant, glyphs });
+    onReport?.({
+      glyphMeshCount: group.children.length - logos.length,
+      logoMeshCount: logos.length,
+      logos,
+      reliefs: [...reliefs.values()],
+      minWorldDeterminant,
+      glyphs,
+    });
 
-    // Glyph geometry is shared and cached; a logo's is built per width.
+    // Relief geometry is cached and shared; only the flat measuring copies are ours.
     return () => {
       for (const geometry of built) geometry.dispose();
     };
-  }, [group, layers, logoSources, model, fonts, faceZ, material, onReport]);
+  }, [group, layers, logoSources, model, fonts, faceZ, material, materials, onReport]);
 
   // Screen x of each glyph centre, in canvas CSS px, kept on the canvas
   // element whenever the camera or the layout changes — the e2e reading-
@@ -356,4 +535,15 @@ export function BrandingMeshes({ layers, logoSources, model, faceZ, material, on
   });
 
   return <primitive object={group} />;
+}
+
+/** A short, stable key per uploaded SVG, so the geometry cache isn't keyed by the whole file. */
+const logoKeys = new Map<string, number>();
+function logoKey(svg: string): number {
+  let key = logoKeys.get(svg);
+  if (key === undefined) {
+    key = logoKeys.size + 1;
+    logoKeys.set(svg, key);
+  }
+  return key;
 }

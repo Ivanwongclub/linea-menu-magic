@@ -12,6 +12,9 @@ export const GL_SETTINGS = {
   toneMapping: NeutralToneMapping,
   toneMappingExposure: TONE_MAPPING_EXPOSURE,
   outputColorSpace: SRGBColorSpace,
+  // Engraved layers carve their recess with the stencil buffer (Phase 5 R2;
+  // E1 §6 R4) — asked for explicitly, never left to the renderer's default.
+  stencil: true,
 } as const;
 
 /**

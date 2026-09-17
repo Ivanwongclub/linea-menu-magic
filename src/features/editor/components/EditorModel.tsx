@@ -9,7 +9,7 @@ import type { PickerFinish } from "../hooks/useFinishOptions";
 import { decoratedFaceRotation, withSmoothNormals } from "../lib/prepareModel";
 import { bakeOcclusion, occlusionKey } from "../lib/ambientOcclusion";
 import { useEditorStore } from "../store/useEditorStore";
-import { applyTwoTone } from "../lib/twoTone";
+import { applyShaderPatches, brushForSurface } from "../lib/shaderPatch";
 import type { Layer } from "../lib/recipe";
 import { BrandingMeshes, type TextSceneReport } from "./branding/BrandingMeshes";
 import {
@@ -62,14 +62,12 @@ export interface RulerMeasurements {
 }
 
 /**
- * BRUSHED runs linear along the model's local X axis, which is three.js's
- * zero-rotation tangent default. CIRCLE_BRUSHED is radial — no single
- * angle expresses it without per-vertex tangents — and every other surface
- * is isotropic, so all resolve to 0 today (R6, Phase 3).
+ * `anisotropyRotation` stays 0: the brush direction is no longer a rotation
+ * of three.js's derivative tangent but a tangent computed per fragment —
+ * linear along the face frame's X for BRUSHED, radial about the face centre
+ * for CIRCLE_BRUSHED (Phase 5 R5, `lib/shaderPatch.ts`).
  */
-function anisotropyRotationForSurface(_surfaceCode: string | undefined): number {
-  return 0;
-}
+const ANISOTROPY_ROTATION = 0;
 
 /**
  * `MeshPhysicalMaterial` straight from the finish row: the database derives
@@ -108,11 +106,15 @@ export function EditorModel({
         metalness: finish.metalness,
         roughness: finish.roughness,
         anisotropy: finish.anisotropy,
-        anisotropyRotation: anisotropyRotationForSurface(finish.surface?.code),
+        anisotropyRotation: ANISOTROPY_ROTATION,
         clearcoat: finish.clearcoat ?? 0,
         clearcoatRoughness: finish.clearcoat_roughness ?? 0,
       });
-      if (finish.two_tone) applyTwoTone(m, finish.oxide_color_hex);
+      applyShaderPatches(m, {
+        twoTone: !!finish.two_tone,
+        twoToneOxideHex: finish.oxide_color_hex,
+        brush: brushForSurface(finish.surface?.code, finish.anisotropy),
+      });
       return m;
     }
     return new THREE.MeshPhysicalMaterial({

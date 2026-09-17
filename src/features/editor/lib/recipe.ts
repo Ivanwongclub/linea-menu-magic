@@ -71,9 +71,39 @@ export const logoHeightMm = (layer: LogoLayer): number => (layer.content.aspect 
 
 export type Provenance = "recovered" | "user";
 
-export interface TextRelief {
+/**
+ * Raised or engraved, per layer (Phase 5 R1; E1 §3.3). `depth_mm` is the
+ * magnitude along the local surface normal for both types — the UI labels it
+ * "Emboss height" or "Engrave depth". `bevel_mm` is the chamfer on the top
+ * edge of a raised layer / the opening edge of an engraved one.
+ */
+export interface LayerRelief {
   type: "emboss" | "deboss";
   depth_mm: number;
+  bevel_mm: number;
+}
+
+/** 4d/4j wrote relief without a bevel; a stored layer may still be that shape. */
+export type TextRelief = LayerRelief;
+
+/** R1: the last fallback, when neither the model nor the finish's process says otherwise. */
+export const DEFAULT_RELIEF_DEPTH_MM = 0.3;
+export const DEFAULT_BEVEL_MM = 0.05;
+
+/**
+ * R1: recovered relief if the model carried one, else the finish's process
+ * minimum, else 0.30 mm. A new layer is raised unless the factory's own
+ * lettering was engraved.
+ */
+export function defaultRelief(recovered: RecoveredRelief | null, processMinDepthMm?: number | null): LayerRelief {
+  if (recovered) return { bevel_mm: DEFAULT_BEVEL_MM, ...recovered };
+  const depth = processMinDepthMm != null && processMinDepthMm > 0 ? processMinDepthMm : DEFAULT_RELIEF_DEPTH_MM;
+  return { type: "emboss", depth_mm: depth, bevel_mm: DEFAULT_BEVEL_MM };
+}
+
+/** What a layer renders and quotes with: its own relief, with any missing bevel filled in. */
+export function layerRelief(layer: Layer): LayerRelief {
+  return layer.relief ? { bevel_mm: DEFAULT_BEVEL_MM, ...layer.relief } : defaultRelief(null);
 }
 
 export interface DraftRecipe {
@@ -90,6 +120,8 @@ export interface LayerPatch {
   content?: (Partial<Omit<TextLayer["content"], "font">> & { font?: TextLayer["content"]["font"] }) | Partial<LogoLayer["content"]>;
   style?: Partial<TextLayer["style"]>;
   placement?: Partial<Omit<LayerPlacement, "centre_mm">> & { centre_mm?: LayerPlacement["centre_mm"] };
+  /** Phase 5: type, depth or bevel; the layer's other relief fields are kept. */
+  relief?: Partial<LayerRelief>;
 }
 
 export const DEFAULT_FONT_KEY = "poppins-semibold";
@@ -129,14 +161,24 @@ export interface LayerDefaults {
   arc_position_deg: number;
   direction: TextDirection;
   text_size_mm: number | null;
-  relief: TextRelief | null;
+  relief: RecoveredRelief | null;
 }
+
+/** What 4d/4j recovered from the model: a type and a depth, no bevel. */
+export type RecoveredRelief = Omit<LayerRelief, "bevel_mm"> & { bevel_mm?: number };
 
 /**
  * Fallback defaults (E1 §3.3 table) — straight, centred, 12% cap height —
  * or, given recovered `defaults`, a circle where the factory lettering was.
+ * `processMinDepthMm` is the selected finish's `min_deboss_depth_mm` (R1).
  */
-export function newTextLayer(id: string, faceDiameterMm: number, value = "", defaults: LayerDefaults | null = null): TextLayer {
+export function newTextLayer(
+  id: string,
+  faceDiameterMm: number,
+  value = "",
+  defaults: LayerDefaults | null = null,
+  processMinDepthMm: number | null = null,
+): TextLayer {
   const layer: TextLayer = {
     id,
     kind: "text",
@@ -153,7 +195,7 @@ export function newTextLayer(id: string, faceDiameterMm: number, value = "", def
       baseline_offset_mm: 0,
       conform: true,
     },
-    relief: null,
+    relief: defaultRelief(null, processMinDepthMm),
     fill: null,
   };
   if (!defaults) return layer;
@@ -175,10 +217,8 @@ export function newTextLayer(id: string, faceDiameterMm: number, value = "", def
     layer.style = { ...layer.style, text_size_mm: defaults.text_size_mm };
     provenance.text_size_mm = "recovered";
   }
-  if (defaults.relief) {
-    layer.relief = defaults.relief;
-    provenance.depth_mm = "recovered";
-  }
+  layer.relief = defaultRelief(defaults.relief, processMinDepthMm);
+  if (defaults.relief) provenance.depth_mm = "recovered";
   layer.provenance = provenance;
   return layer;
 }
@@ -199,6 +239,10 @@ function markEdited(layer: Layer, patch: LayerPatch): Layer["provenance"] {
       edited(key, layer.style[key as keyof TextLayer["style"]], value);
     }
   }
+  // A recovered depth the buyer retypes becomes theirs (§4.1).
+  for (const [key, value] of Object.entries(patch.relief ?? {})) {
+    edited(key, layerRelief(layer)[key as keyof LayerRelief], value);
+  }
   return next;
 }
 
@@ -209,6 +253,7 @@ export function applyLayerPatch<T extends Layer>(layer: T, patch: LayerPatch): T
     content: { ...layer.content, ...patch.content },
     style: { ...layer.style, ...patch.style },
     placement: { ...layer.placement, ...patch.placement },
+    ...(patch.relief ? { relief: { ...layerRelief(layer), ...patch.relief } } : {}),
     ...(layer.provenance ? { provenance: markEdited(layer, patch) } : {}),
   } as T;
 }
@@ -240,7 +285,13 @@ export function scaleLayers(layers: Layer[], ratio: number): Layer[] {
 /** A logo's default width (4k R3): 40% of the face diameter, centred, unrotated. */
 export const LOGO_WIDTH_FRACTION = 0.4;
 
-export function newLogoLayer(id: string, faceDiameterMm: number, aspect: number, assetId: string | null = null): LogoLayer {
+export function newLogoLayer(
+  id: string,
+  faceDiameterMm: number,
+  aspect: number,
+  assetId: string | null = null,
+  processMinDepthMm: number | null = null,
+): LogoLayer {
   return {
     id,
     kind: "logo",
@@ -257,7 +308,7 @@ export function newLogoLayer(id: string, faceDiameterMm: number, aspect: number,
       baseline_offset_mm: 0,
       conform: true,
     },
-    relief: null,
+    relief: defaultRelief(null, processMinDepthMm),
     fill: null,
   };
 }

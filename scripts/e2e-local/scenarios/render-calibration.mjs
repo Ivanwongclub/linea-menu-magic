@@ -15,6 +15,10 @@
 //    review; relief visible in each.
 // 5. No viewport toolbar; three-quarter camera filling ~60% (baseline 0.56),
 //    home direction elevation 30° / azimuth −25° read back from the canvas (4h).
+// 6. Brushed facets (Phase 5 R5): on a smooth dome with per-face UVs — a CAD
+//    export's islands — a brushed and a circle-brushed finish shade as
+//    smoothly as an isotropic one. Baselines below; before R5 the same dome
+//    measured 58.6 (BRUSHED) and 67.7 (CIRCLE_BRUSHED) against the same 0.78.
 import assert from "node:assert/strict";
 import { readFileSync, mkdirSync } from "node:fs";
 import path from "node:path";
@@ -23,6 +27,7 @@ import {
   sharp,
   POLO_OBJ,
   discObj,
+  domeObj,
   readMeasurements,
   faceStats,
   centrePixel,
@@ -39,6 +44,8 @@ import { hexToRgb255 } from "../lib/colour.mjs";
 import { derivePlatedMaterial, METAL_F0, linearToSrgbHex } from "../../../src/features/finishes/metalReflectance.ts";
 
 const TOLERANCE = 3;
+/** How much rougher than an isotropic finish a brushed one may read on the smooth dome (R5). */
+const FACET_LIMIT = 5;
 const SHEET = [
   { code: "CYC-0001", label: "Bright nickel" },
   { code: "CYC-0002", label: "Brushed nickel" },
@@ -219,5 +226,41 @@ export default async function ({ page, base, admin, h }) {
     assert.ok(t.detail > flatDetail * 3, `${t.code}: relief detail ${t.detail.toFixed(2)} vs flat disc ${flatDetail.toFixed(2)}`);
   }
   out.sheet = { file: "reports/4-materials.png", detail: Object.fromEntries(tiles.map((t) => [t.code, +t.detail.toFixed(1)])) };
+
+  /* ---- 6. brushed metal has no per-triangle facets (Phase 5 R5) ---- */
+  const brushedRow = byCode.get("CYC-0002");
+  const circleRow = finishes.find((f) => f.surface?.code === "CIRCLE_BRUSHED");
+  assert.ok(circleRow, "a circle-brushed finish exists");
+  const stagedDome = await stageProduct(admin, metal, {
+    modelPath: `models/${metal.id}/e2e-calibration-dome.obj`,
+    modelBody: new Blob([domeObj()], { type: "model/obj" }),
+    finishIds: [nickel.id, brushedRow.id, circleRow.id],
+    defaultFinishId: nickel.id,
+  });
+  try {
+    const canvas = await openEditor(page, `${base}/designer-studio/editor/new?product=${metal.slug}&calibration=1`);
+    const domeDetail = {};
+    for (const row of [nickel, brushedRow, circleRow]) {
+      await pickFinish(page, row.cyc_code);
+      // An antique finish bakes its occlusion on first use.
+      if (row.two_tone) await page.waitForTimeout(1500);
+      domeDetail[row.cyc_code] = +(await centralDetail(await canvas.screenshot())).toFixed(2);
+    }
+    // The dome is smooth and carries no relief, so all the isotropic row can
+    // show is the studio's own gradient — the yardstick the brushed rows are
+    // held to. A per-face tangent reads two orders of magnitude above it.
+    const smooth = domeDetail[nickel.cyc_code];
+    for (const row of [brushedRow, circleRow]) {
+      const detail = domeDetail[row.cyc_code];
+      assert.ok(
+        detail <= Math.max(3, smooth * FACET_LIMIT),
+        `${row.cyc_code} (${row.surface?.code}) shades in facets: detail ${detail} vs ${smooth} on the same dome with an isotropic finish`,
+      );
+    }
+    out.brushedFacets = domeDetail;
+  } finally {
+    await stagedDome.restore();
+  }
+
   return out;
 }

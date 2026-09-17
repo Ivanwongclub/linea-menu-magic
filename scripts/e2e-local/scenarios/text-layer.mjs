@@ -204,7 +204,8 @@ export default async function ({ page, base, admin, editor, h }) {
     assert.ok(Math.abs(switched.layers[0].style.text_size_mm - beforeSwitch.style.text_size_mm * ratio) < 1e-9, "text size scales with the variant");
     assert.ok(Math.abs(switched.layers[0].placement.radius_mm - beforeSwitch.placement.radius_mm * ratio) < 1e-9, "radius scales with the variant");
     assert.equal(switched.layers[0].placement.arc_position_deg, beforeSwitch.placement.arc_position_deg, "angles don't scale");
-    assert.equal(switched.layers[0].relief, null, "no relief before Phase 5");
+    // Phase 5: relief is physical — a variant switch never scales it (C10).
+    assert.deepEqual(switched.layers[0].relief, beforeSwitch.relief, "relief depth and bevel stay physical across a variant switch");
 
     /* ---- forced RLS denial: "Not saved", nothing written; restored → saves ---- */
     const denied = await admin.from("designs").update({ owner_id: otherOwnerId }).eq("id", designId);

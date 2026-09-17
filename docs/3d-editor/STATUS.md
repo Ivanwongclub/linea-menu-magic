@@ -25,7 +25,7 @@ this is an index, not a decision log.
 | 4i | Drag handles on the model, one shared state (§3); undo / redo | **Done** |
 | 4j | Catalogue branding defaults: marked groups hidden, text lands on recovered placement; ruler branding radius and edge margin | **Done** |
 | 4k | Add logo: SVG upload, validation, `design_assets`, logo layers | **Done** — Phase 4 closed |
-| 5 | Relief: emboss/deboss per layer, depth, bevel, manufacturing warning strip with WIN-CYC thresholds | Not started |
+| 5 | Relief: emboss/deboss per layer, depth, bevel, manufacturing warning strip with WIN-CYC thresholds | **Done** |
 | 6 | Fill picker on deboss layers; occlusion bake moves to a worker | Not started |
 | 7 | Versions: named saves, snapshot, reload | Not started |
 | 8 | Shares | Not started |
@@ -2016,3 +2016,164 @@ text (E1 §6 R2).
    two-colour SVG engraves as one shape. *Recommend* leaving it until Phase 6,
    where a fill picker could map an SVG's colours onto finishes.
 
+## Phase 5 — done (2026-09-18)
+
+Relief per layer, the manufacturing strip and the brushed tangent, per
+v3-review §1/§3/§5, E1 §3.3 and §6 R3/R4/R7/R8, rulings §5.
+
+Files:
+
+- `src/features/editor/lib/recipe.ts` — `LayerRelief` is
+  `{ type, depth_mm, bevel_mm }` (E1 §3.3); `defaultRelief` (R1: recovered
+  relief, else the finish's process `min_deboss_depth_mm`, else 0.30 mm; bevel
+  0.05) and `layerRelief` (a layer stored before this phase reads as a raised
+  default); `LayerPatch.relief` merges one field at a time and marks a
+  recovered depth `user` when it is retyped (§4.1). Every new text and logo
+  layer is created with a relief.
+- `src/features/editor/lib/strokeWidth.ts` (new) — the inset test (R3): the
+  outline is rasterised, each inside sample gets its exact distance to the
+  boundary, and a radius "fits" when every sample more than 0.8 r from the
+  boundary is covered by a disc of radius r inside the shape. The radius is
+  walked *up* from one cell, never bisected down — a hairline beside a thick
+  bowl fails a radius the bowl still fits. Corners, which no disc can cover,
+  are excluded by that same 0.8; a 20° spike still counts as thin.
+- `src/features/editor/lib/manufacturing.ts` (new) — the strip's checks
+  against `finish_processes` (`min_feature_mm`, `min_deboss_depth_mm`,
+  `max_deboss_depth_mm`) plus a fixed 0.5 mm edge margin; `processThresholds`
+  localises the process name. Pure: keys out, no formatting.
+- `src/features/editor/lib/reliefGeometry.ts` (new) — raised: one
+  `ExtrudeGeometry` with `bevelOffset = −bevelSize`, so the walls stay on the
+  outline and the chamfer insets the top face instead of fattening the letter;
+  its top is exactly `depth_mm` above the surface and its base sinks 0.02 mm
+  below it (E1 §6 R3). Engraved: the opening (flat, 0.02 mm proud), the recess
+  walls (skirted ring by ring, chamfered at the opening, front faces pointing
+  into the recess) and the floor at −`depth_mm`, inset by the bevel.
+  `offsetRing` is the miter offset both use.
+- `src/features/editor/lib/glyphOutlines.ts` (new) — a glyph's contours in mm
+  at cap height `text_size_mm`, origin at the advance midpoint: relief, the
+  flat footprint and the stroke measure all read the same contours.
+- `src/features/editor/lib/logoGeometry.ts` — `logoOutlines` replaces
+  `buildLogoGeometry`: the artwork's contours in the face frame, mirrored as
+  *points* (never a negative scale), with each builder orienting its own
+  winding.
+- `src/features/editor/lib/shaderPatch.ts` (new) — the shader-patch composer
+  (E1 §6 R7): one `onBeforeCompile`, one cache key derived from the enabled
+  features (`wincyc:two-tone+brush-radial`), and `clonePatched` so a recess's
+  own materials keep the finish's appearance. The brush patch (R5) computes
+  the anisotropy tangent per fragment — linear along the face frame's X for
+  BRUSHED, radial about the face centre for CIRCLE_BRUSHED — and writes it
+  into `tbn` after `normal_fragment_begin`.
+- `src/features/editor/lib/twoTone.ts` — now chunks the composer applies; the
+  constants and the oxide fallback are unchanged.
+- `src/features/editor/lib/renderSettings.ts` — `stencil: true` in
+  `GL_SETTINGS`, asked for explicitly (E1 §6 R4).
+- `src/features/editor/components/branding/BrandingMeshes.tsx` — the 4f/4k
+  preview slabs are gone. Each glyph and each logo is a group standing on the
+  surface: raised layers carry the extrusion in the part's material; engraved
+  layers carry a stencil mask, a depth punch and the recess's walls and floor
+  as their own meshes in the part's material. Reports `reliefs` (type, depth,
+  bevel, pieces, measured height or floor, wall and opening meshes, and the
+  anchor the ruler's callout runs from). Geometry is cached per outline ×
+  relief, so dragging never rebuilds.
+- `src/features/editor/components/ManufacturingStrip.tsx` (new) — the
+  permanent line under the viewport (R3), live because it reads the same
+  store the drag writes. Hidden under `?calibration=1`, which keeps the 3b–4.0
+  screenshots on the canvas they were measured on.
+- `src/features/editor/hooks/useLayerStrokes.ts` (new) — each layer's
+  narrowest stroke, measured once per glyph and per artwork at unit size and
+  multiplied by the layer's own size.
+- `src/features/editor/hooks/useFinishOptions.ts` — the process embed carries
+  the three tolerance columns.
+- `src/features/editor/components/branding/BrandingGroup.tsx` — Raised /
+  Engraved and a typed Depth on every layer row (R1, v3-review §3); a new
+  layer starts at the process minimum.
+- `src/features/editor/components/branding/PositionAndCurve.tsx` — Bevel, for
+  text and logos alike.
+- `src/features/editor/components/branding/Handles.tsx` — a press state on
+  every handle (4i Q4): the shape darkens while a finger holds it.
+- `src/features/editor/components/RulerOverlay.tsx` — the relief callout (R4):
+  a line from where the layer stands, along that point's own normal, and an
+  "Emboss height / Engrave depth" label at 2 dp.
+- `src/features/editor/components/EditorModel.tsx` — the material goes through
+  the composer; `anisotropyRotation` stays 0 and the named constant says why.
+- `src/features/editor/components/EditorViewport.tsx`,
+  `components/EditorPanel.tsx`, `pages/EditorNewPage.tsx`,
+  `pages/EditorDesignPage.tsx` — the selected finish's process reaches the
+  strip and Add text; `data-reliefs` read-back.
+- `src/features/i18n/translations.ts` — 8 keys × 3 locales (Raised, Engraved,
+  Depth, Bevel, the two ruler callouts, the seven strip messages and the
+  staff line share those keys).
+- `scripts/e2e-local/lib/calibration.mjs` — `domeObj`: a smooth spherical cap
+  with per-face UVs, a stand-in for a CAD export's UV islands.
+- `scripts/e2e-local/scenarios/render-calibration.mjs` — check 6: on that
+  dome a brushed and a circle-brushed finish must shade within 5× the
+  isotropic row's detail. Baselines: 0.78 isotropic, 1.68 BRUSHED, 2.21
+  CIRCLE_BRUSHED — where the same dome measured 58.6 and 67.7 before R5. The
+  non-brushed checks are untouched and unchanged.
+- `scripts/e2e-local/scenarios/relief-layers.mjs` (new) — R7's proofs.
+- `scripts/e2e-local/scenarios/text-layer.mjs`,
+  `scripts/e2e-local/unit/text-layout.test.mjs` — a new layer now carries a
+  relief, and a variant switch leaves it alone (C10).
+- `scripts/e2e-local/unit/relief.test.mjs` (new) — the inset measure, the
+  strip's checks, the relief the recipe stores and the geometry it builds.
+- `docs/3d-editor/STATUS.md` — this file.
+
+### Rulings
+
+- **Depth is checked against both process limits for both relief types.** R3
+  says "depth against min/max"; the columns are named for deboss but the panel
+  has one depth field for both types (E1 §3.3), so an emboss height is held to
+  the same numbers, with the message worded by type. See open question 1.
+- **A null threshold suppresses only its own check.** All three null and the
+  strip has nothing to say to a buyer; staff get the one line naming the
+  process. The edge margin is geometry, not a process tolerance, so it is
+  checked whatever `finish_processes` holds.
+- **The recess is carved with the stencil buffer, in four passes per piece.**
+  The part draws first; the opening writes the stencil where it is frontmost;
+  a depth punch pushes the depth inside the opening to the far plane; the
+  walls and floor then draw through the stencil and depth-sort among
+  themselves. No CSG, and nothing is subtracted from the part (bake is Phase
+  12's).
+- **The brush direction is the face frame's, not the mesh's.** A glyph's own X
+  axis turns with the glyph; the brushed grain on a real part does not. The
+  patch reads world position, which is the face frame for the part and for
+  every relief mesh on it.
+
+### Deviation from R2: the logo recess follows the logo's own plane
+
+A logo is placed parallel to the face on the highest surface under its
+footprint (4k's deviation, kept). Its recess is therefore cut from that plane,
+so on a strongly domed face the floor under the low side of the artwork is
+shallower than the depth says. Text, which conforms per glyph, is exact.
+Per-vertex bending for both is still Phase 11's.
+
+### Open questions from this phase, with a recommendation each
+
+1. **`max_deboss_depth_mm` is applied to raised layers too.** A plating line's
+   maximum recess depth is not obviously a limit on emboss height. *Recommend*
+   confirming; if it isn't, the max check should be skipped for `emboss` and
+   the column left to deboss alone.
+2. **The stroke measure reads about 2–3% wide.** The rasteriser's half-cell
+   slack rounds in the optimistic direction, so a stroke exactly on the
+   threshold can pass. *Recommend* leaving it (the alternative is a finer grid
+   on every glyph) or, if false negatives matter more than speed, comparing
+   against `min_feature_mm × 1.03`.
+3. **An engraved layer's recess is not in the occlusion bake.** An antique
+   finish therefore renders the recess buffed rather than oxidised. *Recommend*
+   leaving it to Phase 6, which moves the bake to a worker and re-bakes per
+   relief edit (E1 §6 R6/R9).
+4. **The strip is silent when nothing is wrong.** It keeps its line of height
+   so the viewport never jumps, but says nothing. *Recommend* leaving it — a
+   standing "within tolerance" line trains buyers to ignore the strip.
+
+### Phase 4k rulings recorded (R8)
+
+- **4k Q1 — a logo reads faintly.** Ruled: relief lands in Phase 5, and flat
+  logos were correct until it did. Done.
+- **4k Q2 — a replaced artwork's `aspect`.** Ruled: a "Replace file" action in
+  Phase 11 re-reads the aspect; nothing re-derives it before then.
+- **4k Q3 — deleting a logo deletes its asset immediately.** Ruled: a
+  reference count lands in Phase 7, where versions make assets genuinely
+  shared.
+- **4k Q4 — only the first fill is honoured.** Ruled: Phase 6's fill picker
+  maps an SVG's colours onto finishes.

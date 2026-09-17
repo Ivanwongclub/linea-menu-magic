@@ -20,6 +20,8 @@ import { CameraReport } from "./CameraReport";
 import { HandleProjector, HandlesOverlay, newHandleBridge, newHandleElements } from "./branding/Handles";
 import { useEditorStore } from "../store/useEditorStore";
 import { useLogoSources } from "../hooks/useLogoAssets";
+import { ManufacturingStrip } from "./ManufacturingStrip";
+import type { ProcessThresholds } from "../lib/manufacturing";
 
 interface EditorViewportProps {
   modelStoragePath: string | null;
@@ -41,6 +43,8 @@ interface EditorViewportProps {
   markedGroupIndices: number[];
   /** Catalogue editors and designer staff may show the original lettering. */
   canShowOriginal: boolean;
+  /** The selected finish's process and its tolerances — the strip's thresholds (Phase 5 R3). */
+  process: ProcessThresholds | null;
 }
 
 function ViewportFallback() {
@@ -125,6 +129,7 @@ export function EditorViewport({
   layers,
   markedGroupIndices,
   canShowOriginal,
+  process,
 }: EditorViewportProps) {
   const controlsRef = useRef<OrbitControlsImpl>(null);
   const [autoRotate, setAutoRotate] = useState(true);
@@ -142,6 +147,7 @@ export function EditorViewport({
   const modelFrame = useEditorStore((s) => s.modelFrame);
   const logoSources = useLogoSources(layers);
   const selectedLayer = layers.find((l) => l.id === selectedLayerId) ?? null;
+  const selectedRelief = textReport?.reliefs.find((r) => r.layerId === selectedLayerId) ?? null;
   // Calibration screenshots composite any DOM over the canvas; `?calibration=1` hides the viewport chrome.
   const calibration = useSearchParams()[0].get("calibration") === "1";
 
@@ -158,6 +164,7 @@ export function EditorViewport({
   // Transparent canvas over the site's secondary token: the backdrop is the
   // design system's own colour, never tone-mapped (R2).
   return (
+    <>
     <div
       className="relative flex-1 min-h-0 overflow-hidden bg-secondary"
       data-testid="editor-viewport"
@@ -174,6 +181,8 @@ export function EditorViewport({
       data-model-mesh-total={meshCount?.total}
       data-min-world-determinant={textReport?.minWorldDeterminant}
       data-glyphs={textReport ? JSON.stringify(textReport.glyphs) : undefined}
+      // What each layer's relief actually became on screen (Phase 5 R7).
+      data-reliefs={textReport ? JSON.stringify(textReport.reliefs) : undefined}
     >
       <Suspense fallback={<ViewportFallback />}>
         <Canvas
@@ -203,7 +212,16 @@ export function EditorViewport({
             logoSources={logoSources}
             onTextReport={setTextReport}
           />
-          {ruler && rulerMeasurements && <RulerOverlay measurements={rulerMeasurements} labels={rulerLabels} obstacles={handleBridge} layer={selectedLayer} faceZ={faceZ ?? rulerMeasurements.maxZ} />}
+          {ruler && rulerMeasurements && (
+            <RulerOverlay
+              measurements={rulerMeasurements}
+              labels={rulerLabels}
+              obstacles={handleBridge}
+              layer={selectedLayer}
+              faceZ={faceZ ?? rulerMeasurements.maxZ}
+              relief={selectedRelief}
+            />
+          )}
           {!calibration && faceZ != null && (
             <HandleProjector layer={selectedLayer} faceZ={faceZ} bridge={handleBridge} elements={handleElements} />
           )}
@@ -223,7 +241,7 @@ export function EditorViewport({
         <HandlesOverlay key={selectedLayer.id} layer={selectedLayer} bridge={handleBridge} elements={handleElements} />
       )}
       {ruler && rulerMeasurements && (
-        <RulerLabels measurements={rulerMeasurements} sizeLigne={sizeLigne} sizeLabel={sizeLabel} labels={rulerLabels} layer={selectedLayer} />
+        <RulerLabels measurements={rulerMeasurements} sizeLigne={sizeLigne} sizeLabel={sizeLabel} labels={rulerLabels} layer={selectedLayer} relief={selectedRelief} />
       )}
       {!calibration && (
         <div className="absolute bottom-3 right-3 z-10 flex items-center gap-2">
@@ -233,6 +251,11 @@ export function EditorViewport({
           <RulerToggle active={ruler} onToggle={onRulerToggle} />
         </div>
       )}
-    </div>
+      </div>
+      {/* The manufacturing strip is chrome: the calibration screenshots keep the canvas they were measured on. */}
+      {!calibration && (
+        <ManufacturingStrip layers={layers} process={process} faceRadiusMm={modelSizeMm != null ? modelSizeMm / 2 : null} logoSources={logoSources} />
+      )}
+    </>
   );
 }

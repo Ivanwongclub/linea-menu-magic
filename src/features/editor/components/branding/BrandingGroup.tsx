@@ -8,7 +8,9 @@ import { useI18n } from "@/features/i18n/I18nProvider";
 import { cn } from "@/lib/utils";
 import { selectCanRedo, selectCanUndo, useEditorStore } from "../../store/useEditorStore";
 import { BUNDLED_FONTS } from "../../lib/fonts";
-import { isLogoLayer, isTextLayer, newLogoLayer, newTextLayer, type Layer, type TextLayer, type TextLayout } from "../../lib/recipe";
+import { isLogoLayer, isTextLayer, layerRelief, newLogoLayer, newTextLayer, type Layer, type TextLayer, type TextLayout } from "../../lib/recipe";
+import { PrecisionNumberInput } from "../controls/PrecisionNumberInput";
+import type { ProcessThresholds } from "../../lib/manufacturing";
 import { MAX_LOGO_BYTES, asRejection, rejectionMessage, validateLogoSvg } from "../../lib/logoSvg";
 import { parseLogoSvg } from "../../lib/logoGeometry";
 import { deleteLogoAsset, uploadLogoAsset, useLogoSources } from "../../hooks/useLogoAssets";
@@ -43,11 +45,12 @@ function LayerRow({ layer, selected, logoSvg }: { layer: Layer; selected: boolea
       data-layer-id={layer.id}
       data-selected={selected}
       className={cn(
-        "group flex items-center border bg-background transition-colors",
+        "group flex flex-col border bg-background transition-colors",
         selected ? "border-foreground" : "border-border hover:border-foreground/40",
         isDragging && "relative z-10 shadow-sm",
       )}
     >
+      <div className="flex items-center">
       <button
         type="button"
         ref={setActivatorNodeRef}
@@ -86,7 +89,70 @@ function LayerRow({ layer, selected, logoSvg }: { layer: Layer; selected: boolea
       >
         <X className="w-3.5 h-3.5" strokeWidth={1.5} />
       </button>
+      </div>
+      <ReliefRow layer={layer} />
     </li>
+  );
+}
+
+const RELIEF_TYPES = [
+  { value: "emboss", label: "editor.branding.raised" },
+  { value: "deboss", label: "editor.branding.engraved" },
+] as const;
+
+/**
+ * R1: raised or engraved, and the depth, on the layer's own row — the panel's
+ * only real decision (v3-review §3, MVP item 8/9). Typed, because the factory
+ * quotes from it; the bevel sits behind "Position and curve".
+ */
+function ReliefRow({ layer }: { layer: Layer }) {
+  const { t } = useI18n();
+  const updateLayer = useEditorStore((s) => s.updateLayer);
+  const commit = useEditorStore((s) => s.commit);
+  const relief = layerRelief(layer);
+
+  return (
+    <div className="flex items-center gap-2 border-t border-border px-1.5 py-1.5" data-testid="layer-relief" data-layer-id={layer.id} data-type={relief.type}>
+      <div role="radiogroup" aria-label={t("editor.branding.relief")} className="flex border border-border" data-testid="relief-type">
+        {RELIEF_TYPES.map((option) => {
+          const active = relief.type === option.value;
+          return (
+            <button
+              key={option.value}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              data-value={option.value}
+              onClick={() => {
+                updateLayer(layer.id, { relief: { type: option.value } });
+                commit();
+              }}
+              className={cn(
+                "px-2 py-0.5 text-[11px] tracking-[0.05em] transition-colors",
+                active ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {t(option.label)}
+            </button>
+          );
+        })}
+      </div>
+      <span className={cn(FIELD_LABEL, "ml-auto")} id={`depth-label-${layer.id}`}>
+        {t("editor.branding.depth")}
+      </span>
+      <PrecisionNumberInput
+        value={relief.depth_mm}
+        unit="mm"
+        min={0}
+        exclusiveMin
+        max={5}
+        ariaLabelledBy={`depth-label-${layer.id}`}
+        testId="relief-depth-input"
+        className="w-20 shrink-0"
+        onChange={(depth_mm) => updateLayer(layer.id, { relief: { depth_mm } })}
+        onCommit={commit}
+      />
+    </div>
   );
 }
 
@@ -254,11 +320,14 @@ export function BrandingGroup({
   faceDiameterMm,
   reference,
   scaleFactor,
+  process,
 }: {
   faceDiameterMm: number;
   /** The product's recovered branding (raw units, C8); null → E1 §3.3 fallbacks. */
   reference: BrandingReferenceRaw | null;
   scaleFactor: number | null;
+  /** The selected finish's process: a new layer's depth starts at its minimum (Phase 5 R1). */
+  process: ProcessThresholds | null;
 }) {
   const { t } = useI18n();
   const layers = useEditorStore((s) => s.recipe.layers);
@@ -323,9 +392,9 @@ export function BrandingGroup({
           ownerId: user.id,
           brandId: isStaff ? null : primaryBrand?.id ?? null,
         });
-        addLayer(newLogoLayer(layerId, faceDiameterMm, artwork.aspect, assetId));
+        addLayer(newLogoLayer(layerId, faceDiameterMm, artwork.aspect, assetId, process?.min_deboss_depth_mm ?? null));
       } else {
-        addLayer(newLogoLayer(layerId, faceDiameterMm, artwork.aspect), { filename: file.name, svg });
+        addLayer(newLogoLayer(layerId, faceDiameterMm, artwork.aspect, null, process?.min_deboss_depth_mm ?? null), { filename: file.name, svg });
       }
     } catch (error) {
       setLogoError(t("editor.branding.logoFailed", { reason: String((error as Error)?.message ?? error) }));
@@ -365,6 +434,7 @@ export function BrandingGroup({
                 faceDiameterMm,
                 "",
                 recoveredDefaults(reference, modelFrame?.transform ?? null, scaleFactor, modelFrame?.markedGlyphCentres ?? []),
+                process?.min_deboss_depth_mm ?? null,
               ),
             )
           }

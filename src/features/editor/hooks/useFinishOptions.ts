@@ -16,8 +16,15 @@ export interface AxisName {
  * alongside these aliases). Satisfies `FinishRow` structurally, so it can
  * feed `useFinishFilter`/`FinishFacetRail`/`FinishSwatchGrid` unchanged.
  */
+/** The process axis also carries WIN-CYC's manufacturing tolerances (Phase 1 R3; Phase 5 R3). */
+export interface ProcessAxis extends AxisName {
+  min_feature_mm: number | null;
+  min_deboss_depth_mm: number | null;
+  max_deboss_depth_mm: number | null;
+}
+
 export type PickerFinish = FinishRow & {
-  process: AxisName | null;
+  process: ProcessAxis | null;
   base_family: AxisName | null;
   surface: AxisName | null;
   tone: AxisName | null;
@@ -31,7 +38,7 @@ const AXIS_NAME_COLS = "name, name_zh_hant, name_zh_hans";
 
 const FINISH_OPTION_SELECT = `
   *,
-  process:finish_processes!process_id ( ${AXIS_NAME_COLS}, code ),
+  process:finish_processes!process_id ( ${AXIS_NAME_COLS}, code, min_feature_mm, min_deboss_depth_mm, max_deboss_depth_mm ),
   base_family:finish_base_families!base_family_id ( ${AXIS_NAME_COLS}, code ),
   surface:finish_surfaces!surface_id ( ${AXIS_NAME_COLS}, code ),
   tone:finish_tones!tone_id ( ${AXIS_NAME_COLS}, code ),

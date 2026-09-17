@@ -251,7 +251,8 @@ export default async function ({ page, base, admin, editor, h }) {
         }
         return { count: rects.length, clashes: out };
       });
-      assert.equal(clashes.count, 5, "two product dimensions and the layer's three");
+      // Two product dimensions, the layer's three, and Phase 5's relief callout.
+      assert.equal(clashes.count, 6, "two product dimensions, the layer's three and its relief");
       assert.deepEqual(clashes.clashes, [], "no ruler label overlaps another label or a handle");
       await page.waitForTimeout(300);
     }

@@ -37,6 +37,72 @@ export function discObj(segments = 96, radius = 7.5, half = 0.5) {
   return [...v, ...n, ...f].join("\n") + "\n";
 }
 
+/**
+ * A smooth spherical cap on a disc, with vertex normals and per-face UVs — the
+ * brushed facet check's subject (Phase 5 R5). It is smooth by construction and
+ * carries no relief, so anything the eye can see across it is shading, not
+ * geometry. The UVs are per face, as a CAD export's islands are: three.js
+ * derives its anisotropy tangent from their screen-space derivatives, so a
+ * per-face UV makes a per-face tangent — the fan of flat facets R5 is about.
+ */
+export function domeObj({ radius = 7.5, rise = 1.6, rings = 20, segments = 72, skirt = 0.6 } = {}) {
+  const v = [];
+  const vn = [];
+  const vt = [];
+  const f = [];
+  // Sphere through the rim and the pole: centre on the axis, below the rim.
+  const sphere = (radius * radius + rise * rise) / (2 * rise);
+  const point = (r, a) => [r * Math.cos(a), Math.sqrt(Math.max(0, sphere * sphere - r * r)) - (sphere - rise), r * Math.sin(a)];
+  const normal = (r, a) => {
+    const [x, , z] = point(r, a);
+    const y = Math.sqrt(Math.max(1e-6, sphere * sphere - r * r));
+    const length = Math.hypot(x, y, z);
+    return [x / length, y / length, z / length];
+  };
+  const index = (ring, seg) => ring * segments + (seg % segments) + 1;
+  for (let ring = 0; ring <= rings; ring++) {
+    const r = (ring / rings) * radius;
+    for (let seg = 0; seg < segments; seg++) {
+      const a = (seg / segments) * Math.PI * 2;
+      const [x, y, z] = point(r, a);
+      const [nx, ny, nz] = normal(r, a);
+      v.push(`v ${x.toFixed(5)} ${y.toFixed(5)} ${z.toFixed(5)}`);
+      vn.push(`vn ${nx.toFixed(5)} ${ny.toFixed(5)} ${nz.toFixed(5)}`);
+    }
+  }
+  const base = (rings + 1) * segments;
+  for (let seg = 0; seg < segments; seg++) {
+    const a = (seg / segments) * Math.PI * 2;
+    v.push(`v ${(radius * Math.cos(a)).toFixed(5)} ${(-skirt).toFixed(5)} ${(radius * Math.sin(a)).toFixed(5)}`);
+    vn.push(`vn ${Math.cos(a).toFixed(5)} 0 ${Math.sin(a).toFixed(5)}`);
+  }
+  const rim = (seg) => base + (seg % segments) + 1;
+  // Every triangle gets its own UV island, like a CAD export's.
+  const face = (p, q, r) => {
+    const t = vt.length + 1;
+    vt.push("vt 0 0", "vt 1 0", "vt 0 1");
+    f.push(`f ${p}/${t}/${p} ${q}/${t + 1}/${q} ${r}/${t + 2}/${r}`);
+  };
+  for (let ring = 0; ring < rings; ring++) {
+    for (let seg = 0; seg < segments; seg++) {
+      const a = index(ring, seg);
+      const b = index(ring, seg + 1);
+      const c = index(ring + 1, seg + 1);
+      const d = index(ring + 1, seg);
+      if (ring === 0) face(a, c, d);
+      else {
+        face(a, b, c);
+        face(a, c, d);
+      }
+    }
+  }
+  for (let seg = 0; seg < segments; seg++) {
+    face(index(rings, seg), rim(seg), rim(seg + 1));
+    face(index(rings, seg), rim(seg + 1), index(rings, seg + 1));
+  }
+  return [...v, ...vn, ...vt, ...f].join("\n") + "\n";
+}
+
 export function readMeasurements() {
   const lines = readFileSync(MEASUREMENTS_CSV, "utf8").replace(/\r/g, "").trim().split("\n");
   const parse = (l) => {

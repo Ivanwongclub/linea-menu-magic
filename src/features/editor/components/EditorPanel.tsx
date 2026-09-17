@@ -8,6 +8,7 @@ import { FinishSwatch } from "@/features/finishes/FinishSwatch";
 import { FinishSelectionPicker } from "@/features/finishes/FinishSelectionPicker";
 import { finishAxisLine, finishMarketingName } from "@/features/finishes/finishAxisLine";
 import { tradeLigne } from "../lib/ligne";
+import { processThresholds } from "../lib/manufacturing";
 import { BrandingGroup } from "./branding/BrandingGroup";
 import type { PickerFinish } from "../hooks/useFinishOptions";
 import type { AutosaveStatus } from "../hooks/useAutosaveDraft";
@@ -133,6 +134,7 @@ export function EditorPanel({
         <BrandingGroup
           reference={product.model_branding_reference}
           scaleFactor={product.model_scale_factor}
+          process={processThresholds(selectedFinish?.process, language)}
           faceDiameterMm={product.size_variants.find((v) => v.id === sizeVariantId)?.size_primary_mm ?? product.size_variants[0]?.size_primary_mm ?? 10} />
         <PanelGroup title={t("editor.panel.output")} />
       </div>

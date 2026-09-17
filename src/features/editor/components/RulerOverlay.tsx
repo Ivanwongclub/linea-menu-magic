@@ -8,6 +8,8 @@ import { layerDimensions, type LayerDimension } from "../lib/layerMeasurements";
 import type { Layer } from "../lib/recipe";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import type { RulerMeasurements } from "./EditorModel";
+import type { ReliefReport } from "./branding/BrandingMeshes";
+import { layerRelief } from "../lib/recipe";
 
 /** The DOM label elements (rendered by `RulerLabels` outside the canvas) this overlay positions each frame. */
 export interface RulerLabelElements {
@@ -15,10 +17,12 @@ export interface RulerLabelElements {
   thickness: HTMLElement | null;
   /** The selected layer's dimensions (4j), by kind. */
   layer: Partial<Record<LayerDimension["kind"], HTMLElement | null>>;
+  /** The relief callout (Phase 5 R4). */
+  relief: HTMLElement | null;
 }
 
 export function newRulerLabelElements(): RulerLabelElements {
-  return { diameter: null, thickness: null, layer: {} };
+  return { diameter: null, thickness: null, layer: {}, relief: null };
 }
 
 interface RulerOverlayProps {
@@ -30,12 +34,31 @@ interface RulerOverlayProps {
   layer: Layer | null;
   /** The face top, where the layer's dimension lines are drawn. */
   faceZ: number;
+  /** What the selected layer's relief became on screen, and where it stands (Phase 5 R4). */
+  relief: ReliefReport | null;
 }
 
 /** Render layer the ruler lives on exclusively (C5) — never layer 0. */
 const RULER_LAYER = 1;
 const TICK_MM = 0.6;
 const MARGIN_MM = 1.2;
+
+/**
+ * The relief callout's two ends: the point the layer stands on, and that point
+ * plus its own normal times the relief — up for a raised layer, into the part
+ * for an engraved one (R4).
+ */
+export function reliefCallout(layer: Layer | null, relief: ReliefReport | null): [number, number, number][] | null {
+  if (!layer || !relief?.anchor) return null;
+  const { depth_mm, type } = layerRelief(layer);
+  if (!(depth_mm > 0)) return null;
+  const a = relief.anchor;
+  const reach = type === "emboss" ? depth_mm : -depth_mm;
+  return [
+    [a.x, a.y, a.z],
+    [a.x + a.nx * reach, a.y + a.ny * reach, a.z + a.nz * reach],
+  ];
+}
 
 export function diameterLabel(mm: number, sizeLigne: number | null, sizeLabel: string | null): string {
   const ligneText = !sizeLabel && sizeLigne != null ? ` (${tradeLigne(sizeLigne)}L)` : "";
@@ -58,7 +81,7 @@ export function diameterLabel(mm: number, sizeLigne: number | null, sizeLabel: s
  * pushed apart when they would overlap. Each label carries the projected line
  * it belongs to (`data-line`) for the e2e no-overlap check.
  */
-export function RulerOverlay({ measurements, labels, obstacles, layer, faceZ }: RulerOverlayProps) {
+export function RulerOverlay({ measurements, labels, obstacles, layer, faceZ, relief }: RulerOverlayProps) {
   const { camera, size } = useThree();
   const groupRef = useRef<Group>(null);
 
@@ -83,6 +106,10 @@ export function RulerOverlay({ measurements, labels, obstacles, layer, faceZ }: 
     [d.from.x, d.from.y, lift],
     [d.to.x, d.to.y, lift],
   ];
+
+  // R4: the emboss height / engrave depth, drawn where the layer actually
+  // stands, along that point's own surface normal.
+  const reliefLinePoints = reliefCallout(layer, relief);
 
   const { minX, maxX, minY, maxY, minZ, maxZ } = measurements;
   // Opposite sides: the diameter line (below, or left when it runs along Y)
@@ -141,6 +168,8 @@ export function RulerOverlay({ measurements, labels, obstacles, layer, faceZ }: 
       const el = labels.current.layer[dim.kind];
       if (el) entries.push([el, line(dimPoints(dim), el), "beside"]);
     }
+    const reliefLabel = labels.current.relief;
+    if (reliefLabel && reliefLinePoints) entries.push([reliefLabel, line(reliefLinePoints, reliefLabel), "beside"]);
     const placed = layoutLabels(
       entries.map(([, l, place]) => ({ line: l, place })),
       centre,
@@ -169,6 +198,11 @@ export function RulerOverlay({ measurements, labels, obstacles, layer, faceZ }: 
       <Line points={[[thicknessX - TICK_MM, centerY, minZ], [thicknessX + TICK_MM, centerY, minZ]]} color="#1a1a1a" lineWidth={1.5} />
       <Line points={[[thicknessX - TICK_MM, centerY, maxZ], [thicknessX + TICK_MM, centerY, maxZ]]} color="#1a1a1a" lineWidth={1.5} />
 
+      {/* The relief callout, along the surface normal (Phase 5 R4). */}
+      {reliefLinePoints && (
+        <Line points={reliefLinePoints} color="#1a1a1a" lineWidth={1.5} depthTest={false} />
+      )}
+
       {/* The selected layer's dimensions, on the face (4j R5). */}
       {dims.map((dim) => (
         <Line key={dim.kind} points={dimPoints(dim)} color="#1a1a1a" lineWidth={1.25} dashed dashSize={0.2} gapSize={0.12} depthTest={false} />
@@ -184,6 +218,7 @@ interface RulerLabelsProps {
   sizeLabel: string | null;
   labels: MutableRefObject<RulerLabelElements>;
   layer: Layer | null;
+  relief: ReliefReport | null;
 }
 
 const LAYER_LABEL_KEY: Record<LayerDimension["kind"], string> = {
@@ -206,9 +241,10 @@ const LABEL_CLASS =
   "absolute left-0 top-0 text-[11px] whitespace-nowrap bg-background/90 px-1 py-0.5 border border-border text-foreground will-change-transform";
 
 /** The ruler's DOM labels, over the canvas; `RulerOverlay` positions them. Hidden until first placed. */
-export function RulerLabels({ measurements, sizeLigne, sizeLabel, labels, layer }: RulerLabelsProps) {
+export function RulerLabels({ measurements, sizeLigne, sizeLabel, labels, layer, relief }: RulerLabelsProps) {
   const { t } = useI18n();
   const dims = layer ? layerDimensions(layer, measurements.diameterMm / 2) : [];
+  const reliefDepth = layer && relief?.anchor ? layerRelief(layer) : null;
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden" data-testid="ruler-labels">
       <span
@@ -227,6 +263,18 @@ export function RulerLabels({ measurements, sizeLigne, sizeLabel, labels, layer 
       >
         {measurements.thicknessMm.toFixed(2)} mm
       </span>
+      {reliefDepth && (
+        <span
+          ref={(el) => (labels.current.relief = el)}
+          className={LABEL_CLASS}
+          style={{ visibility: "hidden" }}
+          data-testid="ruler-relief-label"
+          data-relief={reliefDepth.type}
+          data-value-mm={reliefDepth.depth_mm}
+        >
+          {t(reliefDepth.type === "emboss" ? "editor.ruler.embossHeight" : "editor.ruler.engraveDepth", { value: `${reliefDepth.depth_mm.toFixed(2)} mm` })}
+        </span>
+      )}
       {dims.map((dim) => (
         <span
           key={`${layer?.id}-${dim.kind}`}

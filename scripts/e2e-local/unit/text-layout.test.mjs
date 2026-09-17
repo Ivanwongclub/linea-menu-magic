@@ -39,7 +39,8 @@ test("new-layer fallbacks follow E1 §3.3", () => {
   close(layer.placement.radius_mm, 3.78, 1e-12, "0.35 × face diameter");
   assert.equal(layer.placement.direction, "cw");
   assert.equal(layer.placement.conform, true);
-  assert.equal(layer.relief, null);
+  // Phase 5 R1: a new layer carries a relief from the start (0.30 mm with no process minimum).
+  assert.deepEqual(layer.relief, { type: "emboss", depth_mm: 0.3, bevel_mm: 0.05 });
 });
 
 test("a variant switch scales placement and size, not angles (C10)", () => {
@@ -49,7 +50,7 @@ test("a variant switch scales placement and size, not angles (C10)", () => {
   close(scaled.style.text_size_mm, 1.296 * (15 / 10.8), 1e-9, "size");
   close(scaled.placement.centre_mm.y, -2 * (15 / 10.8), 1e-9, "centre");
   assert.equal(scaled.placement.arc_position_deg, 30);
-  assert.equal(scaled.relief, null);
+  assert.deepEqual(scaled.relief, layer.relief, "relief is physical: a variant switch never scales it");
 });
 
 test("straight layout: centred, advances + spacing, clockwise rotation", () => {

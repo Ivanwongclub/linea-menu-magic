@@ -157,9 +157,11 @@ export default async function ({ page, base, admin, editor, h }) {
     for (const id of ["pc-radius", "pc-arc-range", "pc-arc-position", "pc-arc"]) {
       assert.equal(await page.getByTestId(id).count(), 0, `straight hides ${id}`);
     }
-    for (const id of ["emboss", "deboss", "relief"]) {
-      assert.equal(await page.locator(`[data-testid*="${id}"]`).count(), 0, `no ${id} control before Phase 5`);
+    // Phase 5: relief is on the layer row, the bevel behind this disclosure.
+    for (const id of ["layer-relief", "relief-type", "relief-depth-input", "pc-bevel"]) {
+      assert.equal(await page.getByTestId(id).count(), 1, `Phase 5 shows ${id}`);
     }
+    assert.equal(await page.locator('[data-testid*="fill"]').count(), 0, "no fill control before Phase 6");
 
     /* ---- circular ---- */
     await page.locator('[data-testid="text-layer-layout"] [data-value="circle"]').click();

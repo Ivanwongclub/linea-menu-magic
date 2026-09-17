@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js";
+import type { ReliefOutline } from "./reliefGeometry";
 
 /**
  * An uploaded SVG as face geometry (4k R3): `SVGLoader` → shapes (holes
@@ -37,45 +38,31 @@ export function parseLogoSvg(svgText: string): LogoArtwork | null {
   return { shapes, aspect: size.x / size.y, widthUnits: size.x, heightUnits: size.y };
 }
 
-/**
- * Reverses every triangle's winding. SVG's y runs down, so the face frame
- * needs the artwork mirrored in y — which leaves each triangle wound the
- * wrong way round and the whole logo back-face culled. Flipping the order
- * restores front faces toward +Z without a negative object scale (rulings §5).
- */
-function flipWinding(geometry: THREE.BufferGeometry): void {
-  const index = geometry.getIndex();
-  if (index) {
-    for (let i = 0; i < index.count; i += 3) {
-      const b = index.getX(i + 1);
-      index.setX(i + 1, index.getX(i + 2));
-      index.setX(i + 2, b);
-    }
-    index.needsUpdate = true;
-    return;
-  }
-  const position = geometry.getAttribute("position") as THREE.BufferAttribute;
-  for (let i = 0; i < position.count; i += 3) {
-    const bx = position.getX(i + 1);
-    const by = position.getY(i + 1);
-    const bz = position.getZ(i + 1);
-    position.setXYZ(i + 1, position.getX(i + 2), position.getY(i + 2), position.getZ(i + 2));
-    position.setXYZ(i + 2, bx, by, bz);
-  }
-  position.needsUpdate = true;
-}
+/** Segments per curve when an SVG path is sampled. */
+export const LOGO_CURVE_SEGMENTS = 24;
 
-/** The artwork at `widthMm`, centred on the origin, y up. Caller disposes. */
-export function buildLogoGeometry(artwork: LogoArtwork, widthMm: number): THREE.BufferGeometry {
-  const geometry = new THREE.ShapeGeometry(artwork.shapes, 24);
-  geometry.computeBoundingBox();
-  const box = geometry.boundingBox as THREE.Box3;
-  const centre = box.getCenter(new THREE.Vector3());
-  const scale = widthMm / (box.max.x - box.min.x || 1);
-  geometry.translate(-centre.x, -centre.y, 0);
-  // SVG y runs down; the face frame's runs up.
-  geometry.scale(scale, -scale, 1);
-  flipWinding(geometry);
-  geometry.computeVertexNormals();
-  return geometry;
+/**
+ * The artwork's contours at `widthMm`, centred on the origin, in the face
+ * frame (mm, y up). SVG's y runs down, so the points are mirrored — a
+ * mirror of the *points*, never a negative object scale (rulings §5); every
+ * builder downstream orients its own winding from these contours, so front
+ * faces still come out toward +Z.
+ *
+ * Phase 5: outlines rather than one flat geometry — relief, the flat
+ * footprint and the stroke measure are all built from the same contours.
+ */
+export function logoOutlines(artwork: LogoArtwork, widthMm: number): ReliefOutline[] {
+  const sampled = artwork.shapes.map((shape) => shape.extractPoints(LOGO_CURVE_SEGMENTS));
+  const box = new THREE.Box2(new THREE.Vector2(Infinity, Infinity), new THREE.Vector2(-Infinity, -Infinity));
+  for (const { shape, holes } of sampled) {
+    for (const p of shape) box.expandByPoint(p);
+    for (const hole of holes) for (const p of hole) box.expandByPoint(p);
+  }
+  const size = box.getSize(new THREE.Vector2());
+  const centre = box.getCenter(new THREE.Vector2());
+  const scale = widthMm / (size.x || 1);
+  const place = (points: THREE.Vector2[]) => points.map((p) => new THREE.Vector2((p.x - centre.x) * scale, -(p.y - centre.y) * scale));
+  return sampled
+    .map(({ shape, holes }) => ({ outer: place(shape), holes: holes.map(place) }))
+    .filter((outline) => outline.outer.length >= 3);
 }

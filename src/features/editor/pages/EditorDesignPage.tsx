@@ -3,6 +3,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth/AuthProvider";
 import { useI18n } from "@/features/i18n/I18nProvider";
+import { processThresholds } from "../lib/manufacturing";
 import { supabase } from "@/integrations/supabase/client";
 import { useEditorProductById, variantRatio } from "../hooks/useEditorProduct";
 import { normalizeRecipe } from "../lib/recipe";
@@ -43,7 +44,7 @@ function LoadingShell() {
  */
 export function EditorDesignPage({ designId }: { designId: string }) {
   const location = useLocation();
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const { session, loading: authLoading } = useAuth();
 
   const designQuery = useQuery({
@@ -141,6 +142,7 @@ export function EditorDesignPage({ designId }: { designId: string }) {
           layers={recipe.layers}
           markedGroupIndices={product.model_branding_group_indices}
           canShowOriginal={isCatalogueEditor || isStaff}
+          process={processThresholds(selectedFinish?.process, language)}
         />
       }
       panel={

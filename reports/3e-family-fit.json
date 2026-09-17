@@ -1,7 +1,7 @@
 {
   "studio": {
     "code": "CYC-0001",
-    "surroundLum": 49,
+    "surroundLum": 50,
     "highlightLum": 238
   },
   "families": [
@@ -23,19 +23,19 @@
         -3.13
       ],
       "renderedMedianLab": [
-        60.07,
+        60.26,
         -5.34,
         -3.3
       ],
-      "hueDiff": 57.45,
-      "hueError": 57.454,
+      "hueDiff": 57.47,
+      "hueError": 57.465,
       "renderedChroma": 6.28,
       "physicalHueDiff": 0,
       "appliedHueShift": 0,
       "appliedChromaScale": 1,
       "appliedOxideL": 15,
-      "physicalL": 60.07,
-      "highlightL": 82.38,
+      "physicalL": 60.26,
+      "highlightL": 82.51,
       "current": {
         "hue_shift": 0,
         "chroma_scale": 1,
@@ -55,15 +55,15 @@
           "chartHex": "#13161B",
           "renderedHex": "#79888A",
           "renderedLab": [
-            55.634,
-            -4.935,
-            -2.976
+            55.728,
+            -4.938,
+            -2.977
           ],
-          "highlightL": 71.76,
+          "highlightL": 72.03,
           "transfer": [
-            0.8311682601312197,
-            0.8379967073236673,
-            0.839138395092271
+            0.8339930831561765,
+            0.8408067936337115,
+            0.8419365048841082
           ]
         },
         {
@@ -76,17 +76,17 @@
             "tint": null
           },
           "chartHex": "#25272A",
-          "renderedHex": "#8EA0A3",
+          "renderedHex": "#8EA1A3",
           "renderedLab": [
-            64.497,
-            -5.744,
-            -3.628
+            64.786,
+            -5.752,
+            -3.631
           ],
           "highlightL": 92.99,
           "transfer": [
-            0.6693572785529841,
-            0.6759580689432245,
-            0.6769366361355146
+            0.6759923923746457,
+            0.6824540435590738,
+            0.6833755143416399
           ]
         }
       ],
@@ -101,8 +101,8 @@
       "chartChroma": 4.29,
       "hueFitted": false,
       "codes": [
-        "CYC-0032",
-        "CYC-0059"
+        "CYC-0059",
+        "CYC-0032"
       ],
       "chartMedianLab": [
         14.16,
@@ -110,19 +110,19 @@
         4.03
       ],
       "renderedMedianLab": [
-        22.79,
-        -1.2,
-        23.55
+        36.75,
+        -1.73,
+        23.6
       ],
-      "hueDiff": 0.08,
-      "hueError": -0.08,
-      "renderedChroma": 23.58,
+      "hueDiff": 1.37,
+      "hueError": -1.368,
+      "renderedChroma": 23.66,
       "physicalHueDiff": 0,
       "appliedHueShift": 0,
       "appliedChromaScale": 1,
       "appliedOxideL": 15,
-      "physicalL": 22.79,
-      "highlightL": 22.79,
+      "physicalL": 36.75,
+      "highlightL": 58.29,
       "current": {
         "hue_shift": 0,
         "chroma_scale": 1,
@@ -130,29 +130,6 @@
         "oxide_l": 15
       },
       "samples": [
-        {
-          "code": "CYC-0032",
-          "axes": {
-            "base_family": "ANTI_BRASS",
-            "surface": "CIRCLE_BRUSHED",
-            "tone": null,
-            "effect": null,
-            "tint": null
-          },
-          "chartHex": "#1F1A14",
-          "renderedHex": "#3F3612",
-          "renderedLab": [
-            22.788,
-            -1.197,
-            23.549
-          ],
-          "highlightL": 22.79,
-          "transfer": [
-            0.20123743187126267,
-            0.19152437713089043,
-            0.17117494232284602
-          ]
-        },
         {
           "code": "CYC-0059",
           "axes": {
@@ -165,15 +142,38 @@
           "chartHex": "#2D2E29",
           "renderedHex": "#3F3612",
           "renderedLab": [
-            22.788,
-            -1.197,
-            23.549
+            22.806,
+            -1.225,
+            23.522
           ],
-          "highlightL": 22.79,
+          "highlightL": 23.11,
           "transfer": [
-            0.20123743187126267,
-            0.19152437713089043,
-            0.17117494232284602
+            0.2014004355592004,
+            0.19193143315400465,
+            0.17172095802361792
+          ]
+        },
+        {
+          "code": "CYC-0032",
+          "axes": {
+            "base_family": "ANTI_BRASS",
+            "surface": "CIRCLE_BRUSHED",
+            "tone": null,
+            "effect": null,
+            "tint": null
+          },
+          "chartHex": "#1F1A14",
+          "renderedHex": "#837950",
+          "renderedLab": [
+            50.703,
+            -2.239,
+            23.673
+          ],
+          "highlightL": 93.47,
+          "transfer": [
+            0.722103035204771,
+            0.711443927523017,
+            0.6659838370512596
           ]
         }
       ],
@@ -196,19 +196,19 @@
         5.29
       ],
       "renderedMedianLab": [
-        17.07,
-        13.6,
-        10.25
+        46.45,
+        12.32,
+        8.4
       ],
-      "hueDiff": 2.33,
-      "hueError": -2.331,
-      "renderedChroma": 17.03,
-      "physicalHueDiff": 10.5,
+      "hueDiff": 0.37,
+      "hueError": 0.368,
+      "renderedChroma": 14.91,
+      "physicalHueDiff": 11.62,
       "appliedHueShift": -12.5,
       "appliedChromaScale": 1,
       "appliedOxideL": 15,
-      "physicalL": 17.63,
-      "highlightL": 17.08,
+      "physicalL": 46.4,
+      "highlightL": 88.17,
       "current": {
         "hue_shift": -12.5,
         "chroma_scale": 1,
@@ -226,21 +226,21 @@
             "tint": null
           },
           "chartHex": "#23130F",
-          "renderedHex": "#40221C",
+          "renderedHex": "#876661",
           "renderedLab": [
-            17.075,
-            13.604,
-            10.247
+            46.445,
+            12.322,
+            8.402
           ],
-          "highlightL": 17.08,
+          "highlightL": 88.17,
           "transfer": [
-            0.20588517210122112,
-            0.18107904788649554,
-            0.17790924339739744
+            0.7049379828449712,
+            0.662783481972888,
+            0.6535276615447606
           ]
         }
       ],
-      "lightnessDiff": -0.55
+      "lightnessDiff": 0.05
     },
     {
       "family": "ANTI_SILVER",
@@ -260,19 +260,19 @@
         -0.68
       ],
       "renderedMedianLab": [
-        59.88,
+        60.08,
         -0.42,
-        2.39
+        2.4
       ],
-      "hueDiff": 170.51,
-      "hueError": 170.515,
+      "hueDiff": 170.49,
+      "hueError": 170.492,
       "renderedChroma": 2.43,
-      "physicalHueDiff": 0,
+      "physicalHueDiff": 0.01,
       "appliedHueShift": 0,
       "appliedChromaScale": 1,
       "appliedOxideL": 20.74,
-      "physicalL": 59.88,
-      "highlightL": 76.47,
+      "physicalL": 60.08,
+      "highlightL": 76.74,
       "current": {
         "hue_shift": 0,
         "chroma_scale": 1,
@@ -290,17 +290,17 @@
             "tint": null
           },
           "chartHex": "#39393C",
-          "renderedHex": "#94928F",
+          "renderedHex": "#949390",
           "renderedLab": [
-            60.724,
-            -0.22,
-            1.823
+            60.927,
+            -0.221,
+            1.826
           ],
-          "highlightL": 77.42,
+          "highlightL": 77.68,
           "transfer": [
-            0.8417894463207776,
-            0.8410929786083727,
-            0.8391431955002558
+            0.8476304724183967,
+            0.846951476775608,
+            0.8449931709704025
           ]
         },
         {
@@ -313,17 +313,17 @@
             "tint": null
           },
           "chartHex": "#2A2B2A",
-          "renderedHex": "#8F8E89",
+          "renderedHex": "#908F89",
           "renderedLab": [
-            59.036,
-            -0.621,
-            2.963
+            59.236,
+            -0.623,
+            2.966
           ],
-          "highlightL": 75.52,
+          "highlightL": 75.8,
           "transfer": [
-            0.8391431955002558,
-            0.8384945098767378,
-            0.8354897831726834
+            0.8449931709704025,
+            0.8443595813081018,
+            0.8413623341941789
           ]
         }
       ],
@@ -338,8 +338,8 @@
       "chartChroma": 4.61,
       "hueFitted": false,
       "codes": [
-        "CYC-0044",
         "CYC-0135",
+        "CYC-0044",
         "CYC-0045"
       ],
       "chartMedianLab": [
@@ -348,18 +348,18 @@
         -4.61
       ],
       "renderedMedianLab": [
-        52.06,
-        9.51,
+        52.15,
+        9.52,
         10.17
       ],
       "hueDiff": 138.41,
-      "hueError": -138.412,
+      "hueError": -138.405,
       "renderedChroma": 13.93,
       "physicalHueDiff": 0,
       "appliedHueShift": 0,
       "appliedChromaScale": 1,
       "appliedOxideL": 15,
-      "physicalL": 52.06,
+      "physicalL": 52.15,
       "highlightL": 68.08,
       "current": {
         "hue_shift": 0,
@@ -368,29 +368,6 @@
         "oxide_l": 15
       },
       "samples": [
-        {
-          "code": "CYC-0044",
-          "axes": {
-            "base_family": "BLACK_COPPER",
-            "surface": null,
-            "tone": null,
-            "effect": null,
-            "tint": null
-          },
-          "chartHex": "#17191C",
-          "renderedHex": "#93766B",
-          "renderedLab": [
-            52.056,
-            9.514,
-            10.172
-          ],
-          "highlightL": 68.08,
-          "transfer": [
-            0.844157436472255,
-            0.8299898553868983,
-            0.8267696277501149
-          ]
-        },
         {
           "code": "CYC-0135",
           "axes": {
@@ -403,15 +380,38 @@
           "chartHex": "#0D1B25",
           "renderedHex": "#93766B",
           "renderedLab": [
-            52.056,
-            9.514,
-            10.172
+            52.148,
+            9.518,
+            10.174
           ],
           "highlightL": 68.08,
           "transfer": [
-            0.844157436472255,
-            0.8299898553868983,
-            0.8267696277501149
+            0.846951476775608,
+            0.8328149687732895,
+            0.8296515774984524
+          ]
+        },
+        {
+          "code": "CYC-0044",
+          "axes": {
+            "base_family": "BLACK_COPPER",
+            "surface": null,
+            "tone": null,
+            "effect": null,
+            "tint": null
+          },
+          "chartHex": "#17191C",
+          "renderedHex": "#93766B",
+          "renderedLab": [
+            52.148,
+            9.518,
+            10.174
+          ],
+          "highlightL": 68.08,
+          "transfer": [
+            0.846951476775608,
+            0.8328149687732895,
+            0.8296515774984524
           ]
         },
         {
@@ -424,17 +424,17 @@
             "tint": null
           },
           "chartHex": "#070C14",
-          "renderedHex": "#8E7367",
+          "renderedHex": "#8F7367",
           "renderedLab": [
-            50.658,
-            8.978,
-            10.69
+            50.75,
+            8.982,
+            10.692
           ],
           "highlightL": 66.47,
           "transfer": [
-            0.8415613907400161,
-            0.8288944971262695,
-            0.8258099902264779
+            0.8443595813081018,
+            0.8317494153093198,
+            0.8287151839539176
           ]
         }
       ],
@@ -459,18 +459,18 @@
         5.86
       ],
       "renderedMedianLab": [
-        78.68,
+        78.72,
         -0.81,
         34.17
       ],
       "hueDiff": 18.38,
-      "hueError": 18.385,
+      "hueError": 18.383,
       "renderedChroma": 34.18,
       "physicalHueDiff": 0,
       "appliedHueShift": 0,
       "appliedChromaScale": 1,
       "appliedOxideL": null,
-      "physicalL": 78.68,
+      "physicalL": 78.72,
       "highlightL": 85.02,
       "current": {
         "hue_shift": 0,
@@ -491,15 +491,15 @@
           "chartHex": "#333537",
           "renderedHex": "#D8C183",
           "renderedLab": [
-            78.684,
-            -0.81,
+            78.722,
+            -0.811,
             34.173
           ],
           "highlightL": 85.02,
           "transfer": [
-            0.791974422043297,
-            0.7403180699571948,
-            0.6309753705119332
+            0.7928185361226079,
+            0.7411580101703479,
+            0.6318516934890245
           ]
         },
         {
@@ -514,15 +514,15 @@
           "chartHex": "#3E3E34",
           "renderedHex": "#D8C183",
           "renderedLab": [
-            78.684,
-            -0.81,
+            78.722,
+            -0.811,
             34.173
           ],
           "highlightL": 85.02,
           "transfer": [
-            0.791974422043297,
-            0.7403180699571948,
-            0.6309753705119332
+            0.7928185361226079,
+            0.7411580101703479,
+            0.6318516934890245
           ]
         },
         {
@@ -537,15 +537,15 @@
           "chartHex": "#24251C",
           "renderedHex": "#87743E",
           "renderedLab": [
-            49.484,
-            0.044,
-            32.299
+            49.562,
+            -0.087,
+            32.268
           ],
-          "highlightL": 49.48,
+          "highlightL": 49.78,
           "transfer": [
             0.3091463577469158,
-            0.2766708642620534,
-            0.20831221111168463
+            0.2777835930819864,
+            0.20914656808969184
           ]
         }
       ],
@@ -560,10 +560,10 @@
       "chartChroma": 5.23,
       "hueFitted": false,
       "codes": [
-        "CYC-0100",
         "CYC-0015",
-        "CYC-0030",
-        "CYC-0026"
+        "CYC-0100",
+        "CYC-0026",
+        "CYC-0030"
       ],
       "chartMedianLab": [
         28.19,
@@ -571,18 +571,18 @@
         2.6
       ],
       "renderedMedianLab": [
-        79.5,
+        79.57,
         2.5,
-        44.29
+        44.28
       ],
       "hueDiff": 30.88,
-      "hueError": 30.882,
-      "renderedChroma": 44.36,
+      "hueError": 30.88,
+      "renderedChroma": 44.35,
       "physicalHueDiff": 0,
       "appliedHueShift": 0,
       "appliedChromaScale": 1,
       "appliedOxideL": 15,
-      "physicalL": 79.51,
+      "physicalL": 79.57,
       "highlightL": 82.72,
       "current": {
         "hue_shift": 0,
@@ -591,29 +591,6 @@
         "oxide_l": 15
       },
       "samples": [
-        {
-          "code": "CYC-0100",
-          "axes": {
-            "base_family": "GOLD",
-            "surface": "MATT",
-            "tone": null,
-            "effect": null,
-            "tint": null
-          },
-          "chartHex": "#424239",
-          "renderedHex": "#E4C172",
-          "renderedLab": [
-            79.505,
-            2.489,
-            44.287
-          ],
-          "highlightL": 84.08,
-          "transfer": [
-            0.8149101959826894,
-            0.7324397679394824,
-            0.6062819637211359
-          ]
-        },
         {
           "code": "CYC-0015",
           "axes": {
@@ -626,38 +603,38 @@
           "chartHex": "#636E71",
           "renderedHex": "#E4C172",
           "renderedLab": [
-            79.505,
-            2.489,
-            44.287
+            79.567,
+            2.483,
+            44.277
           ],
           "highlightL": 84.08,
           "transfer": [
-            0.8149101959826894,
-            0.7324397679394824,
-            0.6062819637211359
+            0.8163783245911189,
+            0.7339557875676742,
+            0.6079932507717459
           ]
         },
         {
-          "code": "CYC-0030",
+          "code": "CYC-0100",
           "axes": {
             "base_family": "GOLD",
-            "surface": "SAND",
-            "tone": "IMT",
+            "surface": "MATT",
+            "tone": null,
             "effect": null,
             "tint": null
           },
-          "chartHex": "#424444",
-          "renderedHex": "#E6C16E",
+          "chartHex": "#424239",
+          "renderedHex": "#E4C172",
           "renderedLab": [
-            79.754,
-            2.817,
-            46.451
+            79.567,
+            2.483,
+            44.277
           ],
-          "highlightL": 81.36,
+          "highlightL": 84.08,
           "transfer": [
-            0.8809453731182633,
-            0.7761639935320696,
-            0.616373410963896
+            0.8163783245911189,
+            0.7339557875676742,
+            0.6079932507717459
           ]
         },
         {
@@ -673,18 +650,41 @@
           "renderedHex": "#8C712A",
           "renderedLab": [
             48.951,
-            2.521,
-            41.948
+            2.523,
+            41.933
           ],
-          "highlightL": 48.95,
+          "highlightL": 48.96,
           "transfer": [
-            0.31664746368481483,
-            0.27212584335371204,
-            0.1910705899939332
+            0.31665842753748374,
+            0.27213977690703534,
+            0.19120705893918533
+          ]
+        },
+        {
+          "code": "CYC-0030",
+          "axes": {
+            "base_family": "GOLD",
+            "surface": "SAND",
+            "tone": "IMT",
+            "effect": null,
+            "tint": null
+          },
+          "chartHex": "#424444",
+          "renderedHex": "#E6C16E",
+          "renderedLab": [
+            79.775,
+            2.814,
+            46.447
+          ],
+          "highlightL": 81.36,
+          "transfer": [
+            0.8815413429119852,
+            0.7767686750435753,
+            0.6169994096181662
           ]
         }
       ],
-      "lightnessDiff": -0.01
+      "lightnessDiff": 0
     },
     {
       "family": "GUN_METAL",
@@ -703,18 +703,18 @@
         -1.98
       ],
       "renderedMedianLab": [
-        17.64,
+        17.67,
         0.75,
         -3.71
       ],
-      "hueDiff": 13.64,
-      "hueError": -13.642,
+      "hueDiff": 13.63,
+      "hueError": -13.631,
       "renderedChroma": 3.79,
-      "physicalHueDiff": 0.01,
+      "physicalHueDiff": 0,
       "appliedHueShift": 0,
       "appliedChromaScale": 1,
       "appliedOxideL": 15,
-      "physicalL": 17.64,
+      "physicalL": 17.67,
       "highlightL": 19.94,
       "current": {
         "hue_shift": 0,
@@ -735,15 +735,15 @@
           "chartHex": "#0F1114",
           "renderedHex": "#2A2B31",
           "renderedLab": [
-            17.642,
-            0.75,
-            -3.712
+            17.668,
+            0.749,
+            -3.711
           ],
           "highlightL": 19.94,
           "transfer": [
-            0.5650456046913148,
-            0.565362374023463,
-            0.5669633428622783
+            0.5657112249030772,
+            0.5660346316640563,
+            0.5676302232319039
           ]
         }
       ],
@@ -758,8 +758,8 @@
       "chartChroma": 3.08,
       "hueFitted": false,
       "codes": [
-        "CYC-0024",
         "CYC-0023",
+        "CYC-0024",
         "CYC-0018"
       ],
       "chartMedianLab": [
@@ -768,18 +768,18 @@
         1.31
       ],
       "renderedMedianLab": [
-        80.19,
+        80.23,
         0.6,
-        28.35
+        28.34
       ],
-      "hueDiff": 18.75,
-      "hueError": 18.746,
+      "hueDiff": 18.74,
+      "hueError": 18.744,
       "renderedChroma": 28.35,
       "physicalHueDiff": 0,
       "appliedHueShift": 0,
       "appliedChromaScale": 1,
       "appliedOxideL": null,
-      "physicalL": 80.2,
+      "physicalL": 80.23,
       "highlightL": 86.02,
       "current": {
         "hue_shift": 0,
@@ -788,6 +788,29 @@
         "oxide_l": null
       },
       "samples": [
+        {
+          "code": "CYC-0023",
+          "axes": {
+            "base_family": "LIGHT_GOLD",
+            "surface": "BRUSHED",
+            "tone": "IMT",
+            "effect": null,
+            "tint": null
+          },
+          "chartHex": "#4D5356",
+          "renderedHex": "#8A784C",
+          "renderedLab": [
+            51.041,
+            0.74,
+            26.55
+          ],
+          "highlightL": 51.22,
+          "transfer": [
+            0.3137486933168077,
+            0.28397807284714843,
+            0.2236568507155198
+          ]
+        },
         {
           "code": "CYC-0024",
           "axes": {
@@ -800,38 +823,15 @@
           "chartHex": "#3E3C36",
           "renderedHex": "#DBC592",
           "renderedLab": [
-            80.195,
-            0.602,
-            28.383
+            80.233,
+            0.601,
+            28.382
           ],
           "highlightL": 86.02,
           "transfer": [
-            0.800293996117809,
-            0.7469359123281248,
-            0.6517794503428451
-          ]
-        },
-        {
-          "code": "CYC-0023",
-          "axes": {
-            "base_family": "LIGHT_GOLD",
-            "surface": "BRUSHED",
-            "tone": "IMT",
-            "effect": null,
-            "tint": null
-          },
-          "chartHex": "#4D5356",
-          "renderedHex": "#8A774C",
-          "renderedLab": [
-            50.827,
-            1.108,
-            26.332
-          ],
-          "highlightL": 50.83,
-          "transfer": [
-            0.313365895968262,
-            0.28090880411473873,
-            0.22325486974048994
+            0.8011040371961063,
+            0.7477553986237847,
+            0.652631059193086
           ]
         },
         {
@@ -846,19 +846,19 @@
           "chartHex": "#2D2928",
           "renderedHex": "#E4D9A2",
           "renderedLab": [
-            86.245,
+            86.277,
             -4.416,
-            28.347
+            28.344
           ],
           "highlightL": 90.64,
           "transfer": [
-            0.8149101959826894,
-            0.7866259779561682,
-            0.6725597021527061
+            0.8157011344877391,
+            0.7874160497788648,
+            0.6733864266718094
           ]
         }
       ],
-      "lightnessDiff": -0.01
+      "lightnessDiff": 0
     },
     {
       "family": "NICKEL",
@@ -878,7 +878,7 @@
         -4.02
       ],
       "renderedMedianLab": [
-        54.77,
+        54.82,
         0.45,
         7.42
       ],
@@ -889,8 +889,8 @@
       "appliedHueShift": 0,
       "appliedChromaScale": 1,
       "appliedOxideL": 15,
-      "physicalL": 54.77,
-      "highlightL": 59.25,
+      "physicalL": 54.82,
+      "highlightL": 59.39,
       "current": {
         "hue_shift": 0,
         "chroma_scale": 1,
@@ -910,15 +910,15 @@
           "chartHex": "#2E2F30",
           "renderedHex": "#B2A99A",
           "renderedLab": [
-            69.726,
+            69.739,
             0.442,
             9.228
           ],
           "highlightL": 72.16,
           "transfer": [
-            0.7391191620705134,
-            0.7192012601911603,
-            0.6867372684355061
+            0.7394114027250264,
+            0.719493632610852,
+            0.6870331662555238
           ]
         },
         {
@@ -931,17 +931,17 @@
             "tint": null
           },
           "chartHex": "#1E222C",
-          "renderedHex": "#625D55",
+          "renderedHex": "#635D55",
           "renderedLab": [
-            39.823,
+            39.901,
             0.458,
-            5.612
+            5.611
           ],
-          "highlightL": 46.34,
+          "highlightL": 46.63,
           "transfer": [
-            0.5948267204573645,
-            0.5903003424217311,
-            0.5838031355602104
+            0.5966511942488322,
+            0.5921277586540008,
+            0.5856473313609041
           ]
         }
       ],
@@ -965,18 +965,18 @@
         6.38
       ],
       "renderedMedianLab": [
-        69.96,
+        70.23,
         13.48,
         16.96
       ],
-      "hueDiff": 0.12,
-      "hueError": 0.124,
+      "hueDiff": 0.14,
+      "hueError": 0.137,
       "renderedChroma": 21.66,
-      "physicalHueDiff": 2.97,
+      "physicalHueDiff": 2.98,
       "appliedHueShift": -1.5,
       "appliedChromaScale": 1,
       "appliedOxideL": null,
-      "physicalL": 69.66,
+      "physicalL": 69.93,
       "highlightL": 86.69,
       "current": {
         "hue_shift": -1.5,
@@ -995,17 +995,17 @@
             "tint": "ORANGE"
           },
           "chartHex": "#352320",
-          "renderedHex": "#CF9B7F",
+          "renderedHex": "#D09C80",
           "renderedLab": [
-            68.242,
-            15.755,
-            22.135
+            68.433,
+            15.763,
+            22.134
           ],
           "highlightL": 84.72,
           "transfer": [
-            0.6646331642525325,
-            0.6748574913586447,
-            0.6917354254426865
+            0.6684289389929363,
+            0.679145288328751,
+            0.6966015088601067
           ]
         },
         {
@@ -1018,17 +1018,17 @@
             "tint": null
           },
           "chartHex": "#30281F",
-          "renderedHex": "#CCA89B",
+          "renderedHex": "#CDA99C",
           "renderedLab": [
-            71.683,
-            11.2,
-            11.781
+            72.024,
+            11.202,
+            11.779
           ],
           "highlightL": 88.65,
           "transfer": [
-            0.6739996251900043,
-            0.6763387493830167,
-            0.6794870756430497
+            0.6807135835510293,
+            0.6837695786031088,
+            0.6873087929461029
           ]
         }
       ],
@@ -1051,18 +1051,18 @@
         -0.95
       ],
       "renderedMedianLab": [
-        75.42,
+        75.46,
         12.15,
         24.46
       ],
       "hueDiff": 71.75,
-      "hueError": -71.75,
+      "hueError": -71.752,
       "renderedChroma": 27.31,
       "physicalHueDiff": 0,
       "appliedHueShift": 0,
       "appliedChromaScale": 1,
       "appliedOxideL": null,
-      "physicalL": 75.42,
+      "physicalL": 75.46,
       "highlightL": 80.91,
       "current": {
         "hue_shift": 0,
@@ -1081,17 +1081,17 @@
             "tint": null
           },
           "chartHex": "#4C3F44",
-          "renderedHex": "#DFB18D",
+          "renderedHex": "#DFB18E",
           "renderedLab": [
-            75.425,
-            12.148,
-            24.458
+            75.46,
+            12.146,
+            24.457
           ],
           "highlightL": 80.91,
           "transfer": [
-            0.8073739044256825,
-            0.7030717425230104,
-            0.643213991046415
+            0.8081465236110955,
+            0.7038660517861244,
+            0.6440446591925544
           ]
         }
       ],
@@ -1114,18 +1114,18 @@
         -1.38
       ],
       "renderedMedianLab": [
-        26.82,
+        26.98,
         0.29,
         -0.78
       ],
       "hueDiff": 32.53,
       "hueError": -32.529,
       "renderedChroma": 0.83,
-      "physicalHueDiff": 0,
+      "physicalHueDiff": 0.01,
       "appliedHueShift": 0,
       "appliedChromaScale": 1,
       "appliedOxideL": null,
-      "physicalL": 26.82,
+      "physicalL": 26.98,
       "highlightL": 51.28,
       "current": {
         "hue_shift": 0,
@@ -1144,17 +1144,17 @@
             "tint": null
           },
           "chartHex": "#0F1113",
-          "renderedHex": "#3F3F41",
+          "renderedHex": "#404041",
           "renderedLab": [
-            26.82,
+            26.98,
             0.29,
             -0.782
           ],
           "highlightL": 51.28,
           "transfer": [
-            0.8817598556654083,
-            0.8817598556654083,
-            0.8810401374498962
+            0.8873108969331447,
+            0.8873108969331447,
+            0.8866095332818581
           ]
         }
       ],
@@ -1177,19 +1177,19 @@
         -0.94
       ],
       "renderedMedianLab": [
-        65.17,
+        65.46,
         0.36,
         -0.99
       ],
-      "hueDiff": 34.32,
-      "hueError": 34.316,
+      "hueDiff": 34.34,
+      "hueError": 34.335,
       "renderedChroma": 1.05,
       "physicalHueDiff": 0.01,
       "appliedHueShift": 0,
       "appliedChromaScale": 1,
       "appliedOxideL": null,
-      "physicalL": 65.17,
-      "highlightL": 94.52,
+      "physicalL": 65.46,
+      "highlightL": 94.85,
       "current": {
         "hue_shift": 0,
         "chroma_scale": 1,
@@ -1207,17 +1207,17 @@
             "tint": null
           },
           "chartHex": "#373537",
-          "renderedHex": "#9E9EA0",
+          "renderedHex": "#9F9FA1",
           "renderedLab": [
-            65.166,
+            65.463,
             0.365,
-            -0.987
+            -0.988
           ],
-          "highlightL": 94.52,
+          "highlightL": 94.85,
           "transfer": [
-            0.6762922351260514,
-            0.6762922351260514,
-            0.6770112096666508
+            0.6829632398252716,
+            0.6829632398252716,
+            0.6836708891602483
           ]
         }
       ],
@@ -1242,7 +1242,7 @@
         -1.37
       ],
       "renderedMedianLab": [
-        23.58,
+        23.88,
         0,
         0
       ],
@@ -1253,8 +1253,8 @@
       "appliedHueShift": 0,
       "appliedChromaScale": 1,
       "appliedOxideL": 17.81,
-      "physicalL": 23.58,
-      "highlightL": 47.24,
+      "physicalL": 23.88,
+      "highlightL": 47.64,
       "current": {
         "hue_shift": 0,
         "chroma_scale": 1,
@@ -1274,15 +1274,15 @@
           "chartHex": "#2A2C2C",
           "renderedHex": "#1A1A1A",
           "renderedLab": [
-            9.299,
+            9.425,
             0,
             0
           ],
-          "highlightL": 20.79,
+          "highlightL": 21.25,
           "transfer": [
-            0.9628865219496537,
-            0.9628865219496537,
-            0.9628865219496537
+            0.9700820305417213,
+            0.9700820305417213,
+            0.9700820305417213
           ]
         },
         {
@@ -1295,17 +1295,17 @@
             "tint": null
           },
           "chartHex": "#121315",
-          "renderedHex": "#383838",
+          "renderedHex": "#393939",
           "renderedLab": [
-            23.576,
+            23.876,
             0,
             0
           ],
-          "highlightL": 47.24,
+          "highlightL": 47.64,
           "transfer": [
-            0.921501588699455,
-            0.921501588699455,
-            0.921501588699455
+            0.9320416538227658,
+            0.9320416538227658,
+            0.9320416538227658
           ]
         },
         {
@@ -1318,17 +1318,17 @@
             "tint": null
           },
           "chartHex": "#5A5C5E",
-          "renderedHex": "#383838",
+          "renderedHex": "#393939",
           "renderedLab": [
-            23.576,
+            23.876,
             0,
             0
           ],
-          "highlightL": 47.24,
+          "highlightL": 47.64,
           "transfer": [
-            0.921501588699455,
-            0.921501588699455,
-            0.921501588699455
+            0.9320416538227658,
+            0.9320416538227658,
+            0.9320416538227658
           ]
         }
       ],

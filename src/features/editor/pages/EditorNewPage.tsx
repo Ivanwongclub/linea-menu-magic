@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Box } from "lucide-react";
 import { useAuth } from "@/features/auth/AuthProvider";
 import { useI18n } from "@/features/i18n/I18nProvider";
+import { processThresholds } from "../lib/manufacturing";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
 import { useEditorProductBySlug, variantRatio, type EditorProduct } from "../hooks/useEditorProduct";
@@ -67,7 +68,7 @@ function LoadingShell() {
  */
 export function EditorNewPage({ productSlug }: { productSlug: string | null }) {
   const navigate = useNavigate();
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const calibration = useSearchParams()[0].get("calibration") === "1";
   const { session, user, primaryBrand, loading: authLoading } = useAuth();
   const { isStaff, loading: staffLoading } = useDesignerStaffStatus();
@@ -222,6 +223,7 @@ export function EditorNewPage({ productSlug }: { productSlug: string | null }) {
           layers={recipe.layers}
           markedGroupIndices={product.model_branding_group_indices}
           canShowOriginal={isCatalogueEditor || isStaff}
+          process={processThresholds(selectedFinish?.process, language)}
         />
       }
       panel={

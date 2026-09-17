@@ -1,7 +1,8 @@
-import { useRef, type MutableRefObject, type PointerEvent as ReactPointerEvent } from "react";
+import { useRef, useState, type MutableRefObject, type PointerEvent as ReactPointerEvent } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { useI18n } from "@/features/i18n/I18nProvider";
+import { cn } from "@/lib/utils";
 import { useEditorStore } from "../../store/useEditorStore";
 import {
   HANDLE_HIT_PX,
@@ -155,6 +156,8 @@ export function HandlesOverlay({
 }) {
   const { t } = useI18n();
   const drag = useRef<{ start: DragStart; progress: DragProgress; pointerId: number } | null>(null);
+  // 4i Q4: a finger gets no hover, so a handle under one says so while it is held.
+  const [pressed, setPressed] = useState<HandleKind | null>(null);
 
   const onDown = (kind: HandleKind) => (event: ReactPointerEvent<SVGGElement>) => {
     const at = bridge.current.facePoint?.(event.clientX, event.clientY);
@@ -166,6 +169,7 @@ export function HandlesOverlay({
     event.currentTarget.setPointerCapture(event.pointerId);
     const start: DragStart = { kind, layer: current, at };
     drag.current = { start, progress: startProgress(start), pointerId: event.pointerId };
+    setPressed(kind);
     store.beginDrag();
   };
 
@@ -181,14 +185,19 @@ export function HandlesOverlay({
     const active = drag.current;
     if (!active || active.pointerId !== event.pointerId) return;
     drag.current = null;
+    setPressed(null);
     useEditorStore.getState().endDrag();
   };
 
-  const handlers = (kind: HandleKind) => ({
+  const handlers = (kind: HandleKind, pressedClass = "") => ({
     onPointerDown: onDown(kind),
     onPointerMove: onMove,
     onPointerUp: onUp,
     onPointerCancel: onUp,
+    "data-pressed": pressed === kind,
+    // The press state itself: the handle's own shape darkens while it is
+    // held, so a finger sees what it has hold of.
+    className: cn("pointer-events-auto", pressed === kind && pressedClass),
     style: { touchAction: "none", cursor: kind === "move" ? "move" : kind === "size" ? "nwse-resize" : "grab" } as const,
   });
 
@@ -201,12 +210,12 @@ export function HandlesOverlay({
       data-testid="layer-handles"
       data-layer-id={layer.id}
     >
-      <g ref={(el) => (elements.current.ring = el)} data-testid="handle-radius" aria-label={t("editor.handles.radius")} className="pointer-events-auto" {...handlers("radius")}>
+      <g ref={(el) => (elements.current.ring = el)} data-testid="handle-radius" aria-label={t("editor.handles.radius")} {...handlers("radius", "[&>path:last-of-type]:stroke-[2.5]")}>
         <path fill="none" stroke="transparent" strokeWidth={HANDLE_HIT_PX} style={{ pointerEvents: "stroke" }} />
         <path fill="none" stroke="hsl(var(--background))" strokeWidth={3} style={{ pointerEvents: "none" }} />
         <path fill="none" stroke="hsl(var(--foreground))" strokeWidth={1.25} strokeDasharray="4 3" style={{ pointerEvents: "none" }} />
       </g>
-      <g ref={(el) => (elements.current.arc = el)} data-testid="handle-arc" aria-label={t("editor.handles.arcPosition")} className="pointer-events-auto" {...handlers("arc")}>
+      <g ref={(el) => (elements.current.arc = el)} data-testid="handle-arc" aria-label={t("editor.handles.arcPosition")} {...handlers("arc", "[&>circle:last-of-type]:fill-foreground")}>
         <circle r={r} fill="transparent" />
         <circle r={6} fill="hsl(var(--background))" stroke="hsl(var(--foreground))" strokeWidth={1.5} />
       </g>
@@ -214,13 +223,12 @@ export function HandlesOverlay({
         ref={(el) => (elements.current.size = el)}
         data-testid="handle-size"
         aria-label={t("editor.handles.size")}
-        className="pointer-events-auto"
-        {...handlers("size")}
+        {...handlers("size", "[&>rect]:fill-foreground")}
       >
         <circle r={r} fill="transparent" />
         <rect x={-5} y={-5} width={10} height={10} fill="hsl(var(--background))" stroke="hsl(var(--foreground))" strokeWidth={1.5} />
       </g>
-      <g ref={(el) => (elements.current.move = el)} data-testid="handle-move" aria-label={t("editor.handles.move")} className="pointer-events-auto" {...handlers("move")}>
+      <g ref={(el) => (elements.current.move = el)} data-testid="handle-move" aria-label={t("editor.handles.move")} {...handlers("move", "[&>circle:last-of-type]:fill-foreground [&>path]:stroke-background")}>
         <circle r={r} fill="transparent" />
         <circle r={7} fill="hsl(var(--background))" stroke="hsl(var(--foreground))" strokeWidth={1.5} />
         <path d="M-3.5 0H3.5M0 -3.5V3.5" stroke="hsl(var(--foreground))" strokeWidth={1.25} />

@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { useEditorStore } from "../../store/useEditorStore";
 import { useFontMetrics } from "../../hooks/useFontMetrics";
 import { letterSpacingForSpan, textArc } from "../../lib/textLayout";
-import { isLogoLayer, logoHeightMm, type Layer, type LogoLayer, type TextLayer } from "../../lib/recipe";
+import { isLogoLayer, layerRelief, logoHeightMm, type Layer, type LogoLayer, type TextLayer } from "../../lib/recipe";
 import { ValueSlider } from "../controls/ValueSlider";
 import { RangeValueSlider } from "../controls/RangeValueSlider";
 
@@ -292,6 +292,33 @@ function LogoPlacementFields({ layer, faceDiameterMm }: { layer: LogoLayer; face
   );
 }
 
+/** R1: the bevel lives with the spatial values, not on the layer row. */
+function BevelField({ layer }: { layer: Layer }) {
+  const { t } = useI18n();
+  const updateLayer = useEditorStore((s) => s.updateLayer);
+  const commit = useEditorStore((s) => s.commit);
+  const beginDrag = useEditorStore((s) => s.beginDrag);
+  const endDrag = useEditorStore((s) => s.endDrag);
+  const relief = layerRelief(layer);
+
+  return (
+    <ValueSlider
+      onCommit={commit}
+      onDragStart={beginDrag}
+      onDragEnd={endDrag}
+      id={`bevel-${layer.id}`}
+      testId="pc-bevel"
+      label={t("editor.branding.bevel")}
+      unit="mm"
+      value={relief.bevel_mm}
+      min={0}
+      max={Math.max(0.2, relief.depth_mm / 2)}
+      hardMin={0}
+      onChange={(bevel_mm) => updateLayer(layer.id, { relief: { bevel_mm } })}
+    />
+  );
+}
+
 /**
  * The disclosure itself (v3-review §3): one row that opens the selected
  * layer's spatial values in place — a text layer's arc and size, or a logo's
@@ -323,6 +350,7 @@ export function PositionAndCurve({ layer, faceDiameterMm }: { layer: Layer; face
           ) : (
             <TextPlacementFields layer={layer} faceDiameterMm={faceDiameterMm} />
           )}
+          <BevelField layer={layer} />
         </div>
       )}
     </div>
