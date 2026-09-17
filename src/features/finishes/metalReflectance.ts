@@ -1,9 +1,10 @@
 /**
- * Plated-finish material model (Phases 3b, 3c and 3d).
+ * Plated-finish material model (Phases 3b, 3c, 3d and 4.0).
  *
  * The database is the source of truth — `finish_plated_material()` in
  * supabase/migrations/20260917230000_phase3d_hue_only_calibration.sql
- * (values: 20260918090000_phase3e_chroma_gated_calibration.sql)
+ * (values: 20260918090000_phase3e_chroma_gated_calibration.sql; carried
+ * finish items: 20260918100000_phase4_0_carried_finish_items.sql)
  * — and this module mirrors it so the numbers are readable in one place and
  * `render-calibration.mjs` can assert the two agree row for row. Change both
  * together; FAMILY_CALIBRATION must equal the `finish_family_calibration` seed.
@@ -50,7 +51,7 @@ export const BASE_FAMILY: Record<string, BaseRecipe> = {
   GUN_METAL: { metal: "black_nickel" },
   GOLD: { metal: "gold" },
   LIGHT_GOLD: { metal: "gold", blend: { toward: "silver", t: 0.35 } },
-  ROSE_GOLD: { metal: "gold", blend: { toward: "copper", t: 0.5 } },
+  ROSE_GOLD: { metal: "gold", blend: { toward: "copper", t: 0.7 } }, // 4.0 R1: was 0.5
   BRASS: { metal: "brass" },
   ANTI_BRASS: { metal: "brass" },
   RED_COPPER: { metal: "copper" },
@@ -67,10 +68,16 @@ export const BASE_FAMILY: Record<string, BaseRecipe> = {
 export const GUN_METAL_COOL_BIAS: LinearRGB = [0.96, 1.0, 1.08];
 export const GUN_METAL_ROUGHNESS_FLOOR = 0.15;
 
-/** Antique two-tone (3c R2; oxide lightness 3d R3). */
+/** Antique two-tone (3c R2; oxide lightness 3d R3; buffed darkening 4.0 R2). */
 export const TWO_TONE_TONES = new Set(["ANTI", "ANCIENT", "DEEP", "DARK"]);
 export const TWO_TONE_FAMILIES = new Set(["ANTI_BRASS", "ANTI_COPPER", "ANTI_SILVER", "BLACK_COPPER"]);
 export const TWO_TONE_BUFFED_ROUGHNESS = 0.3;
+/** 4.0 R2: the two-tone buffed layer's L* (and chroma, in proportion) relative to its physical value. */
+export const TWO_TONE_BUFFED_L_SCALE = 0.7;
+
+export function isTwoTonePlated(axes: PlatedAxes): boolean {
+  return (!!axes.tone && TWO_TONE_TONES.has(axes.tone)) || (!!axes.base_family && TWO_TONE_FAMILIES.has(axes.base_family));
+}
 
 /** Tone (non-antique) and tint: per-channel multipliers on linear RGB, tone then tint. */
 export const OFFSETS: Record<string, LinearRGB> = {
@@ -185,8 +192,12 @@ export interface PlatedMaterial {
   oxide_color_hex: string | null;
 }
 
-/** Linear base colour before the sRGB conversion — the calibration harness fits against this. */
-export function platedLinear(axes: PlatedAxes, calibration: Record<string, FamilyCalibration> = FAMILY_CALIBRATION): LinearRGB {
+/**
+ * Physical linear base colour before the sRGB conversion, before the 4.0 R2
+ * two-tone buffed darkening — the calibration harness fits against this, and
+ * it's the reference `platedLinear` darkens from.
+ */
+export function physicalPlatedLinear(axes: PlatedAxes, calibration: Record<string, FamilyCalibration> = FAMILY_CALIBRATION): LinearRGB {
   const recipe = BASE_FAMILY[axes.base_family ?? ""] ?? { metal: "nickel" as Metal };
   let c: LinearRGB = METAL_F0[recipe.metal];
   if (recipe.blend) {
@@ -212,6 +223,18 @@ export function platedLinear(axes: PlatedAxes, calibration: Record<string, Famil
     }
   }
   return c;
+}
+
+/**
+ * Linear base colour before the sRGB conversion (stored `base_color_hex`).
+ * Two-tone rows darken to `TWO_TONE_BUFFED_L_SCALE` × their physical L*, with
+ * chroma scaled in the same proportion and hue kept (4.0 R2).
+ */
+export function platedLinear(axes: PlatedAxes, calibration: Record<string, FamilyCalibration> = FAMILY_CALIBRATION): LinearRGB {
+  const c = physicalPlatedLinear(axes, calibration);
+  if (!isTwoTonePlated(axes)) return c;
+  const [l, a, b] = linearToLab(c);
+  return inGamutAtChroma(l * TWO_TONE_BUFFED_L_SCALE, Math.sqrt(a * a + b * b) * TWO_TONE_BUFFED_L_SCALE, Math.atan2(b, a));
 }
 
 /** Linear base colour of the oxide layer of a two-tone row (R3). */
@@ -271,7 +294,7 @@ function inGamutAtChroma(l: number, chroma: number, h: number): LinearRGB {
 
 /** Plated finishes only (coating null). Unknown base families fall back to nickel. */
 export function derivePlatedMaterial(axes: PlatedAxes, calibration?: Record<string, FamilyCalibration>): PlatedMaterial {
-  const twoTone = (!!axes.tone && TWO_TONE_TONES.has(axes.tone)) || (!!axes.base_family && TWO_TONE_FAMILIES.has(axes.base_family));
+  const twoTone = isTwoTonePlated(axes);
   const surface = SURFACE[axes.surface ?? "BRIGHT"] ?? SURFACE.BRIGHT;
   let roughness = surface.roughness;
   if (twoTone && axes.surface == null) roughness = TWO_TONE_BUFFED_ROUGHNESS;

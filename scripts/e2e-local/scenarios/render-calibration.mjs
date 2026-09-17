@@ -1,4 +1,4 @@
-// Render calibration (Phase 3b, revised 3c, 3d and 3e).
+// Render calibration (Phase 3b, revised 3c, 3d, 3e and 4.0).
 //
 // 1. Procedural studio: a bright nickel flat disc at reference F0 (RTR4, before
 //    family calibration) reads surround ≤ #505050 and highlight ≥ #EDEDED in
@@ -6,11 +6,13 @@
 // 2. Colour pipeline: #808080 and #C0392B dielectric discs render centre-pixel
 //    within ±3/255.
 // 3. Database derivation == src/features/finishes/metalReflectance.ts on every
-//    plated row; painted rows take their base colour from the chart CSV and
-//    their roughness / clearcoat / metalness from the coating table and no
-//    oxide colour.
-// 4. Twelve finishes on the lettered Polo button → reports/3e-materials.png,
-//    each beside its chart swatch, for human review; relief visible in each.
+//    plated row (4.0: ROSE_GOLD's t = 0.7 blend and the two-tone buffed
+//    darkening included); painted rows take their base colour from the chart
+//    CSV and their roughness / clearcoat / metalness from the coating table
+//    and no oxide colour.
+// 4. Twelve finishes on the lettered Polo button → reports/4-materials.png
+//    (the same 3e twelve cells), each beside its chart swatch, for human
+//    review; relief visible in each.
 // 5. No viewport toolbar; three-quarter camera filling ~60%.
 import assert from "node:assert/strict";
 import { readFileSync, mkdirSync } from "node:fs";
@@ -205,11 +207,11 @@ export default async function ({ page, base, admin, h }) {
   await sharp({ create: { width: TILE_W * COLS, height: (TILE_H + LABEL_H) * rows, channels: 3, background: "#FFFFFF" } })
     .composite(composites)
     .png()
-    .toFile(path.join(REPO_ROOT, "reports/3e-materials.png"));
+    .toFile(path.join(REPO_ROOT, "reports/4-materials.png"));
 
   for (const t of tiles) {
     assert.ok(t.detail > flatDetail * 3, `${t.code}: relief detail ${t.detail.toFixed(2)} vs flat disc ${flatDetail.toFixed(2)}`);
   }
-  out.sheet = { file: "reports/3e-materials.png", detail: Object.fromEntries(tiles.map((t) => [t.code, +t.detail.toFixed(1)])) };
+  out.sheet = { file: "reports/4-materials.png", detail: Object.fromEntries(tiles.map((t) => [t.code, +t.detail.toFixed(1)])) };
   return out;
 }

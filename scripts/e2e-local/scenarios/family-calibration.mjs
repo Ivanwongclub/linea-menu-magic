@@ -1,18 +1,35 @@
-// Phase 3d R5, gated in 3e: every plated base family, rendered as flat discs
-// through the editor under the procedural studio (calibrate/fit-families.mjs
-// measures and refreshes reports/3e-family-fit.json; this asserts on it):
+// Phase 3d R5, gated in 3e, darkening added in 4.0: every plated base family,
+// rendered as flat discs through the editor under the procedural studio
+// (calibrate/fit-families.mjs measures and refreshes reports/3e-family-fit.json;
+// this asserts on it):
 //   - hue, fitted families (chart C* ≥ 7): rendered median hue within 8° of
 //     the R2 chart rows
 //   - hue, physical families: no shift, chroma scale 1, and the rendered hue
 //     within 1° of the physical prediction (where the render has hue at all)
 //   - lightness: rendered median L* within 5 of the physical L* (buffed layer),
-//     and every rendered row's base colour at its metal's physical L*
+//     two-tone rows' base colour L* = 0.7 × physical (4.0 R2), non-two-tone
+//     rows' base colour L* equal to physical, and the oxide layer's target L*
+//     unaffected by the buffed darkening
 //   - GOLD and LIGHT_GOLD highlight L* ≥ 70
 //   - bright nickel (CYC-0001, calibrated) reaches the studio targets
+//   - ROSE_GOLD blends gold→copper at t = 0.7 (4.0 R1), hex parity with the
+//     stored rows
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import measure, { OUT } from "../calibrate/fit-families.mjs";
-import { FAMILY_CALIBRATION, linearToLab, platedLinear } from "../../../src/features/finishes/metalReflectance.ts";
+import { FINISH_AXES_SELECT, axesOf } from "../lib/calibration.mjs";
+import {
+  FAMILY_CALIBRATION,
+  OXIDE_L_FLOOR,
+  TWO_TONE_BUFFED_L_SCALE,
+  BASE_FAMILY,
+  linearToLab,
+  platedLinear,
+  physicalPlatedLinear,
+  oxideLinear,
+  isTwoTonePlated,
+  derivePlatedMaterial,
+} from "../../../src/features/finishes/metalReflectance.ts";
 
 const HUE_LIMIT = 8;
 const PHYSICAL_HUE_LIMIT = 1;
@@ -20,6 +37,8 @@ const PHYSICAL_HUE_LIMIT = 1;
 const HUE_DEFINED_C = 1;
 const L_LIMIT = 5;
 const HIGHLIGHT_L = 70;
+const BUFFED_L_TOLERANCE = 0.05;
+const OXIDE_L_TOLERANCE = 0.1;
 
 export default async function (ctx) {
   delete process.env.FIT;
@@ -44,13 +63,49 @@ export default async function (ctx) {
   const lOver = families.filter((f) => Math.abs(f.lightnessDiff) > L_LIMIT);
   assert.equal(lOver.length, 0, `L* more than ${L_LIMIT} from physical: ${lOver.map((f) => `${f.family} ${f.lightnessDiff}`).join(", ")}`);
 
-  // R1 at the source: the calibration never moves a base colour's L* (8-bit hex rounding aside).
+  // R1 at the source: the hue rotation never moves a base colour's L* (8-bit
+  // hex rounding aside). 4.0 R2: two-tone rows darken to 0.7 × that physical
+  // L*, chroma scaled in proportion; non-two-tone rows stay equal to it. The
+  // oxide layer's target L* is unaffected by the buffed darkening.
   const unrotated = Object.fromEntries(Object.entries(FAMILY_CALIBRATION).map(([k, c]) => [k, { ...c, hue_shift: 0, chroma_scale: 1 }]));
   for (const f of families) {
     for (const s of f.samples) {
-      const stored = platedLinear(s.axes);
-      const l = linearToLab(platedLinear(s.axes, unrotated))[0];
-      assert.ok(Math.abs(linearToLab(stored)[0] - l) < 0.05, `${s.code}: base L* ${linearToLab(stored)[0].toFixed(2)} vs physical ${l.toFixed(2)}`);
+      const storedL = linearToLab(platedLinear(s.axes))[0];
+      const physicalL = linearToLab(physicalPlatedLinear(s.axes, unrotated))[0];
+      const twoTone = isTwoTonePlated(s.axes);
+      const expectedL = twoTone ? physicalL * TWO_TONE_BUFFED_L_SCALE : physicalL;
+      assert.ok(
+        Math.abs(storedL - expectedL) < BUFFED_L_TOLERANCE,
+        `${s.code}: base L* ${storedL.toFixed(2)} vs expected ${expectedL.toFixed(2)} (physical ${physicalL.toFixed(2)}, twoTone ${twoTone})`,
+      );
+
+      if (twoTone) {
+        const cal = FAMILY_CALIBRATION[s.axes.base_family ?? ""];
+        if (cal?.oxide_l != null) {
+          const oxideL = linearToLab(oxideLinear(s.axes))[0];
+          const target = Math.max(OXIDE_L_FLOOR, cal.oxide_l);
+          assert.ok(
+            Math.abs(oxideL - target) < OXIDE_L_TOLERANCE,
+            `${s.code}: oxide L* ${oxideL.toFixed(2)} should still hit its calibration target ${target} (4.0: buffed darkening must not move it)`,
+          );
+        }
+      }
+    }
+  }
+
+  // R1: ROSE_GOLD blends gold toward copper at t = 0.7 (was 0.5), and the
+  // stored rows match the TS mirror exactly.
+  assert.equal(BASE_FAMILY.ROSE_GOLD.blend?.toward, "copper");
+  assert.equal(BASE_FAMILY.ROSE_GOLD.blend?.t, 0.7, "ROSE_GOLD should blend toward copper at t = 0.7");
+  {
+    const { admin } = ctx;
+    const { data: roseGold, error } = await admin.from("finishes").select(FINISH_AXES_SELECT).is("coating_id", null);
+    if (error) throw new Error(error.message);
+    const rows = roseGold.filter((f) => f.base_family?.code === "ROSE_GOLD");
+    assert.ok(rows.length > 0, "expected at least one ROSE_GOLD row");
+    for (const row of rows) {
+      const expected = derivePlatedMaterial(axesOf(row));
+      assert.equal(row.base_color_hex, expected.base_color_hex, `${row.cyc_code}: ROSE_GOLD base colour should match the TS mirror at t 0.7`);
     }
   }
 
