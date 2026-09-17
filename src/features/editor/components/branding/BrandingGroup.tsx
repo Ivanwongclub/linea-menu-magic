@@ -1,14 +1,19 @@
 import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useEffect, type ReactNode } from "react";
-import { GripVertical, Plus, Redo2, Undo2, X } from "lucide-react";
+import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from "react";
+import { GripVertical, ImagePlus, Plus, Redo2, Undo2, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { cn } from "@/lib/utils";
 import { selectCanRedo, selectCanUndo, useEditorStore } from "../../store/useEditorStore";
 import { BUNDLED_FONTS } from "../../lib/fonts";
-import { newTextLayer, type TextLayer, type TextLayout } from "../../lib/recipe";
+import { isLogoLayer, isTextLayer, newLogoLayer, newTextLayer, type Layer, type TextLayer, type TextLayout } from "../../lib/recipe";
+import { MAX_LOGO_BYTES, asRejection, rejectionMessage, validateLogoSvg } from "../../lib/logoSvg";
+import { parseLogoSvg } from "../../lib/logoGeometry";
+import { deleteLogoAsset, uploadLogoAsset, useLogoSources } from "../../hooks/useLogoAssets";
+import { useAuth } from "@/features/auth/AuthProvider";
+import { useDesignerStaffStatus } from "../../hooks/useDesignerStaffStatus";
 import { recoveredDefaults, type BrandingReferenceRaw } from "../../lib/recoveredPlacement";
 import { PositionAndCurve } from "./PositionAndCurve";
 
@@ -19,10 +24,15 @@ const LAYOUTS: { value: TextLayout; label: string }[] = [
   { value: "circle", label: "editor.branding.layoutCircular" },
 ];
 
-function LayerRow({ layer, selected }: { layer: TextLayer; selected: boolean }) {
+function LayerRow({ layer, selected, logoSvg }: { layer: Layer; selected: boolean; logoSvg?: string }) {
   const { t } = useI18n();
   const selectLayer = useEditorStore((s) => s.selectLayer);
   const removeLayer = useEditorStore((s) => s.removeLayer);
+  const onDelete = () => {
+    // A logo's file goes with its layer (R7); an undo puts both back.
+    if (isLogoLayer(layer) && layer.content.asset_id) void deleteLogoAsset(layer.content.asset_id);
+    removeLayer(layer.id);
+  };
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({ id: layer.id });
 
   return (
@@ -56,15 +66,22 @@ function LayerRow({ layer, selected }: { layer: TextLayer; selected: boolean }) 
         onClick={() => selectLayer(layer.id)}
         className="flex-1 min-w-0 py-2 pr-2 text-left"
       >
-        <span className={cn("block truncate text-sm tracking-wide", layer.content.value ? "text-foreground" : "text-muted-foreground italic")}>
-          {layer.content.value || t("editor.branding.emptyLayer")}
-        </span>
+        {isLogoLayer(layer) ? (
+          <span className="flex items-center gap-2">
+            <LogoThumbnail svg={logoSvg} />
+            <span className="truncate text-sm tracking-wide text-foreground">{t("editor.branding.logoLayer")}</span>
+          </span>
+        ) : (
+          <span className={cn("block truncate text-sm tracking-wide", layer.content.value ? "text-foreground" : "text-muted-foreground italic")}>
+            {layer.content.value || t("editor.branding.emptyLayer")}
+          </span>
+        )}
       </button>
       <button
         type="button"
         data-testid="text-layer-delete"
         aria-label={t("editor.branding.delete")}
-        onClick={() => removeLayer(layer.id)}
+        onClick={onDelete}
         className="self-stretch px-2 text-muted-foreground hover:text-foreground"
       >
         <X className="w-3.5 h-3.5" strokeWidth={1.5} />
@@ -73,10 +90,33 @@ function LayerRow({ layer, selected }: { layer: TextLayer; selected: boolean }) 
   );
 }
 
-function LayerEditor({ layer, faceDiameterMm }: { layer: TextLayer; faceDiameterMm: number }) {
+/** The uploaded artwork itself, at row size (R4). */
+function LogoThumbnail({ svg }: { svg?: string }) {
+  if (!svg) return <span className="h-5 w-5 shrink-0 border border-border bg-secondary" data-testid="logo-thumbnail" data-loaded="false" />;
+  return (
+    <img
+      src={`data:image/svg+xml;utf8,${encodeURIComponent(svg)}`}
+      alt=""
+      data-testid="logo-thumbnail"
+      data-loaded="true"
+      className="h-5 w-5 shrink-0 object-contain"
+    />
+  );
+}
+
+function LayerEditor({ layer, faceDiameterMm }: { layer: Layer; faceDiameterMm: number }) {
   const { t } = useI18n();
   const updateLayer = useEditorStore((s) => s.updateLayer);
   const commit = useEditorStore((s) => s.commit);
+
+  if (isLogoLayer(layer)) {
+    // A logo has no content to type: its placement is all there is (R3).
+    return (
+      <div className="space-y-4 pt-1" data-testid="logo-layer-editor">
+        <PositionAndCurve layer={layer} faceDiameterMm={faceDiameterMm} />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 pt-1" data-testid="text-layer-editor">
@@ -230,12 +270,69 @@ export function BrandingGroup({
   const redo = useEditorStore((s) => s.redo);
   const canUndo = useEditorStore(selectCanUndo);
   const canRedo = useEditorStore(selectCanRedo);
+  const logoSources = useLogoSources(layers);
+  const { user, primaryBrand } = useAuth();
+  const { isStaff } = useDesignerStaffStatus();
+  const fileInput = useRef<HTMLInputElement>(null);
+  const [logoError, setLogoError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   useUndoShortcuts();
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
   const selected = layers.find((l) => l.id === selectedLayerId) ?? null;
+
+  /**
+   * Add logo (4k R1/R2): the file is validated as text before anything is
+   * stored — SVG, ≤ 200 KB, outlines only, every path closed — then parsed
+   * for its aspect. Signed in, it uploads to `design-uploads` and becomes a
+   * `design_assets` row; anonymously it waits in the draft for the claim.
+   */
+  const onLogoFile = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    setLogoError(null);
+    setUploading(true);
+    try {
+      if (file.size > MAX_LOGO_BYTES) {
+        const { key, vars } = rejectionMessage({ reason: "tooLarge", limitKb: MAX_LOGO_BYTES / 1024 });
+        setLogoError(t(key, vars));
+        return;
+      }
+      const svg = await file.text();
+      const validation = validateLogoSvg(svg, file.size);
+      const rejection = asRejection(validation);
+      if (rejection) {
+        const { key, vars } = rejectionMessage(rejection);
+        setLogoError(t(key, vars));
+        return;
+      }
+      const artwork = parseLogoSvg(svg);
+      if (!artwork) {
+        const { key, vars } = rejectionMessage({ reason: "empty" });
+        setLogoError(t(key, vars));
+        return;
+      }
+      const layerId = crypto.randomUUID();
+      if (user) {
+        const assetId = await uploadLogoAsset({
+          svg,
+          filename: file.name,
+          ownerId: user.id,
+          brandId: isStaff ? null : primaryBrand?.id ?? null,
+        });
+        addLayer(newLogoLayer(layerId, faceDiameterMm, artwork.aspect, assetId));
+      } else {
+        addLayer(newLogoLayer(layerId, faceDiameterMm, artwork.aspect), { filename: file.name, svg });
+      }
+    } catch (error) {
+      setLogoError(t("editor.branding.logoFailed", { reason: String((error as Error)?.message ?? error) }));
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const onDragEnd = ({ active, over }: DragEndEvent) => {
     if (!over || active.id === over.id) return;
@@ -276,7 +373,31 @@ export function BrandingGroup({
           <Plus className="w-3.5 h-3.5" strokeWidth={1.5} />
           {t("editor.branding.addText")}
         </button>
+        <button
+          type="button"
+          data-testid="add-logo"
+          disabled={uploading}
+          onClick={() => fileInput.current?.click()}
+          className="flex items-center gap-1 text-xs tracking-[0.05em] text-foreground underline-offset-4 hover:underline disabled:text-muted-foreground"
+        >
+          <ImagePlus className="w-3.5 h-3.5" strokeWidth={1.5} />
+          {t("editor.branding.addLogo")}
+        </button>
+        <input
+          ref={fileInput}
+          type="file"
+          accept="image/svg+xml,.svg"
+          data-testid="logo-input"
+          className="hidden"
+          onChange={(event) => void onLogoFile(event)}
+        />
       </div>
+
+      {logoError && (
+        <p className="text-xs text-destructive" data-testid="logo-error">
+          {logoError}
+        </p>
+      )}
 
       {layers.length === 0 ? (
         <p className="text-xs text-muted-foreground">{t("editor.branding.empty")}</p>
@@ -285,7 +406,7 @@ export function BrandingGroup({
           <SortableContext items={layers.map((l) => l.id)} strategy={verticalListSortingStrategy}>
             <ul className="space-y-1.5" aria-label={t("editor.branding.layers")} data-testid="text-layers">
               {layers.map((layer) => (
-                <LayerRow key={layer.id} layer={layer} selected={layer.id === selectedLayerId} />
+                <LayerRow key={layer.id} layer={layer} selected={layer.id === selectedLayerId} logoSvg={logoSources[layer.id]} />
               ))}
             </ul>
           </SortableContext>

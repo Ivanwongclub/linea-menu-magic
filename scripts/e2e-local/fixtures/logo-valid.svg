@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A 100 x 60 plate with a rectangular hole: one fill, closed outlines. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 60" width="100" height="60">
+  <path fill="#111111" fill-rule="evenodd" d="M0 0 H100 V60 H0 Z M20 15 H80 V45 H20 Z" />
+</svg>

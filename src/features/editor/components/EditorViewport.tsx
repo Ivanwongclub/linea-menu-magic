@@ -7,8 +7,8 @@ import { Link, useSearchParams } from "react-router-dom";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { EditorModel, type RulerMeasurements } from "./EditorModel";
-import type { TextSceneReport } from "./branding/TextLayerMeshes";
-import type { TextLayer } from "../lib/recipe";
+import type { TextSceneReport } from "./branding/BrandingMeshes";
+import type { Layer } from "../lib/recipe";
 import { RulerLabels, RulerOverlay, newRulerLabelElements } from "./RulerOverlay";
 import { RulerToggle } from "./RulerToggle";
 import { OriginalLetteringToggle } from "./OriginalLetteringToggle";
@@ -19,6 +19,7 @@ import { ProceduralStudio } from "./ProceduralStudio";
 import { CameraReport } from "./CameraReport";
 import { HandleProjector, HandlesOverlay, newHandleBridge, newHandleElements } from "./branding/Handles";
 import { useEditorStore } from "../store/useEditorStore";
+import { useLogoSources } from "../hooks/useLogoAssets";
 
 interface EditorViewportProps {
   modelStoragePath: string | null;
@@ -35,7 +36,7 @@ interface EditorViewportProps {
   isCatalogueEditor: boolean;
   ruler: boolean;
   onRulerToggle: () => void;
-  layers: TextLayer[];
+  layers: Layer[];
   /** The product's marked branding groups (4d); hidden in the buyer view (4j). */
   markedGroupIndices: number[];
   /** Catalogue editors and designer staff may show the original lettering. */
@@ -139,6 +140,7 @@ export function EditorViewport({
   const handleElements = useRef(newHandleElements());
   const selectedLayerId = useEditorStore((s) => s.selectedLayerId);
   const modelFrame = useEditorStore((s) => s.modelFrame);
+  const logoSources = useLogoSources(layers);
   const selectedLayer = layers.find((l) => l.id === selectedLayerId) ?? null;
   // Calibration screenshots composite any DOM over the canvas; `?calibration=1` hides the viewport chrome.
   const calibration = useSearchParams()[0].get("calibration") === "1";
@@ -162,6 +164,8 @@ export function EditorViewport({
       data-model-size-mm={modelSizeMm != null ? modelSizeMm.toFixed(2) : undefined}
       // Scene read-backs for the text scenarios: the rendered glyphs and the no-mirroring check.
       data-glyph-count={textReport?.glyphMeshCount}
+      data-logo-count={textReport?.logoMeshCount}
+      data-logos={textReport ? JSON.stringify(textReport.logos) : undefined}
       // Drawn part meshes vs the file's groups: the buyer view hides the marked branding (4j).
       data-model-mesh-count={meshCount?.drawn}
       data-face-z={faceZ ?? undefined}
@@ -196,6 +200,7 @@ export function EditorViewport({
             hideMarked={!(canShowOriginal && showOriginal)}
             onMeshCount={onMeshCount}
             layers={layers}
+            logoSources={logoSources}
             onTextReport={setTextReport}
           />
           {ruler && rulerMeasurements && <RulerOverlay measurements={rulerMeasurements} labels={rulerLabels} obstacles={handleBridge} layer={selectedLayer} faceZ={faceZ ?? rulerMeasurements.maxZ} />}

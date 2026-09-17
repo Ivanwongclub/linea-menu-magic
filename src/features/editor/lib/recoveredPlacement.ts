@@ -101,12 +101,28 @@ export function angularClusters(anglesDeg: number[], gapDeg = CLUSTER_GAP_DEG): 
   return clusters;
 }
 
-/** The widest cluster; ties go to the one with more glyphs. */
+/** Two clusters this close in angular extent are a tie (4k R5). */
+export const CLUSTER_TIE_DEG = 20;
+
+/** Distance from 12 o'clock, either way round. */
+function fromTop(deg: number): number {
+  const d = ((deg % 360) + 360) % 360;
+  return Math.min(d, 360 - d);
+}
+
+/**
+ * The widest cluster — but when two are within `CLUSTER_TIE_DEG` of each
+ * other in extent, the one nearest 0° wins (4k R5, closing 4j Q1: the top
+ * lettering is what a buyer expects, and a few degrees of extra extent on the
+ * bottom arc shouldn't take it).
+ */
 export function largestCluster(clusters: AngularCluster[]): AngularCluster | null {
-  return clusters.reduce<AngularCluster | null>(
-    (best, c) => (!best || c.extentDeg > best.extentDeg + 1e-9 || (Math.abs(c.extentDeg - best.extentDeg) <= 1e-9 && c.count > best.count) ? c : best),
-    null,
-  );
+  return clusters.reduce<AngularCluster | null>((best, c) => {
+    if (!best) return c;
+    const gap = c.extentDeg - best.extentDeg;
+    if (Math.abs(gap) <= CLUSTER_TIE_DEG) return fromTop(c.midDeg) < fromTop(best.midDeg) ? c : best;
+    return gap > 0 ? c : best;
+  }, null);
 }
 
 /**

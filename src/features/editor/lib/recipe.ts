@@ -7,30 +7,31 @@
  * No path aliases and no React here: the node unit tests import this file.
  */
 
-export type TextLayout = "straight" | "circle";
+/** `free` is a logo's placement: centre, width and rotation, no curve (4k R3). */
+export type TextLayout = "straight" | "circle" | "free";
 /** `cw` reads along the outside of the circle (top arc), `ccw` along the inside (bottom arc). */
 export type TextDirection = "cw" | "ccw";
 
-export interface TextLayer {
+/** One placement shape for every layer kind; a logo uses `centre_mm`, `rotation_deg` and `conform` only. */
+export interface LayerPlacement {
+  layout: TextLayout;
+  centre_mm: { x: number; y: number };
+  /** Straight only. */
+  rotation_deg: number;
+  /** Circle only — the radius of the text's cap-height midline. */
+  radius_mm: number;
+  /** Circle only — the angle of the text's midpoint (C7); start, end and span are derived. */
+  arc_position_deg: number;
+  direction: TextDirection;
+  /** Along the glyph's own up direction. */
+  baseline_offset_mm: number;
+  conform: boolean;
+}
+
+interface LayerCommon {
   id: string;
-  kind: "text";
   visible: boolean;
-  content: { type: "text"; value: string; font: { source: "bundled"; key: string } };
-  style: { text_size_mm: number; letter_spacing_mm: number };
-  placement: {
-    layout: TextLayout;
-    centre_mm: { x: number; y: number };
-    /** Straight only. */
-    rotation_deg: number;
-    /** Circle only — the radius of the text's cap-height midline. */
-    radius_mm: number;
-    /** Circle only — the angle of the text's midpoint (C7); start, end and span are derived. */
-    arc_position_deg: number;
-    direction: TextDirection;
-    /** Along the glyph's own up direction. */
-    baseline_offset_mm: number;
-    conform: boolean;
-  };
+  placement: LayerPlacement;
   /**
    * Phase 5 renders and edits it. 4j fills it only from a recovered
    * reference (the factory's own relief, physical mm — C10 never scales it).
@@ -41,6 +42,32 @@ export interface TextLayer {
   /** §4.1 labels; an absent key means `user`. Keys are the field names (`radius_mm`, `depth_mm`, …). */
   provenance?: Record<string, Provenance>;
 }
+
+export interface TextLayer extends LayerCommon {
+  kind: "text";
+  content: { type: "text"; value: string; font: { source: "bundled"; key: string } };
+  style: { text_size_mm: number; letter_spacing_mm: number };
+}
+
+/**
+ * An uploaded SVG on the face (4k). `asset_id` is the `design_assets` row;
+ * it is null only while an anonymous draft holds the file in sessionStorage,
+ * until the claim uploads it. `aspect` is the artwork's width / height, so
+ * the height follows from `width_mm`.
+ */
+export interface LogoLayer extends LayerCommon {
+  kind: "logo";
+  content: { type: "logo"; asset_id: string | null; width_mm: number; aspect: number };
+  style: Record<string, never>;
+}
+
+export type Layer = TextLayer | LogoLayer;
+
+export const isTextLayer = (layer: Layer): layer is TextLayer => layer.kind === "text";
+export const isLogoLayer = (layer: Layer): layer is LogoLayer => layer.kind === "logo";
+
+/** A logo's height follows from its width and the artwork's aspect. */
+export const logoHeightMm = (layer: LogoLayer): number => (layer.content.aspect > 0 ? layer.content.width_mm / layer.content.aspect : layer.content.width_mm);
 
 export type Provenance = "recovered" | "user";
 
@@ -55,14 +82,14 @@ export interface DraftRecipe {
   finish_id: string | null;
   colour_id: string | null;
   view: { ruler: boolean };
-  layers: TextLayer[];
+  layers: Layer[];
 }
 
 export interface LayerPatch {
   visible?: boolean;
-  content?: Partial<Omit<TextLayer["content"], "font">> & { font?: TextLayer["content"]["font"] };
+  content?: (Partial<Omit<TextLayer["content"], "font">> & { font?: TextLayer["content"]["font"] }) | Partial<LogoLayer["content"]>;
   style?: Partial<TextLayer["style"]>;
-  placement?: Partial<Omit<TextLayer["placement"], "centre_mm">> & { centre_mm?: TextLayer["placement"]["centre_mm"] };
+  placement?: Partial<Omit<LayerPlacement, "centre_mm">> & { centre_mm?: LayerPlacement["centre_mm"] };
 }
 
 export const DEFAULT_FONT_KEY = "poppins-semibold";
@@ -91,7 +118,7 @@ export function normalizeRecipe(raw: unknown): DraftRecipe {
     finish_id: id(raw.finish_id),
     colour_id: id(raw.colour_id),
     view: { ruler: view.ruler === true },
-    layers: raw.recipe_version === 2 && Array.isArray(raw.layers) ? (raw.layers as TextLayer[]) : [],
+    layers: raw.recipe_version === 2 && Array.isArray(raw.layers) ? (raw.layers as Layer[]) : [],
   };
 }
 
@@ -157,7 +184,7 @@ export function newTextLayer(id: string, faceDiameterMm: number, value = "", def
 }
 
 /** A recovered field the buyer changes becomes `user` (§4.1); untouched ones keep their label. */
-function markEdited(layer: TextLayer, patch: LayerPatch): TextLayer["provenance"] {
+function markEdited(layer: Layer, patch: LayerPatch): Layer["provenance"] {
   if (!layer.provenance) return layer.provenance;
   let next = layer.provenance;
   const edited = (key: string, before: unknown, after: unknown) => {
@@ -165,15 +192,17 @@ function markEdited(layer: TextLayer, patch: LayerPatch): TextLayer["provenance"
     next = { ...next, [key]: "user" };
   };
   for (const [key, value] of Object.entries(patch.placement ?? {})) {
-    edited(key, layer.placement[key as keyof TextLayer["placement"]], value);
+    edited(key, layer.placement[key as keyof LayerPlacement], value);
   }
-  for (const [key, value] of Object.entries(patch.style ?? {})) {
-    edited(key, layer.style[key as keyof TextLayer["style"]], value);
+  if (isTextLayer(layer)) {
+    for (const [key, value] of Object.entries(patch.style ?? {})) {
+      edited(key, layer.style[key as keyof TextLayer["style"]], value);
+    }
   }
   return next;
 }
 
-export function applyLayerPatch(layer: TextLayer, patch: LayerPatch): TextLayer {
+export function applyLayerPatch<T extends Layer>(layer: T, patch: LayerPatch): T {
   return {
     ...layer,
     ...(patch.visible !== undefined ? { visible: patch.visible } : {}),
@@ -181,7 +210,7 @@ export function applyLayerPatch(layer: TextLayer, patch: LayerPatch): TextLayer 
     style: { ...layer.style, ...patch.style },
     placement: { ...layer.placement, ...patch.placement },
     ...(layer.provenance ? { provenance: markEdited(layer, patch) } : {}),
-  };
+  } as T;
 }
 
 /**
@@ -189,16 +218,46 @@ export function applyLayerPatch(layer: TextLayer, patch: LayerPatch): TextLayer 
  * relief depth and bevel stay physical (none exist before Phase 5). Angles
  * are scale-free and untouched.
  */
-export function scaleLayers(layers: TextLayer[], ratio: number): TextLayer[] {
+export function scaleLayers(layers: Layer[], ratio: number): Layer[] {
   if (!(ratio > 0) || ratio === 1) return layers;
-  return layers.map((layer) => ({
-    ...layer,
-    style: { text_size_mm: layer.style.text_size_mm * ratio, letter_spacing_mm: layer.style.letter_spacing_mm * ratio },
+  const placement = (layer: Layer): LayerPlacement => ({
+    ...layer.placement,
+    centre_mm: { x: layer.placement.centre_mm.x * ratio, y: layer.placement.centre_mm.y * ratio },
+    radius_mm: layer.placement.radius_mm * ratio,
+    baseline_offset_mm: layer.placement.baseline_offset_mm * ratio,
+  });
+  return layers.map((layer) =>
+    isTextLayer(layer)
+      ? {
+          ...layer,
+          style: { text_size_mm: layer.style.text_size_mm * ratio, letter_spacing_mm: layer.style.letter_spacing_mm * ratio },
+          placement: placement(layer),
+        }
+      : { ...layer, content: { ...layer.content, width_mm: layer.content.width_mm * ratio }, placement: placement(layer) },
+  );
+}
+
+/** A logo's default width (4k R3): 40% of the face diameter, centred, unrotated. */
+export const LOGO_WIDTH_FRACTION = 0.4;
+
+export function newLogoLayer(id: string, faceDiameterMm: number, aspect: number, assetId: string | null = null): LogoLayer {
+  return {
+    id,
+    kind: "logo",
+    visible: true,
+    content: { type: "logo", asset_id: assetId, width_mm: LOGO_WIDTH_FRACTION * faceDiameterMm, aspect },
+    style: {},
     placement: {
-      ...layer.placement,
-      centre_mm: { x: layer.placement.centre_mm.x * ratio, y: layer.placement.centre_mm.y * ratio },
-      radius_mm: layer.placement.radius_mm * ratio,
-      baseline_offset_mm: layer.placement.baseline_offset_mm * ratio,
+      layout: "free",
+      centre_mm: { x: 0, y: 0 },
+      rotation_deg: 0,
+      radius_mm: 0,
+      arc_position_deg: 0,
+      direction: "cw",
+      baseline_offset_mm: 0,
+      conform: true,
     },
-  }));
+    relief: null,
+    fill: null,
+  };
 }

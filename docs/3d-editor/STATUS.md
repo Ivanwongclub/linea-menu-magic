@@ -24,6 +24,7 @@ this is an index, not a decision log.
 | 4h | Hybrid numeric / slider controls in "Position and curve" (§3); ruler label layout, camera read-back, CMS preview fixes | **Done** |
 | 4i | Drag handles on the model, one shared state (§3); undo / redo | **Done** |
 | 4j | Catalogue branding defaults: marked groups hidden, text lands on recovered placement; ruler branding radius and edge margin | **Done** |
+| 4k | Add logo: SVG upload, validation, `design_assets`, logo layers | **Done** — Phase 4 closed |
 | 5 | Relief: emboss/deboss per layer, depth, bevel, manufacturing warning strip with WIN-CYC thresholds | Not started |
 | 6 | Fill picker on deboss layers; occlusion bake moves to a worker | Not started |
 | 7 | Versions: named saves, snapshot, reload | Not started |
@@ -1906,4 +1907,106 @@ by that definition. A bake that still carried the lettering would show as an
    a finger (28 px) and drag correctly, but there is no press state.
    *Recommend* adding one when Phase 5's relief controls bring another pass
    over the on-model UI.
+
+### Phase 4i–4j rulings on the above (2026-09-18, given in the 4k task)
+
+- **4j Q1 ruled: a tie rule for recovered clusters.** Two glyph clusters
+  within 20° of each other in extent are a tie, and the one nearest 0° wins
+  (`CLUSTER_TIE_DEG`, `recoveredPlacement.ts`). On the Polo that moves Add
+  text's default from "EST. 1967" (8 glyphs, 60°) to "POLO" (4 glyphs, 44°).
+- 4i Q4 (no press state on touch handles), 4j Q2 (relief stored, Phase 5
+  renders it) and 4j Q3 (the re-bake when the original lettering is toggled)
+  received no ruling; their recommendations stand.
+
+## Phase 4k — done (2026-09-18) · Phase 4 closed
+
+Add logo, per the 4k rulings; `design_assets` and the `design-uploads` bucket
+from Phase 1 R5/R6, architecture Part 3.
+
+Files:
+
+- `src/features/editor/lib/logoSvg.ts` (new) — validation before anything is
+  stored (R1): 200 KB, SVG, outlines only (no `<text>`, `<image>`, gradients,
+  filters or masks — the offending element is named), every subpath closed,
+  at least one shape. Text-only, so it runs before any parser and the node
+  tests can load it. No raster tracing (Phase 11).
+- `src/features/editor/lib/logoGeometry.ts` (new) — `SVGLoader` → shapes with
+  their holes → one `ShapeGeometry`, scaled so the artwork's width is
+  `width_mm`, centred, and mirrored into the face frame with its triangle
+  winding flipped, so the logo faces out instead of being back-face culled.
+- `src/features/editor/lib/recipe.ts` — `Layer` is now text or logo;
+  `LogoLayer.content` is `{ type, asset_id, width_mm, aspect }` and
+  `recipe_version` stays 2; `newLogoLayer` (40% of the face diameter, centred,
+  unrotated, conform on); one `LayerPlacement` for both kinds; a variant
+  switch scales a logo's width (C10).
+- `src/features/editor/hooks/useLogoAssets.ts` (new) — upload (storage object
+  under `<brand id or owner uid>/logos/<asset id>.svg` plus a `design_assets`
+  row of kind `logo_svg`), delete, and re-upload under the same id when an
+  undo brings a deleted layer back; `useLogoSources` resolves each layer's SVG
+  from the draft or the private bucket, cached per session.
+- `src/features/editor/lib/anonymousDraft.ts`, `store/useEditorStore.ts` —
+  an anonymous buyer's files ride in the draft (`logos`, by layer id) and in
+  `pendingLogos`; `initialize` keeps only those its layers use.
+- `src/features/editor/pages/EditorNewPage.tsx` — the claim uploads each
+  pending file and fills in the layer's `asset_id`; everything else about the
+  recipe is still claimed verbatim (collision 23).
+- `src/features/editor/components/branding/BrandingMeshes.tsx` (was
+  `TextLayerMeshes.tsx`) — logos render beside glyphs: one mesh per layer,
+  lifted 0.02 mm. A logo conforms by sitting on the highest surface under its
+  whole footprint (7 × 7 samples), parallel to the face, rather than tilting
+  to the normal under its centre — see the deviation below. Reports each
+  logo's measured width, height, area and facing.
+- `src/features/editor/components/branding/BrandingGroup.tsx` — "Add logo"
+  beside "Add text", the file input, the one-sentence rejection, a thumbnail
+  of the artwork in the layer row, and a logo's delete taking its asset.
+- `src/features/editor/components/branding/PositionAndCurve.tsx` — split into
+  the disclosure and its fields: a logo gets centre X/Y, width (with the
+  height it implies) and rotation; no curve.
+- `src/features/editor/lib/handleGeometry.ts`,
+  `components/branding/Handles.tsx` — a logo gets the move handle and one
+  corner handle that scales the width with the aspect kept.
+- `src/features/editor/lib/layerMeasurements.ts`,
+  `components/RulerOverlay.tsx` — a selected logo's width, height and edge
+  margin (face radius − the distance to its farthest corner).
+- `src/features/editor/lib/recoveredPlacement.ts` — the 4j Q1 tie rule (R5).
+- `src/features/editor/components/EditorModel.tsx`, `EditorViewport.tsx` —
+  logo sources through to the scene; `data-logo-count` and `data-logos`.
+- `src/features/i18n/translations.ts` — 13 keys × 3 (Add logo, the five
+  rejections, the logo fields, the corner handle, the two ruler labels).
+- `scripts/e2e-local/fixtures/logo-valid.svg`, `logo-invalid.svg` (new) — a
+  100 × 60 plate with a rectangular hole, and the same plate with `<text>`.
+- `scripts/e2e-local/scenarios/logo-layer.mjs` (new) — R7's read-backs.
+- `scripts/e2e-local/unit/logo-layer.test.mjs` (new) — validation, the layer
+  defaults and scaling, the corner drag, a logo's ruler dimensions, the tie rule.
+- `docs/3d-editor/STATUS.md` — this file.
+
+### Deviation from R3: how a logo conforms
+
+R3 asks for the logo to be "lifted 0.02 mm and conformed like text". Text
+conforms per glyph, each glyph small enough that tilting it to the surface
+normal under it is right. A logo is one sheet: tilting it to the normal under
+its centre buried its far side in the Polo's domed hub (measured on screen
+before the change). It is therefore placed parallel to the face, 0.02 mm
+above the highest surface under its own footprint, which keeps every part of
+it clear of the relief it sits on. Per-vertex bending is Phase 5's, as for
+text (E1 §6 R2).
+
+### Open questions from this phase, with a recommendation each
+
+1. **A logo reads faintly.** Like the text preview slab, a flat
+   `ShapeGeometry` in the part's own material shows only as a change in
+   shading. *Recommend* leaving it until Phase 5 gives layers real relief,
+   rather than inventing a preview colour Phase 6's fill would contradict.
+2. **`aspect` is stored, and the artwork could be replaced.** Nothing
+   re-derives it if an asset's file is ever swapped. *Recommend* adding a
+   "Replace file" action in Phase 11 that re-reads the aspect, rather than
+   trusting a future edit path.
+3. **Deleting a logo deletes its asset immediately** and an undo re-uploads
+   it under the same id. That is one extra round trip per undo, and an asset
+   shared by two designs would be deleted by either. *Recommend* revisiting
+   when Phase 7 (versions) makes assets genuinely shared — a reference count,
+   or deletion deferred to a sweep.
+4. **Only the first fill is honoured.** R1 treats one fill as solid, so a
+   two-colour SVG engraves as one shape. *Recommend* leaving it until Phase 6,
+   where a fill picker could map an SVG's colours onto finishes.
 

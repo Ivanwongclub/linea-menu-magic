@@ -1,0 +1,73 @@
+/**
+ * Logo upload validation (4k R1). Runs on the file's text *before* anything
+ * is stored or parsed into geometry: the editor engraves outlines, so only
+ * paths and basic shapes can be accepted, and every outline must close.
+ * No raster tracing — a bitmap is refused, not traced (Phase 11).
+ *
+ * Deliberately text-only (no DOM): the node tests load this file, and an
+ * upload is rejected before any parser touches it.
+ */
+
+/** R1: 200 KB. */
+export const MAX_LOGO_BYTES = 200 * 1024;
+
+/** Outlines the editor can engrave. */
+const ALLOWED_ELEMENTS = new Set(["svg", "g", "path", "rect", "circle", "ellipse", "polygon", "polyline", "title", "desc", "metadata"]);
+/** Named in R1 (plus their obvious relatives) so the rejection can say which one. */
+const SHAPE_ELEMENTS = new Set(["path", "rect", "circle", "ellipse", "polygon", "polyline"]);
+
+export type LogoRejection =
+  | { reason: "tooLarge"; limitKb: number }
+  | { reason: "notSvg" }
+  | { reason: "element"; element: string }
+  | { reason: "openPath" }
+  | { reason: "empty" };
+
+export type LogoValidation = { ok: true } | ({ ok: false } & LogoRejection);
+
+export const asRejection = (validation: LogoValidation): LogoRejection | null =>
+  validation.ok ? null : ({ ...validation } as LogoRejection);
+
+/** Element names in document order, comments and CDATA removed. */
+function elementNames(svg: string): string[] {
+  const stripped = svg.replace(/<!--[\s\S]*?-->/g, "").replace(/<!\[CDATA\[[\s\S]*?\]\]>/g, "");
+  return [...stripped.matchAll(/<\s*([A-Za-z_][\w.:-]*)/g)].map((m) => m[1].replace(/^.*:/, "").toLowerCase());
+}
+
+function pathData(svg: string): string[] {
+  return [...svg.matchAll(/\sd\s*=\s*"([^"]*)"|\sd\s*=\s*'([^']*)'/g)].map((m) => m[1] ?? m[2]);
+}
+
+/** Every subpath (each `M`/`m` run) has to close with `Z`/`z`. */
+export function pathsAreClosed(d: string): boolean {
+  const subpaths = d.split(/(?=[Mm])/).filter((part) => part.trim().length > 0);
+  if (subpaths.length === 0) return false;
+  return subpaths.every((part) => /[Zz]\s*$/.test(part.trim()));
+}
+
+export function validateLogoSvg(text: string, sizeBytes: number): LogoValidation {
+  if (sizeBytes > MAX_LOGO_BYTES) return { ok: false, reason: "tooLarge", limitKb: MAX_LOGO_BYTES / 1024 };
+  const names = elementNames(text);
+  if (!names.includes("svg")) return { ok: false, reason: "notSvg" };
+  const forbidden = names.find((name) => !ALLOWED_ELEMENTS.has(name));
+  if (forbidden) return { ok: false, reason: "element", element: forbidden };
+  if (!names.some((name) => SHAPE_ELEMENTS.has(name))) return { ok: false, reason: "empty" };
+  if (!pathData(text).every(pathsAreClosed)) return { ok: false, reason: "openPath" };
+  return { ok: true };
+}
+
+/** The i18n key and variables for a rejection — one plain sentence naming the reason (R1). */
+export function rejectionMessage(rejection: LogoRejection): { key: string; vars: Record<string, string | number> } {
+  switch (rejection.reason) {
+    case "tooLarge":
+      return { key: "editor.branding.logoTooLarge", vars: { limit: rejection.limitKb } };
+    case "notSvg":
+      return { key: "editor.branding.logoNotSvg", vars: {} };
+    case "element":
+      return { key: "editor.branding.logoElement", vars: { element: rejection.element } };
+    case "openPath":
+      return { key: "editor.branding.logoOpenPath", vars: {} };
+    case "empty":
+      return { key: "editor.branding.logoEmpty", vars: {} };
+  }
+}

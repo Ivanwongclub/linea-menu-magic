@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { useEditorStore } from "../../store/useEditorStore";
 import { useFontMetrics } from "../../hooks/useFontMetrics";
 import { letterSpacingForSpan, textArc } from "../../lib/textLayout";
-import type { TextLayer } from "../../lib/recipe";
+import { isLogoLayer, logoHeightMm, type Layer, type LogoLayer, type TextLayer } from "../../lib/recipe";
 import { ValueSlider } from "../controls/ValueSlider";
 import { RangeValueSlider } from "../controls/RangeValueSlider";
 
@@ -40,9 +40,8 @@ function intoDomain(deg: number, [min]: [number, number]): number {
  * Straight: centre X/Y and rotation. Both: text size, letter spacing,
  * baseline offset. Emboss/deboss ship with Phase 5 (rulings §6).
  */
-export function PositionAndCurve({ layer, faceDiameterMm }: { layer: TextLayer; faceDiameterMm: number }) {
+function TextPlacementFields({ layer, faceDiameterMm }: { layer: TextLayer; faceDiameterMm: number }) {
   const { t } = useI18n();
-  const [open, setOpen] = useState(false);
   const updateLayer = useEditorStore((s) => s.updateLayer);
   const commit = useEditorStore((s) => s.commit);
   const beginDrag = useEditorStore((s) => s.beginDrag);
@@ -79,21 +78,8 @@ export function PositionAndCurve({ layer, faceDiameterMm }: { layer: TextLayer; 
   const arc = p.direction === "cw" ? "top" : "bottom";
 
   return (
-    <div className="border-t border-border pt-2" data-testid="position-and-curve">
-      <button
-        type="button"
-        aria-expanded={open}
-        aria-controls={id("position-curve")}
-        data-testid="position-and-curve-toggle"
-        onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center gap-1 py-1 text-left text-xs tracking-[0.05em] text-foreground"
-      >
-        <ChevronRight className={cn("h-3.5 w-3.5 transition-transform", open && "rotate-90")} strokeWidth={1.5} />
-        {t("editor.branding.positionAndCurve")}
-      </button>
+    <>
 
-      {open && (
-        <div id={id("position-curve")} className="space-y-4 pt-2 min-w-0">
           {p.layout === "circle" ? (
             <>
               <div className="space-y-1.5">
@@ -223,17 +209,120 @@ export function PositionAndCurve({ layer, faceDiameterMm }: { layer: TextLayer; 
             max={0.15 * d}
             onChange={(letter_spacing_mm) => style({ letter_spacing_mm })}
           />
-          <ValueSlider
-            {...history}
-            id={id("baseline")}
-            testId="pc-baseline"
-            label={t("editor.branding.baselineOffset")}
-            unit="mm"
-            value={p.baseline_offset_mm}
-            min={-0.1 * d}
-            max={0.1 * d}
-            onChange={(baseline_offset_mm) => placement({ baseline_offset_mm })}
-          />
+      <ValueSlider
+        {...history}
+        id={id("baseline")}
+        testId="pc-baseline"
+        label={t("editor.branding.baselineOffset")}
+        unit="mm"
+        value={p.baseline_offset_mm}
+        min={-0.1 * d}
+        max={0.1 * d}
+        onChange={(baseline_offset_mm) => placement({ baseline_offset_mm })}
+      />
+    </>
+  );
+}
+
+/** A logo's placement (4k R3): centre, width and rotation — no curve. */
+function LogoPlacementFields({ layer, faceDiameterMm }: { layer: LogoLayer; faceDiameterMm: number }) {
+  const { t } = useI18n();
+  const updateLayer = useEditorStore((s) => s.updateLayer);
+  const commit = useEditorStore((s) => s.commit);
+  const beginDrag = useEditorStore((s) => s.beginDrag);
+  const endDrag = useEditorStore((s) => s.endDrag);
+  const history = { onCommit: commit, onDragStart: beginDrag, onDragEnd: endDrag };
+  const p = layer.placement;
+  const d = faceDiameterMm;
+  const id = (name: string) => `${name}-${layer.id}`;
+  const placement = (patch: Parameters<typeof updateLayer>[1]["placement"]) => updateLayer(layer.id, { placement: patch });
+
+  return (
+    <>
+      <ValueSlider
+        {...history}
+        id={id("centre-x")}
+        testId="pc-centre-x"
+        label={t("editor.branding.centreX")}
+        unit="mm"
+        value={p.centre_mm.x}
+        min={-d / 2}
+        max={d / 2}
+        onChange={(x) => placement({ centre_mm: { x, y: p.centre_mm.y } })}
+      />
+      <ValueSlider
+        {...history}
+        id={id("centre-y")}
+        testId="pc-centre-y"
+        label={t("editor.branding.centreY")}
+        unit="mm"
+        value={p.centre_mm.y}
+        min={-d / 2}
+        max={d / 2}
+        onChange={(y) => placement({ centre_mm: { x: p.centre_mm.x, y } })}
+      />
+      <ValueSlider
+        {...history}
+        id={id("logo-width")}
+        testId="pc-logo-width"
+        label={t("editor.branding.logoWidth")}
+        unit="mm"
+        value={layer.content.width_mm}
+        min={0}
+        max={d}
+        hardMin={0}
+        exclusiveMin
+        onChange={(width_mm) => updateLayer(layer.id, { content: { width_mm } })}
+      />
+      <p className="text-[11px] text-muted-foreground" data-testid="pc-logo-height">
+        {t("editor.branding.logoHeightLine", { value: `${logoHeightMm(layer).toFixed(2)} mm` })}
+      </p>
+      <ValueSlider
+        {...history}
+        id={id("rotation")}
+        testId="pc-rotation"
+        label={t("editor.branding.rotation")}
+        unit="deg"
+        value={p.rotation_deg}
+        min={-180}
+        max={180}
+        onChange={(rotation_deg) => placement({ rotation_deg })}
+      />
+    </>
+  );
+}
+
+/**
+ * The disclosure itself (v3-review §3): one row that opens the selected
+ * layer's spatial values in place — a text layer's arc and size, or a logo's
+ * centre, width and rotation.
+ */
+export function PositionAndCurve({ layer, faceDiameterMm }: { layer: Layer; faceDiameterMm: number }) {
+  const { t } = useI18n();
+  const [open, setOpen] = useState(false);
+  const panelId = `position-curve-${layer.id}`;
+
+  return (
+    <div className="border-t border-border pt-2" data-testid="position-and-curve">
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={panelId}
+        data-testid="position-and-curve-toggle"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center gap-1 py-1 text-left text-xs tracking-[0.05em] text-foreground"
+      >
+        <ChevronRight className={cn("h-3.5 w-3.5 transition-transform", open && "rotate-90")} strokeWidth={1.5} />
+        {t("editor.branding.positionAndCurve")}
+      </button>
+
+      {open && (
+        <div id={panelId} className="space-y-4 pt-2 min-w-0">
+          {isLogoLayer(layer) ? (
+            <LogoPlacementFields layer={layer} faceDiameterMm={faceDiameterMm} />
+          ) : (
+            <TextPlacementFields layer={layer} faceDiameterMm={faceDiameterMm} />
+          )}
         </div>
       )}
     </div>

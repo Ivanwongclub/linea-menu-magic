@@ -10,8 +10,8 @@ import { decoratedFaceRotation, withSmoothNormals } from "../lib/prepareModel";
 import { bakeOcclusion, occlusionKey } from "../lib/ambientOcclusion";
 import { useEditorStore } from "../store/useEditorStore";
 import { applyTwoTone } from "../lib/twoTone";
-import type { TextLayer } from "../lib/recipe";
-import { TextLayerMeshes, type TextSceneReport } from "./branding/TextLayerMeshes";
+import type { Layer } from "../lib/recipe";
+import { BrandingMeshes, type TextSceneReport } from "./branding/BrandingMeshes";
 import {
   CAMERA_AZIMUTH_DEG,
   CAMERA_ELEVATION_DEG,
@@ -43,8 +43,10 @@ interface EditorModelProps {
   hideMarked: boolean;
   /** Reports how many of the model's meshes are drawn, and how many it has. */
   onMeshCount?: (drawn: number, total: number) => void;
-  /** The recipe's text layers, drawn on the face — siblings of the model, never inside its measured bounds. */
-  layers: TextLayer[];
+  /** The recipe's layers, drawn on the face — siblings of the model, never inside its measured bounds. */
+  layers: Layer[];
+  /** The SVG behind each logo layer, by layer id (4k). */
+  logoSources: Record<string, string>;
   onTextReport?: (report: TextSceneReport) => void;
 }
 
@@ -91,6 +93,7 @@ export function EditorModel({
   hideMarked,
   onMeshCount,
   layers,
+  logoSources,
   onTextReport,
 }: EditorModelProps) {
   const obj = useLoader(OBJLoader, url);
@@ -303,7 +306,7 @@ export function EditorModel({
   return (
     <>
       <primitive object={model} />
-      <TextLayerMeshes layers={layers} model={model} faceZ={bounds.max.z} material={material} onReport={onTextReport} />
+      <BrandingMeshes layers={layers} logoSources={logoSources} model={model} faceZ={bounds.max.z} material={material} onReport={onTextReport} />
       <ContactShadows
         key={`${renderedSizeMm}-${url}`}
         position={[0, bounds.min.y - 0.01, 0]}

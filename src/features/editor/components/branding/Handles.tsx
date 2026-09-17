@@ -15,7 +15,7 @@ import {
   type HandleKind,
 } from "../../lib/handleGeometry";
 import type { Rect } from "../../lib/rulerLabelLayout";
-import type { TextLayer } from "../../lib/recipe";
+import type { Layer } from "../../lib/recipe";
 
 const RING_SEGMENTS = 96;
 
@@ -34,6 +34,7 @@ export interface HandleElements {
   ring: SVGGElement | null;
   arc: SVGGElement | null;
   move: SVGGElement | null;
+  size: SVGGElement | null;
 }
 
 export function newHandleBridge(): HandleBridge {
@@ -41,7 +42,7 @@ export function newHandleBridge(): HandleBridge {
 }
 
 export function newHandleElements(): HandleElements {
-  return { root: null, ring: null, arc: null, move: null };
+  return { root: null, ring: null, arc: null, move: null, size: null };
 }
 
 /**
@@ -56,7 +57,7 @@ export function HandleProjector({
   bridge,
   elements,
 }: {
-  layer: TextLayer | null;
+  layer: Layer | null;
   faceZ: number;
   bridge: MutableRefObject<HandleBridge>;
   elements: MutableRefObject<HandleElements>;
@@ -75,7 +76,7 @@ export function HandleProjector({
   };
 
   useFrame(() => {
-    const { root, ring, arc, move } = elements.current;
+    const { root, ring, arc, move, size: sizeHandle } = elements.current;
     if (!root || !layer) {
       bridge.current.rects = [];
       return;
@@ -103,6 +104,7 @@ export function HandleProjector({
     const rects: Rect[] = [];
     place(arc, h.arcKnob);
     place(move, h.move);
+    place(sizeHandle, h.size);
 
     if (ring) {
       if (h.radius == null) {
@@ -136,7 +138,8 @@ export function HandleProjector({
 /**
  * The DOM side (4i R1): SVG over the canvas, handles for the selected layer
  * only — a ring for the radius, a knob for the arc position, a move handle
- * for straight text — each with a ≥ 28 px hit area and `touch-action: none`
+ * for straight text and logos, and a corner handle that scales a logo —
+ * each with a ≥ 28 px hit area and `touch-action: none`
  * so a finger drags instead of scrolling. Drags write the same store as the
  * numeric fields (live), hold autosave, and commit one undo entry and one
  * write on pointer-up.
@@ -146,7 +149,7 @@ export function HandlesOverlay({
   bridge,
   elements,
 }: {
-  layer: TextLayer;
+  layer: Layer;
   bridge: MutableRefObject<HandleBridge>;
   elements: MutableRefObject<HandleElements>;
 }) {
@@ -186,7 +189,7 @@ export function HandlesOverlay({
     onPointerMove: onMove,
     onPointerUp: onUp,
     onPointerCancel: onUp,
-    style: { touchAction: "none", cursor: kind === "move" ? "move" : "grab" } as const,
+    style: { touchAction: "none", cursor: kind === "move" ? "move" : kind === "size" ? "nwse-resize" : "grab" } as const,
   });
 
   const r = HANDLE_HIT_PX / 2;
@@ -206,6 +209,16 @@ export function HandlesOverlay({
       <g ref={(el) => (elements.current.arc = el)} data-testid="handle-arc" aria-label={t("editor.handles.arcPosition")} className="pointer-events-auto" {...handlers("arc")}>
         <circle r={r} fill="transparent" />
         <circle r={6} fill="hsl(var(--background))" stroke="hsl(var(--foreground))" strokeWidth={1.5} />
+      </g>
+      <g
+        ref={(el) => (elements.current.size = el)}
+        data-testid="handle-size"
+        aria-label={t("editor.handles.size")}
+        className="pointer-events-auto"
+        {...handlers("size")}
+      >
+        <circle r={r} fill="transparent" />
+        <rect x={-5} y={-5} width={10} height={10} fill="hsl(var(--background))" stroke="hsl(var(--foreground))" strokeWidth={1.5} />
       </g>
       <g ref={(el) => (elements.current.move = el)} data-testid="handle-move" aria-label={t("editor.handles.move")} className="pointer-events-auto" {...handlers("move")}>
         <circle r={r} fill="transparent" />

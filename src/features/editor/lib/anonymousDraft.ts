@@ -6,6 +6,12 @@ const KEY_PREFIX = "designer-studio:anon-draft:";
 export interface AnonymousDraft {
   productSlug: string;
   recipe: DraftRecipe;
+  /**
+   * Uploaded logo SVGs by layer id (4k R2): an anonymous buyer has nowhere
+   * to put a file, so it rides here until the claim uploads it. Never part of
+   * the recipe — the claim inserts that verbatim (collision 23).
+   */
+  logos?: Record<string, { filename: string; svg: string }>;
 }
 
 /** Pre-4f drafts held three camelCase ids and an optional ruler flag. */
@@ -24,9 +30,10 @@ export function readAnonymousDraft(productSlug: string): AnonymousDraft | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<AnonymousDraft> & LegacyDraft;
     if (parsed.productSlug !== productSlug) return null;
-    if (parsed.recipe) return { productSlug, recipe: normalizeRecipe(parsed.recipe) };
+    if (parsed.recipe) return { productSlug, recipe: normalizeRecipe(parsed.recipe), logos: parsed.logos ?? {} };
     return {
       productSlug,
+      logos: {},
       recipe: {
         ...normalizeRecipe({
           size_variant_id: parsed.sizeVariantId,

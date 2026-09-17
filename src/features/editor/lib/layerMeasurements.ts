@@ -3,10 +3,11 @@
  * radius, letter height and edge margin (face radius − radius − text size / 2)
  * as face-frame segments. Pure maths, no three.js.
  */
-import type { TextLayer } from "./recipe";
+import { isLogoLayer, logoHeightMm, type Layer } from "./recipe.ts";
+import { logoCorner } from "./handleGeometry.ts";
 
 export interface LayerDimension {
-  kind: "brandingRadius" | "letterHeight" | "edgeMargin";
+  kind: "brandingRadius" | "letterHeight" | "edgeMargin" | "logoWidth" | "logoHeight";
   valueMm: number;
   from: { x: number; y: number };
   to: { x: number; y: number };
@@ -16,13 +17,44 @@ const RAD = Math.PI / 180;
 /** The letter-height tick sits this far round from the radius line so the two never share a line. */
 const HEIGHT_OFFSET_DEG = 14;
 
-export function edgeMarginMm(layer: TextLayer, faceRadiusMm: number): number {
+/**
+ * How much bare face is left outside the branding: for text, the face radius
+ * less the arc and half a letter; for a logo, the face radius less the
+ * distance to its farthest corner.
+ */
+export function edgeMarginMm(layer: Layer, faceRadiusMm: number): number {
+  if (isLogoLayer(layer)) {
+    const corner = logoCorner(layer);
+    return faceRadiusMm - Math.hypot(corner.x, corner.y);
+  }
   return faceRadiusMm - layer.placement.radius_mm - layer.style.text_size_mm / 2;
 }
 
-export function layerDimensions(layer: TextLayer, faceRadiusMm: number): LayerDimension[] {
+export function layerDimensions(layer: Layer, faceRadiusMm: number): LayerDimension[] {
   const p = layer.placement;
-  const size = layer.style.text_size_mm;
+  if (isLogoLayer(layer)) {
+    // Width and height across the logo's own axes, and the margin from its
+    // farthest corner out to the face edge (4k R4).
+    const w = layer.content.width_mm;
+    const h = logoHeightMm(layer);
+    const theta = -p.rotation_deg * RAD;
+    const cos = Math.cos(theta);
+    const sin = Math.sin(theta);
+    const at = (lx: number, ly: number) => ({ x: p.centre_mm.x + lx * cos - ly * sin, y: p.centre_mm.y + lx * sin + ly * cos });
+    const corner = logoCorner(layer);
+    const reach = Math.hypot(corner.x, corner.y) || 1;
+    return [
+      { kind: "logoWidth", valueMm: w, from: at(-w / 2, -h / 2 - 0.3), to: at(w / 2, -h / 2 - 0.3) },
+      { kind: "logoHeight", valueMm: h, from: at(-w / 2 - 0.3, -h / 2), to: at(-w / 2 - 0.3, h / 2) },
+      {
+        kind: "edgeMargin",
+        valueMm: edgeMarginMm(layer, faceRadiusMm),
+        from: corner,
+        to: { x: (corner.x / reach) * faceRadiusMm, y: (corner.y / reach) * faceRadiusMm },
+      },
+    ];
+  }
+  const size = layer.kind === "text" ? layer.style.text_size_mm : 0;
   const c = p.centre_mm;
   if (p.layout !== "circle") {
     // Straight text: its letter height, drawn just left of the text centre.

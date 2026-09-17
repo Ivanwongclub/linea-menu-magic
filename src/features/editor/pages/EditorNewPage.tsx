@@ -11,7 +11,8 @@ import { useDesignerStaffStatus } from "../hooks/useDesignerStaffStatus";
 import { useCatalogueEditorStatus } from "@/features/admin/hooks/useCatalogueEditorStatus";
 import { useEditorStore } from "../store/useEditorStore";
 import { readAnonymousDraft, writeAnonymousDraft, clearAnonymousDraft } from "../lib/anonymousDraft";
-import { emptyRecipe, type DraftRecipe } from "../lib/recipe";
+import { emptyRecipe, isLogoLayer, type DraftRecipe } from "../lib/recipe";
+import { uploadLogoAsset } from "../hooks/useLogoAssets";
 import { EditorShell } from "../components/EditorShell";
 import { EditorViewport } from "../components/EditorViewport";
 import { EditorPanel } from "../components/EditorPanel";
@@ -83,6 +84,8 @@ export function EditorNewPage({ productSlug }: { productSlug: string | null }) {
   const setFinishId = useEditorStore((s) => s.setFinishId);
   const setRuler = useEditorStore((s) => s.setRuler);
   const initialize = useEditorStore((s) => s.initialize);
+  const pendingLogos = useEditorStore((s) => s.pendingLogos);
+  const setPendingLogos = useEditorStore((s) => s.setPendingLogos);
 
   const initializedFor = useRef<string | null>(null);
   const createStarted = useRef(false);
@@ -90,14 +93,16 @@ export function EditorNewPage({ productSlug }: { productSlug: string | null }) {
   useEffect(() => {
     if (!product || initializedFor.current === product.id) return;
     initializedFor.current = product.id;
+    // The draft's files first: `initialize` keeps only those its layers use.
+    setPendingLogos(readAnonymousDraft(product.slug)?.logos ?? {});
     initialize(startingRecipe(product), `new:${product.slug}`);
-  }, [product, initialize]);
+  }, [product, initialize, setPendingLogos]);
 
   // Only once the store holds this product's recipe — never a previous page's.
   useEffect(() => {
     if (session || !product || hydratedFor !== `new:${product.slug}`) return;
-    writeAnonymousDraft({ productSlug: product.slug, recipe });
-  }, [session, product, hydratedFor, recipe]);
+    writeAnonymousDraft({ productSlug: product.slug, recipe, logos: pendingLogos });
+  }, [session, product, hydratedFor, recipe, pendingLogos]);
 
   useEffect(() => {
     if (!session || !user || !product || authLoading || staffLoading || createStarted.current) return;
@@ -107,28 +112,44 @@ export function EditorNewPage({ productSlug }: { productSlug: string | null }) {
     if (product.model_scale_status !== "confirmed") return;
     createStarted.current = true;
     const brand_id = isStaff ? null : primaryBrand?.id ?? null;
-    supabase
-      .from("designs")
-      .insert({
-        name: product.name,
-        product_id: product.id,
-        brand_id,
-        owner_id: user.id,
-        status: "draft",
-        // Verbatim (collision 23): text layers and view state survive the claim.
-        draft_recipe: startingRecipe(product) as unknown as Json,
-      })
-      .select("id")
-      .single()
-      .then(({ data, error: insertError }) => {
-        if (insertError || !data) {
-          createStarted.current = false;
-          return;
+    const claim = async () => {
+      const recipeToClaim = startingRecipe(product);
+      // 4k R2: a logo the anonymous draft was holding is uploaded now, and
+      // the layer that referenced nothing gets its `design_assets` id. Every
+      // other field of the recipe is claimed verbatim (collision 23).
+      const draftLogos = readAnonymousDraft(product.slug)?.logos ?? {};
+      const layers = [];
+      for (const layer of recipeToClaim.layers) {
+        const file = isLogoLayer(layer) && !layer.content.asset_id ? draftLogos[layer.id] : undefined;
+        if (!file) {
+          layers.push(layer);
+          continue;
         }
-        clearAnonymousDraft(product.slug);
-        navigate(`/designer-studio/editor/${data.id}`, { replace: true });
-      });
-  }, [session, user, product, authLoading, staffLoading, isStaff, primaryBrand, navigate]);
+        const asset_id = await uploadLogoAsset({ svg: file.svg, filename: file.filename, ownerId: user.id, brandId: brand_id });
+        layers.push({ ...layer, content: { ...layer.content, asset_id } });
+      }
+      const { data, error: insertError } = await supabase
+        .from("designs")
+        .insert({
+          name: product.name,
+          product_id: product.id,
+          brand_id,
+          owner_id: user.id,
+          status: "draft",
+          draft_recipe: { ...recipeToClaim, layers } as unknown as Json,
+        })
+        .select("id")
+        .single();
+      if (insertError || !data) {
+        createStarted.current = false;
+        return;
+      }
+      clearAnonymousDraft(product.slug);
+      setPendingLogos({});
+      navigate(`/designer-studio/editor/${data.id}`, { replace: true });
+    };
+    void claim();
+  }, [session, user, product, authLoading, staffLoading, isStaff, primaryBrand, navigate, setPendingLogos]);
 
   if (!productSlug) {
     return (

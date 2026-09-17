@@ -5,7 +5,7 @@ import { Vector3, type Group } from "three";
 import { tradeLigne } from "../lib/ligne";
 import { layoutLabels, type DimensionLine, type LabelItem, type Point, type Rect } from "../lib/rulerLabelLayout";
 import { layerDimensions, type LayerDimension } from "../lib/layerMeasurements";
-import type { TextLayer } from "../lib/recipe";
+import type { Layer } from "../lib/recipe";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import type { RulerMeasurements } from "./EditorModel";
 
@@ -27,7 +27,7 @@ interface RulerOverlayProps {
   /** Screen rects the labels must keep clear of — the on-model handles (4i). */
   obstacles?: MutableRefObject<{ rects: Rect[] }>;
   /** The selected layer, whose dimensions join the product's (4j R5); none when nothing is selected. */
-  layer: TextLayer | null;
+  layer: Layer | null;
   /** The face top, where the layer's dimension lines are drawn. */
   faceZ: number;
 }
@@ -183,19 +183,23 @@ interface RulerLabelsProps {
   /** A labelled variant is non-round hardware by definition — no ligne (R3, moved from `MeasurementLine`). */
   sizeLabel: string | null;
   labels: MutableRefObject<RulerLabelElements>;
-  layer: TextLayer | null;
+  layer: Layer | null;
 }
 
 const LAYER_LABEL_KEY: Record<LayerDimension["kind"], string> = {
   brandingRadius: "editor.ruler.brandingRadius",
   letterHeight: "editor.ruler.letterHeight",
   edgeMargin: "editor.ruler.edgeMargin",
+  logoWidth: "editor.ruler.logoWidth",
+  logoHeight: "editor.ruler.logoHeight",
 };
 
 const LAYER_LABEL_TESTID: Record<LayerDimension["kind"], string> = {
   brandingRadius: "ruler-branding-radius-label",
   letterHeight: "ruler-letter-height-label",
   edgeMargin: "ruler-edge-margin-label",
+  logoWidth: "ruler-logo-width-label",
+  logoHeight: "ruler-logo-height-label",
 };
 
 const LABEL_CLASS =

@@ -1,6 +1,7 @@
 import { create } from "zustand";
-import { applyLayerPatch, emptyRecipe, scaleLayers, type DraftRecipe, type LayerPatch, type TextLayer } from "../lib/recipe";
+import { applyLayerPatch, emptyRecipe, scaleLayers, type DraftRecipe, type Layer, type LayerPatch } from "../lib/recipe";
 import type { FaceTransform } from "../lib/recoveredPlacement";
+import type { PendingLogo } from "../hooks/useLogoAssets";
 import { applyDiscrete, canRedo, canUndo, commitHistory, redoHistory, startHistory, undoHistory, type History } from "../lib/recipeHistory";
 
 /**
@@ -42,13 +43,18 @@ interface EditorState {
   /** Bumped on pointer-up: autosave writes at once instead of debouncing. */
   flushSeq: number;
   modelFrame: ModelFrame | null;
+  /**
+   * An anonymous buyer's uploaded SVGs, by layer id (4k R2): they live in the
+   * sessionStorage draft until a sign-in claims the design and uploads them.
+   */
+  pendingLogos: Record<string, PendingLogo>;
   initialize: (recipe: DraftRecipe, hydratedFor: string) => void;
   /** `ratio` = new variant mm / old variant mm; layers scale with the product (C10). */
   setSizeVariantId: (id: string, ratio?: number) => void;
   setFinishId: (id: string) => void;
   setColourId: (id: string) => void;
   setRuler: (ruler: boolean) => void;
-  addLayer: (layer: TextLayer) => void;
+  addLayer: (layer: Layer, pendingLogo?: PendingLogo) => void;
   /** A live edit; call `commit` when it is done. */
   updateLayer: (id: string, patch: LayerPatch) => void;
   removeLayer: (id: string) => void;
@@ -60,6 +66,8 @@ interface EditorState {
   undo: () => void;
   redo: () => void;
   setModelFrame: (frame: ModelFrame | null) => void;
+  /** Replaces the pending files wholesale — used when a draft is read back. */
+  setPendingLogos: (logos: Record<string, PendingLogo>) => void;
 }
 
 const history = (s: EditorState): History => ({ recipe: s.recipe, past: s.past, future: s.future, checkpoint: s.checkpoint });
@@ -74,13 +82,28 @@ export const useEditorStore = create<EditorState>((set) => ({
   dragging: false,
   flushSeq: 0,
   modelFrame: null,
-  initialize: (recipe, hydratedFor) => set({ ...startHistory(recipe), dragging: false, selectedLayerId: null, hydratedFor }),
+  pendingLogos: {},
+  initialize: (recipe, hydratedFor) =>
+    set((s) => ({
+      ...startHistory(recipe),
+      dragging: false,
+      selectedLayerId: null,
+      hydratedFor,
+      // Files an anonymous draft is still holding belong to the layers it is
+      // being initialised with; anything else is from a previous product.
+      pendingLogos: Object.fromEntries(Object.entries(s.pendingLogos).filter(([layerId]) => recipe.layers.some((l) => l.id === layerId))),
+    })),
   setSizeVariantId: (id, ratio = 1) =>
     set((s) => discrete(s, (r) => ({ ...r, size_variant_id: id, layers: scaleLayers(r.layers, ratio) }))),
   setFinishId: (id) => set((s) => discrete(s, (r) => (r.finish_id === id ? r : { ...r, finish_id: id }))),
   setColourId: (id) => set((s) => discrete(s, (r) => (r.colour_id === id ? r : { ...r, colour_id: id }))),
   setRuler: (ruler) => set((s) => discrete(s, (r) => ({ ...r, view: { ...r.view, ruler } }))),
-  addLayer: (layer) => set((s) => ({ ...discrete(s, (r) => ({ ...r, layers: [...r.layers, layer] })), selectedLayerId: layer.id })),
+  addLayer: (layer, pendingLogo) =>
+    set((s) => ({
+      ...discrete(s, (r) => ({ ...r, layers: [...r.layers, layer] })),
+      selectedLayerId: layer.id,
+      ...(pendingLogo ? { pendingLogos: { ...s.pendingLogos, [layer.id]: pendingLogo } } : {}),
+    })),
   updateLayer: (id, patch) =>
     set((s) => ({ recipe: { ...s.recipe, layers: s.recipe.layers.map((l) => (l.id === id ? applyLayerPatch(l, patch) : l)) } })),
   removeLayer: (id) =>
@@ -113,6 +136,7 @@ export const useEditorStore = create<EditorState>((set) => ({
       return { ...h, selectedLayerId: keepSelection(s, h.recipe) };
     }),
   setModelFrame: (modelFrame) => set({ modelFrame }),
+  setPendingLogos: (pendingLogos) => set({ pendingLogos }),
 }));
 
 export const selectCanUndo = (s: EditorState) => canUndo(history(s));
