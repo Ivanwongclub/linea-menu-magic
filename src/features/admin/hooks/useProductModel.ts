@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 import { parseObjFileRawBounds, type ModelRawBounds } from "@/features/admin/lib/objBounds";
+import type { BrandingMark, BrandingReference } from "@/features/admin/lib/brandingRecovery";
 
 const BUCKET = "product-models";
 
@@ -217,4 +219,55 @@ export function useProductModelScale(productId: string) {
   });
 
   return { scale, variants, confirmUnitScale, calibrateKnownDimension, calibrateTwoPoint, markUnconfirmed };
+}
+
+export interface ProductBranding {
+  model_branding_groups: BrandingMark[];
+  model_branding_reference: BrandingReference | null;
+}
+
+function brandingQueryKey(productId: string) {
+  return ["admin-product-model-branding", productId];
+}
+
+/**
+ * Phase 4d branding marks (E1 §3.1/§3.2): `model_branding_groups` as
+ * `[{index, name}]` and the recovered `model_branding_reference` (raw units),
+ * written together — a reference is only ever the analysis of the marks
+ * saved beside it, and stays null on low confidence (C9).
+ */
+export function useProductBranding(productId: string) {
+  const queryClient = useQueryClient();
+
+  const branding = useQuery({
+    queryKey: brandingQueryKey(productId),
+    queryFn: async (): Promise<ProductBranding> => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("model_branding_groups, model_branding_reference")
+        .eq("id", productId)
+        .single();
+      if (error) throw error;
+      return data as unknown as ProductBranding;
+    },
+  });
+
+  const saveBranding = useMutation({
+    mutationFn: async ({ marks, reference }: { marks: BrandingMark[]; reference: BrandingReference | null }) => {
+      const { error } = await supabase
+        .from("products")
+        .update({
+          model_branding_groups: marks as unknown as Json,
+          model_branding_reference: reference as unknown as Json,
+        })
+        .eq("id", productId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      invalidate(queryClient, productId);
+      queryClient.invalidateQueries({ queryKey: brandingQueryKey(productId) });
+    },
+  });
+
+  return { branding, saveBranding };
 }

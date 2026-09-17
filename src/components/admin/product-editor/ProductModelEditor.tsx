@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useProductModel, useProductModelScale, type ScaleMethod } from "@/features/admin/hooks/useProductModel";
 import { proposeScaleFactor } from "@/features/admin/lib/objBounds";
 import { useI18n } from "@/features/i18n/I18nProvider";
+import { ProductBrandingMarks } from "./ProductBrandingMarks";
 
 // R15: the R3F chunk never loads with the rest of the admin bundle — only
 // once the panel's preview is opened.
@@ -52,6 +53,7 @@ export function ProductModelEditor({ productId, modelStoragePath }: { productId:
   const [pointA, setPointA] = useState<THREE.Vector3 | null>(null);
   const [pointB, setPointB] = useState<THREE.Vector3 | null>(null);
   const [twoPointMm, setTwoPointMm] = useState("");
+  const [brandingMarked, setBrandingMarked] = useState<number[]>([]);
   const measuredRaw = pointA && pointB ? pointA.distanceTo(pointB) : null;
 
   const variantOptions = variants.data ?? [];
@@ -73,6 +75,7 @@ export function ProductModelEditor({ productId, modelStoragePath }: { productId:
     setPointB(null);
     setTwoPointMm("");
     setCalibrating(false);
+    setBrandingMarked([]);
   }, [modelStoragePath]);
 
   const onError = (error: unknown) => toast.error(describeSupabaseError(error as { message: string; code?: string }));
@@ -209,6 +212,7 @@ export function ProductModelEditor({ productId, modelStoragePath }: { productId:
               <ProductModelPreview
                 url={modelUrl}
                 picking={twoPointMode}
+                highlightIndices={brandingMarked}
                 pointA={pointA}
                 pointB={pointB}
                 onPick={(point) => {
@@ -224,6 +228,7 @@ export function ProductModelEditor({ productId, modelStoragePath }: { productId:
               <div data-testid="model-scale-factor">{t("admin.model.scale.factorLine", { factor: scale.data!.model_scale_factor!.toFixed(6) })}</div>
               <div className="text-xs text-muted-foreground">
                 {scale.data?.model_scale_method ? t(METHOD_KEY[scale.data.model_scale_method]) : null}
+                {scale.data?.model_scale_method === "two_point" ? ` · ${t("admin.model.scale.twoPointPrecision")}` : null}
                 {referenceVariant ? ` · ${referenceVariant.size_label ?? `${referenceVariant.size_primary_mm} mm`}` : null}
               </div>
               <Button
@@ -330,7 +335,7 @@ export function ProductModelEditor({ productId, modelStoragePath }: { productId:
                   </p>
                   {measuredRaw != null && (
                     <p className="text-sm text-foreground" data-testid="two-point-measured">
-                      {t("admin.model.scale.twoPointMeasuredLine", { measured: measuredRaw.toFixed(3) })}
+                      {t("admin.model.scale.twoPointMeasuredLine", { measured: measuredRaw.toFixed(3) })} · {t("admin.model.scale.twoPointPrecision")}
                     </p>
                   )}
                   <Label className="text-xs">{t("admin.model.scale.twoPointDistanceLabel")}</Label>
@@ -457,6 +462,17 @@ export function ProductModelEditor({ productId, modelStoragePath }: { productId:
             </div>
           )}
         </div>
+      )}
+
+      {modelStoragePath && rawBounds && modelUrl && (
+        <ProductBrandingMarks
+          productId={productId}
+          modelUrl={modelUrl}
+          confirmedFactor={confirmed ? scale.data?.model_scale_factor ?? null : null}
+          marked={brandingMarked}
+          onMarkedChange={setBrandingMarked}
+          onOpen={() => setPreviewOpen(true)}
+        />
       )}
     </div>
   );

@@ -75,6 +75,8 @@ function frameToPoints(camera: THREE.PerspectiveCamera, points: THREE.Vector3[],
 interface ProductModelPreviewProps {
   url: string;
   picking: boolean;
+  /** OBJ group indices (file order) drawn in the highlight colour — the CMS branding marks. */
+  highlightIndices?: number[];
   pointA: THREE.Vector3 | null;
   pointB: THREE.Vector3 | null;
   onPick: (point: THREE.Vector3) => void;
@@ -83,11 +85,13 @@ interface ProductModelPreviewProps {
 function PreviewModel({
   url,
   picking,
+  highlightIndices,
   onPick,
   controlsRef,
 }: {
   url: string;
   picking: boolean;
+  highlightIndices: number[];
   onPick: (point: THREE.Vector3) => void;
   controlsRef: React.RefObject<OrbitControlsImpl>;
 }) {
@@ -107,13 +111,24 @@ function PreviewModel({
   }, [obj]);
 
   const material = useMemo(() => new THREE.MeshStandardMaterial({ color: "#9a9a9a", roughness: 0.6, metalness: 0.1 }), []);
-  useEffect(() => () => material.dispose(), [material]);
+  const highlight = useMemo(() => new THREE.MeshStandardMaterial({ color: "#d97706", roughness: 0.5, metalness: 0.1 }), []);
+  useEffect(
+    () => () => {
+      material.dispose();
+      highlight.dispose();
+    },
+    [material, highlight],
+  );
+  const highlightKey = [...highlightIndices].sort((a, b) => a - b).join(",");
   useEffect(() => {
-    prepared.traverse((child) => {
-      const mesh = child as THREE.Mesh;
-      if (mesh.isMesh) mesh.material = material;
-    });
-  }, [prepared, material]);
+    const marked = new Set(highlightKey ? highlightKey.split(",").map(Number) : []);
+    // Direct mesh children in file order — the same indexing as `model_branding_groups`.
+    prepared.children
+      .filter((child) => (child as THREE.Mesh).isMesh)
+      .forEach((child, index) => {
+        (child as THREE.Mesh).material = marked.has(index) ? highlight : material;
+      });
+  }, [prepared, material, highlight, highlightKey]);
 
   // Frames the model to fill most of the preview, whatever its real size —
   // a fixed camera distance would render a small button as a speck (and
@@ -155,7 +170,7 @@ function PointMarker({ point }: { point: THREE.Vector3 }) {
   );
 }
 
-export default function ProductModelPreview({ url, picking, pointA, pointB, onPick }: ProductModelPreviewProps) {
+export default function ProductModelPreview({ url, picking, highlightIndices = [], pointA, pointB, onPick }: ProductModelPreviewProps) {
   const controlsRef = useRef<OrbitControlsImpl>(null);
   return (
     <div className="h-[38rem] max-w-3xl mx-auto border border-border bg-secondary" data-testid="model-preview-canvas">
@@ -163,7 +178,7 @@ export default function ProductModelPreview({ url, picking, pointA, pointB, onPi
         <ambientLight intensity={0.6} />
         <directionalLight position={[5, 10, 7]} intensity={1} />
         <Suspense fallback={null}>
-          <PreviewModel url={url} picking={picking} onPick={onPick} controlsRef={controlsRef} />
+          <PreviewModel url={url} picking={picking} highlightIndices={highlightIndices} onPick={onPick} controlsRef={controlsRef} />
         </Suspense>
         {pointA && <PointMarker point={pointA} />}
         {pointB && <PointMarker point={pointB} />}

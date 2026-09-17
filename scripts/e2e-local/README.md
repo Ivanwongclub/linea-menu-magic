@@ -26,6 +26,8 @@ role so scenarios can assert on what was actually stored.
   adding a migration; it never talks to production.
 - `npm run e2e:down` — `supabase stop --no-backup` and deletes the scratch
   directory.
+- `node --test "scripts/e2e-local/unit/*.test.mjs"` — pure-function unit
+  tests (no stack, no browser), e.g. `brandingRecovery` on synthetic geometry.
 
 The repo's `supabase/` directory is never touched, and nothing here ever
 connects to production.

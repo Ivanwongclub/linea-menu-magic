@@ -17,7 +17,7 @@ this is an index, not a decision log.
 | 4a | `products` scale columns + reset trigger; CMS raw bounds, proposal, confirm / known-dimension calibration (units §1.1) | **Done** |
 | 4b | Editor uses stored factor (force-rescale removed, §1.3); buyer refusal for unconfirmed scale (§1.2); e2e staging confirmed | **Done** |
 | 4c | CMS model preview; two-point calibration | **Done** |
-| 4d | CMS branding group marks; recovered radius / angles / relief stored in raw units (§4.2) | Not started |
+| 4d | CMS branding group marks; recovered radius / angles / relief stored in raw units (§4.2) | **Done** |
 | 4e | Ruler toggle, buyer scope, replaces the measurement line (§2) | Not started |
 | 4f | Recipe v2, store / autosave / anonymous draft for layers; add text, layer list, straight layout | Not started |
 | 4g | Circular layout, per-glyph placement, reversed text without mirroring (§5) | Not started |
@@ -1185,3 +1185,105 @@ future fixture with a sharp (non-bevelled) edge would not need it relaxed.
    extracted, since `EditorModel`'s buyer framing has its own calibrated
    pixel-parity tests (3b–4.0) that a shared abstraction would put at risk
    for no benefit here.
+
+## Phase 4d — done (2026-09-18)
+
+Branding group marks and geometry recovery, per reports/E1-plan-integration.md
+§5 row 4d, §3.2, C8, C9, C11 and addendum §3, §14, §17–§18.
+
+Files:
+
+- `src/features/admin/lib/brandingRecovery.ts` (new) — pure functions over an
+  unrotated OBJ root (no React; Phase 11 reuses it): `listModelGroups`
+  (index, name, vertex count in file order); `rawFaceFrame` (face normal and
+  12 o'clock from `decoratedFaceRotation` on the full model, inverted into the
+  raw frame — C8, collision 10); `kasaCircleFit`; `fitTextPath`; `coveringArc`;
+  `measureRelief` (three-mesh-bvh raycasts both ways along each top-facing
+  marked vertex's normal against the unmarked body, nearer hit, signed,
+  10th–90th percentile band median — C11); `confidenceFor` (§3.2 1% / 3%);
+  `analyseBranding` → the §3.2 `model_branding_reference` shape, with
+  `reference: null` on low confidence (C9). Imports `prepareModel.ts`
+  relatively with its extension so Node scripts can load it.
+- `src/features/admin/hooks/useModelGroups.ts` (new) — fetches and parses the
+  OBJ only when the group list is opened; `brandingRecovery` and MeshBVH are
+  dynamic imports (own chunks — the admin chunk doesn't carry them).
+- `src/features/admin/hooks/useProductModel.ts` — `useProductBranding`: reads
+  `model_branding_groups` / `model_branding_reference`, writes both together.
+- `src/components/admin/product-editor/ProductBrandingMarks.tsx` (new) —
+  catalogue editors only (`useCatalogueEditorStatus`): group list (index,
+  name, vertex count), click toggles, Shift-click applies to the range from
+  the last click; "Analyse branding" analyses and saves marks + reference in
+  one action; result block (radius, start → end, direction, text height,
+  relief, confidence, fit RMS) in raw units and mm at the confirmed factor
+  (raw only, with a one-line note, while unconfirmed), labelled "Recovered
+  from geometry"; low confidence shows one line and no stored reference.
+- `src/components/admin/product-editor/ProductModelEditor.tsx` — mounts the
+  panel, holds the marked set, opens the preview with the group list; the
+  two-point measured line and a `two_point` factor show "measured to ±1.5%"
+  (4c Q3).
+- `src/components/admin/product-editor/ProductModelPreview.tsx` —
+  `highlightIndices`: marked groups render in amber.
+- `src/features/i18n/adminTranslations.ts` — `admin.model.branding.*` (26
+  keys) and `admin.model.scale.twoPointPrecision`, × 3 languages.
+- `scripts/e2e-local/unit/branding-recovery.test.mjs` (new) — `node --test`:
+  exact Kåsa circle; band median; confidence thresholds; covering arc across
+  0°; group listing; a synthetic plate with eight radial glyphs on radius 5
+  over a 120° clockwise span, 0.35 raised → radius within 1%, start/end within
+  0.5°, direction cw, text height ±0.05, relief exact, confidence high;
+  reversed glyph order → ccw with start/end swapped; recessed glyphs → −0.3;
+  glyphs pulled off the circle → low, reference null; fewer than three
+  groups → low.
+- `scripts/e2e-local/scenarios/cms-branding-marks.mjs` (new) — Polo upload,
+  33 groups listed, object_6 + Shift-click object_33 → read-back 28
+  `{index, name}` marks, `radius_raw` 5.048 (5.04 ± 0.05), confidence high,
+  RMS 0.043, relief 0.30 (see Q1), mm shown at the stored factor; clear and
+  mark object_1 + object_3 → read-back 2 marks, reference null, low-confidence
+  line shown.
+- `scripts/e2e-local/README.md` — how to run the unit tests.
+- `docs/3d-editor/STATUS.md` — this file.
+
+### Rulings
+
+R1–R7 are given in the 4d task; recorded here as implemented:
+
+- **Marks and reference are written together.** A reference is only ever the
+  analysis of the marks saved beside it, so "Analyse branding" is the one
+  write; there's no separate "save marks" that could leave a stale reference.
+- **Text path model (R2).** A vertex-level Kåsa fit on lettering scores the
+  glyphs' own radial height as fit error (Polo: RMS 0.63, 12% of radius — low
+  for any real text). `fitTextPath` seeds Kåsa from glyph bounding-box
+  centres, then refits on each glyph's radial centroid (mean vertex radius on
+  its mean bearing). `fit_rms_raw` is the RMS of how far the fitted path runs
+  *outside* each glyph's own radial span — zero for glyphs the path passes
+  through, growing for glyphs off any common circle. §3.2's 1% / 3% bounds
+  apply to that. A circle needs ≥ 3 marked groups, and a radius larger than
+  the part's face is treated as not a text circle (near-collinear glyphs).
+- **Angles.** 0° = `angle_zero_raw` (the oriented model's +Y), clockwise
+  viewed from `face_normal_raw`. Start/end are the smallest arc covering every
+  marked vertex, ordered by reading direction; direction is the sign of the
+  summed glyph-to-glyph steps in file order.
+- **Text height** is the median glyph radial extent; **centre_raw** lies in
+  the face plane at the marked vertices' median height along the normal.
+
+### Open questions from this phase, with a recommendation each
+
+1. **Polo relief measures 0.30 raw units, not E1's 0.5 ± 0.1.** Addendum §14
+   defines relief as branding top surface to the underlying model surface
+   along the local normal. The Polo's glyph caps top out at ≈ 3.97 on the face
+   axis; the face plate under them (object_5) is at ≈ 3.67 (checked by
+   downward raycasts at five glyph centres). 0.5 is the glyph solids' own
+   extrusion (caps to wall bottoms at ≈ 3.40), ≈ 0.27 of which is buried
+   below the face. The scenario asserts 0.30 ± 0.1. *Recommend* keeping the
+   §14 surface definition — it is what a buyer sees and what a deboss/emboss
+   depth is compared against — and correcting E1's 0.5 (and addendum §18's
+   `reliefRaw = 0.50` example) rather than measuring buried extrusion.
+2. **Polo reads `ccw` with all 28 groups marked.** The Polo mixes top text,
+   bottom text and separators on one ring, so file order doesn't follow one
+   reading direction. *Recommend* marking top and bottom text as separate
+   references once Phase 4j needs per-arc defaults (the schema holds one
+   reference today).
+3. **Group marking is list-only.** Capabilities §3A makes viewport click the
+   primary selection method, but the preview's click is already two-point
+   picking. *Recommend* adding viewport click-to-mark in Phase 11's scene
+   tree, where selection gets its own mode, rather than overloading the CMS
+   preview's click now.
