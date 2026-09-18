@@ -125,7 +125,7 @@ export function useEditorProductBySlug(slug: string | null) {
     queryFn: () => fetchBySlug(slug as string),
     enabled: !!slug,
   });
-  return { ...query, data: query.data ? transform(query.data, language) : query.data };
+  return { ...query, data: query.data ? transform(query.data, language) : undefined };
 }
 
 export function useEditorProductById(productId: string | null) {
@@ -135,7 +135,7 @@ export function useEditorProductById(productId: string | null) {
     queryFn: () => fetchById(productId as string),
     enabled: !!productId,
   });
-  return { ...query, data: query.data ? transform(query.data, language) : query.data };
+  return { ...query, data: query.data ? transform(query.data, language) : undefined };
 }
 
 /** Variant switch ratio for layer scaling (C10): new variant mm / current variant mm, 1 when either is unknown. */

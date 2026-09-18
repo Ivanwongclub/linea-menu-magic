@@ -24,11 +24,11 @@ test("bundled fonts are Latin-1 subsets with cap height and licence", () => {
   }
 });
 
-test("a v1 recipe reads as v2 with no layers and the ruler off", () => {
+test("a v1 recipe reads as the current version with no layers and the ruler off", () => {
   const v1 = normalizeRecipe({ size_variant_id: "a", finish_id: "b", colour_id: null });
-  assert.deepEqual(v1, { recipe_version: 2, size_variant_id: "a", finish_id: "b", colour_id: null, view: { ruler: false }, layers: [] });
+  assert.deepEqual(v1, { recipe_version: 3, size_variant_id: "a", finish_id: "b", colour_id: null, view: { ruler: false }, layers: [] });
   const layer = newTextLayer("l1", 10.8, "POLO");
-  const v2 = normalizeRecipe({ recipe_version: 2, size_variant_id: "a", finish_id: null, colour_id: null, view: { ruler: true }, layers: [layer] });
+  const v2 = normalizeRecipe({ recipe_version: 3, size_variant_id: "a", finish_id: null, colour_id: null, view: { ruler: true }, layers: [layer] });
   assert.equal(v2.layers[0].content.value, "POLO");
   assert.equal(v2.view.ruler, true);
 });

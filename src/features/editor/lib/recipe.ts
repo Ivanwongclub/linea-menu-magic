@@ -37,7 +37,9 @@ interface LayerCommon {
    * reference (the factory's own relief, physical mm — C10 never scales it).
    */
   relief: TextRelief | null;
-  /** Phase 6. */
+  /** Phase 6a: what the layer is made of; absent on a v2 layer, read as the part's own finish. */
+  appearance?: LayerAppearance | null;
+  /** @deprecated superseded by `appearance` (Phase 6a R1); still written null so a v2 reader sees the shape it expects. */
   fill: null;
   /** §4.1 labels; an absent key means `user`. Keys are the field names (`radius_mm`, `depth_mm`, …). */
   provenance?: Record<string, Provenance>;
@@ -77,11 +79,44 @@ export type Provenance = "recovered" | "user";
  * "Emboss height" or "Engrave depth". `bevel_mm` is the chamfer on the top
  * edge of a raised layer / the opening edge of an engraved one.
  */
+export type ReliefType = "emboss" | "deboss" | "printed";
+
 export interface LayerRelief {
-  type: "emboss" | "deboss";
+  /** `printed` is flat by definition (Phase 6a R1): the depth is kept but not rendered. */
+  type: ReliefType;
   depth_mm: number;
   bevel_mm: number;
 }
+
+/**
+ * What the layer is made of (Phase 6a R1): the part's own finish, a plated
+ * finish of its own, a paint colour (the fill of axis-design §3), or printed
+ * ink. `finish_id` is a `finishes` row — plated for `plated`, a PAINT-process
+ * row for `paint` and `printed`; `custom` is a colour WIN-CYC has to confirm
+ * (R3), and plating never accepts one.
+ */
+export type AppearanceMode = "part" | "plated" | "paint" | "printed";
+
+export interface CustomColour {
+  /** The Pantone code as typed, canonicalised; null when the buyer picked a hex directly. */
+  pantone: string | null;
+  hex: string;
+}
+
+export interface LayerAppearance {
+  mode: AppearanceMode;
+  finish_id: string | null;
+  custom: CustomColour | null;
+}
+
+export const DEFAULT_APPEARANCE: LayerAppearance = { mode: "part", finish_id: null, custom: null };
+
+export function layerAppearance(layer: Layer): LayerAppearance {
+  return layer.appearance ? { ...DEFAULT_APPEARANCE, ...layer.appearance } : { ...DEFAULT_APPEARANCE };
+}
+
+/** A printed layer is flat, whatever depth it carries. */
+export const isPrinted = (relief: LayerRelief): boolean => relief.type === "printed";
 
 /** 4d/4j wrote relief without a bevel; a stored layer may still be that shape. */
 export type TextRelief = LayerRelief;
@@ -106,8 +141,31 @@ export function layerRelief(layer: Layer): LayerRelief {
   return layer.relief ? { bevel_mm: DEFAULT_BEVEL_MM, ...layer.relief } : defaultRelief(null);
 }
 
+/**
+ * Relief type and appearance mode are two faces of one decision (R1):
+ * Printed is a relief type *and* an appearance, so setting either sets the
+ * other. Leaving Printed falls back to raised, and leaving a colour behind
+ * falls back to the part's own finish.
+ */
+export function reconcileAppearance(relief: LayerRelief, appearance: LayerAppearance, changed: "relief" | "appearance"): { relief: LayerRelief; appearance: LayerAppearance } {
+  if (changed === "relief") {
+    if (relief.type === "printed") return { relief, appearance: { ...appearance, mode: "printed" } };
+    if (appearance.mode === "printed") {
+      const mode: AppearanceMode = appearance.finish_id || appearance.custom ? "paint" : "part";
+      return { relief, appearance: { ...appearance, mode } };
+    }
+    return { relief, appearance };
+  }
+  if (appearance.mode === "printed") return { relief: { ...relief, type: "printed" }, appearance };
+  if (relief.type === "printed") return { relief: { ...relief, type: "emboss" }, appearance };
+  return { relief, appearance };
+}
+
+/** Phase 6a R5: appearance per layer. A v2 recipe reads forward (`normalizeRecipe`). */
+export const RECIPE_VERSION = 3;
+
 export interface DraftRecipe {
-  recipe_version: 2;
+  recipe_version: 3;
   size_variant_id: string | null;
   finish_id: string | null;
   colour_id: string | null;
@@ -122,12 +180,14 @@ export interface LayerPatch {
   placement?: Partial<Omit<LayerPlacement, "centre_mm">> & { centre_mm?: LayerPlacement["centre_mm"] };
   /** Phase 5: type, depth or bevel; the layer's other relief fields are kept. */
   relief?: Partial<LayerRelief>;
+  /** Phase 6a: mode, finish or custom colour; the layer's other appearance fields are kept. */
+  appearance?: Partial<LayerAppearance>;
 }
 
 export const DEFAULT_FONT_KEY = "poppins-semibold";
 
 export function emptyRecipe(): DraftRecipe {
-  return { recipe_version: 2, size_variant_id: null, finish_id: null, colour_id: null, view: { ruler: false }, layers: [] };
+  return { recipe_version: RECIPE_VERSION, size_variant_id: null, finish_id: null, colour_id: null, view: { ruler: false }, layers: [] };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -135,23 +195,33 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 /**
- * Any stored shape → v2 (collision 27). An absent `recipe_version` is v1:
- * its three ids carry over, `layers` is `[]` and the ruler is off. A v2 row
- * is taken as stored; only missing containers are filled.
+ * Any stored shape → v3 (collision 27; Phase 6a R5). An absent
+ * `recipe_version` is v1: its three ids carry over, `layers` is `[]` and the
+ * ruler is off. A v2 row's layers are read forward — every one of them gets
+ * the appearance it implied, the part's own finish — and a v3 row is taken as
+ * stored, with only missing containers filled.
  */
 export function normalizeRecipe(raw: unknown): DraftRecipe {
   const base = emptyRecipe();
   if (!isRecord(raw)) return base;
   const id = (v: unknown) => (typeof v === "string" ? v : null);
   const view = isRecord(raw.view) ? raw.view : {};
+  const version = raw.recipe_version;
+  const stored = (version === 2 || version === 3) && Array.isArray(raw.layers) ? (raw.layers as Layer[]) : [];
   return {
-    recipe_version: 2,
+    recipe_version: RECIPE_VERSION,
     size_variant_id: id(raw.size_variant_id),
     finish_id: id(raw.finish_id),
     colour_id: id(raw.colour_id),
     view: { ruler: view.ruler === true },
-    layers: raw.recipe_version === 2 && Array.isArray(raw.layers) ? (raw.layers as Layer[]) : [],
+    layers: stored.map(upgradeLayer),
   };
+}
+
+/** A layer as v3 stores it: relief and appearance both present and agreeing. */
+export function upgradeLayer(layer: Layer): Layer {
+  const { relief, appearance } = reconcileAppearance(layerRelief(layer), layerAppearance(layer), "relief");
+  return { ...layer, relief, appearance, fill: null };
 }
 
 /** The recovered placement a new layer starts from (4j, C8); every field it sets is labelled `recovered`. */
@@ -196,6 +266,7 @@ export function newTextLayer(
       conform: true,
     },
     relief: defaultRelief(null, processMinDepthMm),
+    appearance: { ...DEFAULT_APPEARANCE },
     fill: null,
   };
   if (!defaults) return layer;
@@ -247,13 +318,20 @@ function markEdited(layer: Layer, patch: LayerPatch): Layer["provenance"] {
 }
 
 export function applyLayerPatch<T extends Layer>(layer: T, patch: LayerPatch): T {
+  // Relief and appearance are reconciled together (R1): Printed is both.
+  const changed = patch.appearance ? "appearance" : "relief";
+  const { relief, appearance } = reconcileAppearance(
+    { ...layerRelief(layer), ...patch.relief },
+    { ...layerAppearance(layer), ...patch.appearance },
+    changed,
+  );
   return {
     ...layer,
     ...(patch.visible !== undefined ? { visible: patch.visible } : {}),
     content: { ...layer.content, ...patch.content },
     style: { ...layer.style, ...patch.style },
     placement: { ...layer.placement, ...patch.placement },
-    ...(patch.relief ? { relief: { ...layerRelief(layer), ...patch.relief } } : {}),
+    ...(patch.relief || patch.appearance ? { relief, appearance } : {}),
     ...(layer.provenance ? { provenance: markEdited(layer, patch) } : {}),
   } as T;
 }
@@ -309,6 +387,7 @@ export function newLogoLayer(
       conform: true,
     },
     relief: defaultRelief(null, processMinDepthMm),
+    appearance: { ...DEFAULT_APPEARANCE },
     fill: null,
   };
 }

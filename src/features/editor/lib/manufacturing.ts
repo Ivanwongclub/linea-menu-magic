@@ -6,7 +6,7 @@
  * component measures the geometry (stroke widths) and formats; the node tests
  * drive this directly.
  */
-import { isLogoLayer, layerRelief, type Layer } from "./recipe.ts";
+import { isLogoLayer, layerAppearance, layerRelief, type Layer } from "./recipe.ts";
 import { edgeMarginMm } from "./layerMeasurements.ts";
 
 /** `finish_processes`' three tolerance columns (Phase 1 R3); any of them may be null. */
@@ -45,11 +45,18 @@ export const MIN_EDGE_MARGIN_MM = 0.5;
 
 export interface ManufacturingWarning {
   layerId: string;
-  kind: "stroke" | "depthMin" | "depthMax" | "edgeMargin";
+  kind: "stroke" | "depthMin" | "depthMax" | "edgeMargin" | "customColour";
+  /**
+   * `warning` is something WIN-CYC cannot make as drawn; `info` is something
+   * they have to confirm (Phase 6a R4) — a custom colour is not a fault.
+   */
+  severity: "warning" | "info";
   /** Translation key, with `{value}`, `{limit}` and `{process}` already measured. */
   key: string;
   valueMm: number;
   limitMm: number;
+  /** The custom colour's code or hex, for the info line. */
+  colour?: string;
 }
 
 export interface LayerMeasure {
@@ -70,26 +77,40 @@ export function manufacturingWarnings(
   measures: LayerMeasure[],
   process: ProcessThresholds | null,
   faceRadiusMm: number | null,
+  /** The PAINT process's own tolerances: what a printed layer is held to (Phase 6a R4). */
+  printProcess: ProcessThresholds | null = null,
 ): ManufacturingWarning[] {
   const out: ManufacturingWarning[] = [];
   for (const { layer, strokeMm } of measures) {
     if (!layer.visible) continue;
     const relief = layerRelief(layer);
     const deboss = relief.type === "deboss";
+    const printed = relief.type === "printed";
+    // A printed layer is ink, so it answers to the print line's minimum
+    // feature, not the plating's — and with no print thresholds set, nothing
+    // can be said about it.
+    const strokeProcess = printed ? printProcess : process;
 
-    if (process?.min_feature_mm != null && strokeMm != null && strokeMm < process.min_feature_mm) {
+    if (strokeProcess?.min_feature_mm != null && strokeMm != null && strokeMm < strokeProcess.min_feature_mm) {
       out.push({
         layerId: layer.id,
         kind: "stroke",
-        key: isLogoLayer(layer) ? "editor.manufacturing.logoStroke" : "editor.manufacturing.letterStroke",
+        severity: "warning",
+        key: printed
+          ? "editor.manufacturing.printStroke"
+          : isLogoLayer(layer)
+            ? "editor.manufacturing.logoStroke"
+            : "editor.manufacturing.letterStroke",
         valueMm: strokeMm,
-        limitMm: process.min_feature_mm,
+        limitMm: strokeProcess.min_feature_mm,
       });
     }
-    if (process?.min_deboss_depth_mm != null && relief.depth_mm < process.min_deboss_depth_mm) {
+    // Printed ink has no depth to check.
+    if (!printed && process?.min_deboss_depth_mm != null && relief.depth_mm < process.min_deboss_depth_mm) {
       out.push({
         layerId: layer.id,
         kind: "depthMin",
+        severity: "warning",
         key: deboss ? "editor.manufacturing.engraveDepthMin" : "editor.manufacturing.embossHeightMin",
         valueMm: relief.depth_mm,
         limitMm: process.min_deboss_depth_mm,
@@ -98,10 +119,11 @@ export function manufacturingWarnings(
     // 5b R3 (Phase 5 Q1): the maximum is how deep a recess may be cut — it
     // says nothing about how proud a raised layer may stand, so it is checked
     // on engraved layers only.
-    if (deboss && process?.max_deboss_depth_mm != null && relief.depth_mm > process.max_deboss_depth_mm) {
+    if (deboss && !printed && process?.max_deboss_depth_mm != null && relief.depth_mm > process.max_deboss_depth_mm) {
       out.push({
         layerId: layer.id,
         kind: "depthMax",
+        severity: "warning",
         key: "editor.manufacturing.engraveDepthMax",
         valueMm: relief.depth_mm,
         limitMm: process.max_deboss_depth_mm,
@@ -110,8 +132,23 @@ export function manufacturingWarnings(
     if (faceRadiusMm != null && faceRadiusMm > 0) {
       const margin = edgeMarginMm(layer, faceRadiusMm);
       if (margin < MIN_EDGE_MARGIN_MM) {
-        out.push({ layerId: layer.id, kind: "edgeMargin", key: "editor.manufacturing.edgeMargin", valueMm: margin, limitMm: MIN_EDGE_MARGIN_MM });
+        out.push({ layerId: layer.id, kind: "edgeMargin", severity: "warning", key: "editor.manufacturing.edgeMargin", valueMm: margin, limitMm: MIN_EDGE_MARGIN_MM });
       }
+    }
+
+    // A custom colour is not a fault: it is something WIN-CYC has to confirm
+    // against a physical sample (R3/R4), so it reads as information.
+    const custom = layerAppearance(layer).custom;
+    if (custom) {
+      out.push({
+        layerId: layer.id,
+        kind: "customColour",
+        severity: "info",
+        key: "editor.manufacturing.customColour",
+        valueMm: 0,
+        limitMm: 0,
+        colour: custom.pantone ?? custom.hex,
+      });
     }
   }
   return out;

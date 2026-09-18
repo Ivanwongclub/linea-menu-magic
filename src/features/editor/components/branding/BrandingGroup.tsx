@@ -1,19 +1,37 @@
 import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type ReactNode } from "react";
 import { GripVertical, ImagePlus, Plus, Redo2, Undo2, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { cn } from "@/lib/utils";
 import { selectCanRedo, selectCanUndo, useEditorStore } from "../../store/useEditorStore";
 import { BUNDLED_FONTS } from "../../lib/fonts";
-import { isLogoLayer, isTextLayer, layerRelief, newLogoLayer, newTextLayer, type Layer, type TextLayer, type TextLayout } from "../../lib/recipe";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { FinishSelectionPicker } from "@/features/finishes/FinishSelectionPicker";
+import { finishMarketingName } from "@/features/finishes/finishAxisLine";
+import {
+  isLogoLayer,
+  isTextLayer,
+  layerAppearance,
+  layerRelief,
+  newLogoLayer,
+  newTextLayer,
+  type AppearanceMode,
+  type Layer,
+  type LayerAppearance,
+  type TextLayer,
+  type TextLayout,
+} from "../../lib/recipe";
+import { finishesForGroup, usePublicFinishes, type AppearanceFinishGroup } from "../../hooks/usePublicFinishes";
+import type { PickerFinish } from "../../hooks/useFinishOptions";
+import { normalizeHex, normalizePantone, pantoneHex, resolveCustomColour } from "../../lib/pantone";
 import { PrecisionNumberInput } from "../controls/PrecisionNumberInput";
 import type { ProcessThresholds } from "../../lib/manufacturing";
-import { MAX_LOGO_BYTES, asRejection, rejectionMessage, validateLogoSvg } from "../../lib/logoSvg";
+import { MAX_LOGO_BYTES, MAX_RASTER_BYTES, RASTER_MIME_TYPES, asRejection, rejectionMessage, validateLogoSvg, validateRasterLogo } from "../../lib/logoSvg";
 import { parseLogoSvg } from "../../lib/logoGeometry";
-import { deleteLogoAsset, uploadLogoAsset, useLogoSources } from "../../hooks/useLogoAssets";
+import { deleteLogoAsset, isRasterMime, uploadLogoAsset, useLogoSources, type LogoSource } from "../../hooks/useLogoAssets";
 import { useAuth } from "@/features/auth/AuthProvider";
 import { useDesignerStaffStatus } from "../../hooks/useDesignerStaffStatus";
 import { recoveredDefaults, type BrandingReferenceRaw } from "../../lib/recoveredPlacement";
@@ -26,7 +44,7 @@ const LAYOUTS: { value: TextLayout; label: string }[] = [
   { value: "circle", label: "editor.branding.layoutCircular" },
 ];
 
-function LayerRow({ layer, selected, logoSvg }: { layer: Layer; selected: boolean; logoSvg?: string }) {
+function LayerRow({ layer, selected, logoSource }: { layer: Layer; selected: boolean; logoSource?: LogoSource }) {
   const { t } = useI18n();
   const selectLayer = useEditorStore((s) => s.selectLayer);
   const removeLayer = useEditorStore((s) => s.removeLayer);
@@ -71,7 +89,7 @@ function LayerRow({ layer, selected, logoSvg }: { layer: Layer; selected: boolea
       >
         {isLogoLayer(layer) ? (
           <span className="flex items-center gap-2">
-            <LogoThumbnail svg={logoSvg} />
+            <LogoThumbnail source={logoSource} />
             <span className="truncate text-sm tracking-wide text-foreground">{t("editor.branding.logoLayer")}</span>
           </span>
         ) : (
@@ -91,6 +109,7 @@ function LayerRow({ layer, selected, logoSvg }: { layer: Layer; selected: boolea
       </button>
       </div>
       <ReliefRow layer={layer} />
+      <AppearanceRow layer={layer} />
     </li>
   );
 }
@@ -98,6 +117,8 @@ function LayerRow({ layer, selected, logoSvg }: { layer: Layer; selected: boolea
 const RELIEF_TYPES = [
   { value: "emboss", label: "editor.branding.raised" },
   { value: "deboss", label: "editor.branding.engraved" },
+  // Phase 6a R1: printed is a relief type of its own — flat, no depth.
+  { value: "printed", label: "editor.branding.printed" },
 ] as const;
 
 /**
@@ -137,36 +158,269 @@ function ReliefRow({ layer }: { layer: Layer }) {
           );
         })}
       </div>
-      <span className={cn(FIELD_LABEL, "ml-auto")} id={`depth-label-${layer.id}`}>
-        {t("editor.branding.depth")}
-      </span>
-      <PrecisionNumberInput
-        value={relief.depth_mm}
-        unit="mm"
-        min={0}
-        exclusiveMin
-        max={5}
-        ariaLabelledBy={`depth-label-${layer.id}`}
-        testId="relief-depth-input"
-        className="w-20 shrink-0"
-        onChange={(depth_mm) => updateLayer(layer.id, { relief: { depth_mm } })}
-        onCommit={commit}
-      />
+      {/* Printed ink has no depth to quote. */}
+      {relief.type !== "printed" && (
+        <>
+          <span className={cn(FIELD_LABEL, "ml-auto")} id={`depth-label-${layer.id}`}>
+            {t("editor.branding.depth")}
+          </span>
+          <PrecisionNumberInput
+            value={relief.depth_mm}
+            unit="mm"
+            min={0}
+            exclusiveMin
+            max={5}
+            ariaLabelledBy={`depth-label-${layer.id}`}
+            testId="relief-depth-input"
+            className="w-20 shrink-0"
+            onChange={(depth_mm) => updateLayer(layer.id, { relief: { depth_mm } })}
+            onCommit={commit}
+          />
+        </>
+      )}
     </div>
   );
 }
 
-/** The uploaded artwork itself, at row size (R4). */
-function LogoThumbnail({ svg }: { svg?: string }) {
-  if (!svg) return <span className="h-5 w-5 shrink-0 border border-border bg-secondary" data-testid="logo-thumbnail" data-loaded="false" />;
+/** A raster file as a data URL: what the draft holds and what the texture loads. */
+function readAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error ?? new Error("read failed"));
+    reader.readAsDataURL(file);
+  });
+}
+
+/** The artwork's own width / height, so the layer keeps its proportions. */
+function rasterAspect(dataUrl: string): Promise<number | null> {
+  return new Promise((resolve) => {
+    const image = new Image();
+    image.onload = () => resolve(image.naturalWidth > 0 && image.naturalHeight > 0 ? image.naturalWidth / image.naturalHeight : null);
+    image.onerror = () => resolve(null);
+    image.src = dataUrl;
+  });
+}
+
+/** A raster layer is printed from the start (R2): flat, in the ink colour. */
+function printedLayer<T extends Layer>(layer: T): T {
+  return { ...layer, relief: { ...layer.relief!, type: "printed" }, appearance: { mode: "printed", finish_id: null, custom: null } };
+}
+
+const APPEARANCE_MODES: { value: AppearanceMode; label: string }[] = [
+  { value: "part", label: "editor.appearance.part" },
+  { value: "plated", label: "editor.appearance.plated" },
+  { value: "paint", label: "editor.appearance.paint" },
+  { value: "printed", label: "editor.appearance.printed" },
+];
+
+/** The colour a layer reads as on the row: a finish's own swatch colour, a custom colour, or the part's. */
+function appearanceSwatchHex(appearance: LayerAppearance, finish: PickerFinish | null): string | null {
+  if (appearance.custom) return appearance.custom.hex;
+  if (finish) return finish.base_color_hex ?? finish.hex_approx ?? null;
+  return null;
+}
+
+/**
+ * Appearance, per layer (Phase 6a R1): the part's own finish, a plated finish
+ * of its own, a paint colour — the fill of axis-design §3 — or printed ink.
+ * One control; the finish behind it is chosen in the same picker the button
+ * uses, filtered to the processes that can do the job (R2).
+ */
+function AppearanceRow({ layer }: { layer: Layer }) {
+  const { t, language } = useI18n();
+  const updateLayer = useEditorStore((s) => s.updateLayer);
+  const commit = useEditorStore((s) => s.commit);
+  const { data: finishes } = usePublicFinishes();
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [customOpen, setCustomOpen] = useState(false);
+  const appearance = layerAppearance(layer);
+  const group: AppearanceFinishGroup = appearance.mode === "plated" ? "plated" : "paint";
+  const options = useMemo(() => finishesForGroup(finishes ?? [], group), [finishes, group]);
+  const selected = (finishes ?? []).find((f) => f.id === appearance.finish_id) ?? null;
+  const needsColour = appearance.mode === "plated" || appearance.mode === "paint" || appearance.mode === "printed";
+  const swatchHex = appearanceSwatchHex(appearance, selected);
+
+  const setMode = (mode: AppearanceMode) => {
+    // Leaving a colour behind clears it: a plated layer never carries a custom
+    // colour (R3), and the part's own finish carries none either.
+    const custom = mode === "paint" || mode === "printed" ? appearance.custom : null;
+    const finish_id = mode === "part" ? null : appearance.finish_id;
+    updateLayer(layer.id, { appearance: { mode, custom, finish_id } });
+    commit();
+  };
+
+  const label = selected
+    ? finishMarketingName(selected, language)
+    : appearance.custom
+      ? t("editor.appearance.customSummary", { colour: appearance.custom.pantone ?? appearance.custom.hex })
+      : t("editor.appearance.choose");
+
   return (
-    <img
-      src={`data:image/svg+xml;utf8,${encodeURIComponent(svg)}`}
-      alt=""
-      data-testid="logo-thumbnail"
-      data-loaded="true"
-      className="h-5 w-5 shrink-0 object-contain"
-    />
+    <div className="flex flex-wrap items-center gap-2 border-t border-border px-1.5 py-1.5" data-testid="layer-appearance" data-layer-id={layer.id} data-mode={appearance.mode} data-finish-id={appearance.finish_id ?? undefined} data-custom={appearance.custom?.hex ?? undefined}>
+      <span className={FIELD_LABEL} id={`appearance-${layer.id}`}>
+        {t("editor.appearance.label")}
+      </span>
+      <span
+        data-testid="appearance-swatch"
+        data-hex={swatchHex ?? undefined}
+        aria-hidden="true"
+        className={cn("h-4 w-4 shrink-0 border border-border", !swatchHex && "border-dashed bg-secondary")}
+        style={swatchHex ? { backgroundColor: swatchHex } : undefined}
+      />
+      <Select value={appearance.mode} onValueChange={(mode) => setMode(mode as AppearanceMode)}>
+        <SelectTrigger aria-labelledby={`appearance-${layer.id}`} data-testid="appearance-mode" className="h-7 w-[140px] rounded-none border-0 border-b border-border px-0 text-[11px] shadow-none focus:ring-0 focus:border-foreground">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent className="rounded-none">
+          {APPEARANCE_MODES.map((option) => (
+            <SelectItem key={option.value} value={option.value} className="rounded-none text-xs">
+              {t(option.label)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      {needsColour && (
+        <button
+          type="button"
+          data-testid="appearance-choose"
+          onClick={() => setPickerOpen(true)}
+          className="text-[11px] tracking-[0.05em] text-foreground underline-offset-4 hover:underline truncate max-w-[140px]"
+        >
+          {label}
+        </button>
+      )}
+      {(appearance.mode === "paint" || appearance.mode === "printed") && (
+        <button
+          type="button"
+          data-testid="appearance-custom-open"
+          onClick={() => setCustomOpen((v) => !v)}
+          className="text-[11px] tracking-[0.05em] text-muted-foreground underline-offset-4 hover:underline hover:text-foreground"
+        >
+          {t("editor.appearance.custom")}
+        </button>
+      )}
+
+      {customOpen && (appearance.mode === "paint" || appearance.mode === "printed") && (
+        <CustomColourPanel
+          layer={layer}
+          onDone={() => setCustomOpen(false)}
+        />
+      )}
+
+      <Sheet open={pickerOpen} onOpenChange={setPickerOpen}>
+        <SheetContent side="right" className="w-full sm:max-w-xl flex flex-col">
+          <SheetHeader>
+            <SheetTitle>{t(group === "paint" ? "editor.appearance.paintPickerTitle" : "editor.appearance.platedPickerTitle")}</SheetTitle>
+          </SheetHeader>
+          <div className="flex-1 min-h-0 mt-4" data-testid="appearance-picker">
+            <FinishSelectionPicker
+              finishes={options}
+              selectedId={appearance.finish_id}
+              onSelect={(finish) => {
+                updateLayer(layer.id, { appearance: { finish_id: finish.id, custom: null } });
+                commit();
+                setPickerOpen(false);
+              }}
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
+    </div>
+  );
+}
+
+/**
+ * "Custom…" (R3): a Pantone code from the solid coated range, or a colour
+ * picked on screen. An unknown code keeps the code and takes the buyer's own
+ * hex beside it; either way the layer is labelled "to be confirmed".
+ */
+function CustomColourPanel({ layer, onDone }: { layer: Layer; onDone: () => void }) {
+  const { t } = useI18n();
+  const updateLayer = useEditorStore((s) => s.updateLayer);
+  const commit = useEditorStore((s) => s.commit);
+  const existing = layerAppearance(layer).custom;
+  const [pantone, setPantone] = useState(existing?.pantone ?? "");
+  const [hex, setHex] = useState(existing?.hex ?? "#000000");
+  const resolved = resolveCustomColour({ pantone, hex });
+  const known = pantone.trim() !== "" && !!pantoneHex(pantone);
+  const codeInvalid = pantone.trim() !== "" && normalizePantone(pantone) === null;
+
+  return (
+    <div className="w-full space-y-2 border border-border p-2" data-testid="custom-colour-panel">
+      <div className="flex items-center gap-2">
+        <label className={FIELD_LABEL} htmlFor={`pantone-${layer.id}`}>
+          {t("editor.appearance.pantone")}
+        </label>
+        <input
+          id={`pantone-${layer.id}`}
+          data-testid="custom-pantone"
+          value={pantone}
+          autoComplete="off"
+          onChange={(e) => {
+            setPantone(e.target.value);
+            const found = pantoneHex(e.target.value);
+            if (found) setHex(found);
+          }}
+          placeholder="185 C"
+          className="w-24 border-b border-border bg-transparent py-0.5 text-sm text-foreground outline-none focus:border-foreground"
+        />
+        <input
+          type="color"
+          data-testid="custom-pick"
+          aria-label={t("editor.appearance.pick")}
+          value={normalizeHex(hex) ?? "#000000"}
+          onChange={(e) => setHex(e.target.value)}
+          className="h-6 w-8 shrink-0 border border-border bg-transparent p-0"
+        />
+        <input
+          data-testid="custom-hex"
+          aria-label={t("editor.appearance.hex")}
+          value={hex}
+          autoComplete="off"
+          onChange={(e) => setHex(e.target.value)}
+          className="w-24 border-b border-border bg-transparent py-0.5 font-mono text-xs text-foreground outline-none focus:border-foreground"
+        />
+      </div>
+      <p className="text-[11px] text-muted-foreground" data-testid="custom-colour-hint">
+        {codeInvalid
+          ? t("editor.appearance.pantoneInvalid")
+          : known
+            ? t("editor.appearance.pantoneKnown")
+            : pantone.trim()
+              ? t("editor.appearance.pantoneUnknown")
+              : t("editor.appearance.customHint")}
+      </p>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          data-testid="custom-apply"
+          disabled={!resolved}
+          onClick={() => {
+            if (!resolved) return;
+            updateLayer(layer.id, { appearance: { custom: resolved, finish_id: null } });
+            commit();
+            onDone();
+          }}
+          className="border border-foreground px-2 py-0.5 text-[11px] tracking-[0.05em] text-foreground disabled:border-border disabled:text-muted-foreground"
+        >
+          {t("editor.appearance.applyCustom")}
+        </button>
+        <button type="button" data-testid="custom-cancel" onClick={onDone} className="text-[11px] text-muted-foreground hover:text-foreground">
+          {t("editor.common.cancel")}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** The uploaded artwork itself, at row size (4k R4) — vector or raster (6a). */
+function LogoThumbnail({ source }: { source?: LogoSource }) {
+  if (!source) return <span className="h-5 w-5 shrink-0 border border-border bg-secondary" data-testid="logo-thumbnail" data-loaded="false" />;
+  const src = source.kind === "raster" ? source.url : `data:image/svg+xml;utf8,${encodeURIComponent(source.svg)}`;
+  return (
+    <img src={src} alt="" data-testid="logo-thumbnail" data-loaded="true" data-kind={source.kind} className="h-5 w-5 shrink-0 object-contain" />
   );
 }
 
@@ -353,10 +607,12 @@ export function BrandingGroup({
   const selected = layers.find((l) => l.id === selectedLayerId) ?? null;
 
   /**
-   * Add logo (4k R1/R2): the file is validated as text before anything is
-   * stored — SVG, ≤ 200 KB, outlines only, every path closed — then parsed
-   * for its aspect. Signed in, it uploads to `design-uploads` and becomes a
-   * `design_assets` row; anonymously it waits in the draft for the claim.
+   * Add logo (4k R1/R2, 6a R2): an SVG is validated as text before anything is
+   * stored — ≤ 200 KB, outlines only, every path closed — then parsed for its
+   * aspect. A PNG or JPEG (≤ 2 MB) is accepted too, for printing only: there
+   * is no outline to extrude, so the layer lands as a printed one. Signed in,
+   * the file uploads to `design-uploads` and becomes a `design_assets` row;
+   * anonymously it waits in the draft for the claim.
    */
   const onLogoFile = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -364,37 +620,46 @@ export function BrandingGroup({
     if (!file) return;
     setLogoError(null);
     setUploading(true);
+    const reject = (rejection: Parameters<typeof rejectionMessage>[0]) => {
+      const { key, vars } = rejectionMessage(rejection);
+      setLogoError(t(key, vars));
+    };
     try {
-      if (file.size > MAX_LOGO_BYTES) {
-        const { key, vars } = rejectionMessage({ reason: "tooLarge", limitKb: MAX_LOGO_BYTES / 1024 });
-        setLogoError(t(key, vars));
-        return;
-      }
-      const svg = await file.text();
-      const validation = validateLogoSvg(svg, file.size);
-      const rejection = asRejection(validation);
-      if (rejection) {
-        const { key, vars } = rejectionMessage(rejection);
-        setLogoError(t(key, vars));
-        return;
-      }
-      const artwork = parseLogoSvg(svg);
-      if (!artwork) {
-        const { key, vars } = rejectionMessage({ reason: "empty" });
-        setLogoError(t(key, vars));
-        return;
-      }
+      const raster = isRasterMime(file.type);
       const layerId = crypto.randomUUID();
+      const brandId = isStaff ? null : primaryBrand?.id ?? null;
+      const minDepth = process?.min_deboss_depth_mm ?? null;
+
+      if (raster) {
+        const validation = validateRasterLogo(file.type, file.size);
+        const rejection = asRejection(validation);
+        if (rejection) return reject(rejection);
+        const dataUrl = await readAsDataUrl(file);
+        const aspect = await rasterAspect(dataUrl);
+        if (!aspect) return reject({ reason: "empty" });
+        // A raster can only be printed (R2): it lands printed, in the ink
+        // colour the buyer picks next.
+        const layer = printedLayer(newLogoLayer(layerId, faceDiameterMm, aspect, null, minDepth));
+        if (user) {
+          const assetId = await uploadLogoAsset({ raster: dataUrl, mimeType: file.type, filename: file.name, ownerId: user.id, brandId });
+          addLayer({ ...layer, content: { ...layer.content, asset_id: assetId } });
+        } else {
+          addLayer(layer, { filename: file.name, raster: dataUrl, mimeType: file.type });
+        }
+        return;
+      }
+
+      if (file.size > MAX_LOGO_BYTES) return reject({ reason: "tooLarge", limitKb: MAX_LOGO_BYTES / 1024 });
+      const svg = await file.text();
+      const rejection = asRejection(validateLogoSvg(svg, file.size));
+      if (rejection) return reject(rejection);
+      const artwork = parseLogoSvg(svg);
+      if (!artwork) return reject({ reason: "empty" });
       if (user) {
-        const assetId = await uploadLogoAsset({
-          svg,
-          filename: file.name,
-          ownerId: user.id,
-          brandId: isStaff ? null : primaryBrand?.id ?? null,
-        });
-        addLayer(newLogoLayer(layerId, faceDiameterMm, artwork.aspect, assetId, process?.min_deboss_depth_mm ?? null));
+        const assetId = await uploadLogoAsset({ svg, mimeType: "image/svg+xml", filename: file.name, ownerId: user.id, brandId });
+        addLayer(newLogoLayer(layerId, faceDiameterMm, artwork.aspect, assetId, minDepth));
       } else {
-        addLayer(newLogoLayer(layerId, faceDiameterMm, artwork.aspect, null, process?.min_deboss_depth_mm ?? null), { filename: file.name, svg });
+        addLayer(newLogoLayer(layerId, faceDiameterMm, artwork.aspect, null, minDepth), { filename: file.name, svg, mimeType: "image/svg+xml" });
       }
     } catch (error) {
       setLogoError(t("editor.branding.logoFailed", { reason: String((error as Error)?.message ?? error) }));
@@ -456,7 +721,7 @@ export function BrandingGroup({
         <input
           ref={fileInput}
           type="file"
-          accept="image/svg+xml,.svg"
+          accept={`image/svg+xml,.svg,${RASTER_MIME_TYPES.join(",")}`}
           data-testid="logo-input"
           className="hidden"
           onChange={(event) => void onLogoFile(event)}
@@ -476,7 +741,7 @@ export function BrandingGroup({
           <SortableContext items={layers.map((l) => l.id)} strategy={verticalListSortingStrategy}>
             <ul className="space-y-1.5" aria-label={t("editor.branding.layers")} data-testid="text-layers">
               {layers.map((layer) => (
-                <LayerRow key={layer.id} layer={layer} selected={layer.id === selectedLayerId} logoSvg={logoSources[layer.id]} />
+                <LayerRow key={layer.id} layer={layer} selected={layer.id === selectedLayerId} logoSource={logoSources[layer.id]} />
               ))}
             </ul>
           </SortableContext>

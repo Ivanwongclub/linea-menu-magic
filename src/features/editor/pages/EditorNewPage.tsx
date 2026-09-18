@@ -126,7 +126,14 @@ export function EditorNewPage({ productSlug }: { productSlug: string | null }) {
           layers.push(layer);
           continue;
         }
-        const asset_id = await uploadLogoAsset({ svg: file.svg, filename: file.filename, ownerId: user.id, brandId: brand_id });
+        const asset_id = await uploadLogoAsset({
+          svg: file.svg,
+          raster: file.raster,
+          mimeType: file.mimeType,
+          filename: file.filename,
+          ownerId: user.id,
+          brandId: brand_id,
+        });
         layers.push({ ...layer, content: { ...layer.content, asset_id } });
       }
       const { data, error: insertError } = await supabase

@@ -11,7 +11,8 @@ export interface AnonymousDraft {
    * to put a file, so it rides here until the claim uploads it. Never part of
    * the recipe — the claim inserts that verbatim (collision 23).
    */
-  logos?: Record<string, { filename: string; svg: string }>;
+  /** Phase 6a: `PendingLogo`, structurally — SVG text or a raster data URL, with its mime type. */
+  logos?: Record<string, { filename: string; svg?: string; raster?: string; mimeType: string }>;
 }
 
 /** Pre-4f drafts held three camelCase ids and an optional ruler flag. */

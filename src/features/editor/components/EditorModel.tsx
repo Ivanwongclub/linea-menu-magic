@@ -9,15 +9,11 @@ import type { PickerFinish } from "../hooks/useFinishOptions";
 import { decoratedFaceRotation, withSmoothNormals } from "../lib/prepareModel";
 import { bakeOcclusion, occlusionKey } from "../lib/ambientOcclusion";
 import { useEditorStore } from "../store/useEditorStore";
-import { applyShaderPatches, brushForSurface } from "../lib/shaderPatch";
+import { colourMaterial, finishMaterial } from "../lib/finishMaterial";
 import type { Layer } from "../lib/recipe";
+import type { LogoSource } from "../hooks/useLogoAssets";
 import { BrandingMeshes, type TextSceneReport } from "./branding/BrandingMeshes";
-import {
-  CAMERA_AZIMUTH_DEG,
-  CAMERA_ELEVATION_DEG,
-  NON_METAL_ROUGHNESS,
-  TARGET_VIEWPORT_FILL,
-} from "../lib/renderSettings";
+import { CAMERA_AZIMUTH_DEG, CAMERA_ELEVATION_DEG, TARGET_VIEWPORT_FILL } from "../lib/renderSettings";
 
 interface EditorModelProps {
   url: string;
@@ -45,8 +41,10 @@ interface EditorModelProps {
   onMeshCount?: (drawn: number, total: number) => void;
   /** The recipe's layers, drawn on the face — siblings of the model, never inside its measured bounds. */
   layers: Layer[];
-  /** The SVG behind each logo layer, by layer id (4k). */
-  logoSources: Record<string, string>;
+  /** The artwork behind each logo layer, by layer id (4k, 6a). */
+  logoSources: Record<string, LogoSource>;
+  /** Phase 6a R2: per-layer appearance materials, by layer id. */
+  layerMaterials?: Record<string, THREE.MeshPhysicalMaterial>;
   onTextReport?: (report: TextSceneReport) => void;
 }
 
@@ -60,14 +58,6 @@ export interface RulerMeasurements {
   minZ: number;
   maxZ: number;
 }
-
-/**
- * `anisotropyRotation` stays 0: the brush direction is no longer a rotation
- * of three.js's derivative tangent but a tangent computed per fragment —
- * linear along the face frame's X for BRUSHED, radial about the face centre
- * for CIRCLE_BRUSHED (Phase 5 R5, `lib/shaderPatch.ts`).
- */
-const ANISOTROPY_ROTATION = 0;
 
 /**
  * `MeshPhysicalMaterial` straight from the finish row: the database derives
@@ -92,6 +82,7 @@ export function EditorModel({
   onMeshCount,
   layers,
   logoSources,
+  layerMaterials,
   onTextReport,
 }: EditorModelProps) {
   const obj = useLoader(OBJLoader, url);
@@ -99,30 +90,12 @@ export function EditorModel({
 
   const twoTone = !!(isMetal && finish?.two_tone);
 
-  const material = useMemo(() => {
-    if (isMetal && finish) {
-      const m = new THREE.MeshPhysicalMaterial({
-        color: finish.base_color_hex ?? finish.hex_approx ?? "#9a9a9a",
-        metalness: finish.metalness,
-        roughness: finish.roughness,
-        anisotropy: finish.anisotropy,
-        anisotropyRotation: ANISOTROPY_ROTATION,
-        clearcoat: finish.clearcoat ?? 0,
-        clearcoatRoughness: finish.clearcoat_roughness ?? 0,
-      });
-      applyShaderPatches(m, {
-        twoTone: !!finish.two_tone,
-        twoToneOxideHex: finish.oxide_color_hex,
-        brush: brushForSurface(finish.surface?.code, finish.anisotropy),
-      });
-      return m;
-    }
-    return new THREE.MeshPhysicalMaterial({
-      color: colour?.hex ?? "#9a9a9a",
-      metalness: 0,
-      roughness: NON_METAL_ROUGHNESS,
-    });
-  }, [isMetal, finish, colour]);
+  // One builder for the part and for every layer that carries its own finish
+  // (Phase 6a R2, `lib/finishMaterial.ts`).
+  const material = useMemo(
+    () => (isMetal && finish ? finishMaterial(finish) : colourMaterial(colour?.hex)),
+    [isMetal, finish, colour],
+  );
 
   useEffect(() => () => material.dispose(), [material]);
 
@@ -308,7 +281,15 @@ export function EditorModel({
   return (
     <>
       <primitive object={model} />
-      <BrandingMeshes layers={layers} logoSources={logoSources} model={model} faceZ={bounds.max.z} material={material} onReport={onTextReport} />
+      <BrandingMeshes
+        layers={layers}
+        logoSources={logoSources}
+        model={model}
+        faceZ={bounds.max.z}
+        material={material}
+        layerMaterials={layerMaterials}
+        onReport={onTextReport}
+      />
       <ContactShadows
         key={`${renderedSizeMm}-${url}`}
         position={[0, bounds.min.y - 0.01, 0]}

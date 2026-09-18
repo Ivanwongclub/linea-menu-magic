@@ -27,7 +27,8 @@ this is an index, not a decision log.
 | 4k | Add logo: SVG upload, validation, `design_assets`, logo layers | **Done** — Phase 4 closed |
 | 5 | Relief: emboss/deboss per layer, depth, bevel, manufacturing warning strip with WIN-CYC thresholds | **Done** |
 | 5b | 3D-ready badges and editor entry, admin 3D column, Phase 5 close-out, deck shots | **Done** |
-| 6 | Fill picker on deboss layers; occlusion bake moves to a worker | Not started |
+| 6a | Appearance per layer: plated, paint (the fill), printed, custom colour | **Done** |
+| 6b | Zones and parts; occlusion bake moves to a worker | Not started |
 | 7 | Versions: named saves, snapshot, reload | Not started |
 | 8 | Shares | Not started |
 | 9 | Quote request and staff queue | Not started |
@@ -2267,3 +2268,141 @@ Files:
    directory carries no `.obj` files in this checkout, so the deck skips them
    and says so in `manifest.json`. *Recommend* adding the real trims before
    the deck is shown, not test geometry.
+
+## Phase 6a — done (2026-09-18)
+
+Appearance per layer, per axis-design §1/§3/§7, v3-review §3 and E1 §3.3.
+
+Files:
+
+- `src/features/editor/lib/recipe.ts` — recipe v3 (R5): `appearance`
+  `{ mode, finish_id, custom }` per layer, `relief.type` gains `printed`, and
+  `reconcileAppearance` keeps the two in step — Printed is a relief type *and*
+  an appearance (R1), so choosing it in either control sets the other, and
+  leaving it falls back to raised. `normalizeRecipe` reads a v2 recipe forward,
+  giving every layer the appearance it implied (the part's own finish).
+- `src/features/editor/lib/pantone.ts` (new) — R3: code canonicalisation
+  (`pantone 185` → `185 C`), a bundled solid-coated **subset** with each
+  entry's published approximation, hex validation, and the resolution rule —
+  known code wins, unknown code keeps the code and takes the buyer's hex, a
+  picked colour stands alone. The licensed full table is a data drop-in; see
+  the open questions.
+- `src/features/editor/lib/finishMaterial.ts` (new) — one builder for the part
+  and for a layer (R2): a `finishes` row → material, through the same shader
+  composer (two-tone, brushed tangent), plus the matt-enamel approximation a
+  custom colour renders in.
+- `src/features/editor/hooks/usePublicFinishes.ts` (new) — every public finish
+  once, and the process filter axis-design §1 rules: `HP`/`ROLL`/`ECO` for a
+  plated layer, `PAINT` for a colour.
+- `src/features/editor/hooks/useLayerMaterials.ts` (new) — the material each
+  layer renders in, keyed by the appearance itself, so two layers in the same
+  enamel share one material and a drag rebuilds nothing.
+- `src/features/editor/components/branding/BrandingMeshes.tsx` — each piece is
+  built in its layer's own material: a raised solid, a recess whose floor and
+  walls take the paint while the rim keeps the part's plating (the fill of
+  axis-design §3), or a flat decal for printed ink. Raster artwork renders as
+  a textured plane with its alpha honoured. Reports the appearance and the
+  colour the layer actually rendered in.
+- `src/features/editor/components/branding/BrandingGroup.tsx` — Raised /
+  Engraved / Printed, with the depth field gone on a printed layer; the
+  Appearance control (Same as button · Plated finish · Paint colour ·
+  Printed), its swatch chip, the layer's own picker sheet and the "Custom…"
+  panel (Pantone, on-screen pick, hex). A PNG or JPEG upload lands as a
+  printed layer.
+- `src/features/editor/lib/logoSvg.ts` — raster validation: PNG/JPEG, 2 MB,
+  with its own two rejections.
+- `src/features/editor/hooks/useLogoAssets.ts` — `LogoSource` is vector or
+  raster; a raster uploads as its own file with its mime type and is recorded
+  under `design_assets.kind = 'texture'` (see the rulings), downloads back as
+  a data URL, and rides an anonymous draft the same way an SVG does.
+- `src/features/editor/lib/manufacturing.ts`, `components/ManufacturingStrip.tsx`
+  — R4: a printed layer is checked against the PAINT process's own
+  `min_feature_mm` (silent when it isn't set) and has no depth to check; a
+  custom colour adds an information line, not a warning, and the strip now
+  distinguishes the two.
+- `src/features/editor/components/EditorViewport.tsx`, `EditorModel.tsx`,
+  `hooks/useLayerStrokes.ts` — the per-layer materials and the PAINT process
+  reach the scene and the strip; a raster has no stroke to measure.
+- `src/features/editor/hooks/useEditorProduct.ts` — `data` is the transformed
+  product or `undefined`, never the raw row (it had been typed as both).
+- `src/features/i18n/translations.ts` — 24 keys × 3 locales (the appearance
+  control, the custom-colour panel, printed, the two raster rejections, the
+  print-stroke warning and the custom-colour line).
+- `scripts/e2e-local/lib/appearance.mjs` (new) — shared staging and the pixel
+  measurement R7 asks for: the projection the buyer sees, a 3 × 3 median, CIE
+  Lab so hue and lightness can be compared rather than raw RGB.
+- `scripts/e2e-local/scenarios/appearance-plated.mjs`,
+  `appearance-paint.mjs`, `appearance-printed.mjs`, `custom-colour.mjs` (new)
+  — R7's four.
+- `scripts/e2e-local/fixtures/logo-raster.png` (new) — a 256 × 160 PNG with
+  alpha, for the printed raster path.
+- `scripts/e2e-local/unit/appearance.test.mjs` (new) — the Pantone lookup, hex
+  entry, the v2 → v3 read and the Printed reconciliation.
+- `docs/3d-editor/STATUS.md` — this file.
+
+### Rulings
+
+- **Printed is one decision in two controls.** The relief control offers
+  Raised / Engraved / Printed and the appearance control offers Printed as its
+  fourth choice; both write the same pair of fields, so they can never
+  disagree. Leaving Printed returns the layer to raised, keeping any colour it
+  had as its paint.
+- **A raster is printed, and nothing else.** A bitmap has no outline to
+  extrude or carve, so a PNG or JPEG lands as a printed layer and renders as
+  its own pixels — a full-colour print. Text and vector logos print as spot
+  colour, in the chosen paint. The ink picker is therefore about vector work;
+  a raster carries its own colours.
+- **A raster is stored as `kind = 'texture'`.** Phase 1's check constraint
+  already has that value and a raster renders as exactly that, so Phase 6a
+  needs no migration — `logo_svg` still means outlines.
+- **A layer's finishes come from the whole public catalogue**, not the
+  product's attached list: a buyer may want black enamel lettering on a button
+  whose attached finishes are all platings.
+- **A custom colour never reaches plating.** Plating is a catalogue code or
+  nothing (R3); Custom… appears on paint and printed layers only.
+
+### Deviation from R3: the bundled Pantone table is a subset
+
+R3 asks for "a bundled Pantone-to-sRGB table of the solid coated range".
+Pantone's sRGB values are licensed data that cannot be reconstructed here, and
+inventing ~2,300 rows would be worse than shipping none: the table carries the
+codes whose published approximations are well known, and every other code
+takes R3's own fallback — the code is kept and the buyer's hex is used. The
+lookup, the canonicalisation, the fallback and the "to be confirmed" labelling
+are all built; filling the table is a data change.
+
+### Open questions from this phase, with a recommendation each
+
+1. **The Pantone table needs the licensed data.** Until it lands, a buyer
+   typing a code outside the subset has to supply a colour too. *Recommend*
+   buying the solid coated list (or taking WIN-CYC's own ink book) and
+   dropping it into `PANTONE_COATED` — no code changes.
+2. **`npx tsc --noEmit` checks nothing in this repo.** The root `tsconfig.json`
+   has `"files": []` and only project references, so the command the phase
+   gates on exits 0 without compiling anything; `tsc -p tsconfig.app.json
+   --noEmit` is the real check, and it reports 7 pre-existing errors outside
+   this phase's scope (`FinishEditDialog`, `useFlatCrudTable` ×4,
+   `useProductModel` ×2) — the editor's own two were fixed here. *Recommend*
+   making `tsc -b` part of the DONE list and clearing those seven.
+3. **A printed raster ignores the ink colour.** It prints its own pixels, so
+   the appearance colour is unused on that layer even though the control still
+   offers one. *Recommend* hiding the ink picker for raster layers in 6b, or
+   ruling that the colour tints the artwork.
+4. **An anonymous draft holds a raster as a data URL in sessionStorage.** A
+   2 MB PNG is ~2.7 MB of base64, close to the 5 MB budget, and a second one
+   would exceed it. *Recommend* refusing raster uploads before sign-in, or
+   keeping them in IndexedDB, when 6b touches the draft.
+5. **Edge margin still uses the circle radius for straight layers** (a 4j
+   formula), so a large straight letter reports a margin it does not have.
+   *Recommend* measuring the layer's own extent in 6b, when zones bring the
+   geometry work back.
+
+### Unit 5b rulings recorded (R8)
+
+- **5b Q1 — legacy studio surfaces on `model_url`.** Ruled: they stay for now;
+  Phase 7 points `LibraryTable`, `ProductQuickView` and `QuickRFQDialog` at
+  `is3DReady` or retires them with the old viewer.
+- **5b Q2 — the product page's legacy "View 3D" dialog.** Ruled: it goes when
+  Phase 10's spec sheet lands and the editor is the only viewer.
+- **5b Q3 — no trim frames in the deck.** Ruled: the real trims are added
+  before the deck is shown; test geometry is not a substitute.

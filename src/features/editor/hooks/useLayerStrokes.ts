@@ -6,6 +6,7 @@ import { logoOutlines, parseLogoSvg, type LogoArtwork } from "../lib/logoGeometr
 import { isLogoLayer, isTextLayer, type Layer } from "../lib/recipe";
 import { glyphChar, type TypefaceMetrics } from "../lib/textLayout";
 import { minStrokeWidth, type Outline } from "../lib/strokeWidth";
+import type { LogoSource } from "./useLogoAssets";
 
 /**
  * The narrowest stroke in each layer's own geometry, mm (Phase 5 R3) — what
@@ -40,7 +41,7 @@ function logoStroke(svg: string): number | null {
   return logoStrokes.get(svg) ?? null;
 }
 
-export function useLayerStrokes(layers: Layer[], logoSources: Record<string, string>): Record<string, number | null> {
+export function useLayerStrokes(layers: Layer[], logoSources: Record<string, LogoSource>): Record<string, number | null> {
   const [fonts, setFonts] = useState<Record<string, Font>>({});
   const fontKeys = useMemo(() => [...new Set(layers.filter(isTextLayer).map((l) => l.content.font.key))].sort().join("|"), [layers]);
 
@@ -63,8 +64,10 @@ export function useLayerStrokes(layers: Layer[], logoSources: Record<string, str
     const out: Record<string, number | null> = {};
     for (const layer of layers) {
       if (isLogoLayer(layer)) {
-        const svg = logoSources[layer.id];
-        const unit = svg ? logoStroke(svg) : null;
+        const source = logoSources[layer.id];
+        // A raster has no outline: its stroke cannot be measured, so the strip
+        // says nothing about it rather than guessing (Phase 6a R4).
+        const unit = source?.kind === "svg" ? logoStroke(source.svg) : null;
         out[layer.id] = unit == null ? null : unit * layer.content.width_mm;
         continue;
       }

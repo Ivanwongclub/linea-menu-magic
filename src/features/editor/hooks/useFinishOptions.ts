@@ -36,7 +36,7 @@ export type PickerFinish = FinishRow & {
 
 const AXIS_NAME_COLS = "name, name_zh_hant, name_zh_hans";
 
-const FINISH_OPTION_SELECT = `
+export const FINISH_OPTION_SELECT = `
   *,
   process:finish_processes!process_id ( ${AXIS_NAME_COLS}, code, min_feature_mm, min_deboss_depth_mm, max_deboss_depth_mm ),
   base_family:finish_base_families!base_family_id ( ${AXIS_NAME_COLS}, code ),

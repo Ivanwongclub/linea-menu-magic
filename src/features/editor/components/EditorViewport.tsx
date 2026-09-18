@@ -1,4 +1,4 @@
-import { Suspense, useCallback, useRef, useState } from "react";
+import { Suspense, useCallback, useMemo, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
@@ -21,7 +21,9 @@ import { HandleProjector, HandlesOverlay, newHandleBridge, newHandleElements } f
 import { useEditorStore } from "../store/useEditorStore";
 import { useLogoSources } from "../hooks/useLogoAssets";
 import { ManufacturingStrip } from "./ManufacturingStrip";
-import type { ProcessThresholds } from "../lib/manufacturing";
+import { processThresholds, type ProcessThresholds } from "../lib/manufacturing";
+import { usePublicFinishes, PAINT_PROCESS } from "../hooks/usePublicFinishes";
+import { useLayerMaterials } from "../hooks/useLayerMaterials";
 
 interface EditorViewportProps {
   modelStoragePath: string | null;
@@ -146,6 +148,15 @@ export function EditorViewport({
   const selectedLayerId = useEditorStore((s) => s.selectedLayerId);
   const modelFrame = useEditorStore((s) => s.modelFrame);
   const logoSources = useLogoSources(layers);
+  // Phase 6a: a layer may carry its own finish, paint or ink; the PAINT
+  // process's own tolerances come with the same query.
+  const { data: publicFinishes } = usePublicFinishes();
+  const layerMaterials = useLayerMaterials(layers, publicFinishes);
+  const { language } = useI18n();
+  const printProcess = useMemo(
+    () => processThresholds((publicFinishes ?? []).find((f) => f.process?.code === PAINT_PROCESS)?.process, language),
+    [publicFinishes, language],
+  );
   const selectedLayer = layers.find((l) => l.id === selectedLayerId) ?? null;
   const selectedRelief = textReport?.reliefs.find((r) => r.layerId === selectedLayerId) ?? null;
   // Calibration screenshots composite any DOM over the canvas; `?calibration=1` hides the viewport chrome.
@@ -210,6 +221,7 @@ export function EditorViewport({
             onMeshCount={onMeshCount}
             layers={layers}
             logoSources={logoSources}
+            layerMaterials={layerMaterials}
             onTextReport={setTextReport}
           />
           {ruler && rulerMeasurements && (
@@ -254,7 +266,13 @@ export function EditorViewport({
       </div>
       {/* The manufacturing strip is chrome: the calibration screenshots keep the canvas they were measured on. */}
       {!calibration && (
-        <ManufacturingStrip layers={layers} process={process} faceRadiusMm={modelSizeMm != null ? modelSizeMm / 2 : null} logoSources={logoSources} />
+        <ManufacturingStrip
+          layers={layers}
+          process={process}
+          printProcess={printProcess}
+          faceRadiusMm={modelSizeMm != null ? modelSizeMm / 2 : null}
+          logoSources={logoSources}
+        />
       )}
     </>
   );

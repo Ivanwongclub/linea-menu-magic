@@ -192,7 +192,8 @@ export default async function ({ page, base, admin, editor, h }) {
     assert.ok(!stored.error, `the object is readable: ${stored.error?.message}`);
     assert.equal(await stored.data.text(), validSvg, "the stored object is the file the buyer chose");
     const claimedRecipe = await waitForRecipe(designId, (r) => r.layers?.[0]?.content?.asset_id === claimed.id, "claimed layer");
-    assert.equal(claimedRecipe.recipe_version, 2, "a logo layer does not change the recipe version");
+    // Phase 6a: the recipe is v3; a logo layer is not what changed it.
+    assert.equal(claimedRecipe.recipe_version, 3, "the claimed recipe is stored at the current version");
     assert.equal(claimedRecipe.layers[0].kind, "logo");
     assert.equal(claimedRecipe.layers[0].content.type, "logo");
     assert.ok(Math.abs(claimedRecipe.layers[0].content.aspect - ARTWORK_ASPECT) <= 0.01, "the stored aspect is the artwork's");

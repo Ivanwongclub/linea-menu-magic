@@ -146,7 +146,7 @@ export default async function ({ page, base, admin, editor, h }) {
     await page.waitForURL((u) => /^\/designer-studio\/editor\/[0-9a-f-]{36}$/.test(u.pathname), { timeout: 20000 });
     const designId = page.url().split("/").pop();
     const claimed = await readRecipe(designId);
-    assert.equal(claimed.recipe_version, 2, "claimed recipe_version 2");
+    assert.equal(claimed.recipe_version, 3, "claimed at the current recipe version");
     assert.equal(claimed.layers?.[0]?.content?.value, "POLO", "claimed layers[0].content.value = POLO");
     assert.equal(claimed.size_variant_id, small.id, "claimed size variant");
 
@@ -156,7 +156,7 @@ export default async function ({ page, base, admin, editor, h }) {
     await page.getByTestId("text-layer-select").first().click();
     await page.getByTestId("text-layer-content").fill("WINCYC");
     const edited = await waitForRecipe(designId, (r) => r?.layers?.[0]?.content?.value === "WINCYC", "autosave WINCYC");
-    assert.equal(edited.recipe_version, 2);
+    assert.equal(edited.recipe_version, 3);
     await saveStatus("saved");
 
     /* ---- reload: 6 glyph meshes ---- */
@@ -243,7 +243,7 @@ export default async function ({ page, base, admin, editor, h }) {
     await page.waitForTimeout(2600);
     assert.equal((await readRecipe(v1.data.id)).recipe_version, undefined, "opening a v1 row writes nothing by itself (hydration gate)");
     await page.getByTestId("ruler-toggle").click();
-    const upgraded = await waitForRecipe(v1.data.id, (r) => r?.recipe_version === 2, "v1 → v2 on first change");
+    const upgraded = await waitForRecipe(v1.data.id, (r) => r?.recipe_version === 3, "v1 → v3 on first change");
     assert.deepEqual(upgraded.layers, [], "saved v1 row has layers []");
     assert.equal(upgraded.view.ruler, true);
 
