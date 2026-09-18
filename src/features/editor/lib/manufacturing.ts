@@ -63,6 +63,8 @@ export interface LayerMeasure {
   layer: Layer;
   /** Narrowest stroke of the layer's own geometry, mm — null while the font or artwork is still loading. */
   strokeMm: number | null;
+  /** How far a straight layer reaches from the face centre, mm (6b R5). */
+  reachMm?: number | null;
 }
 
 export function hasThresholds(process: ProcessThresholds | null): boolean {
@@ -81,7 +83,7 @@ export function manufacturingWarnings(
   printProcess: ProcessThresholds | null = null,
 ): ManufacturingWarning[] {
   const out: ManufacturingWarning[] = [];
-  for (const { layer, strokeMm } of measures) {
+  for (const { layer, strokeMm, reachMm = null } of measures) {
     if (!layer.visible) continue;
     const relief = layerRelief(layer);
     const deboss = relief.type === "deboss";
@@ -130,7 +132,7 @@ export function manufacturingWarnings(
       });
     }
     if (faceRadiusMm != null && faceRadiusMm > 0) {
-      const margin = edgeMarginMm(layer, faceRadiusMm);
+      const margin = edgeMarginMm(layer, faceRadiusMm, reachMm);
       if (margin < MIN_EDGE_MARGIN_MM) {
         out.push({ layerId: layer.id, kind: "edgeMargin", severity: "warning", key: "editor.manufacturing.edgeMargin", valueMm: margin, limitMm: MIN_EDGE_MARGIN_MM });
       }

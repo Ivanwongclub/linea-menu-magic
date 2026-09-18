@@ -1,5 +1,5 @@
-import { useEffect, useLayoutEffect, useMemo, type RefObject } from "react";
-import { useLoader, useThree } from "@react-three/fiber";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from "react";
+import { useLoader, useThree, type ThreeEvent } from "@react-three/fiber";
 import { ContactShadows } from "@react-three/drei";
 import * as THREE from "three";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
@@ -7,10 +7,13 @@ import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import type { EditorColour } from "../hooks/useEditorProduct";
 import type { PickerFinish } from "../hooks/useFinishOptions";
 import { decoratedFaceRotation, withSmoothNormals } from "../lib/prepareModel";
-import { bakeOcclusion, occlusionKey } from "../lib/ambientOcclusion";
-import { useEditorStore } from "../store/useEditorStore";
+import { MeshBVH } from "three-mesh-bvh";
+import { applyBakedOcclusion, bakeOcclusion, occlusionKey, type BakeStats } from "../lib/ambientOcclusion";
+import { EMPTY_ZONES, useEditorStore } from "../store/useEditorStore";
 import { colourMaterial, finishMaterial } from "../lib/finishMaterial";
-import type { Layer } from "../lib/recipe";
+import type { Layer, Zone } from "../lib/recipe";
+import { decodeRuns, encodeRuns, facesForGroups, facesForPlane, resolveZones, totalFaces } from "../lib/zones";
+import type { ZoneStyle } from "../lib/shaderPatch";
 import type { LogoSource } from "../hooks/useLogoAssets";
 import { BrandingMeshes, type TextSceneReport } from "./branding/BrandingMeshes";
 import { CAMERA_AZIMUTH_DEG, CAMERA_ELEVATION_DEG, TARGET_VIEWPORT_FILL } from "../lib/renderSettings";
@@ -35,8 +38,18 @@ interface EditorModelProps {
   onFaceZ?: (z: number) => void;
   /** OBJ group indices (file order) of the product's marked branding (4d). */
   markedGroupIndices: number[];
-  /** Hide the marked groups — the buyer view (4j); staff may show them. */
+  /** Hide the marked groups — the buyer view (4j); the Parts list toggles it (6b R1). */
   hideMarked: boolean;
+  /** Phase 6b R1: OBJ groups the buyer hid in the Parts list. */
+  hiddenGroups?: number[];
+  /** Phase 6b R2: the zones to mask the part's material with, in order. */
+  zones?: Zone[];
+  zoneStyles?: ZoneStyle[];
+  /** Phase 6b R1/R2: what the model is made of, and what the zones cover. */
+  onPartsReport?: (report: PartsReport) => void;
+  /** Phase 6b R4: whether the occlusion bake is running, and what it cost. */
+  onOcclusionState?: (state: "idle" | "pending" | "ready") => void;
+  onBakeStats?: (stats: BakeStats) => void;
   /** Reports how many of the model's meshes are drawn, and how many it has. */
   onMeshCount?: (drawn: number, total: number) => void;
   /** The recipe's layers, drawn on the face — siblings of the model, never inside its measured bounds. */
@@ -46,6 +59,17 @@ interface EditorModelProps {
   /** Phase 6a R2: per-layer appearance materials, by layer id. */
   layerMaterials?: Record<string, THREE.MeshPhysicalMaterial>;
   onTextReport?: (report: TextSceneReport) => void;
+}
+
+/** What the Parts list and the strip read back (6b R1/R2/R7). */
+export interface PartsReport {
+  groups: { index: number; name: string; faces: number; visible: boolean }[];
+  /** The model's own extent, mm — the plane zone's slider range. */
+  bounds: { minX: number; maxX: number; minY: number; maxY: number; minZ: number; maxZ: number };
+  /** Faces each zone actually covers, in zone order, and the pairs that overlap. */
+  zoneFaces: number[];
+  overlaps: [number, number][];
+  totalFaces: number;
 }
 
 export interface RulerMeasurements {
@@ -83,6 +107,12 @@ export function EditorModel({
   layers,
   logoSources,
   layerMaterials,
+  hiddenGroups,
+  zones,
+  zoneStyles,
+  onPartsReport,
+  onOcclusionState,
+  onBakeStats,
   onTextReport,
 }: EditorModelProps) {
   const obj = useLoader(OBJLoader, url);
@@ -92,10 +122,13 @@ export function EditorModel({
 
   // One builder for the part and for every layer that carries its own finish
   // (Phase 6a R2, `lib/finishMaterial.ts`).
-  const material = useMemo(
-    () => (isMetal && finish ? finishMaterial(finish) : colourMaterial(colour?.hex)),
-    [isMetal, finish, colour],
-  );
+  // The zone styles are part of the program, so a new zone rebuilds the material.
+  const zoneStyleKey = JSON.stringify(zoneStyles ?? []);
+  const material = useMemo(() => {
+    const styles = zoneStyles?.length ? zoneStyles : null;
+    return isMetal && finish ? finishMaterial(finish, styles) : colourMaterial(colour?.hex, styles);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMetal, finish, colour, zoneStyleKey]);
 
   useEffect(() => () => material.dispose(), [material]);
 
@@ -105,22 +138,24 @@ export function EditorModel({
     const group = obj.clone(true);
     group.traverse((child) => {
       const mesh = child as THREE.Mesh;
-      if (mesh.isMesh) mesh.geometry = withSmoothNormals(mesh.geometry);
+      if (!mesh.isMesh) return;
+      const smoothed = withSmoothNormals(mesh.geometry);
+      // Zones carry a slot per face (6b R2), which an indexed geometry cannot
+      // hold: one shared vertex would have to be in two zones at once.
+      mesh.geometry = smoothed.getIndex() ? smoothed.toNonIndexed() : smoothed;
     });
     group.quaternion.copy(decoratedFaceRotation(group));
     return group;
   }, [obj]);
 
   const markedKey = [...markedGroupIndices].sort((a, b) => a - b).join(",");
-  const hiddenIndices = useMemo(() => (hideMarked && markedKey ? markedKey.split(",").map(Number) : []), [hideMarked, markedKey]);
-
-  // Baked once per file and hidden set, and only once an antique finish
-  // needs it; hidden groups are out of the BVH (collision 9).
-  useMemo(() => {
-    if (!twoTone) return;
-    const groups = prepared.children.filter((c) => (c as THREE.Mesh).isMesh);
-    bakeOcclusion(prepared, occlusionKey(url, hiddenIndices), new Set(hiddenIndices.map((i) => groups[i]).filter(Boolean)));
-  }, [prepared, url, twoTone, hiddenIndices]);
+  const partsKey = [...(hiddenGroups ?? [])].sort((a, b) => a - b).join(",");
+  // The lettering bundle and the Parts list are one hidden set (6b R1).
+  const hiddenIndices = useMemo(() => {
+    const hidden = new Set(partsKey ? partsKey.split(",").map(Number) : []);
+    if (hideMarked && markedKey) for (const index of markedKey.split(",").map(Number)) hidden.add(index);
+    return [...hidden].sort((a, b) => a - b);
+  }, [hideMarked, markedKey, partsKey]);
 
   // Material is assigned separately so changing the finish never rebuilds
   // the object — which would re-run framing and yank the camera.
@@ -163,6 +198,169 @@ export function EditorModel({
     });
     onMeshCount?.(groups.filter((m) => m.visible).length, groups.length);
   }, [model, hiddenIndices, onMeshCount]);
+
+  /**
+   * The model's faces, once per loaded file (6b R2): how many each group has,
+   * and where each one's centroid sits in the mm frame — the plane zone
+   * classifies against these, and a painted zone indexes into them.
+   */
+  const faceData = useMemo(() => {
+    const meshes = model.children.filter((c) => (c as THREE.Mesh).isMesh) as THREE.Mesh[];
+    model.updateWorldMatrix(true, true);
+    const counts = meshes.map((mesh) => Math.floor((mesh.geometry.getAttribute("position")?.count ?? 0) / 3));
+    const total = totalFaces(counts);
+    const centroids = new Float32Array(total * 3);
+    const v = new THREE.Vector3();
+    let face = 0;
+    for (const mesh of meshes) {
+      const position = mesh.geometry.getAttribute("position");
+      if (!position) continue;
+      for (let i = 0; i + 2 < position.count; i += 3) {
+        let x = 0;
+        let y = 0;
+        let z = 0;
+        for (let k = 0; k < 3; k++) {
+          v.fromBufferAttribute(position, i + k).applyMatrix4(mesh.matrixWorld);
+          x += v.x;
+          y += v.y;
+          z += v.z;
+        }
+        centroids[face * 3] = x / 3;
+        centroids[face * 3 + 1] = y / 3;
+        centroids[face * 3 + 2] = z / 3;
+        face++;
+      }
+    }
+    return { meshes, counts, centroids, total };
+  }, [model]);
+
+  /** Each zone's faces, however it was defined (R2/R3). */
+  const zoneRuns = useMemo(
+    () =>
+      (zones ?? EMPTY_ZONES).map((zone) => {
+        if (zone.method === "plane" && zone.plane) return facesForPlane(faceData.centroids, zone.plane);
+        if (zone.method === "groups") return facesForGroups(faceData.counts, zone.groups ?? []);
+        return encodeRuns(decodeRuns(zone.faces ?? []));
+      }),
+    [zones, faceData],
+  );
+
+  // The slot each face renders in: a later zone wins where two overlap (R2).
+  useLayoutEffect(() => {
+    const { meshes, counts, total } = faceData;
+    const { slots, overlaps } = resolveZones(total, zoneRuns);
+    let face = 0;
+    meshes.forEach((mesh, group) => {
+      const count = counts[group];
+      const attribute = new Float32Array(count * 3);
+      for (let i = 0; i < count; i++) {
+        const slot = slots[face + i];
+        attribute[i * 3] = slot;
+        attribute[i * 3 + 1] = slot;
+        attribute[i * 3 + 2] = slot;
+      }
+      face += count;
+      mesh.geometry.setAttribute("zoneIndex", new THREE.BufferAttribute(attribute, 1));
+    });
+    const box = new THREE.Box3().setFromObject(model);
+    onPartsReport?.({
+      bounds: { minX: box.min.x, maxX: box.max.x, minY: box.min.y, maxY: box.max.y, minZ: box.min.z, maxZ: box.max.z },
+      groups: meshes.map((mesh, index) => ({ index, name: mesh.name || `group_${index + 1}`, faces: counts[index], visible: mesh.visible })),
+      zoneFaces: zoneRuns.map((runs) => decodeRuns(runs).length),
+      overlaps,
+      totalFaces: total,
+    });
+  }, [model, faceData, zoneRuns, hiddenIndices, onPartsReport]);
+
+  /**
+   * The occlusion bake, in its worker (6b R4): once per file, hidden set and
+   * relief, and only where an antique finish needs it. The relief the editor
+   * has carved is in the cast, so an engraved recess takes the oxide (5 Q3).
+   */
+  const [occlusionState, setOcclusionState] = useState<"idle" | "pending" | "ready">("idle");
+  const reliefGroup = useRef<THREE.Object3D | null>(null);
+  const [reliefKey, setReliefKey] = useState("");
+
+  useEffect(() => {
+    if (!twoTone) {
+      setOcclusionState("idle");
+      return;
+    }
+    const key = occlusionKey(url, hiddenIndices, reliefKey);
+    if (applyBakedOcclusion(key)) {
+      setOcclusionState("ready");
+      return;
+    }
+    let live = true;
+    setOcclusionState("pending");
+    const groups = model.children.filter((c) => (c as THREE.Mesh).isMesh);
+    void bakeOcclusion(key, {
+      root: model,
+      excluded: new Set(hiddenIndices.map((i) => groups[i]).filter(Boolean)),
+      relief: reliefGroup.current,
+    }).then((stats) => {
+      if (!live) return;
+      setOcclusionState("ready");
+      onBakeStats?.(stats);
+    });
+    return () => {
+      live = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [model, url, twoTone, hiddenIndices, reliefKey]);
+
+  useEffect(() => {
+    onOcclusionState?.(occlusionState);
+  }, [occlusionState, onOcclusionState]);
+
+  /**
+   * The brush (6b R2): a pointer on the model adds every face within the
+   * brush's radius of the hit — across parts, so a stroke over a seam paints
+   * both sides of it. Faces, not geometry: the model is never cut.
+   */
+  const paintZoneId = useEditorStore((s) => s.paintZoneId);
+  const brushRadiusMm = useEditorStore((s) => s.brushRadiusMm);
+  const updateZone = useEditorStore((s) => s.updateZone);
+  const commitZone = useEditorStore((s) => s.commit);
+  const painting = useRef(false);
+
+  const paintAt = useCallback(
+    (point: THREE.Vector3) => {
+      if (!paintZoneId) return;
+      const zone = (zones ?? EMPTY_ZONES).find((z) => z.id === paintZoneId);
+      if (!zone) return;
+      const faces = new Set(decodeRuns(zone.faces ?? []));
+      let offset = 0;
+      faceData.meshes.forEach((mesh, group) => {
+        const start = offset;
+        offset += faceData.counts[group];
+        if (!mesh.visible) return;
+        const geometry = mesh.geometry as THREE.BufferGeometry & { boundsTree?: MeshBVH };
+        if (!geometry.boundsTree) geometry.boundsTree = new MeshBVH(geometry);
+        // Building the tree indexes the geometry and sorts that index for the
+        // tree's own use, so a hit's triangle number is in the tree's order,
+        // not the file's. Only whole faces move, so the first vertex of the
+        // hit triangle says which face of the file it is — which is the number
+        // the zone stores and the slot attribute below is laid out in.
+        const index = geometry.getIndex();
+        const local = mesh.worldToLocal(point.clone());
+        const radius = brushRadiusMm / (mesh.getWorldScale(new THREE.Vector3()).x || 1);
+        const sphere = new THREE.Sphere(local, radius);
+        geometry.boundsTree.shapecast({
+          intersectsBounds: (box: THREE.Box3) => sphere.intersectsBox(box),
+          intersectsTriangle: (triangle: THREE.Triangle, triangleIndex: number) => {
+            const closest = triangle.closestPointToPoint(sphere.center, new THREE.Vector3());
+            if (closest.distanceTo(sphere.center) > radius) return false;
+            const face = index ? Math.floor(index.getX(triangleIndex * 3) / 3) : triangleIndex;
+            faces.add(start + face);
+            return false;
+          },
+        });
+      });
+      updateZone(paintZoneId, { faces: encodeRuns(faces) });
+    },
+    [paintZoneId, zones, faceData, brushRadiusMm, updateZone],
+  );
 
   // Where the model sits, for Add text's recovered defaults (4j, C8): the
   // raw → face transform applied above and the marked glyphs' face-frame centres.
@@ -280,7 +478,25 @@ export function EditorModel({
 
   return (
     <>
-      <primitive object={model} />
+      <primitive
+        object={model}
+        onPointerDown={(event: ThreeEvent<PointerEvent>) => {
+          if (!paintZoneId) return;
+          event.stopPropagation();
+          painting.current = true;
+          paintAt(event.point);
+        }}
+        onPointerMove={(event: ThreeEvent<PointerEvent>) => {
+          if (!paintZoneId || !painting.current) return;
+          event.stopPropagation();
+          paintAt(event.point);
+        }}
+        onPointerUp={() => {
+          if (!painting.current) return;
+          painting.current = false;
+          commitZone();
+        }}
+      />
       <BrandingMeshes
         layers={layers}
         logoSources={logoSources}
@@ -288,6 +504,10 @@ export function EditorModel({
         faceZ={bounds.max.z}
         material={material}
         layerMaterials={layerMaterials}
+        onGroupReady={(group, key) => {
+          reliefGroup.current = group;
+          setReliefKey(key);
+        }}
         onReport={onTextReport}
       />
       <ContactShadows

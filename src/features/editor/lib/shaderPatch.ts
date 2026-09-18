@@ -17,11 +17,22 @@ import { oxideColor, twoToneFragmentChunks, twoToneVertexChunks } from "./twoTon
 
 export type BrushKind = "linear" | "radial";
 
+/** How many zones one part can carry (Phase 6b R2). */
+export const MAX_ZONES = 8;
+
+export interface ZoneStyle {
+  colorHex: string;
+  metalness: number;
+  roughness: number;
+}
+
 export interface ShaderPatchOptions {
   twoTone?: boolean;
   /** The finish's oxide colour, as stored; absent falls back to the 3c oxide. */
   twoToneOxideHex?: string | null;
   brush?: BrushKind | null;
+  /** Phase 6b R2: one appearance per zone slot, masked per face by the `zoneIndex` attribute. */
+  zones?: ZoneStyle[] | null;
 }
 
 type Shader = { vertexShader: string; fragmentShader: string; uniforms: Record<string, { value: unknown }> };
@@ -64,6 +75,41 @@ function brushPatch(shader: Shader, kind: BrushKind): void {
 }
 
 /**
+ * Zones (R2): the part keeps one material and one draw call; the face's own
+ * zone slot picks the colour, metalness and roughness out of a small uniform
+ * array. The slot rides on a per-face attribute, so nothing is duplicated and
+ * nothing is cut.
+ *
+ * The lookup is a constant-bounds loop rather than a dynamic index: GLSL ES 1
+ * only allows uniform arrays to be indexed by constant expressions, and a
+ * loop counter is one.
+ */
+function zonePatch(shader: Shader, zones: ZoneStyle[]): void {
+  const uniforms = shader.uniforms as Record<string, { value: unknown }>;
+  uniforms.zoneColor = { value: zones.map((z) => new THREE.Color(z.colorHex)) };
+  uniforms.zoneMetalness = { value: zones.map((z) => z.metalness) };
+  uniforms.zoneRoughness = { value: zones.map((z) => z.roughness) };
+  shader.vertexShader = after(shader.vertexShader, "common", "attribute float zoneIndex;\nvarying float vZoneIndex;");
+  shader.vertexShader = after(shader.vertexShader, "begin_vertex", "\tvZoneIndex = zoneIndex;");
+  const declarations = `uniform vec3 zoneColor[ ${zones.length} ];
+uniform float zoneMetalness[ ${zones.length} ];
+uniform float zoneRoughness[ ${zones.length} ];
+varying float vZoneIndex;`;
+  shader.fragmentShader = after(shader.fragmentShader, "common", declarations);
+  // The slot is constant across a face, but it arrives as an interpolated
+  // varying: 1.0 can land as 0.99999 and truncate to nothing, which speckles a
+  // zone's edge. Round it instead of truncating.
+  const pick = (target: string, source: string) => `	if ( vZoneIndex > 0.5 ) {
+		for ( int zone = 0; zone < ${zones.length}; zone ++ ) {
+			if ( zone == int( vZoneIndex + 0.5 ) - 1 ) ${target} = ${source}[ zone ];
+		}
+	}`;
+  shader.fragmentShader = after(shader.fragmentShader, "color_fragment", pick("diffuseColor.rgb", "zoneColor"));
+  shader.fragmentShader = after(shader.fragmentShader, "roughnessmap_fragment", pick("roughnessFactor", "zoneRoughness"));
+  shader.fragmentShader = after(shader.fragmentShader, "metalnessmap_fragment", pick("metalnessFactor", "zoneMetalness"));
+}
+
+/**
  * Applies the enabled patches to `material` and records them in `userData`,
  * so `clonePatched` can give a derived material (a recess floor, a wall) the
  * same appearance.
@@ -71,8 +117,9 @@ function brushPatch(shader: Shader, kind: BrushKind): void {
 export function applyShaderPatches(material: THREE.MeshPhysicalMaterial, options: ShaderPatchOptions): void {
   const twoTone = !!options.twoTone;
   const brush = options.brush ?? null;
+  const zones = options.zones?.length ? options.zones.slice(0, MAX_ZONES) : null;
   material.userData = { ...material.userData, shaderPatch: options };
-  const features = [twoTone ? "two-tone" : null, brush ? `brush-${brush}` : null].filter(Boolean) as string[];
+  const features = [twoTone ? "two-tone" : null, brush ? `brush-${brush}` : null, zones ? `zones-${zones.length}` : null].filter(Boolean) as string[];
   if (features.length === 0) {
     material.onBeforeCompile = () => undefined;
     material.customProgramCacheKey = () => "wincyc:plain";
@@ -84,6 +131,7 @@ export function applyShaderPatches(material: THREE.MeshPhysicalMaterial, options
       twoToneFragmentChunks(shader as Shader, oxideColor(material, options.twoToneOxideHex));
     }
     if (brush) brushPatch(shader as Shader, brush);
+    if (zones) zonePatch(shader as Shader, zones);
   };
   material.customProgramCacheKey = () => `wincyc:${features.join("+")}`;
 }

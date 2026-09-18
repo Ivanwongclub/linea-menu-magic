@@ -8,9 +8,6 @@ import { useI18n } from "@/features/i18n/I18nProvider";
 import { cn } from "@/lib/utils";
 import { selectCanRedo, selectCanUndo, useEditorStore } from "../../store/useEditorStore";
 import { BUNDLED_FONTS } from "../../lib/fonts";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { FinishSelectionPicker } from "@/features/finishes/FinishSelectionPicker";
-import { finishMarketingName } from "@/features/finishes/finishAxisLine";
 import {
   isLogoLayer,
   isTextLayer,
@@ -24,9 +21,8 @@ import {
   type TextLayer,
   type TextLayout,
 } from "../../lib/recipe";
-import { finishesForGroup, usePublicFinishes, type AppearanceFinishGroup } from "../../hooks/usePublicFinishes";
-import type { PickerFinish } from "../../hooks/useFinishOptions";
-import { normalizeHex, normalizePantone, pantoneHex, resolveCustomColour } from "../../lib/pantone";
+import { AppearanceControl } from "./AppearanceControl";
+import { AddZoneButton, ZoneList } from "./ZonesSection";
 import { PrecisionNumberInput } from "../controls/PrecisionNumberInput";
 import type { ProcessThresholds } from "../../lib/manufacturing";
 import { MAX_LOGO_BYTES, MAX_RASTER_BYTES, RASTER_MIME_TYPES, asRejection, rejectionMessage, validateLogoSvg, validateRasterLogo } from "../../lib/logoSvg";
@@ -108,8 +104,8 @@ function LayerRow({ layer, selected, logoSource }: { layer: Layer; selected: boo
         <X className="w-3.5 h-3.5" strokeWidth={1.5} />
       </button>
       </div>
-      <ReliefRow layer={layer} />
-      <AppearanceRow layer={layer} />
+      <ReliefRow layer={layer} source={logoSource} />
+      <AppearanceRow layer={layer} source={logoSource} />
     </li>
   );
 }
@@ -126,37 +122,51 @@ const RELIEF_TYPES = [
  * only real decision (v3-review §3, MVP item 8/9). Typed, because the factory
  * quotes from it; the bevel sits behind "Position and curve".
  */
-function ReliefRow({ layer }: { layer: Layer }) {
+function ReliefRow({ layer, source }: { layer: Layer; source?: LogoSource }) {
   const { t } = useI18n();
   const updateLayer = useEditorStore((s) => s.updateLayer);
   const commit = useEditorStore((s) => s.commit);
   const relief = layerRelief(layer);
+  // R9: a bitmap has no outline to extrude or carve, so those two choices are
+  // offered but disabled, with the reason beside them.
+  const rasterOnly = source?.kind === "raster";
 
   return (
     <div className="flex items-center gap-2 border-t border-border px-1.5 py-1.5" data-testid="layer-relief" data-layer-id={layer.id} data-type={relief.type}>
       <div role="radiogroup" aria-label={t("editor.branding.relief")} className="flex border border-border" data-testid="relief-type">
         {RELIEF_TYPES.map((option) => {
           const active = relief.type === option.value;
+          const disabled = rasterOnly && option.value !== "printed";
           return (
             <button
               key={option.value}
               type="button"
               role="radio"
               aria-checked={active}
+              aria-disabled={disabled}
+              disabled={disabled}
+              title={disabled ? t("editor.branding.rasterReliefReason") : undefined}
               data-value={option.value}
               onClick={() => {
+                if (disabled) return;
                 updateLayer(layer.id, { relief: { type: option.value } });
                 commit();
               }}
               className={cn(
                 "px-2 py-0.5 text-[11px] tracking-[0.05em] transition-colors",
                 active ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground",
+                disabled && "cursor-not-allowed text-muted-foreground/40 hover:text-muted-foreground/40",
               )}
             >
               {t(option.label)}
             </button>
           );
         })}
+        {rasterOnly && (
+          <span className="px-2 py-0.5 text-[10px] text-muted-foreground" data-testid="relief-raster-reason">
+            {t("editor.branding.rasterReliefReason")}
+          </span>
+        )}
       </div>
       {/* Printed ink has no depth to quote. */}
       {relief.type !== "printed" && (
@@ -207,210 +217,29 @@ function printedLayer<T extends Layer>(layer: T): T {
   return { ...layer, relief: { ...layer.relief!, type: "printed" }, appearance: { mode: "printed", finish_id: null, custom: null } };
 }
 
-const APPEARANCE_MODES: { value: AppearanceMode; label: string }[] = [
-  { value: "part", label: "editor.appearance.part" },
-  { value: "plated", label: "editor.appearance.plated" },
-  { value: "paint", label: "editor.appearance.paint" },
-  { value: "printed", label: "editor.appearance.printed" },
-];
-
-/** The colour a layer reads as on the row: a finish's own swatch colour, a custom colour, or the part's. */
-function appearanceSwatchHex(appearance: LayerAppearance, finish: PickerFinish | null): string | null {
-  if (appearance.custom) return appearance.custom.hex;
-  if (finish) return finish.base_color_hex ?? finish.hex_approx ?? null;
-  return null;
-}
+const LAYER_MODES: AppearanceMode[] = ["part", "plated", "paint", "printed"];
 
 /**
- * Appearance, per layer (Phase 6a R1): the part's own finish, a plated finish
- * of its own, a paint colour — the fill of axis-design §3 — or printed ink.
- * One control; the finish behind it is chosen in the same picker the button
- * uses, filtered to the processes that can do the job (R2).
+ * Appearance, per layer (6a R1), through the shared control. A raster logo
+ * prints its own pixels, so it is offered no ink colour (6b R5).
  */
-function AppearanceRow({ layer }: { layer: Layer }) {
-  const { t, language } = useI18n();
+function AppearanceRow({ layer, source }: { layer: Layer; source?: LogoSource }) {
   const updateLayer = useEditorStore((s) => s.updateLayer);
   const commit = useEditorStore((s) => s.commit);
-  const { data: finishes } = usePublicFinishes();
-  const [pickerOpen, setPickerOpen] = useState(false);
-  const [customOpen, setCustomOpen] = useState(false);
-  const appearance = layerAppearance(layer);
-  const group: AppearanceFinishGroup = appearance.mode === "plated" ? "plated" : "paint";
-  const options = useMemo(() => finishesForGroup(finishes ?? [], group), [finishes, group]);
-  const selected = (finishes ?? []).find((f) => f.id === appearance.finish_id) ?? null;
-  const needsColour = appearance.mode === "plated" || appearance.mode === "paint" || appearance.mode === "printed";
-  const swatchHex = appearanceSwatchHex(appearance, selected);
-
-  const setMode = (mode: AppearanceMode) => {
-    // Leaving a colour behind clears it: a plated layer never carries a custom
-    // colour (R3), and the part's own finish carries none either.
-    const custom = mode === "paint" || mode === "printed" ? appearance.custom : null;
-    const finish_id = mode === "part" ? null : appearance.finish_id;
-    updateLayer(layer.id, { appearance: { mode, custom, finish_id } });
-    commit();
-  };
-
-  const label = selected
-    ? finishMarketingName(selected, language)
-    : appearance.custom
-      ? t("editor.appearance.customSummary", { colour: appearance.custom.pantone ?? appearance.custom.hex })
-      : t("editor.appearance.choose");
+  const raster = source?.kind === "raster";
 
   return (
-    <div className="flex flex-wrap items-center gap-2 border-t border-border px-1.5 py-1.5" data-testid="layer-appearance" data-layer-id={layer.id} data-mode={appearance.mode} data-finish-id={appearance.finish_id ?? undefined} data-custom={appearance.custom?.hex ?? undefined}>
-      <span className={FIELD_LABEL} id={`appearance-${layer.id}`}>
-        {t("editor.appearance.label")}
-      </span>
-      <span
-        data-testid="appearance-swatch"
-        data-hex={swatchHex ?? undefined}
-        aria-hidden="true"
-        className={cn("h-4 w-4 shrink-0 border border-border", !swatchHex && "border-dashed bg-secondary")}
-        style={swatchHex ? { backgroundColor: swatchHex } : undefined}
+    <div className="flex flex-wrap items-center gap-2 border-t border-border px-1.5 py-1.5" data-testid="layer-appearance" data-layer-id={layer.id} data-mode={layerAppearance(layer).mode}>
+      <AppearanceControl
+        ownerId={layer.id}
+        appearance={layerAppearance(layer)}
+        modes={LAYER_MODES}
+        colourDisabled={raster}
+        onChange={(patch) => {
+          updateLayer(layer.id, { appearance: patch });
+          commit();
+        }}
       />
-      <Select value={appearance.mode} onValueChange={(mode) => setMode(mode as AppearanceMode)}>
-        <SelectTrigger aria-labelledby={`appearance-${layer.id}`} data-testid="appearance-mode" className="h-7 w-[140px] rounded-none border-0 border-b border-border px-0 text-[11px] shadow-none focus:ring-0 focus:border-foreground">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent className="rounded-none">
-          {APPEARANCE_MODES.map((option) => (
-            <SelectItem key={option.value} value={option.value} className="rounded-none text-xs">
-              {t(option.label)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
-      {needsColour && (
-        <button
-          type="button"
-          data-testid="appearance-choose"
-          onClick={() => setPickerOpen(true)}
-          className="text-[11px] tracking-[0.05em] text-foreground underline-offset-4 hover:underline truncate max-w-[140px]"
-        >
-          {label}
-        </button>
-      )}
-      {(appearance.mode === "paint" || appearance.mode === "printed") && (
-        <button
-          type="button"
-          data-testid="appearance-custom-open"
-          onClick={() => setCustomOpen((v) => !v)}
-          className="text-[11px] tracking-[0.05em] text-muted-foreground underline-offset-4 hover:underline hover:text-foreground"
-        >
-          {t("editor.appearance.custom")}
-        </button>
-      )}
-
-      {customOpen && (appearance.mode === "paint" || appearance.mode === "printed") && (
-        <CustomColourPanel
-          layer={layer}
-          onDone={() => setCustomOpen(false)}
-        />
-      )}
-
-      <Sheet open={pickerOpen} onOpenChange={setPickerOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-xl flex flex-col">
-          <SheetHeader>
-            <SheetTitle>{t(group === "paint" ? "editor.appearance.paintPickerTitle" : "editor.appearance.platedPickerTitle")}</SheetTitle>
-          </SheetHeader>
-          <div className="flex-1 min-h-0 mt-4" data-testid="appearance-picker">
-            <FinishSelectionPicker
-              finishes={options}
-              selectedId={appearance.finish_id}
-              onSelect={(finish) => {
-                updateLayer(layer.id, { appearance: { finish_id: finish.id, custom: null } });
-                commit();
-                setPickerOpen(false);
-              }}
-            />
-          </div>
-        </SheetContent>
-      </Sheet>
-    </div>
-  );
-}
-
-/**
- * "Custom…" (R3): a Pantone code from the solid coated range, or a colour
- * picked on screen. An unknown code keeps the code and takes the buyer's own
- * hex beside it; either way the layer is labelled "to be confirmed".
- */
-function CustomColourPanel({ layer, onDone }: { layer: Layer; onDone: () => void }) {
-  const { t } = useI18n();
-  const updateLayer = useEditorStore((s) => s.updateLayer);
-  const commit = useEditorStore((s) => s.commit);
-  const existing = layerAppearance(layer).custom;
-  const [pantone, setPantone] = useState(existing?.pantone ?? "");
-  const [hex, setHex] = useState(existing?.hex ?? "#000000");
-  const resolved = resolveCustomColour({ pantone, hex });
-  const known = pantone.trim() !== "" && !!pantoneHex(pantone);
-  const codeInvalid = pantone.trim() !== "" && normalizePantone(pantone) === null;
-
-  return (
-    <div className="w-full space-y-2 border border-border p-2" data-testid="custom-colour-panel">
-      <div className="flex items-center gap-2">
-        <label className={FIELD_LABEL} htmlFor={`pantone-${layer.id}`}>
-          {t("editor.appearance.pantone")}
-        </label>
-        <input
-          id={`pantone-${layer.id}`}
-          data-testid="custom-pantone"
-          value={pantone}
-          autoComplete="off"
-          onChange={(e) => {
-            setPantone(e.target.value);
-            const found = pantoneHex(e.target.value);
-            if (found) setHex(found);
-          }}
-          placeholder="185 C"
-          className="w-24 border-b border-border bg-transparent py-0.5 text-sm text-foreground outline-none focus:border-foreground"
-        />
-        <input
-          type="color"
-          data-testid="custom-pick"
-          aria-label={t("editor.appearance.pick")}
-          value={normalizeHex(hex) ?? "#000000"}
-          onChange={(e) => setHex(e.target.value)}
-          className="h-6 w-8 shrink-0 border border-border bg-transparent p-0"
-        />
-        <input
-          data-testid="custom-hex"
-          aria-label={t("editor.appearance.hex")}
-          value={hex}
-          autoComplete="off"
-          onChange={(e) => setHex(e.target.value)}
-          className="w-24 border-b border-border bg-transparent py-0.5 font-mono text-xs text-foreground outline-none focus:border-foreground"
-        />
-      </div>
-      <p className="text-[11px] text-muted-foreground" data-testid="custom-colour-hint">
-        {codeInvalid
-          ? t("editor.appearance.pantoneInvalid")
-          : known
-            ? t("editor.appearance.pantoneKnown")
-            : pantone.trim()
-              ? t("editor.appearance.pantoneUnknown")
-              : t("editor.appearance.customHint")}
-      </p>
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          data-testid="custom-apply"
-          disabled={!resolved}
-          onClick={() => {
-            if (!resolved) return;
-            updateLayer(layer.id, { appearance: { custom: resolved, finish_id: null } });
-            commit();
-            onDone();
-          }}
-          className="border border-foreground px-2 py-0.5 text-[11px] tracking-[0.05em] text-foreground disabled:border-border disabled:text-muted-foreground"
-        >
-          {t("editor.appearance.applyCustom")}
-        </button>
-        <button type="button" data-testid="custom-cancel" onClick={onDone} className="text-[11px] text-muted-foreground hover:text-foreground">
-          {t("editor.common.cancel")}
-        </button>
-      </div>
     </div>
   );
 }
@@ -583,6 +412,9 @@ export function BrandingGroup({
   /** The selected finish's process: a new layer's depth starts at its minimum (Phase 5 R1). */
   process: ProcessThresholds | null;
 }) {
+  // Where a new plane zone cuts by default: half way up the part (6b R2).
+  const partsReport = useEditorStore((s) => s.partsReport);
+  const defaultPlaneMm = partsReport ? (partsReport.bounds.minY + partsReport.bounds.maxY) / 2 : 0;
   const { t } = useI18n();
   const layers = useEditorStore((s) => s.recipe.layers);
   const selectedLayerId = useEditorStore((s) => s.selectedLayerId);
@@ -631,6 +463,11 @@ export function BrandingGroup({
       const minDepth = process?.min_deboss_depth_mm ?? null;
 
       if (raster) {
+        // R9: an image logo needs somewhere to live, which is an account.
+        if (!user) {
+          setLogoError(t("editor.branding.logoSignInForImages"));
+          return;
+        }
         const validation = validateRasterLogo(file.type, file.size);
         const rejection = asRejection(validation);
         if (rejection) return reject(rejection);
@@ -718,10 +555,11 @@ export function BrandingGroup({
           <ImagePlus className="w-3.5 h-3.5" strokeWidth={1.5} />
           {t("editor.branding.addLogo")}
         </button>
+        <AddZoneButton defaultPlaneMm={defaultPlaneMm} />
         <input
           ref={fileInput}
           type="file"
-          accept={`image/svg+xml,.svg,${RASTER_MIME_TYPES.join(",")}`}
+          accept={user ? `image/svg+xml,.svg,${RASTER_MIME_TYPES.join(",")},.png,.jpg,.jpeg` : "image/svg+xml,.svg"}
           data-testid="logo-input"
           className="hidden"
           onChange={(event) => void onLogoFile(event)}
@@ -733,6 +571,14 @@ export function BrandingGroup({
           {logoError}
         </p>
       )}
+
+      {!user && (
+        <p className="text-[11px] text-muted-foreground" data-testid="logo-anonymous-note">
+          {t("editor.branding.logoSignInForImages")}
+        </p>
+      )}
+
+      <ZoneList />
 
       {layers.length === 0 ? (
         <p className="text-xs text-muted-foreground">{t("editor.branding.empty")}</p>

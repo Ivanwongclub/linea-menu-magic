@@ -90,6 +90,18 @@ export function letterSpacingForSpan(font: TypefaceMetrics, layer: TextLayer, sp
   return (arcLength - mm.reduce((a, b) => a + b, 0)) / (mm.length - 1);
 }
 
+/**
+ * How far a straight layer reaches from its own centre, mm (6b R5): half the
+ * set line, half the cap height, as a radius. The 4j formula measured a
+ * straight layer off the circle radius it wasn't using.
+ */
+export function straightReachMm(font: TypefaceMetrics, layer: TextLayer): number {
+  const { mm } = advances(font, layer.content.value, layer.style.text_size_mm);
+  const half = totalLength(mm, layer.style.letter_spacing_mm) / 2;
+  const centre = Math.hypot(layer.placement.centre_mm.x, layer.placement.centre_mm.y);
+  return centre + Math.hypot(half, layer.style.text_size_mm / 2 + Math.abs(layer.placement.baseline_offset_mm));
+}
+
 export function layoutText(font: TypefaceMetrics, layer: TextLayer): PlacedGlyph[] {
   const { chars, mm } = advances(font, layer.content.value, layer.style.text_size_mm);
   const spacing = layer.style.letter_spacing_mm;

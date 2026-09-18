@@ -155,7 +155,10 @@ export default async function ({ page, base, admin, editor, h }) {
     await viewport().locator("canvas").first().waitFor({ timeout: 30000 });
     await waitMeshCount(BODY_GROUPS);
     assert.equal(await viewport().getAttribute("data-model-mesh-total"), "33", "the file still has 33 groups");
-    assert.equal(await page.getByTestId("original-lettering-toggle").count(), 0, "no staff toggle for a buyer");
+    // 6b R1: the lettering is a Parts row now, and it starts hidden for everyone.
+    await page.getByTestId("parts-toggle").click();
+    assert.equal(await page.getByTestId("part-row-lettering").getAttribute("data-visible"), "false", "the factory lettering starts hidden");
+    await page.getByTestId("parts-toggle").click();
     out.buyerMeshes = await meshCount();
 
     /* ---- 2. staff toggle, framing unmoved ---- */
@@ -167,9 +170,14 @@ export default async function ({ page, base, admin, editor, h }) {
     await canvas.waitFor({ timeout: 30000 });
     await waitMeshCount(BODY_GROUPS);
     const homeBefore = await canvas.getAttribute("data-camera-home");
-    await page.getByTestId("original-lettering-toggle").click();
+    // The lettering is a row of the Parts list now (6b R1), not a corner toggle.
+    const letteringRow = async () => {
+      if ((await page.getByTestId("part-row-lettering").count()) === 0) await page.getByTestId("parts-toggle").click();
+      return page.getByTestId("part-row-lettering").getByTestId("part-visibility");
+    };
+    (await letteringRow()).click();
     await waitMeshCount(33);
-    await page.getByTestId("original-lettering-toggle").click();
+    (await letteringRow()).click();
     await waitMeshCount(BODY_GROUPS);
     assert.equal(await canvas.getAttribute("data-camera-home"), homeBefore, "showing the lettering never re-frames the camera");
 
@@ -337,7 +345,8 @@ export default async function ({ page, base, admin, editor, h }) {
     await page.waitForURL((u) => /^\/designer-studio\/editor\/[0-9a-f-]{36}$/.test(u.pathname), { timeout: 20000 });
     const shownCanvas = viewport().locator("canvas").first();
     await shownCanvas.waitFor({ timeout: 30000 });
-    await page.getByTestId("original-lettering-toggle").click();
+    await page.getByTestId("parts-toggle").click();
+    await page.getByTestId("part-row-lettering").getByTestId("part-visibility").click();
     await waitMeshCount(33);
     const box = await shownCanvas.boundingBox();
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);

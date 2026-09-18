@@ -10,6 +10,7 @@ import { finishAxisLine, finishMarketingName } from "@/features/finishes/finishA
 import { tradeLigne } from "../lib/ligne";
 import { processThresholds } from "../lib/manufacturing";
 import { BrandingGroup } from "./branding/BrandingGroup";
+import { PartsGroup } from "./PartsGroup";
 import type { PickerFinish } from "../hooks/useFinishOptions";
 import type { AutosaveStatus } from "../hooks/useAutosaveDraft";
 import type { EditorColour, EditorProduct, EditorSizeVariant } from "../hooks/useEditorProduct";
@@ -130,6 +131,9 @@ export function EditorPanel({
             {selectedColour && <p className="text-sm text-foreground">{selectedColour.name}</p>}
           </PanelGroup>
         )}
+
+        {/* Phase 6b R1: the model's own parts, for everyone. */}
+        <PartsGroup markedGroupIndices={product.model_branding_group_indices ?? []} />
 
         <BrandingGroup
           reference={product.model_branding_reference}

@@ -7,6 +7,8 @@
  * No path aliases and no React here: the node unit tests import this file.
  */
 
+import type { ZoneMethod, ZonePlane } from "./zones.ts";
+
 /** `free` is a logo's placement: centre, width and rotation, no curve (4k R3). */
 export type TextLayout = "straight" | "circle" | "free";
 /** `cw` reads along the outside of the circle (top arc), `ccw` along the inside (bottom arc). */
@@ -164,13 +166,34 @@ export function reconcileAppearance(relief: LayerRelief, appearance: LayerAppear
 /** Phase 6a R5: appearance per layer. A v2 recipe reads forward (`normalizeRecipe`). */
 export const RECIPE_VERSION = 3;
 
+/**
+ * A named region of the part with its own appearance (Phase 6b R2/R3). The
+ * method says which fields carry the definition: a plane along an axis, a set
+ * of OBJ groups, or painted faces as a run list. Appearance reuses 6a's
+ * control, limited to a plated finish or a paint colour.
+ */
+export interface Zone {
+  id: string;
+  name: string;
+  method: ZoneMethod;
+  plane?: ZonePlane | null;
+  groups?: number[] | null;
+  /** `[start, length, …]` over the model's global face order. */
+  faces?: number[] | null;
+  appearance: LayerAppearance;
+}
+
 export interface DraftRecipe {
   recipe_version: 3;
   size_variant_id: string | null;
   finish_id: string | null;
   colour_id: string | null;
-  view: { ruler: boolean };
+  view: { ruler: boolean; original_lettering?: boolean };
   layers: Layer[];
+  /** Phase 6b R1: OBJ groups the buyer has hidden; hiding never deletes geometry. */
+  hidden_groups?: number[];
+  /** Phase 6b R2: optional, so a recipe without zones stays exactly as v3 wrote it. */
+  zones?: Zone[];
 }
 
 export interface LayerPatch {
@@ -187,7 +210,31 @@ export interface LayerPatch {
 export const DEFAULT_FONT_KEY = "poppins-semibold";
 
 export function emptyRecipe(): DraftRecipe {
-  return { recipe_version: RECIPE_VERSION, size_variant_id: null, finish_id: null, colour_id: null, view: { ruler: false }, layers: [] };
+  return {
+    recipe_version: RECIPE_VERSION,
+    size_variant_id: null,
+    finish_id: null,
+    colour_id: null,
+    view: { ruler: false, original_lettering: false },
+    layers: [],
+    hidden_groups: [],
+    zones: [],
+  };
+}
+
+/** A new zone: named for the way it was made, in the part's own finish until one is picked. */
+export function newZone(id: string, name: string, method: ZoneMethod): Zone {
+  return {
+    id,
+    name,
+    method,
+    // Height is the face frame's Y: axis-design §2's "nickel top, copper
+    // bottom" is a plane the buyer drags up and down the part.
+    plane: method === "plane" ? { axis: "y", at_mm: 0, side: "above" } : null,
+    groups: method === "groups" ? [] : null,
+    faces: method === "paint" ? [] : null,
+    appearance: { mode: "plated", finish_id: null, custom: null },
+  };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -213,8 +260,12 @@ export function normalizeRecipe(raw: unknown): DraftRecipe {
     size_variant_id: id(raw.size_variant_id),
     finish_id: id(raw.finish_id),
     colour_id: id(raw.colour_id),
-    view: { ruler: view.ruler === true },
+    // 6b R1: the factory's own lettering is a row in the Parts list now; it
+    // stays hidden unless a design says otherwise, as it was before.
+    view: { ruler: view.ruler === true, original_lettering: view.original_lettering === true },
     layers: stored.map(upgradeLayer),
+    hidden_groups: Array.isArray(raw.hidden_groups) ? (raw.hidden_groups as unknown[]).map(Number).filter((n) => Number.isInteger(n) && n >= 0) : [],
+    zones: Array.isArray(raw.zones) ? (raw.zones as Zone[]) : [],
   };
 }
 

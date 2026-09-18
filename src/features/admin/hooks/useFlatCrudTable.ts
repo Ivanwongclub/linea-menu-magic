@@ -51,7 +51,7 @@ export function useFlatCrudTable<T extends TaxonomyTableName>(table: T, opts: Op
 
   const update = useMutation({
     mutationFn: async ({ id, values }: { id: string; values: TaxonomyUpdate<T> }) => {
-      const { error } = await supabase.from(table).update(values as never).eq("id", id);
+      const { error } = await supabase.from(table).update(values as never).eq("id" as never, id as never);
       if (error) throw error;
     },
     onSuccess: invalidate,
@@ -62,7 +62,7 @@ export function useFlatCrudTable<T extends TaxonomyTableName>(table: T, opts: Op
       const { error } = await supabase
         .from(table)
         .update({ is_active: isActive } as never)
-        .eq("id", id);
+        .eq("id" as never, id as never);
       if (error) throw error;
     },
     onSuccess: invalidate,
@@ -75,7 +75,7 @@ export function useFlatCrudTable<T extends TaxonomyTableName>(table: T, opts: Op
           supabase
             .from(table)
             .update({ sort_order } as never)
-            .eq("id", id),
+            .eq("id" as never, id as never),
         ),
       );
       const failed = results.find((r) => r.error);
@@ -86,7 +86,7 @@ export function useFlatCrudTable<T extends TaxonomyTableName>(table: T, opts: Op
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from(table).delete().eq("id", id);
+      const { error } = await supabase.from(table).delete().eq("id" as never, id as never);
       if (error) throw error;
     },
     onSuccess: invalidate,

@@ -22,11 +22,14 @@ const HEIGHT_OFFSET_DEG = 14;
  * less the arc and half a letter; for a logo, the face radius less the
  * distance to its farthest corner.
  */
-export function edgeMarginMm(layer: Layer, faceRadiusMm: number): number {
+export function edgeMarginMm(layer: Layer, faceRadiusMm: number, reachMm: number | null = null): number {
   if (isLogoLayer(layer)) {
     const corner = logoCorner(layer);
     return faceRadiusMm - Math.hypot(corner.x, corner.y);
   }
+  // 6b R5: a straight layer is measured off its own extent — the 4j formula
+  // used the circle radius it wasn't laid out on.
+  if (layer.placement.layout === "straight" && reachMm != null) return faceRadiusMm - reachMm;
   return faceRadiusMm - layer.placement.radius_mm - layer.style.text_size_mm / 2;
 }
 

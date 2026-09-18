@@ -141,7 +141,6 @@ export function EditorDesignPage({ designId }: { designId: string }) {
           onRulerToggle={() => setRuler(!ruler)}
           layers={recipe.layers}
           markedGroupIndices={product.model_branding_group_indices}
-          canShowOriginal={isCatalogueEditor || isStaff}
           process={processThresholds(selectedFinish?.process, language)}
         />
       }

@@ -4,7 +4,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import * as THREE from "three";
-import { POLO_OBJ, pixels } from "./calibration.mjs";
+import { POLO_OBJ, domeObj, pixels } from "./calibration.mjs";
 import { linearToLab, rgb255ToLinear } from "./colour.mjs";
 import { parseObjRawBounds } from "../../../src/features/admin/lib/objBounds.ts";
 
@@ -12,6 +12,8 @@ import { parseObjRawBounds } from "../../../src/features/admin/lib/objBounds.ts"
 export const BUTTON_FINISH = "CYC-0001";
 export const LAYER_PLATED = "CYC-0013";
 export const LAYER_PAINT = "CYC-0131";
+/** Matt black enamel, for tests that need a colour with no mirror in it. */
+export const LAYER_MATT = "CYC-0112";
 
 /**
  * Publishes `slug` with the Polo at 15 mm and the three finishes public, and
@@ -19,7 +21,7 @@ export const LAYER_PAINT = "CYC-0131";
  * picker offers has to be public (R2), so the ones this staging uses are made
  * public and put back afterwards.
  */
-export async function stageAppearance(admin, slug, filename) {
+export async function stageAppearance(admin, slug, filename, { model = "polo" } = {}) {
   const { data: product, error } = await admin
     .from("products")
     .select("id, slug, name, item_code, status, is_public, brand_id, material_id, default_finish_id, model_storage_path, model_scale_status, model_scale_factor, model_scale_method, model_scale_reference_variant_id")
@@ -31,13 +33,15 @@ export async function stageAppearance(admin, slug, filename) {
   const { data: finishRows, error: finishError } = await admin
     .from("finishes")
     .select("id, cyc_code, is_public, base_color_hex, metalness, roughness, clearcoat, two_tone")
-    .in("cyc_code", [BUTTON_FINISH, LAYER_PLATED, LAYER_PAINT]);
+    .in("cyc_code", [BUTTON_FINISH, LAYER_PLATED, LAYER_PAINT, LAYER_MATT]);
   if (finishError) throw new Error(finishError.message);
   const finishes = Object.fromEntries(finishRows.map((f) => [f.cyc_code, f]));
-  assert.ok(finishes[BUTTON_FINISH] && finishes[LAYER_PLATED] && finishes[LAYER_PAINT], "the three staged finishes exist");
+  assert.ok(finishes[BUTTON_FINISH] && finishes[LAYER_PLATED] && finishes[LAYER_PAINT] && finishes[LAYER_MATT], "the staged finishes exist");
 
-  const polo = readFileSync(POLO_OBJ, "utf8");
-  const factor = 15 / parseObjRawBounds(polo).primary_raw;
+  // The Polo for anything about a real part; the calibration dome where a test
+  // has to read a colour off a surface without lettering or a hole in the way.
+  const objText = model === "dome" ? domeObj() : readFileSync(POLO_OBJ, "utf8");
+  const factor = 15 / parseObjRawBounds(objText).primary_raw;
   const modelPath = `models/${product.id}/${filename}`;
   const before = { ...product };
   const wasPublic = finishRows.filter((f) => !f.is_public).map((f) => f.id);
@@ -58,7 +62,7 @@ export async function stageAppearance(admin, slug, filename) {
   };
 
   try {
-  const up = await admin.storage.from("product-models").upload(modelPath, new Blob([polo], { type: "model/obj" }), { upsert: true, contentType: "model/obj" });
+  const up = await admin.storage.from("product-models").upload(modelPath, new Blob([objText], { type: "model/obj" }), { upsert: true, contentType: "model/obj" });
   if (up.error) throw new Error(up.error.message);
   undo.push(() => admin.storage.from("product-models").remove([modelPath]));
   // One default variant per product: the sample's own steps aside while this
@@ -242,6 +246,33 @@ export function samplePoint(glyph, relief) {
   if (relief.type === "deboss") return { x: glyph.x, y: glyph.y, z: glyph.z - relief.depthMm };
   if (relief.type === "printed") return { x: glyph.x, y: glyph.y, z: glyph.z + 0.02 };
   return { x: glyph.x, y: glyph.y, z: glyph.z + relief.depthMm };
+}
+
+/** Where a face-frame point lands on the canvas, in page coordinates. */
+export async function projectPoint(page, canvas, { x, y, z }) {
+  await page.waitForFunction(() => document.querySelector('[data-testid="editor-viewport"] canvas')?.dataset.viewProjection != null, null, { timeout: 20000 });
+  const vp = (await canvas.getAttribute("data-view-projection")).split(",").map(Number);
+  const box = await canvas.boundingBox();
+  const p = new THREE.Vector3(x, y, z).applyMatrix4(new THREE.Matrix4().fromArray(vp));
+  return { x: box.x + ((p.x + 1) / 2) * box.width, y: box.y + ((1 - p.y) / 2) * box.height };
+}
+
+/**
+ * The colour at a point on the canvas itself, in page coordinates: what a
+ * painted patch covers is a screen footprint, and its surface height is not
+ * known from the face frame alone.
+ */
+export async function colourAtScreen(page, canvas, { x, y }) {
+  const box = await canvas.boundingBox();
+  const shot = await canvas.screenshot();
+  const { info, at } = await pixels(shot);
+  const px = Math.round(((x - box.x) / box.width) * info.width);
+  const py = Math.round(((y - box.y) / box.height) * info.height);
+  if (px < 2 || py < 2 || px >= info.width - 2 || py >= info.height - 2) throw new Error(`screen point ${x},${y} is off canvas`);
+  const samples = [];
+  for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) samples.push(at(px + dx, py + dy));
+  const rgb = [0, 1, 2].map((c) => samples.map((s) => s[c]).sort((a, b) => a - b)[4]);
+  return { rgb, lab: linearToLab(rgb255ToLinear(rgb)) };
 }
 
 /** Lab of a stored hex, to compare a render against what was asked for. */

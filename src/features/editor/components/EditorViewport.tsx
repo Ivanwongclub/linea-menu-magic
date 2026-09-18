@@ -6,24 +6,27 @@ import { Box } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { supabase } from "@/integrations/supabase/client";
-import { EditorModel, type RulerMeasurements } from "./EditorModel";
+import { EditorModel, type PartsReport, type RulerMeasurements } from "./EditorModel";
 import type { TextSceneReport } from "./branding/BrandingMeshes";
 import type { Layer } from "../lib/recipe";
 import { RulerLabels, RulerOverlay, newRulerLabelElements } from "./RulerOverlay";
 import { RulerToggle } from "./RulerToggle";
-import { OriginalLetteringToggle } from "./OriginalLetteringToggle";
 import type { EditorColour } from "../hooks/useEditorProduct";
 import type { PickerFinish } from "../hooks/useFinishOptions";
 import { GL_SETTINGS } from "../lib/renderSettings";
 import { ProceduralStudio } from "./ProceduralStudio";
 import { CameraReport } from "./CameraReport";
 import { HandleProjector, HandlesOverlay, newHandleBridge, newHandleElements } from "./branding/Handles";
-import { useEditorStore } from "../store/useEditorStore";
+import { selectHiddenGroups, selectZones, useEditorStore } from "../store/useEditorStore";
 import { useLogoSources } from "../hooks/useLogoAssets";
 import { ManufacturingStrip } from "./ManufacturingStrip";
 import { processThresholds, type ProcessThresholds } from "../lib/manufacturing";
 import { usePublicFinishes, PAINT_PROCESS } from "../hooks/usePublicFinishes";
 import { useLayerMaterials } from "../hooks/useLayerMaterials";
+import { zoneStyleFor } from "../lib/finishMaterial";
+import { zonesSentence } from "../lib/zones";
+import { finishMarketingName } from "@/features/finishes/finishAxisLine";
+
 
 interface EditorViewportProps {
   modelStoragePath: string | null;
@@ -43,8 +46,6 @@ interface EditorViewportProps {
   layers: Layer[];
   /** The product's marked branding groups (4d); hidden in the buyer view (4j). */
   markedGroupIndices: number[];
-  /** Catalogue editors and designer staff may show the original lettering. */
-  canShowOriginal: boolean;
   /** The selected finish's process and its tolerances — the strip's thresholds (Phase 5 R3). */
   process: ProcessThresholds | null;
 }
@@ -130,7 +131,6 @@ export function EditorViewport({
   onRulerToggle,
   layers,
   markedGroupIndices,
-  canShowOriginal,
   process,
 }: EditorViewportProps) {
   const controlsRef = useRef<OrbitControlsImpl>(null);
@@ -140,7 +140,7 @@ export function EditorViewport({
   const [textReport, setTextReport] = useState<TextSceneReport | null>(null);
   const rulerLabels = useRef(newRulerLabelElements());
   const [faceZ, setFaceZ] = useState<number | null>(null);
-  const [showOriginal, setShowOriginal] = useState(false);
+
   const [meshCount, setMeshCount] = useState<{ drawn: number; total: number } | null>(null);
   const onMeshCount = useCallback((drawn: number, total: number) => setMeshCount({ drawn, total }), []);
   const handleBridge = useRef(newHandleBridge());
@@ -157,6 +157,33 @@ export function EditorViewport({
     () => processThresholds((publicFinishes ?? []).find((f) => f.process?.code === PAINT_PROCESS)?.process, language),
     [publicFinishes, language],
   );
+  // Phase 6b: parts and zones come from the recipe, and the zones' styles from
+  // the same public-finish query the appearance picker uses.
+  const hiddenGroups = useEditorStore(selectHiddenGroups);
+  const zones = useEditorStore(selectZones);
+  const originalLettering = useEditorStore((s) => s.recipe.view.original_lettering === true);
+  const partsReport = useEditorStore((s) => s.partsReport);
+  const setPartsReport = useEditorStore((s) => s.setPartsReport);
+  const [occlusionState, setOcclusionState] = useState<"idle" | "pending" | "ready">("idle");
+  const [bakeStats, setBakeStats] = useState<{ mainThreadMs: number; totalMs: number } | null>(null);
+  const zoneStyles = useMemo(() => {
+    const byId = new Map((publicFinishes ?? []).map((f) => [f.id, f]));
+    return zones.map((zone) => zoneStyleFor(zone.appearance, byId) ?? { colorHex: "#FFFFFF", metalness: 0, roughness: 1 });
+  }, [zones, publicFinishes]);
+  // R3: what the spec sheet will say — "rim: bright nickel; face: red copper".
+  const zoneSentence = useMemo(() => {
+    const byId = new Map((publicFinishes ?? []).map((f) => [f.id, f]));
+    return zonesSentence(
+      zones.map((zone) => {
+        const finish = zone.appearance.finish_id ? byId.get(zone.appearance.finish_id) : undefined;
+        const custom = zone.appearance.custom;
+        return {
+          name: zone.name,
+          finish: finish ? finishMarketingName(finish, language) : custom ? (custom.pantone ?? custom.hex) : null,
+        };
+      }),
+    );
+  }, [zones, publicFinishes, language]);
   const selectedLayer = layers.find((l) => l.id === selectedLayerId) ?? null;
   const selectedRelief = textReport?.reliefs.find((r) => r.layerId === selectedLayerId) ?? null;
   // Calibration screenshots composite any DOM over the canvas; `?calibration=1` hides the viewport chrome.
@@ -194,6 +221,30 @@ export function EditorViewport({
       data-glyphs={textReport ? JSON.stringify(textReport.glyphs) : undefined}
       // What each layer's relief actually became on screen (Phase 5 R7).
       data-reliefs={textReport ? JSON.stringify(textReport.reliefs) : undefined}
+      // Phase 6b: the model's own parts, the zones drawn on it, and whether
+      // the occlusion bake is still running in its worker.
+      data-parts={partsReport ? JSON.stringify(partsReport.groups) : undefined}
+      data-zones={
+        partsReport
+          ? JSON.stringify(
+              zones.map((zone, index) => ({
+                id: zone.id,
+                name: zone.name,
+                method: zone.method,
+                faces: partsReport.zoneFaces[index] ?? 0,
+                colourHex: zoneStyles[index]?.colorHex ?? null,
+                mode: zone.appearance.mode,
+                finishId: zone.appearance.finish_id,
+              })),
+            )
+          : undefined
+      }
+      data-zone-overlaps={partsReport ? JSON.stringify(partsReport.overlaps) : undefined}
+      data-zone-sentence={zoneSentence || undefined}
+      data-total-faces={partsReport?.totalFaces}
+      data-occlusion={occlusionState}
+      data-occlusion-main-ms={bakeStats ? Math.round(bakeStats.mainThreadMs) : undefined}
+      data-occlusion-total-ms={bakeStats ? Math.round(bakeStats.totalMs) : undefined}
     >
       <Suspense fallback={<ViewportFallback />}>
         <Canvas
@@ -217,7 +268,13 @@ export function EditorViewport({
             onRulerMeasurements={ruler ? setRulerMeasurements : undefined}
             onFaceZ={setFaceZ}
             markedGroupIndices={markedGroupIndices}
-            hideMarked={!(canShowOriginal && showOriginal)}
+            hideMarked={!originalLettering}
+            hiddenGroups={hiddenGroups}
+            zones={zones}
+            zoneStyles={zoneStyles}
+            onPartsReport={setPartsReport}
+            onOcclusionState={setOcclusionState}
+            onBakeStats={setBakeStats}
             onMeshCount={onMeshCount}
             layers={layers}
             logoSources={logoSources}
@@ -257,9 +314,6 @@ export function EditorViewport({
       )}
       {!calibration && (
         <div className="absolute bottom-3 right-3 z-10 flex items-center gap-2">
-          {canShowOriginal && markedGroupIndices.length > 0 && (
-            <OriginalLetteringToggle active={showOriginal} onToggle={() => setShowOriginal((v) => !v)} />
-          )}
           <RulerToggle active={ruler} onToggle={onRulerToggle} />
         </div>
       )}

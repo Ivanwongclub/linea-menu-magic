@@ -122,7 +122,16 @@ export default async function ({ page, base, admin, editor, h }) {
     const logos = JSON.parse(await page.getByTestId("editor-viewport").getAttribute("data-logos"));
     assert.equal(logos.length, 1, "and it is on the face");
     assert.ok(Math.abs(logos[0].measuredWidthMm - logos[0].widthMm) < 0.01, "the decal is the width the recipe asks for");
-    out.raster = { kind: assets[0].kind, widthMm: +logos[0].widthMm.toFixed(2) };
+    // 6b R9: the two relief choices a bitmap has no outline for are offered but
+    // disabled, with the reason beside them — not silently missing.
+    const rasterRelief = page.locator('[data-testid="layer-relief"][data-layer-id="' + withRaster.layers[1].id + '"]');
+    for (const type of ["emboss", "deboss"]) {
+      assert.equal(await rasterRelief.locator(`[data-value="${type}"]`).getAttribute("aria-disabled"), "true", `${type} is offered but disabled for a bitmap`);
+    }
+    assert.equal(await rasterRelief.locator('[data-value="printed"]').getAttribute("aria-disabled"), "false");
+    const reason = (await rasterRelief.getByTestId("relief-raster-reason").innerText()).trim();
+    assert.match(reason, /vector/i, reason);
+    out.raster = { kind: assets[0].kind, widthMm: +logos[0].widthMm.toFixed(2), reason };
 
     return out;
   } finally {

@@ -174,7 +174,10 @@ export function FinishEditDialog({ open, onOpenChange, finish, axes }: Props) {
     const onError = (error: unknown) => toast.error(describeSupabaseError(error as SupabaseError, t));
 
     if (isNew) {
-      const payload: FinishInsert = {
+      // `editable` carries every appearance column as optional (the database
+      // derives them); the insert type wants `anisotropy` present, and the
+      // trigger fills it either way.
+      const payload = {
         ...editable,
         marketing_name: values.marketing_name.trim(),
         factory_name_en: values.factory_name_en.trim(),
@@ -183,7 +186,7 @@ export function FinishEditDialog({ open, onOpenChange, finish, axes }: Props) {
         chart_page: text(values.chart_page),
         cyc_code: text(values.cyc_code),
       };
-      create.mutate(payload, {
+      create.mutate(payload as FinishInsert, {
         onSuccess: () => {
           toast.success(t("admin.finishes.created"));
           onOpenChange(false);

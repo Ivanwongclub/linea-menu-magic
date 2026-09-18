@@ -1,7 +1,8 @@
 import { create } from "zustand";
-import { applyLayerPatch, emptyRecipe, scaleLayers, type DraftRecipe, type Layer, type LayerPatch } from "../lib/recipe";
+import { applyLayerPatch, emptyRecipe, scaleLayers, type DraftRecipe, type Layer, type LayerPatch, type Zone } from "../lib/recipe";
 import type { FaceTransform } from "../lib/recoveredPlacement";
 import type { PendingLogo } from "../hooks/useLogoAssets";
+import type { PartsReport } from "../components/EditorModel";
 import { applyDiscrete, canRedo, canUndo, commitHistory, redoHistory, startHistory, undoHistory, type History } from "../lib/recipeHistory";
 
 /**
@@ -32,6 +33,8 @@ export interface ModelFrame {
 interface EditorState {
   recipe: DraftRecipe;
   selectedLayerId: string | null;
+  /** The zone being edited, if any — the painter and the plane handle follow it. */
+  selectedZoneId: string | null;
   /** The design id (or `new:<slug>`) `initialize` last ran for — autosave hydrates only after it matches (collision 24). */
   hydratedFor: string | null;
   past: DraftRecipe[];
@@ -43,6 +46,11 @@ interface EditorState {
   /** Bumped on pointer-up: autosave writes at once instead of debouncing. */
   flushSeq: number;
   modelFrame: ModelFrame | null;
+  /** Phase 6b R1: the model's own parts, as the scene reports them. Runtime only. */
+  partsReport: PartsReport | null;
+  /** Phase 6b R2: the zone the brush is painting into, and how wide the brush is. */
+  paintZoneId: string | null;
+  brushRadiusMm: number;
   /**
    * An anonymous buyer's uploaded SVGs, by layer id (4k R2): they live in the
    * sessionStorage draft until a sign-in claims the design and uploads them.
@@ -54,6 +62,8 @@ interface EditorState {
   setFinishId: (id: string) => void;
   setColourId: (id: string) => void;
   setRuler: (ruler: boolean) => void;
+  /** Phase 6b R1: the factory's own lettering, as a Parts row rather than a staff toggle. */
+  setOriginalLettering: (visible: boolean) => void;
   addLayer: (layer: Layer, pendingLogo?: PendingLogo) => void;
   /** A live edit; call `commit` when it is done. */
   updateLayer: (id: string, patch: LayerPatch) => void;
@@ -66,6 +76,17 @@ interface EditorState {
   undo: () => void;
   redo: () => void;
   setModelFrame: (frame: ModelFrame | null) => void;
+  setPartsReport: (report: PartsReport | null) => void;
+  setPaintZone: (zoneId: string | null) => void;
+  setBrushRadius: (mm: number) => void;
+  /** Phase 6b R1: which OBJ groups the buyer has hidden. */
+  setHiddenGroups: (indices: number[]) => void;
+  toggleHiddenGroup: (index: number) => void;
+  /** Phase 6b R2: zones are edited like layers — live while dragging, one undo entry per change. */
+  addZone: (zone: Zone) => void;
+  updateZone: (id: string, patch: Partial<Zone>) => void;
+  removeZone: (id: string) => void;
+  selectZone: (id: string | null) => void;
   /** Replaces the pending files wholesale — used when a draft is read back. */
   setPendingLogos: (logos: Record<string, PendingLogo>) => void;
 }
@@ -78,16 +99,21 @@ const keepSelection = (s: EditorState, recipe: DraftRecipe) => (recipe.layers.so
 export const useEditorStore = create<EditorState>((set) => ({
   ...startHistory(emptyRecipe()),
   selectedLayerId: null,
+  selectedZoneId: null,
   hydratedFor: null,
   dragging: false,
   flushSeq: 0,
   modelFrame: null,
+  partsReport: null,
+  paintZoneId: null,
+  brushRadiusMm: 1,
   pendingLogos: {},
   initialize: (recipe, hydratedFor) =>
     set((s) => ({
       ...startHistory(recipe),
       dragging: false,
       selectedLayerId: null,
+      selectedZoneId: null,
       hydratedFor,
       // Files an anonymous draft is still holding belong to the layers it is
       // being initialised with; anything else is from a previous product.
@@ -98,6 +124,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   setFinishId: (id) => set((s) => discrete(s, (r) => (r.finish_id === id ? r : { ...r, finish_id: id }))),
   setColourId: (id) => set((s) => discrete(s, (r) => (r.colour_id === id ? r : { ...r, colour_id: id }))),
   setRuler: (ruler) => set((s) => discrete(s, (r) => ({ ...r, view: { ...r.view, ruler } }))),
+  setOriginalLettering: (visible) => set((s) => discrete(s, (r) => ({ ...r, view: { ...r.view, original_lettering: visible } }))),
   addLayer: (layer, pendingLogo) =>
     set((s) => ({
       ...discrete(s, (r) => ({ ...r, layers: [...r.layers, layer] })),
@@ -135,9 +162,48 @@ export const useEditorStore = create<EditorState>((set) => ({
       const h = redoHistory(history(s));
       return { ...h, selectedLayerId: keepSelection(s, h.recipe) };
     }),
+  setHiddenGroups: (indices) =>
+    set((s) => discrete(s, (r) => ({ ...r, hidden_groups: [...new Set(indices)].sort((a, b) => a - b) }))),
+  toggleHiddenGroup: (index) =>
+    set((s) =>
+      discrete(s, (r) => {
+        const hidden = new Set(r.hidden_groups ?? []);
+        if (hidden.has(index)) hidden.delete(index);
+        else hidden.add(index);
+        return { ...r, hidden_groups: [...hidden].sort((a, b) => a - b) };
+      }),
+    ),
+  addZone: (zone) =>
+    set((s) => ({ ...discrete(s, (r) => ({ ...r, zones: [...(r.zones ?? []), zone] })), selectedZoneId: zone.id })),
+  // A zone's plane and brush are live edits, like a layer's placement: the
+  // pointer-up commits one undo entry.
+  updateZone: (id, patch) =>
+    set((s) => ({ recipe: { ...s.recipe, zones: (s.recipe.zones ?? []).map((z) => (z.id === id ? { ...z, ...patch } : z)) } })),
+  removeZone: (id) =>
+    set((s) => ({
+      ...discrete(s, (r) => ({ ...r, zones: (r.zones ?? []).filter((z) => z.id !== id) })),
+      selectedZoneId: s.selectedZoneId === id ? null : s.selectedZoneId,
+      paintZoneId: s.paintZoneId === id ? null : s.paintZoneId,
+    })),
+  selectZone: (selectedZoneId) => set({ selectedZoneId }),
   setModelFrame: (modelFrame) => set({ modelFrame }),
+  setPartsReport: (partsReport) => set({ partsReport }),
+  setPaintZone: (paintZoneId) => set({ paintZoneId }),
+  setBrushRadius: (brushRadiusMm) => set({ brushRadiusMm }),
   setPendingLogos: (pendingLogos) => set({ pendingLogos }),
 }));
+
+/**
+ * Stable empties for the optional recipe fields: a selector that returns a new
+ * `[]` every call re-renders for ever (zustand compares by reference).
+ */
+export const EMPTY_NUMBERS: number[] = [];
+export const EMPTY_ZONES: Zone[] = [];
+export const EMPTY_OVERLAPS: [number, number][] = [];
+
+export const selectZones = (s: EditorState): Zone[] => s.recipe.zones ?? EMPTY_ZONES;
+export const selectHiddenGroups = (s: EditorState): number[] => s.recipe.hidden_groups ?? EMPTY_NUMBERS;
+export const selectZoneOverlaps = (s: EditorState): [number, number][] => s.partsReport?.overlaps ?? EMPTY_OVERLAPS;
 
 export const selectCanUndo = (s: EditorState) => canUndo(history(s));
 export const selectCanRedo = (s: EditorState) => canRedo(history(s));

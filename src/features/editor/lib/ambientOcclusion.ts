@@ -1,133 +1,179 @@
 import * as THREE from "three";
-import { MeshBVH } from "three-mesh-bvh";
+import type { OcclusionRequest, OcclusionResponse, OcclusionTarget } from "./occlusionWorker";
 
 /**
- * Per-vertex ambient occlusion for the antique two-tone (Phase 3c R2):
- * baked once per model file and hidden-group set, written to an `occlusion`
- * attribute (0 = open, 1 = fully enclosed). Rays are cast over
- * the cosine hemisphere around each vertex normal against one BVH of the
- * whole part, so a recess formed by two neighbouring groups still reads as
- * a recess. Vertices that share a position and normal are baked once —
- * OBJLoader emits un-indexed triangles, so this is most of the work saved.
+ * Per-vertex ambient occlusion for the antique two-tone (Phase 3c R2), baked
+ * in a Web Worker since Phase 6b (R4; E1 §6 R6): the main thread gathers the
+ * triangles, hands them over, and paints the result on when it arrives, so
+ * toggling the original lettering or hiding a part no longer freezes the
+ * viewport.
  *
- * 4j (E1 collision 9): meshes the buyer can't see — the product's marked
- * branding groups — are left out of the BVH, so the blank face carries no
- * oxide shadow of lettering that isn't there. The cache key includes the
- * hidden set; each key's attributes are kept, so toggling the original
- * lettering on and off re-applies a bake instead of redoing it.
+ * What occludes: every mesh the buyer can see, plus the relief the editor has
+ * carved — an engraved recess is a recess, and takes the oxide (Phase 5 Q3).
+ * Meshes the buyer can't see (the product's marked branding, a hidden part)
+ * are left out, so the blank face carries no shadow of geometry that isn't
+ * drawn (4j, E1 collision 9).
+ *
+ * The cache is keyed by model, hidden set and relief, and each key's
+ * attributes are kept: toggling back re-applies a bake instead of redoing it.
  */
 const RAYS = 32;
 /** Rays longer than this fraction of the part's largest dimension ignore the hit. */
 const REACH = 0.08;
 
 const baked = new Map<string, Map<THREE.BufferGeometry, THREE.BufferAttribute>>();
+const pending = new Map<string, Promise<void>>();
 
-function hemisphereDirections(count: number): THREE.Vector3[] {
-  // Fibonacci spiral, cosine-weighted.
-  const dirs: THREE.Vector3[] = [];
-  const golden = Math.PI * (3 - Math.sqrt(5));
-  for (let i = 0; i < count; i++) {
-    const u = (i + 0.5) / count;
-    const r = Math.sqrt(u);
-    const phi = i * golden;
-    dirs.push(new THREE.Vector3(r * Math.cos(phi), r * Math.sin(phi), Math.sqrt(1 - u)));
+let worker: Worker | null = null;
+let nextRequestId = 1;
+const inFlight = new Map<number, (response: OcclusionResponse) => void>();
+
+function occlusionWorker(): Worker {
+  if (!worker) {
+    worker = new Worker(new URL("./occlusionWorker.ts", import.meta.url), { type: "module" });
+    worker.onmessage = (event: MessageEvent<OcclusionResponse>) => {
+      const resolve = inFlight.get(event.data.id);
+      inFlight.delete(event.data.id);
+      resolve?.(event.data);
+    };
   }
-  return dirs;
+  return worker;
 }
 
-/** The cache key for a model file with some groups hidden (collision 9). */
-export function occlusionKey(url: string, hiddenIndices: number[]): string {
-  return `${url}|hidden:${[...hiddenIndices].sort((a, b) => a - b).join(",")}`;
+function runInWorker(request: Omit<OcclusionRequest, "id">): Promise<OcclusionResponse> {
+  const id = nextRequestId++;
+  return new Promise((resolve) => {
+    inFlight.set(id, resolve);
+    const transfers = [request.occluders.buffer, ...request.targets.flatMap((t) => [t.positions.buffer, t.normals.buffer])];
+    occlusionWorker().postMessage({ id, ...request } satisfies OcclusionRequest, transfers);
+  });
+}
+
+/** The cache key for a model file with some groups hidden (collision 9) and some relief on it. */
+export function occlusionKey(url: string, hiddenIndices: number[], reliefKey = ""): string {
+  return `${url}|hidden:${[...hiddenIndices].sort((a, b) => a - b).join(",")}${reliefKey ? `|relief:${reliefKey}` : ""}`;
+}
+
+/** Applies a finished bake, if this key has one. */
+export function applyBakedOcclusion(cacheKey: string): boolean {
+  const cached = baked.get(cacheKey);
+  if (!cached) return false;
+  for (const [geometry, attribute] of cached) geometry.setAttribute("occlusion", attribute);
+  return true;
+}
+
+interface BakeInput {
+  /** Drawn meshes of the part: they occlude and they receive. */
+  root: THREE.Object3D;
+  excluded?: ReadonlySet<THREE.Object3D>;
+  /** Relief meshes (Phase 5): they occlude, and their own faces receive too. */
+  relief?: THREE.Object3D | null;
+}
+
+function collect(root: THREE.Object3D, excluded: ReadonlySet<THREE.Object3D>, toRootSpace: THREE.Matrix4, out: THREE.Mesh[]): void {
+  root.traverse((o) => {
+    const mesh = o as THREE.Mesh;
+    if (!mesh.isMesh || excluded.has(mesh) || !mesh.visible) return;
+    if (!mesh.geometry.getAttribute("position") || !mesh.geometry.getAttribute("normal")) return;
+    out.push(mesh);
+  });
+  void toRootSpace;
 }
 
 /**
- * Bakes (or re-applies the cached bake for) `cacheKey`. `excluded` meshes
- * neither occlude nor receive — they aren't drawn.
+ * Bakes `cacheKey` in the worker and applies it when it lands. Resolves once
+ * the attributes are on the geometries; a key already baking is awaited rather
+ * than baked twice.
  */
-export function bakeOcclusion(root: THREE.Object3D, cacheKey: string, excluded: ReadonlySet<THREE.Object3D> = new Set()): void {
-  const cached = baked.get(cacheKey);
-  if (cached) {
-    for (const [geometry, attribute] of cached) geometry.setAttribute("occlusion", attribute);
-    return;
+export interface BakeStats {
+  /** What the main thread spent gathering and applying, ms (6b R4/R7). */
+  mainThreadMs: number;
+  /** Wall time from request to applied, ms — mostly the worker's own work. */
+  totalMs: number;
+}
+
+export async function bakeOcclusion(cacheKey: string, { root, excluded = new Set(), relief = null }: BakeInput): Promise<BakeStats> {
+  const startedAt = performance.now();
+  if (applyBakedOcclusion(cacheKey)) return { mainThreadMs: performance.now() - startedAt, totalMs: performance.now() - startedAt };
+  const already = pending.get(cacheKey);
+  if (already) {
+    await already;
+    return { mainThreadMs: 0, totalMs: performance.now() - startedAt };
   }
 
   root.updateWorldMatrix(true, true);
+  relief?.updateWorldMatrix(true, true);
   const inverseRoot = new THREE.Matrix4().copy(root.matrixWorld).invert();
   const meshes: THREE.Mesh[] = [];
-  root.traverse((o) => {
-    const mesh = o as THREE.Mesh;
-    if (mesh.isMesh && !excluded.has(mesh) && mesh.geometry.getAttribute("position")) meshes.push(mesh);
-  });
-  if (meshes.length === 0) return;
+  collect(root, excluded, inverseRoot, meshes);
+  const reliefMeshes: THREE.Mesh[] = [];
+  if (relief) collect(relief, new Set(), inverseRoot, reliefMeshes);
+  if (meshes.length === 0) return { mainThreadMs: performance.now() - startedAt, totalMs: performance.now() - startedAt };
 
-  // One geometry in root space for the BVH.
-  const toRoot = meshes.map((m) => new THREE.Matrix4().multiplyMatrices(inverseRoot, m.matrixWorld));
+  const all = [...meshes, ...reliefMeshes];
+  const toRoot = all.map((m) => new THREE.Matrix4().multiplyMatrices(inverseRoot, m.matrixWorld));
+
+  // One triangle soup in root space for the BVH.
   let total = 0;
-  for (const m of meshes) total += m.geometry.getIndex()?.count ?? m.geometry.getAttribute("position").count;
-  const merged = new Float32Array(total * 3);
+  for (const m of all) total += m.geometry.getAttribute("position").count;
+  const occluders = new Float32Array(total * 3);
   const v = new THREE.Vector3();
   let offset = 0;
-  meshes.forEach((m, mi) => {
-    const pos = m.geometry.getAttribute("position");
-    const idx = m.geometry.getIndex();
-    const count = idx ? idx.count : pos.count;
-    for (let i = 0; i < count; i++) {
-      const vi = idx ? idx.getX(i) : i;
-      v.fromBufferAttribute(pos, vi).applyMatrix4(toRoot[mi]);
-      merged[offset++] = v.x;
-      merged[offset++] = v.y;
-      merged[offset++] = v.z;
+  all.forEach((m, mi) => {
+    const position = m.geometry.getAttribute("position");
+    for (let i = 0; i < position.count; i++) {
+      v.fromBufferAttribute(position, i).applyMatrix4(toRoot[mi]);
+      occluders[offset++] = v.x;
+      occluders[offset++] = v.y;
+      occluders[offset++] = v.z;
     }
   });
-  const bvhGeometry = new THREE.BufferGeometry();
-  bvhGeometry.setAttribute("position", new THREE.BufferAttribute(merged.subarray(0, offset - (offset % 9)), 3));
-  const bvh = new MeshBVH(bvhGeometry);
 
-  const box = new THREE.Box3().setFromBufferAttribute(bvhGeometry.getAttribute("position") as THREE.BufferAttribute);
+  const box = new THREE.Box3().setFromArray(occluders);
   const size = box.getSize(new THREE.Vector3());
   const reach = Math.max(size.x, size.y, size.z) * REACH;
-  const epsilon = reach * 0.002;
-  const local = hemisphereDirections(RAYS);
-  const ray = new THREE.Ray();
-  const tangent = new THREE.Vector3();
-  const bitangent = new THREE.Vector3();
-  const normal = new THREE.Vector3();
+
   const normalMatrix = new THREE.Matrix3();
-  const seen = new Map<string, number>();
-  const result = new Map<THREE.BufferGeometry, THREE.BufferAttribute>();
-
-  meshes.forEach((m, mi) => {
-    const geometry = m.geometry;
-    const pos = geometry.getAttribute("position");
-    const nor = geometry.getAttribute("normal");
-    const occlusion = new Float32Array(pos.count);
+  const normal = new THREE.Vector3();
+  const targets: OcclusionTarget[] = all.map((m, mi) => {
+    const position = m.geometry.getAttribute("position");
+    const source = m.geometry.getAttribute("normal");
+    const positions = new Float32Array(position.count * 3);
+    const normals = new Float32Array(position.count * 3);
     normalMatrix.getNormalMatrix(toRoot[mi]);
-
-    for (let i = 0; i < pos.count; i++) {
-      v.fromBufferAttribute(pos, i).applyMatrix4(toRoot[mi]);
-      normal.fromBufferAttribute(nor, i).applyMatrix3(normalMatrix).normalize();
-      const key = `${v.x.toFixed(4)},${v.y.toFixed(4)},${v.z.toFixed(4)},${normal.x.toFixed(2)},${normal.y.toFixed(2)},${normal.z.toFixed(2)}`;
-      const cached = seen.get(key);
-      if (cached !== undefined) {
-        occlusion[i] = cached;
-        continue;
-      }
-      tangent.set(Math.abs(normal.x) > 0.9 ? 0 : 1, Math.abs(normal.x) > 0.9 ? 1 : 0, 0).cross(normal).normalize();
-      bitangent.crossVectors(normal, tangent);
-      let hits = 0;
-      for (const d of local) {
-        ray.origin.copy(v).addScaledVector(normal, epsilon);
-        ray.direction.set(0, 0, 0).addScaledVector(tangent, d.x).addScaledVector(bitangent, d.y).addScaledVector(normal, d.z).normalize();
-        if (bvh.raycastFirst(ray, THREE.DoubleSide, 0, reach)) hits++;
-      }
-      occlusion[i] = hits / RAYS;
-      seen.set(key, occlusion[i]);
+    for (let i = 0; i < position.count; i++) {
+      v.fromBufferAttribute(position, i).applyMatrix4(toRoot[mi]);
+      normal.fromBufferAttribute(source, i).applyMatrix3(normalMatrix).normalize();
+      positions[i * 3] = v.x;
+      positions[i * 3 + 1] = v.y;
+      positions[i * 3 + 2] = v.z;
+      normals[i * 3] = normal.x;
+      normals[i * 3 + 1] = normal.y;
+      normals[i * 3 + 2] = normal.z;
     }
-    const attribute = new THREE.BufferAttribute(occlusion, 1);
-    geometry.setAttribute("occlusion", attribute);
-    result.set(geometry, attribute);
+    return { id: String(mi), positions, normals };
   });
 
-  bvhGeometry.dispose();
-  baked.set(cacheKey, result);
+  // Everything above is the main thread's whole share of the bake: the rays
+  // are the worker's (R4).
+  const gatheredAt = performance.now();
+  const run = runInWorker({ occluders, targets, rays: RAYS, reach }).then((response) => {
+    const appliedFrom = performance.now();
+    const result = new Map<THREE.BufferGeometry, THREE.BufferAttribute>();
+    for (const { id, occlusion } of response.results) {
+      const mesh = all[Number(id)];
+      if (!mesh) continue;
+      const attribute = new THREE.BufferAttribute(occlusion, 1);
+      mesh.geometry.setAttribute("occlusion", attribute);
+      result.set(mesh.geometry, attribute);
+    }
+    baked.set(cacheKey, result);
+    pending.delete(cacheKey);
+    return {
+      mainThreadMs: gatheredAt - startedAt + (performance.now() - appliedFrom),
+      totalMs: performance.now() - startedAt,
+    };
+  });
+  pending.set(cacheKey, run.then(() => undefined));
+  return run;
 }

@@ -4,7 +4,7 @@ import { loadBundledFont } from "../lib/fonts";
 import { glyphOutlines } from "../lib/glyphOutlines";
 import { logoOutlines, parseLogoSvg, type LogoArtwork } from "../lib/logoGeometry";
 import { isLogoLayer, isTextLayer, type Layer } from "../lib/recipe";
-import { glyphChar, type TypefaceMetrics } from "../lib/textLayout";
+import { glyphChar, straightReachMm, type TypefaceMetrics } from "../lib/textLayout";
 import { minStrokeWidth, type Outline } from "../lib/strokeWidth";
 import type { LogoSource } from "./useLogoAssets";
 
@@ -41,7 +41,14 @@ function logoStroke(svg: string): number | null {
   return logoStrokes.get(svg) ?? null;
 }
 
-export function useLayerStrokes(layers: Layer[], logoSources: Record<string, LogoSource>): Record<string, number | null> {
+export interface LayerMeasurement {
+  /** Narrowest stroke, mm — null while the artwork or font is still loading. */
+  strokeMm: number | null;
+  /** How far the layer reaches from the face centre, mm (6b R5); null when the shape decides it. */
+  reachMm: number | null;
+}
+
+export function useLayerStrokes(layers: Layer[], logoSources: Record<string, LogoSource>): Record<string, LayerMeasurement> {
   const [fonts, setFonts] = useState<Record<string, Font>>({});
   const fontKeys = useMemo(() => [...new Set(layers.filter(isTextLayer).map((l) => l.content.font.key))].sort().join("|"), [layers]);
 
@@ -61,23 +68,24 @@ export function useLayerStrokes(layers: Layer[], logoSources: Record<string, Log
   }, [fontKeys]);
 
   return useMemo(() => {
-    const out: Record<string, number | null> = {};
+    const out: Record<string, LayerMeasurement> = {};
     for (const layer of layers) {
       if (isLogoLayer(layer)) {
         const source = logoSources[layer.id];
         // A raster has no outline: its stroke cannot be measured, so the strip
         // says nothing about it rather than guessing (Phase 6a R4).
         const unit = source?.kind === "svg" ? logoStroke(source.svg) : null;
-        out[layer.id] = unit == null ? null : unit * layer.content.width_mm;
+        out[layer.id] = { strokeMm: unit == null ? null : unit * layer.content.width_mm, reachMm: null };
         continue;
       }
       if (!isTextLayer(layer)) continue;
       const font = fonts[layer.content.font.key];
       if (!font) {
-        out[layer.id] = null;
+        out[layer.id] = { strokeMm: null, reachMm: null };
         continue;
       }
       const metrics = font.data as unknown as TypefaceMetrics;
+      const reachMm = layer.placement.layout === "straight" ? straightReachMm(metrics, layer) : null;
       let narrowest: number | null = null;
       for (const raw of Array.from(layer.content.value)) {
         const char = glyphChar(metrics, raw);
@@ -86,7 +94,7 @@ export function useLayerStrokes(layers: Layer[], logoSources: Record<string, Log
         if (unit == null) continue;
         narrowest = narrowest == null ? unit : Math.min(narrowest, unit);
       }
-      out[layer.id] = narrowest == null ? null : narrowest * layer.style.text_size_mm;
+      out[layer.id] = { strokeMm: narrowest == null ? null : narrowest * layer.style.text_size_mm, reachMm };
     }
     return out;
   }, [layers, logoSources, fonts]);

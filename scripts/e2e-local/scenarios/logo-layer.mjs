@@ -146,6 +146,14 @@ export default async function ({ page, base, admin, editor, h }) {
     await page.evaluate(() => window.sessionStorage.clear());
     await page.goto(url, { waitUntil: "networkidle" });
     await viewport().locator("canvas").first().waitFor({ timeout: 30000 });
+
+    /* ---- 0. what a signed-out buyer may upload (6b R9) ---- */
+    // A vector is all an anonymous draft can carry, and the picker says so
+    // rather than refusing a PNG after the buyer has chosen one.
+    const accept = await page.getByTestId("logo-input").getAttribute("accept");
+    assert.ok(!/png|jpe?g/i.test(accept), `signed out, the picker offers vectors only: ${accept}`);
+    assert.match(await page.getByTestId("logo-anonymous-note").innerText(), /sign in/i);
+
     await addLogo(VALID);
     const anonLogos = await logoReports(1);
     assert.equal(anonLogos.length, 1, "the anonymous logo renders from the draft");
@@ -200,6 +208,11 @@ export default async function ({ page, base, admin, editor, h }) {
     await viewport().locator("canvas").first().waitFor({ timeout: 30000 });
     await logoReports(1);
     out.claimed = { assetId: claimed.id, path: claimed.storage_path, sizeBytes: claimed.size_bytes };
+
+    /* ---- 2b. signed in, image logos too (6b R9) ---- */
+    const signedInAccept = await page.getByTestId("logo-input").getAttribute("accept");
+    assert.match(signedInAccept, /png/i, `signed in, the picker takes images as well: ${signedInAccept}`);
+    assert.equal(await page.getByTestId("logo-anonymous-note").count(), 0, "and the note is gone");
 
     /* ---- 3. the invalid fixture is refused ---- */
     await addLogo(INVALID);

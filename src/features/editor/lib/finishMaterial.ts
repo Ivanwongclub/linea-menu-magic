@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import type { PickerFinish } from "../hooks/useFinishOptions";
-import { applyShaderPatches, brushForSurface } from "./shaderPatch";
+import type { LayerAppearance } from "./recipe";
+import { applyShaderPatches, brushForSurface, type ZoneStyle } from "./shaderPatch";
 import { NON_METAL_ROUGHNESS } from "./renderSettings";
 
 /**
@@ -11,7 +12,7 @@ import { NON_METAL_ROUGHNESS } from "./renderSettings";
  * clearcoat, plus the two-tone and brushed shader patches through the one
  * composer (E1 §6 R7).
  */
-export function finishMaterial(finish: PickerFinish): THREE.MeshPhysicalMaterial {
+export function finishMaterial(finish: PickerFinish, zones: ZoneStyle[] | null = null): THREE.MeshPhysicalMaterial {
   const material = new THREE.MeshPhysicalMaterial({
     color: finish.base_color_hex ?? finish.hex_approx ?? "#9a9a9a",
     metalness: finish.metalness,
@@ -25,15 +26,34 @@ export function finishMaterial(finish: PickerFinish): THREE.MeshPhysicalMaterial
     twoTone: !!finish.two_tone,
     twoToneOxideHex: finish.oxide_color_hex,
     brush: brushForSurface(finish.surface?.code, finish.anisotropy),
+    zones,
   });
   return material;
 }
 
 /** A non-metal product's colourway: a plain dielectric (Phase 3b). */
-export function colourMaterial(hex: string | null | undefined): THREE.MeshPhysicalMaterial {
+export function colourMaterial(hex: string | null | undefined, zones: ZoneStyle[] | null = null): THREE.MeshPhysicalMaterial {
   const material = new THREE.MeshPhysicalMaterial({ color: hex ?? "#9a9a9a", metalness: 0, roughness: NON_METAL_ROUGHNESS });
-  applyShaderPatches(material, {});
+  applyShaderPatches(material, { zones });
   return material;
+}
+
+/**
+ * What a zone renders as (Phase 6b R2): the finish's own appearance columns,
+ * or a custom colour's matt enamel approximation. Null while nothing is
+ * chosen — the zone then renders as the part, not as a guess.
+ */
+export function zoneStyleFor(appearance: LayerAppearance, finishById: Map<string, PickerFinish>): ZoneStyle | null {
+  if (appearance.custom) {
+    return { colorHex: appearance.custom.hex, metalness: CUSTOM_PAINT.metalness, roughness: CUSTOM_PAINT.roughness };
+  }
+  const finish = appearance.finish_id ? finishById.get(appearance.finish_id) : undefined;
+  if (!finish) return null;
+  return {
+    colorHex: finish.base_color_hex ?? finish.hex_approx ?? "#9a9a9a",
+    metalness: finish.metalness,
+    roughness: finish.roughness,
+  };
 }
 
 /**

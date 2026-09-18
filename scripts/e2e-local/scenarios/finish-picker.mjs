@@ -63,11 +63,20 @@ export default async function ({ page, base, admin, editor, h }) {
         "model_scale_status, model_scale_factor, model_scale_method, model_scale_reference_variant_id, " +
         "material:product_materials!material_id(is_metal)",
     )
+    .order("slug")
     .limit(300);
   if (error) throw new Error(error.message);
 
-  const metalProduct = products.find((p) => p.material?.is_metal);
-  const colourProduct = products.find((p) => !p.material?.is_metal);
+  // A product that already has a default size variant cannot take this
+  // scenario's own, and the row order of an unordered query moves as other
+  // scenarios update products — so choose by slug, among the ones with no
+  // variants of their own.
+  const { data: variantRows, error: variantError } = await admin.from("product_size_variants").select("product_id");
+  if (variantError) throw new Error(variantError.message);
+  const sized = new Set((variantRows ?? []).map((row) => row.product_id));
+  const free = products.filter((p) => !sized.has(p.id));
+  const metalProduct = free.find((p) => p.material?.is_metal);
+  const colourProduct = free.find((p) => !p.material?.is_metal);
   if (!metalProduct) throw new Error("no metal product in the seed");
   if (!colourProduct) throw new Error("no non-metal product in the seed");
 

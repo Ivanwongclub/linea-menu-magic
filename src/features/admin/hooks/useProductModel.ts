@@ -76,7 +76,7 @@ export function useProductModel(productId: string) {
 
       const { error: updateError } = await supabase
         .from("products")
-        .update({ model_storage_path: path, model_raw_bounds: rawBounds })
+        .update({ model_storage_path: path, model_raw_bounds: rawBounds as unknown as Json })
         .eq("id", productId);
       if (updateError) throw updateError;
 
@@ -229,7 +229,7 @@ export function useProductModelScale(productId: string) {
       const { data, error: downloadError } = await supabase.storage.from(BUCKET).download(path);
       if (downloadError) throw downloadError;
       const rawBounds = parseObjRawBounds(await data.text());
-      const { error } = await supabase.from("products").update({ model_raw_bounds: rawBounds }).eq("id", productId);
+      const { error } = await supabase.from("products").update({ model_raw_bounds: rawBounds as unknown as Json }).eq("id", productId);
       if (error) throw error;
       return rawBounds;
     },

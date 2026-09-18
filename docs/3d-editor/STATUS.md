@@ -28,7 +28,7 @@ this is an index, not a decision log.
 | 5 | Relief: emboss/deboss per layer, depth, bevel, manufacturing warning strip with WIN-CYC thresholds | **Done** |
 | 5b | 3D-ready badges and editor entry, admin 3D column, Phase 5 close-out, deck shots | **Done** |
 | 6a | Appearance per layer: plated, paint (the fill), printed, custom colour | **Done** |
-| 6b | Zones and parts; occlusion bake moves to a worker | Not started |
+| 6b | Zones and parts; occlusion bake moves to a worker | **Done** — Phase 6 closed |
 | 7 | Versions: named saves, snapshot, reload | Not started |
 | 8 | Shares | Not started |
 | 9 | Quote request and staff queue | Not started |
@@ -2406,3 +2406,164 @@ are all built; filling the table is a data change.
   Phase 10's spec sheet lands and the editor is the only viewer.
 - **5b Q3 — no trim frames in the deck.** Ruled: the real trims are added
   before the deck is shown; test geometry is not a substitute.
+
+## Phase 6b — done (2026-09-18)
+
+Zones, the Parts list, the occlusion bake in a worker, the logo picker and the
+five 6a corrections. Axis-design §2's two-tone, without CAD masks. Phase 6 is
+closed.
+
+Files:
+
+- `src/features/editor/lib/zones.ts` (new) — the pure part of a zone (R2/R3):
+  the run-list faces are stored as (`encodeRuns` / `decodeRuns` /
+  `runsInclude`, membership without expanding the list), the plane
+  classification by face centroid, a part's slice of the global face order,
+  the exclusivity rule (`resolveZones` — the later zone wins, and the pairs
+  that overlap are reported) and the spec sheet's sentence.
+- `src/features/editor/lib/occlusionWorker.ts` (new) — R4: the worker builds
+  one BVH over the triangle soup it is handed and casts 32 cosine-hemisphere
+  rays per vertex, deduplicated by position and normal.
+- `src/features/editor/lib/ambientOcclusion.ts` — the main thread now only
+  gathers triangles and applies the answer; the bake is keyed by model, hidden
+  set and relief, and each key's attributes are kept, so toggling back
+  re-applies rather than re-bakes. `BakeStats` reports the main thread's own
+  share against the wall time.
+- `src/features/editor/lib/recipe.ts` — `hidden_groups` and `zones` on v3
+  (still v3: both are optional fields, and a 6a recipe reads forward
+  unchanged); `newZone`; `view.original_lettering` is the recipe's, not a
+  staff toggle's.
+- `src/features/editor/lib/shaderPatch.ts` — the zone patch: up to 8 slots of
+  colour, metalness and roughness picked per fragment from a per-face
+  attribute, injected into the same composer as two-tone and the brushed
+  tangent, and part of the program cache key. The slot is rounded, not
+  truncated — an interpolated 1.0 can arrive as 0.99999 and speckle a zone's
+  edge.
+- `src/features/editor/components/EditorModel.tsx` — geometry is made
+  non-indexed (a shared vertex cannot be in two zones), the per-face slot
+  attribute is laid out per mesh, the brush walks every visible mesh's own BVH
+  with a sphere in millimetres, and the bake runs against the drawn set. The
+  brush maps a hit back through the geometry's index: building a BVH sorts
+  that index for its own use, so a hit's triangle number is in the tree's
+  order, not the file's.
+- `src/features/editor/components/PartsGroup.tsx` (new) — R1: every OBJ group
+  by name with show / hide, and the product's marked lettering as one row of
+  its own. Hiding never deletes geometry; the ruler and the framing stay the
+  whole model's.
+- `src/features/editor/components/OriginalLetteringToggle.tsx` — deleted; the
+  Parts row replaces it, and the question is now asked where the rest of the
+  model is listed.
+- `src/features/editor/components/branding/ZonesSection.tsx` (new) — Add zone
+  beside Add text and Add logo, its three methods (a plane dragged along the
+  model's height, one or more parts, a brush in millimetres) and each zone's
+  row: name, extent control, face count, delete, and its Appearance.
+- `src/features/editor/components/branding/AppearanceControl.tsx` (new) — 6a's
+  appearance control, extracted so a zone and a layer share one: a zone offers
+  plating and paint only.
+- `src/features/editor/components/branding/BrandingGroup.tsx` — R9: the logo
+  picker takes `.svg`, `.png` and `.jpg` for a signed-in buyer and vectors
+  only before sign-in, with the reason in the panel rather than a refusal
+  after the file is chosen; a raster layer starts printed with Raised and
+  Engraved offered but disabled, and the reason beside them. R5: the ink
+  picker is hidden for a raster, which carries its own colours.
+- `src/features/editor/components/EditorViewport.tsx`, `EditorPanel.tsx` — the
+  zones reach the material as styles, the parts report reaches the panel, and
+  the viewport reads back `data-parts`, `data-zones`, `data-zone-overlaps`,
+  `data-zone-sentence`, `data-total-faces`, `data-occlusion` and the two bake
+  timings.
+- `src/features/editor/store/useEditorStore.ts` — zones, the hidden set, the
+  parts report, which zone the brush is painting and its radius; the selectors
+  return stable empties so a zone-less recipe doesn't re-render on every frame.
+- `src/features/editor/lib/manufacturing.ts`, `ManufacturingStrip.tsx` — the
+  overlap warning ("the later zone is what gets made"), and R5's edge margin
+  measured from a straight layer's own extent rather than the circular
+  formula.
+- `src/features/editor/lib/textLayout.ts` — `straightReachMm`, that extent.
+- `src/components/admin/finish/FinishEditDialog.tsx`,
+  `src/features/admin/hooks/useFlatCrudTable.ts`,
+  `src/features/admin/hooks/useProductModel.ts` — R5: the seven pre-existing
+  type errors, cleared without behaviour change.
+- `src/features/i18n/translations.ts` — the Parts list, zones and the logo
+  picker's note, × 3 locales.
+- `scripts/e2e-local/scenarios/parts-list.mjs`, `zones.mjs` (new) — R7's two.
+- `scripts/e2e-local/unit/zones.test.mjs` (new) — the run-list encoding, the
+  plane classification, the exclusivity rule and the sentence.
+- `scripts/e2e-local/lib/appearance.mjs` — `colourAtScreen` for a point on the
+  canvas rather than a point on the face, and the calibration dome as a
+  staging option.
+- `scripts/e2e-local/scenarios/branding-defaults.mjs`, `logo-layer.mjs`,
+  `appearance-printed.mjs` — read-backs follow the Parts row and R9's picker.
+- `scripts/e2e-local/scenarios/finish-picker.mjs` — it had been picking "the
+  first metal product" from an unordered query, so once other scenarios update
+  products it could land on one that already has a default size variant and
+  fail on the unique index. It now chooses by slug, among the products with no
+  variants of their own.
+- `scripts/e2e-local/unit/text-layout.test.mjs` — the v1 read-forward now
+  carries the empty parts and zones sets.
+- `docs/3d-editor/STATUS.md` — this file.
+
+### Rulings
+
+- **A zone is a face mask, never a cut.** A zone names faces — by a plane, by
+  parts, or by brush — and the material is masked per face. The model is never
+  cut, so a zone can be moved or deleted and the part is unchanged.
+- **Zones are exclusive, and the later one wins.** Where two zones cover the
+  same face the later zone is what gets made, and the strip says so. Two
+  platings cannot be on one face in the real process either.
+- **Faces are stored as runs.** A plane or a part is one run of two numbers; a
+  brush stroke is a few short ones. The recipe stays v3 — `zones` and
+  `hidden_groups` are optional fields, and a 6a recipe reads forward unchanged.
+- **Hiding a part is a view, not an edit.** The hidden set rides the recipe,
+  the geometry stays, and the ruler and framing stay the whole model's.
+- **The brush is a radius in millimetres**, not in pixels: a 1 mm brush marks
+  a 2 mm band whatever the zoom, and a face the brush touches takes the zone
+  whole, because a face is the smallest thing that can be plated differently.
+- **Image logos print.** A raster has no outline to extrude, so `.png` and
+  `.jpg` land printed with the other two relief choices disabled and the
+  reason shown — and they need an account, because an anonymous draft cannot
+  carry the file.
+
+### The five 6a corrections (R5)
+
+1. The ink picker is hidden for a raster layer (6a Q3).
+2. A straight layer's edge margin is measured from its own extent (6a Q5).
+3. The seven pre-existing type errors are cleared (6a Q2).
+4. `tsc -b` is the gate — `npx tsc --noEmit` compiles nothing in this repo
+   (root `tsconfig.json` has `"files": []`).
+5. Raster uploads need an account, which also settles 6a Q4: no 2.7 MB of
+   base64 in an anonymous draft.
+
+### 6a rulings recorded (R8)
+
+- **6a Q1 — the Pantone table is a subset.** Ruled: WIN-CYC's own ink book
+  goes on the inputs list; until it lands, a code outside the bundled subset
+  keeps the code and takes the buyer's hex, labelled "WIN-CYC to confirm". No
+  code change when the data arrives.
+- **6a Q3 — a printed raster ignores the ink colour.** Ruled: it prints its
+  own pixels, and the picker is hidden for it (above).
+- **6a Q4 — a raster in an anonymous draft.** Ruled: raster uploads need an
+  account (above).
+- **6a Q5 — the straight-layer edge margin.** Ruled: measured from the layer's
+  own extent (above).
+
+### Waiting on WIN-CYC (inputs)
+
+- The solid coated **ink book** (or the licensed Pantone list) for
+  `PANTONE_COATED` — a data drop-in, no code change.
+- Real trim geometry for the deck (5b Q3).
+
+### Open questions from this phase, with a recommendation each
+
+1. **Eight zones is the shader's limit.** The patch carries 8 slots because
+   each is a uniform array entry in one program. *Recommend* leaving it: a
+   part with more than eight finishes is not a part WIN-CYC quotes. If it is
+   ever needed, the slots become a small data texture.
+2. **A painted zone is stored as face numbers of that file.** Re-exporting the
+   OBJ with a different triangulation invalidates a brushed zone (a plane or a
+   part zone survives). *Recommend* re-running the CMS model preview on
+   re-upload and warning on designs whose zones reference the old face count —
+   Phase 11's import work is where that belongs.
+3. **The occlusion cache is per session.** A bake is kept per model, hidden
+   set and relief for as long as the tab lives, but a reload re-bakes (1.4–3.3
+   s in the worker, 5–14 ms of main thread). *Recommend* leaving it until
+   Phase 12, where a baked export would store it anyway.

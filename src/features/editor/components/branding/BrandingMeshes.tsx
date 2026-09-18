@@ -103,6 +103,12 @@ interface BrandingMeshesProps {
   material: THREE.MeshPhysicalMaterial;
   /** Phase 6a R2: the material a layer carries its own appearance in; absent means the part's own. */
   layerMaterials?: Record<string, THREE.MeshPhysicalMaterial>;
+  /**
+   * Phase 6b R4: the relief group and a key that changes when its geometry
+   * does — what the occlusion bake casts against, so an engraved recess takes
+   * the oxide (Phase 5 Q3).
+   */
+  onGroupReady?: (group: THREE.Group, key: string) => void;
   onReport?: (report: TextSceneReport) => void;
 }
 
@@ -345,7 +351,7 @@ function reliefMaterials(): ReliefMaterials {
  * opening mask, a depth punch, and the recess's walls and floor as their own
  * meshes (R2). Geometry only for display — never part of the measured model.
  */
-export function BrandingMeshes({ layers, logoSources, model, faceZ, material, layerMaterials, onReport }: BrandingMeshesProps) {
+export function BrandingMeshes({ layers, logoSources, model, faceZ, material, layerMaterials, onGroupReady, onReport }: BrandingMeshesProps) {
   const [fonts, setFonts] = useState<Record<string, Font>>({});
   /** Bumped when a raster artwork finishes decoding, so the layout runs again. */
   const [textureVersion, setTextureVersion] = useState(0);
@@ -620,6 +626,11 @@ export function BrandingMeshes({ layers, logoSources, model, faceZ, material, la
         minWorldDeterminant = Math.min(minWorldDeterminant, o.matrixWorld.determinant());
       });
     }
+    // What the bake has to cast against: the relief as it now stands.
+    onGroupReady?.(
+      group,
+      [...reliefs.values()].map((r) => `${r.layerId}:${r.type}:${r.depthMm}:${r.pieces}`).join("|"),
+    );
     onReport?.({
       glyphMeshCount: group.children.length - logos.length,
       logoMeshCount: logos.length,
@@ -633,7 +644,7 @@ export function BrandingMeshes({ layers, logoSources, model, faceZ, material, la
     return () => {
       for (const geometry of built) geometry.dispose();
     };
-  }, [group, layers, logoSources, model, fonts, faceZ, material, layerMaterials, materials, textureVersion, onReport]);
+  }, [group, layers, logoSources, model, fonts, faceZ, material, layerMaterials, materials, textureVersion, onGroupReady, onReport]);
 
   // Screen x of each glyph centre, in canvas CSS px, kept on the canvas
   // element whenever the camera or the layout changes — the e2e reading-

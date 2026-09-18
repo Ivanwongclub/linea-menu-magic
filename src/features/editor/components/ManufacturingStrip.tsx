@@ -1,5 +1,6 @@
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { useDesignerStaffStatus } from "../hooks/useDesignerStaffStatus";
+import { selectZoneOverlaps, selectZones, useEditorStore } from "../store/useEditorStore";
 import { useLayerStrokes } from "../hooks/useLayerStrokes";
 import { formatMm, hasThresholds, manufacturingWarnings, type ProcessThresholds } from "../lib/manufacturing";
 import type { Layer } from "../lib/recipe";
@@ -32,12 +33,17 @@ export function ManufacturingStrip({ layers, process, printProcess = null, faceR
   const strokes = useLayerStrokes(layers, logoSources);
 
   const lines = manufacturingWarnings(
-    layers.map((layer) => ({ layer, strokeMm: strokes[layer.id] ?? null })),
+    layers.map((layer) => ({ layer, strokeMm: strokes[layer.id]?.strokeMm ?? null, reachMm: strokes[layer.id]?.reachMm ?? null })),
     process,
     faceRadiusMm,
     printProcess,
   );
   const warnings = lines.filter((line) => line.severity === "warning");
+  // 6b R2: zones are exclusive, so an overlap is a decision the buyer has not
+  // made — the later zone wins, and the strip says which.
+  const zones = useEditorStore(selectZones);
+  const overlaps = useEditorStore(selectZoneOverlaps);
+  const zoneName = (index: number) => zones[index]?.name ?? "";
   // "…for roll plating", in the middle of a sentence.
   const lower = (name: string) => (language === "en" ? name.toLocaleLowerCase("en") : name);
   const processName = process ? lower(process.name) : "";
@@ -48,7 +54,7 @@ export function ManufacturingStrip({ layers, process, printProcess = null, faceR
     <div
       className="shrink-0 border-t border-border bg-background px-3 py-1.5 min-h-[28px] text-[11px] leading-[1.35] text-foreground"
       data-testid="manufacturing-strip"
-      data-warning-count={warnings.length}
+      data-warning-count={warnings.length + overlaps.length}
       data-process={process?.name ?? undefined}
     >
       {lines.map((line) => (
@@ -67,6 +73,11 @@ export function ManufacturingStrip({ layers, process, printProcess = null, faceR
             process: line.kind === "stroke" && line.key === "editor.manufacturing.printStroke" ? printProcessName : processName,
             colour: line.colour ?? "",
           })}
+        </p>
+      ))}
+      {overlaps.map(([first, second]) => (
+        <p key={`overlap-${first}-${second}`} data-testid="manufacturing-warning" data-kind="zoneOverlap" data-severity="warning">
+          {t("editor.manufacturing.zoneOverlap", { first: zoneName(first), second: zoneName(second) })}
         </p>
       ))}
       {missing && isStaff && (
