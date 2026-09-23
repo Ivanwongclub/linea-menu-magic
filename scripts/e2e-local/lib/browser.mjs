@@ -1,5 +1,15 @@
 // Browser-side helpers handed to scenarios.
+
+// Playwright's own default is 30s. `E2E_ACTION_TIMEOUT` raises it for a loaded
+// or slow box; read once, applied to the page below, and used as a floor under
+// every explicit wait in this file so raising it never *shortens* one. The
+// short probes that exist to fail fast and retry (the dnd-kit pick-up check)
+// keep their own literal and are exempt.
+const ACTION_TIMEOUT = Number(process.env.E2E_ACTION_TIMEOUT || 30000);
+const atLeast = (literal) => Math.max(literal, ACTION_TIMEOUT);
+
 export function helpers(page, base) {
+  page.setDefaultTimeout(ACTION_TIMEOUT);
   return {
     /** The cookie banner is a fixed z-[200] overlay on every route and intercepts clicks. */
     async dismissCookies() {
@@ -13,16 +23,16 @@ export function helpers(page, base) {
       await page.fill("#email", editor.email);
       await page.fill("#password", editor.password);
       await page.click("button[type=submit]");
-      await page.waitForURL(/\/admin\/products$/, { timeout: 20000 });
+      await page.waitForURL(/\/admin\/products$/, { timeout: atLeast(20000) });
     },
 
     async openProduct(id) {
       await page.goto(`${base}/admin/products/${id}`, { waitUntil: "networkidle" });
-      await page.getByRole("heading", { name: "Identity" }).waitFor({ timeout: 20000 });
+      await page.getByRole("heading", { name: "Identity" }).waitFor({ timeout: atLeast(20000) });
     },
 
     /** Waits for a sonner toast matching `re`, returns its text. */
-    async waitForToast(re, timeout = 10000) {
+    async waitForToast(re, timeout = atLeast(10000)) {
       const toast = page.locator("[data-sonner-toast]", { hasText: re });
       await toast.first().waitFor({ timeout });
       return (await toast.first().innerText()).trim();
@@ -37,7 +47,7 @@ export function helpers(page, base) {
      * were on screen before. Use this when the same message can already be
      * showing from a previous step (sonner keeps toasts ~4s).
      */
-    async expectToast(re, action, timeout = 15000) {
+    async expectToast(re, action, timeout = atLeast(15000)) {
       const src = re.source;
       const flags = re.flags;
       const countMatching = () =>
@@ -65,7 +75,7 @@ export function helpers(page, base) {
      * reliable "the save landed" signal than a toast (sonner keeps toasts
      * for ~4s, so a wait can match the previous action's toast).
      */
-    async waitForDialogClosed(timeout = 15000) {
+    async waitForDialogClosed(timeout = atLeast(15000)) {
       await page.getByRole("dialog").waitFor({ state: "detached", timeout });
     },
 

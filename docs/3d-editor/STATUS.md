@@ -49,6 +49,118 @@ Phase 3 (R7). Archive and the design list (old Phase 9) have no row in §7 —
 see E1 open question 4. Later references in this file to "Phase 5/6/8/9" were
 written against the previous numbering.
 
+## How to use this file
+
+Read this file at the start of a session — it and `CLAUDE.md` are meant to be
+enough context to start from, without reconstructing state from the codebase.
+Update it at each milestone. Its reference set is `reports/E0-designer-studio-audit.md`,
+`reports/E1-plan-integration.md` and `reports/E2-workspace-audit.md`; the
+per-phase rulings stay in each phase's migration header and commit, and are
+summarised here only where they still bind later work.
+
+**Built: 6 of 12 phases** (1–6 done, 6b closed Phase 6; 7–12 not started) and
+**6 of 13 workspace units** (U1–U4, U6, U8).
+
+## Workspace units — 6 of 13 built
+
+E2's 13-unit build plan for the docked workspace. Six of the thirteen must
+land before Phase 7a; U1–U4, U6 and U8 are built, and the unit titles below
+that are not yet built are named in E2's build plan rather than restated here
+(this file has not been reconciled against E2 unit by unit — see open item 3).
+
+| Unit | Contents | Status |
+|---|---|---|
+| U1 | One selection — a layer, a zone or a part, never three fields; parts selectable; undo keeps a selection only if the recipe still holds it | **Done** |
+| U2 | The 600-line branding box split into a list, the selected layer's properties, the row controls and the upload hook — same DOM, same test ids | **Done** |
+| U3 | Test ids on the size radios and Change finish; the suite's ordinal, DOM-id and CSS-descendant selectors replaced with attribute ones | **Done** |
+| U4 | The workspace itself: fixed left/right docking, collapse and resize, remembered per user in localStorage under a layout version, Reset workspace for the chrome alone, default layout under `?calibration=1` | **Done** |
+| U5 | Properties placement (U6's panel currently sits under the layer list until this unit moves it) | Not started |
+| U6 | One Properties panel following the selection: a layer's relief, appearance and placement; a zone's plane, parts or brush and what it is made of; a part's name, share of the model, visibility and covering zones; a plain sentence when nothing is selected. Controls moved parent, not shape — test ids and `data-layer-id` / `data-zone-id` unchanged | **Done** |
+| U7 | — | Not started |
+| U8 | The Versions / Output socket for Phase 7's saves and Phase 9/10/12's output; renders only when it has something in it (E2 §3.4 item 7), today the design's own save state on its header | **Done** |
+| U9–U11 | — | Not started |
+| U12 | Deck re-shot against the workspace | Not started |
+| U13 | — | Not started |
+
+### Standing rulings — E2, 6b, U1–U4, U6–U8
+
+These bind later units and Phase 7a; they are not re-decided per unit.
+
+1. **An empty socket is deleted, not carried.** E2's ruling: the empty Output
+   group was removed rather than kept as a stub. E2 §3.4 item 7 then governs
+   what replaces it — a dock renders only once it has something in it.
+2. **The Output dock's title stays visible with zero sections**, the one
+   deliberate exception to (1), since the dock is the buyer's anchor for saves.
+   Revisit in 7a.
+3. **Properties stays under the layer list until U5.** No temporary
+   scroll-into-view in the meantime; the placement problem is U5's, not a
+   patch in U6.
+4. **The deck is re-shot in U12**, not when an individual unit changes the
+   chrome. `npm run deck:shots` output is stale between now and U12 by design.
+5. **Both part-visibility controls stay.** The Parts list sweeps (show / hide
+   across rows); Properties acts on the one selected part. They are two jobs,
+   not a duplicate.
+6. **Moving a control does not change its contract.** U2 and U6 moved controls
+   between parents while keeping the DOM, the test ids and the
+   `data-layer-id` / `data-zone-id` attributes — so the e2e suite's selectors
+   survive a re-parenting. U3 made that possible by replacing the suite's
+   ordinal, DOM-id and CSS-descendant selectors with attribute ones; keep new
+   selectors attribute-based.
+7. **Workspace chrome is per user, versioned, and resettable.** Layout lives in
+   localStorage under a layout version; Reset workspace restores the chrome
+   alone and never touches the recipe; `?calibration=1` forces the default
+   layout so calibration and deck shots are reproducible.
+
+### Open items
+
+1. **Six units before Phase 7a.** E2 names six units that must precede 7a;
+   U1–U4, U6 and U8 are built. Whether that set *is* the six, or U5/U7 are
+   among them, is not settled in this file — check E2's build plan before
+   starting 7a.
+2. **U5 and U7 are unstarted and U6's placement depends on U5** (standing
+   ruling 3). U7's contents are not recorded here.
+3. **This file's unit table is not reconciled against E2 unit by unit.** U1–U4,
+   U6 and U8 are transcribed from their commits; U5, U7 and U9–U13 are
+   placeholders except where a standing ruling names one (U12). Reconcile
+   against `reports/E2-workspace-audit.md` when E2 is next in scope.
+
+## Verification baseline
+
+Until 2026-09-23 there was **no full-suite runner**: `run.mjs` took one
+scenario, and every previous "47/47" figure was assembled from individual
+scenario runs, not one mechanical pass. Those figures are not a baseline.
+
+`scripts/e2e-local/suite.sh` (`npm run e2e:suite`) now boots the stack once and
+runs every scenario in `scenarios/`, sorted, one at a time, recording pass/fail
+per scenario and exiting non-zero on any failure. `E2E_ACTION_TIMEOUT`
+(default 30000, read once in `lib/browser.mjs` and applied via
+`page.setDefaultTimeout`, with each explicit wait's literal as a floor) is the
+one knob for a loaded box. **The first suite.sh run is the first real
+baseline** — its result is recorded below.
+
+| Date | Result | Action timeout | Notes |
+|---|---|---|---|
+| 2026-09-23 | **47/47** in 19m 18s | 30000 (default) | First mechanical full-suite pass — the baseline |
+
+Two things the first runs exposed, both now handled by `suite.sh` rather than
+by the person running it:
+
+- **`cms-preview-build` asserts on `E2E_BUILD` itself** and fails in 2s against
+  the dev server, so a plain sweep could never be green. The runner reads each
+  scenario for `E2E_BUILD` and gives that scenario build mode, marked `[build]`
+  in the output. This is why the first complete run scored 46/47.
+- **A port already in use is served to the browser as if it were the app.**
+  `run.mjs` treats any answer on `E2E_PORT` as "the dev server is ready", so an
+  `ssh -L` forward on 8080 produced fast, nonsensical failures. The runner now
+  refuses to start on an occupied port and names the holder; use
+  `E2E_PORT=<free port>`.
+
+The baseline run used port 8123 and reused an already-booted stack
+(`E2E_SUITE_SKIP_UP=1`). The default action timeout was not raised — 30000 was
+enough for all 47 on this box. An earlier attempt was killed by the OS at 18/47
+under memory pressure (load average ~12); that is a capacity limit of the
+machine, not a scenario failure.
+
 ## Phase 1 — done (2026-09-17)
 
 Files:

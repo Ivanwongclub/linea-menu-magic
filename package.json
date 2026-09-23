@@ -13,6 +13,7 @@
     "e2e:run": "node scripts/e2e-local/run.mjs",
     "e2e:types": "node scripts/e2e-local/types.mjs",
     "e2e:down": "node scripts/e2e-local/down.mjs",
+    "e2e:suite": "bash scripts/e2e-local/suite.sh",
     "deck:shots": "node scripts/e2e-local/deck/run.mjs"
   },
   "dependencies": {
