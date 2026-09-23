@@ -43,16 +43,19 @@ export default async function ({ page, base, admin, editor, h }) {
     // E2 U1/U3: adding or touching a zone selects it, so the row under test is
     // the selected one — never "the last row".
     const zoneRow = () => page.locator('[data-testid="zone-row"][data-selected="true"]');
+    // E2 U6: what a zone *is* lives in the Properties panel, which follows the
+    // selection; the row is its name, its method and its delete.
+    const zoneProps = () => page.getByTestId("properties-panel").getByTestId("zone-properties");
 
     /** A zone starts plated; a paint colour needs the mode switched first. */
     const setZoneMode = async (mode) => {
-      await zoneRow().getByTestId("appearance-mode").click();
+      await zoneProps().getByTestId("appearance-mode").click();
       await page.getByRole("option", { name: new RegExp(mode, "i") }).click();
       await page.waitForTimeout(500);
     };
     const pickZoneFinish = async (cycCode, mode = "Plated finish") => {
       await setZoneMode(mode);
-      await zoneRow().getByTestId("appearance-choose").click();
+      await zoneProps().getByTestId("appearance-choose").click();
       const swatch = page.getByTestId("appearance-picker").locator(`[data-testid="finish-swatch"][data-code="${cycCode}"]`);
       await swatch.waitFor({ timeout: 20000 });
       await swatch.click();
@@ -147,7 +150,7 @@ export default async function ({ page, base, admin, editor, h }) {
 
     /* ---- 4. zones are exclusive, and an overlap is said out loud (R2) ---- */
     await addZone("plane");
-    await zoneRow().getByTestId("zone-side").locator('[data-value="above"]').click();
+    await zoneProps().getByTestId("zone-side").locator('[data-value="above"]').click();
     await page.getByTestId("zone-plane-input").fill("-10");
     await page.getByTestId("zone-plane-input").blur();
     await pickZoneFinish(LAYER_PLATED);

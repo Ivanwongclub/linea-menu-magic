@@ -11,6 +11,8 @@ import { tradeLigne } from "../lib/ligne";
 import { processThresholds } from "../lib/manufacturing";
 import { BrandingGroup } from "./branding/BrandingGroup";
 import { PartsGroup } from "./PartsGroup";
+import { PropertiesPanel } from "./workspace/PropertiesPanel";
+import { OutputDock } from "./workspace/OutputDock";
 import type { PickerFinish } from "../hooks/useFinishOptions";
 import type { AutosaveStatus } from "../hooks/useAutosaveDraft";
 import type { EditorColour, EditorProduct, EditorSizeVariant } from "../hooks/useEditorProduct";
@@ -65,16 +67,12 @@ export function EditorPanel({
 }: EditorPanelProps) {
   const { t, language } = useI18n();
   const [pickerOpen, setPickerOpen] = useState(false);
+  const faceDiameterMm = product.size_variants.find((v) => v.id === sizeVariantId)?.size_primary_mm ?? product.size_variants[0]?.size_primary_mm ?? 10;
 
   return (
     // No height of its own: the workspace's scroll container is the parent, and
     // a panel that filled it would leave nothing to scroll.
     <div className="min-w-0" data-testid="editor-panel">
-      {saveStatus && saveStatus !== "idle" && (
-        <div className="px-4 py-1.5 border-b border-border text-[11px] text-muted-foreground text-right" data-testid="autosave-status" data-status={saveStatus}>
-          {saveStatus === "saving" ? t("editor.autosave.saving") : saveStatus === "error" ? t("editor.autosave.notSaved") : t("editor.autosave.saved")}
-        </div>
-      )}
       <div className="p-4 space-y-4">
         <PanelGroup group="product" title={t("editor.panel.product")}>
           <div className="space-y-0.5">
@@ -146,7 +144,13 @@ export function EditorPanel({
           reference={product.model_branding_reference}
           scaleFactor={product.model_scale_factor}
           process={processThresholds(selectedFinish?.process, language)}
-          faceDiameterMm={product.size_variants.find((v) => v.id === sizeVariantId)?.size_primary_mm ?? product.size_variants[0]?.size_primary_mm ?? 10} />
+          faceDiameterMm={faceDiameterMm} />
+
+        {/* E2 U6: one panel for whatever is selected. */}
+        <PropertiesPanel faceDiameterMm={faceDiameterMm} />
+
+        {/* E2 U8: the socket Phase 7's versions and Phase 9/10's output fill. */}
+        <OutputDock saveStatus={saveStatus} />
       </div>
 
       <Sheet open={pickerOpen} onOpenChange={setPickerOpen}>

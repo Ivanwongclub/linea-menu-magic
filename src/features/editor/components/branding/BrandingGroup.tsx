@@ -1,7 +1,7 @@
 import { ImagePlus, Plus, Redo2, Undo2 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useI18n } from "@/features/i18n/I18nProvider";
-import { selectCanRedo, selectCanUndo, selectSelectedLayerId, useEditorStore } from "../../store/useEditorStore";
+import { selectCanRedo, selectCanUndo, useEditorStore } from "../../store/useEditorStore";
 import { newTextLayer } from "../../lib/recipe";
 import { RASTER_MIME_TYPES } from "../../lib/logoSvg";
 import { useLogoSources } from "../../hooks/useLogoAssets";
@@ -11,15 +11,12 @@ import { recoveredDefaults, type BrandingReferenceRaw } from "../../lib/recovere
 import type { ProcessThresholds } from "../../lib/manufacturing";
 import { AddZoneButton, ZoneList } from "./ZonesSection";
 import { LayerList } from "./LayerList";
-import { LayerProperties } from "./LayerProperties";
 
 /**
  * BRANDING (v3-review §3): what is on the part and what is selected. Since
- * E2 U2 this component only composes — the list is `LayerList`, the selected
- * layer's fields are `LayerProperties`, the row controls are
- * `LayerRowControls`, and the upload is `useLogoUpload`. U6 mounts the
- * properties in the Properties panel instead; nothing here has to move with
- * them.
+ * E2 U2 this component only composes — the list is `LayerList`, the upload is
+ * `useLogoUpload`, and since U6 the selected layer's own fields are the
+ * Properties panel's, not this group's.
  */
 export function BrandingGroup({
   faceDiameterMm,
@@ -39,7 +36,6 @@ export function BrandingGroup({
   const partsReport = useEditorStore((s) => s.partsReport);
   const defaultPlaneMm = partsReport ? (partsReport.bounds.minY + partsReport.bounds.maxY) / 2 : 0;
   const layers = useEditorStore((s) => s.recipe.layers);
-  const selectedLayerId = useEditorStore(selectSelectedLayerId);
   const addLayer = useEditorStore((s) => s.addLayer);
   const modelFrame = useEditorStore((s) => s.modelFrame);
   const undo = useEditorStore((s) => s.undo);
@@ -50,8 +46,6 @@ export function BrandingGroup({
   const minDepthMm = process?.min_deboss_depth_mm ?? null;
   const { fileInput, logoError, uploading, onLogoFile, signedIn } = useLogoUpload({ faceDiameterMm, minDepthMm });
   useUndoShortcuts();
-
-  const selected = layers.find((l) => l.id === selectedLayerId) ?? null;
 
   return (
     <div className="border border-border p-4 space-y-3" data-testid="branding-group">
@@ -121,8 +115,6 @@ export function BrandingGroup({
       <ZoneList />
 
       <LayerList layers={layers} logoSources={logoSources} />
-
-      {selected && <LayerProperties key={selected.id} layer={selected} faceDiameterMm={faceDiameterMm} />}
     </div>
   );
 }

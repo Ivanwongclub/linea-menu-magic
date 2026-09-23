@@ -7,12 +7,12 @@ import { cn } from "@/lib/utils";
 import { selectSelectedLayerId, useEditorStore } from "../../store/useEditorStore";
 import { isLogoLayer, type Layer } from "../../lib/recipe";
 import { deleteLogoAsset, type LogoSource } from "../../hooks/useLogoAssets";
-import { AppearanceRow, ReliefRow } from "./LayerRowControls";
 
 /**
  * The layers on the part, in the order they are applied (E2 U2): the list and
- * its rows, nothing else. Selecting a row is what the Properties panel reads,
- * so this component owns no editing of its own beyond delete and reorder.
+ * its rows, nothing else. Selecting a row is what the Properties panel reads
+ * (U6), so a row carries a name, a grip and a delete — its relief, appearance
+ * and placement are shown there, for the selected layer only.
  */
 export function LayerList({ layers, logoSources }: { layers: Layer[]; logoSources: Record<string, LogoSource> }) {
   const { t } = useI18n();
@@ -65,7 +65,7 @@ function LayerRow({ layer, selected, logoSource }: { layer: Layer; selected: boo
       data-layer-id={layer.id}
       data-selected={selected}
       className={cn(
-        "group flex flex-col border bg-background transition-colors",
+        "group flex border bg-background transition-colors",
         selected ? "border-foreground" : "border-border hover:border-foreground/40",
         isDragging && "relative z-10 shadow-sm",
       )}
@@ -110,8 +110,6 @@ function LayerRow({ layer, selected, logoSource }: { layer: Layer; selected: boo
           <X className="w-3.5 h-3.5" strokeWidth={1.5} />
         </button>
       </div>
-      <ReliefRow layer={layer} source={logoSource} />
-      <AppearanceRow layer={layer} source={logoSource} />
     </li>
   );
 }

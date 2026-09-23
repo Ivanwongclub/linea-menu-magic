@@ -369,7 +369,8 @@ export default async function ({ page, base, admin, editor, h, outDir }) {
     // E2 U3: the row is named by the layer it holds, not by where it sits.
     const brandLayer = page.locator('[data-testid="text-layer-row"]').filter({ hasText: "BRAND" });
     await brandLayer.getByTestId("text-layer-select").click();
-    const reliefRow = () => brandLayer.getByTestId("layer-relief");
+    // E2 U6: the relief belongs to the selection, and it is shown in Properties.
+    const reliefRow = () => page.getByTestId("properties-panel").getByTestId("layer-relief");
     const setDepth = async (mm) => {
       const input = reliefRow().getByTestId("relief-depth-input");
       await input.fill(String(mm));
