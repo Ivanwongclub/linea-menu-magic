@@ -159,6 +159,7 @@ baseline** — its result is recorded below.
 |---|---|---|---|
 | 2026-09-23 | **47/47** in 19m 18s | 30000 (default) | First mechanical full-suite pass — the baseline |
 | 2026-09-23 | **not run** (Phase 7a) | 30000 (default) | Box at load 35; the stack answered 544/504 and the dev server was killed mid-run. 48 scenarios are owed on a quiet box — see Phase 7a's verification note |
+| 2026-09-24 | **killed at 4/48** (Phase 7a) | 30000 (default) | Started in the quietest window the box offered (1 min 5.9, 5 min 10.2). `e2e:up` booted cleanly this time. `admin-i18n`, `appearance-paint`, `appearance-plated` passed; the OS killed the run inside `appearance-printed` with ~68 MB free. Second memory kill on this box, after the 18/47 one — a capacity limit, not a scenario failure |
 
 Two things the first runs exposed, both now handled by `suite.sh` rather than
 by the person running it:
@@ -2812,6 +2813,19 @@ capacity limit the baseline note records at load ~12, not a scenario failure.
 **`npm run e2e:suite` and the render-calibration baselines are owed on a quiet
 box before this phase is called verified**, and the new scenario in particular
 has never had a green run.
+
+**Second attempt, 2026-09-24.** Started in the quietest window the box offered
+(1-minute load 5.9, 5-minute 10.2, both falling). `npm run e2e:up` booted the
+stack cleanly this time — the health gate that failed the day before passed —
+and the suite reached 4 of 48 before the OS killed it for memory with ~68 MB
+free: `admin-i18n`, `appearance-paint` and `appearance-plated` passed,
+`appearance-printed` was in flight. That is the second memory kill on this box
+after the 18/47 one recorded above. Nothing was learned about 7a's own
+scenarios, which sort after `d`: **`design-versions` still has never run to
+completion.** The phase stays written-not-verified. The suite needs a box with
+memory free, not just a low load average — the whole run is one browser and one
+dev server per scenario against a Docker stack, and this machine is carrying
+another six containers and 32 login sessions.
 
 ### 7a's open questions, ruled (2026-09-23)
 
