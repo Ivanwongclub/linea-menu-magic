@@ -69,6 +69,13 @@ interface EditorState {
    */
   pendingLogos: Record<string, PendingLogo>;
   initialize: (recipe: DraftRecipe, hydratedFor: string) => void;
+  /**
+   * Phase 7: a saved version becomes the working draft. Unlike `initialize`
+   * this keeps the design's history — reloading a version is an edit the buyer
+   * can undo, not a new session — and autosave writes it to `draft_recipe`
+   * like any other change.
+   */
+  loadRecipe: (recipe: DraftRecipe) => void;
   /** `ratio` = new variant mm / old variant mm; layers scale with the product (C10). */
   setSizeVariantId: (id: string, ratio?: number) => void;
   setFinishId: (id: string) => void;
@@ -142,6 +149,9 @@ export const useEditorStore = create<EditorState>((set) => ({
       // being initialised with; anything else is from a previous product.
       pendingLogos: Object.fromEntries(Object.entries(s.pendingLogos).filter(([layerId]) => recipe.layers.some((l) => l.id === layerId))),
     })),
+  // The selection goes: a reloaded version's layers are not the ones that were
+  // on screen, even where an id happens to survive.
+  loadRecipe: (recipe) => set((s) => ({ ...discrete(s, () => recipe), selection: null, paintZoneId: null })),
   setSizeVariantId: (id, ratio = 1) =>
     set((s) => discrete(s, (r) => ({ ...r, size_variant_id: id, layers: scaleLayers(r.layers, ratio) }))),
   setFinishId: (id) => set((s) => discrete(s, (r) => (r.finish_id === id ? r : { ...r, finish_id: id }))),

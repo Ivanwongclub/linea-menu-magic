@@ -2,8 +2,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Eye, Box, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Eye, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import type { UserLibraryItem } from "@/features/products/types";
+import { is3DReady } from "@/features/products/utils/model3d";
+import { ThreeDBadge } from "@/components/products/ThreeDBadge";
 import { format } from "date-fns";
 import { getProductImageUrl } from "@/lib/productImage";
 
@@ -137,11 +139,9 @@ const LibraryTable = ({
                     )}
                   </TableCell>
                   <TableCell>
-                    {product?.model_url ? (
-                      <Badge className="bg-primary/90 text-xs gap-1">
-                        <Box className="w-3 h-3" strokeWidth={1.5} />
-                        Yes
-                      </Badge>
+                    {/* Phase 7 (5b Q1): the one readiness rule, not the legacy `model_url`. */}
+                    {is3DReady(product) ? (
+                      <ThreeDBadge />
                     ) : (
                       <span className="text-muted-foreground text-sm">-</span>
                     )}

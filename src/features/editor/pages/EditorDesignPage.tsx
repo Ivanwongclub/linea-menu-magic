@@ -156,6 +156,7 @@ export function EditorDesignPage({ designId }: { designId: string }) {
           selectedColour={selectedColour}
           onSelectColour={(c) => setColourId(c.id)}
           saveStatus={saveStatus}
+          designId={designId}
         />
       }
     />

@@ -15,6 +15,9 @@ import {
   FileCode, FileText
 } from "lucide-react";
 import type { UserLibraryItem } from "@/features/products/types";
+import { editorUrlForProduct, is3DReady } from "@/features/products/utils/model3d";
+import { ThreeDBadge } from "@/components/products/ThreeDBadge";
+import { useI18n } from "@/features/i18n/I18nProvider";
 import { format } from "date-fns";
 import OBJModel from "./OBJModelLoader";
 import * as THREE from "three";
@@ -138,6 +141,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
   const [show3D, setShow3D] = useState(false);
   const [autoRotate, setAutoRotate] = useState(true);
   const [lightMode, setLightMode] = useState(true);
+  const { t } = useI18n();
 
   if (!item) return null;
 
@@ -147,6 +151,7 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
   const itemCode = p?.item_code ?? '';
   const slug = p?.slug ?? itemCode;
   const modelUrl = p?.model_url;
+  const ready3D = is3DReady(p);
   const modelType = deriveModelType(p?.primary_category?.slug ?? p?.categories?.[0]?.slug);
   const description = p?.description_en || p?.description;
   const isPublic = p?.is_public ?? true;
@@ -248,11 +253,20 @@ const ProductQuickView = ({ item, open, onOpenChange }: ProductQuickViewProps) =
                 </>
               )}
               
-              {modelUrl && !show3D && (
-                <Badge variant="default" className="absolute top-4 left-4">
-                  <Box className="w-3.5 h-3.5 mr-1.5" strokeWidth={1.5} />
-                  3D Model Available
-                </Badge>
+              {/*
+                Phase 7 (5b Q1): the mark and the entry follow `is3DReady`, so
+                this dialog says the same thing as the cards and the product
+                page. The preview above stays on the legacy `model_url` viewer
+                until Phase 10 retires it (5b Q2) — a model with an
+                unconfirmed scale can be spun here, it just cannot be designed.
+              */}
+              {ready3D && !show3D && (
+                <div className="absolute top-4 left-4 flex items-center gap-2">
+                  <ThreeDBadge />
+                  <Button asChild size="sm" variant="secondary" className="h-7 gap-1.5 text-xs">
+                    <Link to={editorUrlForProduct(slug)}>{t("product.cta.designIn3D")}</Link>
+                  </Button>
+                </div>
               )}
             </div>
 

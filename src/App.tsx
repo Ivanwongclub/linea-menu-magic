@@ -30,6 +30,7 @@ const loadNews = () => import("./pages/News");
 const loadNewsDetail = () => import("./pages/NewsDetail");
 const loadDesignerStudio = () => import("./pages/DesignerStudio");
 const loadDesignerStudioTrimLibrary = () => import("./pages/DesignerStudioTrimLibrary");
+const loadDesignerStudioDesigns = () => import("./pages/DesignerStudioDesigns");
 const loadEditorRoute = () => import("./features/editor/EditorRoute");
 const loadDesignerStudioWorkspace = () => import("./pages/DesignerStudioWorkspace");
 const loadComposerPage = () => import("./features/designer/pages/ComposerPage");
@@ -58,6 +59,7 @@ const News = lazy(loadNews);
 const NewsDetail = lazy(loadNewsDetail);
 const DesignerStudio = lazy(loadDesignerStudio);
 const DesignerStudioTrimLibrary = lazy(loadDesignerStudioTrimLibrary);
+const DesignerStudioDesigns = lazy(loadDesignerStudioDesigns);
 const EditorRoute = lazy(loadEditorRoute);
 const DesignerStudioWorkspace = lazy(loadDesignerStudioWorkspace);
 const ComposerPage = lazy(loadComposerPage);
@@ -252,6 +254,7 @@ const App = () => (
                     <Route path="/designer-studio" element={withRouteSuspense(<DesignerStudio />)} />
                     <Route path="/designer-studio/trim-library" element={withRouteSuspense(<DesignerStudioTrimLibrary />)} />
                     <Route path="/designer-studio/login" element={withRouteSuspense(<DesignerStudioLogin />)} />
+                    <Route path="/designer-studio/designs" element={withRouteSuspense(<DesignerStudioDesigns />)} />
                     <Route path="/designer-studio/editor" element={<EditorBareRedirect />} />
                     <Route path="/designer-studio/editor/new" element={withRouteSuspense(<EditorRoute />)} />
                     <Route path="/designer-studio/editor/:designId" element={withRouteSuspense(<EditorRoute />)} />

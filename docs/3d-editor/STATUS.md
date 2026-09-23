@@ -29,7 +29,7 @@ this is an index, not a decision log.
 | 5b | 3D-ready badges and editor entry, admin 3D column, Phase 5 close-out, deck shots | **Done** |
 | 6a | Appearance per layer: plated, paint (the fill), printed, custom colour | **Done** |
 | 6b | Zones and parts; occlusion bake moves to a worker | **Done** — Phase 6 closed |
-| 7 | Versions: named saves, snapshot, reload | Not started |
+| 7a | Versions: named saves, snapshot, reload; the design list; the legacy `model_url` surfaces swept onto `is3DReady` | **Written, not verified** — the suite has not run against it; not closed until it does |
 | 8 | Shares | Not started |
 | 9 | Quote request and staff queue | Not started |
 | 10 | Spec sheet PDF, recovered values labelled (§4.3) | Not started |
@@ -46,7 +46,8 @@ Phases 4–12 follow `wincyc-3d-editor-units-and-recovery-rulings.md` §7 (§ re
 above are to that document); Phase 4's units, their e2e proofs and open
 questions are in `reports/E1-plan-integration.md` §5. Autosave already landed in
 Phase 3 (R7). Archive and the design list (old Phase 9) have no row in §7 —
-see E1 open question 4. Later references in this file to "Phase 5/6/8/9" were
+E1 open question 4; **the design list landed in 7a** (a named save is worth
+nothing without a way back to the design holding it), archive still has no home. Later references in this file to "Phase 5/6/8/9" were
 written against the previous numbering.
 
 ## How to use this file
@@ -58,9 +59,13 @@ Update it at each milestone. Its reference set is `reports/E0-designer-studio-au
 per-phase rulings stay in each phase's migration header and commit, and are
 summarised here only where they still bind later work.
 
-**Built: 6 of 12 phases** (1–6 done, 6b closed Phase 6; 7–12 not started) and
-**6 of 13 workspace units** (U1–U4, U6, U8 — which are exactly E2's six
-pre-7a units, so Phase 7a is unblocked).
+**Built: 6 of 12 phases verified** (1–6 done, 6b closed Phase 6), **7a written
+but not verified** (8–12 not started), and **6 of 13 workspace units** (U1–U4,
+U6, U8 — which were exactly E2's six pre-7a units, so Phase 7a was unblocked).
+7a is committed and does not close until `npm run e2e:suite` runs against it:
+its own scenario has never had a green run, and the attempts that failed on
+capacity already turned up one real bug (a load race on the version list), so
+another may be hiding behind them.
 
 ## Workspace units — 6 of 13 built
 
@@ -95,10 +100,14 @@ These bind later units and Phase 7a; they are not re-decided per unit.
    what replaces it — a dock renders only once it has something in it.
 2. **The Output dock's title stays visible with zero sections**, the one
    deliberate exception to (1), since the dock is the buyer's anchor for saves.
-   Revisit in 7a.
+   *Revisited in 7a and kept, now narrower:* a saved design always has the
+   versions section, so the exception only ever applies to the anonymous
+   `/new` path, where there is no design and the dock is not rendered at all.
 3. **Properties stays under the layer list until U5.** No temporary
    scroll-into-view in the meantime; the placement problem is U5's, not a
-   patch in U6.
+   patch in U6. **E2's own title for U5 — the layers dock — is canonical**;
+   this ruling is a constraint that title imposes on the units before it, not
+   a competing scope for U5.
 4. **The deck is re-shot in U12**, not when an individual unit changes the
    chrome. `npm run deck:shots` output is stale between now and U12 by design.
 5. **Both part-visibility controls stay.** The Parts list sweeps (show / hide
@@ -127,6 +136,10 @@ These bind later units and Phase 7a; they are not re-decided per unit.
 3. **U9 retires a Phase 3 ruling.** E2 §5 has the floating view tools retire
    "no floating toolbar" (Phase 3 R2). Confirm that retirement when U9 is
    scheduled rather than treating R2 as still binding.
+4. **Settled (2026-09-23): `reports/deck/` stays tracked through U12.** The
+   frames are stale by standing ruling 4 and are re-shot in U12; whether they
+   (and `reports/*.md`, E2 open question 7) stay tracked artefacts is decided
+   then, in one go, not per unit.
 
 ## Verification baseline
 
@@ -145,6 +158,7 @@ baseline** — its result is recorded below.
 | Date | Result | Action timeout | Notes |
 |---|---|---|---|
 | 2026-09-23 | **47/47** in 19m 18s | 30000 (default) | First mechanical full-suite pass — the baseline |
+| 2026-09-23 | **not run** (Phase 7a) | 30000 (default) | Box at load 35; the stack answered 544/504 and the dev server was killed mid-run. 48 scenarios are owed on a quiet box — see Phase 7a's verification note |
 
 Two things the first runs exposed, both now handled by `suite.sh` rather than
 by the person running it:
@@ -2683,3 +2697,160 @@ Files:
    set and relief for as long as the tab lives, but a reload re-bakes (1.4–3.3
    s in the worker, 5–14 ms of main thread). *Recommend* leaving it until
    Phase 12, where a baked export would store it anyway.
+
+## Phase 7a — written 2026-09-23, not yet verified
+
+Named versions, the design list, and the sweep that takes the last three
+surfaces off the legacy `model_url`. Phase 7 is closed. **No migration** —
+`design_versions` has been in place since Phase 1 (R1/R2), and nothing this
+phase needed was missing from it.
+
+Files:
+
+- `src/features/editor/lib/versionSnapshot.ts` (new) — what a version freezes
+  (Phase 1 R2, extended by 4a R3): the product, the finish's *material*
+  columns (every field `finishMaterial` reads, including the surface code the
+  brushed patch keys off), the size variant, the colourway, and the model's
+  path, scale and marked groups. Pure and free of runtime imports, so the unit
+  test reads it directly.
+- `src/features/editor/hooks/useDesignVersions.ts` (new) — the list, the save
+  and `fetchVersionRecipe`. `version_number` is read then written rather than
+  defaulted in the database: `unique (design_id, version_number)` turns a race
+  into a retry, and the loser takes the next number instead of overwriting a
+  version it never saw. The save then points `designs.current_version_id` at
+  the new row; a failure there leaves the version saved and the pointer stale,
+  which is the harmless way round.
+- `src/features/editor/components/workspace/VersionsSection.tsx` (new) — the
+  name box, the save, and the list newest-first with a Reload per row. It
+  carries `data-loading`, because an empty list and a list not yet read look
+  the same on screen.
+- `src/features/editor/components/workspace/OutputDock.tsx` — unchanged; U8
+  built the socket with a `sections` prop and this phase filled it.
+- `src/features/editor/components/EditorPanel.tsx` — one new `designId` prop,
+  and the versions section handed to the dock.
+- `src/features/editor/pages/EditorDesignPage.tsx` — passes `designId`.
+- `src/features/editor/store/useEditorStore.ts` — `loadRecipe`: a reloaded
+  version becomes the working draft as one *undoable* discrete edit, keeping
+  the design's history, so autosave writes it to `draft_recipe` like any other
+  change. The selection and the armed brush are dropped.
+- `src/pages/DesignerStudioDesigns.tsx` (new) — `/designer-studio/designs`:
+  every design the buyer can see, newest work first, with its version count.
+  The query carries no filter of its own — RLS decides the set, so a buyer and
+  a salesperson get the same page with different rows.
+- `src/App.tsx` — the route, lazy like its neighbours. **Outside this phase's
+  listed edit scope** (the same reasoning as Phase 2's `AdminProductEditor`: a
+  page with no route is unreachable).
+- `src/features/i18n/translations.ts` — 17 keys × 3 locales (`editor.versions.*`
+  and `designs.*`). **Outside the listed scope**, and unavoidable: every string
+  the editor renders is localised.
+- `src/components/designer-studio/LibraryTable.tsx`,
+  `ProductQuickView.tsx` — the sweep (5b Q1). Both now read `is3DReady` and
+  render the shared `ThreeDBadge`; the QuickView also offers "Design in 3D" on
+  the Phase 2 route. Its inline preview stays on `model_url` — that is the old
+  viewer, which 5b Q2 retires with Phase 10's spec sheet. **Outside the listed
+  scope**, and named by the task.
+- `src/components/designer-studio/QuickRFQDialog.tsx`,
+  `src/features/products/legacyTypes.ts` — **deleted**, the other half of 5b
+  Q1's ruling ("or retires them"). The dialog had no caller anywhere in the
+  repo, its `modelUrl` came from its own legacy item shape rather than
+  `products`, and `legacyTypes.ts` existed only to feed it — its own header
+  said to delete it when the dialog went.
+- `scripts/e2e-local/unit/version-snapshot.test.mjs` (new) — 4 tests: the
+  frozen material columns, that the snapshot is a copy, and that a non-metal
+  design stores its colourway rather than the picker's fallback finish.
+- `scripts/e2e-local/scenarios/design-versions.mjs` (new) — the six proofs
+  listed in its header, including that a version is immutable in the UI *and*
+  in the grant (the owner's own `update` and `delete` both return no rows).
+- `scripts/e2e-local/scenarios/workspace.mjs` — U8's "an empty socket is not
+  rendered" moved to the anonymous `/new` path in the new scenario; a saved
+  design now has versions in the socket, so the assertions there became
+  `data-sections="1"` and a body that opens.
+- `docs/3d-editor/STATUS.md` — this file.
+
+### Rulings
+
+- **A version is immutable.** Phase 1 grants `authenticated` select and insert
+  on `design_versions` and nothing else, so 7a offers no rename and no delete.
+  A version the buyer can edit is not a version.
+- **Reloading is an edit, not a session.** It goes through the history like
+  any other change: undo returns to what was on screen, and autosave writes the
+  reloaded recipe to `draft_recipe`. `initialize` is still reserved for a
+  design being opened.
+- **A version freezes the snapshot, and the draft stays live.** Reload puts the
+  *recipe* back and leaves the buyer in the live editor; nothing yet renders
+  from `snapshot`. That column is for Phase 10's spec sheet and Phase 9's
+  quote, which must show what was quoted, not what the finish looks like today.
+- **`current_version_id` means "last saved", not "what is on screen".** Saving
+  moves it; reloading an older version does not. The list marks the two
+  separately (`data-current`, `data-loaded`).
+- **An unnamed save is not an unnamed row.** An empty box stores `label: null`
+  and the list shows "Version n", so the buyer is never made to name something
+  to save it.
+
+### Phase 3 open question 5, settled
+
+`useAutosaveDraft`'s hydration guard is keyed on `designId` (`hydrated.current
+!== designId`) and the store's `hydratedFor` is set per design, so navigating
+between two designs re-seeds rather than writing one design's recipe over
+another. The design list is the UI that made this reachable; no change was
+needed to reach it.
+
+### Verification (2026-09-23)
+
+`tsc -b` clean · `node --test` **73/73** (4 new) · `npm run build` passes.
+
+**The full suite was not run for this phase.** The box was at load average 35
+with the local stack degraded under it — storage answering 544 and Kong 504 on
+requests the scenarios make, and the dev server killed mid-run. `supabase db
+reset` also could not clear its own post-reset health gate (it timed out on
+`supabase_storage`, then `supabase_realtime`, each of which went healthy
+seconds later); the stack was completed by writing `status.json` from the
+running containers. Two targeted runs of `design-versions` and `workspace`
+both died on those infrastructure errors rather than on an assertion — the
+first reached step 2's read-back and step 8 respectively. This is the same
+capacity limit the baseline note records at load ~12, not a scenario failure.
+**`npm run e2e:suite` and the render-calibration baselines are owed on a quiet
+box before this phase is called verified**, and the new scenario in particular
+has never had a green run.
+
+### 7a's open questions, ruled (2026-09-23)
+
+The five questions below were put and answered; they are recorded here rather
+than left open, and are not re-decided in a later phase.
+
+- **Q1 — the commit.** Ruled: 7a is committed as written, and **7a is not
+  closed until the suite runs against it**. Until then this file says
+  written-not-verified, above and in the phase table.
+- **Q2 — `snapshot.model.sha256`.** Ruled: hashed at CMS upload in Phase 11,
+  never at save time. The editor does not fetch a model to hash it.
+- **Q3 — `design_versions.thumbnail_url`.** Ruled: filled when Phase 12's
+  export can render one off-screen. No canvas grab at save time.
+- **Q4 — the design list has no inbound link.** Ruled: the link lands in U7
+  with the rest of the document chrome.
+- **Q5 — the snapshot reads the live product.** Ruled: left as it is.
+
+The reasoning behind each is kept below, as it was written.
+
+1. **`snapshot.model.sha256` is always null.** Nothing in the editor reads the
+   OBJ's bytes, so the integrity hash Phase 1 R2 documents has no source.
+   *Recommend* hashing at upload time in the CMS (Phase 11 touches that path
+   anyway) and storing it on `products`, rather than making the editor fetch a
+   3.7 MB file to hash it at save time. **Ruled: Phase 11, at upload.**
+2. **No thumbnail is written.** `design_versions.thumbnail_url` stays null;
+   the version list is text. *Recommend* filling it when Phase 12's export
+   exists to render one off-screen — a canvas grab at save time would capture
+   whatever camera the buyer happened to leave. **Ruled: Phase 12.**
+3. **A version is saved from the *live* product, not from what is on screen.**
+   If a catalogue editor re-confirms a scale while a buyer has the editor open,
+   the snapshot takes the new value. *Recommend* leaving it — the alternative
+   is freezing the product at page load, which would quietly save a scale the
+   viewport is no longer using. **Ruled: left as it is.**
+4. **The design list is the only entry to itself.** Nothing links to
+   `/designer-studio/designs` yet: the editor's own "back to my designs" is
+   U7's document bar, and the workspace's tab strip (`library`, `brochures`,
+   `products`, `composer`) was outside this phase's scope. *Recommend* the link
+   lands in U7 with the rest of the document chrome. **Ruled: U7 carries it.**
+5. **Two saves of an unchanged recipe make two versions.** Nothing compares the
+   recipe against the newest version. *Recommend* leaving it — a version is a
+   bookmark the buyer chose to drop, and refusing one because "nothing changed"
+   explains itself badly. *Still open — not put with the other four.*

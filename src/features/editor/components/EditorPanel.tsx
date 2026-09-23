@@ -12,7 +12,8 @@ import { processThresholds } from "../lib/manufacturing";
 import { BrandingGroup } from "./branding/BrandingGroup";
 import { PartsGroup } from "./PartsGroup";
 import { PropertiesPanel } from "./workspace/PropertiesPanel";
-import { OutputDock } from "./workspace/OutputDock";
+import { OutputDock, type OutputSection } from "./workspace/OutputDock";
+import { VersionsSection } from "./workspace/VersionsSection";
 import type { PickerFinish } from "../hooks/useFinishOptions";
 import type { AutosaveStatus } from "../hooks/useAutosaveDraft";
 import type { EditorColour, EditorProduct, EditorSizeVariant } from "../hooks/useEditorProduct";
@@ -28,6 +29,8 @@ interface EditorPanelProps {
   selectedColour: EditorColour | null;
   onSelectColour: (colour: EditorColour) => void;
   saveStatus?: AutosaveStatus;
+  /** Phase 7: the design versions belong to. Null on the anonymous `/new` path, which has nothing to version yet. */
+  designId?: string | null;
 }
 
 /** `group` is what a scenario looks for: the heading is copy, and copy changes (E2 U3). */
@@ -64,10 +67,32 @@ export function EditorPanel({
   selectedColour,
   onSelectColour,
   saveStatus,
+  designId = null,
 }: EditorPanelProps) {
   const { t, language } = useI18n();
   const [pickerOpen, setPickerOpen] = useState(false);
-  const faceDiameterMm = product.size_variants.find((v) => v.id === sizeVariantId)?.size_primary_mm ?? product.size_variants[0]?.size_primary_mm ?? 10;
+  const selectedVariant = product.size_variants.find((v) => v.id === sizeVariantId) ?? null;
+  const faceDiameterMm = selectedVariant?.size_primary_mm ?? product.size_variants[0]?.size_primary_mm ?? 10;
+
+  // E2 U8 / standing ruling 1: the dock renders what it has. Until a design
+  // exists there is nothing to version, so it carries the save state alone.
+  const outputSections: OutputSection[] = designId
+    ? [
+        {
+          id: "versions",
+          title: t("editor.versions.title"),
+          body: (
+            <VersionsSection
+              designId={designId}
+              product={product}
+              finish={selectedFinish}
+              sizeVariant={selectedVariant ?? product.size_variants[0] ?? null}
+              colour={selectedColour}
+            />
+          ),
+        },
+      ]
+    : [];
 
   return (
     // No height of its own: the workspace's scroll container is the parent, and
@@ -149,8 +174,8 @@ export function EditorPanel({
         {/* E2 U6: one panel for whatever is selected. */}
         <PropertiesPanel faceDiameterMm={faceDiameterMm} />
 
-        {/* E2 U8: the socket Phase 7's versions and Phase 9/10's output fill. */}
-        <OutputDock saveStatus={saveStatus} />
+        {/* E2 U8: the socket, with Phase 7's versions in it. */}
+        <OutputDock saveStatus={saveStatus} sections={outputSections} />
       </div>
 
       <Sheet open={pickerOpen} onOpenChange={setPickerOpen}>

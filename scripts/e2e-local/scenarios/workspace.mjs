@@ -12,8 +12,8 @@
 //      render baselines are measured on the same canvas as ever.
 //   7. One Properties panel follows that selection (U6), and says so when
 //      nothing is selected.
-//   8. Versions / Output is a socket that renders only when it has something
-//      in it (U8) — today, the design's own save state.
+//   8. Versions / Output is a socket that renders what it has (U8): Phase 7a's
+//      versions in the body, the design's own save state on the header.
 import assert from "node:assert/strict";
 import { openEditorFor, stageAppearance, waitForRecipe } from "../lib/appearance.mjs";
 
@@ -91,7 +91,10 @@ export default async function ({ page, base, admin, editor, h }) {
     /* ---- 4. nothing selected: Properties says so, and Output is not there ---- */
     assert.equal(await page.getByTestId("properties-panel").getAttribute("data-kind"), "none", "nothing is selected on open");
     assert.equal(await page.getByTestId("properties-empty").count(), 1, "and the panel says so rather than showing an empty frame");
-    assert.equal(await page.getByTestId("output-dock").count(), 0, "an empty Versions / Output is not rendered at all (U8)");
+    // U8's "an empty socket is not rendered" is proved on the anonymous /new
+    // path in design-versions.mjs; a saved design has had versions in the
+    // socket since Phase 7a, so here it is present and closed.
+    assert.equal(await page.getByTestId("output-body").count(), 0, "Versions / Output opens on request, not on load (U8)");
 
     /* ---- 5. reset is chrome only (E2 §3.4 item 8) ---- */
     await page.getByTestId("add-text").click();
@@ -141,19 +144,19 @@ export default async function ({ page, base, admin, editor, h }) {
     assert.equal(await page.getByTestId("text-layer-row").getByTestId("layer-relief").count(), 0, "the row carries no controls of its own (U6)");
     out.layerProperties = ["layer-relief", "layer-appearance", "text-layer-content", "position-and-curve"];
 
-    // The save state is the one thing Versions / Output has today (U8), so the
-    // socket appears with the first save and not before.
-    assert.equal(await page.getByTestId("output-dock").count(), 0, "a freshly loaded design has nothing to put in the socket");
+    // What the socket carries (U8): Phase 7a's versions in the body, and the
+    // design's own save state on the header — the buyer sees "Saved" without
+    // opening a drawer.
+    const dock = page.getByTestId("output-dock");
+    await dock.waitFor({ timeout: 20000 });
+    assert.equal(await dock.getAttribute("data-sections"), "1", "versions fill the socket (Phase 7a)");
     await page.getByTestId("text-layer-content").fill("WORKSPACE II");
     await page.getByTestId("text-layer-content").blur();
     await waitForRecipe(page, admin, designId, (r) => r.layers?.[0]?.content?.value === "WORKSPACE II", "an edit to save");
-    const dock = page.getByTestId("output-dock");
-    await dock.waitFor({ timeout: 20000 });
-    assert.equal(await dock.getAttribute("data-sections"), "0", "nothing fills the socket yet");
     assert.equal(await dock.getByTestId("autosave-status").count(), 1, "the save state rides in its header");
-    assert.equal(await page.getByTestId("output-toggle").isDisabled(), true, "and there is nothing to open");
-    assert.equal(await page.getByTestId("output-body").count(), 0);
-    out.output = { sections: 0, header: (await dock.getByTestId("autosave-status").innerText()).trim() };
+    assert.equal(await page.getByTestId("output-toggle").isDisabled(), false, "and the body opens");
+    assert.equal(await page.getByTestId("output-body").count(), 0, "closed until it is asked for");
+    out.output = { sections: 1, header: (await dock.getByTestId("autosave-status").innerText()).trim() };
 
     await page.getByTestId("parts-toggle").click();
     await page.getByTestId("part-row").first().waitFor({ timeout: 20000 });
