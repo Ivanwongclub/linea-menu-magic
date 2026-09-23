@@ -27,3 +27,4 @@ scripts/e2e-local/.shots/
 *.njsproj
 *.sln
 *.sw?
+*.tsbuildinfo
