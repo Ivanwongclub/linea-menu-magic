@@ -40,16 +40,20 @@ export default async function ({ page, base, admin, editor, h }) {
     const faceZ = Number(await viewport.getAttribute("data-face-z"));
     const zonesData = async () => JSON.parse((await viewport.getAttribute("data-zones")) ?? "[]");
 
+    // E2 U1/U3: adding or touching a zone selects it, so the row under test is
+    // the selected one — never "the last row".
+    const zoneRow = () => page.locator('[data-testid="zone-row"][data-selected="true"]');
+
     /** A zone starts plated; a paint colour needs the mode switched first. */
     const setZoneMode = async (mode) => {
-      await page.getByTestId("zone-row").last().getByTestId("appearance-mode").click();
+      await zoneRow().getByTestId("appearance-mode").click();
       await page.getByRole("option", { name: new RegExp(mode, "i") }).click();
       await page.waitForTimeout(500);
     };
     const pickZoneFinish = async (cycCode, mode = "Plated finish") => {
       await setZoneMode(mode);
-      await page.getByTestId("zone-row").last().getByTestId("appearance-choose").click();
-      const swatch = page.locator(`[data-testid="appearance-picker"] [data-testid="finish-swatch"][data-code="${cycCode}"]`);
+      await zoneRow().getByTestId("appearance-choose").click();
+      const swatch = page.getByTestId("appearance-picker").locator(`[data-testid="finish-swatch"][data-code="${cycCode}"]`);
       await swatch.waitFor({ timeout: 20000 });
       await swatch.click();
       await swatch.waitFor({ state: "detached", timeout: 20000 });
@@ -58,7 +62,7 @@ export default async function ({ page, base, admin, editor, h }) {
     const addZone = async (method) => {
       await page.getByTestId("add-zone").click();
       await page.getByTestId(`add-zone-${method}`).click();
-      await page.getByTestId("zone-row").last().waitFor({ timeout: 10000 });
+      await zoneRow().waitFor({ timeout: 10000 });
       await page.waitForTimeout(600);
     };
 
@@ -82,7 +86,7 @@ export default async function ({ page, base, admin, editor, h }) {
     out.planePixels = { above: above.rgb, below: below.rgb };
 
     /* ---- 2. a zone made of one of the model's parts (R2) ---- */
-    await page.getByTestId("zone-row").getByTestId("zone-delete").click();
+    await zoneRow().getByTestId("zone-delete").click();
     await addZone("groups");
     const parts = JSON.parse(await viewport.getAttribute("data-parts"));
     const biggest = [...parts].sort((a, b) => b.faces - a.faces)[0];
@@ -98,7 +102,7 @@ export default async function ({ page, base, admin, editor, h }) {
     // On the calibration dome: a 1 mm brush leaves a 2 mm mark, and reading one
     // needs a surface without the Polo's lettering or its centre hole in the
     // way. The zone rendering itself is what steps 1 and 2 just read off a part.
-    await page.getByTestId("zone-row").getByTestId("zone-delete").click();
+    await zoneRow().getByTestId("zone-delete").click();
     const dome = await stageAppearance(admin, "sample-d-rings-o-rings", "e2e-zones-dome.obj", { model: "dome" });
     domeRestore = dome.restore;
     const domeDesign = await openEditorFor(page, base, dome.product);
@@ -143,7 +147,7 @@ export default async function ({ page, base, admin, editor, h }) {
 
     /* ---- 4. zones are exclusive, and an overlap is said out loud (R2) ---- */
     await addZone("plane");
-    await page.getByTestId("zone-row").last().locator('[data-testid="zone-side"] [data-value="above"]').click();
+    await zoneRow().getByTestId("zone-side").locator('[data-value="above"]').click();
     await page.getByTestId("zone-plane-input").fill("-10");
     await page.getByTestId("zone-plane-input").blur();
     await pickZoneFinish(LAYER_PLATED);

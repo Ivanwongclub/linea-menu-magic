@@ -17,6 +17,19 @@ export interface ModelFrame {
 }
 
 /**
+ * What the editor is pointed at (E2 U1): one selection, never three. A layer, a
+ * zone or one of the model's parts — selecting any of them clears the others,
+ * so a contextual panel has exactly one thing to show. A part's id is its OBJ
+ * group index as a string: parts come from the model, not the recipe.
+ */
+export type SelectionKind = "layer" | "zone" | "part";
+
+export interface Selection {
+  kind: SelectionKind;
+  id: string;
+}
+
+/**
  * Local editor state: one `DraftRecipe` (E1 collision 20) — the same shape
  * autosave writes and the anonymous draft stores — plus the selected layer.
  * The store is module-global, so `initialize` replaces everything
@@ -32,9 +45,8 @@ export interface ModelFrame {
  */
 interface EditorState {
   recipe: DraftRecipe;
-  selectedLayerId: string | null;
-  /** The zone being edited, if any — the painter and the plane handle follow it. */
-  selectedZoneId: string | null;
+  /** The one selected thing, or nothing (E2 U1). */
+  selection: Selection | null;
   /** The design id (or `new:<slug>`) `initialize` last ran for — autosave hydrates only after it matches (collision 24). */
   hydratedFor: string | null;
   past: DraftRecipe[];
@@ -69,7 +81,8 @@ interface EditorState {
   updateLayer: (id: string, patch: LayerPatch) => void;
   removeLayer: (id: string) => void;
   moveLayer: (from: number, to: number) => void;
-  selectLayer: (id: string | null) => void;
+  /** Selects a layer, a zone or a part — or nothing. */
+  select: (selection: Selection | null) => void;
   commit: () => void;
   beginDrag: () => void;
   endDrag: () => void;
@@ -86,20 +99,31 @@ interface EditorState {
   addZone: (zone: Zone) => void;
   updateZone: (id: string, patch: Partial<Zone>) => void;
   removeZone: (id: string) => void;
-  selectZone: (id: string | null) => void;
   /** Replaces the pending files wholesale — used when a draft is read back. */
   setPendingLogos: (logos: Record<string, PendingLogo>) => void;
 }
 
 const history = (s: EditorState): History => ({ recipe: s.recipe, past: s.past, future: s.future, checkpoint: s.checkpoint });
 const discrete = (s: EditorState, next: (recipe: DraftRecipe) => DraftRecipe) => applyDiscrete(history(s), next);
-/** Keeps the selection only if the restored recipe still has that layer. */
-const keepSelection = (s: EditorState, recipe: DraftRecipe) => (recipe.layers.some((l) => l.id === s.selectedLayerId) ? s.selectedLayerId : null);
+/**
+ * Keeps the selection only if the restored recipe still holds it. A part is
+ * the model's, not the recipe's, so an undo never deselects one.
+ */
+function keepSelection(s: EditorState, recipe: DraftRecipe): Selection | null {
+  const selection = s.selection;
+  if (!selection) return null;
+  if (selection.kind === "layer") return recipe.layers.some((l) => l.id === selection.id) ? selection : null;
+  if (selection.kind === "zone") return (recipe.zones ?? []).some((z) => z.id === selection.id) ? selection : null;
+  return selection;
+}
+
+/** Clears the selection when the thing it points at is the one being removed. */
+const withoutSelected = (s: EditorState, kind: SelectionKind, id: string): Selection | null =>
+  s.selection && s.selection.kind === kind && s.selection.id === id ? null : s.selection;
 
 export const useEditorStore = create<EditorState>((set) => ({
   ...startHistory(emptyRecipe()),
-  selectedLayerId: null,
-  selectedZoneId: null,
+  selection: null,
   hydratedFor: null,
   dragging: false,
   flushSeq: 0,
@@ -112,8 +136,7 @@ export const useEditorStore = create<EditorState>((set) => ({
     set((s) => ({
       ...startHistory(recipe),
       dragging: false,
-      selectedLayerId: null,
-      selectedZoneId: null,
+      selection: null,
       hydratedFor,
       // Files an anonymous draft is still holding belong to the layers it is
       // being initialised with; anything else is from a previous product.
@@ -128,7 +151,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   addLayer: (layer, pendingLogo) =>
     set((s) => ({
       ...discrete(s, (r) => ({ ...r, layers: [...r.layers, layer] })),
-      selectedLayerId: layer.id,
+      selection: { kind: "layer", id: layer.id },
       ...(pendingLogo ? { pendingLogos: { ...s.pendingLogos, [layer.id]: pendingLogo } } : {}),
     })),
   updateLayer: (id, patch) =>
@@ -136,7 +159,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   removeLayer: (id) =>
     set((s) => ({
       ...discrete(s, (r) => ({ ...r, layers: r.layers.filter((l) => l.id !== id) })),
-      selectedLayerId: s.selectedLayerId === id ? null : s.selectedLayerId,
+      selection: withoutSelected(s, "layer", id),
     })),
   moveLayer: (from, to) =>
     set((s) =>
@@ -148,19 +171,19 @@ export const useEditorStore = create<EditorState>((set) => ({
         return { ...r, layers };
       }),
     ),
-  selectLayer: (id) => set({ selectedLayerId: id }),
+  select: (selection) => set({ selection }),
   commit: () => set((s) => commitHistory(history(s))),
   beginDrag: () => set({ dragging: true }),
   endDrag: () => set((s) => ({ ...commitHistory(history(s)), dragging: false, flushSeq: s.flushSeq + 1 })),
   undo: () =>
     set((s) => {
       const h = undoHistory(history(s));
-      return { ...h, selectedLayerId: keepSelection(s, h.recipe) };
+      return { ...h, selection: keepSelection(s, h.recipe) };
     }),
   redo: () =>
     set((s) => {
       const h = redoHistory(history(s));
-      return { ...h, selectedLayerId: keepSelection(s, h.recipe) };
+      return { ...h, selection: keepSelection(s, h.recipe) };
     }),
   setHiddenGroups: (indices) =>
     set((s) => discrete(s, (r) => ({ ...r, hidden_groups: [...new Set(indices)].sort((a, b) => a - b) }))),
@@ -174,7 +197,7 @@ export const useEditorStore = create<EditorState>((set) => ({
       }),
     ),
   addZone: (zone) =>
-    set((s) => ({ ...discrete(s, (r) => ({ ...r, zones: [...(r.zones ?? []), zone] })), selectedZoneId: zone.id })),
+    set((s) => ({ ...discrete(s, (r) => ({ ...r, zones: [...(r.zones ?? []), zone] })), selection: { kind: "zone", id: zone.id } })),
   // A zone's plane and brush are live edits, like a layer's placement: the
   // pointer-up commits one undo entry.
   updateZone: (id, patch) =>
@@ -182,13 +205,14 @@ export const useEditorStore = create<EditorState>((set) => ({
   removeZone: (id) =>
     set((s) => ({
       ...discrete(s, (r) => ({ ...r, zones: (r.zones ?? []).filter((z) => z.id !== id) })),
-      selectedZoneId: s.selectedZoneId === id ? null : s.selectedZoneId,
+      selection: withoutSelected(s, "zone", id),
       paintZoneId: s.paintZoneId === id ? null : s.paintZoneId,
     })),
-  selectZone: (selectedZoneId) => set({ selectedZoneId }),
   setModelFrame: (modelFrame) => set({ modelFrame }),
   setPartsReport: (partsReport) => set({ partsReport }),
-  setPaintZone: (paintZoneId) => set({ paintZoneId }),
+  // Arming the brush is also a selection: the zone being painted is the zone
+  // being edited.
+  setPaintZone: (paintZoneId) => set((s) => ({ paintZoneId, selection: paintZoneId ? { kind: "zone", id: paintZoneId } : s.selection })),
   setBrushRadius: (brushRadiusMm) => set({ brushRadiusMm }),
   setPendingLogos: (pendingLogos) => set({ pendingLogos }),
 }));
@@ -204,6 +228,11 @@ export const EMPTY_OVERLAPS: [number, number][] = [];
 export const selectZones = (s: EditorState): Zone[] => s.recipe.zones ?? EMPTY_ZONES;
 export const selectHiddenGroups = (s: EditorState): number[] => s.recipe.hidden_groups ?? EMPTY_NUMBERS;
 export const selectZoneOverlaps = (s: EditorState): [number, number][] => s.partsReport?.overlaps ?? EMPTY_OVERLAPS;
+
+/** The selected layer / zone / part, or null when something else is selected. */
+export const selectSelectedLayerId = (s: EditorState): string | null => (s.selection?.kind === "layer" ? s.selection.id : null);
+export const selectSelectedZoneId = (s: EditorState): string | null => (s.selection?.kind === "zone" ? s.selection.id : null);
+export const selectSelectedPartIndex = (s: EditorState): number | null => (s.selection?.kind === "part" ? Number(s.selection.id) : null);
 
 export const selectCanUndo = (s: EditorState) => canUndo(history(s));
 export const selectCanRedo = (s: EditorState) => canRedo(history(s));

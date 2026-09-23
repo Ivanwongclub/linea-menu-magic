@@ -56,7 +56,8 @@ export default async function ({ page, base, admin, editor, h }) {
     out.known = recipe.layers[0].appearance.custom;
 
     /* ---- 3. the row says so, and the strip says WIN-CYC confirms it (R4/R5) ---- */
-    assert.equal(await page.getByTestId("appearance-swatch").first().getAttribute("data-hex"), KNOWN_HEX, "the layer row carries the colour");
+    const layerAppearance = page.locator(`[data-testid="layer-appearance"][data-layer-id="${recipe.layers[0].id}"]`);
+    assert.equal(await layerAppearance.getByTestId("appearance-swatch").getAttribute("data-hex"), KNOWN_HEX, "the layer row carries the colour");
     const info = page.locator('[data-testid="manufacturing-info"][data-kind="customColour"]');
     await info.waitFor({ timeout: 20000 });
     const infoText = (await info.innerText()).trim();

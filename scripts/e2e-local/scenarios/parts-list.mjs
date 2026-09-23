@@ -47,8 +47,9 @@ export default async function ({ page, base, admin, editor, h }) {
     out.parts = { rows, groups: parts.length, drawnBefore };
 
     /* ---- 2. hiding a part (R1) ---- */
-    const firstRow = page.locator('[data-testid="part-row"]').first();
-    const hiddenIndex = Number(await firstRow.getAttribute("data-index"));
+    // E2 U3: the row under test is named by the group it is, not by its place.
+    const hiddenIndex = parts.find((group) => !POLO_MARKS.includes(group.index)).index;
+    const firstRow = page.locator(`[data-testid="part-row"][data-index="${hiddenIndex}"]`);
     await firstRow.getByTestId("part-visibility").click();
     await page.waitForFunction(
       (want) => Number(document.querySelector('[data-testid="editor-viewport"]')?.getAttribute("data-model-mesh-count")) === want,
@@ -82,7 +83,7 @@ export default async function ({ page, base, admin, editor, h }) {
     await page.getByTestId("part-row-lettering").getByTestId("part-visibility").click();
 
     /* ---- 4. the bake runs in a worker (R4/R7) ---- */
-    await page.getByRole("button", { name: /change finish/i }).click();
+    await page.getByTestId("change-finish").click();
     const swatch = page.locator(`[data-testid="finish-swatch"][data-code="${ANTIQUE}"]`);
     await swatch.waitFor({ timeout: 20000 });
     await swatch.click();

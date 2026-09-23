@@ -280,7 +280,7 @@ export default async function ({ page, base, admin, editor, h }) {
     await page.getByTestId("ruler-toggle").click();
 
     /* ---- 6. delete takes the asset with it ---- */
-    await page.locator('[data-testid="text-layer-row"]').nth(1).getByTestId("text-layer-delete").click();
+    await page.locator(`[data-testid="text-layer-row"][data-layer-id="${twoLayers.layers[1].id}"]`).getByTestId("text-layer-delete").click();
     const left = await waitForAssets(1, "delete removes the asset row");
     assert.equal(left[0].id, claimed.id, "the other logo's asset is untouched");
     await waitForRecipe(designId, (r) => r.layers.length === 1, "layer removed");

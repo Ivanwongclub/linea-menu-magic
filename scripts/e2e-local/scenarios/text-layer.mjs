@@ -129,7 +129,9 @@ export default async function ({ page, base, admin, editor, h }) {
 
     await page.getByTestId("add-text").click();
     assert.equal(await page.getByTestId("text-layer-row").count(), 1, "Add text adds a layer row");
-    assert.equal(await page.getByTestId("text-layer-row").first().getAttribute("data-selected"), "true", "the new layer is selected");
+    // E2 U1/U3: exactly one thing is selected, and it is the row just added —
+    // read by attribute rather than by ordinal.
+    assert.equal(await page.locator('[data-testid="text-layer-row"][data-selected="true"]').count(), 1, "the new layer is the one selection");
     await page.getByTestId("text-layer-content").fill("POLO");
     assert.equal(await glyphCount(4), 4, "anonymous POLO renders 4 glyph meshes");
     // Text size sits behind "Position and curve" since 4h.
@@ -187,10 +189,12 @@ export default async function ({ page, base, admin, editor, h }) {
     await page.getByTestId("text-layer-content").fill("BLUE");
     const two = await waitForRecipe(designId, (r) => r?.layers?.length === 2 && r.layers[1].content.value === "BLUE", "second layer");
     await glyphCount(10);
-    await h.keyboardReorder(page.getByTestId("text-layer-handle").nth(1), "up", 1);
+    // The second layer is dragged above the first, by its handle (4i).
+    const rowOf = (id) => page.locator(`[data-testid="text-layer-row"][data-layer-id="${id}"]`);
+    await h.pointerReorder(rowOf(two.layers[1].id).getByTestId("text-layer-handle"), rowOf(two.layers[0].id));
     const reordered = await waitForRecipe(designId, (r) => r?.layers?.[0]?.content?.value === "BLUE", "reorder");
     assert.deepEqual(reordered.layers.map((l) => l.content.value), ["BLUE", "WINCYC"], "drag reorder read-back");
-    await page.getByTestId("text-layer-delete").first().click();
+    await page.locator(`[data-testid="text-layer-row"][data-layer-id="${two.layers[1].id}"]`).getByTestId("text-layer-delete").click();
     const deleted = await waitForRecipe(designId, (r) => r?.layers?.length === 1, "delete");
     assert.equal(deleted.layers[0].content.value, "WINCYC", "the remaining layer is WINCYC");
     assert.equal(deleted.layers[0].id, two.layers[0].id, "the surviving layer keeps its id");
@@ -198,7 +202,7 @@ export default async function ({ page, base, admin, editor, h }) {
 
     /* ---- variant switch: placement and size scale with the product (C10) ---- */
     const beforeSwitch = deleted.layers[0];
-    await page.getByRole("radio", { name: /15mm/ }).click();
+    await page.locator(`[data-testid="size-variant"][data-variant-id="${large.id}"]`).getByRole("radio").click();
     const switched = await waitForRecipe(designId, (r) => r?.size_variant_id === large.id, "variant switch");
     const ratio = 15 / 10.8;
     assert.ok(Math.abs(switched.layers[0].style.text_size_mm - beforeSwitch.style.text_size_mm * ratio) < 1e-9, "text size scales with the variant");

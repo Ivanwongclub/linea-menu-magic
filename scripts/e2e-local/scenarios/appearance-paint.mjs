@@ -31,7 +31,7 @@ export default async function ({ page, base, admin, editor, h }) {
     await addSampleText(page);
 
     /* ---- engraved, still the part's own plating ---- */
-    await page.locator('[data-testid="relief-type"] [data-value="deboss"]').click();
+    await page.getByTestId("relief-type").locator('[data-value="deboss"]').click();
     await page.waitForFunction(
       () => JSON.parse(document.querySelector('[data-testid="editor-viewport"]')?.getAttribute("data-reliefs") ?? "[]")[0]?.floorMm != null,
       null,
@@ -72,7 +72,7 @@ export default async function ({ page, base, admin, editor, h }) {
 
     /* ---- the picker offers PAINT only (R2) ---- */
     await page.getByTestId("appearance-choose").click();
-    await page.locator('[data-testid="appearance-picker"] [data-testid="finish-swatch"]').first().waitFor({ timeout: 20000 });
+    await page.getByTestId("appearance-picker").getByTestId("finish-swatch").first().waitFor({ timeout: 20000 });
     const offered = await page.evaluate(() =>
       [...document.querySelectorAll('[data-testid="appearance-picker"] [data-testid="finish-swatch"]')].map((el) => el.getAttribute("data-code")),
     );

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ChevronRight, Eye, EyeOff } from "lucide-react";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { cn } from "@/lib/utils";
-import { selectHiddenGroups, useEditorStore } from "../store/useEditorStore";
+import { selectHiddenGroups, selectSelectedPartIndex, useEditorStore } from "../store/useEditorStore";
 
 /**
  * Parts (Phase 6b R1): the model's own OBJ groups, by name, each with show /
@@ -23,6 +23,8 @@ export function PartsGroup({ markedGroupIndices }: { markedGroupIndices: number[
   const originalLettering = useEditorStore((s) => s.recipe.view.original_lettering === true);
   const toggleHiddenGroup = useEditorStore((s) => s.toggleHiddenGroup);
   const setOriginalLettering = useEditorStore((s) => s.setOriginalLettering);
+  const select = useEditorStore((s) => s.select);
+  const selectedPart = useEditorStore(selectSelectedPartIndex);
 
   const marked = new Set(markedGroupIndices);
   const groups = (report?.groups ?? []).filter((group) => !marked.has(group.index));
@@ -64,6 +66,8 @@ export function PartsGroup({ markedGroupIndices }: { markedGroupIndices: number[
               name={group.name}
               detail={t("editor.parts.faceCount", { count: group.faces })}
               visible={!hiddenSet.has(group.index)}
+              selected={selectedPart === group.index}
+              onSelect={() => select({ kind: "part", id: String(group.index) })}
               onToggle={() => toggleHiddenGroup(group.index)}
             />
           ))}
@@ -80,6 +84,8 @@ function PartRow({
   name,
   detail,
   visible,
+  selected,
+  onSelect,
   onToggle,
 }: {
   testId: string;
@@ -87,13 +93,31 @@ function PartRow({
   name: string;
   detail: string;
   visible: boolean;
+  selected?: boolean;
+  /** The lettering row is the recipe's, not one of the model's parts: it has nothing to select. */
+  onSelect?: () => void;
   onToggle: () => void;
 }) {
   const { t } = useI18n();
   return (
-    <li className="flex items-center gap-2 border border-border px-2 py-1" data-testid={testId} data-index={index} data-visible={visible}>
-      <span className="min-w-0 flex-1 truncate text-xs text-foreground">{name}</span>
-      <span className="shrink-0 text-[10px] text-muted-foreground">{detail}</span>
+    <li
+      className={cn("flex items-center gap-2 border px-2 py-1", selected ? "border-foreground" : "border-border")}
+      data-testid={testId}
+      data-index={index}
+      data-visible={visible}
+      data-selected={selected}
+    >
+      {onSelect ? (
+        <button type="button" data-testid="part-select" aria-pressed={selected} onClick={onSelect} className="flex min-w-0 flex-1 items-center gap-2 text-left">
+          <span className="min-w-0 flex-1 truncate text-xs text-foreground">{name}</span>
+          <span className="shrink-0 text-[10px] text-muted-foreground">{detail}</span>
+        </button>
+      ) : (
+        <>
+          <span className="min-w-0 flex-1 truncate text-xs text-foreground">{name}</span>
+          <span className="shrink-0 text-[10px] text-muted-foreground">{detail}</span>
+        </>
+      )}
       <button
         type="button"
         data-testid="part-visibility"

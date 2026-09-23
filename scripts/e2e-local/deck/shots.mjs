@@ -284,7 +284,7 @@ export default async function ({ page, base, admin, editor, h, outDir }) {
     await settle();
     await shot("02-editor-first-open", `${POLO_NAME}: the editor as it opens — product, finish, branding and output.`, 2);
 
-    await page.getByRole("button", { name: /change finish/i }).click();
+    await page.getByTestId("change-finish").click();
     await page.getByTestId("finish-swatch").first().waitFor({ timeout: 20000 });
     // The axis rail arrives with its own query, after the swatches.
     await page.getByTestId("finish-rail").waitFor({ timeout: 20000 });
@@ -299,7 +299,7 @@ export default async function ({ page, base, admin, editor, h, outDir }) {
     await page.waitForTimeout(400);
 
     const pickFinishByCode = async (code) => {
-      await page.getByRole("button", { name: /change finish/i }).click();
+      await page.getByTestId("change-finish").click();
       const swatch = page.locator(`[data-testid="finish-swatch"][data-code="${code}"]`);
       await swatch.waitFor({ timeout: 15000 });
       await swatch.click();
@@ -329,12 +329,12 @@ export default async function ({ page, base, admin, editor, h, outDir }) {
     await page.waitForTimeout(400);
     await shot("08-position-curve", "Position and curve: every spatial value as a number and a slider, the number authoritative.", 4);
 
-    await page.locator('[data-testid="pc-arc"] [data-value="bottom"]').click();
+    await page.getByTestId("pc-arc").locator('[data-value="bottom"]').click();
     await waitForGlyphs(5);
     await settle({ home: false });
     await shot("09-text-bottom-arc", "The bottom arc: text reads left to right along the inside of the circle, never mirrored.", 4);
 
-    await page.locator('[data-testid="text-layer-layout"] [data-value="straight"]').click();
+    await page.getByTestId("text-layer-layout").locator('[data-value="straight"]').click();
     await waitForGlyphs(5);
     await settle({ home: false });
     await shot("10-straight-text", "Straight layout: the same layer, laid flat across the face.", 4);
@@ -364,11 +364,12 @@ export default async function ({ page, base, admin, editor, h, outDir }) {
     // factory's own lettering was.
     // The logo is a sheet over the middle of the face; it has had its own
     // shot (12) and would hide the letters these three are about.
-    await page.locator('[data-testid="text-layer-row"]').nth(1).getByTestId("text-layer-delete").click();
+    await page.locator('[data-testid="text-layer-row"]:has([data-testid="logo-thumbnail"])').getByTestId("text-layer-delete").click();
     await waitForLogos(0);
-    const brandLayer = page.locator('[data-testid="text-layer-row"]').first();
+    // E2 U3: the row is named by the layer it holds, not by where it sits.
+    const brandLayer = page.locator('[data-testid="text-layer-row"]').filter({ hasText: "BRAND" });
     await brandLayer.getByTestId("text-layer-select").click();
-    const reliefRow = () => page.locator('[data-testid="layer-relief"]').first();
+    const reliefRow = () => brandLayer.getByTestId("layer-relief");
     const setDepth = async (mm) => {
       const input = reliefRow().getByTestId("relief-depth-input");
       await input.fill(String(mm));
@@ -400,7 +401,7 @@ export default async function ({ page, base, admin, editor, h, outDir }) {
     await admin.from("finish_processes").update({ min_feature_mm: 0.2, min_deboss_depth_mm: 0.15, max_deboss_depth_mm: 0.5 }).not("id", "is", null);
     await page.reload({ waitUntil: "networkidle" });
     await settle();
-    await page.getByTestId("text-layer-select").first().click();
+    await brandLayer.getByTestId("text-layer-select").click();
     // 0.6 mm text against a 0.20 mm minimum feature: the strip says so, live.
     // The disclosure belongs to the selected layer, so it needs opening again.
     const openPositionAndCurve = async () => {
@@ -498,12 +499,12 @@ export default async function ({ page, base, admin, editor, h, outDir }) {
     await page.goto(editorUrl(button.slug), { waitUntil: "networkidle" });
     await page.waitForURL((u) => /^\/designer-studio\/editor\/[0-9a-f-]{36}$/.test(u.pathname), { timeout: 30000 });
     await settle();
-    await page.getByTestId("text-layer-select").first().click().catch(() => {});
+    await page.locator('[data-testid="text-layer-row"]').first().getByTestId("text-layer-select").click().catch(() => {});
     await page.getByTestId("position-and-curve-toggle").click().catch(() => {});
     await page.waitForTimeout(600);
     await shot("15-mobile", "390 px: the viewport keeps its height and the panel stacks under it, controls and all.", 4);
 
-    await page.getByRole("button", { name: /change finish/i }).click();
+    await page.getByTestId("change-finish").click();
     await page.getByTestId("finish-swatch").first().waitFor({ timeout: 20000 });
     await page.waitForTimeout(800);
     await shot("15b-mobile-finish-sheet", "390 px: the finish picker as a full-height sheet, the chart's axes and swatches under a thumb.", 4);
@@ -520,7 +521,7 @@ export default async function ({ page, base, admin, editor, h, outDir }) {
     await page.getByTestId("text-layer-content").fill("BRAND");
     await page.getByTestId("text-layer-content").blur();
     await waitForGlyphs(5);
-    await page.locator('[data-testid="layer-relief"]').first().scrollIntoViewIfNeeded();
+    await page.locator('[data-testid="text-layer-row"]').filter({ hasText: "BRAND" }).getByTestId("layer-relief").scrollIntoViewIfNeeded();
     await page.waitForTimeout(800);
     await shot("15c-mobile-text-layer", "390 px: a text layer with its relief — raised or engraved and the depth — on the row itself.", 5);
     await page.setViewportSize(DESKTOP);

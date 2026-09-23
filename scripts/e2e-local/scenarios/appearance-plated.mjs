@@ -66,7 +66,7 @@ export default async function ({ page, base, admin, editor, h }) {
 
     /* ---- the picker offers plated processes only (R2) ---- */
     await page.getByTestId("appearance-choose").click();
-    await page.locator('[data-testid="appearance-picker"] [data-testid="finish-swatch"]').first().waitFor({ timeout: 20000 });
+    await page.getByTestId("appearance-picker").getByTestId("finish-swatch").first().waitFor({ timeout: 20000 });
     const offered = await page.evaluate(() =>
       [...document.querySelectorAll('[data-testid="appearance-picker"] [data-testid="finish-swatch"]')].map((el) => el.getAttribute("data-code")),
     );

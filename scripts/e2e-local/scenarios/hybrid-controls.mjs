@@ -161,15 +161,19 @@ export default async function ({ page, base, admin, editor, h }) {
     for (const id of ["layer-relief", "relief-type", "relief-depth-input", "pc-bevel"]) {
       assert.equal(await page.getByTestId(id).count(), 1, `Phase 5 shows ${id}`);
     }
-    assert.equal(await page.locator('[data-testid*="fill"]').count(), 0, "no fill control before Phase 6");
+    // E2 U3: the fill controls are named, not matched by substring — any later
+    // id containing "fill" would have failed this silently.
+    for (const absent of ["layer-fill", "fill-mode", "fill-swatch", "fill-picker"]) {
+      assert.equal(await page.getByTestId(absent).count(), 0, `${absent} is not a control the editor has`);
+    }
 
     /* ---- circular ---- */
-    await page.locator('[data-testid="text-layer-layout"] [data-value="circle"]').click();
+    await page.getByTestId("text-layer-layout").locator('[data-value="circle"]').click();
     for (const id of ["pc-arc", "pc-radius", "pc-arc-range", "pc-arc-position", "pc-text-size", "pc-letter-spacing", "pc-baseline"]) {
       assert.equal(await page.getByTestId(id).count(), 1, `circle shows ${id}`);
     }
     assert.equal(await page.getByTestId("pc-centre-x").count(), 0, "circle hides centre X");
-    assert.equal(await page.locator('[data-testid="pc-arc"] [data-value="top"]').getAttribute("aria-checked"), "true", "a new circle is on the top arc");
+    assert.equal(await page.getByTestId("pc-arc").locator('[data-value="top"]').getAttribute("aria-checked"), "true", "a new circle is on the top arc");
 
     /* ---- type radius 4 → glyphs at 4.000 live, read-back ---- */
     const radiusInput = page.getByTestId("pc-radius-input");
@@ -245,7 +249,7 @@ export default async function ({ page, base, admin, editor, h }) {
     out.sizeDrag = { before: sizeBefore, after: layer.style.text_size_mm };
 
     /* ---- bottom arc = ccw at 180° ---- */
-    await page.locator('[data-testid="pc-arc"] [data-value="bottom"]').click();
+    await page.getByTestId("pc-arc").locator('[data-value="bottom"]').click();
     layer = await waitForRecipe(designId, (l) => l.placement.direction === "ccw" && l.placement.arc_position_deg === 180, "bottom arc");
     await page.waitForFunction(
       () => JSON.parse(document.querySelector('[data-testid="editor-viewport"]')?.getAttribute("data-glyphs") ?? "[]").every((g) => g.y < 0),
@@ -257,7 +261,10 @@ export default async function ({ page, base, admin, editor, h }) {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.waitForTimeout(600);
     const layoutCheck = await page.evaluate(() => {
-      const panel = document.querySelector('[data-testid="editor-panel"]').getBoundingClientRect();
+      // E2 U4: the controls are a region of the workspace, and the region is
+      // what stacks — `editor-panel` is its scrolling content, whose own top
+      // goes negative as soon as it is scrolled.
+      const panel = document.querySelector('[data-testid="workspace-panel"]').getBoundingClientRect();
       const view = document.querySelector('[data-testid="editor-viewport"]').getBoundingClientRect();
       const offenders = [...document.querySelectorAll('[data-testid="position-and-curve"] *')]
         .map((el) => ({ id: el.getAttribute("data-testid") ?? el.tagName, r: el.getBoundingClientRect() }))

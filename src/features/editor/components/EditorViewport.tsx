@@ -17,7 +17,7 @@ import { GL_SETTINGS } from "../lib/renderSettings";
 import { ProceduralStudio } from "./ProceduralStudio";
 import { CameraReport } from "./CameraReport";
 import { HandleProjector, HandlesOverlay, newHandleBridge, newHandleElements } from "./branding/Handles";
-import { selectHiddenGroups, selectZones, useEditorStore } from "../store/useEditorStore";
+import { selectHiddenGroups, selectSelectedLayerId, selectZones, useEditorStore } from "../store/useEditorStore";
 import { useLogoSources } from "../hooks/useLogoAssets";
 import { ManufacturingStrip } from "./ManufacturingStrip";
 import { processThresholds, type ProcessThresholds } from "../lib/manufacturing";
@@ -145,7 +145,10 @@ export function EditorViewport({
   const onMeshCount = useCallback((drawn: number, total: number) => setMeshCount({ drawn, total }), []);
   const handleBridge = useRef(newHandleBridge());
   const handleElements = useRef(newHandleElements());
-  const selectedLayerId = useEditorStore((s) => s.selectedLayerId);
+  const selectedLayerId = useEditorStore(selectSelectedLayerId);
+  // Any selection is an interaction: nothing turns while the buyer is working
+  // on a layer, a zone or a part (E2 U1).
+  const hasSelection = useEditorStore((s) => s.selection !== null);
   const modelFrame = useEditorStore((s) => s.modelFrame);
   const logoSources = useLogoSources(layers);
   // Phase 6a: a layer may carry its own finish, paint or ink; the PAINT
@@ -300,7 +303,7 @@ export function EditorViewport({
             enableDamping
             dampingFactor={0.08}
             // Selecting a layer is an interaction too: nothing turns under a handle drag (4i).
-            autoRotate={autoRotate && !selectedLayerId}
+            autoRotate={autoRotate && !hasSelection}
             autoRotateSpeed={0.6}
             onStart={() => setAutoRotate(false)}
           />

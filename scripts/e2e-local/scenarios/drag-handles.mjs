@@ -137,7 +137,7 @@ export default async function ({ page, base, admin, editor, h }) {
     await page.getByTestId("add-text").click();
     await page.getByTestId("text-layer-content").fill("POLO");
     await page.getByTestId("text-layer-content").blur();
-    await page.locator('[data-testid="text-layer-layout"] [data-value="circle"]').click();
+    await page.getByTestId("text-layer-layout").locator('[data-value="circle"]').click();
     await page.getByTestId("position-and-curve-toggle").click();
     await waitForLayer(designId, (l) => l.placement.layout === "circle" && l.content.value === "POLO", "circle POLO");
     await settled();
@@ -263,7 +263,7 @@ export default async function ({ page, base, admin, editor, h }) {
     await page.getByTestId("ruler-toggle").click();
 
     /* ---- 6. straight: move handle ---- */
-    await page.locator('[data-testid="text-layer-layout"] [data-value="straight"]').click();
+    await page.getByTestId("text-layer-layout").locator('[data-value="straight"]').click();
     await waitForLayer(designId, (l) => l.placement.layout === "straight", "straight");
     await settled();
     await page.waitForFunction(() => getComputedStyle(document.querySelector('[data-testid="handle-move"]')).display !== "none", null, { timeout: 10000 });

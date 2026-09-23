@@ -15,6 +15,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { POLO_OBJ, stageProduct } from "../lib/calibration.mjs";
+import { onlyLayerRow } from "../lib/appearance.mjs";
 
 const PRODUCT_SLUG = "sample-eyelets-rivets";
 const MIN_FEATURE_MM = 0.2;
@@ -203,7 +204,7 @@ export default async function ({ page, base, admin, editor, h }) {
     out.staffLine = staffText;
 
     /* ---- 7. the ruler's relief callout (R4) ---- */
-    await page.getByTestId("text-layer-select").first().click();
+    await (await onlyLayerRow(page)).getByTestId("text-layer-select").click();
     await page.getByTestId("ruler-toggle").click();
     const callout = page.getByTestId("ruler-relief-label");
     await callout.waitFor({ timeout: 20000 });

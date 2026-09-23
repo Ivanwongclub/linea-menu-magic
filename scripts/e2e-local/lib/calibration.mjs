@@ -267,7 +267,7 @@ export async function openEditor(page, url) {
 
 /** Picks a finish through the real "Change finish" sheet (no reload, camera untouched). */
 export async function pickFinish(page, cycCode) {
-  await page.getByRole("button", { name: /change finish/i }).click();
+  await page.getByTestId("change-finish").click();
   const swatch = page.locator(`[data-testid="finish-swatch"][data-code="${cycCode}"]`);
   await swatch.waitFor({ timeout: 10000 });
   await swatch.click();

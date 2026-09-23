@@ -14,7 +14,7 @@ import { useEditorStore } from "../store/useEditorStore";
 import { readAnonymousDraft, writeAnonymousDraft, clearAnonymousDraft } from "../lib/anonymousDraft";
 import { emptyRecipe, isLogoLayer, type DraftRecipe } from "../lib/recipe";
 import { uploadLogoAsset } from "../hooks/useLogoAssets";
-import { EditorShell } from "../components/EditorShell";
+import { WorkspaceShell } from "../components/workspace/WorkspaceShell";
 import { EditorViewport } from "../components/EditorViewport";
 import { EditorPanel } from "../components/EditorPanel";
 import { SignInBanner } from "../components/SignInBanner";
@@ -209,7 +209,7 @@ export function EditorNewPage({ productSlug }: { productSlug: string | null }) {
   const variantScale = selectedSize && referenceMm > 0 ? selectedSize.size_primary_mm / referenceMm : 1;
 
   return (
-    <EditorShell
+    <WorkspaceShell
       banner={!session && !calibration ? <SignInBanner /> : undefined}
       viewport={
         <EditorViewport

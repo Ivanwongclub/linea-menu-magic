@@ -28,9 +28,10 @@ interface EditorPanelProps {
   saveStatus?: AutosaveStatus;
 }
 
-function PanelGroup({ title, children }: { title: string; children?: ReactNode }) {
+/** `group` is what a scenario looks for: the heading is copy, and copy changes (E2 U3). */
+function PanelGroup({ group, title, children }: { group: string; title: string; children?: ReactNode }) {
   return (
-    <div className="border border-border p-4 space-y-3">
+    <div className="border border-border p-4 space-y-3" data-testid="panel-group" data-group={group}>
       <h3 className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">{title}</h3>
       {children}
     </div>
@@ -45,7 +46,11 @@ function formatSize(v: EditorSizeVariant): string {
   return `${mm}mm${ligne}`;
 }
 
-/** Four groups, in the order a buyer decides (axis-design §7). */
+/**
+ * The groups a buyer decides in order (axis-design §7). Since E2 U4 the panel
+ * owns none of its own geometry — width, side, scroll and borders belong to
+ * `WorkspaceShell`, which is what the buyer moves around.
+ */
 export function EditorPanel({
   product,
   sizeVariantId,
@@ -62,14 +67,16 @@ export function EditorPanel({
   const [pickerOpen, setPickerOpen] = useState(false);
 
   return (
-    <div className="w-full max-h-[60%] lg:max-h-none lg:w-[360px] shrink-0 border-t lg:border-t-0 lg:border-l border-border bg-background overflow-y-auto overflow-x-hidden" data-testid="editor-panel">
+    // No height of its own: the workspace's scroll container is the parent, and
+    // a panel that filled it would leave nothing to scroll.
+    <div className="min-w-0" data-testid="editor-panel">
       {saveStatus && saveStatus !== "idle" && (
         <div className="px-4 py-1.5 border-b border-border text-[11px] text-muted-foreground text-right" data-testid="autosave-status" data-status={saveStatus}>
           {saveStatus === "saving" ? t("editor.autosave.saving") : saveStatus === "error" ? t("editor.autosave.notSaved") : t("editor.autosave.saved")}
         </div>
       )}
       <div className="p-4 space-y-4">
-        <PanelGroup title={t("editor.panel.product")}>
+        <PanelGroup group="product" title={t("editor.panel.product")}>
           <div className="space-y-0.5">
             <p className="text-sm font-medium text-foreground">{product.name}</p>
             <p className="text-xs text-muted-foreground font-mono">{product.item_code}</p>
@@ -77,7 +84,7 @@ export function EditorPanel({
           {product.size_variants.length > 0 && (
             <RadioGroup value={sizeVariantId ?? undefined} onValueChange={onSizeVariantChange} className="space-y-2 pt-1">
               {product.size_variants.map((v) => (
-                <div key={v.id} className="flex items-center gap-2">
+                <div key={v.id} className="flex items-center gap-2" data-testid="size-variant" data-variant-id={v.id}>
                   <RadioGroupItem value={v.id} id={`size-${v.id}`} />
                   <Label htmlFor={`size-${v.id}`} className="text-sm font-normal cursor-pointer">
                     {formatSize(v)}
@@ -89,7 +96,7 @@ export function EditorPanel({
         </PanelGroup>
 
         {product.is_metal ? (
-          <PanelGroup title={t("editor.panel.finish")}>
+          <PanelGroup group="finish" title={t("editor.panel.finish")}>
             {selectedFinish ? (
               <div className="flex gap-3">
                 <FinishSwatch finish={selectedFinish} className="w-14 h-14 shrink-0 border border-border" />
@@ -103,13 +110,13 @@ export function EditorPanel({
             )}
             <p className="text-xs text-muted-foreground">{t("editor.finish.swatchDisclaimer")}</p>
             {finishOptions.length > 0 && (
-              <Button variant="outline" size="sm" className="rounded-none text-xs tracking-[0.05em]" onClick={() => setPickerOpen(true)}>
+              <Button data-testid="change-finish" variant="outline" size="sm" className="rounded-none text-xs tracking-[0.05em]" onClick={() => setPickerOpen(true)}>
                 {t("editor.finish.changeFinish")}
               </Button>
             )}
           </PanelGroup>
         ) : (
-          <PanelGroup title={t("editor.panel.colour")}>
+          <PanelGroup group="colour" title={t("editor.panel.colour")}>
             {colours.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {colours.map((c) => (
@@ -140,7 +147,6 @@ export function EditorPanel({
           scaleFactor={product.model_scale_factor}
           process={processThresholds(selectedFinish?.process, language)}
           faceDiameterMm={product.size_variants.find((v) => v.id === sizeVariantId)?.size_primary_mm ?? product.size_variants[0]?.size_primary_mm ?? 10} />
-        <PanelGroup title={t("editor.panel.output")} />
       </div>
 
       <Sheet open={pickerOpen} onOpenChange={setPickerOpen}>

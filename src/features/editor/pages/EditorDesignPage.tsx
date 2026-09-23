@@ -12,7 +12,7 @@ import { useAutosaveDraft } from "../hooks/useAutosaveDraft";
 import { useDesignerStaffStatus } from "../hooks/useDesignerStaffStatus";
 import { useCatalogueEditorStatus } from "@/features/admin/hooks/useCatalogueEditorStatus";
 import { useEditorStore } from "../store/useEditorStore";
-import { EditorShell } from "../components/EditorShell";
+import { WorkspaceShell } from "../components/workspace/WorkspaceShell";
 import { EditorViewport } from "../components/EditorViewport";
 import { EditorPanel } from "../components/EditorPanel";
 
@@ -122,7 +122,7 @@ export function EditorDesignPage({ designId }: { designId: string }) {
   const variantScale = selectedSize && referenceMm > 0 ? selectedSize.size_primary_mm / referenceMm : 1;
 
   return (
-    <EditorShell
+    <WorkspaceShell
       viewport={
         <EditorViewport
           modelStoragePath={product.model_storage_path}

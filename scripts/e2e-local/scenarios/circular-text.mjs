@@ -17,6 +17,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { POLO_OBJ } from "../lib/calibration.mjs";
+import { onlyLayerRow } from "../lib/appearance.mjs";
 import { REPO_ROOT } from "../lib/stack.mjs";
 import { parseObjRawBounds } from "../../../src/features/admin/lib/objBounds.ts";
 import { layoutText, normalizeDeg, textArc } from "../../../src/features/editor/lib/textLayout.ts";
@@ -191,7 +192,7 @@ export default async function ({ page, base, admin, editor, h }) {
     }
 
     /* ---- add a character through the panel: radius unchanged, span grows ---- */
-    await page.getByTestId("text-layer-select").first().click();
+    await (await onlyLayerRow(page)).getByTestId("text-layer-select").click();
     await page.getByTestId("text-layer-content").fill("POLOS");
     const grown = await waitForRecipe(designId, (r) => r?.layers?.[0]?.content?.value === "POLOS", "added character");
     assert.equal(grown.layers[0].placement.radius_mm, RADIUS, "radius_mm unchanged after adding a character (read-back)");

@@ -140,14 +140,14 @@ export default async function ({ page, base, admin, editor, h }) {
 
     /* ---- metal product: FINISH group, attached-only picker, ruler toggle, no toolbar ---- */
     await page.goto(`${base}/designer-studio/editor/new?product=${metalProduct.slug}`, { waitUntil: "networkidle" });
-    await page.locator("canvas").first().waitFor({ timeout: 20000 });
+    await page.getByTestId("editor-viewport").locator("canvas").first().waitFor({ timeout: 20000 });
     const panel = page.getByTestId("editor-panel");
     await panel.waitFor({ timeout: 10000 });
-    assert.match(await panel.innerText(), /Finish/i);
+    assert.equal(await panel.locator('[data-testid="panel-group"][data-group="finish"]').count(), 1, "a metal product gets the FINISH group");
     assert.equal(await page.getByTestId("viewport-toolbar").count(), 0, "no floating viewport toolbar");
     assert.equal(await page.getByTestId("ruler-toggle").count(), 1, "ruler toggle is present (collision 18)");
 
-    await page.getByRole("button", { name: /change finish/i }).click();
+    await page.getByTestId("change-finish").click();
     const grid = page.locator('[data-testid="finish-swatch"]');
     await grid.first().waitFor({ timeout: 10000 });
     const shownCodes = await grid.evaluateAll((els) => els.map((el) => el.getAttribute("data-code")));
@@ -160,10 +160,10 @@ export default async function ({ page, base, admin, editor, h }) {
 
     /* ---- non-metal product: COLOUR, not FINISH ---- */
     await page.goto(`${base}/designer-studio/editor/new?product=${colourProduct.slug}`, { waitUntil: "networkidle" });
-    await page.locator("canvas").first().waitFor({ timeout: 20000 });
-    const colourPanelText = await page.getByTestId("editor-panel").innerText();
-    assert.match(colourPanelText, /Colour/i);
-    assert.doesNotMatch(colourPanelText, /^Finish$/m);
+    await page.getByTestId("editor-viewport").locator("canvas").first().waitFor({ timeout: 20000 });
+    const colourPanel = page.getByTestId("editor-panel");
+    assert.equal(await colourPanel.locator('[data-testid="panel-group"][data-group="colour"]').count(), 1, "a non-metal product gets COLOUR");
+    assert.equal(await colourPanel.locator('[data-testid="panel-group"][data-group="finish"]').count(), 0, "and not FINISH");
     assert.ok(await page.getByTestId("colour-swatch").first().count(), "colour swatches render");
     assert.equal(await page.getByTestId("ruler-toggle").count(), 1, "ruler toggle is present (collision 18)");
 
@@ -173,9 +173,9 @@ export default async function ({ page, base, admin, editor, h }) {
     await page.goto(`${base}/designer-studio/editor/new?product=${metalProduct.slug}`, { waitUntil: "networkidle" });
     await page.waitForURL((u) => /^\/designer-studio\/editor\/[0-9a-f-]{36}$/.test(u.pathname), { timeout: 20000 });
     const designId = page.url().split("/").pop();
-    await page.locator("canvas").first().waitFor({ timeout: 20000 });
+    await page.getByTestId("editor-viewport").locator("canvas").first().waitFor({ timeout: 20000 });
 
-    await page.getByRole("button", { name: /change finish/i }).click();
+    await page.getByTestId("change-finish").click();
     await page.locator('[data-testid="finish-swatch"]').first().waitFor({ timeout: 10000 });
     const targetCode = attachedB.cyc_code;
     await page.locator(`[data-testid="finish-swatch"][data-code="${targetCode}"]`).click();

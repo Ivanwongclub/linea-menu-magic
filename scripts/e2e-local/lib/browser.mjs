@@ -74,6 +74,28 @@ export function helpers(page, base) {
      * Lets pending refetches settle first — dnd-kit cancels a drag if the
      * sortable item list changes underneath it.
      */
+    /**
+     * A drag with the pointer, which is what a buyer does: dnd-kit's
+     * `PointerSensor` starts after 4 px, so the move is made in steps and the
+     * drop is given a frame to land. Steadier than the keyboard path under
+     * load, where a swallowed Space reads as "the reorder never happened".
+     */
+    async pointerReorder(handleLocator, targetLocator) {
+      await handleLocator.scrollIntoViewIfNeeded();
+      const from = await handleLocator.boundingBox();
+      const to = await targetLocator.boundingBox();
+      if (!from || !to) throw new Error("nothing to drag");
+      const start = { x: from.x + from.width / 2, y: from.y + from.height / 2 };
+      const end = { x: start.x, y: to.y + to.height / 2 };
+      await page.mouse.move(start.x, start.y);
+      await page.mouse.down();
+      await page.mouse.move(start.x, start.y + (end.y > start.y ? 8 : -8), { steps: 2 });
+      await page.mouse.move(end.x, end.y, { steps: 12 });
+      await page.waitForTimeout(200);
+      await page.mouse.up();
+      await page.waitForTimeout(400);
+    },
+
     async keyboardReorder(handleLocator, direction = "up", steps = 1) {
       // "up"/"down" for vertical lists, "left"/"right" for grids (dnd-kit
       // moves to the nearest item in the arrow's direction).
@@ -81,7 +103,30 @@ export function helpers(page, base) {
       await page.waitForLoadState("networkidle");
       await handleLocator.scrollIntoViewIfNeeded();
       await handleLocator.focus();
-      await page.keyboard.press("Space");
+      // dnd-kit only starts a keyboard drag once the handle really has focus;
+      // under load the focus can land a frame late and the Space is swallowed,
+      // which reads as "the reorder never happened". It announces the pick-up
+      // in its own live region, so wait for that rather than for a delay.
+      await handleLocator.evaluate((el) => el === document.activeElement || el.focus());
+      // dnd-kit announces the pick-up in a live region of its own; there are
+      // other live regions on the page (the toaster), so read them all.
+      const pickedUp = () =>
+        page.waitForFunction(
+          () => [...document.querySelectorAll('[aria-live], [role="status"]')].some((el) => /picked up/i.test(el.textContent ?? "")),
+          null,
+          { timeout: 2000 },
+        );
+      let started = false;
+      for (let attempt = 0; attempt < 3 && !started; attempt++) {
+        await page.keyboard.press("Space");
+        started = await pickedUp().then(
+          () => true,
+          () => false,
+        );
+        // A second Space on a drag that did start would drop it again, so only
+        // retry when nothing was announced at all.
+        if (!started) await page.waitForTimeout(200);
+      }
       await page.waitForTimeout(250);
       for (let i = 0; i < steps; i++) {
         await page.keyboard.press(key);

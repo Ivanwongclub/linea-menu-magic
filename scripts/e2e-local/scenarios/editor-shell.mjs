@@ -76,7 +76,7 @@ export default async function ({ page, base, admin, editor, h }) {
 
     /* ---- anonymous: canvas renders, PRODUCT group, sign-in banner ---- */
     await page.goto(url, { waitUntil: "networkidle" });
-    await page.locator("canvas").first().waitFor({ timeout: 20000 });
+    await page.getByTestId("editor-viewport").locator("canvas").first().waitFor({ timeout: 20000 });
     await page.getByText("Sign in to save this design.").waitFor({ timeout: 10000 });
     const panel = page.getByTestId("editor-panel");
     await panel.waitFor({ timeout: 10000 });
@@ -84,10 +84,13 @@ export default async function ({ page, base, admin, editor, h }) {
     assert.ok(panelText.includes(product.name), "PRODUCT group shows the product name");
     assert.ok(panelText.includes(itemCode), "PRODUCT group shows the item code");
     // Phase 3: the second group is FINISH for a metal product, COLOUR otherwise.
-    assert.ok(
-      /Product/i.test(panelText) && (/Finish/i.test(panelText) || /Colour/i.test(panelText)) && /Branding/i.test(panelText) && /Output/i.test(panelText),
-      "all four groups render",
-    );
+    // E2 U3: groups are read by `data-group`, not by their heading copy; E2
+    // ruling 3 deleted the empty Output group rather than carry a placeholder.
+    const groups = await page.locator('[data-testid="panel-group"]').evaluateAll((els) => els.map((el) => el.getAttribute("data-group")));
+    assert.ok(groups.includes("product"), "the PRODUCT group renders");
+    assert.ok(groups.includes("finish") || groups.includes("colour"), "a finish or a colour group renders");
+    assert.equal(await page.getByTestId("branding-group").count(), 1, "the BRANDING group renders");
+    assert.ok(!groups.includes("output"), "and no empty Output placeholder");
 
     /* ---- bare /editor redirects, mapping legacy ?slug= to ?product= ---- */
     await page.goto(`${base}/designer-studio/editor?slug=${product.slug}`, { waitUntil: "networkidle" });
@@ -111,7 +114,7 @@ export default async function ({ page, base, admin, editor, h }) {
     assert.equal(design.product_id, product.id, "the design is linked to the right product");
     assert.equal(design.status, "draft");
 
-    await page.locator("canvas").first().waitFor({ timeout: 20000 });
+    await page.getByTestId("editor-viewport").locator("canvas").first().waitFor({ timeout: 20000 });
     await page.getByTestId("editor-panel").waitFor({ timeout: 10000 });
 
     return {

@@ -1,7 +1,7 @@
 import { Layers2, X } from "lucide-react";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { cn } from "@/lib/utils";
-import { EMPTY_ZONES, selectZones, useEditorStore } from "../../store/useEditorStore";
+import { EMPTY_ZONES, selectSelectedZoneId, selectZones, useEditorStore } from "../../store/useEditorStore";
 import { newZone, type AppearanceMode, type Zone } from "../../lib/recipe";
 import type { ZoneMethod } from "../../lib/zones";
 import { runsLength } from "../../lib/zones";
@@ -87,6 +87,8 @@ function ZoneRow({ zone }: { zone: Zone }) {
   const beginDrag = useEditorStore((s) => s.beginDrag);
   const endDrag = useEditorStore((s) => s.endDrag);
   const report = useEditorStore((s) => s.partsReport);
+  const select = useEditorStore((s) => s.select);
+  const selectedZoneId = useEditorStore(selectSelectedZoneId);
   const paintZoneId = useEditorStore((s) => s.paintZoneId);
   const setPaintZone = useEditorStore((s) => s.setPaintZone);
   const brushRadiusMm = useEditorStore((s) => s.brushRadiusMm);
@@ -96,7 +98,17 @@ function ZoneRow({ zone }: { zone: Zone }) {
   const painting = paintZoneId === zone.id;
 
   return (
-    <li className="space-y-1.5 border border-border p-2" data-testid="zone-row" data-zone-id={zone.id} data-method={zone.method}>
+    // Touching the row is selecting it (E2 U1): one selection, so this clears
+    // any selected layer or part and the on-model handles with it.
+    <li
+      className={cn("space-y-1.5 border p-2", selectedZoneId === zone.id ? "border-foreground" : "border-border")}
+      data-testid="zone-row"
+      data-zone-id={zone.id}
+      data-method={zone.method}
+      data-selected={selectedZoneId === zone.id}
+      onPointerDownCapture={() => select({ kind: "zone", id: zone.id })}
+      onFocusCapture={() => select({ kind: "zone", id: zone.id })}
+    >
       <div className="flex items-center gap-2">
         <input
           data-testid="zone-name"

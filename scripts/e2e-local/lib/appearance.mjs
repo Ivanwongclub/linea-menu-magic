@@ -165,7 +165,7 @@ export async function addSampleText(page, value = "II", sizeMm = 3.6) {
   await page.getByTestId("text-layer-content").fill(value);
   await page.getByTestId("text-layer-content").blur();
   await page.getByTestId("position-and-curve-toggle").click();
-  await page.locator('[data-testid="text-layer-layout"] [data-value="straight"]').click();
+  await page.getByTestId("text-layer-layout").locator('[data-value="straight"]').click();
   await page.getByTestId("pc-text-size-input").fill(String(sizeMm));
   await page.getByTestId("pc-text-size-input").blur();
   await page.waitForTimeout(1200);
@@ -273,6 +273,22 @@ export async function colourAtScreen(page, canvas, { x, y }) {
   for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) samples.push(at(px + dx, py + dy));
   const rgb = [0, 1, 2].map((c) => samples.map((s) => s[c]).sort((a, b) => a - b)[4]);
   return { rgb, lab: linearToLab(rgb255ToLinear(rgb)) };
+}
+
+/** The row of a layer, by the layer it is (E2 U3) — never by its place in the list. */
+export function layerRow(page, layerId) {
+  return page.locator(`[data-testid="text-layer-row"][data-layer-id="${layerId}"]`);
+}
+
+/**
+ * The row of a design that has exactly one layer: the assumption a `.first()`
+ * used to make silently, made loudly instead (E2 U3).
+ */
+export async function onlyLayerRow(page) {
+  const rows = page.locator('[data-testid="text-layer-row"]');
+  const count = await rows.count();
+  if (count !== 1) throw new Error(`expected exactly one layer row, found ${count}`);
+  return rows.first();
 }
 
 /** Lab of a stored hex, to compare a render against what was asked for. */

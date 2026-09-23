@@ -124,7 +124,7 @@ export default async function ({ page, base, admin, editor, h }) {
     assert.ok(Math.abs(atReference - 10.8) <= 0.01, `at the reference variant, rendered size ${atReference} should be 10.80 ± 0.01`);
 
     /* ---- switching variant rescales to the new variant's mm ---- */
-    await page.locator(`#size-${fifteenVariantId}`).click();
+    await page.locator(`[data-testid="size-variant"][data-variant-id="${fifteenVariantId}"]`).getByRole("radio").click();
     await page.waitForFunction(
       (expected) => {
         const el = document.querySelector('[data-testid="editor-viewport"]');

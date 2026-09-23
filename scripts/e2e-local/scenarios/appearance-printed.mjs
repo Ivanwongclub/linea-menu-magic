@@ -5,6 +5,7 @@ import assert from "node:assert/strict";
 import path from "node:path";
 import { REPO_ROOT } from "../lib/stack.mjs";
 import {
+  onlyLayerRow,
   LAYER_PAINT,
   addSampleText,
   colourAt,
@@ -43,10 +44,11 @@ export default async function ({ page, base, admin, editor, h }) {
     await addSampleText(page);
 
     /* ---- 1. Printed is a relief type (R1) ---- */
-    await page.locator('[data-testid="relief-type"] [data-value="printed"]').click();
+    await page.getByTestId("relief-type").locator('[data-value="printed"]').click();
     const printedRecipe = await waitForRecipe(page, admin, designId, (r) => r.layers?.[0]?.relief?.type === "printed", "printed relief stored");
     assert.equal(printedRecipe.layers[0].appearance.mode, "printed", "and an appearance at the same time");
-    assert.equal(await page.getByTestId("layer-appearance").first().getAttribute("data-mode"), "printed", "the appearance control agrees");
+    const printedAppearance = page.locator(`[data-testid="layer-appearance"][data-layer-id="${printedRecipe.layers[0].id}"]`);
+    assert.equal(await printedAppearance.getAttribute("data-mode"), "printed", "the appearance control agrees");
     assert.equal(await page.getByTestId("relief-depth-input").count(), 0, "printed ink has no depth to type");
     out.printedRelief = printedRecipe.layers[0].relief.type;
 
@@ -99,7 +101,7 @@ export default async function ({ page, base, admin, editor, h }) {
     await setPrintThresholds({ min_feature_mm: null });
     await page.reload({ waitUntil: "networkidle" });
     await canvas.waitFor({ timeout: 40000 });
-    await page.getByTestId("text-layer-select").first().click();
+    await (await onlyLayerRow(page)).getByTestId("text-layer-select").click();
     await page.getByTestId("position-and-curve-toggle").click();
     await page.getByTestId("pc-text-size-input").fill("0.6");
     await page.getByTestId("pc-text-size-input").blur();
