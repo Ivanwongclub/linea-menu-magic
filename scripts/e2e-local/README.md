@@ -7,6 +7,37 @@ a catalogue-editor account, runs the app against that stack, drives a real
 browser through the `/admin` UI, and reads the result back with the service
 role so scenarios can assert on what was actually stored.
 
+## Running everything
+
+`npm run e2e:suite` (`suite.sh`) is the way to run the whole suite. It boots
+the stack once, then runs every scenario in `scenarios/`, sorted, one at a
+time, recording pass/fail per scenario and exiting non-zero if any fails. A
+scenario that asserts on `E2E_BUILD` is given build mode automatically and
+marked `[build]` in the output, so a plain sweep is not silently red.
+
+It **leaves the stack up** when it finishes — pair it with `npm run e2e:down`
+by hand when you are done.
+
+Two environment knobs matter:
+
+- `E2E_PORT` — the dev server port. **The runner refuses to start on an
+  occupied port** and names the process holding it. This is deliberate:
+  `run.mjs` treats any answer on the port as "the dev server is ready", so an
+  unrelated listener (an `ssh -L` forward on 8080, say) used to be served to
+  the browser as if it were the app, producing fast and nonsensical failures.
+  Pass `E2E_PORT=<free port>` rather than killing the holder blindly.
+- `E2E_ACTION_TIMEOUT` — default 30000 ms, read once in `lib/browser.mjs` and
+  applied via `page.setDefaultTimeout`, with each explicit wait's own literal
+  as a floor. This is the one knob to raise on a loaded box; the dnd-kit
+  pick-up probe keeps its own 2000 ms exemption, as commented at that call.
+- `E2E_SUITE_SKIP_UP=1` — reuse an already-booted stack instead of bringing
+  one up.
+
+**Baseline: 47/47 on 2026-09-23**, 19m 18s, default action timeout, port 8123.
+That is the *first* mechanical full-suite figure. Every earlier "47/47" was
+assembled by hand from individual scenario runs — those are not a baseline.
+The numbers live in `docs/3d-editor/STATUS.md`.
+
 ## What it does
 
 - `npm run e2e:up` — copies `supabase/` to a scratch directory

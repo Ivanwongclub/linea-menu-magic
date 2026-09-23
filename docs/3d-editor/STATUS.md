@@ -59,14 +59,16 @@ per-phase rulings stay in each phase's migration header and commit, and are
 summarised here only where they still bind later work.
 
 **Built: 6 of 12 phases** (1–6 done, 6b closed Phase 6; 7–12 not started) and
-**6 of 13 workspace units** (U1–U4, U6, U8).
+**6 of 13 workspace units** (U1–U4, U6, U8 — which are exactly E2's six
+pre-7a units, so Phase 7a is unblocked).
 
 ## Workspace units — 6 of 13 built
 
-E2's 13-unit build plan for the docked workspace. Six of the thirteen must
-land before Phase 7a; U1–U4, U6 and U8 are built, and the unit titles below
-that are not yet built are named in E2's build plan rather than restated here
-(this file has not been reconciled against E2 unit by unit — see open item 3).
+E2's 13-unit build plan for the docked workspace (`reports/E2-workspace-audit.md`
+§5), reconciled unit by unit on 2026-09-23. E2 names **U1, U2, U3, U4, U6 and
+U8** as the six that must precede Phase 7a, and all six are built — nothing in
+the workspace plan now blocks 7a. U5, U7 and U9–U13 may follow 7a; U12 should
+follow whichever unit lands last before the deck is next shown.
 
 | Unit | Contents | Status |
 |---|---|---|
@@ -74,13 +76,15 @@ that are not yet built are named in E2's build plan rather than restated here
 | U2 | The 600-line branding box split into a list, the selected layer's properties, the row controls and the upload hook — same DOM, same test ids | **Done** |
 | U3 | Test ids on the size radios and Change finish; the suite's ordinal, DOM-id and CSS-descendant selectors replaced with attribute ones | **Done** |
 | U4 | The workspace itself: fixed left/right docking, collapse and resize, remembered per user in localStorage under a layout version, Reset workspace for the chrome alone, default layout under `?calibration=1` | **Done** |
-| U5 | Properties placement (U6's panel currently sits under the layer list until this unit moves it) | Not started |
+| U5 | **Layers dock** — the sectioned list (Branding / Zones / Parts) with counts, Parts collapsed, virtualised past ~50 rows; this is also what moves U6's panel out from under the layer list (standing ruling 3) | Not started — may follow 7a |
 | U6 | One Properties panel following the selection: a layer's relief, appearance and placement; a zone's plane, parts or brush and what it is made of; a part's name, share of the model, visibility and covering zones; a plain sentence when nothing is selected. Controls moved parent, not shape — test ids and `data-layer-id` / `data-zone-id` unchanged | **Done** |
-| U7 | — | Not started |
+| U7 | **Document bar** — design name, autosave, undo / redo and the workspace menu: the home for everything that is not a selection; history leaves `BrandingGroup` and `EditorPanel` loses the rest | Not started — may follow 7a |
 | U8 | The Versions / Output socket for Phase 7's saves and Phase 9/10/12's output; renders only when it has something in it (E2 §3.4 item 7), today the design's own save state on its header | **Done** |
-| U9–U11 | — | Not started |
-| U12 | Deck re-shot against the workspace | Not started |
-| U13 | — | Not started |
+| U9 | **Floating view tools** — reset view, zoom to fit, ruler and brush size in a viewport overlay; retires the "no floating toolbar" ruling (Phase 3 R2) and hides the tools under `?calibration=1` | Not started — may follow 7a |
+| U10 | **Strip as a verdict** — the manufacturing warning strip full width under viewport and properties, collapsible with a count badge, collapsed by default on small screens | Not started — may follow 7a |
+| U11 | **390 px sheet** — the phone layout: a bottom sheet with three snap points and a segmented control, viewport floor kept at 200 px | Not started — may follow 7a |
+| U12 | **Deck and docs** — re-shoot every editor shot against the workspace and record the workspace rulings (standing ruling 4) | Not started — follows the last unit before the deck is next shown |
+| U13 | **Free docking** (optional) — four-edge docking and drag-to-dock, only if U4's fixed zones prove insufficient | Not started — optional, may follow 7a |
 
 ### Standing rulings — E2, 6b, U1–U4, U6–U8
 
@@ -113,16 +117,16 @@ These bind later units and Phase 7a; they are not re-decided per unit.
 
 ### Open items
 
-1. **Six units before Phase 7a.** E2 names six units that must precede 7a;
-   U1–U4, U6 and U8 are built. Whether that set *is* the six, or U5/U7 are
-   among them, is not settled in this file — check E2's build plan before
-   starting 7a.
-2. **U5 and U7 are unstarted and U6's placement depends on U5** (standing
-   ruling 3). U7's contents are not recorded here.
-3. **This file's unit table is not reconciled against E2 unit by unit.** U1–U4,
-   U6 and U8 are transcribed from their commits; U5, U7 and U9–U13 are
-   placeholders except where a standing ruling names one (U12). Reconcile
-   against `reports/E2-workspace-audit.md` when E2 is next in scope.
+1. **Settled (2026-09-23): the six pre-7a units are U1, U2, U3, U4, U6 and
+   U8**, per E2 §5, and all six are built. U5 and U7 are *not* among them —
+   E2 says the layers dock can ship flat-but-sectioned first. **Phase 7a is
+   unblocked by the workspace plan.**
+2. **U5 still owns U6's placement** (standing ruling 3). Properties sits under
+   the layer list until the layers dock lands; that is a known temporary
+   arrangement, not a bug to patch in the meantime.
+3. **U9 retires a Phase 3 ruling.** E2 §5 has the floating view tools retire
+   "no floating toolbar" (Phase 3 R2). Confirm that retirement when U9 is
+   scheduled rather than treating R2 as still binding.
 
 ## Verification baseline
 

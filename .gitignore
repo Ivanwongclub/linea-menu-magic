@@ -17,6 +17,13 @@ supabase/.temp
 scripts/e2e-local/last-failure.png
 scripts/e2e-local/.shots/
 
+# Per-run calibration and deck output. These are artefacts of a run, not
+# records: the numbers that matter are transcribed into
+# docs/3d-editor/STATUS.md. Regenerate with the calibrate harness,
+# npm run e2e:suite or npm run deck:shots.
+reports/*-family-fit.json
+reports/*-materials.png
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
