@@ -29,7 +29,7 @@ this is an index, not a decision log.
 | 5b | 3D-ready badges and editor entry, admin 3D column, Phase 5 close-out, deck shots | **Done** |
 | 6a | Appearance per layer: plated, paint (the fill), printed, custom colour | **Done** |
 | 6b | Zones and parts; occlusion bake moves to a worker | **Done** — Phase 6 closed |
-| 7a | Versions: named saves, snapshot, reload; the design list; the legacy `model_url` surfaces swept onto `is3DReady` | **Written, not verified** — the suite has not run against it; not closed until it does |
+| 7a | Versions: named saves, snapshot, reload; the design list; the legacy `model_url` surfaces swept onto `is3DReady` | **Done** — 48/48, Phase 7 closed |
 | 8 | Shares | Not started |
 | 9 | Quote request and staff queue | Not started |
 | 10 | Spec sheet PDF, recovered values labelled (§4.3) | Not started |
@@ -59,13 +59,12 @@ Update it at each milestone. Its reference set is `reports/E0-designer-studio-au
 per-phase rulings stay in each phase's migration header and commit, and are
 summarised here only where they still bind later work.
 
-**Built: 6 of 12 phases verified** (1–6 done, 6b closed Phase 6), **7a written
-but not verified** (8–12 not started), and **6 of 13 workspace units** (U1–U4,
+**Built: 7 of 12 phases** (1–6 done, 6b closed Phase 6; 7a closed Phase 7 and
+is verified at 48/48; 8–12 not started) and **6 of 13 workspace units** (U1–U4,
 U6, U8 — which were exactly E2's six pre-7a units, so Phase 7a was unblocked).
-7a is committed and does not close until `npm run e2e:suite` runs against it:
-its own scenario has never had a green run, and the attempts that failed on
-capacity already turned up one real bug (a load race on the version list), so
-another may be hiding behind them.
+7a took four suite runs to verify and each failure was a real defect — two in
+its own scenario, one in the design list's query; the phase was not called done
+until the suite was green.
 
 ## Workspace units — 6 of 13 built
 
@@ -162,6 +161,7 @@ baseline** — its result is recorded below.
 | 2026-09-24 | **killed at 4/48** (Phase 7a) | 30000 (default) | Started in the quietest window the box offered (1 min 5.9, 5 min 10.2). `e2e:up` booted cleanly this time. `admin-i18n`, `appearance-paint`, `appearance-plated` passed; the OS killed the run inside `appearance-printed` with ~68 MB free. Second memory kill on this box, after the 18/47 one — a capacity limit, not a scenario failure |
 | 2026-09-24 | **47/48** in 22m 13s | 30000 (default) | First mechanical pass since 7a, on a box with ten unrelated containers stopped. Every pre-7a scenario passed, including `render-calibration` and `workspace`. The one failure is 7a's own new `design-versions` — a real defect in the scenario, not capacity (see below) |
 | 2026-09-24 | **47/48** in 24m 51s | 30000 (default) | Re-run with `design-versions`' two DOM read-backs replaced by `waitForRecipe`. Those steps now pass; the scenario got as far as step 6 and failed there on a **product bug** — the design list's query is ambiguous and has never returned a row (see below) |
+| 2026-09-24 | **48/48** in 24m 35s | 30000 (default) | Green, with the design list's embed named by its FK. **This is the baseline for Phase 7a**, and the first mechanical pass over all 48. `render-calibration` unmoved again (surround 49, highlight 238, `#808080` → 128,128,128, `#C0392B` → 192,58,45, fill 0.559) |
 
 Two things the first runs exposed, both now handled by `suite.sh` rather than
 by the person running it:
@@ -181,6 +181,21 @@ The baseline run used port 8123 and reused an already-booted stack
 enough for all 47 on this box. An earlier attempt was killed by the OS at 18/47
 under memory pressure (load average ~12); that is a capacity limit of the
 machine, not a scenario failure.
+
+### Standing rule — every new page gets a scenario that loads it once
+
+A PostgREST embed is a string. `tsc -b` does not read it, the build does not
+execute it, and a typed client cannot tell that a relationship is ambiguous —
+only loading the page does. 7a's design list shipped with an embed PostgREST
+refuses (PGRST201: `designs` reaches `design_versions` both by
+`design_versions.design_id` and by the circular `designs.current_version_id`),
+so the query threw and the page rendered its empty state. Nothing exercised it
+until 7a's own scenario reached the page, three runs later.
+
+**So: a new route gets a scenario that at minimum navigates to it signed in and
+asserts one row of real data.** Not a screenshot, not a smoke test of the
+component — a load against the stack, because that is the only thing that runs
+the query. The same applies to any new select with an embed in it.
 
 ## Phase 1 — done (2026-09-17)
 
@@ -2701,7 +2716,7 @@ Files:
    s in the worker, 5–14 ms of main thread). *Recommend* leaving it until
    Phase 12, where a baked export would store it anyway.
 
-## Phase 7a — written 2026-09-23, not yet verified
+## Phase 7a — done (2026-09-24, verified at 48/48)
 
 Named versions, the design list, and the sweep that takes the last three
 surfaces off the legacy `model_url`. Phase 7 is closed. **No migration** —
@@ -2849,8 +2864,9 @@ recipe, before it can look at a field. Everything the scenario proves before
 that point — the save, the snapshot's contents, `version_number` from the
 table, `current_version_id` — passed.
 
-**7a stays written-not-verified** until that scenario is fixed and the suite
-runs green. Both bugs the scenario has turned up so far were in the scenario
+*(As of that run:)* **7a stays written-not-verified** until that scenario is
+fixed and the suite runs green — which it did, two runs later; see the closing
+section below. Both bugs the scenario has turned up so far were in the scenario
 rather than in the feature, which is the argument for having run it rather
 than assumed it.
 
@@ -2883,6 +2899,28 @@ Everything else 7a added passed: the save, the snapshot's frozen contents,
 reload as an undoable edit, and immutability in both the UI and the grant.
 Every pre-7a scenario passed again, `render-calibration` included.
 
+### Verified — fifth attempt, 2026-09-24: 48/48 in 24m 35s
+
+With the embed named by its foreign key
+(`design_versions!design_versions_design_id_fkey`), the design list returns its
+rows and `design-versions` passes in 46s. **The suite is green and Phase 7a is
+done.** `render-calibration`'s baselines are unmoved for the third run running:
+surround 49, highlight 238, `#808080` → (128, 128, 128), `#C0392B` →
+(192, 58, 45), fill 0.559.
+
+What the scenario proves, as it reports it: no Versions / Output socket for an
+anonymous design; a named save writing version 1 with a snapshot carrying
+`product`, `finish`, `size_variant`, `colour`, `model` and `saved_at`; a second
+save taking version 2; reload making version 1 the draft with undo returning to
+V2; no rename and no delete, in the UI or in the grant; and the design listing
+with its two versions and opening from the list.
+
+Four runs were needed and none of the four failures was noise: a load race on
+the version list, two read-backs waiting on a field that a cleared selection
+removes from the screen, and an ambiguous PostgREST embed that meant the design
+list had never once returned a row. The last of those is now a standing rule —
+see "every new page gets a scenario that loads it once", above.
+
 ### 7a's open questions, ruled (2026-09-23)
 
 The five questions below were put and answered; they are recorded here rather
@@ -2890,7 +2928,8 @@ than left open, and are not re-decided in a later phase.
 
 - **Q1 — the commit.** Ruled: 7a is committed as written, and **7a is not
   closed until the suite runs against it**. Until then this file says
-  written-not-verified, above and in the phase table.
+  written-not-verified, above and in the phase table. **Satisfied 2026-09-24:
+  the suite ran green at 48/48 and 7a is closed.**
 - **Q2 — `snapshot.model.sha256`.** Ruled: hashed at CMS upload in Phase 11,
   never at save time. The editor does not fetch a model to hash it.
 - **Q3 — `design_versions.thumbnail_url`.** Ruled: filled when Phase 12's

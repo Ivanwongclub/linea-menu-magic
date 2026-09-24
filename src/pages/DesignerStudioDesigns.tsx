@@ -24,7 +24,13 @@ interface DesignListRow {
 async function fetchDesigns(): Promise<DesignListRow[]> {
   const { data, error } = await supabase
     .from("designs")
-    .select("id, name, status, updated_at, draft_updated_at, product:products ( slug, name, item_code ), design_versions ( id )")
+    // The embed is named by its FK: `designs` reaches `design_versions` two
+    // ways — a design's versions, and the one `current_version_id` points at
+    // (Phase 1's circular FK) — and an unqualified embed is PGRST201.
+    .select(
+      "id, name, status, updated_at, draft_updated_at, product:products ( slug, name, item_code ), " +
+        "design_versions!design_versions_design_id_fkey ( id )",
+    )
     .order("updated_at", { ascending: false });
   if (error) throw new Error(error.message);
 
