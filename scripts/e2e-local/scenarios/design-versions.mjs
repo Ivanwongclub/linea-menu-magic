@@ -116,19 +116,17 @@ export default async function ({ page, base, admin, editor, status, h }) {
     out.numbering = rows.map((r) => r.number);
 
     /* ---- 4. reload is an edit: the draft goes back, and undo returns ---- */
+    // Asserted through the recipe, never through the layer editor: reloading
+    // clears the selection by design, so there is no field on screen to read.
+    // The recipe is the contract; the input is presentation.
     await page.locator('[data-testid="version-row"][data-version-number="1"]').getByTestId("version-reload").click();
-    await page.waitForFunction(
-      () => document.querySelector('[data-testid="text-layer-content"]')?.value === "V1",
-      null,
-      { timeout: 30000 },
-    );
     await waitForRecipe(page, admin, designId, (r) => r.layers?.[0]?.content?.value === "V1", "the reloaded draft");
     const reloaded = await rowsOf(page);
     assert.equal(reloaded.find((r) => r.number === 1).loaded, true, "the list says which version the draft came from");
     assert.equal(reloaded.find((r) => r.number === 1).current, false, "reloading does not move the design's pointer");
 
     await page.getByTestId("undo").click();
-    await page.waitForFunction(() => document.querySelector('[data-testid="text-layer-content"]')?.value === "V2", null, { timeout: 20000 });
+    await waitForRecipe(page, admin, designId, (r) => r.layers?.[0]?.content?.value === "V2", "the undone reload");
     const undone = await readRecipe(admin, designId);
     assert.equal(undone.layers[0].content.value, "V2", "undo takes the reload back like any other edit");
     await page.locator('[data-testid="version-row"][data-version-number="1"]').getByTestId("version-reload").click();

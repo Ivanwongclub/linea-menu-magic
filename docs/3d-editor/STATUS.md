@@ -161,6 +161,7 @@ baseline** — its result is recorded below.
 | 2026-09-23 | **not run** (Phase 7a) | 30000 (default) | Box at load 35; the stack answered 544/504 and the dev server was killed mid-run. 48 scenarios are owed on a quiet box — see Phase 7a's verification note |
 | 2026-09-24 | **killed at 4/48** (Phase 7a) | 30000 (default) | Started in the quietest window the box offered (1 min 5.9, 5 min 10.2). `e2e:up` booted cleanly this time. `admin-i18n`, `appearance-paint`, `appearance-plated` passed; the OS killed the run inside `appearance-printed` with ~68 MB free. Second memory kill on this box, after the 18/47 one — a capacity limit, not a scenario failure |
 | 2026-09-24 | **47/48** in 22m 13s | 30000 (default) | First mechanical pass since 7a, on a box with ten unrelated containers stopped. Every pre-7a scenario passed, including `render-calibration` and `workspace`. The one failure is 7a's own new `design-versions` — a real defect in the scenario, not capacity (see below) |
+| 2026-09-24 | **47/48** in 24m 51s | 30000 (default) | Re-run with `design-versions`' two DOM read-backs replaced by `waitForRecipe`. Those steps now pass; the scenario got as far as step 6 and failed there on a **product bug** — the design list's query is ambiguous and has never returned a row (see below) |
 
 Two things the first runs exposed, both now handled by `suite.sh` rather than
 by the person running it:
@@ -2852,6 +2853,35 @@ table, `current_version_id` — passed.
 runs green. Both bugs the scenario has turned up so far were in the scenario
 rather than in the feature, which is the argument for having run it rather
 than assumed it.
+
+**Fourth attempt, 2026-09-24 — 47/48 in 24m 51s.** Both DOM read-backs in
+step 4 were replaced by `waitForRecipe`, per the ruling that the recipe is the
+contract and the input is presentation. Those steps pass, and the scenario now
+reaches **step 6, where it fails on a bug in the feature, not the test**:
+`/designer-studio/designs` never lists a row.
+
+The design list's query asks for `design_versions ( id )` to count a design's
+versions, and **`designs` has two foreign keys to `design_versions`** —
+`design_versions.design_id` (the versions of a design) and
+`designs.current_version_id` (the one it points at, added by Phase 1's circular
+FK). PostgREST refuses the ambiguous embed with **PGRST201**, confirmed by
+running the page's own select against the stack:
+
+> Could not embed because more than one relationship was found for 'designs'
+> and 'design_versions' … try `design_versions!design_versions_design_id_fkey`
+> or `design_versions!designs_current_version_id_fkey`.
+
+The query therefore throws, react-query yields no rows, and the page renders
+its empty state. **The design list has never worked** — not in this run and not
+before it; nothing had exercised the page until this scenario reached it. The
+fix is one embed name in `src/pages/DesignerStudioDesigns.tsx`
+(`design_versions!design_versions_design_id_fkey ( id )`), which is a `src/`
+change and was outside the scope of the run that found it.
+
+Everything else 7a added passed: the save, the snapshot's frozen contents,
+`version_number` taken from the table, `current_version_id` moving on save,
+reload as an undoable edit, and immutability in both the UI and the grant.
+Every pre-7a scenario passed again, `render-calibration` included.
 
 ### 7a's open questions, ruled (2026-09-23)
 
