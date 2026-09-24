@@ -60,13 +60,13 @@ per-phase rulings stay in each phase's migration header and commit, and are
 summarised here only where they still bind later work.
 
 **Built: 7 of 12 phases** (1–6 done, 6b closed Phase 6; 7a closed Phase 7 and
-is verified at 48/48; 8–12 not started) and **7 of 13 workspace units** (U1–U4,
-U6, U7, U8 — E2's six pre-7a units, plus the document bar after it).
+is verified at 48/48; 8–12 not started) and **8 of 13 workspace units** (U1–U8
+— E2's six pre-7a units, plus the document bar and the layers dock after it).
 7a took four suite runs to verify and each failure was a real defect — two in
 its own scenario, one in the design list's query; the phase was not called done
 until the suite was green.
 
-## Workspace units — 6 of 13 built
+## Workspace units — 8 of 13 built
 
 E2's 13-unit build plan for the docked workspace (`reports/E2-workspace-audit.md`
 §5), reconciled unit by unit on 2026-09-23. E2 names **U1, U2, U3, U4, U6 and
@@ -80,7 +80,7 @@ follow whichever unit lands last before the deck is next shown.
 | U2 | The 600-line branding box split into a list, the selected layer's properties, the row controls and the upload hook — same DOM, same test ids | **Done** |
 | U3 | Test ids on the size radios and Change finish; the suite's ordinal, DOM-id and CSS-descendant selectors replaced with attribute ones | **Done** |
 | U4 | The workspace itself: fixed left/right docking, collapse and resize, remembered per user in localStorage under a layout version, Reset workspace for the chrome alone, default layout under `?calibration=1` | **Done** |
-| U5 | **Layers dock** — the sectioned list (Branding / Zones / Parts) with counts, Parts collapsed, virtualised past ~50 rows; this is also what moves U6's panel out from under the layer list (standing ruling 3) | Not started — may follow 7a |
+| U5 | Layers dock — the sectioned list (Branding / Zones / Parts) with counts, Parts collapsed, virtualised past ~50 rows; the dock has a height of its own, which is what moves U6's panel out from under the layer list | **Done** — retires standing ruling 3 |
 | U6 | One Properties panel following the selection: a layer's relief, appearance and placement; a zone's plane, parts or brush and what it is made of; a part's name, share of the model, visibility and covering zones; a plain sentence when nothing is selected. Controls moved parent, not shape — test ids and `data-layer-id` / `data-zone-id` unchanged | **Done** |
 | U7 | Document bar — design name, autosave, undo / redo and the workspace menu: the home for everything that is not a selection; history left `BrandingGroup`, the chrome buttons left the panel header, and the bar carries the way back to the design list | **Done** |
 | U8 | The Versions / Output socket for Phase 7's saves and Phase 9/10/12's output; renders only when it has something in it (E2 §3.4 item 7) — since U7 that is Phase 7a's versions alone, the save state having moved to the document bar | **Done** |
@@ -102,11 +102,11 @@ These bind later units and Phase 7a; they are not re-decided per unit.
    anchor for saves; U7 moved the save state to the document bar, so the dock
    is now versions and nothing else and follows (1) with no asterisk: no
    sections, no dock. Revisited in 7a, retired in U7.
-3. **Properties stays under the layer list until U5.** No temporary
-   scroll-into-view in the meantime; the placement problem is U5's, not a
-   patch in U6. **E2's own title for U5 — the layers dock — is canonical**;
-   this ruling is a constraint that title imposes on the units before it, not
-   a competing scope for U5.
+3. ~~**Properties stays under the layer list until U5**~~ — **retired in
+   U5.** The dock now has a height of its own and scrolls inside it, so
+   opening 33 parts no longer moves Properties down the panel. Held from U6
+   to U5 exactly as written: no temporary scroll-into-view was added in the
+   meantime.
 4. **The deck is re-shot in U12**, not when an individual unit changes the
    chrome. `npm run deck:shots` output is stale between now and U12 by design.
 5. **Both part-visibility controls stay.** The Parts list sweeps (show / hide
@@ -129,9 +129,9 @@ These bind later units and Phase 7a; they are not re-decided per unit.
    U8**, per E2 §5, and all six are built. U5 and U7 are *not* among them —
    E2 says the layers dock can ship flat-but-sectioned first. **Phase 7a is
    unblocked by the workspace plan.**
-2. **U5 still owns U6's placement** (standing ruling 3). Properties sits under
-   the layer list until the layers dock lands; that is a known temporary
-   arrangement, not a bug to patch in the meantime.
+2. **Settled (2026-09-24): U5 landed and standing ruling 3 is retired.**
+   Properties is reached without scrolling past the layers, because the dock
+   is capped at 40vh and scrolls inside it rather than growing with the model.
 3. **U9 retires a Phase 3 ruling.** E2 §5 has the floating view tools retire
    "no floating toolbar" (Phase 3 R2). Confirm that retirement when U9 is
    scheduled rather than treating R2 as still binding.
@@ -163,6 +163,7 @@ baseline** — its result is recorded below.
 | 2026-09-24 | **47/48** in 24m 51s | 30000 (default) | Re-run with `design-versions`' two DOM read-backs replaced by `waitForRecipe`. Those steps now pass; the scenario got as far as step 6 and failed there on a **product bug** — the design list's query is ambiguous and has never returned a row (see below) |
 | 2026-09-24 | **48/48** in 24m 35s | 30000 (default) | Green, with the design list's embed named by its FK. **This is the baseline for Phase 7a**, and the first mechanical pass over all 48. `render-calibration` unmoved again (surround 49, highlight 238, `#808080` → 128,128,128, `#C0392B` → 192,58,45, fill 0.559) |
 | 2026-09-24 | **48/48** in 34m 2s | 30000 (default) | Workspace U7. `render-calibration` unmoved for the fourth run running — the document bar is chrome and calibration does not draw it. Slower than the 7a baseline on a busier box, with no scenario near its timeout |
+| 2026-09-24 | **48/48** in 17m 48s | 30000 (default) | Workspace U5. The quickest full pass yet, on the quietest box yet (load 10 falling, against 34m 2s at load ~24). `render-calibration` unmoved for the fifth run running. An earlier attempt was discarded, not failed: a behaviour-preserving edit landed 12 minutes in, and since each scenario boots its own dev server that run straddled two trees |
 
 Two things the first runs exposed, both now handled by `suite.sh` rather than
 by the person running it:
@@ -3044,7 +3045,136 @@ in place, so the 200 px viewport floor still holds.
    of a viewport the mobile test floors at 200 px. It passes today.
    *Recommend* U11 re-measures rather than assuming the floor still holds once
    the bottom sheet lands.
-3. **`workspace-chrome` is now a title and nothing else.** It survives as the
-   panel's heading and as the thing calibration asserts is absent.
-   *Recommend* folding it into U5's layers dock header rather than keeping a
-   bar whose only content is the word "Workspace".
+3. **Settled (2026-09-24): `workspace-chrome` folded into U5's layers dock
+   header.** The bar is gone, `editor.workspace.title` with it, and the dock's
+   own header is what heads the panel. Calibration now asserts the resize
+   handle's absence instead, since the dock is content and is drawn.
+
+## Workspace U5 — layers dock (2026-09-24)
+
+E2 §5's U5, with E2 §3.4 item 3's changes to the proposal applied. What is on
+the part — the buyer's branding, the zones and the model's own parts — is one
+dock in three sections with a count each, and the dock has a height of its own.
+That height is the unit: **standing ruling 3 is retired**, because Properties no
+longer sits below however many rows the model happens to have.
+
+E2 §3.1 draws the dock and Properties as two docks on opposite edges. U4 shipped
+fixed zones with **one** panel (E2 §3.4 item 1), so the split here is vertical
+inside that panel rather than a second edge — the dock is capped and scrolls
+inside itself, and Properties follows it in the same column. U13 is where a
+second edge would come from, if anyone asks for one.
+
+Files:
+
+- `src/features/editor/components/workspace/LayersDock.tsx` (new) — the dock:
+  a header, and a scroll box capped at 40vh holding the three sections. The cap
+  is a share of the viewport, not a row count, because the rows are three
+  different heights and the panel is as tall as the window is.
+- `components/workspace/DockSection.tsx` (new) — one section: title, count,
+  disclosure, whatever it adds (Add text / Add logo / Add zone), and its rows.
+  The count is a bare numeral on `data-count`, so it needs no shortened
+  translation of its own (E2 §4.3).
+- `components/PartsGroup.tsx` — the Parts section. Its own bordered box and
+  disclosure are gone; `parts-toggle` and `parts-summary` are the section's
+  (standing ruling 6). Rows are a fixed 26 px, because past 50 of them their
+  positions are arithmetic. The factory-lettering row sits above the windowed
+  list — it is the recipe's, not one of the model's parts, so it is never one
+  of the windowed rows and never shifts the window by one.
+- `lib/rowWindow.ts` (new) — which rows a long section renders: pure, so the
+  arithmetic is testable without 500 rows on screen. Below 50 rows nothing is
+  windowed; past it, the rows in view plus six either side, with the rest as
+  two spacers so the scrollbar still measures the whole list.
+- `components/branding/ZonesSection.tsx` — `AddZoneButton` moved into the Zones
+  section header, and `ZoneList` says what it is empty of instead of rendering
+  nothing, now that the section has a count and a header of its own.
+- `components/branding/BrandingGroup.tsx` — **deleted.** After U2 took the list
+  out, U6 the properties and U7 the history, it was a composer wrapping three
+  children; the dock's Branding section is what it was. `branding-group` is
+  that section's test id, so the suite's selectors are unchanged.
+- `components/EditorPanel.tsx` — one `LayersDock` where `PartsGroup` and
+  `BrandingGroup` stood.
+- `components/workspace/WorkspaceShell.tsx` — the `workspace-chrome` bar is
+  gone (U7 open question 3): it held one word, and that word is the dock's
+  header now. The panel is its content and nothing else.
+- `src/features/i18n/translations.ts` — `editor.layers.title`,
+  `editor.zones.title`, `editor.zones.empty` × 3 locales;
+  `editor.workspace.title` retired with the bar that used it.
+- `scripts/e2e-local/unit/workspace.test.mjs` — five tests for `rowWindow`: the
+  threshold, the window under scroll, the list's full height whatever is
+  rendered, clamping at both ends, and an unmeasured box.
+- `scripts/e2e-local/scenarios/workspace.mjs` — U5's block: three sections with
+  the counts they hold, Parts collapsed with none of its rows rendered, the
+  dock capped and the list longer than its box, Properties still on screen with
+  33 parts open, and the list left whole below the threshold.
+
+### Rulings
+
+- **The dock's height is the unit, not its sections.** Capping each section
+  would leave three scrollbars and a fixed reservation for rows that may not
+  exist; capping the dock lets a short design use the room and a 33-group model
+  scroll inside it. Properties moves only as far as the cap.
+- **Parts is collapsed and Branding is not** (E2 §3.4 item 3). A buyer
+  branding a button is not shopping for `object_11`, and on the Polo that
+  section is 33 of the dock's 36 rows.
+- **`add-text`, `add-logo` and `add-zone` live in section headers**, so they
+  are reachable with the section folded away. Same ids, new parent (standing
+  ruling 6).
+- **`workspace-chrome` folded into the dock header**, and the dock is drawn
+  under `?calibration=1` because it is content, not chrome — unlike the
+  document bar, it does not change the canvas's size. Calibration now asserts
+  the resize handle's absence in its place.
+- **Section state is component state, not the stored layout.** E2 §3.4 item 3
+  puts it under "Reset workspace"; it is not persisted at all, so a reload is
+  a reset and the ruling holds vacuously. See open question 2.
+
+### Verification
+
+`tsc -b` clean · `node --test` 78/78 (73 + five for `rowWindow`) ·
+`npm run build` passes · `npm run e2e:suite` **48/48** in 17m 48s.
+`render-calibration`'s baselines are unmoved for the fifth run running
+(surround 49, highlight 238, `#808080` → (128, 128, 128), `#C0392B` →
+(192, 58, 45), fill 0.559): the dock is drawn under `?calibration=1`, but it is
+inside the panel, and the panel's width is what the canvas is measured against.
+
+Measured through the real UI at 1280 × 900, with the Polo's 33 parts open: the
+dock is **360 px** (40vh) holding a **1037 px** list — 677 px of rows scrolling
+inside the box instead of pushing Properties down the panel. That number is
+standing ruling 3, retired.
+
+### What this unit could not verify locally
+
+**The >50-row path never ran in a browser.** No model on the local stack has
+more than 50 OBJ groups — the Polo is 33 — so `data-virtualised` is `false` in
+every scenario, and what the suite proves is the other half of the threshold:
+a short list is left whole, every row in the DOM. The window's arithmetic past
+50 rows is covered by unit tests only. This is the shape of defect the standing
+new-page rule was written about, so it is named here rather than left implied.
+
+### Open questions from this unit, with a recommendation each
+
+1. **Virtualisation has no e2e proof.** A 60-group fixture would give one, but
+   it would have to be a disc or a button — the workspace scenario's other
+   assertions need a real face to place text on — and building one to test the
+   test is the wrong order. *Recommend* adding the proof in Phase 11, whose
+   uploads are the reason the threshold exists and which will bring a real
+   model with hundreds of groups; until then treat the threshold as unit-tested
+   arithmetic, not a verified UI path.
+2. **Section state is not remembered.** E2 §3.4 item 3 lists it under "Reset
+   workspace", which implies it is stored; it is component state, so a reload
+   puts Parts back to collapsed. Persisting it means a fourth field in
+   `WorkspaceLayout` and a layout version bump. *Recommend* doing it in U11,
+   which has to remember the bottom sheet's snap point anyway — one version
+   bump for both, rather than one per unit.
+3. **40vh is a guess, measured once.** At 1280 × 900 it leaves Properties
+   about 100 px of room below the dock with the Product and Finish groups
+   above it; a shorter window or a taller Finish group narrows that.
+   *Recommend* U11 re-measure it with the 390 px sheet, as it is already
+   re-measuring the viewport floor (U7 open question 2), and consider making
+   the dock's share of the panel the thing that is stored rather than a
+   constant.
+4. **The dock is one of five boxes in a scrolling column.** Product, Finish,
+   the dock, Properties and Output still share one scroll, so the column can
+   still scroll even though the dock no longer forces it. E2 §3.1's answer is
+   a second edge. *Recommend* leaving it until U13, and only if someone asks —
+   U4's ruling was that a 3D editor has two useful columns, and the viewport is
+   the other one.

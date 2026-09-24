@@ -9,8 +9,7 @@ import { FinishSelectionPicker } from "@/features/finishes/FinishSelectionPicker
 import { finishAxisLine, finishMarketingName } from "@/features/finishes/finishAxisLine";
 import { tradeLigne } from "../lib/ligne";
 import { processThresholds } from "../lib/manufacturing";
-import { BrandingGroup } from "./branding/BrandingGroup";
-import { PartsGroup } from "./PartsGroup";
+import { LayersDock } from "./workspace/LayersDock";
 import { PropertiesPanel } from "./workspace/PropertiesPanel";
 import { OutputDock, type OutputSection } from "./workspace/OutputDock";
 import { VersionsSection } from "./workspace/VersionsSection";
@@ -160,16 +159,19 @@ export function EditorPanel({
           </PanelGroup>
         )}
 
-        {/* Phase 6b R1: the model's own parts, for everyone. */}
-        <PartsGroup markedGroupIndices={product.model_branding_group_indices ?? []} />
-
-        <BrandingGroup
+        {/* E2 U5: what is on the part — branding, zones and the model's own
+            parts (6b R1) — in one dock with a height of its own, so what
+            follows it is not what follows a 33-row list. */}
+        <LayersDock
           reference={product.model_branding_reference}
           scaleFactor={product.model_scale_factor}
           process={processThresholds(selectedFinish?.process, language)}
-          faceDiameterMm={faceDiameterMm} />
+          faceDiameterMm={faceDiameterMm}
+          markedGroupIndices={product.model_branding_group_indices ?? []}
+        />
 
-        {/* E2 U6: one panel for whatever is selected. */}
+        {/* E2 U6: one panel for whatever is selected. Since U5 it is reached
+            without scrolling past the layers, which is standing ruling 3. */}
         <PropertiesPanel faceDiameterMm={faceDiameterMm} />
 
         {/* E2 U8: the socket, with Phase 7's versions in it. */}

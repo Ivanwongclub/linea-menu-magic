@@ -12,9 +12,9 @@ const METHODS: { value: ZoneMethod; label: string }[] = [
 ];
 
 /**
- * Add zone (Phase 6b R2), beside Add text and Add logo: the three ways to say
- * which part of the surface a second finish covers — a plane dragged along the
- * model's height, one or more of its parts, or a brush.
+ * Add zone (Phase 6b R2), in the dock's Zones section since E2 U5: the three
+ * ways to say which part of the surface a second finish covers — a plane
+ * dragged along the model's height, one or more of its parts, or a brush.
  */
 export function AddZoneButton({ defaultPlaneMm }: { defaultPlaneMm: number }) {
   const { t } = useI18n();
@@ -62,8 +62,11 @@ export function AddZoneButton({ defaultPlaneMm }: { defaultPlaneMm: number }) {
 
 /** The zones on the part, each with the way it was made and what it is made of. */
 export function ZoneList() {
+  const { t } = useI18n();
   const zones = useEditorStore(selectZones);
-  if (zones.length === 0) return null;
+  // Since E2 U5 this is a section of the dock with a count of its own, so an
+  // empty one says what it is empty of rather than leaving a blank box.
+  if (zones.length === 0) return <p className="text-xs text-muted-foreground">{t("editor.zones.empty")}</p>;
   return (
     <ul className="space-y-1.5" data-testid="zones">
       {zones.map((zone) => (

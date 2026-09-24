@@ -120,13 +120,9 @@ export function WorkspaceShell({ banner, viewport, panel, document }: WorkspaceS
             )}
           >
             {/* U7 moved the chrome buttons into the document bar's workspace
-                menu; the panel keeps only its title. */}
-            {!calibration && (
-              <div className="flex items-center gap-1 border-b border-border px-2 py-1" data-testid="workspace-chrome">
-                <span className="mr-auto text-[11px] uppercase tracking-[0.12em] text-muted-foreground">{t("editor.workspace.title")}</span>
-              </div>
-            )}
-
+                menu, which left a bar holding one word; U5 folded that word
+                into the layers dock's own header, so the panel is its content
+                and nothing else. */}
             <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">{panel}</div>
 
             {!calibration && (

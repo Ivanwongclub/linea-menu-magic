@@ -1,4 +1,4 @@
-// E2 U1/U4 — the workspace, and the one selection it shows.
+// E2 U1/U4/U5 — the workspace, and the one selection it shows.
 //
 //   1. The controls start on the right, 360 px wide, and the model has the rest.
 //   2. They move to the other edge, collapse, and resize — and every one of
@@ -17,6 +17,9 @@
 //   9. The document bar (U7) is the home for what is not a selection: the
 //      design's name, its save state, undo / redo, the workspace menu, and the
 //      way back to the design list. None of it is drawn under ?calibration=1.
+//  10. The layers dock (U5) is three sections with a count each — Branding,
+//      Zones, Parts — with Parts collapsed, a height of its own, and the
+//      panel's heading folded into its header.
 import assert from "node:assert/strict";
 import { openEditorFor, stageAppearance, waitForRecipe } from "../lib/appearance.mjs";
 
@@ -170,8 +173,51 @@ export default async function ({ page, base, admin, editor, h }) {
     assert.equal(await page.getByTestId("output-body").count(), 0, "closed until it is asked for");
     out.output = { sections: 1, save: (await bar.getByTestId("autosave-status").innerText()).trim() };
 
+    /* ---- 10. the layers dock (U5): three sections, and a height of its own ---- */
+    const layersDock = page.getByTestId("layers-dock");
+    const dockBody = page.getByTestId("layers-dock-body");
+    await layersDock.waitFor({ timeout: 20000 });
+    assert.equal(await page.getByTestId("workspace-chrome").count(), 0, "the panel's chrome bar is gone — its heading is the dock's now (U5)");
+    assert.equal(await layersDock.getByTestId("layers-dock-header").count(), 1, "and the dock is what heads the panel");
+
+    // One section per kind, each saying how many it holds — which is the point
+    // of the sectioning: 1 layer and 1 zone next to 33 OBJ groups.
+    const sectionCounts = async () =>
+      Object.fromEntries(
+        await Promise.all(
+          ["branding-group", "zones-section", "parts-group"].map(async (id) => [id, Number(await page.getByTestId(id).getAttribute("data-count"))]),
+        ),
+      );
+    const modelGroups = JSON.parse(await viewport.getAttribute("data-parts")).length;
+    assert.deepEqual(await sectionCounts(), { "branding-group": 1, "zones-section": 0, "parts-group": modelGroups }, "each section counts what it holds");
+
+    // Parts is collapsed on open (E2 §3.4 item 3): a buyer branding a button is
+    // not shopping for `object_11`.
+    assert.equal(await page.getByTestId("parts-group").getAttribute("data-open"), "false", "Parts starts collapsed");
+    assert.equal(await page.getByTestId("part-row").count(), 0, "so none of its rows are even rendered");
+    assert.equal(await page.getByTestId("branding-group").getAttribute("data-open"), "true", "Branding does not");
+
+    // Standing ruling 3, retired: the list scrolls inside the dock instead of
+    // pushing Properties down the panel.
     await page.getByTestId("parts-toggle").click();
     await page.getByTestId("part-row").first().waitFor({ timeout: 20000 });
+    const dockBox = await dockBody.evaluate((el) => ({ client: el.clientHeight, scroll: el.scrollHeight, windowHeight: window.innerHeight }));
+    assert.ok(dockBox.client <= dockBox.windowHeight * 0.4 + 2, `the dock is capped at 40vh (${dockBox.client}px of ${dockBox.windowHeight})`);
+    assert.ok(dockBox.scroll > dockBox.client + 300, `and the list is ${dockBox.scroll - dockBox.client}px longer than the box it scrolls in`);
+    const panelBox = await panel.boundingBox();
+    const propsBox = await page.getByTestId("properties-panel").boundingBox();
+    assert.ok(propsBox.y < panelBox.y + panelBox.height, "Properties is on screen with 33 parts open — it no longer sits under the layer list");
+
+    // Virtualisation (E2 §3.4 item 3) past ~50 rows. The Polo is 33, so what
+    // this proves is the other half: a short list is left whole, every row in
+    // the DOM. The arithmetic past the threshold is unit-tested — no model on
+    // the local stack has more than 50 groups.
+    const partsList = page.getByTestId("parts-list");
+    assert.equal(await partsList.getAttribute("data-rows"), String(modelGroups));
+    assert.equal(await partsList.getAttribute("data-virtualised"), "false", "33 rows is a list, not a scrolling problem");
+    assert.equal(await partsList.getAttribute("data-window"), `0-${modelGroups}`, "so the window is the whole list");
+    out.layersDock = { counts: await sectionCounts(), dockPx: dockBox.client, listPx: dockBox.scroll, virtualised: false };
+
     const parts = JSON.parse(await viewport.getAttribute("data-parts"));
     const partIndex = await page.locator('[data-testid="part-row"]').first().getAttribute("data-index");
     await page.locator(`[data-testid="part-row"][data-index="${partIndex}"]`).getByTestId("part-select").click();
@@ -239,7 +285,8 @@ export default async function ({ page, base, admin, editor, h }) {
     await page.goto(`${base}/designer-studio/editor/${designId}?calibration=1`, { waitUntil: "networkidle" });
     await panel.waitFor({ timeout: 30000 });
     assert.deepEqual(await layoutOf(), { side: "right", collapsed: false, width: DEFAULT_WIDTH }, "calibration ignores a stored layout");
-    assert.equal(await page.getByTestId("workspace-chrome").count(), 0, "and draws none of the workspace chrome");
+    assert.equal(await page.getByTestId("workspace-resize").count(), 0, "and draws none of the workspace chrome");
+    assert.equal(await page.getByTestId("layers-dock").count(), 1, "the layers dock is content, not chrome, so it is drawn (U5)");
     assert.equal(await page.getByTestId("document-bar").count(), 0, "nor the document bar, which has height (U7)");
     assert.equal((await storedLayout()).value.side, "left", "without forgetting what the buyer chose");
     out.calibration = "default layout, no chrome, no document bar";
