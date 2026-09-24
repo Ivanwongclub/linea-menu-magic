@@ -60,8 +60,8 @@ per-phase rulings stay in each phase's migration header and commit, and are
 summarised here only where they still bind later work.
 
 **Built: 7 of 12 phases** (1–6 done, 6b closed Phase 6; 7a closed Phase 7 and
-is verified at 48/48; 8–12 not started) and **6 of 13 workspace units** (U1–U4,
-U6, U8 — which were exactly E2's six pre-7a units, so Phase 7a was unblocked).
+is verified at 48/48; 8–12 not started) and **7 of 13 workspace units** (U1–U4,
+U6, U7, U8 — E2's six pre-7a units, plus the document bar after it).
 7a took four suite runs to verify and each failure was a real defect — two in
 its own scenario, one in the design list's query; the phase was not called done
 until the suite was green.
@@ -82,8 +82,8 @@ follow whichever unit lands last before the deck is next shown.
 | U4 | The workspace itself: fixed left/right docking, collapse and resize, remembered per user in localStorage under a layout version, Reset workspace for the chrome alone, default layout under `?calibration=1` | **Done** |
 | U5 | **Layers dock** — the sectioned list (Branding / Zones / Parts) with counts, Parts collapsed, virtualised past ~50 rows; this is also what moves U6's panel out from under the layer list (standing ruling 3) | Not started — may follow 7a |
 | U6 | One Properties panel following the selection: a layer's relief, appearance and placement; a zone's plane, parts or brush and what it is made of; a part's name, share of the model, visibility and covering zones; a plain sentence when nothing is selected. Controls moved parent, not shape — test ids and `data-layer-id` / `data-zone-id` unchanged | **Done** |
-| U7 | **Document bar** — design name, autosave, undo / redo and the workspace menu: the home for everything that is not a selection; history leaves `BrandingGroup` and `EditorPanel` loses the rest | Not started — may follow 7a |
-| U8 | The Versions / Output socket for Phase 7's saves and Phase 9/10/12's output; renders only when it has something in it (E2 §3.4 item 7), today the design's own save state on its header | **Done** |
+| U7 | Document bar — design name, autosave, undo / redo and the workspace menu: the home for everything that is not a selection; history left `BrandingGroup`, the chrome buttons left the panel header, and the bar carries the way back to the design list | **Done** |
+| U8 | The Versions / Output socket for Phase 7's saves and Phase 9/10/12's output; renders only when it has something in it (E2 §3.4 item 7) — since U7 that is Phase 7a's versions alone, the save state having moved to the document bar | **Done** |
 | U9 | **Floating view tools** — reset view, zoom to fit, ruler and brush size in a viewport overlay; retires the "no floating toolbar" ruling (Phase 3 R2) and hides the tools under `?calibration=1` | Not started — may follow 7a |
 | U10 | **Strip as a verdict** — the manufacturing warning strip full width under viewport and properties, collapsible with a count badge, collapsed by default on small screens | Not started — may follow 7a |
 | U11 | **390 px sheet** — the phone layout: a bottom sheet with three snap points and a segmented control, viewport floor kept at 200 px | Not started — may follow 7a |
@@ -97,11 +97,11 @@ These bind later units and Phase 7a; they are not re-decided per unit.
 1. **An empty socket is deleted, not carried.** E2's ruling: the empty Output
    group was removed rather than kept as a stub. E2 §3.4 item 7 then governs
    what replaces it — a dock renders only once it has something in it.
-2. **The Output dock's title stays visible with zero sections**, the one
-   deliberate exception to (1), since the dock is the buyer's anchor for saves.
-   *Revisited in 7a and kept, now narrower:* a saved design always has the
-   versions section, so the exception only ever applies to the anonymous
-   `/new` path, where there is no design and the dock is not rendered at all.
+2. ~~**The Output dock's title stays visible with zero sections**~~ —
+   **retired in U7.** The exception existed because the dock was the buyer's
+   anchor for saves; U7 moved the save state to the document bar, so the dock
+   is now versions and nothing else and follows (1) with no asterisk: no
+   sections, no dock. Revisited in 7a, retired in U7.
 3. **Properties stays under the layer list until U5.** No temporary
    scroll-into-view in the meantime; the placement problem is U5's, not a
    patch in U6. **E2's own title for U5 — the layers dock — is canonical**;
@@ -162,6 +162,7 @@ baseline** — its result is recorded below.
 | 2026-09-24 | **47/48** in 22m 13s | 30000 (default) | First mechanical pass since 7a, on a box with ten unrelated containers stopped. Every pre-7a scenario passed, including `render-calibration` and `workspace`. The one failure is 7a's own new `design-versions` — a real defect in the scenario, not capacity (see below) |
 | 2026-09-24 | **47/48** in 24m 51s | 30000 (default) | Re-run with `design-versions`' two DOM read-backs replaced by `waitForRecipe`. Those steps now pass; the scenario got as far as step 6 and failed there on a **product bug** — the design list's query is ambiguous and has never returned a row (see below) |
 | 2026-09-24 | **48/48** in 24m 35s | 30000 (default) | Green, with the design list's embed named by its FK. **This is the baseline for Phase 7a**, and the first mechanical pass over all 48. `render-calibration` unmoved again (surround 49, highlight 238, `#808080` → 128,128,128, `#C0392B` → 192,58,45, fill 0.559) |
+| 2026-09-24 | **48/48** in 34m 2s | 30000 (default) | Workspace U7. `render-calibration` unmoved for the fourth run running — the document bar is chrome and calibration does not draw it. Slower than the 7a baseline on a busier box, with no scenario near its timeout |
 
 Two things the first runs exposed, both now handled by `suite.sh` rather than
 by the person running it:
@@ -2963,3 +2964,87 @@ The reasoning behind each is kept below, as it was written.
    recipe against the newest version. *Recommend* leaving it — a version is a
    bookmark the buyer chose to drop, and refusing one because "nothing changed"
    explains itself badly. *Still open — not put with the other four.*
+
+## Workspace U7 — document bar (2026-09-24)
+
+E2 §5's U7, with E2 §3.4's changes to the proposal applied. The bar spans the
+top of the workspace and holds everything that is not a selection: the design's
+name, its save state, undo / redo, the workspace menu, and the way back to the
+design list that Phase 7a left owed.
+
+Files:
+
+- `src/features/editor/components/workspace/DocumentBar.tsx` (new) — the bar.
+  Undo / redo sit here because they are document verbs, not view tools
+  (E2 §3.4 item 4), and `useUndoShortcuts` is called here with them, so the
+  keyboard and the buttons have one owner. The workspace menu holds dock side,
+  collapse and Reset workspace (E2 §3.4 item 8); the reset item's own label
+  carries "the design is untouched", which is the confirm copy said where the
+  buyer reads it.
+- `components/workspace/WorkspaceShell.tsx` — renders the bar rather than
+  taking it as a node: the menu drives the layout this component owns, and two
+  `useWorkspaceLayout` callers would be two independent layouts. The bar is not
+  drawn under `?calibration=1` — it has height, and every render baseline is
+  measured in pixels. The panel header keeps its title and loses its three
+  chrome buttons to the menu.
+- `components/branding/BrandingGroup.tsx` — history out: the buttons, the
+  shortcut hook and `HistoryButton` are gone, and the group is back to Add
+  text / Add logo / Add zone and the lists.
+- `components/workspace/OutputDock.tsx` — the save state left for the bar, so
+  the dock takes `sections` alone and renders only when it has one.
+- `components/EditorPanel.tsx` — no longer carries `saveStatus` through.
+- `pages/EditorDesignPage.tsx` — reads `designs.name` and hands the bar the
+  name, the save state and the designs link.
+- `pages/EditorNewPage.tsx` — the product names the document until a sign-in
+  claims it; no designs link, because an anonymous buyer has no designs.
+- `src/features/i18n/translations.ts` — 2 keys × 3 locales
+  (`editor.workspace.menu`, `editor.document.allDesigns`).
+- `scripts/e2e-local/scenarios/workspace.mjs` — a `menuItem` helper, since the
+  three chrome buttons are now behind the menu; the autosave assertions moved
+  from the dock header to the bar; and U7's own block: the bar names the
+  design, undo / redo work from it and have left `BrandingGroup`, exactly one
+  `undo` remains on the page, the link reaches the design list, and none of the
+  bar is drawn under `?calibration=1`.
+
+### Rulings
+
+- **Undo and redo are document verbs.** They live beside the name, not in a
+  layer group's header and not in U9's floating cluster, which stays view
+  tools only (E2 §3.4 item 4).
+- **The workspace menu is the home for chrome.** Dock side, collapse and Reset
+  workspace moved out of the panel header into the menu, keeping their test
+  ids (standing ruling 6). A side effect worth having: the menu is reachable
+  while the panel is collapsed, which the panel-header buttons were not.
+- **The document bar is chrome, so calibration does not draw it.** Same rule
+  as `workspace-chrome` and for the same reason.
+- **Standing ruling 2 is retired** — see the standing rulings above. The dock
+  was the anchor for saves only until there was a document bar to be one.
+- **No page was introduced, so the standing new-page rule is satisfied by what
+  exists.** U7's link points at `/designer-studio/designs`, which Phase 7a
+  built and `design-versions.mjs` already loads; `workspace.mjs` now follows
+  the link there too, so the route is loaded by two scenarios.
+
+### Verification
+
+`tsc -b` clean · `node --test` 73/73 · `npm run build` passes ·
+`npm run e2e:suite` **48/48** in 34m 2s. `render-calibration`'s baselines are
+unmoved (surround 49, highlight 238, `#808080` → (128, 128, 128), `#C0392B` →
+(192, 58, 45), fill 0.559), which is the point of not drawing the bar under
+`?calibration=1`. `hybrid-controls`' 390 px geometry block passed with the bar
+in place, so the 200 px viewport floor still holds.
+
+### Open questions from this unit, with a recommendation each
+
+1. **The design's name is shown, not editable.** E2 §5 lists "design name" in
+   the bar without saying whether a buyer can change it; renaming is a write
+   path, an RLS question and a scenario of its own. *Recommend* adding rename
+   when Phase 8's shares make a design something other people see by name —
+   until then the name is whatever created the design.
+2. **The bar costs the viewport ~29 px of height.** At 390 px that comes out
+   of a viewport the mobile test floors at 200 px. It passes today.
+   *Recommend* U11 re-measures rather than assuming the floor still holds once
+   the bottom sheet lands.
+3. **`workspace-chrome` is now a title and nothing else.** It survives as the
+   panel's heading and as the thing calibration asserts is absent.
+   *Recommend* folding it into U5's layers dock header rather than keeping a
+   bar whose only content is the word "Workspace".

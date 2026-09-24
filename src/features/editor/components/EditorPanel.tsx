@@ -15,7 +15,6 @@ import { PropertiesPanel } from "./workspace/PropertiesPanel";
 import { OutputDock, type OutputSection } from "./workspace/OutputDock";
 import { VersionsSection } from "./workspace/VersionsSection";
 import type { PickerFinish } from "../hooks/useFinishOptions";
-import type { AutosaveStatus } from "../hooks/useAutosaveDraft";
 import type { EditorColour, EditorProduct, EditorSizeVariant } from "../hooks/useEditorProduct";
 
 interface EditorPanelProps {
@@ -28,7 +27,6 @@ interface EditorPanelProps {
   colours: EditorColour[];
   selectedColour: EditorColour | null;
   onSelectColour: (colour: EditorColour) => void;
-  saveStatus?: AutosaveStatus;
   /** Phase 7: the design versions belong to. Null on the anonymous `/new` path, which has nothing to version yet. */
   designId?: string | null;
 }
@@ -66,7 +64,6 @@ export function EditorPanel({
   colours,
   selectedColour,
   onSelectColour,
-  saveStatus,
   designId = null,
 }: EditorPanelProps) {
   const { t, language } = useI18n();
@@ -74,8 +71,9 @@ export function EditorPanel({
   const selectedVariant = product.size_variants.find((v) => v.id === sizeVariantId) ?? null;
   const faceDiameterMm = selectedVariant?.size_primary_mm ?? product.size_variants[0]?.size_primary_mm ?? 10;
 
-  // E2 U8 / standing ruling 1: the dock renders what it has. Until a design
-  // exists there is nothing to version, so it carries the save state alone.
+  // E2 U8 / standing ruling 1: the dock renders only what it has, and since
+  // U7 that is versions alone — the save state is the document bar's. An
+  // anonymous design has nothing to version, so no dock is drawn.
   const outputSections: OutputSection[] = designId
     ? [
         {
@@ -175,7 +173,7 @@ export function EditorPanel({
         <PropertiesPanel faceDiameterMm={faceDiameterMm} />
 
         {/* E2 U8: the socket, with Phase 7's versions in it. */}
-        <OutputDock saveStatus={saveStatus} sections={outputSections} />
+        <OutputDock sections={outputSections} />
       </div>
 
       <Sheet open={pickerOpen} onOpenChange={setPickerOpen}>

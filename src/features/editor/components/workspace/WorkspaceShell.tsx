@@ -1,15 +1,24 @@
 import { useCallback, useRef, type ReactNode } from "react";
 import { useSearchParams } from "react-router-dom";
-import { PanelLeft, PanelRight, PanelRightClose, PanelRightOpen, RotateCcw } from "lucide-react";
+import { PanelRightOpen } from "lucide-react";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { cn } from "@/lib/utils";
 import { useWorkspaceLayout } from "../../hooks/useWorkspaceLayout";
 import { widthFromDrag } from "../../lib/workspaceLayout";
+import { DocumentBar } from "./DocumentBar";
+import type { AutosaveStatus } from "../../hooks/useAutosaveDraft";
 
 interface WorkspaceShellProps {
   banner?: ReactNode;
   viewport: ReactNode;
   panel: ReactNode;
+  /**
+   * What the document bar says (E2 U7). The shell renders the bar rather than
+   * taking it as a node, because the workspace menu in it drives the layout
+   * this component owns — two `useWorkspaceLayout` callers would be two
+   * independent layouts.
+   */
+  document?: { name: string; saveStatus?: AutosaveStatus; designsLink?: boolean };
 }
 
 /**
@@ -27,7 +36,7 @@ interface WorkspaceShellProps {
  * The fixed site header's height is one token (`--site-header-height`,
  * index.css), so the viewport's bottom edge can't drift below the fold.
  */
-export function WorkspaceShell({ banner, viewport, panel }: WorkspaceShellProps) {
+export function WorkspaceShell({ banner, viewport, panel, document }: WorkspaceShellProps) {
   const { t } = useI18n();
   // Calibration screenshots are measured in pixels: they always get the
   // default layout, and the chrome that would change it is not drawn.
@@ -54,6 +63,19 @@ export function WorkspaceShell({ banner, viewport, panel }: WorkspaceShellProps)
   return (
     <div className="flex flex-col h-[calc(100vh-var(--site-header-height))]">
       {banner}
+      {/* Suppressed under calibration with the rest of the chrome: the bar has
+          height, and every render baseline is measured in pixels. */}
+      {document && !calibration && (
+        <DocumentBar
+          name={document.name}
+          saveStatus={document.saveStatus}
+          designsLink={document.designsLink}
+          side={layout.side}
+          onDock={() => setSide(layout.side === "right" ? "left" : "right")}
+          onCollapse={() => setCollapsed(true)}
+          onReset={reset}
+        />
+      )}
       <div
         ref={row}
         data-testid="workspace"
@@ -97,23 +119,11 @@ export function WorkspaceShell({ banner, viewport, panel }: WorkspaceShellProps)
               layout.side === "left" ? "lg:border-r" : "lg:border-l",
             )}
           >
+            {/* U7 moved the chrome buttons into the document bar's workspace
+                menu; the panel keeps only its title. */}
             {!calibration && (
               <div className="flex items-center gap-1 border-b border-border px-2 py-1" data-testid="workspace-chrome">
                 <span className="mr-auto text-[11px] uppercase tracking-[0.12em] text-muted-foreground">{t("editor.workspace.title")}</span>
-                <ChromeButton
-                  testId="workspace-dock"
-                  label={t(layout.side === "right" ? "editor.workspace.dockLeft" : "editor.workspace.dockRight")}
-                  onClick={() => setSide(layout.side === "right" ? "left" : "right")}
-                  className="hidden lg:flex"
-                >
-                  {layout.side === "right" ? <PanelLeft className="h-3.5 w-3.5" strokeWidth={1.5} /> : <PanelRight className="h-3.5 w-3.5" strokeWidth={1.5} />}
-                </ChromeButton>
-                <ChromeButton testId="workspace-collapse" label={t("editor.workspace.collapse")} onClick={() => setCollapsed(true)}>
-                  <PanelRightClose className="h-3.5 w-3.5" strokeWidth={1.5} />
-                </ChromeButton>
-                <ChromeButton testId="workspace-reset" label={t("editor.workspace.reset")} onClick={reset}>
-                  <RotateCcw className="h-3.5 w-3.5" strokeWidth={1.5} />
-                </ChromeButton>
               </div>
             )}
 
@@ -138,32 +148,5 @@ export function WorkspaceShell({ banner, viewport, panel }: WorkspaceShellProps)
         )}
       </div>
     </div>
-  );
-}
-
-function ChromeButton({
-  testId,
-  label,
-  onClick,
-  className,
-  children,
-}: {
-  testId: string;
-  label: string;
-  onClick: () => void;
-  className?: string;
-  children: ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      data-testid={testId}
-      aria-label={label}
-      title={label}
-      onClick={onClick}
-      className={cn("flex h-6 w-6 items-center justify-center text-muted-foreground transition-colors hover:text-foreground", className)}
-    >
-      {children}
-    </button>
   );
 }

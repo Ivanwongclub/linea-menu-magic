@@ -1,12 +1,10 @@
-import { ImagePlus, Plus, Redo2, Undo2 } from "lucide-react";
-import type { ReactNode } from "react";
+import { ImagePlus, Plus } from "lucide-react";
 import { useI18n } from "@/features/i18n/I18nProvider";
-import { selectCanRedo, selectCanUndo, useEditorStore } from "../../store/useEditorStore";
+import { useEditorStore } from "../../store/useEditorStore";
 import { newTextLayer } from "../../lib/recipe";
 import { RASTER_MIME_TYPES } from "../../lib/logoSvg";
 import { useLogoSources } from "../../hooks/useLogoAssets";
 import { useLogoUpload } from "../../hooks/useLogoUpload";
-import { useUndoShortcuts } from "../../hooks/useUndoShortcuts";
 import { recoveredDefaults, type BrandingReferenceRaw } from "../../lib/recoveredPlacement";
 import type { ProcessThresholds } from "../../lib/manufacturing";
 import { AddZoneButton, ZoneList } from "./ZonesSection";
@@ -14,7 +12,8 @@ import { LayerList } from "./LayerList";
 
 /**
  * BRANDING (v3-review §3): what is on the part and what is selected. Since
- * E2 U2 this component only composes — the list is `LayerList`, the upload is
+ * E2 U2 this component only composes, and since U7 it owns no history —
+ * undo, redo and their shortcuts are the document bar's — the list is `LayerList`, the upload is
  * `useLogoUpload`, and since U6 the selected layer's own fields are the
  * Properties panel's, not this group's.
  */
@@ -38,27 +37,14 @@ export function BrandingGroup({
   const layers = useEditorStore((s) => s.recipe.layers);
   const addLayer = useEditorStore((s) => s.addLayer);
   const modelFrame = useEditorStore((s) => s.modelFrame);
-  const undo = useEditorStore((s) => s.undo);
-  const redo = useEditorStore((s) => s.redo);
-  const canUndo = useEditorStore(selectCanUndo);
-  const canRedo = useEditorStore(selectCanRedo);
   const logoSources = useLogoSources(layers);
   const minDepthMm = process?.min_deboss_depth_mm ?? null;
   const { fileInput, logoError, uploading, onLogoFile, signedIn } = useLogoUpload({ faceDiameterMm, minDepthMm });
-  useUndoShortcuts();
 
   return (
     <div className="border border-border p-4 space-y-3" data-testid="branding-group">
       <div className="flex items-center justify-between gap-2">
         <h3 className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">{t("editor.panel.branding")}</h3>
-        <div className="ml-auto flex items-center">
-          <HistoryButton testId="undo" label={t("editor.branding.undo")} disabled={!canUndo} onClick={undo}>
-            <Undo2 className="w-3.5 h-3.5" strokeWidth={1.5} />
-          </HistoryButton>
-          <HistoryButton testId="redo" label={t("editor.branding.redo")} disabled={!canRedo} onClick={redo}>
-            <Redo2 className="w-3.5 h-3.5" strokeWidth={1.5} />
-          </HistoryButton>
-        </div>
         <button
           type="button"
           data-testid="add-text"
@@ -116,33 +102,5 @@ export function BrandingGroup({
 
       <LayerList layers={layers} logoSources={logoSources} />
     </div>
-  );
-}
-
-function HistoryButton({
-  testId,
-  label,
-  disabled,
-  onClick,
-  children,
-}: {
-  testId: string;
-  label: string;
-  disabled: boolean;
-  onClick: () => void;
-  children: ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      data-testid={testId}
-      aria-label={label}
-      title={label}
-      disabled={disabled}
-      onClick={onClick}
-      className="flex h-7 w-7 items-center justify-center text-foreground transition-colors hover:bg-secondary disabled:pointer-events-none disabled:text-muted-foreground/40"
-    >
-      {children}
-    </button>
   );
 }

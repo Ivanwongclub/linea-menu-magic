@@ -13,11 +13,21 @@
 //   7. One Properties panel follows that selection (U6), and says so when
 //      nothing is selected.
 //   8. Versions / Output is a socket that renders what it has (U8): Phase 7a's
-//      versions in the body, the design's own save state on the header.
+//      versions in the body, and nothing else since U7 took the save state.
+//   9. The document bar (U7) is the home for what is not a selection: the
+//      design's name, its save state, undo / redo, the workspace menu, and the
+//      way back to the design list. None of it is drawn under ?calibration=1.
 import assert from "node:assert/strict";
 import { openEditorFor, stageAppearance, waitForRecipe } from "../lib/appearance.mjs";
 
 const DEFAULT_WIDTH = 360;
+
+/** U7 moved dock / collapse / reset into the document bar's workspace menu. */
+async function menuItem(page, testId) {
+  await page.getByTestId("workspace-menu").click();
+  await page.getByTestId("workspace-menu-items").waitFor({ timeout: 10000 });
+  await page.getByTestId(testId).click();
+}
 
 export default async function ({ page, base, admin, editor, h }) {
   const { product, restore } = await stageAppearance(admin, "sample-buckles-cord-locks", "e2e-workspace.obj");
@@ -52,7 +62,7 @@ export default async function ({ page, base, admin, editor, h }) {
     out.opened = { panelWidth: Math.round(firstBoxes.panel.width), side: "right" };
 
     /* ---- 2. the other edge, and it is remembered ---- */
-    await page.getByTestId("workspace-dock").click();
+    await menuItem(page, "workspace-dock");
     await page.waitForFunction(() => document.querySelector('[data-testid="workspace"]')?.getAttribute("data-side") === "left", null, { timeout: 10000 });
     const docked = { panel: await panel.boundingBox(), viewport: await viewport.boundingBox() };
     assert.ok(docked.panel.x < docked.viewport.x, "the controls moved to the left edge");
@@ -78,7 +88,7 @@ export default async function ({ page, base, admin, editor, h }) {
 
     /* ---- 3. collapsed, the model gets the room ---- */
     const beforeCollapse = (await viewport.boundingBox()).width;
-    await page.getByTestId("workspace-collapse").click();
+    await menuItem(page, "workspace-collapse");
     await page.getByTestId("workspace-rail").waitFor({ timeout: 10000 });
     assert.equal(await panel.count(), 0, "the controls are out of the way");
     assert.ok((await viewport.boundingBox()).width > beforeCollapse + 200, "and the model has the room");
@@ -102,7 +112,7 @@ export default async function ({ page, base, admin, editor, h }) {
     await page.getByTestId("text-layer-content").blur();
     await waitForRecipe(page, admin, designId, (r) => r.layers?.[0]?.content?.value === "WORKSPACE", "a layer to leave alone");
 
-    await page.getByTestId("workspace-reset").click();
+    await menuItem(page, "workspace-reset");
     await page.waitForFunction(() => document.querySelector('[data-testid="workspace"]')?.getAttribute("data-side") === "right", null, { timeout: 10000 });
     assert.deepEqual(await layoutOf(), { side: "right", collapsed: false, width: DEFAULT_WIDTH }, "reset restores the default layout");
     assert.equal(await storedLayout(), null, "and forgets what was stored");
@@ -153,10 +163,12 @@ export default async function ({ page, base, admin, editor, h }) {
     await page.getByTestId("text-layer-content").fill("WORKSPACE II");
     await page.getByTestId("text-layer-content").blur();
     await waitForRecipe(page, admin, designId, (r) => r.layers?.[0]?.content?.value === "WORKSPACE II", "an edit to save");
-    assert.equal(await dock.getByTestId("autosave-status").count(), 1, "the save state rides in its header");
+    assert.equal(await dock.getByTestId("autosave-status").count(), 0, "the save state is no longer the dock's (U7)");
+    const bar = page.getByTestId("document-bar");
+    assert.equal(await bar.getByTestId("autosave-status").count(), 1, "it rides in the document bar");
     assert.equal(await page.getByTestId("output-toggle").isDisabled(), false, "and the body opens");
     assert.equal(await page.getByTestId("output-body").count(), 0, "closed until it is asked for");
-    out.output = { sections: 1, header: (await dock.getByTestId("autosave-status").innerText()).trim() };
+    out.output = { sections: 1, save: (await bar.getByTestId("autosave-status").innerText()).trim() };
 
     await page.getByTestId("parts-toggle").click();
     await page.getByTestId("part-row").first().waitFor({ timeout: 20000 });
@@ -193,15 +205,44 @@ export default async function ({ page, base, admin, editor, h }) {
     assert.equal(await page.getByTestId("zone-row").getByTestId("zone-plane").count(), 0, "the row is a name and a delete");
     out.selection = "layer → part → zone, one at a time";
 
+    /* ---- 9. the document bar: everything that is not a selection (U7) ---- */
+    const docBar = page.getByTestId("document-bar");
+    await docBar.waitFor({ timeout: 20000 });
+    const { data: designRow } = await admin.from("designs").select("name").eq("id", designId).single();
+    assert.equal((await docBar.getByTestId("document-name").innerText()).trim(), designRow.name, "the bar names the design");
+    assert.equal(await docBar.getByTestId("undo").count(), 1, "undo is a document verb, not a layer group's (E2 §3.4 item 4)");
+    assert.equal(await docBar.getByTestId("redo").count(), 1);
+    assert.equal(await page.getByTestId("branding-group").getByTestId("undo").count(), 0, "and it has left BrandingGroup");
+    assert.equal(await page.getByTestId("undo").count(), 1, "exactly one undo on the page — the suite's bare selectors stay unambiguous");
+
+    // The history still works from its new home, on the layer added in step 5.
+    assert.equal(await page.getByTestId("undo").isDisabled(), false, "there is something to undo");
+    await page.getByTestId("undo").click();
+    await waitForRecipe(page, admin, designId, (r) => (r.zones?.length ?? 0) === 0, "undo from the document bar");
+    await page.getByTestId("redo").click();
+    await waitForRecipe(page, admin, designId, (r) => (r.zones?.length ?? 0) === 1, "and redo");
+
+    // The way back to the design list, which is what 7a left owed.
+    const link = docBar.getByTestId("document-designs-link");
+    assert.equal(await link.count(), 1, "the bar is the way back to the design list");
+    await link.click();
+    await page.waitForURL((u) => u.pathname === "/designer-studio/designs", { timeout: 30000 });
+    await page.locator(`[data-testid="design-row"][data-design-id="${designId}"]`).waitFor({ timeout: 30000 });
+    out.documentBar = { name: designRow.name, history: "undo/redo in the bar", link: "/designer-studio/designs" };
+
+    await page.goto(`${base}/designer-studio/editor/${designId}`, { waitUntil: "networkidle" });
+    await panel.waitFor({ timeout: 30000 });
+
     /* ---- 8. calibration renders the default whatever is stored ---- */
-    await page.getByTestId("workspace-dock").click();
+    await menuItem(page, "workspace-dock");
     await page.waitForFunction(() => document.querySelector('[data-testid="workspace"]')?.getAttribute("data-side") === "left", null, { timeout: 10000 });
     await page.goto(`${base}/designer-studio/editor/${designId}?calibration=1`, { waitUntil: "networkidle" });
     await panel.waitFor({ timeout: 30000 });
     assert.deepEqual(await layoutOf(), { side: "right", collapsed: false, width: DEFAULT_WIDTH }, "calibration ignores a stored layout");
     assert.equal(await page.getByTestId("workspace-chrome").count(), 0, "and draws none of the workspace chrome");
+    assert.equal(await page.getByTestId("document-bar").count(), 0, "nor the document bar, which has height (U7)");
     assert.equal((await storedLayout()).value.side, "left", "without forgetting what the buyer chose");
-    out.calibration = "default layout, no chrome";
+    out.calibration = "default layout, no chrome, no document bar";
 
     return out;
   } finally {

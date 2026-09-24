@@ -18,13 +18,15 @@ import { EditorPanel } from "../components/EditorPanel";
 
 interface DesignRow {
   id: string;
+  /** U7: what the document bar calls this design. */
+  name: string;
   product_id: string | null;
   /** Any stored version; `normalizeRecipe` reads a v1 row as `layers: []`, ruler off (collision 27). */
   draft_recipe: unknown;
 }
 
 async function fetchDesign(designId: string): Promise<DesignRow | null> {
-  const { data, error } = await supabase.from("designs").select("id, product_id, draft_recipe").eq("id", designId).maybeSingle();
+  const { data, error } = await supabase.from("designs").select("id, name, product_id, draft_recipe").eq("id", designId).maybeSingle();
   if (error) throw new Error(error.message);
   return data as DesignRow | null;
 }
@@ -123,6 +125,7 @@ export function EditorDesignPage({ designId }: { designId: string }) {
 
   return (
     <WorkspaceShell
+      document={{ name: designQuery.data.name, saveStatus, designsLink: true }}
       viewport={
         <EditorViewport
           modelStoragePath={product.model_storage_path}
@@ -155,7 +158,6 @@ export function EditorDesignPage({ designId }: { designId: string }) {
           colours={product.colours}
           selectedColour={selectedColour}
           onSelectColour={(c) => setColourId(c.id)}
-          saveStatus={saveStatus}
           designId={designId}
         />
       }
