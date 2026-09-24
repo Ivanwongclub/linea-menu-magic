@@ -160,6 +160,7 @@ baseline** — its result is recorded below.
 | 2026-09-23 | **47/47** in 19m 18s | 30000 (default) | First mechanical full-suite pass — the baseline |
 | 2026-09-23 | **not run** (Phase 7a) | 30000 (default) | Box at load 35; the stack answered 544/504 and the dev server was killed mid-run. 48 scenarios are owed on a quiet box — see Phase 7a's verification note |
 | 2026-09-24 | **killed at 4/48** (Phase 7a) | 30000 (default) | Started in the quietest window the box offered (1 min 5.9, 5 min 10.2). `e2e:up` booted cleanly this time. `admin-i18n`, `appearance-paint`, `appearance-plated` passed; the OS killed the run inside `appearance-printed` with ~68 MB free. Second memory kill on this box, after the 18/47 one — a capacity limit, not a scenario failure |
+| 2026-09-24 | **47/48** in 22m 13s | 30000 (default) | First mechanical pass since 7a, on a box with ten unrelated containers stopped. Every pre-7a scenario passed, including `render-calibration` and `workspace`. The one failure is 7a's own new `design-versions` — a real defect in the scenario, not capacity (see below) |
 
 Two things the first runs exposed, both now handled by `suite.sh` rather than
 by the person running it:
@@ -2826,6 +2827,31 @@ completion.** The phase stays written-not-verified. The suite needs a box with
 memory free, not just a low load average — the whole run is one browser and one
 dev server per scenario against a Docker stack, and this machine is carrying
 another six containers and 32 login sessions.
+
+**Third attempt, 2026-09-24 — the suite ran: 47/48 in 22m 13s.** Ten unrelated
+containers were stopped first; the five Bar Pacific ones stayed up, so this was
+a partial reclaim and it was enough. Every scenario that existed before 7a
+passed, so **7a broke nothing**. `render-calibration` passed with its baselines
+unmoved: surround luminance 49 (target ≤ 80), highlight 238 (≥ 237), `#808080`
+→ (128, 128, 128), `#C0392B` → (192, 58, 45), model fill 0.559 — the same
+numbers the Phase 3c table records.
+
+**The one failure is 7a's own `design-versions`, and it is a defect in the
+scenario.** Step 4 clicks Reload on version 1, then waits for the layer
+editor's `text-layer-content` to read "V1". It never does: `loadRecipe`
+deliberately clears the selection, and the layer editor is contextual — with
+nothing selected there is no text input on screen to read. The editor's
+behaviour is right and is this phase's own recorded ruling ("a reloaded
+version's layers are not the ones that were on screen"); the read-back is what
+is wrong, and it has to select the reloaded layer, or assert through the
+recipe, before it can look at a field. Everything the scenario proves before
+that point — the save, the snapshot's contents, `version_number` from the
+table, `current_version_id` — passed.
+
+**7a stays written-not-verified** until that scenario is fixed and the suite
+runs green. Both bugs the scenario has turned up so far were in the scenario
+rather than in the feature, which is the argument for having run it rather
+than assumed it.
 
 ### 7a's open questions, ruled (2026-09-23)
 
