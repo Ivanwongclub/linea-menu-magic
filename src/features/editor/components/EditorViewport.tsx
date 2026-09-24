@@ -10,18 +10,19 @@ import { EditorModel, type PartsReport, type RulerMeasurements } from "./EditorM
 import type { TextSceneReport } from "./branding/BrandingMeshes";
 import type { Layer } from "../lib/recipe";
 import { RulerLabels, RulerOverlay, newRulerLabelElements } from "./RulerOverlay";
-import { RulerToggle } from "./RulerToggle";
+import { ViewportTools } from "./ViewportTools";
 import type { EditorColour } from "../hooks/useEditorProduct";
 import type { PickerFinish } from "../hooks/useFinishOptions";
 import { GL_SETTINGS } from "../lib/renderSettings";
+import type { PerspectiveCamera } from "three";
+import { centreOf, cornersOf, diagonalOf, fitDistance } from "../lib/framing";
 import { ProceduralStudio } from "./ProceduralStudio";
 import { CameraReport } from "./CameraReport";
 import { HandleProjector, HandlesOverlay, newHandleBridge, newHandleElements } from "./branding/Handles";
 import { selectHiddenGroups, selectSelectedLayerId, selectZones, useEditorStore } from "../store/useEditorStore";
 import { useLogoSources } from "../hooks/useLogoAssets";
-import { ManufacturingStrip } from "./ManufacturingStrip";
-import { processThresholds, type ProcessThresholds } from "../lib/manufacturing";
-import { usePublicFinishes, PAINT_PROCESS } from "../hooks/usePublicFinishes";
+import type { ProcessThresholds } from "../lib/manufacturing";
+import { usePublicFinishes } from "../hooks/usePublicFinishes";
 import { useLayerMaterials } from "../hooks/useLayerMaterials";
 import { zoneStyleFor } from "../lib/finishMaterial";
 import { zonesSentence } from "../lib/zones";
@@ -135,7 +136,6 @@ export function EditorViewport({
 }: EditorViewportProps) {
   const controlsRef = useRef<OrbitControlsImpl>(null);
   const [autoRotate, setAutoRotate] = useState(true);
-  const [modelSizeMm, setModelSizeMm] = useState<number | null>(null);
   const [rulerMeasurements, setRulerMeasurements] = useState<RulerMeasurements | null>(null);
   const [textReport, setTextReport] = useState<TextSceneReport | null>(null);
   const rulerLabels = useRef(newRulerLabelElements());
@@ -150,16 +150,16 @@ export function EditorViewport({
   // on a layer, a zone or a part (E2 U1).
   const hasSelection = useEditorStore((s) => s.selection !== null);
   const modelFrame = useEditorStore((s) => s.modelFrame);
+  // U10: the strip reads this from the store now, at the bottom of the
+  // workspace rather than inside this column.
+  const modelSizeMm = useEditorStore((s) => s.modelSizeMm);
+  const setModelSizeMm = useEditorStore((s) => s.setModelSizeMm);
   const logoSources = useLogoSources(layers);
   // Phase 6a: a layer may carry its own finish, paint or ink; the PAINT
   // process's own tolerances come with the same query.
   const { data: publicFinishes } = usePublicFinishes();
   const layerMaterials = useLayerMaterials(layers, publicFinishes);
   const { language } = useI18n();
-  const printProcess = useMemo(
-    () => processThresholds((publicFinishes ?? []).find((f) => f.process?.code === PAINT_PROCESS)?.process, language),
-    [publicFinishes, language],
-  );
   // Phase 6b: parts and zones come from the recipe, and the zones' styles from
   // the same public-finish query the appearance picker uses.
   const hiddenGroups = useEditorStore(selectHiddenGroups);
@@ -191,6 +191,26 @@ export function EditorViewport({
   const selectedRelief = textReport?.reliefs.find((r) => r.layerId === selectedLayerId) ?? null;
   // Calibration screenshots composite any DOM over the canvas; `?calibration=1` hides the viewport chrome.
   const calibration = useSearchParams()[0].get("calibration") === "1";
+
+  // E2 U9. Reset view is the framing saved on load (`controls.saveState()`),
+  // which is what a double-click has always done. Zoom to fit keeps the
+  // direction the buyer turned to and solves the distance again, so a model
+  // orbited and zoomed into comes back to frame without losing the angle.
+  const onResetView = useCallback(() => controlsRef.current?.reset(), []);
+  const onZoomToFit = useCallback(() => {
+    const controls = controlsRef.current;
+    const bounds = partsReport?.bounds;
+    if (!controls || !bounds) return;
+    const camera = controls.object as PerspectiveCamera;
+    const centre = centreOf(bounds);
+    const direction = camera.position.clone().sub(controls.target).normalize();
+    const distance = fitDistance(camera, centre, cornersOf(bounds), direction, diagonalOf(bounds) * 2);
+    controls.target.copy(centre);
+    camera.position.copy(centre).addScaledVector(direction, distance);
+    camera.lookAt(centre);
+    camera.updateProjectionMatrix();
+    controls.update();
+  }, [partsReport]);
 
   if (!modelStoragePath) {
     return <EmptyModelState />;
@@ -316,21 +336,15 @@ export function EditorViewport({
         <RulerLabels measurements={rulerMeasurements} sizeLigne={sizeLigne} sizeLabel={sizeLabel} labels={rulerLabels} layer={selectedLayer} relief={selectedRelief} />
       )}
       {!calibration && (
-        <div className="absolute bottom-3 right-3 z-10 flex items-center gap-2">
-          <RulerToggle active={ruler} onToggle={onRulerToggle} />
-        </div>
-      )}
-      </div>
-      {/* The manufacturing strip is chrome: the calibration screenshots keep the canvas they were measured on. */}
-      {!calibration && (
-        <ManufacturingStrip
-          layers={layers}
-          process={process}
-          printProcess={printProcess}
-          faceRadiusMm={modelSizeMm != null ? modelSizeMm / 2 : null}
-          logoSources={logoSources}
+        <ViewportTools
+          ruler={ruler}
+          onRulerToggle={onRulerToggle}
+          onResetView={onResetView}
+          onZoomToFit={onZoomToFit}
+          canFit={partsReport != null}
         />
       )}
+      </div>
     </>
   );
 }

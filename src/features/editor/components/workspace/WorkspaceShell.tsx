@@ -13,6 +13,13 @@ interface WorkspaceShellProps {
   viewport: ReactNode;
   panel: ReactNode;
   /**
+   * The manufacturing verdict (E2 U10). It sits here rather than in the
+   * viewport column because it judges the design, not the view, so it spans
+   * the viewport *and* the controls. Not drawn under `?calibration=1`, as it
+   * never was.
+   */
+  strip?: ReactNode;
+  /**
    * What the document bar says (E2 U7). The shell renders the bar rather than
    * taking it as a node, because the workspace menu in it drives the layout
    * this component owns — two `useWorkspaceLayout` callers would be two
@@ -36,7 +43,7 @@ interface WorkspaceShellProps {
  * The fixed site header's height is one token (`--site-header-height`,
  * index.css), so the viewport's bottom edge can't drift below the fold.
  */
-export function WorkspaceShell({ banner, viewport, panel, document }: WorkspaceShellProps) {
+export function WorkspaceShell({ banner, viewport, panel, strip, document }: WorkspaceShellProps) {
   const { t } = useI18n();
   // Calibration screenshots are measured in pixels: they always get the
   // default layout, and the chrome that would change it is not drawn.
@@ -143,6 +150,11 @@ export function WorkspaceShell({ banner, viewport, panel, document }: WorkspaceS
           </div>
         )}
       </div>
+
+      {/* Full width under the viewport and the controls both (E2 §3.4 item 6).
+          Its height comes off the row above it, so the canvas is exactly as
+          tall as it was when the strip lived inside the viewport column. */}
+      {!calibration && strip}
     </div>
   );
 }

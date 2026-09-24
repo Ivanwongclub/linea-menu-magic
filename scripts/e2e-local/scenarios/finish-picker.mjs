@@ -138,14 +138,25 @@ export default async function ({ page, base, admin, editor, h }) {
     await publish(admin, metalProduct, metalModelPath, metalVariantId);
     await publish(admin, colourProduct, colourModelPath, colourVariantId);
 
-    /* ---- metal product: FINISH group, attached-only picker, ruler toggle, no toolbar ---- */
+    /* ---- metal product: FINISH group, attached-only picker, ruler toggle, view tools ---- */
     await page.goto(`${base}/designer-studio/editor/new?product=${metalProduct.slug}`, { waitUntil: "networkidle" });
     await page.getByTestId("editor-viewport").locator("canvas").first().waitFor({ timeout: 20000 });
     const panel = page.getByTestId("editor-panel");
     await panel.waitFor({ timeout: 10000 });
     assert.equal(await panel.locator('[data-testid="panel-group"][data-group="finish"]').count(), 1, "a metal product gets the FINISH group");
-    assert.equal(await page.getByTestId("viewport-toolbar").count(), 0, "no floating viewport toolbar");
+    // E2 U9: **Phase 3 R2 — "no floating toolbar over the viewport" — is
+    // retired.** The cluster is view tools only: reset view, zoom to fit and
+    // the ruler. Undo and redo stayed in the document bar (U7).
+    const toolbar = page.getByTestId("viewport-toolbar");
+    assert.equal(await toolbar.count(), 1, "the view-tools cluster is over the viewport (U9)");
     assert.equal(await page.getByTestId("ruler-toggle").count(), 1, "ruler toggle is present (collision 18)");
+    for (const tool of ["view-reset", "view-fit", "ruler-toggle"]) {
+      assert.equal(await toolbar.getByTestId(tool).count(), 1, `${tool} is in the cluster`);
+    }
+    for (const verb of ["undo", "redo"]) {
+      assert.equal(await toolbar.getByTestId(verb).count(), 0, `${verb} is a document verb, not a view tool (E2 §3.4 item 4)`);
+    }
+    assert.equal(await toolbar.getByTestId("viewport-brush").count(), 0, "and the brush only joins while a paint zone is armed");
 
     await page.getByTestId("change-finish").click();
     const grid = page.locator('[data-testid="finish-swatch"]');

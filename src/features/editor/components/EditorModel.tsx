@@ -16,7 +16,7 @@ import { decodeRuns, encodeRuns, facesForGroups, facesForPlane, resolveZones, to
 import type { ZoneStyle } from "../lib/shaderPatch";
 import type { LogoSource } from "../hooks/useLogoAssets";
 import { BrandingMeshes, type TextSceneReport } from "./branding/BrandingMeshes";
-import { CAMERA_AZIMUTH_DEG, CAMERA_ELEVATION_DEG, TARGET_VIEWPORT_FILL } from "../lib/renderSettings";
+import { cornersOf, fitDistance, homeDirection, type BoundsMm } from "../lib/framing";
 
 interface EditorModelProps {
   url: string;
@@ -418,44 +418,13 @@ export function EditorModel({
   useEffect(() => {
     const perspective = camera as THREE.PerspectiveCamera;
     const center = bounds.getCenter(new THREE.Vector3());
-    const elevation = THREE.MathUtils.degToRad(CAMERA_ELEVATION_DEG);
-    const azimuth = THREE.MathUtils.degToRad(CAMERA_AZIMUTH_DEG);
-    const direction = new THREE.Vector3(
-      Math.cos(elevation) * Math.sin(azimuth),
-      Math.sin(elevation),
-      Math.cos(elevation) * Math.cos(azimuth),
-    );
-    const corners = [0, 1, 2, 3, 4, 5, 6, 7].map(
-      (i) =>
-        new THREE.Vector3(
-          i & 1 ? bounds.max.x : bounds.min.x,
-          i & 2 ? bounds.max.y : bounds.min.y,
-          i & 4 ? bounds.max.z : bounds.min.z,
-        ),
-    );
+    // E2 U9: the same solve the cluster's zoom-to-fit runs (`lib/framing`), so
+    // "fit" and "reset view" cannot drift apart.
+    const box: BoundsMm = { minX: bounds.min.x, maxX: bounds.max.x, minY: bounds.min.y, maxY: bounds.max.y, minZ: bounds.min.z, maxZ: bounds.max.z };
+    const direction = homeDirection();
+    const corners = cornersOf(box);
 
-    let distance = Math.max(bounds.getSize(new THREE.Vector3()).length(), 1) * 2;
-    const ndc = new THREE.Vector3();
-    for (let i = 0; i < 6; i++) {
-      camera.position.copy(center).addScaledVector(direction, distance);
-      camera.lookAt(center);
-      camera.updateMatrixWorld();
-      perspective.updateProjectionMatrix();
-      let minX = Infinity;
-      let maxX = -Infinity;
-      let minY = Infinity;
-      let maxY = -Infinity;
-      for (const c of corners) {
-        ndc.copy(c).project(camera);
-        minX = Math.min(minX, ndc.x);
-        maxX = Math.max(maxX, ndc.x);
-        minY = Math.min(minY, ndc.y);
-        maxY = Math.max(maxY, ndc.y);
-      }
-      const fill = Math.max(maxX - minX, maxY - minY) / 2;
-      if (fill <= 0) break;
-      distance *= fill / TARGET_VIEWPORT_FILL;
-    }
+    const distance = fitDistance(perspective, center, corners, direction, Math.max(bounds.getSize(new THREE.Vector3()).length(), 1) * 2);
     camera.position.copy(center).addScaledVector(direction, distance);
     camera.lookAt(center);
     gl.domElement.dataset.cameraHome = `${direction.x.toFixed(3)},${direction.y.toFixed(3)},${direction.z.toFixed(3)}`;

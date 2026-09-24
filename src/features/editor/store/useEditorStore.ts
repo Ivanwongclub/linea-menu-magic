@@ -58,6 +58,12 @@ interface EditorState {
   /** Bumped on pointer-up: autosave writes at once instead of debouncing. */
   flushSeq: number;
   modelFrame: ModelFrame | null;
+  /**
+   * The rendered primary dimension, mm. Runtime only, and in the store since
+   * E2 U10 because the manufacturing strip left the viewport column for the
+   * bottom of the workspace and still needs the edge-margin reference.
+   */
+  modelSizeMm: number | null;
   /** Phase 6b R1: the model's own parts, as the scene reports them. Runtime only. */
   partsReport: PartsReport | null;
   /** Phase 6b R2: the zone the brush is painting into, and how wide the brush is. */
@@ -96,6 +102,7 @@ interface EditorState {
   undo: () => void;
   redo: () => void;
   setModelFrame: (frame: ModelFrame | null) => void;
+  setModelSizeMm: (mm: number | null) => void;
   setPartsReport: (report: PartsReport | null) => void;
   setPaintZone: (zoneId: string | null) => void;
   setBrushRadius: (mm: number) => void;
@@ -135,6 +142,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   dragging: false,
   flushSeq: 0,
   modelFrame: null,
+  modelSizeMm: null,
   partsReport: null,
   paintZoneId: null,
   brushRadiusMm: 1,
@@ -144,6 +152,7 @@ export const useEditorStore = create<EditorState>((set) => ({
       ...startHistory(recipe),
       dragging: false,
       selection: null,
+      modelSizeMm: null,
       hydratedFor,
       // Files an anonymous draft is still holding belong to the layers it is
       // being initialised with; anything else is from a previous product.
@@ -219,6 +228,7 @@ export const useEditorStore = create<EditorState>((set) => ({
       paintZoneId: s.paintZoneId === id ? null : s.paintZoneId,
     })),
   setModelFrame: (modelFrame) => set({ modelFrame }),
+  setModelSizeMm: (modelSizeMm) => set({ modelSizeMm }),
   setPartsReport: (partsReport) => set({ partsReport }),
   // Arming the brush is also a selection: the zone being painted is the zone
   // being edited.

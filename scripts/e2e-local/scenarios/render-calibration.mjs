@@ -137,7 +137,9 @@ export default async function ({ page, base, admin, h }) {
     out.studio = { surroundLum: Math.round(stats.lumP02), highlightLum: Math.round(stats.lumP98), referenceNickel };
     assert.ok(stats.lumP02 <= 0x50, `surround-facing region ${stats.lumP02.toFixed(0)} should be ≤ #505050`);
     assert.ok(stats.lumP98 >= 0xed, `highlight ${stats.lumP98.toFixed(0)} should be ≥ #EDEDED`);
-    assert.equal(await page.getByTestId("viewport-toolbar").count(), 0, "no floating viewport toolbar");
+    // E2 U9 retired Phase 3 R2, so the cluster exists — but never here: it is
+    // chrome over the canvas, and this whole file is measured in pixels.
+    assert.equal(await page.getByTestId("viewport-toolbar").count(), 0, "no view tools under ?calibration=1 (U9)");
   } finally {
     await admin.from("finishes").update({ base_color_hex: nickel.base_color_hex }).eq("id", nickel.id);
     await stagedStudio.restore();

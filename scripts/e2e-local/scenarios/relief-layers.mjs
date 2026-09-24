@@ -203,6 +203,33 @@ export default async function ({ page, base, admin, editor, h }) {
     assert.deepEqual(await warnings(), [], "a missing threshold is never a warning");
     out.staffLine = staffText;
 
+    /* ---- U10: the strip is a verdict, spanning the whole workspace ---- */
+    const strip = page.getByTestId("manufacturing-strip");
+    const stripBox = await strip.boundingBox();
+    const workspaceBox = await page.getByTestId("workspace").boundingBox();
+    const panelBox = await page.getByTestId("workspace-panel").boundingBox();
+    assert.ok(Math.abs(stripBox.width - workspaceBox.width) <= 1, `the strip spans the workspace (${stripBox.width} vs ${workspaceBox.width})`);
+    assert.ok(stripBox.width > panelBox.width + 100, "the viewport and the controls both, not one column (E2 §3.4 item 6)");
+    assert.ok(stripBox.y >= workspaceBox.y + workspaceBox.height - 1, "and it sits under them");
+
+    // A count, and the lines behind it. Expanded on a desk; the collapse is
+    // what a phone gets by default, so the strip never eats the viewport it
+    // is judging.
+    assert.equal(await strip.getAttribute("data-collapsed"), "false", "open at this width");
+    const shown = Number(await page.getByTestId("manufacturing-count").getAttribute("data-count"));
+    assert.equal(shown, Number(await strip.getAttribute("data-warning-count")), "the badge is the strip's own count");
+    await page.getByTestId("manufacturing-toggle").click();
+    await page.waitForFunction(() => document.querySelector('[data-testid="manufacturing-strip"]')?.getAttribute("data-collapsed") === "true", null, { timeout: 10000 });
+    assert.equal(await page.getByTestId("manufacturing-lines").count(), 0, "collapsed, it is the verdict and nothing else");
+    assert.equal(
+      Number(await page.getByTestId("manufacturing-count").getAttribute("data-count")),
+      shown,
+      "and the count survives the collapse — that is what is left to read",
+    );
+    await page.getByTestId("manufacturing-toggle").click();
+    await page.getByTestId("manufacturing-lines").waitFor({ timeout: 10000 });
+    out.strip = { widthPx: Math.round(stripBox.width), workspacePx: Math.round(workspaceBox.width), count: shown };
+
     /* ---- 7. the ruler's relief callout (R4) ---- */
     await (await onlyLayerRow(page)).getByTestId("text-layer-select").click();
     await page.getByTestId("ruler-toggle").click();

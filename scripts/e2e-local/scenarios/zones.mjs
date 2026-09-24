@@ -112,6 +112,22 @@ export default async function ({ page, base, admin, editor, h }) {
     const domeCanvas = page.getByTestId("editor-viewport").locator("canvas").first();
     const domeFaceZ = Number(await viewport.getAttribute("data-face-z"));
     await addZone("paint");
+
+    // E2 U9: while a paint zone is armed the brush size joins the viewport
+    // cluster, a hand's width from the pointer that is about to paint. It is
+    // the same state as the zone's own control, not a second setting.
+    const viewportBrush = page.getByTestId("viewport-brush");
+    await viewportBrush.waitFor({ timeout: 20000 });
+    await page.getByTestId("viewport-brush-input").fill(String(BRUSH_MM));
+    // The panel's own control formats its value (2 dp), so this reads the
+    // number, not the text.
+    await page.waitForFunction(
+      (mm) => Number(document.querySelector('[data-testid="zone-brush-input"]')?.value) === mm,
+      BRUSH_MM,
+      { timeout: 10000 },
+    );
+    assert.equal(Number(await viewportBrush.getAttribute("data-value")), BRUSH_MM, "one brush radius, reachable from the model or the panel");
+
     await page.getByTestId("zone-brush-input").fill(String(BRUSH_MM));
     await page.getByTestId("zone-brush-input").blur();
     await pickZoneFinish(BRUSH_PAINT, "Paint colour");

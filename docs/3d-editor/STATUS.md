@@ -60,13 +60,14 @@ per-phase rulings stay in each phase's migration header and commit, and are
 summarised here only where they still bind later work.
 
 **Built: 7 of 12 phases** (1–6 done, 6b closed Phase 6; 7a closed Phase 7 and
-is verified at 48/48; 8–12 not started) and **8 of 13 workspace units** (U1–U8
-— E2's six pre-7a units, plus the document bar and the layers dock after it).
+is verified at 48/48; 8–12 not started) and **10 of 13 workspace units** (U1–U10
+— E2's six pre-7a units, plus the document bar, the layers dock, the floating
+view tools and the strip as a verdict after it).
 7a took four suite runs to verify and each failure was a real defect — two in
 its own scenario, one in the design list's query; the phase was not called done
 until the suite was green.
 
-## Workspace units — 8 of 13 built
+## Workspace units — 10 of 13 built
 
 E2's 13-unit build plan for the docked workspace (`reports/E2-workspace-audit.md`
 §5), reconciled unit by unit on 2026-09-23. E2 names **U1, U2, U3, U4, U6 and
@@ -84,8 +85,8 @@ follow whichever unit lands last before the deck is next shown.
 | U6 | One Properties panel following the selection: a layer's relief, appearance and placement; a zone's plane, parts or brush and what it is made of; a part's name, share of the model, visibility and covering zones; a plain sentence when nothing is selected. Controls moved parent, not shape — test ids and `data-layer-id` / `data-zone-id` unchanged | **Done** |
 | U7 | Document bar — design name, autosave, undo / redo and the workspace menu: the home for everything that is not a selection; history left `BrandingGroup`, the chrome buttons left the panel header, and the bar carries the way back to the design list | **Done** |
 | U8 | The Versions / Output socket for Phase 7's saves and Phase 9/10/12's output; renders only when it has something in it (E2 §3.4 item 7) — since U7 that is Phase 7a's versions alone, the save state having moved to the document bar | **Done** |
-| U9 | **Floating view tools** — reset view, zoom to fit, ruler and brush size in a viewport overlay; retires the "no floating toolbar" ruling (Phase 3 R2) and hides the tools under `?calibration=1` | Not started — may follow 7a |
-| U10 | **Strip as a verdict** — the manufacturing warning strip full width under viewport and properties, collapsible with a count badge, collapsed by default on small screens | Not started — may follow 7a |
+| U9 | Floating view tools — reset view, zoom to fit, ruler and brush size in a viewport overlay; hidden under `?calibration=1` | **Done** — retires Phase 3 R2 |
+| U10 | Strip as a verdict — the manufacturing warning strip full width under viewport and properties, collapsible with a count badge, collapsed by default on small screens | **Done** |
 | U11 | **390 px sheet** — the phone layout: a bottom sheet with three snap points and a segmented control, viewport floor kept at 200 px | Not started — may follow 7a |
 | U12 | **Deck and docs** — re-shoot every editor shot against the workspace and record the workspace rulings (standing ruling 4) | Not started — follows the last unit before the deck is next shown |
 | U13 | **Free docking** (optional) — four-edge docking and drag-to-dock, only if U4's fixed zones prove insufficient | Not started — optional, may follow 7a |
@@ -122,6 +123,18 @@ These bind later units and Phase 7a; they are not re-decided per unit.
    localStorage under a layout version; Reset workspace restores the chrome
    alone and never touches the recipe; `?calibration=1` forces the default
    layout so calibration and deck shots are reproducible.
+8. ~~**No floating toolbar over the viewport**~~ (Phase 3 R2) — **retired in
+   U9.** R2 was written when there were no view tools to put in one and a
+   toolbar would have been a box of disabled buttons. The cluster that
+   replaces it is held to E2 §3.4 item 4: *view* tools only — reset view,
+   zoom to fit, the ruler, and the brush size while a paint zone is armed.
+   Undo and redo are document verbs and stayed in the document bar (U7). It
+   is not drawn under `?calibration=1`.
+9. **The strip judges the design, so it spans the workspace.** Since U10 it is
+   the shell's, not the viewport column's, and it collapses to a count. Its
+   height comes off the row above it, so the canvas is exactly as tall as it
+   was when the strip lived inside the viewport column — which is why the
+   render baselines did not move.
 
 ### Open items
 
@@ -132,9 +145,9 @@ These bind later units and Phase 7a; they are not re-decided per unit.
 2. **Settled (2026-09-24): U5 landed and standing ruling 3 is retired.**
    Properties is reached without scrolling past the layers, because the dock
    is capped at 40vh and scrolls inside it rather than growing with the model.
-3. **U9 retires a Phase 3 ruling.** E2 §5 has the floating view tools retire
-   "no floating toolbar" (Phase 3 R2). Confirm that retirement when U9 is
-   scheduled rather than treating R2 as still binding.
+3. **Settled (2026-09-24): Phase 3 R2 is retired**, in U9's commit and in the
+   standing rulings below. The cluster is view tools only, and it is not drawn
+   under `?calibration=1`.
 4. **Settled (2026-09-23): `reports/deck/` stays tracked through U12.** The
    frames are stale by standing ruling 4 and are re-shot in U12; whether they
    (and `reports/*.md`, E2 open question 7) stay tracked artefacts is decided
@@ -164,6 +177,39 @@ baseline** — its result is recorded below.
 | 2026-09-24 | **48/48** in 24m 35s | 30000 (default) | Green, with the design list's embed named by its FK. **This is the baseline for Phase 7a**, and the first mechanical pass over all 48. `render-calibration` unmoved again (surround 49, highlight 238, `#808080` → 128,128,128, `#C0392B` → 192,58,45, fill 0.559) |
 | 2026-09-24 | **48/48** in 34m 2s | 30000 (default) | Workspace U7. `render-calibration` unmoved for the fourth run running — the document bar is chrome and calibration does not draw it. Slower than the 7a baseline on a busier box, with no scenario near its timeout |
 | 2026-09-24 | **48/48** in 17m 48s | 30000 (default) | Workspace U5. The quickest full pass yet, on the quietest box yet (load 10 falling, against 34m 2s at load ~24). `render-calibration` unmoved for the fifth run running. An earlier attempt was discarded, not failed: a behaviour-preserving edit landed 12 minutes in, and since each scenario boots its own dev server that run straddled two trees |
+| 2026-09-24 | **48/48** in 25 + 12 + 11 batches | 30000 (default) | Workspace U9 and U10, on one unchanged tree. Not one run: this box killed three attempts, two by the OS under memory pressure and one at 26/48 by the harness's own watchdog, while another project's Playwright suite held the load between 96 and 613. The batches ran back to back on the same stack; scenarios already boot their own dev server each, so what a single run adds is one wall-clock number, not isolation. An earlier 46/48 was **residue, not a defect** — see the killed-run note above |
+
+### A killed run leaves staged rows behind, and poisons the next one
+
+A scenario stages what it needs and undoes it in `finally`. Kill the run — the
+OS under memory pressure, or a stop — and that `finally` never runs, so the
+staged rows stay. The next run then fails in *staging*, before any UI, with a
+constraint violation that looks nothing like the unit under test:
+`duplicate key value violates unique constraint "idx_one_default_size"` is a
+`product_size_variants` row a previous run never deleted.
+
+**A clean local seed has no `product_size_variants` and no `product_finishes`
+rows at all** (confirmed in Phase 3, still true). So anything in those tables
+before a run is residue, and the check after any killed run is:
+
+```
+docker exec supabase_db_<ref> psql -U postgres -d postgres \
+  -c "select count(*) from product_size_variants; select count(*) from product_finishes;"
+```
+
+Both should be 0. U9/U10's first full pass scored 46/48 on exactly this, in
+`branding-defaults` and `drag-handles`; both passed once the rows were dropped,
+with no change to the code under test.
+
+### A source edit during a run invalidates that run
+
+Each scenario boots its own dev server (`run.mjs`), so a file saved while the
+suite is running is compiled by every scenario that starts after it and by none
+that started before. The pass then straddles two trees and is evidence for
+neither. **Discard it and start again on the final tree** — that is what
+happened to U5's first full run, killed at 12 minutes; the recorded 48/48 is
+the re-run. Waiting out a 20-minute suite costs less than a baseline nobody can
+trust, and the failure mode is silent: every scenario still says `pass`.
 
 Two things the first runs exposed, both now handled by `suite.sh` rather than
 by the person running it:
@@ -3152,29 +3198,142 @@ new-page rule was written about, so it is named here rather than left implied.
 
 ### Open questions from this unit, with a recommendation each
 
-1. **Virtualisation has no e2e proof.** A 60-group fixture would give one, but
-   it would have to be a disc or a button — the workspace scenario's other
-   assertions need a real face to place text on — and building one to test the
-   test is the wrong order. *Recommend* adding the proof in Phase 11, whose
-   uploads are the reason the threshold exists and which will bring a real
-   model with hundreds of groups; until then treat the threshold as unit-tested
-   arithmetic, not a verified UI path.
-2. **Section state is not remembered.** E2 §3.4 item 3 lists it under "Reset
-   workspace", which implies it is stored; it is component state, so a reload
-   puts Parts back to collapsed. Persisting it means a fourth field in
-   `WorkspaceLayout` and a layout version bump. *Recommend* doing it in U11,
-   which has to remember the bottom sheet's snap point anyway — one version
-   bump for both, rather than one per unit.
-3. **40vh is a guess, measured once.** At 1280 × 900 it leaves Properties
-   about 100 px of room below the dock with the Product and Finish groups
-   above it; a shorter window or a taller Finish group narrows that.
-   *Recommend* U11 re-measure it with the 390 px sheet, as it is already
-   re-measuring the viewport floor (U7 open question 2), and consider making
-   the dock's share of the panel the thing that is stored rather than a
-   constant.
-4. **The dock is one of five boxes in a scrolling column.** Product, Finish,
-   the dock, Properties and Output still share one scroll, so the column can
-   still scroll even though the dock no longer forces it. E2 §3.1's answer is
-   a second edge. *Recommend* leaving it until U13, and only if someone asks —
-   U4's ruling was that a 3D editor has two useful columns, and the viewport is
-   the other one.
+1. **Settled (2026-09-24): the virtualisation proof lands in Phase 11**, whose
+   uploads are why the threshold exists. Until then the threshold is
+   unit-tested arithmetic, not a verified UI path — see "What this unit could
+   not verify locally" above.
+2. **Settled (2026-09-24): section state persists in U11**, in one layout
+   version bump with the bottom sheet's snap point. Until then a reload is a
+   reset and Parts comes back collapsed.
+3. **Settled (2026-09-24): U11 re-measures 40vh**, alongside the 390 px
+   viewport floor it is already re-measuring (U7 open question 2).
+4. **Settled (2026-09-24): the five-box shared scroll waits for U13**, and
+   only on request. E2 §3.1's second edge is not built on spec.
+
+## Workspace U9 and U10 — view tools, and the strip as a verdict (2026-09-24)
+
+Two units in one pass, because they share an edge: U9 puts chrome *over* the
+viewport and U10 takes chrome *out* of it, and both are measured against the
+same canvas.
+
+### U9 — floating view tools
+
+**This retires Phase 3 R2, "no floating toolbar over the viewport."** R2 was
+written when there were no view tools to put in one; retiring it is deliberate,
+and the cluster is held to E2 §3.4 item 4 — view tools only. Reset view, zoom
+to fit and the ruler change where the model is looked at from and nothing about
+what gets made. Undo and redo stayed in the document bar (U7).
+
+Files:
+
+- `components/ViewportTools.tsx` (new) — the cluster, bottom-right, carrying
+  `viewport-toolbar`: the id two scenarios asserted was absent, now asserted
+  present. The brush size joins it only while a paint zone is armed, which is
+  the one moment the pointer is on the model; the zone's own `zone-brush` stays
+  where it is, one value reachable from either (as standing ruling 5 has it for
+  part visibility).
+- `lib/framing.ts` (new) — the framing solve, extracted so the load framing and
+  zoom-to-fit cannot drift apart. The numbers are unchanged; the baselines
+  below are what prove the extraction was faithful.
+- `components/EditorModel.tsx` — frames through the extracted solve.
+- `components/CameraReport.tsx` — `data-camera-distance` beside the direction,
+  so a scenario can tell the two verbs apart.
+- `components/EditorViewport.tsx` — renders the cluster in place of the lone
+  ruler corner; owns `onResetView` (the framing saved on load, which is what a
+  double-click has always done) and `onZoomToFit` (the buyer's own angle, the
+  distance re-solved from `partsReport.bounds`).
+- `components/RulerToggle.tsx` — unchanged control, new parent.
+- `scenarios/finish-picker.mjs` — R2's assertion inverted, and the cluster's
+  contents pinned: the three view tools in, undo / redo out.
+- `scenarios/render-calibration.mjs` — still asserts the cluster is absent, now
+  meaning "not under `?calibration=1`" rather than "not at all".
+- `scenarios/ruler-buyer.mjs` — the two verbs proved apart: zoom to fit keeps
+  the angle and restores the distance (34.33 framed → 34.39 fitted after a
+  wheel burst), reset view puts both back.
+- `scenarios/zones.mjs` — the cluster's brush and the panel's are one value.
+
+### U10 — the strip as a verdict
+
+- `components/ManufacturingStrip.tsx` — spans the workspace rather than the
+  viewport column, and collapses to one line with a count (`CHECK · 2`).
+  Collapsed by default below `lg`, or it eats the viewport it is judging. It
+  now looks up its own PAINT thresholds and logo sources instead of being
+  handed them, so it needs only the layers and the process.
+- `components/workspace/WorkspaceShell.tsx` — a `strip` slot under both
+  columns, not drawn under `?calibration=1`.
+- `store/useEditorStore.ts` — `modelSizeMm`, runtime only: the strip left the
+  viewport column and still needs the edge-margin reference.
+- `components/EditorViewport.tsx` — no longer renders the strip.
+- `pages/EditorDesignPage.tsx`, `pages/EditorNewPage.tsx` — pass the strip.
+- `src/features/i18n/translations.ts` — 4 keys × 3 locales
+  (`editor.viewport.resetView`, `.zoomToFit`, `editor.manufacturing.check`,
+  `.clear`).
+- `scenarios/relief-layers.mjs` — the strip spans the workspace, the badge is
+  the strip's own count, and the count survives the collapse.
+
+### Rulings
+
+- **The cluster is view tools only.** Anything that changes the design belongs
+  to the panel or the document bar. This is what makes retiring R2 safe.
+- **The strip judges the design, so it spans the workspace.** It reports the
+  design, not the model view, and a verdict that only spans the viewport reads
+  as a property of the view.
+- **The canvas did not change size.** The strip's height used to come off the
+  viewport column; it now comes off the row holding the viewport *and* the
+  panel, and the viewport fills what is left either way. That is why the
+  render baselines are unmoved, and it is the thing to re-check if they ever
+  move.
+- **Zoom to fit is not reset view.** Fit keeps the angle the buyer turned to
+  and re-solves the distance; reset puts the framing back the way the model
+  arrived. One solve serves both (`lib/framing`).
+
+### Verification
+
+`tsc -b` clean · `node --test` 78/78 · `npm run build` passes ·
+`npm run e2e:suite` **48/48**, in three batches on one unchanged tree (25 + 12
++ 11 — see the baseline table for why it was not one run).
+`render-calibration`'s baselines are unmoved for the sixth run running
+(surround 49, highlight 238, `#808080` → (128, 128, 128), `#C0392B` →
+(192, 58, 45), fill 0.559), which is what proves the framing extraction was
+faithful and that neither the cluster nor the strip's move changed the canvas.
+
+Measured through the real UI at 1280 × 900: the strip spans **1280 px**, the
+workspace's own width, against a 360 px panel — the viewport and the controls
+both. Zoom to fit returns a wheel-zoomed camera to **34.39** against the
+framed **34.33**, without turning it.
+
+### What these units could not verify locally
+
+**The suite was not one mechanical run.** Three attempts were killed on this
+box before the batches went through; the batches share a tree and a stack, but
+nobody watched all 48 run end to end. If anything here is going to be doubted
+later, it is that.
+
+**The strip's collapsed-by-default path is asserted at desk width only.** The
+`lg` breakpoint decides it at mount, and the one scenario that runs at 390 px
+(`hybrid-controls`) measures geometry, not the strip. The collapse itself is
+proved by clicking it at 1280; that it *starts* collapsed on a phone is not.
+U11 is where that belongs, since it is the unit that re-measures 390 px.
+
+### Open questions from these units, with a recommendation each
+
+1. **Zoom to fit reads `partsReport.bounds`, not the framing box.** They are
+   the same `Box3` today — both are `setFromObject(model)` — but they are
+   computed in two places and only one of them is what the camera was framed
+   on. *Recommend* having `EditorModel` report its framing box directly when
+   Phase 11 adds uploads whose parts can be hidden at load, rather than relying
+   on the two staying identical.
+2. **The cluster and the ruler labels share the bottom-right corner.** No
+   assertion covers a collision — the label-overlap checks compare labels with
+   labels and with handles, not with chrome — so the two can overlap visually
+   without failing. *Recommend* adding the cluster to those overlap checks in
+   U12, when the deck is re-shot and someone is looking at the corners anyway.
+3. **`data-camera-distance` is a new read-back with one consumer.** It exists
+   because the two view verbs are otherwise indistinguishable from the DOM.
+   *Recommend* keeping it; it is the only way a scenario can say "the framing
+   came back" without a screenshot diff.
+4. **The strip is one line taller than it was**, because the verdict row is
+   always drawn and the lines sit under it. At 1280 that is free; at 390 it is
+   the collapsed height, which is what the viewport floor is measured against.
+   *Recommend* U11 measure the floor with the strip collapsed *and* expanded,
+   since a buyer can open it on a phone.

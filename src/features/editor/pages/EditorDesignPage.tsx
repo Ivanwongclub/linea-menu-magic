@@ -15,6 +15,7 @@ import { useEditorStore } from "../store/useEditorStore";
 import { WorkspaceShell } from "../components/workspace/WorkspaceShell";
 import { EditorViewport } from "../components/EditorViewport";
 import { EditorPanel } from "../components/EditorPanel";
+import { ManufacturingStrip } from "../components/ManufacturingStrip";
 
 interface DesignRow {
   id: string;
@@ -147,6 +148,9 @@ export function EditorDesignPage({ designId }: { designId: string }) {
           process={processThresholds(selectedFinish?.process, language)}
         />
       }
+      // E2 U10: the verdict spans the workspace, so the shell renders it under
+      // both columns rather than the viewport carrying it in its own.
+      strip={<ManufacturingStrip layers={recipe.layers} process={processThresholds(selectedFinish?.process, language)} />}
       panel={
         <EditorPanel
           product={product}

@@ -17,6 +17,7 @@ import { uploadLogoAsset } from "../hooks/useLogoAssets";
 import { WorkspaceShell } from "../components/workspace/WorkspaceShell";
 import { EditorViewport } from "../components/EditorViewport";
 import { EditorPanel } from "../components/EditorPanel";
+import { ManufacturingStrip } from "../components/ManufacturingStrip";
 import { SignInBanner } from "../components/SignInBanner";
 
 function defaultSizeVariantId(product: EditorProduct): string | null {
@@ -232,6 +233,9 @@ export function EditorNewPage({ productSlug }: { productSlug: string | null }) {
           process={processThresholds(selectedFinish?.process, language)}
         />
       }
+      // E2 U10: the verdict spans the workspace, so the shell renders it under
+      // both columns rather than the viewport carrying it in its own.
+      strip={<ManufacturingStrip layers={recipe.layers} process={processThresholds(selectedFinish?.process, language)} />}
       panel={
         <EditorPanel
           product={product}

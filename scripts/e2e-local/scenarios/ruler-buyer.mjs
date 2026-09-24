@@ -140,6 +140,108 @@ export default async function ({ page, base, admin, editor, h }) {
     const sizeAfterRuler = await viewport.getAttribute("data-model-size-mm");
     assert.equal(sizeAfterRuler, sizeBeforeRuler, "the overlay is not geometry — the model's own measured size is unchanged");
 
+    /* ---- U9: the view tools, which retire "no floating toolbar" (Phase 3 R2) ---- */
+    // Reset view and zoom to fit are not the same verb: fit keeps the angle
+    // the buyer turned to and re-solves the distance; reset puts the framing
+    // back the way the model arrived.
+    const cameraNow = () =>
+      page.evaluate(() => {
+        const c = document.querySelector('[data-testid="editor-viewport"] canvas');
+        const parse = (s) => (s ? s.split(",").map(Number) : null);
+        return { direction: parse(c.dataset.cameraDirection), home: parse(c.dataset.cameraHome), distance: Number(c.dataset.cameraDistance) };
+      });
+    const near = (a, b, tol) => a.every((v, i) => Math.abs(v - b[i]) <= tol);
+    // OrbitControls eases a drag out over several frames (damping 0.08), and a
+    // reset issued mid-ease is overtaken by the frames still arriving. Every
+    // command here is given a still camera to act on.
+    const settle = async () => {
+      let last = null;
+      for (let i = 0; i < 24; i++) {
+        const now = (await cameraNow()).direction?.join(",");
+        if (now && now === last) return;
+        last = now;
+        await page.waitForTimeout(250);
+      }
+      throw new Error("the camera never settled");
+    };
+
+    await page.waitForFunction(
+      () => Number(document.querySelector('[data-testid="editor-viewport"] canvas')?.dataset.cameraDistance) > 0,
+      null,
+      { timeout: 20000 },
+    );
+
+    // The model idles under auto-rotate until the first interaction (Phase 3
+    // R1), so it is never on its home direction by the time anyone reads it.
+    // A press on the canvas stops the turn for good; reset view is what puts
+    // it back — which is the first thing this proves.
+    const canvasBox = await viewport.locator("canvas").first().boundingBox();
+    const centre = { x: canvasBox.x + canvasBox.width / 2, y: canvasBox.y + canvasBox.height / 2 };
+    await page.mouse.move(centre.x, centre.y);
+    await page.mouse.down();
+    await page.mouse.up();
+    await page.getByTestId("view-reset").click();
+    await page.waitForFunction(
+      () => {
+        const c = document.querySelector('[data-testid="editor-viewport"] canvas');
+        const d = c?.dataset.cameraDirection?.split(",").map(Number);
+        const home = c?.dataset.cameraHome?.split(",").map(Number);
+        return d && home && d.every((v, i) => Math.abs(v - home[i]) <= 0.02);
+      },
+      null,
+      { timeout: 20000 },
+    );
+    const framed = await cameraNow();
+    assert.ok(near(framed.direction, framed.home, 0.02), `reset view puts the model back on its home framing ${JSON.stringify(framed)}`);
+
+    // Zoom in with the wheel, then fit: the same direction, the framed distance.
+    await page.mouse.move(centre.x, centre.y);
+    // OrbitControls dollies a fixed step per wheel *event* and ignores the
+    // delta's size, so one big scroll is one small step: this is a burst.
+    for (let i = 0; i < 10; i++) await page.mouse.wheel(0, -120);
+    await page.waitForFunction(
+      (was) => Number(document.querySelector('[data-testid="editor-viewport"] canvas')?.dataset.cameraDistance) < was * 0.9,
+      framed.distance,
+      { timeout: 20000 },
+    );
+    await page.getByTestId("view-fit").click();
+    await page.waitForFunction(
+      (was) => Math.abs(Number(document.querySelector('[data-testid="editor-viewport"] canvas')?.dataset.cameraDistance) - was) / was < 0.03,
+      framed.distance,
+      { timeout: 20000 },
+    );
+    await settle();
+    const fitted = await cameraNow();
+    assert.ok(near(fitted.direction, framed.direction, 0.02), "zoom to fit does not turn the model");
+    const zoomToFit = { framed: +framed.distance.toFixed(2), fitted: +fitted.distance.toFixed(2) };
+
+    // Orbit away, then reset: the home direction comes back.
+    await page.mouse.move(centre.x, centre.y);
+    await page.mouse.down();
+    await page.mouse.move(centre.x + 140, centre.y + 50, { steps: 10 });
+    await page.mouse.up();
+    await page.waitForFunction(
+      (home) => {
+        const d = document.querySelector('[data-testid="editor-viewport"] canvas')?.dataset.cameraDirection?.split(",").map(Number);
+        return d && d.some((v, i) => Math.abs(v - home[i]) > 0.05);
+      },
+      framed.home,
+      { timeout: 20000 },
+    );
+    await settle();
+    await page.getByTestId("view-reset").click();
+    await page.waitForFunction(
+      (home) => {
+        const d = document.querySelector('[data-testid="editor-viewport"] canvas')?.dataset.cameraDirection?.split(",").map(Number);
+        return d && d.every((v, i) => Math.abs(v - home[i]) <= 0.02);
+      },
+      framed.home,
+      { timeout: 20000 },
+    );
+    const reset = await cameraNow();
+    assert.ok(Math.abs(reset.distance - framed.distance) / framed.distance < 0.03, `reset restores the framed distance too (${reset.distance})`);
+    const viewTools = { reset: "home direction and distance", fit: "the distance only" };
+
     /* ---- off again: labels gone ---- */
     await page.getByTestId("ruler-toggle").click();
     await page.getByTestId("ruler-diameter-label").waitFor({ state: "detached", timeout: 10000 });
@@ -185,6 +287,8 @@ export default async function ({ page, base, admin, editor, h }) {
       labelSamples: layoutSamples.length,
       claimedRuler: claimed.draft_recipe?.view?.ruler,
       savedRuler: saved.draft_recipe?.view?.ruler,
+      zoomToFit,
+      viewTools,
     };
   } finally {
     await restore();
