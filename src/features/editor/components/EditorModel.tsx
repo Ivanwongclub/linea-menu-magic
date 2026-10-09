@@ -335,7 +335,7 @@ export function EditorModel({
         const start = offset;
         offset += faceData.counts[group];
         if (!mesh.visible) return;
-        const geometry = mesh.geometry as THREE.BufferGeometry & { boundsTree?: MeshBVH };
+        const geometry = mesh.geometry as unknown as Omit<THREE.BufferGeometry, "boundsTree"> & { boundsTree?: MeshBVH };
         if (!geometry.boundsTree) geometry.boundsTree = new MeshBVH(geometry);
         // Building the tree indexes the geometry and sorts that index for the
         // tree's own use, so a hit's triangle number is in the tree's order,
