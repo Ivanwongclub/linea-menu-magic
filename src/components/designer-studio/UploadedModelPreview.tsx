@@ -26,7 +26,8 @@ function Model({ url, wireframe, onReady }: { url: string; wireframe: boolean; o
   const model = useMemo(() => {
     const group = source.clone(true);
     group.traverse(child => {
-      if (child instanceof THREE.Mesh) child.material = material;
+      const mesh = child as THREE.Mesh;
+      if (mesh.isMesh) mesh.material = material;
     });
     // Both Rhino exports have their shallow axis along Y. Face the broad
     // surface towards the camera, preserving every supplied mesh and normal.
