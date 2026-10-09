@@ -79,6 +79,7 @@ const AdminProducts = lazy(loadAdminProducts);
 const AdminProductEditor = lazy(loadAdminProductEditor);
 const AdminTaxonomy = lazy(loadAdminTaxonomy);
 const AdminFinishes = lazy(loadAdminFinishes);
+const ModelPreview = lazy(() => import("./pages/ModelPreview"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -221,6 +222,7 @@ const App = () => (
                   {/* /admin sits outside the customer-facing Layout (no Header/Footer) —
                       its own shell, its own login, gated on catalogue_editors. */}
                   <Route path="/admin/login" element={<AdminLogin />} />
+                  <Route path="/model-preview" element={withRouteSuspense(<ModelPreview />)} />
                   <Route
                     path="/admin"
                     element={

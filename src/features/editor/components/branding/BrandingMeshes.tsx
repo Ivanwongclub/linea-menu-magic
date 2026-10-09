@@ -217,8 +217,8 @@ function prepareRaycast(model: THREE.Object3D): void {
   model.traverse((o) => {
     const mesh = o as THREE.Mesh;
     if (!mesh.isMesh) return;
-    const geometry = mesh.geometry as THREE.BufferGeometry & { boundsTree?: MeshBVH };
-    if (!geometry.boundsTree) geometry.boundsTree = new MeshBVH(geometry);
+    const geometry = mesh.geometry as unknown as Omit<THREE.BufferGeometry, "boundsTree"> & { boundsTree?: MeshBVH };
+    if (!geometry.boundsTree) geometry.boundsTree = new MeshBVH(mesh.geometry);
     mesh.raycast = acceleratedRaycast;
   });
 }
