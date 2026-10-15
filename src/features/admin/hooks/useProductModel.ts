@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
-import { parseObjFileRawBounds, parseObjRawBounds, type ModelRawBounds } from "@/features/admin/lib/objBounds";
+import { parseObjFileRawBounds, parseStoredModelRawBounds, type ModelRawBounds } from "@/features/admin/lib/objBounds";
+import { modelFormatFromName } from "@/features/editor/lib/modelFormat";
 import type { BrandingMark, BrandingReference } from "@/features/admin/lib/brandingRecovery";
 
 const BUCKET = "product-models";
@@ -56,9 +57,10 @@ export function useProductModel(productId: string) {
 
   const upload = useMutation({
     mutationFn: async ({ file, previousPath }: { file: File; previousPath: string | null }) => {
-      const path = `models/${productId}/${Date.now()}.obj`;
+      const format = modelFormatFromName(file.name) ?? "obj";
+      const path = `models/${productId}/${Date.now()}.${format}`;
       const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, file, {
-        contentType: "model/obj",
+        contentType: format === "stl" ? "model/stl" : "model/obj",
         upsert: false,
       });
       if (uploadError) throw uploadError;
@@ -228,7 +230,7 @@ export function useProductModelScale(productId: string) {
     mutationFn: async (path: string) => {
       const { data, error: downloadError } = await supabase.storage.from(BUCKET).download(path);
       if (downloadError) throw downloadError;
-      const rawBounds = parseObjRawBounds(await data.text());
+      const rawBounds = await parseStoredModelRawBounds(path, data);
       const { error } = await supabase.from("products").update({ model_raw_bounds: rawBounds as unknown as Json }).eq("id", productId);
       if (error) throw error;
       return rawBounds;

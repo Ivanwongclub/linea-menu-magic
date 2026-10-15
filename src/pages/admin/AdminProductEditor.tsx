@@ -561,7 +561,7 @@ export default function AdminProductEditor() {
       {/* 3D model — Phase 2 (docs/3d-editor/STATUS.md) */}
       <section className="border border-border p-6 space-y-4">
         <div>
-          <h2 className="text-sm font-medium tracking-wide text-foreground">3D model (.obj)</h2>
+          <h2 className="text-sm font-medium tracking-wide text-foreground">{t("editor.viewport.cmsModelTitle")}</h2>
           <p className="text-xs text-muted-foreground">Used by the Designer Studio editor. One file per product.</p>
         </div>
         {isNew || !id ? (

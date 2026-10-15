@@ -83,8 +83,8 @@ export function ProductModelEditor({ productId, modelStoragePath }: { productId:
 
   const handleFile = (file: File | null) => {
     if (!file) return;
-    if (!file.name.toLowerCase().endsWith(".obj")) {
-      toast.error(`${file.name}: only .obj files are accepted`);
+    if (!/\.(obj|stl)$/i.test(file.name)) {
+      toast.error(t("editor.viewport.badModelFile"));
       return;
     }
     upload.mutate(
@@ -177,7 +177,7 @@ export function ProductModelEditor({ productId, modelStoragePath }: { productId:
           ) : (
             <div className="space-y-1">
               <UploadCloud className="w-5 h-5 mx-auto text-muted-foreground" strokeWidth={1.5} />
-              <p className="text-sm text-foreground">Drop a .obj file, or click to choose</p>
+              <p className="text-sm text-foreground">{t("editor.viewport.dropModel")}</p>
             </div>
           )}
         </div>
@@ -186,7 +186,7 @@ export function ProductModelEditor({ productId, modelStoragePath }: { productId:
         ref={inputRef}
         data-testid="model-input"
         type="file"
-        accept=".obj"
+        accept=".obj,.stl"
         className="hidden"
         onChange={(e) => {
           handleFile(e.target.files?.[0] ?? null);

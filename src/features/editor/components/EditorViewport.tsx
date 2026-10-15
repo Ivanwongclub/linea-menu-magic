@@ -2,6 +2,7 @@ import { Suspense, useCallback, useMemo, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
+import { toast } from "sonner";
 import { Box } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useI18n } from "@/features/i18n/I18nProvider";
@@ -20,6 +21,7 @@ import { ProceduralStudio } from "./ProceduralStudio";
 import { CameraReport } from "./CameraReport";
 import { HandleProjector, HandlesOverlay, newHandleBridge, newHandleElements } from "./branding/Handles";
 import { selectHiddenGroups, selectSelectedLayerId, selectZones, useEditorStore } from "../store/useEditorStore";
+import { isModelFilename } from "../lib/modelFormat";
 import { useLogoSources } from "../hooks/useLogoAssets";
 import type { ProcessThresholds } from "../lib/manufacturing";
 import { usePublicFinishes } from "../hooks/usePublicFinishes";
@@ -159,7 +161,7 @@ export function EditorViewport({
   // process's own tolerances come with the same query.
   const { data: publicFinishes } = usePublicFinishes();
   const layerMaterials = useLayerMaterials(layers, publicFinishes);
-  const { language } = useI18n();
+  const { language, t } = useI18n();
   // Phase 6b: parts and zones come from the recipe, and the zones' styles from
   // the same public-finish query the appearance picker uses.
   const hiddenGroups = useEditorStore(selectHiddenGroups);
@@ -197,6 +199,21 @@ export function EditorViewport({
   // direction the buyer turned to and solves the distance again, so a model
   // orbited and zoomed into comes back to frame without losing the angle.
   const onResetView = useCallback(() => controlsRef.current?.reset(), []);
+  const localModel = useEditorStore((s) => s.localModel);
+  const setLocalModel = useEditorStore((s) => s.setLocalModel);
+
+  const openLocalFile = useCallback(
+    (file: File | null) => {
+      if (!file) return;
+      if (!isModelFilename(file.name)) {
+        toast.error(t("editor.viewport.badModelFile"));
+        return;
+      }
+      setLocalModel({ url: URL.createObjectURL(file), name: file.name });
+    },
+    [setLocalModel, t],
+  );
+
   const onZoomToFit = useCallback(() => {
     const controls = controlsRef.current;
     const bounds = partsReport?.bounds;
@@ -212,15 +229,21 @@ export function EditorViewport({
     controls.update();
   }, [partsReport]);
 
-  if (!modelStoragePath) {
+  if (!localModel && !modelStoragePath) {
     return <EmptyModelState />;
   }
 
-  if (scaleStatus !== "confirmed" || scaleFactor == null) {
+  if (!localModel && (scaleStatus !== "confirmed" || scaleFactor == null)) {
     return <AwaitingSetupState productId={productId} isCatalogueEditor={isCatalogueEditor} />;
   }
 
-  const url = supabase.storage.from("product-models").getPublicUrl(modelStoragePath).data.publicUrl;
+  const catalogUrl = modelStoragePath ? supabase.storage.from("product-models").getPublicUrl(modelStoragePath).data.publicUrl : null;
+  const url = localModel?.url ?? catalogUrl;
+  if (!url) {
+    return <EmptyModelState />;
+  }
+  const sourceName = localModel?.name ?? modelStoragePath;
+  const drawnScaleFactor = localModel ? 1 : (scaleFactor ?? 1);
 
   // Transparent canvas over the site's secondary token: the backdrop is the
   // design system's own colour, never tone-mapped (R2).
@@ -229,6 +252,11 @@ export function EditorViewport({
     <div
       className="relative flex-1 min-h-0 overflow-hidden bg-secondary"
       data-testid="editor-viewport"
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={(e) => {
+        e.preventDefault();
+        openLocalFile(e.dataTransfer.files?.[0] ?? null);
+      }}
       data-model-size-mm={modelSizeMm != null ? modelSizeMm.toFixed(2) : undefined}
       // Scene read-backs for the text scenarios: the rendered glyphs and the no-mirroring check.
       data-glyph-count={textReport?.glyphMeshCount}
@@ -280,8 +308,9 @@ export function EditorViewport({
           <CameraReport />
           <EditorModel
             url={url}
-            scaleFactor={scaleFactor}
-            variantScale={variantScale}
+            sourceName={sourceName}
+            scaleFactor={drawnScaleFactor}
+            variantScale={localModel ? 1 : variantScale}
             sizePrimaryMm={sizePrimaryMm}
             isMetal={isMetal}
             finish={finish}
@@ -290,7 +319,7 @@ export function EditorViewport({
             onModelSizeMm={setModelSizeMm}
             onRulerMeasurements={ruler ? setRulerMeasurements : undefined}
             onFaceZ={setFaceZ}
-            markedGroupIndices={markedGroupIndices}
+            markedGroupIndices={localModel ? [] : markedGroupIndices}
             hideMarked={!originalLettering}
             hiddenGroups={hiddenGroups}
             zones={zones}
@@ -335,6 +364,14 @@ export function EditorViewport({
       {ruler && rulerMeasurements && (
         <RulerLabels measurements={rulerMeasurements} sizeLigne={sizeLigne} sizeLabel={sizeLabel} labels={rulerLabels} layer={selectedLayer} relief={selectedRelief} />
       )}
+      {localModel && (
+        <div className="absolute top-3 left-3 z-10 flex items-center gap-2 border border-border bg-background/90 px-2.5 py-1.5 text-xs text-foreground" data-testid="local-model-banner">
+          <span>{t("editor.viewport.localFileBanner", { name: localModel.name })}</span>
+          <button type="button" className="underline underline-offset-2" onClick={() => setLocalModel(null)}>
+            {t("editor.viewport.localFileClear")}
+          </button>
+        </div>
+      )}
       {!calibration && (
         <ViewportTools
           ruler={ruler}
@@ -342,6 +379,7 @@ export function EditorViewport({
           onResetView={onResetView}
           onZoomToFit={onZoomToFit}
           canFit={partsReport != null}
+          onOpenFile={openLocalFile}
         />
       )}
       </div>

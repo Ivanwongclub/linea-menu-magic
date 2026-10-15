@@ -2,7 +2,8 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, typ
 import { useLoader, useThree, type ThreeEvent } from "@react-three/fiber";
 import { ContactShadows } from "@react-three/drei";
 import * as THREE from "three";
-import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
+import { ModelFileLoader } from "../lib/ModelFileLoader";
+import { modelFormatFromName, type ModelFormat } from "../lib/modelFormat";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import type { EditorColour } from "../hooks/useEditorProduct";
 import type { PickerFinish } from "../hooks/useFinishOptions";
@@ -20,6 +21,8 @@ import { cornersOf, fitDistance, homeDirection, type BoundsMm } from "../lib/fra
 
 interface EditorModelProps {
   url: string;
+  /** Original filename or storage path — blob URLs have no extension. */
+  sourceName?: string | null;
   /** `products.model_scale_factor` — mm per raw OBJ unit at the reference variant (E1 collision 1). */
   scaleFactor: number;
   /** `variantMm / referenceMm` — a product-size change, not a unit reinterpretation (E1 collision 3). */
@@ -91,6 +94,7 @@ export interface RulerMeasurements {
  */
 export function EditorModel({
   url,
+  sourceName,
   scaleFactor,
   variantScale,
   sizePrimaryMm,
@@ -115,7 +119,10 @@ export function EditorModel({
   onBakeStats,
   onTextReport,
 }: EditorModelProps) {
-  const obj = useLoader(OBJLoader, url);
+  const format: ModelFormat = modelFormatFromName(sourceName) ?? modelFormatFromName(url) ?? "obj";
+  const obj = useLoader(ModelFileLoader, url, (loader) => {
+    loader.formatHint = format;
+  });
   const { camera, gl, size: viewport } = useThree();
 
   const twoTone = !!(isMetal && finish?.two_tone);

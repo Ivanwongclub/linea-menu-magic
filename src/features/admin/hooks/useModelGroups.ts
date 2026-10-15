@@ -19,13 +19,16 @@ export function useModelGroups(modelUrl: string | null, enabled: boolean) {
     enabled: enabled && !!modelUrl,
     staleTime: Infinity,
     queryFn: async (): Promise<LoadedModelGroups> => {
-      const [response, { OBJLoader }, recovery] = await Promise.all([
+      const [response, { groupFromModelData }, { modelFormatFromName }, recovery] = await Promise.all([
         fetch(modelUrl as string),
-        import("three/examples/jsm/loaders/OBJLoader.js"),
+        import("@/features/editor/lib/ModelFileLoader"),
+        import("@/features/editor/lib/modelFormat"),
         import("@/features/admin/lib/brandingRecovery"),
       ]);
       if (!response.ok) throw new Error(`Couldn't load the model (${response.status})`);
-      const root = new OBJLoader().parse(await response.text());
+      const format = modelFormatFromName(modelUrl) ?? "obj";
+      const data = format === "stl" ? await response.arrayBuffer() : await response.text();
+      const root = groupFromModelData(data, format);
       return { root, groups: recovery.listModelGroups(root) };
     },
   });

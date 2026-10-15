@@ -1,5 +1,6 @@
-import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 import * as THREE from "three";
+import { groupFromModelData } from "@/features/editor/lib/ModelFileLoader";
+import { modelFormatFromName } from "@/features/editor/lib/modelFormat";
 
 /**
  * `products.model_raw_bounds` — parsed client-side at CMS upload, before any
@@ -18,9 +19,7 @@ export interface ModelRawBounds {
   primary_raw: number;
 }
 
-/** Parses raw OBJ text with `OBJLoader.parse` — no viewer, no DOM canvas. */
-export function parseObjRawBounds(text: string): ModelRawBounds {
-  const group = new OBJLoader().parse(text);
+export function boundsFromGroup(group: THREE.Object3D): ModelRawBounds {
   const min: [number, number, number] = [Infinity, Infinity, Infinity];
   const max: [number, number, number] = [-Infinity, -Infinity, -Infinity];
 
@@ -41,7 +40,7 @@ export function parseObjRawBounds(text: string): ModelRawBounds {
     }
   });
 
-  if (!Number.isFinite(min[0])) throw new Error("OBJ file has no vertex data");
+  if (!Number.isFinite(min[0])) throw new Error("Model file has no vertex data");
 
   const extent: [number, number, number] = [max[0] - min[0], max[1] - min[1], max[2] - min[2]];
   const faceAxis: 0 | 1 | 2 = extent[0] <= extent[1] && extent[0] <= extent[2] ? 0 : extent[1] <= extent[2] ? 1 : 2;
@@ -51,9 +50,22 @@ export function parseObjRawBounds(text: string): ModelRawBounds {
   return { min, max, face_axis: faceAxis, primary_raw: primaryRaw };
 }
 
-/** Reads `file` as text and parses its raw bounds. */
+/** Parses raw OBJ text — no viewer, no DOM canvas. */
+export function parseObjRawBounds(text: string): ModelRawBounds {
+  return boundsFromGroup(groupFromModelData(text, "obj"));
+}
+
+/** Reads `file` as OBJ text or STL bytes and parses its raw bounds. */
 export async function parseObjFileRawBounds(file: File): Promise<ModelRawBounds> {
-  return parseObjRawBounds(await file.text());
+  const format = modelFormatFromName(file.name) ?? "obj";
+  const data = format === "stl" ? await file.arrayBuffer() : await file.text();
+  return boundsFromGroup(groupFromModelData(data, format));
+}
+
+export async function parseStoredModelRawBounds(path: string, blob: Blob): Promise<ModelRawBounds> {
+  const format = modelFormatFromName(path) ?? "obj";
+  const data = format === "stl" ? await blob.arrayBuffer() : await blob.text();
+  return boundsFromGroup(groupFromModelData(data, format));
 }
 
 /**

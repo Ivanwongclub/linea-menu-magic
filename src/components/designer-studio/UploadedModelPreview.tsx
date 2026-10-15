@@ -1,7 +1,8 @@
 import { Component, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Canvas, useLoader } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
-import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
+import { ModelFileLoader } from "@/features/editor/lib/ModelFileLoader";
+import { modelFormatFromName } from "@/features/editor/lib/modelFormat";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import * as THREE from "three";
 import { Grid2X2, RotateCcw, RotateCw } from "lucide-react";
@@ -18,7 +19,9 @@ class ModelErrorBoundary extends Component<{ children: ReactNode }, { failed: bo
 }
 
 function Model({ url, wireframe, onReady }: { url: string; wireframe: boolean; onReady: () => void }) {
-  const source = useLoader(OBJLoader, url);
+  const source = useLoader(ModelFileLoader, url, (loader) => {
+    loader.formatHint = modelFormatFromName(url) ?? "obj";
+  });
   const material = useMemo(() => {
     const token = getComputedStyle(document.documentElement).getPropertyValue("--muted-foreground").trim().split(/\s+/);
     return new THREE.MeshStandardMaterial({ color: `hsl(${token.join(",")})`, metalness: 0.25, roughness: 0.45, side: THREE.DoubleSide });

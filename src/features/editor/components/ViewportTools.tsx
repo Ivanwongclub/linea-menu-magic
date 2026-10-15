@@ -1,4 +1,5 @@
-import { Maximize2, RotateCcw } from "lucide-react";
+import { useRef } from "react";
+import { FolderOpen, Maximize2, RotateCcw } from "lucide-react";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { cn } from "@/lib/utils";
 import { useEditorStore } from "../store/useEditorStore";
@@ -30,6 +31,7 @@ export function ViewportTools({
   onResetView,
   onZoomToFit,
   canFit,
+  onOpenFile,
 }: {
   ruler: boolean;
   onRulerToggle: () => void;
@@ -37,7 +39,9 @@ export function ViewportTools({
   onZoomToFit: () => void;
   /** False until the model has reported its bounds — there is nothing to fit to yet. */
   canFit: boolean;
+  onOpenFile: (file: File | null) => void;
 }) {
+  const fileRef = useRef<HTMLInputElement>(null);
   const { t } = useI18n();
   const paintZoneId = useEditorStore((s) => s.paintZoneId);
   const brushRadiusMm = useEditorStore((s) => s.brushRadiusMm);
@@ -74,6 +78,20 @@ export function ViewportTools({
         <ToolButton testId="view-fit" label={t("editor.viewport.zoomToFit")} onClick={onZoomToFit} disabled={!canFit}>
           <Maximize2 className="h-3.5 w-3.5" strokeWidth={1.5} />
         </ToolButton>
+        <ToolButton testId="view-open-model" label={t("editor.viewport.openModel")} onClick={() => fileRef.current?.click()}>
+          <FolderOpen className="h-3.5 w-3.5" strokeWidth={1.5} />
+        </ToolButton>
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".obj,.stl"
+          className="hidden"
+          data-testid="view-open-model-input"
+          onChange={(e) => {
+            onOpenFile(e.target.files?.[0] ?? null);
+            e.target.value = "";
+          }}
+        />
       </div>
 
       <RulerToggle active={ruler} onToggle={onRulerToggle} />

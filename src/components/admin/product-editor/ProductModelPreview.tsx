@@ -3,7 +3,8 @@ import { Canvas, useLoader, useThree, type ThreeEvent } from "@react-three/fiber
 import { Line, OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
-import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
+import { ModelFileLoader } from "@/features/editor/lib/ModelFileLoader";
+import { modelFormatFromName } from "@/features/editor/lib/modelFormat";
 import { decoratedFaceRotation, withSmoothNormals } from "@/features/editor/lib/prepareModel";
 import type { BrandingReference } from "@/features/admin/lib/brandingRecovery";
 import { useI18n } from "@/features/i18n/I18nProvider";
@@ -122,7 +123,9 @@ function PreviewModel({
   onReady: () => void;
   onReport: (report: PreviewSceneReport) => void;
 }) {
-  const obj = useLoader(OBJLoader, url);
+  const obj = useLoader(ModelFileLoader, url, (loader) => {
+    loader.formatHint = modelFormatFromName(url) ?? "obj";
+  });
   const { camera } = useThree();
 
   const prepared = useMemo(() => {

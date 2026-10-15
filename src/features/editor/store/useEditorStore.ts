@@ -74,6 +74,8 @@ interface EditorState {
    * sessionStorage draft until a sign-in claims the design and uploads them.
    */
   pendingLogos: Record<string, PendingLogo>;
+  /** Session-only OBJ/STL opened from disk — not saved to the product. */
+  localModel: { url: string; name: string } | null;
   initialize: (recipe: DraftRecipe, hydratedFor: string) => void;
   /**
    * Phase 7: a saved version becomes the working draft. Unlike `initialize`
@@ -115,6 +117,7 @@ interface EditorState {
   removeZone: (id: string) => void;
   /** Replaces the pending files wholesale — used when a draft is read back. */
   setPendingLogos: (logos: Record<string, PendingLogo>) => void;
+  setLocalModel: (file: { url: string; name: string } | null) => void;
 }
 
 const history = (s: EditorState): History => ({ recipe: s.recipe, past: s.past, future: s.future, checkpoint: s.checkpoint });
@@ -147,17 +150,22 @@ export const useEditorStore = create<EditorState>((set) => ({
   paintZoneId: null,
   brushRadiusMm: 1,
   pendingLogos: {},
+  localModel: null,
   initialize: (recipe, hydratedFor) =>
-    set((s) => ({
-      ...startHistory(recipe),
-      dragging: false,
-      selection: null,
-      modelSizeMm: null,
-      hydratedFor,
-      // Files an anonymous draft is still holding belong to the layers it is
-      // being initialised with; anything else is from a previous product.
-      pendingLogos: Object.fromEntries(Object.entries(s.pendingLogos).filter(([layerId]) => recipe.layers.some((l) => l.id === layerId))),
-    })),
+    set((s) => {
+      if (s.localModel?.url) URL.revokeObjectURL(s.localModel.url);
+      return {
+        ...startHistory(recipe),
+        dragging: false,
+        selection: null,
+        modelSizeMm: null,
+        localModel: null,
+        hydratedFor,
+        // Files an anonymous draft is still holding belong to the layers it is
+        // being initialised with; anything else is from a previous product.
+        pendingLogos: Object.fromEntries(Object.entries(s.pendingLogos).filter(([layerId]) => recipe.layers.some((l) => l.id === layerId))),
+      };
+    }),
   // The selection goes: a reloaded version's layers are not the ones that were
   // on screen, even where an id happens to survive.
   loadRecipe: (recipe) => set((s) => ({ ...discrete(s, () => recipe), selection: null, paintZoneId: null })),
@@ -235,6 +243,11 @@ export const useEditorStore = create<EditorState>((set) => ({
   setPaintZone: (paintZoneId) => set((s) => ({ paintZoneId, selection: paintZoneId ? { kind: "zone", id: paintZoneId } : s.selection })),
   setBrushRadius: (brushRadiusMm) => set({ brushRadiusMm }),
   setPendingLogos: (pendingLogos) => set({ pendingLogos }),
+  setLocalModel: (localModel) =>
+    set((s) => {
+      if (s.localModel?.url && s.localModel.url !== localModel?.url) URL.revokeObjectURL(s.localModel.url);
+      return { localModel };
+    }),
 }));
 
 /**
