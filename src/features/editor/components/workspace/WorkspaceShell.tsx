@@ -1,11 +1,13 @@
-import { useCallback, useRef, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useSearchParams } from "react-router-dom";
 import { PanelRightOpen } from "lucide-react";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { cn } from "@/lib/utils";
 import { useWorkspaceLayout } from "../../hooks/useWorkspaceLayout";
-import { widthFromDrag } from "../../lib/workspaceLayout";
+import { WIDE_QUERY, widthFromDrag } from "../../lib/workspaceLayout";
 import { DocumentBar } from "./DocumentBar";
+import { BottomSheet } from "./BottomSheet";
+import { WorkspaceProvider } from "./WorkspaceContext";
 import type { AutosaveStatus } from "../../hooks/useAutosaveDraft";
 
 interface WorkspaceShellProps {
@@ -32,13 +34,13 @@ interface WorkspaceShellProps {
  * The workspace (E2 U4). Full height below the site header, with the model on
  * one side and the controls on the other; which side, how wide, and whether
  * the controls are collapsed is the buyer's, remembered per user
- * (`useWorkspaceLayout`) and reset from the panel's own chrome.
+ * (`useWorkspaceLayout`) and reset from the workspace menu.
  *
  * Fixed zones, not free docking (E2 §3.4 item 1): the panel takes the left or
- * the right edge and nothing else. Below `lg` there are no edges to take — the
- * panel stacks under the viewport as it always has, and only collapse is
- * offered, because on a phone the one thing worth doing is getting the
- * controls out of the way of the model.
+ * the right edge and nothing else. **Below `lg` there are no edges to take, so
+ * since U11 the controls are a bottom sheet** (E2 §3.3) — three snap points
+ * and a segmented control, with the viewport floored at 200 px. The strip
+ * stays below both, as U10 put it.
  *
  * The fixed site header's height is one token (`--site-header-height`,
  * index.css), so the viewport's bottom edge can't drift below the fold.
@@ -48,8 +50,30 @@ export function WorkspaceShell({ banner, viewport, panel, strip, document }: Wor
   // Calibration screenshots are measured in pixels: they always get the
   // default layout, and the chrome that would change it is not drawn.
   const calibration = useSearchParams()[0].get("calibration") === "1";
-  const { layout, setSide, setCollapsed, setWidth, reset } = useWorkspaceLayout(calibration);
+  const { layout, setSide, setCollapsed, setWidth, setSnap, setTab, toggleSection, reset } = useWorkspaceLayout(calibration);
   const row = useRef<HTMLDivElement>(null);
+
+  // Which layout is on screen, watched rather than read once: a phone turned
+  // on its side crosses this, and so does the e2e suite resizing the window.
+  const [wide, setWide] = useState(() => {
+    try {
+      return window.matchMedia(WIDE_QUERY).matches;
+    } catch {
+      return true;
+    }
+  });
+  useEffect(() => {
+    let query: MediaQueryList;
+    try {
+      query = window.matchMedia(WIDE_QUERY);
+    } catch {
+      return;
+    }
+    const onChange = () => setWide(query.matches);
+    onChange();
+    query.addEventListener("change", onChange);
+    return () => query.removeEventListener("change", onChange);
+  }, []);
 
   const onResizePointerDown = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
@@ -68,93 +92,100 @@ export function WorkspaceShell({ banner, viewport, panel, strip, document }: Wor
   );
 
   return (
-    <div className="flex flex-col h-[calc(100vh-var(--site-header-height))]">
-      {banner}
-      {/* Suppressed under calibration with the rest of the chrome: the bar has
-          height, and every render baseline is measured in pixels. */}
-      {document && !calibration && (
-        <DocumentBar
-          name={document.name}
-          saveStatus={document.saveStatus}
-          designsLink={document.designsLink}
-          side={layout.side}
-          onDock={() => setSide(layout.side === "right" ? "left" : "right")}
-          onCollapse={() => setCollapsed(true)}
-          onReset={reset}
-        />
-      )}
-      <div
-        ref={row}
-        data-testid="workspace"
-        data-side={layout.side}
-        data-collapsed={layout.collapsed}
-        data-width={layout.widthPx}
-        className={cn("flex flex-1 min-h-0 flex-col", layout.side === "left" ? "lg:flex-row-reverse" : "lg:flex-row")}
-      >
-        {/* `min-w-0`: the canvas keeps its own width, and without this the
-            viewport column refuses to shrink and pushes the panel off-screen
-            when it is widened. */}
-        <div className="flex flex-col flex-1 min-h-0 min-w-0">{viewport}</div>
-
-        {layout.collapsed ? (
-          <div
-            data-testid="workspace-rail"
-            className={cn(
-              "flex shrink-0 items-center justify-center border-border bg-background",
-              "border-t py-1 lg:w-10 lg:flex-col lg:border-t-0 lg:py-2",
-              layout.side === "left" ? "lg:border-r" : "lg:border-l",
-            )}
-          >
-            <button
-              type="button"
-              data-testid="workspace-expand"
-              aria-label={t("editor.workspace.expand")}
-              title={t("editor.workspace.expand")}
-              onClick={() => setCollapsed(false)}
-              className="flex h-7 w-7 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
-            >
-              <PanelRightOpen className="h-4 w-4" strokeWidth={1.5} />
-            </button>
-          </div>
-        ) : (
-          <div
-            data-testid="workspace-panel"
-            style={{ ["--workspace-panel-width" as string]: `${layout.widthPx}px` }}
-            className={cn(
-              "relative flex w-full max-h-[60%] shrink-0 flex-col border-border bg-background",
-              "border-t lg:max-h-none lg:border-t-0 lg:w-[var(--workspace-panel-width)]",
-              layout.side === "left" ? "lg:border-r" : "lg:border-l",
-            )}
-          >
-            {/* U7 moved the chrome buttons into the document bar's workspace
-                menu, which left a bar holding one word; U5 folded that word
-                into the layers dock's own header, so the panel is its content
-                and nothing else. */}
-            <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">{panel}</div>
-
-            {!calibration && (
-              // The handle sits on the panel's inner edge; a drag away from the
-              // panel's own side makes it wider.
-              <div
-                data-testid="workspace-resize"
-                role="separator"
-                aria-orientation="vertical"
-                aria-label={t("editor.workspace.resize")}
-                onPointerDown={onResizePointerDown}
-                className={cn(
-                  "absolute inset-y-0 z-10 hidden w-1.5 cursor-col-resize bg-transparent hover:bg-foreground/10 lg:block",
-                  layout.side === "left" ? "right-0" : "left-0",
-                )}
-              />
-            )}
-          </div>
+    <WorkspaceProvider value={{ wide, tab: layout.tab, setTab, sections: layout.sections, toggleSection }}>
+      <div className="flex flex-col h-[calc(100vh-var(--site-header-height))]">
+        {banner}
+        {/* Suppressed under calibration with the rest of the chrome: the bar has
+            height, and every render baseline is measured in pixels. */}
+        {document && !calibration && (
+          <DocumentBar
+            name={document.name}
+            saveStatus={document.saveStatus}
+            designsLink={document.designsLink}
+            side={layout.side}
+            onDock={() => setSide(layout.side === "right" ? "left" : "right")}
+            onCollapse={() => setCollapsed(true)}
+            onReset={reset}
+          />
         )}
-      </div>
+        <div
+          ref={row}
+          data-testid="workspace"
+          data-side={layout.side}
+          data-collapsed={layout.collapsed}
+          data-width={layout.widthPx}
+          data-wide={wide}
+          className={cn("flex flex-1 min-h-0 flex-col", layout.side === "left" ? "lg:flex-row-reverse" : "lg:flex-row")}
+        >
+          {/* `min-w-0`: the canvas keeps its own width, and without this the
+              viewport column refuses to shrink and pushes the panel off-screen
+              when it is widened. */}
+          <div className="flex flex-col flex-1 min-h-0 min-w-0">{viewport}</div>
 
-      {/* Full width under the viewport and the controls both (E2 §3.4 item 6).
-          Its height comes off the row above it, so the canvas is exactly as
-          tall as it was when the strip lived inside the viewport column. */}
-      {!calibration && strip}
-    </div>
+          {layout.collapsed ? (
+            <div
+              data-testid="workspace-rail"
+              className={cn(
+                "flex shrink-0 items-center justify-center border-border bg-background",
+                "border-t py-1 lg:w-10 lg:flex-col lg:border-t-0 lg:py-2",
+                layout.side === "left" ? "lg:border-r" : "lg:border-l",
+              )}
+            >
+              <button
+                type="button"
+                data-testid="workspace-expand"
+                aria-label={t("editor.workspace.expand")}
+                title={t("editor.workspace.expand")}
+                onClick={() => setCollapsed(false)}
+                className="flex h-7 w-7 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <PanelRightOpen className="h-4 w-4" strokeWidth={1.5} />
+              </button>
+            </div>
+          ) : wide ? (
+            <div
+              data-testid="workspace-panel"
+              style={{ ["--workspace-panel-width" as string]: `${layout.widthPx}px` }}
+              className={cn(
+                "relative flex w-[var(--workspace-panel-width)] shrink-0 flex-col border-border bg-background",
+                layout.side === "left" ? "border-r" : "border-l",
+              )}
+            >
+              {/* U7 moved the chrome buttons into the document bar's workspace
+                  menu, which left a bar holding one word; U5 folded that word
+                  into the layers dock's own header, so the panel is its content
+                  and nothing else. */}
+              <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">{panel}</div>
+
+              {!calibration && (
+                // The handle sits on the panel's inner edge; a drag away from the
+                // panel's own side makes it wider.
+                <div
+                  data-testid="workspace-resize"
+                  role="separator"
+                  aria-orientation="vertical"
+                  aria-label={t("editor.workspace.resize")}
+                  onPointerDown={onResizePointerDown}
+                  className={cn(
+                    "absolute inset-y-0 z-10 hidden w-1.5 cursor-col-resize bg-transparent hover:bg-foreground/10 lg:block",
+                    layout.side === "left" ? "right-0" : "left-0",
+                  )}
+                />
+              )}
+            </div>
+          ) : (
+            <BottomSheet rowRef={row} snap={layout.snap} onSnap={setSnap} tab={layout.tab} onTab={setTab}>
+              {panel}
+            </BottomSheet>
+          )}
+        </div>
+
+        {/* Full width under the viewport and the controls both (E2 §3.4 item 6).
+            Its height comes off the row above it, so the canvas is exactly as
+            tall as it was when the strip lived inside the viewport column — and
+            on a phone, opening it shrinks the sheet rather than the model. */}
+        {!calibration && strip}
+      </div>
+    </WorkspaceProvider>
   );
 }

@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Check, Eye, EyeOff, Focus, Pencil, X } from "lucide-react";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { cn } from "@/lib/utils";
 import { selectHiddenGroups, selectSelectedPartIndex, useEditorStore } from "../store/useEditorStore";
 import { DOCK_ROW_PX, VIRTUALISE_ABOVE, rowWindow, type RowWindow } from "../lib/rowWindow";
 import { DockSection } from "./workspace/DockSection";
+import { partDisplayName } from "../lib/partNames";
 
 /**
  * Parts (Phase 6b R1), as the layers dock's third section since E2 U5: the
@@ -39,6 +40,9 @@ export function PartsGroup({
   const hidden = useEditorStore(selectHiddenGroups);
   const originalLettering = useEditorStore((s) => s.recipe.view.original_lettering === true);
   const toggleHiddenGroup = useEditorStore((s) => s.toggleHiddenGroup);
+  const isolatePart = useEditorStore((s) => s.isolatePart);
+  const renamePart = useEditorStore((s) => s.renamePart);
+  const partNames = useEditorStore((s) => s.recipe.part_names);
   const setOriginalLettering = useEditorStore((s) => s.setOriginalLettering);
   const select = useEditorStore((s) => s.select);
   const selectedPart = useEditorStore(selectSelectedPartIndex);
@@ -121,12 +125,15 @@ export function PartsGroup({
             key={group.index}
             testId="part-row"
             index={group.index}
-            name={group.name}
+            name={partDisplayName(group.index, group.name, partNames)}
             detail={t("editor.parts.faceCount", { count: group.faces })}
             visible={!hiddenSet.has(group.index)}
             selected={selectedPart === group.index}
             onSelect={() => select({ kind: "part", id: String(group.index) })}
             onToggle={() => toggleHiddenGroup(group.index)}
+            isolated={report ? report.groups.length > 1 && report.groups.every((candidate) => (candidate.index === group.index ? !hiddenSet.has(candidate.index) : hiddenSet.has(candidate.index)) ) : false}
+            onIsolate={() => isolatePart(group.index)}
+            onRename={(name) => renamePart(group.index, name)}
           />
         ))}
         {window_.padBottomPx > 0 && <li aria-hidden="true" style={{ height: window_.padBottomPx }} />}
@@ -145,6 +152,9 @@ function PartRow({
   selected,
   onSelect,
   onToggle,
+  onRename,
+  isolated = false,
+  onIsolate,
 }: {
   testId: string;
   index?: number;
@@ -155,8 +165,26 @@ function PartRow({
   /** The lettering row is the recipe's, not one of the model's parts: it has nothing to select. */
   onSelect?: () => void;
   onToggle: () => void;
+  onRename?: (name: string) => void;
+  isolated?: boolean;
+  onIsolate?: () => void;
 }) {
   const { t } = useI18n();
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(name);
+
+  useEffect(() => {
+    if (!editing) setDraft(name);
+  }, [editing, name]);
+
+  const beginRename = () => {
+    setDraft(name);
+    setEditing(true);
+  };
+  const saveRename = () => {
+    onRename?.(draft);
+    setEditing(false);
+  };
   return (
     // A fixed height, because past 50 rows a row's place in the list is
     // arithmetic (`lib/rowWindow`), not something the browser lays out.
@@ -171,17 +199,52 @@ function PartRow({
       data-visible={visible}
       data-selected={selected}
     >
-      {onSelect ? (
-        <button type="button" data-testid="part-select" aria-pressed={selected} onClick={onSelect} className="flex min-w-0 flex-1 items-center gap-2 text-left">
+      <div className="flex min-w-0 flex-1 items-center gap-2">
+        {onSelect ? (
+          editing ? (
+            <input
+              autoFocus
+              value={draft}
+              data-testid="part-name-input"
+              aria-label={t("editor.parts.renameInput", { name })}
+              onChange={(event) => setDraft(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") saveRename();
+                if (event.key === "Escape") setEditing(false);
+              }}
+              className="min-w-0 flex-1 bg-transparent text-xs text-foreground outline-none"
+            />
+          ) : (
+            <button type="button" data-testid="part-select" aria-pressed={selected} onClick={onSelect} className="min-w-0 flex-1 truncate text-left text-xs text-foreground">
+              {name}
+            </button>
+          )
+        ) : (
           <span className="min-w-0 flex-1 truncate text-xs text-foreground">{name}</span>
-          <span className="shrink-0 text-[10px] text-muted-foreground">{detail}</span>
-        </button>
-      ) : (
-        <>
-          <span className="min-w-0 flex-1 truncate text-xs text-foreground">{name}</span>
-          <span className="shrink-0 text-[10px] text-muted-foreground">{detail}</span>
-        </>
-      )}
+        )}
+        <span className="shrink-0 text-[10px] text-muted-foreground">{detail}</span>
+        {onRename && (
+          editing ? (
+            <>
+              <button type="button" data-testid="part-rename-save" aria-label={t("editor.parts.saveName")} onClick={saveRename} className="shrink-0 text-muted-foreground hover:text-foreground">
+                <Check className="h-3.5 w-3.5" strokeWidth={1.5} />
+              </button>
+              <button type="button" data-testid="part-rename-cancel" aria-label={t("editor.parts.cancelRename")} onClick={() => setEditing(false)} className="shrink-0 text-muted-foreground hover:text-foreground">
+                <X className="h-3.5 w-3.5" strokeWidth={1.5} />
+              </button>
+            </>
+          ) : (
+            <button type="button" data-testid="part-rename" aria-label={t("editor.parts.rename", { name })} onClick={beginRename} className="shrink-0 text-muted-foreground hover:text-foreground">
+              <Pencil className="h-3.5 w-3.5" strokeWidth={1.5} />
+            </button>
+          )
+        )}
+        {onIsolate && (
+          <button type="button" data-testid="part-isolate" aria-pressed={isolated} aria-label={t(isolated ? "editor.parts.restoreAll" : "editor.parts.isolate", { name })} onClick={onIsolate} className={cn("shrink-0 text-muted-foreground hover:text-foreground", isolated && "text-foreground")}>
+            <Focus className="h-3.5 w-3.5" strokeWidth={1.5} />
+          </button>
+        )}
+      </div>
       <button
         type="button"
         data-testid="part-visibility"

@@ -61,8 +61,45 @@ export default async function ({ page, base, admin, editor, h }) {
     assert.equal(await firstRow.getAttribute("data-visible"), "false");
     out.hidden = { index: hiddenIndex, drawn: drawnBefore - 1 };
 
+    /* ---- 2b. a user label is a recipe edit, not a new model part ---- */
+    const renamedIndex = parts.find((group) => !POLO_MARKS.includes(group.index)).index;
+    const renamedRow = page.locator(`[data-testid="part-row"][data-index="${renamedIndex}"]`);
+    await renamedRow.getByTestId("part-rename").click();
+    await renamedRow.getByTestId("part-name-input").fill("Front object");
+    await renamedRow.getByTestId("part-name-input").press("Enter");
+    assert.match(await renamedRow.innerText(), /Front object/);
+    const renamedRecipe = await waitForRecipe(page, admin, designId, (r) => r.part_names?.[String(renamedIndex)] === "Front object", "part name stored");
+    assert.equal(renamedRecipe.part_names[String(renamedIndex)], "Front object");
+    await page.reload();
+    if ((await page.getByTestId("parts-group").getAttribute("data-open")) !== "true") await page.getByTestId("parts-toggle").click();
+    const reloadedRow = page.locator(`[data-testid="part-row"][data-index="${renamedIndex}"]`);
+    await reloadedRow.waitFor({ timeout: 20000 });
+    assert.match(await reloadedRow.innerText(), /Front object/, "the custom name survives reload");
+    out.rename = { index: renamedIndex, name: "Front object" };
+
+    /* ---- 2c. isolate keeps one indexed object and toggles back (Phase 11) ---- */
+    await reloadedRow.getByTestId("part-isolate").click();
+    await page.waitForFunction(() => Number(document.querySelector('[data-testid="editor-viewport"]')?.getAttribute("data-model-mesh-count")) === 1, null, { timeout: 20000 });
+    assert.equal(await reloadedRow.getByTestId("part-isolate").getAttribute("aria-pressed"), "true");
+    const isolatedVisibleRows = await page.locator('[data-testid="part-row"][data-visible="true"]').count();
+    assert.equal(isolatedVisibleRows, 1, "isolate leaves one object visible");
+    await reloadedRow.getByTestId("part-isolate").click();
+    await page.waitForFunction(
+      (want) => Number(document.querySelector('[data-testid="editor-viewport"]')?.getAttribute("data-model-mesh-count")) === want,
+      drawnBefore,
+      { timeout: 20000 },
+    );
+    out.isolate = { index: renamedIndex, restored: true };
+
     // Nothing was deleted: showing it again brings it back.
-    await firstRow.getByTestId("part-visibility").click();
+    const reloadedFirstRow = page.locator(`[data-testid="part-row"][data-index="${hiddenIndex}"]`);
+    await reloadedFirstRow.getByTestId("part-visibility").click();
+    await page.waitForFunction(
+      (want) => Number(document.querySelector('[data-testid="editor-viewport"]')?.getAttribute("data-model-mesh-count")) === want,
+      drawnBefore - 1,
+      { timeout: 20000 },
+    );
+    await reloadedFirstRow.getByTestId("part-visibility").click();
     await page.waitForFunction(
       (want) => Number(document.querySelector('[data-testid="editor-viewport"]')?.getAttribute("data-model-mesh-count")) === want,
       drawnBefore,

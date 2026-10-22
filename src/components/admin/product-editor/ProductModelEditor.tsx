@@ -3,6 +3,14 @@ import { toast } from "sonner";
 import { Box, CheckCircle2, Loader2, Trash2, UploadCloud } from "lucide-react";
 import * as THREE from "three";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -24,8 +32,9 @@ const METHOD_KEY: Record<ScaleMethod, string> = {
 };
 
 /**
- * "3D model (.obj)" upload — one file, immediate write, following
- * ProductImagesEditor's pattern (storage object first, then the row).
+ * "3D model (.obj)" upload — one file, with a confirmation step for the
+ * first import and an immediate replacement path (storage object first, then
+ * the row).
  * The editor (src/features/editor/**) loads from `model_storage_path`; a
  * product with none shows an empty state there, never a demo mesh.
  *
@@ -55,6 +64,7 @@ export function ProductModelEditor({ productId, modelStoragePath }: { productId:
   const [brandingMarked, setBrandingMarked] = useState<number[]>([]);
   const [brandingResult, setBrandingResult] = useState<BrandingReference | null>(null);
   const [previewAsBuyer, setPreviewAsBuyer] = useState(false);
+  const [pendingImport, setPendingImport] = useState<File | null>(null);
   const measuredRaw = pointA && pointB ? pointA.distanceTo(pointB) : null;
 
   const variantOptions = variants.data ?? [];
@@ -81,12 +91,7 @@ export function ProductModelEditor({ productId, modelStoragePath }: { productId:
 
   const onError = (error: unknown) => toast.error(describeSupabaseError(error as { message: string; code?: string }));
 
-  const handleFile = (file: File | null) => {
-    if (!file) return;
-    if (!file.name.toLowerCase().endsWith(".obj")) {
-      toast.error(`${file.name}: only .obj files are accepted`);
-      return;
-    }
+  const uploadFile = (file: File) => {
     upload.mutate(
       { file, previousPath: modelStoragePath },
       {
@@ -94,6 +99,19 @@ export function ProductModelEditor({ productId, modelStoragePath }: { productId:
         onError,
       },
     );
+  };
+
+  const handleFile = (file: File | null) => {
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith(".obj")) {
+      toast.error(`${file.name}: only .obj files are accepted`);
+      return;
+    }
+    if (!modelStoragePath) {
+      setPendingImport(file);
+      return;
+    }
+    uploadFile(file);
   };
 
   const onDrop = (e: DragEvent<HTMLDivElement>) => {
@@ -193,6 +211,41 @@ export function ProductModelEditor({ productId, modelStoragePath }: { productId:
           e.target.value = "";
         }}
       />
+
+      <Dialog open={!!pendingImport} onOpenChange={(open) => !open && setPendingImport(null)}>
+        <DialogContent data-testid="model-import-dialog">
+          <DialogHeader>
+            <DialogTitle>{t("admin.model.import.title")}</DialogTitle>
+            <DialogDescription>
+              {t("admin.model.import.description", { file: pendingImport?.name ?? "" })}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              data-testid="model-import-cancel"
+              onClick={() => setPendingImport(null)}
+              disabled={upload.isPending}
+            >
+              {t("admin.model.import.cancel")}
+            </Button>
+            <Button
+              type="button"
+              data-testid="model-import-confirm"
+              disabled={upload.isPending || !pendingImport}
+              onClick={() => {
+                if (!pendingImport) return;
+                const file = pendingImport;
+                setPendingImport(null);
+                uploadFile(file);
+              }}
+            >
+              {t("admin.model.import.confirm")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {modelStoragePath && rawBounds && (
         <div className="space-y-3 border border-border p-3" data-testid="model-scale-panel">

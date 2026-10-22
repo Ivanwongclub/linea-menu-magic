@@ -66,7 +66,7 @@ export default async function ({ page, admin, editor, h }) {
     await page
       .locator('[data-testid="model-input"]')
       .setInputFiles({ name: "polo-branding.obj", mimeType: "model/obj", buffer: readFileSync(POLO_OBJ) });
-    await h.waitForToast(/3D model uploaded/i);
+    await h.expectToast(/3D model uploaded/i, () => page.getByTestId("model-import-confirm").click());
     await page.getByTestId("model-scale-panel").waitFor({ timeout: 15000 });
     // Own update: the reset trigger clobbers scale fields written alongside a path change.
     const confirm = await admin
@@ -166,9 +166,29 @@ export default async function ({ page, admin, editor, h }) {
     assert.match(await panel.getByTestId("model-branding-marked-count").innerText(), /\b0\b/);
     await row(0).click();
     await row(2).click();
-    await h.expectToast(/Branding marks saved/i, () => panel.getByTestId("model-branding-analyse").click(), 30000);
+    await page.waitForFunction(
+      () => {
+        const count = document.querySelector('[data-testid="model-branding-marked-count"]')?.textContent ?? "";
+        const marked = (index) => document.querySelector(`[data-testid="model-branding-group"][data-index="${index}"]`)?.getAttribute("aria-pressed") === "true";
+        return /\b2\b/.test(count) && marked(0) && marked(2) && !marked(5) && !marked(32);
+      },
+      null,
+      { timeout: 10000 },
+    );
+    await page.waitForTimeout(100);
+    // A previous identical Sonner toast may still occupy the single visible
+    // slot. The read-back below is the durable save signal for this second
+    // analysis; the first analysis still verifies the toast contract.
+    await panel.getByTestId("model-branding-analyse").click();
+    const bodyDeadline = Date.now() + 10000;
+    let body;
+    while (Date.now() < bodyDeadline) {
+      body = await readBranding();
+      if (body.model_branding_groups.length === 2) break;
+      await page.waitForTimeout(200);
+    }
 
-    const body = await readBranding();
+    body ??= await readBranding();
     assert.deepEqual(body.model_branding_groups, [
       { index: 0, name: "object_1" },
       { index: 2, name: "object_3" },

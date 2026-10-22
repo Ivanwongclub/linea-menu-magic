@@ -7,10 +7,13 @@ import { useI18n } from "@/features/i18n/I18nProvider";
 import { FinishSwatch } from "@/features/finishes/FinishSwatch";
 import { FinishSelectionPicker } from "@/features/finishes/FinishSelectionPicker";
 import { finishAxisLine, finishMarketingName } from "@/features/finishes/finishAxisLine";
+import { useEditorStore } from "../store/useEditorStore";
 import { tradeLigne } from "../lib/ligne";
 import { processThresholds } from "../lib/manufacturing";
 import { LayersDock } from "./workspace/LayersDock";
 import { PropertiesPanel } from "./workspace/PropertiesPanel";
+import { ManufacturingLines } from "./ManufacturingStrip";
+import { showsTab, useWorkspace } from "./workspace/WorkspaceContext";
 import { OutputDock, type OutputSection } from "./workspace/OutputDock";
 import { VersionsSection } from "./workspace/VersionsSection";
 import type { PickerFinish } from "../hooks/useFinishOptions";
@@ -67,6 +70,11 @@ export function EditorPanel({
 }: EditorPanelProps) {
   const { t, language } = useI18n();
   const [pickerOpen, setPickerOpen] = useState(false);
+  // E2 U11: on a phone this column is a sheet with three segments, so each
+  // part of it renders only when its segment is showing. On a desk `showsTab`
+  // is true for all three and the panel is the column it has always been.
+  const workspace = useWorkspace();
+  const layers = useEditorStore((s) => s.recipe.layers);
   const selectedVariant = product.size_variants.find((v) => v.id === sizeVariantId) ?? null;
   const faceDiameterMm = selectedVariant?.size_primary_mm ?? product.size_variants[0]?.size_primary_mm ?? 10;
 
@@ -96,6 +104,8 @@ export function EditorPanel({
     // a panel that filled it would leave nothing to scroll.
     <div className="min-w-0" data-testid="editor-panel">
       <div className="p-4 space-y-4">
+        {showsTab(workspace, "layers") && (
+          <>
         <PanelGroup group="product" title={t("editor.panel.product")}>
           <div className="space-y-0.5">
             <p className="text-sm font-medium text-foreground">{product.name}</p>
@@ -170,12 +180,22 @@ export function EditorPanel({
           markedGroupIndices={product.model_branding_group_indices ?? []}
         />
 
-        {/* E2 U6: one panel for whatever is selected. Since U5 it is reached
-            without scrolling past the layers, which is standing ruling 3. */}
-        <PropertiesPanel faceDiameterMm={faceDiameterMm} />
-
         {/* E2 U8: the socket, with Phase 7's versions in it. */}
         <OutputDock sections={outputSections} />
+          </>
+        )}
+
+        {/* E2 U6: one panel for whatever is selected. Since U5 it is reached
+            without scrolling past the layers, which is standing ruling 3. */}
+        {showsTab(workspace, "properties") && <PropertiesPanel faceDiameterMm={faceDiameterMm} />}
+
+        {/* E2 U11: on a phone the verdict's lines live here, not in the strip,
+            so there is only ever one copy of them on the page. */}
+        {!workspace.wide && workspace.tab === "check" && (
+          <div className="border border-border" data-testid="sheet-check">
+            <ManufacturingLines layers={layers} process={processThresholds(selectedFinish?.process, language)} />
+          </div>
+        )}
       </div>
 
       <Sheet open={pickerOpen} onOpenChange={setPickerOpen}>

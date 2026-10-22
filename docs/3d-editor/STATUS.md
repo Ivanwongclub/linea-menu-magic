@@ -60,14 +60,14 @@ per-phase rulings stay in each phase's migration header and commit, and are
 summarised here only where they still bind later work.
 
 **Built: 7 of 12 phases** (1–6 done, 6b closed Phase 6; 7a closed Phase 7 and
-is verified at 48/48; 8–12 not started) and **10 of 13 workspace units** (U1–U10
+is verified at 48/48; 8–12 not started) and **11 of 13 workspace units** (U1–U11
 — E2's six pre-7a units, plus the document bar, the layers dock, the floating
 view tools and the strip as a verdict after it).
 7a took four suite runs to verify and each failure was a real defect — two in
 its own scenario, one in the design list's query; the phase was not called done
 until the suite was green.
 
-## Workspace units — 10 of 13 built
+## Workspace units — 11 of 13 built
 
 E2's 13-unit build plan for the docked workspace (`reports/E2-workspace-audit.md`
 §5), reconciled unit by unit on 2026-09-23. E2 names **U1, U2, U3, U4, U6 and
@@ -87,8 +87,8 @@ follow whichever unit lands last before the deck is next shown.
 | U8 | The Versions / Output socket for Phase 7's saves and Phase 9/10/12's output; renders only when it has something in it (E2 §3.4 item 7) — since U7 that is Phase 7a's versions alone, the save state having moved to the document bar | **Done** |
 | U9 | Floating view tools — reset view, zoom to fit, ruler and brush size in a viewport overlay; hidden under `?calibration=1` | **Done** — retires Phase 3 R2 |
 | U10 | Strip as a verdict — the manufacturing warning strip full width under viewport and properties, collapsible with a count badge, collapsed by default on small screens | **Done** |
-| U11 | **390 px sheet** — the phone layout: a bottom sheet with three snap points and a segmented control, viewport floor kept at 200 px | Not started — may follow 7a |
-| U12 | **Deck and docs** — re-shoot every editor shot against the workspace and record the workspace rulings (standing ruling 4) | Not started — follows the last unit before the deck is next shown |
+| U11 | **390 px sheet** — the phone layout: a bottom sheet with three snap points and a segmented control, viewport floor kept at 200 px | **Done** — targeted browser verification 2026-09-28 |
+| U12 | **Deck and docs** — re-shoot every editor shot against the workspace and record the workspace rulings (standing ruling 4) | **Done** — 26-shot deck re-shoot and manifest validation completed 2026-09-28 |
 | U13 | **Free docking** (optional) — four-edge docking and drag-to-dock, only if U4's fixed zones prove insufficient | Not started — optional, may follow 7a |
 
 ### Standing rulings — E2, 6b, U1–U4, U6–U8
@@ -109,7 +109,7 @@ These bind later units and Phase 7a; they are not re-decided per unit.
    to U5 exactly as written: no temporary scroll-into-view was added in the
    meantime.
 4. **The deck is re-shot in U12**, not when an individual unit changes the
-   chrome. `npm run deck:shots` output is stale between now and U12 by design.
+   chrome. U12's final rulings and the fresh deck evidence are recorded below.
 5. **Both part-visibility controls stay.** The Parts list sweeps (show / hide
    across rows); Properties acts on the one selected part. They are two jobs,
    not a duplicate.
@@ -148,10 +148,9 @@ These bind later units and Phase 7a; they are not re-decided per unit.
 3. **Settled (2026-09-24): Phase 3 R2 is retired**, in U9's commit and in the
    standing rulings below. The cluster is view tools only, and it is not drawn
    under `?calibration=1`.
-4. **Settled (2026-09-23): `reports/deck/` stays tracked through U12.** The
-   frames are stale by standing ruling 4 and are re-shot in U12; whether they
-   (and `reports/*.md`, E2 open question 7) stay tracked artefacts is decided
-   then, in one go, not per unit.
+4. **Settled (2026-09-28): `reports/deck/` stays tracked after U12.** The
+   complete 26-shot set and manifest are current; future deck runs should
+   account for Docker capacity before starting.
 
 ## Verification baseline
 
@@ -3309,11 +3308,10 @@ box before the batches went through; the batches share a tree and a stack, but
 nobody watched all 48 run end to end. If anything here is going to be doubted
 later, it is that.
 
-**The strip's collapsed-by-default path is asserted at desk width only.** The
-`lg` breakpoint decides it at mount, and the one scenario that runs at 390 px
-(`hybrid-controls`) measures geometry, not the strip. The collapse itself is
-proved by clicking it at 1280; that it *starts* collapsed on a phone is not.
-U11 is where that belongs, since it is the unit that re-measures 390 px.
+**U11 now covers the phone strip path.** At 390 px the strip is the verdict
+button and its lines move to the Check segment; the targeted browser scenario
+measures the collapsed and expanded states and confirms the 200 px floor in
+both. The desktop strip remains covered by the earlier U10 checks.
 
 ### Open questions from these units, with a recommendation each
 
@@ -3323,17 +3321,118 @@ U11 is where that belongs, since it is the unit that re-measures 390 px.
    on. *Recommend* having `EditorModel` report its framing box directly when
    Phase 11 adds uploads whose parts can be hidden at load, rather than relying
    on the two staying identical.
-2. **The cluster and the ruler labels share the bottom-right corner.** No
+2. **Settled (2026-09-28): the cluster and ruler labels share the
+   bottom-right corner.** U12's fresh deck shows the intended arrangement;
+   no
    assertion covers a collision — the label-overlap checks compare labels with
    labels and with handles, not with chrome — so the two can overlap visually
-   without failing. *Recommend* adding the cluster to those overlap checks in
-   U12, when the deck is re-shot and someone is looking at the corners anyway.
+   without failing. Keep this as a future visual-regression consideration.
 3. **`data-camera-distance` is a new read-back with one consumer.** It exists
    because the two view verbs are otherwise indistinguishable from the DOM.
    *Recommend* keeping it; it is the only way a scenario can say "the framing
    came back" without a screenshot diff.
-4. **The strip is one line taller than it was**, because the verdict row is
-   always drawn and the lines sit under it. At 1280 that is free; at 390 it is
-   the collapsed height, which is what the viewport floor is measured against.
-   *Recommend* U11 measure the floor with the strip collapsed *and* expanded,
-   since a buyer can open it on a phone.
+4. **Settled (2026-09-28): U11 measures the floor with the strip collapsed and
+   expanded.** At 390 px the targeted browser result was 200px at the full snap
+   with the strip collapsed and 200px with Check/manufacturing content open.
+
+## Workspace U11 — 390px bottom sheet (2026-09-28)
+
+U11 is closed against the intended phone acceptance criteria. The implementation
+is in the local U11 worktree (not committed here): `BottomSheet.tsx`,
+`WorkspaceContext.tsx`, the workspace shell/panel/strip/layout changes, and the
+targeted scenario/unit updates.
+
+### Browser evidence
+
+Command: `E2E_PORT=8123 E2E_SUITE_ONLY='hybrid-controls|workspace' npm run e2e:suite`
+Result: **2/2 passed in 3m41s** on the unchanged U11 tree.
+Logs: `/var/folders/k5/gfx9qq1n60n95ppvr93b1nv40000gn/T/linea-e2e-suite/`.
+
+At 390px × 844px, the real browser reported:
+
+- peek: viewport 544px, sheet 154px;
+- half: viewport 349px, sheet 349px;
+- full: viewport 200px, sheet 498px;
+- `scrollWidth=390`, no horizontal-overflow offenders;
+- expanded Check/manufacturing state: viewport remained 200px and still fit;
+- three sheet tabs and one content surface per selected segment;
+- Parts-open state survived reload; Reset folded it while preserving the
+  existing design layer/recipe.
+
+The first full suite on the unchanged U11 tree was **46/48 in 20m21s**.
+Follow-up triage reproduced both failures and identified scenario assumptions,
+not product defects: `branding-defaults` unconditionally toggled Parts closed
+after U11 persisted it open, while `cms-branding-marks` waited for a duplicate
+visible Sonner toast and could read the previous save before the second write
+had landed. The minimal scenario fixes are in the local worktree. A complete
+rerun on that tree (`E2E_PORT=8123 E2E_SUITE_SKIP_UP=1 E2E_SUITE_LOG_DIR=/tmp/linea-e2e-suite-triage-full npm run e2e:suite`)
+finished **48/48 in 23m20s**; U11 scenarios and both repaired scenarios passed.
+The final residue check found 2 `product_size_variants` and 2
+`product_finishes` rows, with all design/workspace tables at 0; these are
+documented disposable-harness residue and were not manually removed.
+
+### Known limits
+
+- The >50-row virtualization path remains unit-tested only; the local Polo
+  fixture has 33 groups.
+- The targeted run emitted one unrelated React `fetchPriority` DOM warning on
+  the home hero; the workspace scenario had no console errors.
+- Full-suite residue after the green rerun is
+  `product_size_variants=2` and `product_finishes=2`; the rows belong to the
+  intentional `size-variants` and `finish-picker-layout` fixtures and have not
+  been manually deleted in this task.
+
+### U11 harness triage review — passed (2026-09-28)
+
+The two initial full-suite failures were reviewed against isolated logs, clean
+labeled-stack reproductions, and a detached HEAD comparison. They were
+scenario/harness collisions, not application defects. The corrected scenarios
+passed, and the final evidence is **48/48 full E2E**, **83/83 unit tests**, and
+a passing production build. No application feature code was changed by the
+triage.
+
+## Workspace U12 — deck and final workspace rulings (2026-09-28)
+
+U12 is **verified/complete**. After Docker Desktop capacity was increased,
+the labeled stack was reinitialized with the documented command and the deck
+runner completed against the current workspace. The deck harness required
+three narrow U11-aware setup corrections: explicitly select Layers after
+mobile navigation because the phone tab persists, switch to Properties before
+editing the new text layer, and target the relief control in the Properties
+surface.
+
+Command: `E2E_PORT=8123 npm run deck:shots`.
+Result: **26 shots, `ok: true`**; the only skip was the documented absence of
+trim OBJ fixtures. `reports/deck/manifest.json` is fresh with 26 entries; all
+26 referenced PNGs exist, have no missing/blank images, and were independently
+validated at 2880×1800 desktop or 780×1688 mobile device-scale dimensions.
+Visual inspection confirmed `15-mobile.png` shows the Layers segment,
+`15b-mobile-finish-sheet.png` shows the finish sheet, and
+`15c-mobile-text-layer.png` shows the Properties segment with BRAND and relief
+controls. The run logged the known React `fetchPriority` warning and local 503
+resource warnings, but completed every shot.
+
+The final workspace rulings to carry into the successful re-shoot are:
+
+1. Desktop is a fixed left/right workspace column. Side, width, collapsed
+   state, section state, phone snap and phone tab are versioned per-user
+   chrome state.
+2. At 390px the controls are one bottom sheet with peek, half and full snaps;
+   the viewport floor is 200px. Layers, Properties and Check are the three
+   segments, each with one content surface; phone manufacturing lines belong
+   to Check.
+3. Layers owns creation/listing. Properties owns the selected layer's content,
+   relief and placement controls. Parts is closed by default and its section
+   state persists with the workspace.
+4. Reset workspace changes chrome only. It leaves recipe, selection and camera
+   alone; `?calibration=1` remains the deterministic layout path.
+
+The runner edits and docs were checked with **83/83 unit tests**, `npm run
+build` (pass, existing warnings only), and `git diff --check` (pass). U12 is
+now Done; do not start Phase 8 in this task.
+
+Capacity note (2026-09-28): the VM had 7.8GB free before the successful reset
+and capture, then reported 0 bytes free again after the run while the host had
+113GiB free. The labeled stack was not cleaned up and unrelated resources were
+not touched. This remains an environment-maintenance concern for future runs,
+not a U12 acceptance failure.

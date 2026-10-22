@@ -43,7 +43,7 @@ export default async function ({ page, base, admin, editor, h }) {
     await page
       .locator('[data-testid="model-input"]')
       .setInputFiles({ name: "polo-preview.obj", mimeType: "model/obj", buffer: readFileSync(POLO_OBJ) });
-    await h.waitForToast(/3D model uploaded/i);
+    await h.expectToast(/3D model uploaded/i, () => page.getByTestId("model-import-confirm").click());
 
     /* ---- 1. happy path ---- */
     await h.openProduct(product.id);

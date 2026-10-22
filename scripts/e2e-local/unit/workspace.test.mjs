@@ -1,19 +1,27 @@
 // E2 U4: the workspace layout's own rules — what is stored, what is refused,
 // and what a drag lands on. E2 U5: which rows a long dock section renders.
+// E2 U11: the sheet's snap points, and the viewport floor they never cross.
 // Run: node --test "scripts/e2e-local/unit/*.test.mjs"
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { DOCK_OVERSCAN, DOCK_ROW_PX, VIRTUALISE_ABOVE, rowWindow } from "../../../src/features/editor/lib/rowWindow.ts";
 import {
   DEFAULT_PANEL_PX,
+  DEFAULT_SECTIONS,
   DEFAULT_WORKSPACE_LAYOUT,
   MAX_PANEL_PX,
   MIN_PANEL_PX,
+  SHEET_SNAPS,
+  SHEET_SNAP_FRACTION,
+  VIEWPORT_FLOOR_PX,
   WORKSPACE_LAYOUT_VERSION,
   clampPanelWidth,
   layoutStorageKey,
+  nextSnap,
   parseLayout,
   serializeLayout,
+  sheetHeightPx,
+  snapFromHeight,
   widthFromDrag,
 } from "../../../src/features/editor/lib/workspaceLayout.ts";
 
@@ -24,8 +32,16 @@ test("U4: the key is per user and per layout version", () => {
 });
 
 test("U4: a stored layout comes back as it went in", () => {
-  const layout = { version: WORKSPACE_LAYOUT_VERSION, side: "left", collapsed: true, widthPx: 420 };
-  assert.deepEqual(parseLayout(serializeLayout(layout)), layout);
+  const layout = {
+    version: WORKSPACE_LAYOUT_VERSION,
+    side: "left",
+    collapsed: true,
+    widthPx: 420,
+    sections: { branding: false, zones: true, parts: true },
+    snap: "full",
+    tab: "properties",
+  };
+  assert.deepEqual(parseLayout(serializeLayout(layout)), layout, "sections and the sheet ride with the rest (U11)");
 });
 
 test("U4: anything unreadable is the default, never a half-restored dock", () => {
@@ -35,9 +51,67 @@ test("U4: anything unreadable is the default, never a half-restored dock", () =>
   assert.deepEqual(parseLayout("null"), DEFAULT_WORKSPACE_LAYOUT);
   // A layout written by an older shape of this file is discarded whole.
   assert.deepEqual(parseLayout(JSON.stringify({ version: 0, side: "left", collapsed: true, widthPx: 500 })), DEFAULT_WORKSPACE_LAYOUT);
-  // A side that isn't an edge, and a width that isn't a number.
-  const odd = parseLayout(JSON.stringify({ version: WORKSPACE_LAYOUT_VERSION, side: "top", collapsed: "yes", widthPx: "wide" }));
-  assert.deepEqual(odd, { version: WORKSPACE_LAYOUT_VERSION, side: "right", collapsed: false, widthPx: DEFAULT_PANEL_PX });
+  // A side that isn't an edge, a width that isn't a number, a snap and a tab
+  // that are not among the ones that exist.
+  const odd = parseLayout(
+    JSON.stringify({ version: WORKSPACE_LAYOUT_VERSION, side: "top", collapsed: "yes", widthPx: "wide", snap: "enormous", tab: "everything" }),
+  );
+  assert.deepEqual(odd, {
+    version: WORKSPACE_LAYOUT_VERSION,
+    side: "right",
+    collapsed: false,
+    widthPx: DEFAULT_PANEL_PX,
+    sections: DEFAULT_SECTIONS,
+    snap: DEFAULT_WORKSPACE_LAYOUT.snap,
+    tab: DEFAULT_WORKSPACE_LAYOUT.tab,
+  });
+  // U11 bumped the version, so every U4-era layout is discarded whole rather
+  // than restored without a sheet.
+  assert.deepEqual(parseLayout(JSON.stringify({ version: 1, side: "left", collapsed: true, widthPx: 500 })), DEFAULT_WORKSPACE_LAYOUT);
+});
+
+test("U11: Parts is folded away by default and the rest are not", () => {
+  assert.deepEqual(DEFAULT_SECTIONS, { branding: true, zones: true, parts: false });
+  // An older stored layout with no sections at all still opens sensibly.
+  const partial = parseLayout(JSON.stringify({ version: WORKSPACE_LAYOUT_VERSION, sections: {} }));
+  assert.deepEqual(partial.sections, DEFAULT_SECTIONS, "a section nobody stored is its default, not false");
+});
+
+test("U11: the viewport floor wins every argument with the sheet", () => {
+  // 844 px phone, less the site header, the document bar and a collapsed strip.
+  for (const row of [300, 420, 560, 700, 844]) {
+    for (const snap of SHEET_SNAPS) {
+      const sheet = sheetHeightPx(snap, row);
+      assert.ok(row - sheet >= VIEWPORT_FLOOR_PX - 0.5, `${snap} at row ${row} leaves ${row - sheet}px of model`);
+      assert.ok(sheet >= 0, `${snap} at row ${row} is not negative`);
+    }
+  }
+  // A row with no room to give: the sheet takes nothing rather than going
+  // negative and pushing the viewport off the bottom.
+  assert.equal(sheetHeightPx("full", 180), 0);
+});
+
+test("U11: the snap points are ordered, and `full` is the fraction until the floor bites", () => {
+  const roomy = 1200;
+  assert.ok(sheetHeightPx("peek", roomy) < sheetHeightPx("half", roomy));
+  assert.ok(sheetHeightPx("half", roomy) < sheetHeightPx("full", roomy));
+  assert.equal(sheetHeightPx("full", roomy), Math.round(roomy * SHEET_SNAP_FRACTION.full), "no clamp when there is room");
+  // On a phone `full` and `half` can come out the same: that is the clamp.
+  const tight = 500;
+  assert.equal(sheetHeightPx("full", tight), tight - VIEWPORT_FLOOR_PX);
+});
+
+test("U11: a released drag lands on the nearest snap", () => {
+  const row = 700;
+  for (const snap of SHEET_SNAPS) {
+    assert.equal(snapFromHeight(sheetHeightPx(snap, row), row), snap, `${snap} is its own nearest`);
+  }
+  assert.equal(snapFromHeight(0, row), "peek", "dragged shut is peek, the smallest that exists");
+  assert.equal(snapFromHeight(row, row), "full");
+});
+
+test("U11: tapping the grabber walks the snap points and comes back round", () => {
+  assert.deepEqual([nextSnap("peek"), nextSnap("half"), nextSnap("full")], ["half", "full", "peek"]);
 });
 
 test("U4: the panel stays a column", () => {

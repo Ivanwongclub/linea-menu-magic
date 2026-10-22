@@ -271,7 +271,11 @@ export default async function ({ page, base, admin, editor, h, outDir }) {
      * catalogue entry
      * ---------------------------------------------------------------- */
     await h.login(editor);
-    await page.goto(`${base}/designer-studio`, { waitUntil: "networkidle" });
+    // Authenticated catalogue data can keep a request open (and may return
+    // the known local 401 for anonymous-only resources), so DOM readiness is
+    // the stable navigation boundary here; the screenshot settles fonts and
+    // the later editor navigations retain their explicit waits.
+    await page.goto(`${base}/designer-studio`, { waitUntil: "domcontentloaded" });
     await page.evaluate(() => document.fonts.ready);
     await page.waitForTimeout(1500);
     await shot("01-catalogue-entry", "Designer Studio: the way into the editor from the catalogue.", 2);
@@ -500,6 +504,11 @@ export default async function ({ page, base, admin, editor, h, outDir }) {
     await page.goto(editorUrl(button.slug), { waitUntil: "networkidle" });
     await page.waitForURL((u) => /^\/designer-studio\/editor\/[0-9a-f-]{36}$/.test(u.pathname), { timeout: 30000 });
     await settle();
+    // The workspace tab is persisted per user. A prior desktop/mobile capture
+    // may leave Properties or Check selected, so make the surface explicit
+    // before taking the Layers shot rather than relying on the default.
+    await page.getByTestId("workspace-sheet").waitFor({ timeout: 20000 });
+    await page.locator('[data-testid="sheet-tab"][data-tab="layers"]').click();
     await page.locator('[data-testid="text-layer-row"]').first().getByTestId("text-layer-select").click().catch(() => {});
     await page.getByTestId("position-and-curve-toggle").click().catch(() => {});
     await page.waitForTimeout(600);
@@ -519,12 +528,15 @@ export default async function ({ page, base, admin, editor, h, outDir }) {
     // This is a fresh design (the mobile block re-enters at /editor/new), so
     // the layer the shot is about is added here.
     await page.getByTestId("add-text").click();
+    // U11 makes Layers and Properties separate phone surfaces: add the layer
+    // in Layers, then move to Properties for its content and relief controls.
+    await page.locator('[data-testid="sheet-tab"][data-tab="properties"]').click();
     await page.getByTestId("text-layer-content").fill("BRAND");
     await page.getByTestId("text-layer-content").blur();
     await waitForGlyphs(5);
-    await page.locator('[data-testid="text-layer-row"]').filter({ hasText: "BRAND" }).getByTestId("layer-relief").scrollIntoViewIfNeeded();
+    await page.getByTestId("properties-panel").getByTestId("layer-relief").scrollIntoViewIfNeeded();
     await page.waitForTimeout(800);
-    await shot("15c-mobile-text-layer", "390 px: a text layer with its relief — raised or engraved and the depth — on the row itself.", 5);
+    await shot("15c-mobile-text-layer", "390 px: a text layer with its relief — raised or engraved and the depth — in the Properties segment.", 5);
     await page.setViewportSize(DESKTOP);
 
     /* ---------------------------------------------------------------- *

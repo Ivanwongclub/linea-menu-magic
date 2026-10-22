@@ -6,7 +6,10 @@ import {
   parseLayout,
   serializeLayout,
   type DockSide,
+  type SheetSnap,
+  type SheetTab,
   type WorkspaceLayout,
+  type WorkspaceSections,
 } from "../lib/workspaceLayout";
 
 export interface WorkspaceLayoutControls {
@@ -14,6 +17,10 @@ export interface WorkspaceLayoutControls {
   setSide: (side: DockSide) => void;
   setCollapsed: (collapsed: boolean) => void;
   setWidth: (px: number) => void;
+  /** E2 U11: the dock's sections are remembered with everything else now. */
+  toggleSection: (key: keyof WorkspaceSections) => void;
+  setSnap: (snap: SheetSnap) => void;
+  setTab: (tab: SheetTab) => void;
   /** Chrome back to the default — the design, the selection and the camera are untouched (E2 §3.4 item 8). */
   reset: () => void;
   /** True while the workspace is fixed to the default and nothing is stored. */
@@ -67,6 +74,9 @@ export function useWorkspaceLayout(locked = false): WorkspaceLayoutControls {
     setSide: (side) => store({ ...layout, side }),
     setCollapsed: (collapsed) => store({ ...layout, collapsed }),
     setWidth: (widthPx) => store({ ...layout, widthPx }),
+    toggleSection: (key) => store({ ...layout, sections: { ...layout.sections, [key]: !layout.sections[key] } }),
+    setSnap: (snap) => store({ ...layout, snap }),
+    setTab: (tab) => store({ ...layout, tab }),
     reset: () => {
       setLayout(DEFAULT_WORKSPACE_LAYOUT);
       if (locked) return;

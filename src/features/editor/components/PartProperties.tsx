@@ -2,6 +2,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { cn } from "@/lib/utils";
 import { selectHiddenGroups, selectZones, useEditorStore } from "../store/useEditorStore";
+import { partDisplayName } from "../lib/partNames";
 
 /**
  * A part of the model, once it is the selection (E2 U6). A part is the file's,
@@ -15,6 +16,7 @@ export function PartProperties({ index }: { index: number }) {
   const hidden = useEditorStore(selectHiddenGroups);
   const zones = useEditorStore(selectZones);
   const toggleHiddenGroup = useEditorStore((s) => s.toggleHiddenGroup);
+  const partNames = useEditorStore((s) => s.recipe.part_names);
 
   const group = report?.groups.find((g) => g.index === index);
   if (!group) return <p className="text-xs text-muted-foreground">{t("editor.parts.empty")}</p>;
@@ -30,7 +32,7 @@ export function PartProperties({ index }: { index: number }) {
         <div className="flex items-baseline justify-between gap-2">
           <dt className="uppercase tracking-[0.12em] text-muted-foreground">{t("editor.parts.name")}</dt>
           <dd className="min-w-0 truncate text-foreground" data-testid="part-properties-name">
-            {group.name}
+            {partDisplayName(index, group.name, partNames)}
           </dd>
         </div>
         <div className="flex items-baseline justify-between gap-2">

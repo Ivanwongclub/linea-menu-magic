@@ -89,7 +89,7 @@ export default async function ({ page, admin, editor, h }) {
     await h.openProduct(product.id);
 
     await page.locator('[data-testid="model-input"]').setInputFiles({ name: "polo-two-point.obj", mimeType: "model/obj", buffer: Buffer.from(poloText) });
-    await h.waitForToast(/3D model uploaded/i);
+    await h.expectToast(/3D model uploaded/i, () => page.getByTestId("model-import-confirm").click());
     await page.getByTestId("model-scale-panel").waitFor({ timeout: 15000 });
     // The upload toast overlaps the preview's bottom-right corner — let it
     // clear before screenshotting for the silhouette scan below.

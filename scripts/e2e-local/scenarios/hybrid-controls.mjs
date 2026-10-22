@@ -257,31 +257,103 @@ export default async function ({ page, base, admin, editor, h }) {
       { timeout: 10000 },
     );
 
-    /* ---- 390 px: stacked, no horizontal overflow ---- */
+    /* ---- 390 px (U11): the bottom sheet, and the floor it never crosses ---- */
     await page.setViewportSize({ width: 390, height: 844 });
     await page.waitForTimeout(600);
-    const layoutCheck = await page.evaluate(() => {
-      // E2 U4: the controls are a region of the workspace, and the region is
-      // what stacks — `editor-panel` is its scrolling content, whose own top
-      // goes negative as soon as it is scrolled.
-      const panel = document.querySelector('[data-testid="workspace-panel"]').getBoundingClientRect();
-      const view = document.querySelector('[data-testid="editor-viewport"]').getBoundingClientRect();
-      const offenders = [...document.querySelectorAll('[data-testid="position-and-curve"] *')]
-        .map((el) => ({ id: el.getAttribute("data-testid") ?? el.tagName, r: el.getBoundingClientRect() }))
-        .filter(({ r }) => r.width > 0 && (r.left < -0.5 || r.right > window.innerWidth + 0.5))
-        .map(({ id, r }) => `${id} ${r.left.toFixed(1)}–${r.right.toFixed(1)}`);
-      return {
-        scrollWidth: document.documentElement.scrollWidth,
-        panelTop: panel.top,
-        viewportBottom: view.bottom,
-        viewportHeight: view.height,
-        offenders,
-      };
-    });
-    assert.ok(layoutCheck.scrollWidth <= 390, `page scroll width ${layoutCheck.scrollWidth} at 390 px`);
-    assert.ok(layoutCheck.panelTop >= layoutCheck.viewportBottom - 1, `panel stacks below the viewport ${JSON.stringify(layoutCheck)}`);
-    assert.ok(layoutCheck.viewportHeight >= 200, `viewport keeps height with the disclosure open (${layoutCheck.viewportHeight})`);
-    assert.deepEqual(layoutCheck.offenders, [], "no control overflows horizontally");
+
+    const sheet = page.getByTestId("workspace-sheet");
+    await sheet.waitFor({ timeout: 20000 });
+    assert.equal(await page.getByTestId("workspace-panel").count(), 0, "no docked column on a phone (E2 §3.3)");
+    assert.equal(await page.getByTestId("sheet-tab").count(), 3, "three segments: Layers, Properties, Check");
+
+    // Geometry at one snap: the sheet is under the viewport, the model keeps
+    // its floor, and nothing runs off the side.
+    const geometry = async () =>
+      page.evaluate(() => {
+        const box = (id) => {
+          const el = document.querySelector(`[data-testid="${id}"]`);
+          return el ? el.getBoundingClientRect() : null;
+        };
+        const view = box("editor-viewport");
+        const sh = box("workspace-sheet");
+        const strip = box("manufacturing-strip");
+        const offenders = [...document.querySelectorAll('[data-testid="position-and-curve"] *')]
+          .map((el) => ({ id: el.getAttribute("data-testid") ?? el.tagName, r: el.getBoundingClientRect() }))
+          .filter(({ r }) => r.width > 0 && (r.left < -0.5 || r.right > window.innerWidth + 0.5))
+          .map(({ id, r }) => `${id} ${r.left.toFixed(1)}–${r.right.toFixed(1)}`);
+        return {
+          scrollWidth: document.documentElement.scrollWidth,
+          viewportHeight: view.height,
+          viewportBottom: view.bottom,
+          sheetTop: sh.top,
+          sheetHeight: sh.height,
+          stripHeight: strip ? strip.height : 0,
+          offenders,
+        };
+      });
+
+    // The owed measurement (U9/U10 close-out, ruling 4): the floor holds with
+    // the strip collapsed *and* expanded, at every snap point. Expanding the
+    // strip takes height from the sheet, never from the model.
+    const floorBySnap = {};
+    // A tap on the grabber walks peek → half → full → peek, so any snap is at
+    // most three taps away from wherever the layout opened.
+    const goTo = async (snap) => {
+      for (let i = 0; i < 4 && (await sheet.getAttribute("data-snap")) !== snap; i++) {
+        await page.getByTestId("sheet-grabber").click();
+        await page.waitForTimeout(200);
+      }
+      assert.equal(await sheet.getAttribute("data-snap"), snap, `the grabber reaches ${snap}`);
+    };
+
+    for (const snap of ["peek", "half", "full"]) {
+      await goTo(snap);
+      const at = await geometry();
+      assert.ok(at.viewportHeight >= 200, `${snap}, strip collapsed: viewport ${at.viewportHeight}px`);
+      assert.ok(at.sheetTop >= at.viewportBottom - 1, `${snap}: the sheet is under the model`);
+      assert.ok(at.scrollWidth <= 390, `${snap}: page scroll width ${at.scrollWidth}`);
+      floorBySnap[snap] = { viewport: Math.round(at.viewportHeight), sheet: Math.round(at.sheetHeight) };
+    }
+    // Ordered, and `full` is the tallest the floor allows.
+    assert.ok(floorBySnap.peek.sheet <= floorBySnap.half.sheet, "peek is no taller than half");
+    assert.ok(floorBySnap.half.sheet <= floorBySnap.full.sheet, "half is no taller than full");
+    assert.ok(floorBySnap.full.viewport >= 200, `full leaves ${floorBySnap.full.viewport}px of model`);
+
+    // On a phone the strip is the verdict alone and its lines are the Check
+    // segment (U11), so "expanded" is Check selected — the one state where the
+    // verdict costs the sheet room.
+    await page.getByTestId("manufacturing-toggle").click();
+    await page.waitForFunction(
+      () => document.querySelector('[data-testid="workspace-sheet"]')?.getAttribute("data-tab") === "check",
+      null,
+      { timeout: 10000 },
+    );
+    assert.equal(await page.getByTestId("manufacturing-lines").count(), 1, "one copy of the lines, in the sheet");
+    assert.equal(
+      await page.getByTestId("manufacturing-strip").getByTestId("manufacturing-lines").count(),
+      0,
+      "and not in the strip as well — anything counting warnings would count them twice",
+    );
+    const expanded = await geometry();
+    assert.ok(expanded.viewportHeight >= 200, `strip expanded: viewport ${expanded.viewportHeight}px`);
+    assert.ok(expanded.scrollWidth <= 390, `strip expanded: page scroll width ${expanded.scrollWidth}`);
+
+    // Properties is a segment now, so the disclosure's overflow check has to
+    // ask for it first — otherwise it passes by finding nothing.
+    await page.locator('[data-testid="sheet-tab"][data-tab="properties"]').click();
+    await page.getByTestId("position-and-curve").waitFor({ timeout: 20000 });
+    const properties = await geometry();
+    assert.deepEqual(properties.offenders, [], "no control overflows horizontally");
+    assert.ok(properties.viewportHeight >= 200, `Properties open: viewport ${properties.viewportHeight}px`);
+    assert.ok(properties.scrollWidth <= 390, `Properties open: page scroll width ${properties.scrollWidth}`);
+
+    const layoutCheck = {
+      ...properties,
+      floorBySnap,
+      // The owed pair: the model's height with the verdict shut and with it open.
+      viewportWithStripCollapsed: floorBySnap.full.viewport,
+      viewportWithStripExpanded: Math.round(expanded.viewportHeight),
+    };
     out.mobile = layoutCheck;
 
     return out;

@@ -470,6 +470,12 @@ export const adminTranslations: Record<AppLanguage, Record<string, string>> = {
     "admin.model.scale.markUnconfirmed": "Mark as unconfirmed",
     "admin.model.scale.markedUnconfirmed": "Marked as unconfirmed.",
 
+    // model first-import confirmation (Phase 11)
+    "admin.model.import.title": "Import this OBJ model?",
+    "admin.model.import.description": "{file} will be added to this product. You can confirm its scale after import.",
+    "admin.model.import.cancel": "Cancel",
+    "admin.model.import.confirm": "Import OBJ",
+
     // model branding marks and recovery (Phase 4d)
     "admin.model.scale.twoPointPrecision": "measured to ±1.5%",
     "admin.model.branding.title": "Branding groups",

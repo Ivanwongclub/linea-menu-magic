@@ -17,6 +17,7 @@ import type { ZoneStyle } from "../lib/shaderPatch";
 import type { LogoSource } from "../hooks/useLogoAssets";
 import { BrandingMeshes, type TextSceneReport } from "./branding/BrandingMeshes";
 import { cornersOf, fitDistance, homeDirection, type BoundsMm } from "../lib/framing";
+import { defaultPartName } from "../lib/partNames";
 
 interface EditorModelProps {
   url: string;
@@ -265,7 +266,7 @@ export function EditorModel({
     const box = new THREE.Box3().setFromObject(model);
     onPartsReport?.({
       bounds: { minX: box.min.x, maxX: box.max.x, minY: box.min.y, maxY: box.max.y, minZ: box.min.z, maxZ: box.max.z },
-      groups: meshes.map((mesh, index) => ({ index, name: mesh.name || `group_${index + 1}`, faces: counts[index], visible: mesh.visible })),
+      groups: meshes.map((mesh, index) => ({ index, name: mesh.name || defaultPartName(index), faces: counts[index], visible: mesh.visible })),
       zoneFaces: zoneRuns.map((runs) => decodeRuns(runs).length),
       overlaps,
       totalFaces: total,

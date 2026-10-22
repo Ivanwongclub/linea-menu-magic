@@ -77,7 +77,12 @@ export default async function ({ page, admin, editor, h }) {
 
     /* ---- 1. upload → proposal 1 (within band) → Confirm ---- */
     await modelInput.setInputFiles({ name: "polo-10.8.obj", mimeType: "model/obj", buffer: poloBuffer });
-    await h.waitForToast(/3D model uploaded/i);
+    await page.getByTestId("model-import-dialog").waitFor();
+    await page.getByTestId("model-import-cancel").click();
+    await page.getByTestId("model-import-dialog").waitFor({ state: "hidden" });
+    assert.equal((await readProduct()).model_storage_path, null, "cancel does not upload the selected OBJ");
+    await modelInput.setInputFiles({ name: "polo-10.8.obj", mimeType: "model/obj", buffer: poloBuffer });
+    await h.expectToast(/3D model uploaded/i, () => page.getByTestId("model-import-confirm").click());
     await page.getByTestId("model-scale-panel").waitFor({ timeout: 15000 });
     await page.getByTestId("model-scale-proposal").waitFor({ timeout: 10000 });
 

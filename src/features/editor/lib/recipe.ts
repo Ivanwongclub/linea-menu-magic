@@ -8,6 +8,7 @@
  */
 
 import type { ZoneMethod, ZonePlane } from "./zones.ts";
+import { normalizePartNames, type PartNames } from "./partNames.ts";
 
 /** `free` is a logo's placement: centre, width and rotation, no curve (4k R3). */
 export type TextLayout = "straight" | "circle" | "free";
@@ -192,6 +193,8 @@ export interface DraftRecipe {
   layers: Layer[];
   /** Phase 6b R1: OBJ groups the buyer has hidden; hiding never deletes geometry. */
   hidden_groups?: number[];
+  /** User labels for model parts, keyed by stable OBJ child index. */
+  part_names?: PartNames;
   /** Phase 6b R2: optional, so a recipe without zones stays exactly as v3 wrote it. */
   zones?: Zone[];
 }
@@ -266,6 +269,7 @@ export function normalizeRecipe(raw: unknown): DraftRecipe {
     layers: stored.map(upgradeLayer),
     hidden_groups: Array.isArray(raw.hidden_groups) ? (raw.hidden_groups as unknown[]).map(Number).filter((n) => Number.isInteger(n) && n >= 0) : [],
     zones: Array.isArray(raw.zones) ? (raw.zones as Zone[]) : [],
+    ...(Object.keys(normalizePartNames(raw.part_names)).length > 0 ? { part_names: normalizePartNames(raw.part_names) } : {}),
   };
 }
 

@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { applyLayerPatch, emptyRecipe, scaleLayers, type DraftRecipe, type Layer, type LayerPatch, type Zone } from "../lib/recipe";
+import { renamePartName } from "../lib/partNames";
 import type { FaceTransform } from "../lib/recoveredPlacement";
 import type { PendingLogo } from "../hooks/useLogoAssets";
 import type { PartsReport } from "../components/EditorModel";
@@ -109,6 +110,10 @@ interface EditorState {
   /** Phase 6b R1: which OBJ groups the buyer has hidden. */
   setHiddenGroups: (indices: number[]) => void;
   toggleHiddenGroup: (index: number) => void;
+  /** Show one model part and hide every other OBJ child; repeat to restore all. */
+  isolatePart: (index: number) => void;
+  /** User labels are keyed by OBJ child index and persist with the recipe. */
+  renamePart: (index: number, name: string) => void;
   /** Phase 6b R2: zones are edited like layers — live while dragging, one undo entry per change. */
   addZone: (zone: Zone) => void;
   updateZone: (id: string, patch: Partial<Zone>) => void;
@@ -213,6 +218,21 @@ export const useEditorStore = create<EditorState>((set) => ({
         if (hidden.has(index)) hidden.delete(index);
         else hidden.add(index);
         return { ...r, hidden_groups: [...hidden].sort((a, b) => a - b) };
+      }),
+    ),
+  isolatePart: (index) =>
+    set((s) => {
+      const indices = (s.partsReport?.groups ?? []).map((group) => group.index);
+      if (indices.length <= 1 || !indices.includes(index)) return {};
+      const hidden = new Set(s.recipe.hidden_groups ?? []);
+      const alreadyIsolated = indices.every((groupIndex) => (groupIndex === index ? !hidden.has(groupIndex) : hidden.has(groupIndex)));
+      return discrete(s, (r) => ({ ...r, hidden_groups: alreadyIsolated ? [] : indices.filter((groupIndex) => groupIndex !== index) }));
+    }),
+  renamePart: (index, name) =>
+    set((s) =>
+      discrete(s, (r) => {
+        const names = renamePartName(r.part_names ?? {}, index, name);
+        return Object.keys(names).length > 0 ? { ...r, part_names: names } : { ...r, part_names: undefined };
       }),
     ),
   addZone: (zone) =>

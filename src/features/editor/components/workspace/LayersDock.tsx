@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { ImagePlus, Plus } from "lucide-react";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { useEditorStore } from "../../store/useEditorStore";
@@ -12,6 +12,7 @@ import { AddZoneButton, ZoneList } from "../branding/ZonesSection";
 import { LayerList } from "../branding/LayerList";
 import { PartsGroup } from "../PartsGroup";
 import { DockSection } from "./DockSection";
+import { useWorkspace } from "./WorkspaceContext";
 
 /**
  * The layers dock (E2 U5): everything that is on the part, in three sections
@@ -45,11 +46,11 @@ export function LayersDock({
 }) {
   const { t } = useI18n();
   const body = useRef<HTMLDivElement>(null);
-  // Parts closed, the rest open (E2 §3.4 item 3). Section state is the
-  // workspace's, not the design's, and a reload starts here again — see U5's
-  // open question on persisting it.
-  const [open, setOpen] = useState({ branding: true, zones: true, parts: false });
-  const toggle = (key: keyof typeof open) => () => setOpen((s) => ({ ...s, [key]: !s[key] }));
+  // Parts closed, the rest open (E2 §3.4 item 3). Since U11 the sections are
+  // the workspace's own state: remembered per user, reset by Reset workspace,
+  // and discarded with the rest of a stale layout version.
+  const { sections: open, toggleSection } = useWorkspace();
+  const toggle = (key: keyof typeof open) => () => toggleSection(key);
 
   // Where a new plane zone cuts by default: half way up the part (6b R2).
   const partsReport = useEditorStore((s) => s.partsReport);

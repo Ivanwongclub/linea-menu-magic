@@ -345,7 +345,7 @@ export default async function ({ page, base, admin, editor, h }) {
     await page.waitForURL((u) => /^\/designer-studio\/editor\/[0-9a-f-]{36}$/.test(u.pathname), { timeout: 20000 });
     const shownCanvas = viewport().locator("canvas").first();
     await shownCanvas.waitFor({ timeout: 30000 });
-    await page.getByTestId("parts-toggle").click();
+    if ((await page.getByTestId("part-row-lettering").count()) === 0) await page.getByTestId("parts-toggle").click();
     await page.getByTestId("part-row-lettering").getByTestId("part-visibility").click();
     await waitMeshCount(33);
     const box = await shownCanvas.boundingBox();

@@ -1,4 +1,4 @@
-// E2 U1/U4/U5 — the workspace, and the one selection it shows.
+// E2 U1/U4/U5/U11 — the workspace, and the one selection it shows.
 //
 //   1. The controls start on the right, 360 px wide, and the model has the rest.
 //   2. They move to the other edge, collapse, and resize — and every one of
@@ -20,6 +20,8 @@
 //  10. The layers dock (U5) is three sections with a count each — Branding,
 //      Zones, Parts — with Parts collapsed, a height of its own, and the
 //      panel's heading folded into its header.
+//  11. Section state rides in the stored layout (U11), so it survives a reload
+//      and is put back by Reset workspace.
 import assert from "node:assert/strict";
 import { openEditorFor, stageAppearance, waitForRecipe } from "../lib/appearance.mjs";
 
@@ -125,12 +127,16 @@ export default async function ({ page, base, admin, editor, h }) {
     out.reset = "layout back to default, design untouched";
 
     /* ---- 6. a layout from an older shape is ignored ---- */
-    await page.evaluate(() => {
-      const key = `wincyc:workspace:v1:${"stale"}`;
-      void key;
-      const own = Object.keys(window.localStorage).find((k) => k.startsWith("wincyc:workspace:"));
-      window.localStorage.setItem(own ?? "wincyc:workspace:v1:anon", JSON.stringify({ version: 0, side: "left", collapsed: true, widthPx: 520 }));
-    });
+    // The reset above deleted the stored layout, so make the app write one
+    // again before overwriting it: a key this scenario invents is a key the
+    // app never reads, and the check would pass without proving anything.
+    await menuItem(page, "workspace-dock");
+    await page.waitForFunction(() => document.querySelector('[data-testid="workspace"]')?.getAttribute("data-side") === "left", null, { timeout: 10000 });
+    const ownKey = (await storedLayout()).key;
+    await page.evaluate(
+      (key) => window.localStorage.setItem(key, JSON.stringify({ version: 0, side: "left", collapsed: true, widthPx: 520 })),
+      ownKey,
+    );
     await page.reload({ waitUntil: "networkidle" });
     await panel.waitFor({ timeout: 30000 });
     assert.deepEqual(await layoutOf(), { side: "right", collapsed: false, width: DEFAULT_WIDTH }, "a stale layout version is discarded whole");
@@ -217,6 +223,21 @@ export default async function ({ page, base, admin, editor, h }) {
     assert.equal(await partsList.getAttribute("data-virtualised"), "false", "33 rows is a list, not a scrolling problem");
     assert.equal(await partsList.getAttribute("data-window"), `0-${modelGroups}`, "so the window is the whole list");
     out.layersDock = { counts: await sectionCounts(), dockPx: dockBox.client, listPx: dockBox.scroll, virtualised: false };
+
+    // U11: the sections are the workspace's own state now, so Parts staying
+    // open survives a reload — and Reset workspace puts it back.
+    await page.reload({ waitUntil: "networkidle" });
+    await page.getByTestId("layers-dock").waitFor({ timeout: 30000 });
+    assert.equal(await page.getByTestId("parts-group").getAttribute("data-open"), "true", "Parts was left open, so it opens (U11)");
+    assert.equal((await storedLayout()).value.sections.parts, true, "and the layout is what remembers it");
+    await menuItem(page, "workspace-reset");
+    await page.waitForFunction(() => document.querySelector('[data-testid="parts-group"]')?.getAttribute("data-open") === "false", null, { timeout: 10000 });
+    assert.equal(await page.getByTestId("text-layer-row").count(), 1, "and resetting the chrome left the design alone");
+    out.sections = "Parts open survives a reload; Reset workspace folds it back";
+
+    // Left open for what follows, which reads the part rows.
+    await page.getByTestId("parts-toggle").click();
+    await page.getByTestId("part-row").first().waitFor({ timeout: 20000 });
 
     const parts = JSON.parse(await viewport.getAttribute("data-parts"));
     const partIndex = await page.locator('[data-testid="part-row"]').first().getAttribute("data-index");
