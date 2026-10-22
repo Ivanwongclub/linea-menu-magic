@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useMemo } from "react";
 import { useFrame, useLoader } from "@react-three/fiber";
 import { Center } from "@react-three/drei";
 import * as THREE from "three";
-import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
+import { ModelFileLoader } from "@/features/editor/lib/ModelFileLoader";
 
 interface OBJModelProps {
   url: string;
@@ -15,7 +15,7 @@ interface OBJModelProps {
 }
 
 const OBJModel = ({ url, autoRotate = false, material }: OBJModelProps) => {
-  const obj = useLoader(OBJLoader, url);
+  const obj = useLoader(ModelFileLoader, url);
   const groupRef = useRef<THREE.Group>(null);
 
   const clonedObj = useMemo(() => {

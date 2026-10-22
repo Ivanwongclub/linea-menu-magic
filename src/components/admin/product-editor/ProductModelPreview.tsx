@@ -52,7 +52,10 @@ function worldVertices(group: THREE.Object3D): THREE.Vector3[] {
  * with it).
  */
 function frameToPoints(camera: THREE.PerspectiveCamera, points: THREE.Vector3[], center: THREE.Vector3, direction: THREE.Vector3, fill: number) {
-  let distance = Math.max(...points.map((p) => p.distanceTo(center)), 1) * 2;
+  // CAD exports can exceed the engine's function-argument limit.
+  let radius = 1;
+  for (const point of points) radius = Math.max(radius, point.distanceTo(center));
+  let distance = radius * 2;
   const ndc = new THREE.Vector3();
   for (let i = 0; i < 8; i++) {
     camera.position.copy(center).addScaledVector(direction, distance);

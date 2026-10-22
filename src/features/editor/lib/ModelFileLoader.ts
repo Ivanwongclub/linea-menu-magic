@@ -1,7 +1,7 @@
 import { FileLoader, Group, Loader, Mesh, type LoadingManager } from "three";
-import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader.js";
 import { modelFormatFromName, type ModelFormat } from "./modelFormat";
+import { parseObjSurfaceParts } from "./objSurfaceParts";
 
 /** STL is one mesh with no `o`/`g` groups — the Parts list will show a single row. */
 export function groupFromModelData(data: string | ArrayBuffer, format: ModelFormat): Group {
@@ -14,14 +14,14 @@ export function groupFromModelData(data: string | ArrayBuffer, format: ModelForm
     group.add(mesh);
     return group;
   }
-  return new OBJLoader().parse(data as string);
+  return parseObjSurfaceParts(data as string);
 }
 
 /**
  * `useLoader` entry for catalogue OBJ and client STL. `formatHint` is required
  * for blob: URLs, which have no extension.
  */
-export class ModelFileLoader extends Loader {
+export class ModelFileLoader extends Loader<Group> {
   formatHint: ModelFormat | null = null;
 
   constructor(manager?: LoadingManager) {

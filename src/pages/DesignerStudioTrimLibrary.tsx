@@ -7,7 +7,6 @@ import ProductCard from "@/components/products/ProductCard";
 import { useProducts } from "@/features/products/hooks/useProducts";
 import { useCatalogueTaxonomy } from "@/features/products/hooks/useCatalogueTaxonomy";
 import { localizedName } from "@/features/admin/lib/localize";
-import { pickFamilyFeatured } from "@/features/products/utils/pickFamilyFeatured";
 import { useAuth } from "@/features/auth/AuthProvider";
 import { useI18n } from "@/features/i18n/I18nProvider";
 
@@ -32,10 +31,7 @@ const DesignerStudioTrimLibrary = () => {
 
   const { products, loading } = useProducts(filters);
 
-  // Single source of truth shared with the Designer Studio landing
-  // Featured Trims strip — see pickFamilyFeatured().
   const { families } = useCatalogueTaxonomy();
-  const displayProducts = useMemo(() => pickFamilyFeatured(products, families), [products, families]);
 
   // Family chips from the database taxonomy, in the interface language.
   const familyChips = useMemo(
@@ -149,13 +145,13 @@ const DesignerStudioTrimLibrary = () => {
                 <div key={i} className="aspect-square bg-secondary animate-pulse rounded-[var(--radius)]" />
               ))}
             </div>
-          ) : displayProducts.length === 0 ? (
+          ) : products.length === 0 ? (
             <div className="text-center py-20 text-muted-foreground/50 text-sm">
               {t("studio.empty")}
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {displayProducts.map((product, i) => (
+              {products.map((product, i) => (
                 <Link key={product.id} to={`/designer-studio/products/${product.slug}`}>
                   <ProductCard
                     product={product}

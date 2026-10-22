@@ -9,7 +9,7 @@ import {
   useProgress,
   Html,
 } from "@react-three/drei";
-import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
+import { ModelFileLoader } from "@/features/editor/lib/ModelFileLoader";
 import * as THREE from "three";
 import { X, RotateCcw, Maximize2, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -132,7 +132,7 @@ const ObjMesh = ({
   plating: Plating | null;
   autoRotate: boolean;
 }) => {
-  const obj = useLoader(OBJLoader, url);
+  const obj = useLoader(ModelFileLoader, url);
   const groupRef = useRef<THREE.Group>(null);
 
   const scene = useMemo(() => {

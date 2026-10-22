@@ -9,8 +9,8 @@ import type { AppLanguage } from "@/features/i18n/translations";
  * families' sort_order in the database. Families with no product yield
  * nothing — two of the five are empty at launch.
  *
- * Single source of truth shared by the Designer Studio landing (Featured
- * Trims strip) and the Trim Library grid so the two surfaces never diverge.
+ * Used by the Designer Studio landing's Featured Trims strip. The Trim
+ * Library renders every matching product instead of one per family.
  */
 export function pickFamilyFeatured(products: Product[], families: CatalogueFamily[]): Product[] {
   const picked: Product[] = [];
