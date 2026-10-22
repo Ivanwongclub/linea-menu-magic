@@ -5,7 +5,7 @@ import { useEditorStore } from "../store/useEditorStore";
 import { newLogoLayer, type Layer } from "../lib/recipe";
 import { MAX_LOGO_BYTES, asRejection, rejectionMessage, validateLogoSvg, validateRasterLogo } from "../lib/logoSvg";
 import { parseLogoSvg } from "../lib/logoGeometry";
-import { isRasterMime, uploadLogoAsset } from "./useLogoAssets";
+import { deleteLogoAsset, isRasterMime, uploadLogoAsset } from "./useLogoAssets";
 import { useDesignerStaffStatus } from "./useDesignerStaffStatus";
 
 /** A raster file as a data URL: what the draft holds and what the texture loads. */
@@ -55,11 +55,17 @@ export function useLogoUpload({ faceDiameterMm, minDepthMm }: { faceDiameterMm: 
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) return;
+    const { hydratedFor, localModel } = useEditorStore.getState();
+    const localModelUrl = localModel?.url;
+    const isCurrentContext = () => {
+      const current = useEditorStore.getState();
+      return current.hydratedFor === hydratedFor && current.localModel?.url === localModelUrl;
+    };
     setLogoError(null);
     setUploading(true);
     const reject = (rejection: Parameters<typeof rejectionMessage>[0]) => {
       const { key, vars } = rejectionMessage(rejection);
-      setLogoError(t(key, vars));
+      if (isCurrentContext()) setLogoError(t(key, vars));
     };
     try {
       const raster = isRasterMime(file.type);
@@ -74,28 +80,39 @@ export function useLogoUpload({ faceDiameterMm, minDepthMm }: { faceDiameterMm: 
         const rejection = asRejection(validateRasterLogo(file.type, file.size));
         if (rejection) return reject(rejection);
         const dataUrl = await readAsDataUrl(file);
+        if (!isCurrentContext()) return;
         const aspect = await rasterAspect(dataUrl);
+        if (!isCurrentContext()) return;
         if (!aspect) return reject({ reason: "empty" });
         const layer = printedLayer(newLogoLayer(layerId, faceDiameterMm, aspect, null, minDepthMm));
         const assetId = await uploadLogoAsset({ raster: dataUrl, mimeType: file.type, filename: file.name, ownerId: user.id, brandId });
+        if (!isCurrentContext()) {
+          await deleteLogoAsset(assetId);
+          return;
+        }
         addLayer({ ...layer, content: { ...layer.content, asset_id: assetId } });
         return;
       }
 
       if (file.size > MAX_LOGO_BYTES) return reject({ reason: "tooLarge", limitKb: MAX_LOGO_BYTES / 1024 });
       const svg = await file.text();
+      if (!isCurrentContext()) return;
       const rejection = asRejection(validateLogoSvg(svg, file.size));
       if (rejection) return reject(rejection);
       const artwork = parseLogoSvg(svg);
       if (!artwork) return reject({ reason: "empty" });
       if (user) {
         const assetId = await uploadLogoAsset({ svg, mimeType: "image/svg+xml", filename: file.name, ownerId: user.id, brandId });
+        if (!isCurrentContext()) {
+          await deleteLogoAsset(assetId);
+          return;
+        }
         addLayer(newLogoLayer(layerId, faceDiameterMm, artwork.aspect, assetId, minDepthMm));
       } else {
         addLayer(newLogoLayer(layerId, faceDiameterMm, artwork.aspect, null, minDepthMm), { filename: file.name, svg, mimeType: "image/svg+xml" });
       }
     } catch (error) {
-      setLogoError(t("editor.branding.logoFailed", { reason: String((error as Error)?.message ?? error) }));
+      if (isCurrentContext()) setLogoError(t("editor.branding.logoFailed", { reason: String((error as Error)?.message ?? error) }));
     } finally {
       setUploading(false);
     }

@@ -15,6 +15,7 @@ import { OutputDock, type OutputSection } from "./workspace/OutputDock";
 import { VersionsSection } from "./workspace/VersionsSection";
 import type { PickerFinish } from "../hooks/useFinishOptions";
 import type { EditorColour, EditorProduct, EditorSizeVariant } from "../hooks/useEditorProduct";
+import { useEditorStore } from "../store/useEditorStore";
 
 interface EditorPanelProps {
   product: EditorProduct;
@@ -26,6 +27,9 @@ interface EditorPanelProps {
   colours: EditorColour[];
   selectedColour: EditorColour | null;
   onSelectColour: (colour: EditorColour) => void;
+  localModelName?: string;
+  appearanceMode?: "finish" | "colour";
+  onAppearanceModeChange?: (mode: "finish" | "colour") => void;
   /** Phase 7: the design versions belong to. Null on the anonymous `/new` path, which has nothing to version yet. */
   designId?: string | null;
 }
@@ -63,17 +67,23 @@ export function EditorPanel({
   colours,
   selectedColour,
   onSelectColour,
+  localModelName,
+  appearanceMode,
+  onAppearanceModeChange,
   designId = null,
 }: EditorPanelProps) {
   const { t, language } = useI18n();
+  const modelSizeMm = useEditorStore((s) => s.modelSizeMm);
   const [pickerOpen, setPickerOpen] = useState(false);
   const selectedVariant = product.size_variants.find((v) => v.id === sizeVariantId) ?? null;
-  const faceDiameterMm = selectedVariant?.size_primary_mm ?? product.size_variants[0]?.size_primary_mm ?? 10;
+  const local = !!localModelName;
+  const isMetal = local ? appearanceMode === "finish" : product.is_metal;
+  const faceDiameterMm = local ? modelSizeMm ?? 10 : selectedVariant?.size_primary_mm ?? product.size_variants[0]?.size_primary_mm ?? 10;
 
   // E2 U8 / standing ruling 1: the dock renders only what it has, and since
   // U7 that is versions alone — the save state is the document bar's. An
   // anonymous design has nothing to version, so no dock is drawn.
-  const outputSections: OutputSection[] = designId
+  const outputSections: OutputSection[] = designId && !local
     ? [
         {
           id: "versions",
@@ -98,10 +108,14 @@ export function EditorPanel({
       <div className="p-4 space-y-4">
         <PanelGroup group="product" title={t("editor.panel.product")}>
           <div className="space-y-0.5">
-            <p className="text-sm font-medium text-foreground">{product.name}</p>
-            <p className="text-xs text-muted-foreground font-mono">{product.item_code}</p>
+            <p className="text-sm font-medium text-foreground" data-testid="active-model-name">{localModelName ?? product.name}</p>
+            {local ? (
+              <p className="text-xs text-muted-foreground">{t("editor.viewport.localModelUnits")}</p>
+            ) : (
+              <p className="text-xs text-muted-foreground font-mono">{product.item_code}</p>
+            )}
           </div>
-          {product.size_variants.length > 0 && (
+          {!local && product.size_variants.length > 0 && (
             <RadioGroup value={sizeVariantId ?? undefined} onValueChange={onSizeVariantChange} className="space-y-2 pt-1">
               {product.size_variants.map((v) => (
                 <div key={v.id} className="flex items-center gap-2" data-testid="size-variant" data-variant-id={v.id}>
@@ -115,7 +129,24 @@ export function EditorPanel({
           )}
         </PanelGroup>
 
-        {product.is_metal ? (
+        {local && (
+          <div className="flex border border-border" role="group" aria-label={t("editor.appearance.label")} data-testid="local-model-appearance">
+            {(["finish", "colour"] as const).map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                data-testid={`local-model-${mode}`}
+                aria-pressed={appearanceMode === mode}
+                onClick={() => onAppearanceModeChange?.(mode)}
+                className={`flex-1 px-3 py-2 text-xs ${appearanceMode === mode ? "bg-foreground text-background" : "text-foreground hover:bg-secondary"}`}
+              >
+                {t(`editor.panel.${mode}`)}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {isMetal ? (
           <PanelGroup group="finish" title={t("editor.panel.finish")}>
             {selectedFinish ? (
               <div className="flex gap-3">
@@ -163,11 +194,11 @@ export function EditorPanel({
             parts (6b R1) — in one dock with a height of its own, so what
             follows it is not what follows a 33-row list. */}
         <LayersDock
-          reference={product.model_branding_reference}
-          scaleFactor={product.model_scale_factor}
+          reference={local ? null : product.model_branding_reference}
+          scaleFactor={local ? 1 : product.model_scale_factor}
           process={processThresholds(selectedFinish?.process, language)}
           faceDiameterMm={faceDiameterMm}
-          markedGroupIndices={product.model_branding_group_indices ?? []}
+          markedGroupIndices={local ? [] : product.model_branding_group_indices ?? []}
         />
 
         {/* E2 U6: one panel for whatever is selected. Since U5 it is reached

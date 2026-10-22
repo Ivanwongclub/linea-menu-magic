@@ -1,4 +1,4 @@
-import { Suspense, useCallback, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
@@ -15,13 +15,14 @@ import { ViewportTools } from "./ViewportTools";
 import type { EditorColour } from "../hooks/useEditorProduct";
 import type { PickerFinish } from "../hooks/useFinishOptions";
 import { GL_SETTINGS } from "../lib/renderSettings";
-import type { PerspectiveCamera } from "three";
+import type { BufferGeometry, Group, Material, Mesh, PerspectiveCamera } from "three";
 import { centreOf, cornersOf, diagonalOf, fitDistance } from "../lib/framing";
 import { ProceduralStudio } from "./ProceduralStudio";
 import { CameraReport } from "./CameraReport";
 import { HandleProjector, HandlesOverlay, newHandleBridge, newHandleElements } from "./branding/Handles";
 import { selectHiddenGroups, selectSelectedLayerId, selectZones, useEditorStore } from "../store/useEditorStore";
-import { isModelFilename } from "../lib/modelFormat";
+import { modelFormatFromName } from "../lib/modelFormat";
+import { groupFromModelData } from "../lib/ModelFileLoader";
 import { useLogoSources } from "../hooks/useLogoAssets";
 import type { ProcessThresholds } from "../lib/manufacturing";
 import { usePublicFinishes } from "../hooks/usePublicFinishes";
@@ -59,6 +60,57 @@ function ViewportFallback() {
       <div className="w-16 h-16 bg-foreground/[0.06] border border-foreground/10 animate-pulse" />
     </div>
   );
+}
+
+/** Reject empty, non-finite or wholly degenerate meshes before replacing a usable model. */
+function validateLocalSurfaces(group: Group) {
+  let hasSurface = false;
+  group.traverse((child) => {
+    const mesh = child as Mesh;
+    if (!mesh.isMesh) return;
+    const positions = mesh.geometry.getAttribute("position");
+    if (!positions || positions.count === 0) return;
+    const index = mesh.geometry.getIndex();
+    const count = index?.count ?? positions.count;
+    if (positions.itemSize !== 3 || count % 3 !== 0) throw new Error("Invalid surface geometry");
+    for (let i = 0; i < positions.count; i++) {
+      if (!Number.isFinite(positions.getX(i)) || !Number.isFinite(positions.getY(i)) || !Number.isFinite(positions.getZ(i))) {
+        throw new Error("Invalid surface coordinates");
+      }
+    }
+    for (let i = 0; i < count; i += 3) {
+      const vertices = index ? [index.getX(i), index.getX(i + 1), index.getX(i + 2)] : [i, i + 1, i + 2];
+      if (vertices.some((vertex) => !Number.isInteger(vertex) || vertex < 0 || vertex >= positions.count)) {
+        throw new Error("Invalid surface indices");
+      }
+      if (hasSurface) {
+        if (!index) break;
+        continue;
+      }
+      const [a, b, c] = vertices;
+      const abX = positions.getX(b) - positions.getX(a);
+      const abY = positions.getY(b) - positions.getY(a);
+      const abZ = positions.getZ(b) - positions.getZ(a);
+      const acX = positions.getX(c) - positions.getX(a);
+      const acY = positions.getY(c) - positions.getY(a);
+      const acZ = positions.getZ(c) - positions.getZ(a);
+      hasSurface = abY * acZ - abZ * acY !== 0 || abZ * acX - abX * acZ !== 0 || abX * acY - abY * acX !== 0;
+    }
+  });
+  if (!hasSurface) throw new Error("Model has no surface faces");
+}
+
+function disposeLocalValidation(group: Group) {
+  const geometries = new Set<BufferGeometry>();
+  const materials = new Set<Material>();
+  group.traverse((child) => {
+    const mesh = child as Mesh;
+    if (!mesh.isMesh) return;
+    geometries.add(mesh.geometry);
+    for (const material of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) materials.add(material);
+  });
+  geometries.forEach((geometry) => geometry.dispose());
+  materials.forEach((material) => material.dispose());
 }
 
 /** Never a demo mesh — a product with no uploaded model gets an empty state (v3-review §10). */
@@ -136,12 +188,22 @@ export function EditorViewport({
   markedGroupIndices,
   process,
 }: EditorViewportProps) {
+  const localModel = useEditorStore((s) => s.localModel);
+  const setLocalModel = useEditorStore((s) => s.setLocalModel);
+  const hydratedFor = useEditorStore((s) => s.hydratedFor);
+  const catalogUrl = modelStoragePath ? supabase.storage.from("product-models").getPublicUrl(modelStoragePath).data.publicUrl : null;
+  const url = localModel?.url ?? catalogUrl;
+  const [reportedUrl, setReportedUrl] = useState(url);
   const controlsRef = useRef<OrbitControlsImpl>(null);
   const [autoRotate, setAutoRotate] = useState(true);
   const [rulerMeasurements, setRulerMeasurements] = useState<RulerMeasurements | null>(null);
   const [textReport, setTextReport] = useState<TextSceneReport | null>(null);
   const rulerLabels = useRef(newRulerLabelElements());
   const [faceZ, setFaceZ] = useState<number | null>(null);
+  const [importing, setImporting] = useState(false);
+  const importSequence = useRef(0);
+  const importContext = useRef({ productId, hydratedFor });
+  importContext.current = { productId, hydratedFor };
 
   const [meshCount, setMeshCount] = useState<{ drawn: number; total: number } | null>(null);
   const onMeshCount = useCallback((drawn: number, total: number) => setMeshCount({ drawn, total }), []);
@@ -199,20 +261,61 @@ export function EditorViewport({
   // direction the buyer turned to and solves the distance again, so a model
   // orbited and zoomed into comes back to frame without losing the angle.
   const onResetView = useCallback(() => controlsRef.current?.reset(), []);
-  const localModel = useEditorStore((s) => s.localModel);
-  const setLocalModel = useEditorStore((s) => s.setLocalModel);
+  const invalidateLocalImport = useCallback(() => { importSequence.current++; }, []);
+
+  useEffect(() => {
+    invalidateLocalImport();
+    setImporting(false);
+    return invalidateLocalImport;
+  }, [productId, hydratedFor, invalidateLocalImport]);
+
+  // A URL's cleanup runs before the next model reports its layout measurements.
+  useLayoutEffect(() => () => {
+    setPartsReport(null);
+    setModelSizeMm(null);
+    useEditorStore.getState().setModelFrame(null);
+  }, [url, setPartsReport, setModelSizeMm]);
 
   const openLocalFile = useCallback(
-    (file: File | null) => {
+    async (file: File | null) => {
       if (!file) return;
-      if (!isModelFilename(file.name)) {
+      const sequence = ++importSequence.current;
+      const context = { productId, hydratedFor };
+      const isCurrent = () =>
+        sequence === importSequence.current &&
+        importContext.current.productId === context.productId &&
+        importContext.current.hydratedFor === context.hydratedFor &&
+        useEditorStore.getState().hydratedFor === context.hydratedFor;
+      const format = modelFormatFromName(file.name);
+      if (!format) {
+        setImporting(false);
         toast.error(t("editor.viewport.badModelFile"));
         return;
       }
-      setLocalModel({ url: URL.createObjectURL(file), name: file.name });
+      setImporting(true);
+      let parsed: Group | null = null;
+      try {
+        const data = format === "stl" ? await file.arrayBuffer() : await file.text();
+        if (!isCurrent()) return;
+        parsed = groupFromModelData(data, format);
+        validateLocalSurfaces(parsed);
+        if (!isCurrent()) return;
+        setLocalModel({ url: URL.createObjectURL(file), name: file.name });
+      } catch {
+        if (isCurrent()) toast.error(t("editor.viewport.invalidModelFile"));
+      } finally {
+        if (parsed) disposeLocalValidation(parsed);
+        if (isCurrent()) setImporting(false);
+      }
     },
-    [setLocalModel, t],
+    [productId, hydratedFor, setLocalModel, t],
   );
+
+  const clearLocalModel = useCallback(() => {
+    invalidateLocalImport();
+    setImporting(false);
+    setLocalModel(null);
+  }, [invalidateLocalImport, setLocalModel]);
 
   const onZoomToFit = useCallback(() => {
     const controls = controlsRef.current;
@@ -229,6 +332,19 @@ export function EditorViewport({
     controls.update();
   }, [partsReport]);
 
+  // Reset local readbacks before committing a different model. A passive effect
+  // here could erase the new child's layout reports after they have arrived.
+  if (reportedUrl !== url) {
+    setReportedUrl(url);
+    setRulerMeasurements(null);
+    setTextReport(null);
+    setMeshCount(null);
+    setFaceZ(null);
+    setOcclusionState("idle");
+    setBakeStats(null);
+    setAutoRotate(true);
+  }
+
   if (!localModel && !modelStoragePath) {
     return <EmptyModelState />;
   }
@@ -237,8 +353,6 @@ export function EditorViewport({
     return <AwaitingSetupState productId={productId} isCatalogueEditor={isCatalogueEditor} />;
   }
 
-  const catalogUrl = modelStoragePath ? supabase.storage.from("product-models").getPublicUrl(modelStoragePath).data.publicUrl : null;
-  const url = localModel?.url ?? catalogUrl;
   if (!url) {
     return <EmptyModelState />;
   }
@@ -252,10 +366,12 @@ export function EditorViewport({
     <div
       className="relative flex-1 min-h-0 overflow-hidden bg-secondary"
       data-testid="editor-viewport"
+      aria-busy={importing}
+      data-model-importing={importing || undefined}
       onDragOver={(e) => e.preventDefault()}
       onDrop={(e) => {
         e.preventDefault();
-        openLocalFile(e.dataTransfer.files?.[0] ?? null);
+        void openLocalFile(e.dataTransfer.files?.[0] ?? null);
       }}
       data-model-size-mm={modelSizeMm != null ? modelSizeMm.toFixed(2) : undefined}
       // Scene read-backs for the text scenarios: the rendered glyphs and the no-mirroring check.
@@ -307,6 +423,7 @@ export function EditorViewport({
           <ProceduralStudio />
           <CameraReport />
           <EditorModel
+            key={url}
             url={url}
             sourceName={sourceName}
             scaleFactor={drawnScaleFactor}
@@ -358,6 +475,11 @@ export function EditorViewport({
           />
         </Canvas>
       </Suspense>
+      {importing && (
+        <div className="pointer-events-none absolute inset-0 z-20" data-testid="local-model-importing">
+          <ViewportFallback />
+        </div>
+      )}
       {!calibration && faceZ != null && selectedLayer && (
         <HandlesOverlay key={selectedLayer.id} layer={selectedLayer} bridge={handleBridge} elements={handleElements} />
       )}
@@ -367,7 +489,7 @@ export function EditorViewport({
       {localModel && (
         <div className="absolute top-3 left-3 z-10 flex items-center gap-2 border border-border bg-background/90 px-2.5 py-1.5 text-xs text-foreground" data-testid="local-model-banner">
           <span>{t("editor.viewport.localFileBanner", { name: localModel.name })}</span>
-          <button type="button" className="underline underline-offset-2" onClick={() => setLocalModel(null)}>
+          <button type="button" className="underline underline-offset-2" onClick={clearLocalModel}>
             {t("editor.viewport.localFileClear")}
           </button>
         </div>

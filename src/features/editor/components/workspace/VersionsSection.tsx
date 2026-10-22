@@ -61,13 +61,21 @@ export function VersionsSection({ designId, product, finish, sizeVariant, colour
   };
 
   const onReload = async (version: DesignVersionRow) => {
+    const { hydratedFor, localModel } = useEditorStore.getState();
+    const localModelUrl = localModel?.url;
+    const isCurrentContext = () => {
+      const current = useEditorStore.getState();
+      return current.hydratedFor === hydratedFor && current.localModel?.url === localModelUrl;
+    };
     setError(null);
     setReloadingId(version.id);
     try {
-      loadRecipe(await fetchVersionRecipe(version.id));
+      const versionRecipe = await fetchVersionRecipe(version.id);
+      if (!isCurrentContext()) return;
+      loadRecipe(versionRecipe);
       setLoadedId(version.id);
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      if (isCurrentContext()) setError(e instanceof Error ? e.message : String(e));
     } finally {
       setReloadingId(null);
     }

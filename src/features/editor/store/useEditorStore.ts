@@ -1,9 +1,9 @@
 import { create } from "zustand";
-import { applyLayerPatch, emptyRecipe, scaleLayers, type DraftRecipe, type Layer, type LayerPatch, type Zone } from "../lib/recipe";
+import { applyLayerPatch, emptyRecipe, scaleLayers, type DraftRecipe, type Layer, type LayerPatch, type Zone } from "../lib/recipe.ts";
 import type { FaceTransform } from "../lib/recoveredPlacement";
 import type { PendingLogo } from "../hooks/useLogoAssets";
 import type { PartsReport } from "../components/EditorModel";
-import { applyDiscrete, canRedo, canUndo, commitHistory, redoHistory, startHistory, undoHistory, type History } from "../lib/recipeHistory";
+import { applyDiscrete, canRedo, canUndo, commitHistory, redoHistory, startHistory, undoHistory, type History } from "../lib/recipeHistory.ts";
 
 /**
  * Where the loaded model sits (4j): the raw → face transform `EditorModel`
@@ -27,6 +27,19 @@ export type SelectionKind = "layer" | "zone" | "part";
 export interface Selection {
   kind: SelectionKind;
   id: string;
+}
+
+/** A temporary file and its preview controls, independent of the catalogue product. */
+export interface LocalModel {
+  url: string;
+  name: string;
+  appearanceMode: "finish" | "colour";
+}
+
+interface CatalogueSnapshot extends History {
+  selection: Selection | null;
+  pendingLogos: Record<string, PendingLogo>;
+  flushSeq: number;
 }
 
 /**
@@ -75,7 +88,9 @@ interface EditorState {
    */
   pendingLogos: Record<string, PendingLogo>;
   /** Session-only OBJ/STL opened from disk — not saved to the product. */
-  localModel: { url: string; name: string } | null;
+  localModel: LocalModel | null;
+  /** Held only while a local file is open; never part of a saved recipe. */
+  localCatalogueSnapshot: CatalogueSnapshot | null;
   initialize: (recipe: DraftRecipe, hydratedFor: string) => void;
   /**
    * Phase 7: a saved version becomes the working draft. Unlike `initialize`
@@ -117,11 +132,23 @@ interface EditorState {
   removeZone: (id: string) => void;
   /** Replaces the pending files wholesale — used when a draft is read back. */
   setPendingLogos: (logos: Record<string, PendingLogo>) => void;
-  setLocalModel: (file: { url: string; name: string } | null) => void;
+  setLocalModel: (file: Pick<LocalModel, "url" | "name"> | null) => void;
+  setLocalAppearanceMode: (mode: LocalModel["appearanceMode"]) => void;
 }
 
 const history = (s: EditorState): History => ({ recipe: s.recipe, past: s.past, future: s.future, checkpoint: s.checkpoint });
 const discrete = (s: EditorState, next: (recipe: DraftRecipe) => DraftRecipe) => applyDiscrete(history(s), next);
+const syncLocalAppearance = (s: EditorState, recipe: DraftRecipe) =>
+  s.localModel ? { localModel: { ...s.localModel, appearanceMode: recipe.view.local_appearance_mode ?? "finish" } } : {};
+const resetModelState = {
+  modelFrame: null,
+  modelSizeMm: null,
+  partsReport: null,
+  selection: null,
+  paintZoneId: null,
+  dragging: false,
+  flushSeq: 0,
+};
 /**
  * Keeps the selection only if the restored recipe still holds it. A part is
  * the model's, not the recipe's, so an undo never deselects one.
@@ -151,15 +178,15 @@ export const useEditorStore = create<EditorState>((set) => ({
   brushRadiusMm: 1,
   pendingLogos: {},
   localModel: null,
+  localCatalogueSnapshot: null,
   initialize: (recipe, hydratedFor) =>
     set((s) => {
       if (s.localModel?.url) URL.revokeObjectURL(s.localModel.url);
       return {
         ...startHistory(recipe),
-        dragging: false,
-        selection: null,
-        modelSizeMm: null,
+        ...resetModelState,
         localModel: null,
+        localCatalogueSnapshot: null,
         hydratedFor,
         // Files an anonymous draft is still holding belong to the layers it is
         // being initialised with; anything else is from a previous product.
@@ -168,11 +195,25 @@ export const useEditorStore = create<EditorState>((set) => ({
     }),
   // The selection goes: a reloaded version's layers are not the ones that were
   // on screen, even where an id happens to survive.
-  loadRecipe: (recipe) => set((s) => ({ ...discrete(s, () => recipe), selection: null, paintZoneId: null })),
+  loadRecipe: (recipe) => set((s) => ({ ...discrete(s, () => recipe), ...syncLocalAppearance(s, recipe), selection: null, paintZoneId: null })),
   setSizeVariantId: (id, ratio = 1) =>
     set((s) => discrete(s, (r) => ({ ...r, size_variant_id: id, layers: scaleLayers(r.layers, ratio) }))),
-  setFinishId: (id) => set((s) => discrete(s, (r) => (r.finish_id === id ? r : { ...r, finish_id: id }))),
-  setColourId: (id) => set((s) => discrete(s, (r) => (r.colour_id === id ? r : { ...r, colour_id: id }))),
+  setFinishId: (id) => set((s) => {
+    const next = discrete(s, (r) => r.finish_id === id && (!s.localModel || r.view.local_appearance_mode === "finish") ? r : {
+      ...r,
+      finish_id: id,
+      ...(s.localModel ? { view: { ...r.view, local_appearance_mode: "finish" as const } } : {}),
+    });
+    return { ...next, ...syncLocalAppearance(s, next.recipe) };
+  }),
+  setColourId: (id) => set((s) => {
+    const next = discrete(s, (r) => r.colour_id === id && (!s.localModel || r.view.local_appearance_mode === "colour") ? r : {
+      ...r,
+      colour_id: id,
+      ...(s.localModel ? { view: { ...r.view, local_appearance_mode: "colour" as const } } : {}),
+    });
+    return { ...next, ...syncLocalAppearance(s, next.recipe) };
+  }),
   setRuler: (ruler) => set((s) => discrete(s, (r) => ({ ...r, view: { ...r.view, ruler } }))),
   setOriginalLettering: (visible) => set((s) => discrete(s, (r) => ({ ...r, view: { ...r.view, original_lettering: visible } }))),
   addLayer: (layer, pendingLogo) =>
@@ -205,12 +246,12 @@ export const useEditorStore = create<EditorState>((set) => ({
   undo: () =>
     set((s) => {
       const h = undoHistory(history(s));
-      return { ...h, selection: keepSelection(s, h.recipe) };
+      return { ...h, ...syncLocalAppearance(s, h.recipe), selection: keepSelection(s, h.recipe) };
     }),
   redo: () =>
     set((s) => {
       const h = redoHistory(history(s));
-      return { ...h, selection: keepSelection(s, h.recipe) };
+      return { ...h, ...syncLocalAppearance(s, h.recipe), selection: keepSelection(s, h.recipe) };
     }),
   setHiddenGroups: (indices) =>
     set((s) => discrete(s, (r) => ({ ...r, hidden_groups: [...new Set(indices)].sort((a, b) => a - b) }))),
@@ -246,7 +287,40 @@ export const useEditorStore = create<EditorState>((set) => ({
   setLocalModel: (localModel) =>
     set((s) => {
       if (s.localModel?.url && s.localModel.url !== localModel?.url) URL.revokeObjectURL(s.localModel.url);
-      return { localModel };
+      if (!localModel) {
+        return {
+          ...resetModelState,
+          // Restore the catalogue's selection, not a part/layer selected in
+          // the temporary file. Its full undo/redo history comes back too.
+          ...(s.localCatalogueSnapshot ?? {}),
+          localModel: null,
+          localCatalogueSnapshot: null,
+        };
+      }
+      const localCatalogueSnapshot = s.localCatalogueSnapshot ?? {
+        ...history(s),
+        selection: s.selection,
+        pendingLogos: s.pendingLogos,
+        flushSeq: s.flushSeq,
+      };
+      const recipe = emptyRecipe();
+      recipe.view.ruler = s.recipe.view.ruler;
+      return {
+        ...startHistory(recipe),
+        ...resetModelState,
+        pendingLogos: {},
+        localModel: { ...localModel, appearanceMode: "finish" },
+        localCatalogueSnapshot,
+      };
+    }),
+  setLocalAppearanceMode: (appearanceMode) =>
+    set((s) => {
+      if (!s.localModel) return s;
+      const next = discrete(s, (r) => (r.view.local_appearance_mode ?? "finish") === appearanceMode ? r : {
+        ...r,
+        view: { ...r.view, local_appearance_mode: appearanceMode },
+      });
+      return { ...next, ...syncLocalAppearance(s, next.recipe) };
     }),
 }));
 

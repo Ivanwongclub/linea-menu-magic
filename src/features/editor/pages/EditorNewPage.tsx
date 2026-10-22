@@ -7,7 +7,7 @@ import { processThresholds } from "../lib/manufacturing";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
 import { useEditorProductBySlug, variantRatio, type EditorProduct } from "../hooks/useEditorProduct";
-import { useFinishOptions, type PickerFinish } from "../hooks/useFinishOptions";
+import { useEditorAppearance } from "../hooks/useEditorAppearance";
 import { useDesignerStaffStatus } from "../hooks/useDesignerStaffStatus";
 import { useCatalogueEditorStatus } from "@/features/admin/hooks/useCatalogueEditorStatus";
 import { useEditorStore } from "../store/useEditorStore";
@@ -75,18 +75,19 @@ export function EditorNewPage({ productSlug }: { productSlug: string | null }) {
   const { isStaff, loading: staffLoading } = useDesignerStaffStatus();
   const { isEditor: isCatalogueEditor } = useCatalogueEditorStatus();
   const { data: product, isLoading, error } = useEditorProductBySlug(productSlug);
-  const { data: finishOptions = [] } = useFinishOptions(product?.id ?? null, product?.is_metal ?? false);
+  const { finishOptions, selectedFinish, colours, selectedColour, isMetal, localModel, appearanceMode, setAppearanceMode, onSelectFinish, onSelectColour } = useEditorAppearance(product);
 
   const recipe = useEditorStore((s) => s.recipe);
   const hydratedFor = useEditorStore((s) => s.hydratedFor);
-  const { size_variant_id: sizeVariantId, finish_id: finishId, colour_id: colourId } = recipe;
+  const { size_variant_id: sizeVariantId } = recipe;
   const ruler = recipe.view.ruler;
   const setSizeVariantId = useEditorStore((s) => s.setSizeVariantId);
-  const setColourId = useEditorStore((s) => s.setColourId);
-  const setFinishId = useEditorStore((s) => s.setFinishId);
   const setRuler = useEditorStore((s) => s.setRuler);
   const initialize = useEditorStore((s) => s.initialize);
   const pendingLogos = useEditorStore((s) => s.pendingLogos);
+  const catalogueSnapshot = useEditorStore((s) => s.localCatalogueSnapshot);
+  const catalogueRecipe = catalogueSnapshot?.recipe ?? recipe;
+  const catalogueLogos = catalogueSnapshot?.pendingLogos ?? pendingLogos;
   const setPendingLogos = useEditorStore((s) => s.setPendingLogos);
 
   const initializedFor = useRef<string | null>(null);
@@ -103,11 +104,11 @@ export function EditorNewPage({ productSlug }: { productSlug: string | null }) {
   // Only once the store holds this product's recipe — never a previous page's.
   useEffect(() => {
     if (session || !product || hydratedFor !== `new:${product.slug}`) return;
-    writeAnonymousDraft({ productSlug: product.slug, recipe, logos: pendingLogos });
-  }, [session, product, hydratedFor, recipe, pendingLogos]);
+    writeAnonymousDraft({ productSlug: product.slug, recipe: catalogueRecipe, logos: catalogueLogos });
+  }, [session, product, hydratedFor, catalogueRecipe, catalogueLogos]);
 
   useEffect(() => {
-    if (!session || !user || !product || authLoading || staffLoading || createStarted.current) return;
+    if (!session || !user || !product || localModel || authLoading || staffLoading || createStarted.current) return;
     // Buyer refusal (E1 collision 6): an unconfirmed model never gets a
     // `designs` row — signed-in visits to /new see the same awaiting-setup
     // copy as anonymous, not a created-then-orphaned design.
@@ -158,7 +159,7 @@ export function EditorNewPage({ productSlug }: { productSlug: string | null }) {
       navigate(`/designer-studio/editor/${data.id}`, { replace: true });
     };
     void claim();
-  }, [session, user, product, authLoading, staffLoading, isStaff, primaryBrand, navigate, setPendingLogos]);
+  }, [session, user, product, localModel, authLoading, staffLoading, isStaff, primaryBrand, navigate, setPendingLogos]);
 
   if (!productSlug) {
     return (
@@ -197,14 +198,11 @@ export function EditorNewPage({ productSlug }: { productSlug: string | null }) {
   // Signed-in visits to /new create a design and move on, but only once the
   // model's scale is confirmed — an unconfirmed product falls through to the
   // same awaiting-setup viewport an anonymous visitor sees (E1 collision 6).
-  if (session && product.model_scale_status === "confirmed") {
+  if (session && !localModel && product.model_scale_status === "confirmed") {
     return <LoadingShell />;
   }
 
   const selectedSize = product.size_variants.find((v) => v.id === sizeVariantId) ?? product.size_variants[0] ?? null;
-  const selectedFinish: PickerFinish | null =
-    finishOptions.find((f) => f.id === finishId) ?? finishOptions.find((f) => f.id === product.default_finish_id) ?? finishOptions[0] ?? null;
-  const selectedColour = product.colours.find((c) => c.id === colourId) ?? product.colours[0] ?? null;
   const referenceVariant = product.size_variants.find((v) => v.id === product.model_scale_reference_variant_id) ?? null;
   const referenceMm = referenceVariant?.size_primary_mm ?? selectedSize?.size_primary_mm ?? 1;
   const variantScale = selectedSize && referenceMm > 0 ? selectedSize.size_primary_mm / referenceMm : 1;
@@ -218,10 +216,10 @@ export function EditorNewPage({ productSlug }: { productSlug: string | null }) {
           scaleStatus={product.model_scale_status}
           scaleFactor={product.model_scale_factor}
           variantScale={variantScale}
-          sizePrimaryMm={selectedSize?.size_primary_mm ?? 0}
-          sizeLigne={selectedSize?.size_ligne ?? null}
-          sizeLabel={selectedSize?.size_label ?? null}
-          isMetal={product.is_metal}
+          sizePrimaryMm={localModel ? 0 : selectedSize?.size_primary_mm ?? 0}
+          sizeLigne={localModel ? null : selectedSize?.size_ligne ?? null}
+          sizeLabel={localModel ? null : selectedSize?.size_label ?? null}
+          isMetal={isMetal}
           finish={selectedFinish}
           colour={selectedColour}
           productId={product.id}
@@ -239,14 +237,17 @@ export function EditorNewPage({ productSlug }: { productSlug: string | null }) {
       panel={
         <EditorPanel
           product={product}
+          localModelName={localModel?.name}
+          appearanceMode={appearanceMode}
+          onAppearanceModeChange={setAppearanceMode}
           sizeVariantId={sizeVariantId}
           onSizeVariantChange={(id) => setSizeVariantId(id, variantRatio(product, sizeVariantId, id))}
           finishOptions={finishOptions}
           selectedFinish={selectedFinish}
-          onSelectFinish={(f) => setFinishId(f.id)}
-          colours={product.colours}
+          onSelectFinish={onSelectFinish}
+          colours={colours}
           selectedColour={selectedColour}
-          onSelectColour={(c) => setColourId(c.id)}
+          onSelectColour={onSelectColour}
         />
       }
     />

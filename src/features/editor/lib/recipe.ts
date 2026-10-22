@@ -188,7 +188,7 @@ export interface DraftRecipe {
   size_variant_id: string | null;
   finish_id: string | null;
   colour_id: string | null;
-  view: { ruler: boolean; original_lettering?: boolean };
+  view: { ruler: boolean; original_lettering?: boolean; /** Temporary imports only; never written to catalogue drafts. */ local_appearance_mode?: "finish" | "colour" };
   layers: Layer[];
   /** Phase 6b R1: OBJ groups the buyer has hidden; hiding never deletes geometry. */
   hidden_groups?: number[];
