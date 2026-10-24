@@ -42,6 +42,7 @@ interface UseProductsResult {
   loading: boolean;
   error: string | null;
   totalCount: number;
+  isPlaceholderData: boolean;
 }
 
 interface QueryPayload {
@@ -249,6 +250,10 @@ async function resolveProductSetByDimension(scope: FilterScope): Promise<Set<str
 }
 
 async function fetchProducts(filters: ProductFilters): Promise<QueryPayload> {
+  if (filters.ids && filters.ids.length === 0) {
+    return { products: [], totalCount: 0 };
+  }
+
   const brandScoped = filters.visibility === 'brand';
 
   const filterScopes: FilterScope[] = [
@@ -319,7 +324,16 @@ async function fetchProducts(filters: ProductFilters): Promise<QueryPayload> {
   }
 
   const intersectedIds = sets.length > 0 ? intersectSets(sets) : null;
-  if (intersectedIds && intersectedIds.length === 0) {
+  let idScope = intersectedIds;
+  if (filters.ids && filters.ids.length > 0) {
+    if (idScope) {
+      const allow = new Set(filters.ids);
+      idScope = idScope.filter((id) => allow.has(id));
+    } else {
+      idScope = filters.ids;
+    }
+  }
+  if (idScope && idScope.length === 0) {
     return { products: [], totalCount: 0 };
   }
 
@@ -353,8 +367,8 @@ async function fetchProducts(filters: ProductFilters): Promise<QueryPayload> {
     query = query.eq('is_public', true);
   }
 
-  if (intersectedIds && intersectedIds.length > 0) {
-    query = query.in('id', intersectedIds);
+  if (idScope && idScope.length > 0) {
+    query = query.in('id', idScope);
   }
 
   if (filters.search) {
@@ -376,6 +390,18 @@ async function fetchProducts(filters: ProductFilters): Promise<QueryPayload> {
       break;
     case 'name_desc':
       query = query.order('name', { ascending: false });
+      break;
+    case 'item_code_asc':
+      query = query.order('item_code', { ascending: true });
+      break;
+    case 'item_code_desc':
+      query = query.order('item_code', { ascending: false });
+      break;
+    case 'created_at_asc':
+      query = query.order('created_at', { ascending: true });
+      break;
+    case 'created_at_desc':
+      query = query.order('created_at', { ascending: false });
       break;
     default:
       query = query.order('sort_order', { ascending: true });
@@ -410,7 +436,10 @@ async function fetchProducts(filters: ProductFilters): Promise<QueryPayload> {
   };
 }
 
-export function useProducts(filters: ProductFilters): UseProductsResult {
+export function useProducts(
+  filters: ProductFilters,
+  options?: { enabled?: boolean },
+): UseProductsResult {
   const { loading: taxonomyLoading, error: taxonomyError, categorySlugsForFamily, categorySlugsForSegment } =
     useCatalogueTaxonomy();
   const family = filters.family || undefined;
@@ -439,6 +468,9 @@ export function useProducts(filters: ProductFilters): UseProductsResult {
       certifications: normalizeList(filters.certifications),
       tags: normalizeList(filters.tags),
       finishIds: normalizeList(filters.finishIds),
+      ids: Array.isArray(filters.ids)
+        ? [...new Set(filters.ids.map((id) => id.trim()).filter(Boolean))].sort()
+        : undefined,
       page:
         typeof filters.page === 'number' && Number.isFinite(filters.page)
           ? Math.max(1, Math.trunc(filters.page))
@@ -457,6 +489,7 @@ export function useProducts(filters: ProductFilters): UseProductsResult {
       filters.certifications?.join(','),
       filters.tags?.join(','),
       filters.finishIds?.join(','),
+      Array.isArray(filters.ids) ? [...filters.ids].sort().join(',') : '',
       filters.is_customizable,
       filters.sort,
       filters.page,
@@ -465,17 +498,19 @@ export function useProducts(filters: ProductFilters): UseProductsResult {
   );
 
   const ready = !needsTaxonomy || !taxonomyLoading;
+  const enabled = ready && (options?.enabled ?? true);
   const query = useQuery<QueryPayload, Error>({
     queryKey: ['products', normalizedFilters],
     queryFn: () => fetchProducts(normalizedFilters),
     placeholderData: (previous) => previous,
-    enabled: ready,
+    enabled,
   });
 
   return {
     products: query.data?.products ?? [],
-    loading: query.isLoading || !ready,
+    loading: (query.isLoading || !ready) && (options?.enabled ?? true),
     error: query.error?.message ?? taxonomyError,
     totalCount: query.data?.totalCount ?? 0,
+    isPlaceholderData: query.isPlaceholderData,
   };
 }

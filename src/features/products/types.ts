@@ -238,9 +238,11 @@ export type ProductFilters = {
   /** Resolved by useProductFinishFacets: products with ANY of these finishes. */
   finishIds?: string[];
   is_customizable?: boolean;
-  sort?: 'name_asc' | 'name_desc';
+  sort?: 'name_asc' | 'name_desc' | 'item_code_asc' | 'item_code_desc' | 'created_at_asc' | 'created_at_desc';
   featured?: string;
   collection?: string;
+  /** Restrict the result to these product ids. An empty array matches nothing. */
+  ids?: string[];
   page?: number;
   pageSize?: number;
 };

@@ -30,7 +30,7 @@ import {
 import { useUserLibrary } from "@/features/products/hooks/useUserLibrary";
 import { useProductTaxonomy } from "@/features/products/hooks/useProductTaxonomy";
 import { useProducts } from "@/features/products/hooks/useProducts";
-import type { UserLibraryItem, Product } from "@/features/products/types";
+import type { UserLibraryItem, ProductFilters } from "@/features/products/types";
 import type { SortField } from "@/components/designer-studio/LibraryTable";
 import LibraryItemCard from "@/components/designer-studio/LibraryItemCard";
 import LibraryTable from "@/components/designer-studio/LibraryTable";
@@ -61,6 +61,48 @@ import { useAuth } from "@/features/auth/AuthProvider";
 import { useI18n } from "@/features/i18n/I18nProvider";
 
 type SortOrder = "asc" | "desc";
+
+const LIBRARY_PAGE_SIZE = 20;
+
+function compareLibraryItems(
+  a: UserLibraryItem,
+  b: UserLibraryItem,
+  sortField: SortField,
+  sortOrder: SortOrder,
+): number {
+  let comparison = 0;
+  const pa = a.product;
+  const pb = b.product;
+  switch (sortField) {
+    case "name":
+      comparison = (a.custom_name || pa?.name || "").localeCompare(b.custom_name || pb?.name || "");
+      break;
+    case "itemCode":
+      comparison = (pa?.item_code || "").localeCompare(pb?.item_code || "");
+      break;
+    case "category":
+      comparison = (pa?.primary_category?.name || "").localeCompare(pb?.primary_category?.name || "");
+      break;
+    case "addedAt":
+      comparison = new Date(a.added_at).getTime() - new Date(b.added_at).getTime();
+      break;
+  }
+  return sortOrder === "asc" ? comparison : -comparison;
+}
+
+function catalogServerSort(sortField: SortField, sortOrder: SortOrder): ProductFilters["sort"] {
+  const descending = sortOrder === "desc";
+  switch (sortField) {
+    case "name":
+      return descending ? "name_desc" : "name_asc";
+    case "itemCode":
+      return descending ? "item_code_desc" : "item_code_asc";
+    case "addedAt":
+      return descending ? "created_at_desc" : "created_at_asc";
+    default:
+      return descending ? "created_at_desc" : "created_at_asc";
+  }
+}
 
 // rfq tab quarantined (P14)
 const validTabs = ['library', 'brochures', 'products', 'composer'] as const;
@@ -115,6 +157,8 @@ const DesignerStudioWorkspace = () => {
   const libraryViewMode: 'grid' | 'list' = searchParams.get('mode') === 'list' ? 'list' : 'grid';
   const showFavoritesOnly = searchParams.get('favs') === '1';
   const urlSearchQuery = searchParams.get('q') ?? '';
+  const pageFromUrl = Number.parseInt(searchParams.get('page') ?? '1', 10);
+  const currentPage = Number.isFinite(pageFromUrl) && pageFromUrl > 0 ? pageFromUrl : 1;
 
   // Search input is a local-controlled state for snappy typing; the URL gets
   // updated on a 300ms debounce so each keystroke doesn't add a router event.
@@ -134,15 +178,16 @@ const DesignerStudioWorkspace = () => {
     setSearchParams(params, { replace: true });
   };
 
-  const setLibrarySource = (v: 'all' | 'my') => updateFilter({ view: v === 'my' ? 'saved' : null });
-  const setCategoryFilter = (v: string) => updateFilter({ cat: v === 'all' ? null : v });
+  const setLibrarySource = (v: 'all' | 'my') => updateFilter({ view: v === 'my' ? 'saved' : null, page: null });
+  const setCategoryFilter = (v: string) => updateFilter({ cat: v === 'all' ? null : v, page: null });
   const setLibraryViewMode = (v: 'grid' | 'list') => updateFilter({ mode: v === 'list' ? 'list' : null });
-  const setShowFavoritesOnly = (next: boolean) => updateFilter({ favs: next ? '1' : null });
+  const setShowFavoritesOnly = (next: boolean) => updateFilter({ favs: next ? '1' : null, page: null });
+  const setPage = (page: number) => updateFilter({ page: page <= 1 ? null : String(page) });
 
   // Debounce the search-query URL write so the address bar settles after typing.
   useEffect(() => {
     if (searchQuery === urlSearchQuery) return;
-    const id = window.setTimeout(() => updateFilter({ q: searchQuery || null }), 300);
+    const id = window.setTimeout(() => updateFilter({ q: searchQuery || null, page: null }), 300);
     return () => window.clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery]);
@@ -153,8 +198,43 @@ const DesignerStudioWorkspace = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlSearchQuery]);
 
-  // Full catalog data
-  const { products: catalogProducts, loading: catalogLoading } = useProducts({ visibility: 'brand' });
+  const favouriteProductIds = useMemo(
+    () => libraryItems.filter((item) => item.is_favourite).map((item) => item.product_id).sort(),
+    [libraryItems],
+  );
+  const catalogSearch = urlSearchQuery.trim() || undefined;
+  const catalogCategories = categoryFilter !== 'all' ? [categoryFilter] : undefined;
+  const catalogFavoritesPending = showFavoritesOnly && libraryLoading;
+  const catalogHasNoFavourites = showFavoritesOnly && !libraryLoading && favouriteProductIds.length === 0;
+  const catalogPageEnabled = librarySource === 'all' && !catalogFavoritesPending && !catalogHasNoFavourites;
+
+  // Brand catalogue is paged on the server. Saved library stays a client slice.
+  // The one-row query only exists so the tab keeps the full catalogue total.
+  const {
+    products: catalogProducts,
+    loading: catalogQueryLoading,
+    totalCount: catalogMatchCount,
+    isPlaceholderData: catalogIsPlaceholder,
+  } = useProducts(
+    {
+      visibility: 'brand',
+      search: catalogSearch,
+      categories: catalogCategories,
+      ids: showFavoritesOnly ? favouriteProductIds : undefined,
+      sort: catalogServerSort(sortField, sortOrder),
+      page: currentPage,
+      pageSize: LIBRARY_PAGE_SIZE,
+    },
+    { enabled: catalogPageEnabled },
+  );
+  const { totalCount: brandCatalogueCount } = useProducts({
+    visibility: 'brand',
+    page: 1,
+    pageSize: 1,
+  });
+  const catalogLoading = librarySource === 'all' && (
+    catalogFavoritesPending || (catalogPageEnabled && (catalogQueryLoading || catalogIsPlaceholder))
+  );
 
   // Quick-view modal (single detail surface — P13 W13)
   const [quickViewItem, setQuickViewItem] = useState<UserLibraryItem | null>(null);
@@ -201,20 +281,17 @@ const DesignerStudioWorkspace = () => {
     }));
   }, [catalogAsLibraryItems, libraryItems]);
 
-  // Choose source
-  const sourceItems = librarySource === 'all' ? mergedCatalogItems : libraryItems;
-
-  // Library filtering & sorting
-  const filteredLibraryItems = useMemo(() => {
-    const filtered = sourceItems.filter((item) => {
+  const savedLibraryItems = useMemo(() => {
+    const filtered = libraryItems.filter((item) => {
       const p = item.product;
       const name = item.custom_name || p?.name_en || p?.name || '';
       const code = p?.item_code || '';
+      const needle = searchQuery.toLowerCase();
 
       const matchesSearch =
         !searchQuery ||
-        name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        code.toLowerCase().includes(searchQuery.toLowerCase());
+        name.toLowerCase().includes(needle) ||
+        code.toLowerCase().includes(needle);
 
       const matchesCategory =
         categoryFilter === 'all' ||
@@ -226,27 +303,27 @@ const DesignerStudioWorkspace = () => {
       return matchesSearch && matchesCategory && matchesFavorites;
     });
 
-    return filtered.sort((a, b) => {
-      let comparison = 0;
-      const pa = a.product;
-      const pb = b.product;
-      switch (sortField) {
-        case 'name':
-          comparison = (a.custom_name || pa?.name || '').localeCompare(b.custom_name || pb?.name || '');
-          break;
-        case 'itemCode':
-          comparison = (pa?.item_code || '').localeCompare(pb?.item_code || '');
-          break;
-        case 'category':
-          comparison = (pa?.primary_category?.name || '').localeCompare(pb?.primary_category?.name || '');
-          break;
-        case 'addedAt':
-          comparison = new Date(a.added_at).getTime() - new Date(b.added_at).getTime();
-          break;
-      }
-      return sortOrder === 'asc' ? comparison : -comparison;
-    });
-  }, [sourceItems, searchQuery, categoryFilter, showFavoritesOnly, sortField, sortOrder]);
+    return filtered.sort((a, b) => compareLibraryItems(a, b, sortField, sortOrder));
+  }, [libraryItems, searchQuery, categoryFilter, showFavoritesOnly, sortField, sortOrder]);
+
+  const catalogPageItems = useMemo(
+    () => [...mergedCatalogItems].sort((a, b) => compareLibraryItems(a, b, sortField, sortOrder)),
+    [mergedCatalogItems, sortField, sortOrder],
+  );
+
+  const filteredCount = librarySource === 'all'
+    ? (catalogHasNoFavourites ? 0 : catalogMatchCount)
+    : savedLibraryItems.length;
+  const totalPages = Math.max(1, Math.ceil(filteredCount / LIBRARY_PAGE_SIZE));
+  const pageItems = librarySource === 'all'
+    ? (catalogHasNoFavourites ? [] : catalogPageItems)
+    : savedLibraryItems.slice((currentPage - 1) * LIBRARY_PAGE_SIZE, currentPage * LIBRARY_PAGE_SIZE);
+
+  useEffect(() => {
+    if (catalogLoading || libraryLoading) return;
+    if (currentPage > totalPages) setPage(totalPages);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [catalogLoading, libraryLoading, currentPage, totalPages]);
 
   const favouriteCount = useMemo(() => libraryItems.filter(i => i.is_favourite).length, [libraryItems]);
 
@@ -258,7 +335,7 @@ const DesignerStudioWorkspace = () => {
   const clearAllFilters = () => {
     // Wipe cat/favs/q/view/mode but preserve tab=library (P17 T2.2).
     setSearchQuery("");
-    updateFilter({ cat: null, favs: null, q: null, view: null, mode: null });
+    updateFilter({ cat: null, favs: null, q: null, view: null, mode: null, page: null });
   };
 
   const handleSort = (field: SortField) => {
@@ -268,6 +345,7 @@ const DesignerStudioWorkspace = () => {
       setSortField(field);
       setSortOrder("asc");
     }
+    setPage(1);
   };
 
   const existingProductIds = useMemo(
@@ -403,7 +481,7 @@ const DesignerStudioWorkspace = () => {
                   <div>
                     <h2 className="text-lg font-semibold text-foreground">{t("workspace.library.title")}</h2>
                     <p className="text-xs text-muted-foreground">
-                      {t("workspace.library.summary", { count: filteredLibraryItems.length, brand: brandCatalogueName })}
+                      {t("workspace.library.summary", { count: filteredCount, brand: brandCatalogueName })}
                     </p>
                   </div>
                 </div>
@@ -425,7 +503,7 @@ const DesignerStudioWorkspace = () => {
                       : 'border-transparent text-muted-foreground hover:text-foreground'
                   }`}
                 >
-                  {t("workspace.library.brandCatalogue")} ({catalogProducts.length})
+                  {t("workspace.library.brandCatalogue")} ({brandCatalogueCount})
                 </button>
                 <button
                   onClick={() => setLibrarySource('my')}
@@ -525,7 +603,7 @@ const DesignerStudioWorkspace = () => {
 
               <div className="flex items-center justify-between mb-4">
                 <p className="text-xs text-muted-foreground">
-                  {t("workspace.library.items", { count: filteredLibraryItems.length })}
+                  {t("workspace.library.items", { count: filteredCount })}
                 </p>
               </div>
 
@@ -533,10 +611,10 @@ const DesignerStudioWorkspace = () => {
                 <div className="text-center py-16">
                   <p className="text-sm text-muted-foreground">{t("workspace.library.loading")}</p>
                 </div>
-              ) : filteredLibraryItems.length > 0 ? (
+              ) : pageItems.length > 0 ? (
                 libraryViewMode === "grid" ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
-                    {filteredLibraryItems.map((item) => (
+                    {pageItems.map((item) => (
                       <LibraryItemCard
                         key={item.id}
                         item={item}
@@ -547,7 +625,7 @@ const DesignerStudioWorkspace = () => {
                   </div>
                 ) : (
                   <LibraryTable
-                    items={filteredLibraryItems}
+                    items={pageItems}
                     onView={handleQuickView}
                     sortField={sortField}
                     sortOrder={sortOrder}
@@ -570,6 +648,30 @@ const DesignerStudioWorkspace = () => {
                   ) : (
                     <Button variant="ghost" size="sm" onClick={clearAllFilters}>{t("workspace.library.clearFilters")}</Button>
                   )}
+                </div>
+              )}
+
+              {!catalogLoading && !libraryLoading && filteredCount > LIBRARY_PAGE_SIZE && (
+                <div className="mt-8 flex items-center justify-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={currentPage <= 1}
+                    onClick={() => setPage(currentPage - 1)}
+                  >
+                    {t("workspace.library.prevPage")}
+                  </Button>
+                  <span className="text-xs text-muted-foreground min-w-[92px] text-center">
+                    {t("workspace.library.pageStatus", { page: currentPage, total: totalPages })}
+                  </span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={currentPage >= totalPages}
+                    onClick={() => setPage(currentPage + 1)}
+                  >
+                    {t("workspace.library.nextPage")}
+                  </Button>
                 </div>
               )}
             </div>
