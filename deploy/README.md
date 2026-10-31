@@ -146,6 +146,39 @@ docker compose --env-file deploy/compose.env exec -T db psql -X -U supabase_admi
 保存、重新載入、歷史版本、圖片和電子目錄。新 JWT key 會令舊 session 失效，
 用戶需要重新登入。來源雲端在驗收完成前保留，以便回退。
 
+## 本次公開目錄搬遷（2026-11-01）
+
+已把舊雲端當時可匿名讀取的目錄匯入現有 VPS，包含 60 個產品、45 個分類、
+20 個材質、35 個公開表面效果、30 筆產品圖片、23 個尺寸、3 份電子目錄及
+18 頁內容，以及可解析的標籤、認證和產品關聯。以唯一代碼對應既有 UUID，
+保留 VPS 原有資料；合併後產品總數為 108，表面效果總數為 135。
+
+51 個舊雲端 Storage 檔案已搬到 VPS；另從原始模型壓縮檔補上 12 個 MTL 和
+5 個貼圖，共 68 個物件，逐一下載並以 SHA-256 核對。12 個 MO 模型的 OBJ
+維持原始 bytes，材質檔放在其原有相對路徑，網站內的舊 Storage URL 已改指 VPS。
+已在正式網站逐一驗證 12 個 OBJ 的部件、面數與原始材質，並確認貼圖請求成功；
+3 個原始 STL 亦已通過本機匯入、改色和視角操作。STL 本身沒有材質或分層資料。
+
+這次範圍是**可讀的公開目錄**。舊帳號、私人設計及私人檔案仍需完整來源備份。
+118 筆可讀關聯因其私人產品無法讀取而暫緩；13 筆尺寸確認的來源帳號 ID
+暫存於私人報告，確認狀態、比例及參考尺寸保留，確認人欄位待帳號搬遷後恢復。
+
+匯入前已備份。完整匯出、ID 對應、暫緩清單、匯入 SQL 和核對結果位於本機
+`backups/public-migration/`（排除 Git／部署包）；服務器匯入前備份位於
+`/opt/linea3d/.deploy/backups/before-public-seed.dump`。本次使用單一交易 upsert，
+保留外鍵和唯一約束；一般 `make deploy` 不會重跑匯入。
+
+日後複製明確清單中的公開物件，可在服務器執行：
+
+```sh
+make public-assets ASSET_MANIFEST=.deploy/assets.json
+```
+
+清單格式為 `{"objects":[{"bucket":"product-models","path":"models/example.obj","url":"https://來源公開檔案網址"}]}`。
+也可用工作目錄內的 `localFile` 代替 `url`，並提供 `contentType`。此命令透過
+Storage API 寫入，核對 SHA-256，不覆蓋內容不同的既有檔案；結果寫入私人
+`.deploy/asset-copy-result.json`。它不會修改產品資料，亦不屬於日常重建流程。
+
 ## 功能與服務配置
 
 - 模型上傳可多選一個 OBJ、MTL 和貼圖，或選取整個模型資料夾；子目錄的相對

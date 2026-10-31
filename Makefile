@@ -9,13 +9,14 @@ PUBLIC_URL ?= http://54.179.199.234
 WEB_PORT ?= 80
 BACKUP_DIR ?=
 SMOKE_ARGS ?=
+ASSET_MANIFEST ?= .deploy/assets.json
 
 COMPOSE = docker compose --env-file deploy/compose.env
 SSH = ssh $(SSH_OPTIONS) -i "$(SSH_KEY)" "$(SERVER)"
 ARCHIVE := .deploy/linea3d-src.tar.gz
 NODE_IMAGE := node:22-bookworm-slim
 
-.PHONY: help package upload deploy setup build rebuild status logs smoke db-init db-restore
+.PHONY: help package upload deploy setup build rebuild status logs smoke public-assets db-init db-restore
 
 help:
 	@printf '%s\n' \
@@ -26,6 +27,7 @@ help:
 	  '         make status       Show container health' \
 	  '         make logs         Show recent service logs' \
 	  '         make smoke        Check the running website and APIs' \
+	  '         make public-assets ASSET_MANIFEST=.deploy/assets.json' \
 	  'New DB:  make setup PUBLIC_URL=http://HOST WEB_PORT=80' \
 	  '         make db-init      Initialize an EMPTY test database' \
 	  '         make db-restore BACKUP_DIR=/path/to/export'
@@ -83,6 +85,12 @@ smoke:
 	docker run --rm --network host --user "$$(id -u):$$(id -g)" \
 	  -v "$(CURDIR):/work:ro" -w /work $(NODE_IMAGE) \
 	  node deploy/scripts/smoke.mjs $(SMOKE_ARGS)
+
+# Explicit public Storage copy; not part of deploy/rebuild or DB initialization.
+public-assets:
+	docker run --rm --network host --user "$$(id -u):$$(id -g)" \
+	  -v "$(CURDIR):/work" -w /work $(NODE_IMAGE) \
+	  node deploy/scripts/copy-public-assets.mjs --manifest "$(ASSET_MANIFEST)" --url http://127.0.0.1
 
 # Explicit maintenance tasks; never called by deploy/rebuild.
 db-init:
