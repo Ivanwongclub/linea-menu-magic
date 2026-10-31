@@ -67,6 +67,16 @@ export function PartProperties({ index }: { index: number }) {
           </dd>
         </div>
       </dl>
+      {!!group.materials?.length && report?.hasSourceAppearance && (
+        <div className="space-y-1 text-xs" data-testid="part-source-materials">
+          {group.materials.map((material, position) => (
+            <div key={position} className="flex items-center gap-2">
+              <span className="h-3 w-3 shrink-0 border border-border" style={{ backgroundColor: material.colour, opacity: material.opacity }} />
+              <span className="truncate">{material.name || material.colour}{material.textured ? ` · ${t("editor.panel.texture")}` : ""}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       <button
         type="button"
@@ -82,7 +92,7 @@ export function PartProperties({ index }: { index: number }) {
         {t(visible ? "editor.parts.hideThis" : "editor.parts.showThis")}
       </button>
 
-      {localModel && (
+      {(localModel || report?.hasSourceAppearance) && (
         <div className="space-y-2 border-t border-border pt-2" data-testid="part-appearance" data-index={index}>
           <AppearanceControl
             ownerId={`part-${index}`}

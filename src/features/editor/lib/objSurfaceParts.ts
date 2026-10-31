@@ -1,5 +1,6 @@
 import { BufferAttribute, BufferGeometry, Group, Mesh, type Material } from "three";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
+import type { MTLLoader } from "three/examples/jsm/loaders/MTLLoader.js";
 
 // Rhino can append points/curves to the same unnamed object as its faces.
 // OBJLoader then changes the entire object's primitive type to Points/Lines.
@@ -95,9 +96,12 @@ export function splitFlatObjMaterialParts(root: Group, hasAuthoredGroups: boolea
 }
 
 /** One surface-only OBJ parse seam for editor, CMS groups, previews and bounds. */
-export function parseObjSurfaceParts(text: string): Group {
+export function parseObjSurfaceParts(text: string, materials?: MTLLoader.MaterialCreator): Group {
   const input = surfaceInput(text);
-  const root = new OBJLoader().parse(input);
+  const loader = new OBJLoader();
+  if (materials) loader.setMaterials(materials);
+  const root = loader.parse(input);
+  root.userData.hasSourceMaterials = !!materials && Object.keys(materials.materialsInfo).length > 0;
   if (!root.children.some((child) => (child as Mesh).isMesh && ((child as Mesh).geometry.getAttribute("position")?.count ?? 0) >= 3)) {
     throw new Error("OBJ has no surface faces; export the model as a polygon mesh.");
   }

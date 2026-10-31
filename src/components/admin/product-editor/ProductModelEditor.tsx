@@ -14,6 +14,7 @@ import { proposeScaleFactor } from "@/features/admin/lib/objBounds";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { ProductBrandingMarks } from "./ProductBrandingMarks";
 import { ProductModelPreviewSlot, preloadProductModelPreview } from "./ProductModelPreviewSlot";
+import { modelFilesFromDrop } from "@/features/editor/lib/modelImport";
 import type { BrandingReference } from "@/features/admin/lib/brandingRecovery";
 
 
@@ -41,6 +42,7 @@ export function ProductModelEditor({ productId, modelStoragePath }: { productId:
   const { upload, remove } = useProductModel(productId);
   const { scale, variants, confirmUnitScale, calibrateKnownDimension, calibrateTwoPoint, markUnconfirmed, measureExistingFile } = useProductModelScale(productId);
   const inputRef = useRef<HTMLInputElement>(null);
+  const folderRef = useRef<HTMLInputElement>(null);
   const busy = upload.isPending || remove.isPending;
 
   const [referenceVariantId, setReferenceVariantId] = useState<string | null>(null);
@@ -81,16 +83,18 @@ export function ProductModelEditor({ productId, modelStoragePath }: { productId:
 
   const onError = (error: unknown) => toast.error(describeSupabaseError(error as { message: string; code?: string }));
 
-  const handleFile = (file: File | null) => {
-    if (!file) return;
+  const handleFiles = (files: File[]) => {
+    const file = files.find((entry) => /\.(obj|stl)$/i.test(entry.name));
+    if (!files.length) return;
+    if (!file) { toast.error(t("editor.viewport.badModelFile")); return; }
     if (!/\.(obj|stl)$/i.test(file.name)) {
       toast.error(t("editor.viewport.badModelFile"));
       return;
     }
     upload.mutate(
-      { file, previousPath: modelStoragePath },
+      { file, files, previousPath: modelStoragePath },
       {
-        onSuccess: () => toast.success("3D model uploaded"),
+        onSuccess: (result) => { toast.success("3D model uploaded"); if (result.warnings.length) toast.warning(result.warnings.join(" · ")); },
         onError,
       },
     );
@@ -98,7 +102,7 @@ export function ProductModelEditor({ productId, modelStoragePath }: { productId:
 
   const onDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    handleFile(e.dataTransfer.files?.[0] ?? null);
+    void modelFilesFromDrop(e.dataTransfer).then(handleFiles).catch(onError);
   };
 
   const rawBounds = scale.data?.model_raw_bounds ?? null;
@@ -186,13 +190,20 @@ export function ProductModelEditor({ productId, modelStoragePath }: { productId:
         ref={inputRef}
         data-testid="model-input"
         type="file"
-        accept=".obj,.stl"
+        accept=".obj,.stl,.mtl,.png,.jpg,.jpeg,.webp,.gif,.bmp"
+        multiple
         className="hidden"
         onChange={(e) => {
-          handleFile(e.target.files?.[0] ?? null);
+          handleFiles(Array.from(e.target.files ?? []));
           e.target.value = "";
         }}
       />
+      <Button type="button" variant="outline" size="sm" disabled={busy} onClick={() => folderRef.current?.click()} data-testid="model-folder-upload">
+        {t("editor.viewport.openFolder")}
+      </Button>
+      <input ref={folderRef} type="file" multiple {...{ webkitdirectory: "" }} className="hidden" data-testid="model-folder-input" onChange={(e) => {
+        handleFiles(Array.from(e.target.files ?? [])); e.target.value = "";
+      }} />
 
       {modelStoragePath && rawBounds && (
         <div className="space-y-3 border border-border p-3" data-testid="model-scale-panel">

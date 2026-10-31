@@ -4,13 +4,33 @@
 import { afterEach, beforeEach, mock, test } from "node:test";
 import assert from "node:assert/strict";
 import { useEditorStore } from "../../../src/features/editor/store/useEditorStore.ts";
-import { emptyRecipe, newTextLayer, newZone } from "../../../src/features/editor/lib/recipe.ts";
+import { emptyRecipe, newTextLayer, newZone, normalizeRecipe } from "../../../src/features/editor/lib/recipe.ts";
 
 const state = () => useEditorStore.getState();
 const logo = (name) => ({ filename: `${name}.svg`, mimeType: "image/svg+xml", svg: `<svg id="${name}"/>` });
 const frame = { productKey: "catalogue.obj", transform: { quaternion: [0, 0, 0, 1], scale: 1, offset: [1, 2, 3] }, markedGlyphCentres: [[1, 2]] };
 const report = { groups: [{ index: 0, name: "Body", faces: 2, visible: true }], bounds: { minX: 0, maxX: 10, minY: 0, maxY: 10, minZ: 0, maxZ: 1 }, zoneFaces: [1], overlaps: [], totalFaces: 2 };
 let revoked;
+
+test('appearance choice survives stored-recipe normalization', () => {
+  for (const mode of ['source', 'finish', 'colour']) {
+    const recipe = emptyRecipe();
+    recipe.view.model_appearance_mode = mode;
+    assert.equal(normalizeRecipe(recipe).view.model_appearance_mode, mode);
+  }
+});
+
+test('source appearance can be overridden and undone, and companion URLs are released with the model', () => {
+  state().setLocalModel({url:'blob:source-obj',name:'source.obj',materialText:'newmtl Red\nKd 1 0 0',resourceUrls:['blob:source-texture'],hasSourceAppearance:true});
+  assert.equal(state().localModel.appearanceMode,'source');
+  state().setLocalAppearanceMode('colour');
+  assert.equal(state().localModel.appearanceMode,'colour');
+  state().undo();
+  assert.equal(state().localModel.appearanceMode,'source');
+  state().setLocalModel(null);
+  assert.ok(revoked.includes('blob:source-obj'));
+  assert.ok(revoked.includes('blob:source-texture'));
+});
 
 beforeEach(() => {
   state().initialize(emptyRecipe(), "test:empty");

@@ -4,6 +4,7 @@ import { Line, OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { ModelFileLoader } from "@/features/editor/lib/ModelFileLoader";
+import { hasSourceAppearance } from "@/features/editor/lib/modelMaterials";
 import { modelFormatFromName } from "@/features/editor/lib/modelFormat";
 import { decoratedFaceRotation, withSmoothNormals } from "@/features/editor/lib/prepareModel";
 import type { BrandingReference } from "@/features/admin/lib/brandingRecovery";
@@ -142,6 +143,7 @@ function PreviewModel({
     group.position.sub(box.getCenter(new THREE.Vector3()));
     return group;
   }, [obj]);
+  const originals = useMemo(() => prepared.children.filter((child) => (child as THREE.Mesh).isMesh).map((child) => (child as THREE.Mesh).material), [prepared]);
 
   const material = useMemo(() => new THREE.MeshStandardMaterial({ color: "#9a9a9a", roughness: 0.6, metalness: 0.1 }), []);
   const highlight = useMemo(() => new THREE.MeshStandardMaterial({ color: tokenColour("--primary", "#0a0a0a"), roughness: 0.5, metalness: 0.1 }), []);
@@ -161,13 +163,13 @@ function PreviewModel({
     let hidden = 0;
     meshes.forEach((mesh, index) => {
       const isMarked = marked.has(index);
-      mesh.material = isMarked ? highlight : material;
+      mesh.material = isMarked ? highlight : hasSourceAppearance(obj) ? originals[index] : material;
       mesh.visible = !(isMarked && hideHighlighted);
       if (isMarked && mesh.visible) tinted++;
       if (!mesh.visible) hidden++;
     });
     onReport({ meshes: meshes.length, tinted, hidden });
-  }, [prepared, material, highlight, highlightKey, hideHighlighted, onReport]);
+  }, [prepared, material, highlight, highlightKey, hideHighlighted, onReport, originals, obj]);
 
   useEffect(() => onReady(), [prepared, onReady]);
 

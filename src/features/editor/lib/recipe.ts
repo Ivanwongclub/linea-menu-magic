@@ -188,7 +188,7 @@ export interface DraftRecipe {
   size_variant_id: string | null;
   finish_id: string | null;
   colour_id: string | null;
-  view: { ruler: boolean; original_lettering?: boolean; /** Temporary imports only; never written to catalogue drafts. */ local_appearance_mode?: "finish" | "colour" };
+  view: { ruler: boolean; original_lettering?: boolean; model_appearance_mode?: "source" | "finish" | "colour"; /** Temporary imports only; never written to catalogue drafts. */ local_appearance_mode?: "source" | "finish" | "colour" };
   layers: Layer[];
   /** Phase 6b R1: OBJ groups the buyer has hidden; hiding never deletes geometry. */
   hidden_groups?: number[];
@@ -262,7 +262,12 @@ export function normalizeRecipe(raw: unknown): DraftRecipe {
     colour_id: id(raw.colour_id),
     // 6b R1: the factory's own lettering is a row in the Parts list now; it
     // stays hidden unless a design says otherwise, as it was before.
-    view: { ruler: view.ruler === true, original_lettering: view.original_lettering === true },
+    view: {
+      ruler: view.ruler === true,
+      original_lettering: view.original_lettering === true,
+      ...(["source", "finish", "colour"].includes(String(view.model_appearance_mode)) ? { model_appearance_mode: view.model_appearance_mode as "source" | "finish" | "colour" } : {}),
+      ...(["source", "finish", "colour"].includes(String(view.local_appearance_mode)) ? { local_appearance_mode: view.local_appearance_mode as "source" | "finish" | "colour" } : {}),
+    },
     layers: stored.map(upgradeLayer),
     hidden_groups: Array.isArray(raw.hidden_groups) ? (raw.hidden_groups as unknown[]).map(Number).filter((n) => Number.isInteger(n) && n >= 0) : [],
     zones: Array.isArray(raw.zones) ? (raw.zones as Zone[]) : [],

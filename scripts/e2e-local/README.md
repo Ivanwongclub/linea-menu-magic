@@ -124,6 +124,7 @@ keyboard (focus the drag handle, Space, Arrow keys, Space).
 
 ## Scenarios
 
+- `model-import.mjs` — owns a temporary QA product: OBJ + MTL + texture folder upload (including relative subdirectories), original bytes, actual canvas colours, per-part colour/hide and text, undo, autosave/version/reload, local imports, invalid replacement protection and STL upload/reopen. Removes its product, designs and Storage files afterwards.
 - `size-variants.mjs` — Phase 5 sizes: insert, upsert + insert batch, generated ligne.
 - `colour-finish.mjs` — Phase 6 colours and finishes, including the three metal-gate trigger cases.
 - `finish-picker-layout.mjs` — the attached list and default selector render below a viewport-bounded picker (regression for "nothing below the grid").

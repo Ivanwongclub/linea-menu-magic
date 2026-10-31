@@ -13,7 +13,7 @@
  *            brushed metal read as a fan of flat facets.
  */
 import * as THREE from "three";
-import { oxideColor, twoToneFragmentChunks, twoToneVertexChunks } from "./twoTone";
+import { oxideColor, twoToneFragmentChunks, twoToneVertexChunks } from "./twoTone.ts";
 
 export type BrushKind = "linear" | "radial";
 

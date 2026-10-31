@@ -3,9 +3,26 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
 import { parseObjFileRawBounds, parseStoredModelRawBounds, type ModelRawBounds } from "@/features/admin/lib/objBounds";
 import { modelFormatFromName } from "@/features/editor/lib/modelFormat";
+import { prepareModelImport } from "@/features/editor/lib/modelImport";
+import { randomUUID } from "@/lib/uuid";
 import type { BrandingMark, BrandingReference } from "@/features/admin/lib/brandingRecovery";
 
 const BUCKET = "product-models";
+
+/** New imports own a UUID directory; legacy uploads own only their one file. */
+async function removeModelFiles(path: string) {
+  if (!/^models\/[^/]+\/[0-9a-f-]{36}\/model\.(obj|stl)$/i.test(path)) {
+    await supabase.storage.from(BUCKET).remove([path]);
+    return;
+  }
+  const folder = path.slice(0, path.lastIndexOf("/"));
+  const { data, error } = await supabase.storage.from(BUCKET).list(folder, { limit: 1000 });
+  if (error) throw error;
+  if (data?.length) {
+    const removed = await supabase.storage.from(BUCKET).remove(data.filter((item) => item.id).map((item) => `${folder}/${item.name}`));
+    if (removed.error) throw removed.error;
+  }
+}
 
 export type ScaleMethod = "unit_mm" | "known_dimension" | "two_point";
 
@@ -56,36 +73,30 @@ export function useProductModel(productId: string) {
   const queryClient = useQueryClient();
 
   const upload = useMutation({
-    mutationFn: async ({ file, previousPath }: { file: File; previousPath: string | null }) => {
-      const format = modelFormatFromName(file.name) ?? "obj";
-      const path = `models/${productId}/${Date.now()}.${format}`;
-      const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, file, {
-        contentType: format === "stl" ? "model/stl" : "model/obj",
-        upsert: false,
-      });
-      if (uploadError) throw uploadError;
-
-      let rawBounds: ModelRawBounds;
+    mutationFn: async ({ file, files, previousPath }: { file: File; files?: File[]; previousPath: string | null }) => {
+      const bundle = await prepareModelImport(files ?? [file]);
+      const folder = `models/${productId}/${randomUUID()}`;
+      const path = `${folder}/model.${modelFormatFromName(file.name) ?? "obj"}`;
+      const uploaded: string[] = [];
       try {
-        rawBounds = await parseObjFileRawBounds(file);
-      } catch (err) {
-        // Unreadable geometry means the file itself is unusable — delete the
-        // upload rather than leave an orphan, and leave the row untouched
-        // (4a Q3, ruled in 4c).
-        await supabase.storage.from(BUCKET).remove([path]);
-        throw new Error(`Uploaded, but couldn't read its geometry: ${err instanceof Error ? err.message : String(err)}`);
+        const rawBounds = await parseObjFileRawBounds(bundle.model);
+        for (const entry of bundle.uploads) {
+          const key = `${folder}/${entry.name}`;
+          const { error } = await supabase.storage.from(BUCKET).upload(key, entry.body, { contentType: entry.contentType, upsert: false });
+          if (error) throw error;
+          uploaded.push(key);
+        }
+        const { error } = await supabase.from("products")
+          .update({ model_storage_path: path, model_raw_bounds: rawBounds as unknown as Json }).eq("id", productId);
+        if (error) throw error;
+      } catch (error) {
+        if (uploaded.length) await supabase.storage.from(BUCKET).remove(uploaded);
+        throw error;
+      } finally {
+        bundle.resourceUrls.forEach((url) => URL.revokeObjectURL(url));
       }
-
-      const { error: updateError } = await supabase
-        .from("products")
-        .update({ model_storage_path: path, model_raw_bounds: rawBounds as unknown as Json })
-        .eq("id", productId);
-      if (updateError) throw updateError;
-
-      if (previousPath) {
-        await supabase.storage.from(BUCKET).remove([previousPath]);
-      }
-      return path;
+      if (previousPath) await removeModelFiles(previousPath);
+      return { path, warnings: bundle.warnings };
     },
     onSuccess: () => invalidate(queryClient, productId),
   });
@@ -94,7 +105,7 @@ export function useProductModel(productId: string) {
     mutationFn: async (path: string) => {
       const { error: updateError } = await supabase.from("products").update({ model_storage_path: null }).eq("id", productId);
       if (updateError) throw updateError;
-      await supabase.storage.from(BUCKET).remove([path]);
+      await removeModelFiles(path);
     },
     onSuccess: () => invalidate(queryClient, productId),
   });

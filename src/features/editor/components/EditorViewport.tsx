@@ -22,7 +22,9 @@ import { CameraReport } from "./CameraReport";
 import { HandleProjector, HandlesOverlay, newHandleBridge, newHandleElements } from "./branding/Handles";
 import { selectHiddenGroups, selectSelectedLayerId, selectZones, useEditorStore } from "../store/useEditorStore";
 import { modelFormatFromName } from "../lib/modelFormat";
-import { groupFromModelData } from "../lib/ModelFileLoader";
+import { groupFromModelData, validateModelSurfaces } from "../lib/ModelFileLoader";
+import { prepareModelImport, modelFilesFromDrop, type ModelImport } from "../lib/modelImport";
+import { hasSourceAppearance } from "../lib/modelMaterials";
 import { useLogoSources } from "../hooks/useLogoAssets";
 import type { ProcessThresholds } from "../lib/manufacturing";
 import { usePublicFinishes } from "../hooks/usePublicFinishes";
@@ -60,44 +62,6 @@ function ViewportFallback() {
       <div className="w-16 h-16 bg-foreground/[0.06] border border-foreground/10 animate-pulse" />
     </div>
   );
-}
-
-/** Reject empty, non-finite or wholly degenerate meshes before replacing a usable model. */
-function validateLocalSurfaces(group: Group) {
-  let hasSurface = false;
-  group.traverse((child) => {
-    const mesh = child as Mesh;
-    if (!mesh.isMesh) return;
-    const positions = mesh.geometry.getAttribute("position");
-    if (!positions || positions.count === 0) return;
-    const index = mesh.geometry.getIndex();
-    const count = index?.count ?? positions.count;
-    if (positions.itemSize !== 3 || count % 3 !== 0) throw new Error("Invalid surface geometry");
-    for (let i = 0; i < positions.count; i++) {
-      if (!Number.isFinite(positions.getX(i)) || !Number.isFinite(positions.getY(i)) || !Number.isFinite(positions.getZ(i))) {
-        throw new Error("Invalid surface coordinates");
-      }
-    }
-    for (let i = 0; i < count; i += 3) {
-      const vertices = index ? [index.getX(i), index.getX(i + 1), index.getX(i + 2)] : [i, i + 1, i + 2];
-      if (vertices.some((vertex) => !Number.isInteger(vertex) || vertex < 0 || vertex >= positions.count)) {
-        throw new Error("Invalid surface indices");
-      }
-      if (hasSurface) {
-        if (!index) break;
-        continue;
-      }
-      const [a, b, c] = vertices;
-      const abX = positions.getX(b) - positions.getX(a);
-      const abY = positions.getY(b) - positions.getY(a);
-      const abZ = positions.getZ(b) - positions.getZ(a);
-      const acX = positions.getX(c) - positions.getX(a);
-      const acY = positions.getY(c) - positions.getY(a);
-      const acZ = positions.getZ(c) - positions.getZ(a);
-      hasSurface = abY * acZ - abZ * acY !== 0 || abZ * acX - abX * acZ !== 0 || abX * acY - abY * acX !== 0;
-    }
-  });
-  if (!hasSurface) throw new Error("Model has no surface faces");
 }
 
 function disposeLocalValidation(group: Group) {
@@ -202,6 +166,7 @@ export function EditorViewport({
   const [faceZ, setFaceZ] = useState<number | null>(null);
   const [importing, setImporting] = useState(false);
   const importSequence = useRef(0);
+  const importActive = useRef(true);
   const importContext = useRef({ productId, hydratedFor });
   importContext.current = { productId, hydratedFor };
 
@@ -264,9 +229,10 @@ export function EditorViewport({
   const invalidateLocalImport = useCallback(() => { importSequence.current++; }, []);
 
   useEffect(() => {
+    importActive.current = true;
     invalidateLocalImport();
     setImporting(false);
-    return invalidateLocalImport;
+    return () => { importActive.current = false; invalidateLocalImport(); };
   }, [productId, hydratedFor, invalidateLocalImport]);
 
   // A URL's cleanup runs before the next model reports its layout measurements.
@@ -277,16 +243,18 @@ export function EditorViewport({
   }, [url, setPartsReport, setModelSizeMm]);
 
   const openLocalFile = useCallback(
-    async (file: File | null) => {
-      if (!file) return;
+    async (files: File[]) => {
+      if (!files.length) return;
+      if (!importActive.current || importContext.current.productId !== productId || importContext.current.hydratedFor !== hydratedFor) return;
       const sequence = ++importSequence.current;
       const context = { productId, hydratedFor };
       const isCurrent = () =>
+        importActive.current &&
         sequence === importSequence.current &&
         importContext.current.productId === context.productId &&
         importContext.current.hydratedFor === context.hydratedFor &&
         useEditorStore.getState().hydratedFor === context.hydratedFor;
-      const format = modelFormatFromName(file.name);
+      const format = modelFormatFromName(files.find((file) => modelFormatFromName(file.name))?.name);
       if (!format) {
         setImporting(false);
         toast.error(t("editor.viewport.badModelFile"));
@@ -294,17 +262,24 @@ export function EditorViewport({
       }
       setImporting(true);
       let parsed: Group | null = null;
+      let bundle: ModelImport | null = null;
+      let adopted = false;
       try {
+        bundle = await prepareModelImport(files);
+        const file = bundle.model;
         const data = format === "stl" ? await file.arrayBuffer() : await file.text();
         if (!isCurrent()) return;
-        parsed = groupFromModelData(data, format);
-        validateLocalSurfaces(parsed);
+        parsed = groupFromModelData(data, format, bundle.materialText);
+        validateModelSurfaces(parsed);
         if (!isCurrent()) return;
-        setLocalModel({ url: URL.createObjectURL(file), name: file.name });
-      } catch {
-        if (isCurrent()) toast.error(t("editor.viewport.invalidModelFile"));
+        setLocalModel({ url: URL.createObjectURL(file), name: file.name, materialText: bundle.materialText, resourceUrls: bundle.resourceUrls, hasSourceAppearance: hasSourceAppearance(parsed), warnings: bundle.warnings });
+        adopted = true;
+        if (bundle.warnings.length) toast.warning(bundle.warnings.join(" · "));
+      } catch (error) {
+        if (isCurrent()) toast.error(`${t("editor.viewport.invalidModelFile")} ${error instanceof Error ? error.message : ""}`);
       } finally {
         if (parsed) disposeLocalValidation(parsed);
+        if (!adopted) bundle?.resourceUrls.forEach((url) => URL.revokeObjectURL(url));
         if (isCurrent()) setImporting(false);
       }
     },
@@ -371,7 +346,7 @@ export function EditorViewport({
       onDragOver={(e) => e.preventDefault()}
       onDrop={(e) => {
         e.preventDefault();
-        void openLocalFile(e.dataTransfer.files?.[0] ?? null);
+        void modelFilesFromDrop(e.dataTransfer).then(openLocalFile).catch((error) => toast.error(error.message));
       }}
       data-model-size-mm={modelSizeMm != null ? modelSizeMm.toFixed(2) : undefined}
       // Scene read-backs for the text scenarios: the rendered glyphs and the no-mirroring check.

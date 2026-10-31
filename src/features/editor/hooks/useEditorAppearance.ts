@@ -15,11 +15,15 @@ export function useEditorAppearance(product: EditorProduct | undefined) {
   const setFinishId = useEditorStore((s) => s.setFinishId);
   const setColourId = useEditorStore((s) => s.setColourId);
   const setLocalAppearanceMode = useEditorStore((s) => s.setLocalAppearanceMode);
+  const setModelAppearanceMode = useEditorStore((s) => s.setModelAppearanceMode);
+  const sourceAvailable = useEditorStore((s) => !!s.partsReport?.hasSourceAppearance);
+  const modelAppearanceMode = useEditorStore((s) => s.recipe.view.model_appearance_mode);
   const { data: catalogueFinishes = [] } = useFinishOptions(product?.id ?? null, !!product?.is_metal && !localModel);
   const { data: publicFinishes = [] } = usePublicFinishes();
   const localColours = useMemo(() => getLocalModelColours(language), [language]);
 
-  const appearanceMode = localModel?.appearanceMode ?? (product?.is_metal ? "finish" : "colour");
+  const storedMode = modelAppearanceMode === "source" && !sourceAvailable ? undefined : modelAppearanceMode;
+  const appearanceMode = localModel?.appearanceMode ?? storedMode ?? (sourceAvailable ? "source" : product?.is_metal ? "finish" : "colour");
   const isMetal = appearanceMode === "finish";
   const finishOptions = localModel ? publicFinishes : catalogueFinishes;
   const colours = localModel ? localColours : product?.colours ?? [];
@@ -37,7 +41,8 @@ export function useEditorAppearance(product: EditorProduct | undefined) {
     isMetal,
     localModel,
     appearanceMode,
-    setAppearanceMode: setLocalAppearanceMode,
+    sourceAvailable,
+    setAppearanceMode: localModel ? setLocalAppearanceMode : setModelAppearanceMode,
     onSelectFinish: (finish: PickerFinish) => {
       setFinishId(finish.id);
     },

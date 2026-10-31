@@ -33,7 +33,11 @@ export interface Selection {
 export interface LocalModel {
   url: string;
   name: string;
-  appearanceMode: "finish" | "colour";
+  materialText?: string;
+  resourceUrls?: string[];
+  hasSourceAppearance?: boolean;
+  warnings?: string[];
+  appearanceMode: "source" | "finish" | "colour";
 }
 
 interface CatalogueSnapshot extends History {
@@ -132,14 +136,19 @@ interface EditorState {
   removeZone: (id: string) => void;
   /** Replaces the pending files wholesale — used when a draft is read back. */
   setPendingLogos: (logos: Record<string, PendingLogo>) => void;
-  setLocalModel: (file: Pick<LocalModel, "url" | "name"> | null) => void;
+  setLocalModel: (file: Omit<LocalModel, "appearanceMode"> | null) => void;
   setLocalAppearanceMode: (mode: LocalModel["appearanceMode"]) => void;
+  setModelAppearanceMode: (mode: LocalModel["appearanceMode"]) => void;
 }
 
 const history = (s: EditorState): History => ({ recipe: s.recipe, past: s.past, future: s.future, checkpoint: s.checkpoint });
 const discrete = (s: EditorState, next: (recipe: DraftRecipe) => DraftRecipe) => applyDiscrete(history(s), next);
 const syncLocalAppearance = (s: EditorState, recipe: DraftRecipe) =>
-  s.localModel ? { localModel: { ...s.localModel, appearanceMode: recipe.view.local_appearance_mode ?? "finish" } } : {};
+  s.localModel ? { localModel: { ...s.localModel, appearanceMode: recipe.view.local_appearance_mode ?? (s.localModel.hasSourceAppearance ? "source" : "finish") } } : {};
+function releaseLocalModel(model: LocalModel | null) {
+  if (!model) return;
+  for (const url of new Set([model.url, ...(model.resourceUrls ?? [])])) URL.revokeObjectURL(url);
+}
 const resetModelState = {
   modelFrame: null,
   modelSizeMm: null,
@@ -181,7 +190,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   localCatalogueSnapshot: null,
   initialize: (recipe, hydratedFor) =>
     set((s) => {
-      if (s.localModel?.url) URL.revokeObjectURL(s.localModel.url);
+      releaseLocalModel(s.localModel);
       return {
         ...startHistory(recipe),
         ...resetModelState,
@@ -286,7 +295,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   setPendingLogos: (pendingLogos) => set({ pendingLogos }),
   setLocalModel: (localModel) =>
     set((s) => {
-      if (s.localModel?.url && s.localModel.url !== localModel?.url) URL.revokeObjectURL(s.localModel.url);
+      if (s.localModel?.url !== localModel?.url) releaseLocalModel(s.localModel);
       if (!localModel) {
         return {
           ...resetModelState,
@@ -309,19 +318,20 @@ export const useEditorStore = create<EditorState>((set) => ({
         ...startHistory(recipe),
         ...resetModelState,
         pendingLogos: {},
-        localModel: { ...localModel, appearanceMode: "finish" },
+        localModel: { ...localModel, appearanceMode: localModel.hasSourceAppearance ? "source" : "finish" },
         localCatalogueSnapshot,
       };
     }),
   setLocalAppearanceMode: (appearanceMode) =>
     set((s) => {
       if (!s.localModel) return s;
-      const next = discrete(s, (r) => (r.view.local_appearance_mode ?? "finish") === appearanceMode ? r : {
+      const next = discrete(s, (r) => (r.view.local_appearance_mode ?? (s.localModel.hasSourceAppearance ? "source" : "finish")) === appearanceMode ? r : {
         ...r,
         view: { ...r.view, local_appearance_mode: appearanceMode },
       });
       return { ...next, ...syncLocalAppearance(s, next.recipe) };
     }),
+  setModelAppearanceMode: (mode) => set((s) => discrete(s, (r) => ({ ...r, view: { ...r.view, model_appearance_mode: mode } }))),
 }));
 
 /**

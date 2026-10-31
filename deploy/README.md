@@ -148,6 +148,13 @@ docker compose --env-file deploy/compose.env exec -T db psql -X -U supabase_admi
 
 ## 功能與服務配置
 
+- 模型上傳可多選一個 OBJ、MTL 和貼圖，或選取整個模型資料夾；子目錄的相對
+  路徑會一併解析。原始 OBJ／MTL bytes 保留，顯示用檔案只改寫配套檔案位置。
+  「原始材質」保留顏色／透明度／貼圖，部件依 OBJ 的 object/group 或材質分段
+  識別，可單獨隱藏、改色。MTL 不會還原 OBJ 沒有匯出的 CAD 圖層；貼圖需要 UV。
+- STL 一般只有幾何，編輯器將它作為單一部件；可以改色、加字及量度，亦會讀取
+  loader 支援的彩色 STL 擴充。正式產品模型在後台上傳及校準後可保存設計；
+  視窗內「本機檔」匯入仍是本次工作階段的編輯，橫幅會標示未儲存。
 - `LOVABLE_API_KEY`：如需現有 AI 產品圖片生成功能，在 `deploy/compose.env`
   補入原服務的金鑰，再重建 functions 容器。這項不是自動生成的 Supabase key。
 - 預設關閉新用戶註冊。已有帳號的密碼登入可用；邀請、找回密碼及郵件需要配置

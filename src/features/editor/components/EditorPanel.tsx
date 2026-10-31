@@ -28,8 +28,8 @@ interface EditorPanelProps {
   selectedColour: EditorColour | null;
   onSelectColour: (colour: EditorColour) => void;
   localModelName?: string;
-  appearanceMode?: "finish" | "colour";
-  onAppearanceModeChange?: (mode: "finish" | "colour") => void;
+  appearanceMode?: "source" | "finish" | "colour";
+  onAppearanceModeChange?: (mode: "source" | "finish" | "colour") => void;
   /** Phase 7: the design versions belong to. Null on the anonymous `/new` path, which has nothing to version yet. */
   designId?: string | null;
 }
@@ -77,7 +77,9 @@ export function EditorPanel({
   const [pickerOpen, setPickerOpen] = useState(false);
   const selectedVariant = product.size_variants.find((v) => v.id === sizeVariantId) ?? null;
   const local = !!localModelName;
-  const isMetal = local ? appearanceMode === "finish" : product.is_metal;
+  const isMetal = appearanceMode ? appearanceMode === "finish" : product.is_metal;
+  const sourceAvailable = useEditorStore((s) => !!s.partsReport?.hasSourceAppearance);
+  const materialWarnings = useEditorStore((s) => s.partsReport?.materialWarnings);
   const faceDiameterMm = local ? modelSizeMm ?? 10 : selectedVariant?.size_primary_mm ?? product.size_variants[0]?.size_primary_mm ?? 10;
 
   // E2 U8 / standing ruling 1: the dock renders only what it has, and since
@@ -129,9 +131,9 @@ export function EditorPanel({
           )}
         </PanelGroup>
 
-        {local && (
+        {(local || sourceAvailable) && (
           <div className="flex border border-border" role="group" aria-label={t("editor.appearance.label")} data-testid="local-model-appearance">
-            {(["finish", "colour"] as const).map((mode) => (
+            {([...(sourceAvailable ? ["source" as const] : []), ...(local ? ["finish" as const, "colour" as const] : [product.is_metal ? "finish" as const : "colour" as const])]).map((mode) => (
               <button
                 key={mode}
                 type="button"
@@ -146,7 +148,11 @@ export function EditorPanel({
           </div>
         )}
 
-        {isMetal ? (
+        {appearanceMode === "source" ? (
+          <PanelGroup group="source" title={t("editor.panel.source")}>
+            <p className="text-xs text-muted-foreground">{t("editor.panel.sourceHint")}</p>
+          </PanelGroup>
+        ) : isMetal ? (
           <PanelGroup group="finish" title={t("editor.panel.finish")}>
             {selectedFinish ? (
               <div className="flex gap-3">
@@ -189,6 +195,7 @@ export function EditorPanel({
             {selectedColour && <p className="text-sm text-foreground">{selectedColour.name}</p>}
           </PanelGroup>
         )}
+        {!!materialWarnings?.length && <p className="text-xs text-amber-700" data-testid="model-material-warnings">{materialWarnings.join(" · ")}</p>}
 
         {/* E2 U5: what is on the part — branding, zones and the model's own
             parts (6b R1) — in one dock with a height of its own, so what

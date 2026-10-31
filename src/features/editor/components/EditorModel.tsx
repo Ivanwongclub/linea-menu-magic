@@ -3,6 +3,7 @@ import { useLoader, useThree, type ThreeEvent } from "@react-three/fiber";
 import { ContactShadows } from "@react-three/drei";
 import * as THREE from "three";
 import { ModelFileLoader } from "../lib/ModelFileLoader";
+import { describeSourceMaterials, hasSourceAppearance, sourcePhysicalMaterial } from "../lib/modelMaterials";
 import { modelFormatFromName, type ModelFormat } from "../lib/modelFormat";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import type { EditorColour } from "../hooks/useEditorProduct";
@@ -66,7 +67,9 @@ interface EditorModelProps {
 
 /** What the Parts list and the strip read back (6b R1/R2/R7). */
 export interface PartsReport {
-  groups: { index: number; name: string; faces: number; visible: boolean }[];
+  groups: { index: number; name: string; faces: number; visible: boolean; materials?: ReturnType<typeof describeSourceMaterials>; renderedMaterials?: ReturnType<typeof describeSourceMaterials> }[];
+  hasSourceAppearance?: boolean;
+  materialWarnings?: string[];
   /** The model's own extent, mm — the plane zone's slider range. */
   bounds: { minX: number; maxX: number; minY: number; maxY: number; minZ: number; maxZ: number };
   /** Faces each zone actually covers, in zone order, and the pairs that overlap. */
@@ -119,13 +122,32 @@ export function EditorModel({
   onBakeStats,
   onTextReport,
 }: EditorModelProps) {
+  const localModel = useEditorStore((s) => s.localModel);
+  const modelAppearanceMode = useEditorStore((s) => s.recipe.view.model_appearance_mode);
   const format: ModelFormat = modelFormatFromName(sourceName) ?? modelFormatFromName(url) ?? "obj";
   const obj = useLoader(ModelFileLoader, url, (loader) => {
     loader.formatHint = format;
+    loader.materialTextHint = localModel?.materialText ?? null;
   });
+  useEffect(() => () => {
+    if (!url.startsWith("blob:")) return;
+    useLoader.clear(ModelFileLoader, url);
+    const textures = new Set<THREE.Texture>();
+    obj.traverse((child) => {
+      const mesh = child as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      mesh.geometry.dispose();
+      for (const entry of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) {
+        for (const value of Object.values(entry)) if (value instanceof THREE.Texture) textures.add(value);
+        entry.dispose();
+      }
+    });
+    textures.forEach((texture) => texture.dispose());
+  }, [obj, url]);
   const { camera, gl, size: viewport } = useThree();
 
-  const twoTone = !!(isMetal && finish?.two_tone);
+  const preserveSource = localModel ? localModel.appearanceMode === "source" : hasSourceAppearance(obj) && (!modelAppearanceMode || modelAppearanceMode === "source");
+  const twoTone = !preserveSource && !!(isMetal && finish?.two_tone);
 
   // One builder for the part and for every layer that carries its own finish
   // (Phase 6a R2, `lib/finishMaterial.ts`).
@@ -149,11 +171,22 @@ export function EditorModel({
       const smoothed = withSmoothNormals(mesh.geometry);
       // Zones carry a slot per face (6b R2), which an indexed geometry cannot
       // hold: one shared vertex would have to be in two zones at once.
-      mesh.geometry = smoothed.getIndex() ? smoothed.toNonIndexed() : smoothed;
+      mesh.geometry = smoothed.getIndex() ? smoothed.toNonIndexed() : smoothed.clone();
     });
     group.quaternion.copy(decoratedFaceRotation(group));
     return group;
   }, [obj]);
+  useEffect(() => () => prepared.traverse((child) => {
+    if ((child as THREE.Mesh).isMesh) (child as THREE.Mesh).geometry.dispose();
+  }), [prepared]);
+  const sourceMaterials = useMemo(() => prepared.children.map((child) => {
+    const mesh = child as THREE.Mesh;
+    if (!mesh.isMesh) return null;
+    const create = (source: THREE.Material) => sourcePhysicalMaterial(source, !!mesh.geometry.getAttribute("color"), zoneStyles?.length ? zoneStyles : null);
+    return Array.isArray(mesh.material) ? mesh.material.map(create) : create(mesh.material);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [prepared, zoneStyleKey]);
+  useEffect(() => () => sourceMaterials.flat().forEach((entry) => entry?.dispose()), [sourceMaterials]);
 
   const markedKey = [...markedGroupIndices].sort((a, b) => a - b).join(",");
   const partsKey = [...(hiddenGroups ?? [])].sort((a, b) => a - b).join(",");
@@ -187,11 +220,11 @@ export function EditorModel({
   }, [renderedSizeMm, onModelSizeMm]);
 
   useLayoutEffect(() => {
-    model.traverse((child) => {
+    model.children.forEach((child, index) => {
       const mesh = child as THREE.Mesh;
-      if (mesh.isMesh) mesh.material = material;
+      if (mesh.isMesh) mesh.material = preserveSource && sourceMaterials[index] ? sourceMaterials[index] : material;
     });
-  }, [model, material]);
+  }, [model, material, preserveSource, sourceMaterials]);
 
   // The buyer view (4j): marked branding groups are not drawn. The rotation
   // was already computed on the full model (collision 10), and the framing
@@ -272,12 +305,14 @@ export function EditorModel({
     const box = new THREE.Box3().setFromObject(model);
     onPartsReport?.({
       bounds: { minX: box.min.x, maxX: box.max.x, minY: box.min.y, maxY: box.max.y, minZ: box.min.z, maxZ: box.max.z },
-      groups: meshes.map((mesh, index) => ({ index, name: mesh.name || `group_${index + 1}`, faces: counts[index], visible: mesh.visible })),
+      groups: meshes.map((mesh, index) => ({ index, name: mesh.name || `group_${index + 1}`, faces: counts[index], visible: mesh.visible, materials: describeSourceMaterials((prepared.children.filter((child) => (child as THREE.Mesh).isMesh)[index] as THREE.Mesh).material), renderedMaterials: describeSourceMaterials(mesh.material) })),
+      hasSourceAppearance: hasSourceAppearance(obj),
+      materialWarnings: localModel?.warnings ?? obj.userData.materialWarnings ?? [],
       zoneFaces: zoneRuns.map((runs) => decodeRuns(runs).length),
       overlaps,
       totalFaces: total,
     });
-  }, [model, faceData, zoneRuns, hiddenIndices, onPartsReport]);
+  }, [model, faceData, zoneRuns, hiddenIndices, onPartsReport, prepared, obj, material, sourceMaterials, preserveSource, localModel?.warnings]);
 
   /**
    * The occlusion bake, in its worker (6b R4): once per file, hidden set and

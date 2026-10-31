@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { FolderOpen, Maximize2, RotateCcw } from "lucide-react";
+import { FolderInput, FolderOpen, Maximize2, RotateCcw } from "lucide-react";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { cn } from "@/lib/utils";
 import { useEditorStore } from "../store/useEditorStore";
@@ -39,9 +39,10 @@ export function ViewportTools({
   onZoomToFit: () => void;
   /** False until the model has reported its bounds — there is nothing to fit to yet. */
   canFit: boolean;
-  onOpenFile: (file: File | null) => void;
+  onOpenFile: (files: File[]) => void;
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
+  const folderRef = useRef<HTMLInputElement>(null);
   const { t } = useI18n();
   const paintZoneId = useEditorStore((s) => s.paintZoneId);
   const brushRadiusMm = useEditorStore((s) => s.brushRadiusMm);
@@ -81,14 +82,21 @@ export function ViewportTools({
         <ToolButton testId="view-open-model" label={t("editor.viewport.openModel")} onClick={() => fileRef.current?.click()}>
           <FolderOpen className="h-3.5 w-3.5" strokeWidth={1.5} />
         </ToolButton>
+        <ToolButton testId="view-open-folder" label={t("editor.viewport.openFolder")} onClick={() => folderRef.current?.click()}>
+          <FolderInput className="h-3.5 w-3.5" strokeWidth={1.5} />
+        </ToolButton>
+        <input ref={folderRef} type="file" multiple {...{ webkitdirectory: "" }} className="hidden" data-testid="view-open-folder-input" onChange={(e) => {
+          onOpenFile(Array.from(e.target.files ?? [])); e.target.value = "";
+        }} />
         <input
           ref={fileRef}
           type="file"
-          accept=".obj,.stl"
+          accept=".obj,.stl,.mtl,.png,.jpg,.jpeg,.webp,.gif,.bmp"
+          multiple
           className="hidden"
           data-testid="view-open-model-input"
           onChange={(e) => {
-            onOpenFile(e.target.files?.[0] ?? null);
+            onOpenFile(Array.from(e.target.files ?? []));
             e.target.value = "";
           }}
         />
