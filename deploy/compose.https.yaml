@@ -1,0 +1,29 @@
+# Optional automatic HTTPS. SITE_URL must be https://your-domain (without a path).
+# Point DNS to this server and make ports 80/443 available first.
+services:
+  frontend:
+    ports: !reset []
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    depends_on:
+      frontend:
+        condition: service_healthy
+    environment:
+      SITE_URL: ${SITE_URL:?Set the public HTTPS URL in deploy/compose.env}
+    ports:
+      - 80:80
+      - 443:443
+      - 443:443/udp
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+volumes:
+  caddy-data:
+  caddy-config:

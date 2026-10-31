@@ -1,0 +1,40 @@
+name: ${COMPOSE_PROJECT_NAME:-linea3d}
+
+# Run from the repository root:
+# make rebuild
+# Requires Docker Compose >= 2.24.4 (include and !override support).
+include:
+  - path:
+      - ./deploy/supabase/upstream/docker-compose.yml
+      - ./deploy/supabase/compose.override.yaml
+    env_file: ./deploy/compose.env
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: deploy/frontend/Dockerfile
+      args:
+        VITE_SUPABASE_URL: ${SUPABASE_PUBLIC_URL:?Run make setup PUBLIC_URL=YOUR_PUBLIC_URL first}
+        VITE_SUPABASE_PUBLISHABLE_KEY: ${ANON_KEY:?Generate deploy/compose.env first}
+        VITE_SUPABASE_IMAGE_TRANSFORMS: ${VITE_SUPABASE_IMAGE_TRANSFORMS:-true}
+    restart: unless-stopped
+    depends_on:
+      api-gw:
+        condition: service_healthy
+      auth:
+        condition: service_healthy
+      storage:
+        condition: service_healthy
+    ports:
+      - ${WEB_BIND:-0.0.0.0}:${WEB_PORT:-8080}:80
+    healthcheck:
+      test: [CMD, wget, -q, --spider, http://127.0.0.1/healthz]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"

@@ -54,14 +54,37 @@ serve(async (req) => {
   }
 
   try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    // A valid anonymous API key is not permission to run privileged writes.
+    const token = req.headers.get("Authorization")?.match(/^Bearer\s+(.+)$/i)?.[1];
+    const { data: identity, error: identityError } = token
+      ? await supabase.auth.getUser(token)
+      : { data: { user: null }, error: new Error("Missing session") };
+    if (identityError || !identity.user) {
+      return new Response(JSON.stringify({ error: "Sign in required" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { data: isEditor, error: roleError } = await supabase.rpc("user_is_catalogue_editor", { _user_id: identity.user.id });
+    if (roleError) throw new Error("Could not verify catalogue permissions");
+    if (!isEditor) {
+      return new Response(JSON.stringify({ error: "Catalogue editor permission required" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // Internal Docker hostnames must never be saved as browser-facing URLs.
+    const publicStorage = createClient(Deno.env.get("SUPABASE_PUBLIC_URL") || supabaseUrl,
+      Deno.env.get("SUPABASE_ANON_KEY") || supabaseServiceKey,
+      { auth: { persistSession: false, autoRefreshToken: false } });
 
     let productId: string | undefined;
     let batchSize = 10;
@@ -211,12 +234,12 @@ serve(async (req) => {
           });
 
         // Get public URLs
-        const { data: primaryUrlData } = supabase.storage
+        const { data: primaryUrlData } = publicStorage.storage
           .from("product-assets")
           .getPublicUrl(primaryPath);
         const primaryUrl = primaryUrlData.publicUrl;
 
-        const { data: thumbUrlData } = supabase.storage
+        const { data: thumbUrlData } = publicStorage.storage
           .from("product-assets")
           .getPublicUrl(thumbPath);
         const thumbUrl = thumbUrlData.publicUrl;

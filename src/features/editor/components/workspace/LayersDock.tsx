@@ -1,3 +1,4 @@
+import { randomUUID } from "@/lib/uuid";
 import { useRef, useState } from "react";
 import { ImagePlus, Plus } from "lucide-react";
 import { useI18n } from "@/features/i18n/I18nProvider";
@@ -88,7 +89,7 @@ export function LayersDock({
                   // 4j: where the factory lettering was, once the model is on screen; E1 §3.3 fallbacks otherwise.
                   addLayer(
                     newTextLayer(
-                      crypto.randomUUID(),
+                      randomUUID(),
                       faceDiameterMm,
                       "",
                       recoveredDefaults(reference, modelFrame?.transform ?? null, scaleFactor, modelFrame?.markedGlyphCentres ?? []),

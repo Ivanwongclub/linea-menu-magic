@@ -1,3 +1,4 @@
+import { randomUUID } from "@/lib/uuid";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEditorStore } from "../store/useEditorStore";
@@ -71,7 +72,7 @@ export async function uploadLogoAsset({
   ownerId: string;
   brandId: string | null;
 }): Promise<string> {
-  const assetId = crypto.randomUUID();
+  const assetId = randomUUID();
   const path = logoStoragePath(brandId ?? ownerId, assetId, mimeType);
   const body = raster ? dataUrlToBlob(raster, mimeType) : new Blob([svg ?? ""], { type: mimeType });
   const uploaded = await supabase.storage.from(LOGO_BUCKET).upload(path, body, { upsert: true, contentType: mimeType });

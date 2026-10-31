@@ -1,3 +1,4 @@
+import { randomUUID } from "@/lib/uuid";
 import { Eye, EyeOff } from "lucide-react";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { cn } from "@/lib/utils";
@@ -44,7 +45,7 @@ export function PartProperties({ index }: { index: number }) {
       updateZone(partZone.id, { appearance: next });
       commit();
     } else {
-      const zone = newZone(crypto.randomUUID(), group.name, "groups");
+      const zone = newZone(randomUUID(), group.name, "groups");
       addZone({ ...zone, groups: [index], appearance: next });
     }
     select({ kind: "part", id: String(index) });

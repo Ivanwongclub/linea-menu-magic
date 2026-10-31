@@ -470,13 +470,16 @@ function GenerateAIImagesButton({
 
     try {
       while (hasMore) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) throw new Error("Sign in required");
         const res = await fetch(
           `${ENV.SUPABASE_URL}/functions/v1/generate-product-images`,
           {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${ENV.SUPABASE_KEY}`,
+              apikey: ENV.SUPABASE_KEY,
+              Authorization: `Bearer ${session.access_token}`,
             },
             body: JSON.stringify({ batchSize: 10 }),
           },

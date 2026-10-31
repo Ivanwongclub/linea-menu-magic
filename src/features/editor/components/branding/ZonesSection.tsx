@@ -1,3 +1,4 @@
+import { randomUUID } from "@/lib/uuid";
 import { Layers2, X } from "lucide-react";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { cn } from "@/lib/utils";
@@ -23,7 +24,7 @@ export function AddZoneButton({ defaultPlaneMm }: { defaultPlaneMm: number }) {
   const setPaintZone = useEditorStore((s) => s.setPaintZone);
 
   const add = (method: ZoneMethod) => {
-    const zone = newZone(crypto.randomUUID(), t("editor.zones.defaultName", { n: zoneCount + 1 }), method);
+    const zone = newZone(randomUUID(), t("editor.zones.defaultName", { n: zoneCount + 1 }), method);
     if (zone.plane) zone.plane = { ...zone.plane, at_mm: defaultPlaneMm };
     addZone(zone);
     setPaintZone(method === "paint" ? zone.id : null);

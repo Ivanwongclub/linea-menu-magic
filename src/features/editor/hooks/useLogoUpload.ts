@@ -1,3 +1,4 @@
+import { randomUUID } from "@/lib/uuid";
 import { useRef, useState, type ChangeEvent } from "react";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { useAuth } from "@/features/auth/AuthProvider";
@@ -69,7 +70,7 @@ export function useLogoUpload({ faceDiameterMm, minDepthMm }: { faceDiameterMm: 
     };
     try {
       const raster = isRasterMime(file.type);
-      const layerId = crypto.randomUUID();
+      const layerId = randomUUID();
       const brandId = isStaff ? null : primaryBrand?.id ?? null;
 
       if (raster) {

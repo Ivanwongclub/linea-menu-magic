@@ -1,0 +1,70 @@
+# Project changes are kept separate from the pinned upstream Supabase stack.
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: "3"
+
+services:
+  studio:
+    container_name: !reset null
+    volumes: !override
+      - studio-snippets:/app/snippets
+      - ../../../supabase/functions/generate-product-images:/app/edge-functions/generate-product-images:ro
+    logging: *logging
+  api-gw:
+    container_name: !reset null
+    # Access Studio through an SSH tunnel, not a public database/admin port.
+    ports: !override
+      - 127.0.0.1:${STUDIO_PORT:-8000}:8000
+    logging: *logging
+  auth:
+    container_name: !reset null
+    logging: *logging
+  rest:
+    container_name: !reset null
+    logging: *logging
+  realtime:
+    # The leading realtime-dev tenant is required by Supabase Realtime.
+    container_name: realtime-dev.${COMPOSE_PROJECT_NAME:-linea3d}-realtime
+    logging: *logging
+  storage:
+    container_name: !reset null
+    environment:
+      FILE_SIZE_LIMIT: ${STORAGE_FILE_SIZE_LIMIT:-104857600}
+    volumes:
+      - storage-data:/var/lib/storage
+    logging: *logging
+  imgproxy:
+    container_name: !reset null
+    volumes:
+      - storage-data:/var/lib/storage
+    logging: *logging
+  meta:
+    container_name: !reset null
+    logging: *logging
+  functions:
+    container_name: !reset null
+    environment:
+      LOVABLE_API_KEY: ${LOVABLE_API_KEY:-}
+    # Only deploy the production function. Do not mount bootstrap-demo-user.
+    volumes: !override
+      - ./volumes/functions/main:/home/deno/functions/main:ro
+      - ./volumes/functions/deno.jsonc:/home/deno/functions/deno.jsonc:ro
+      - ../../../supabase/functions/generate-product-images:/home/deno/functions/generate-product-images:ro
+      - deno-cache:/root/.cache/deno
+    logging: *logging
+  db:
+    container_name: !reset null
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    logging: *logging
+  supavisor:
+    container_name: !reset null
+    ports: !reset []
+    logging: *logging
+
+volumes:
+  db-data:
+  storage-data:
+  studio-snippets:

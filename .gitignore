@@ -23,6 +23,7 @@ scripts/e2e-local/.shots/
 # npm run e2e:suite or npm run deck:shots.
 reports/*-family-fit.json
 reports/*-materials.png
+reports/deployment/
 
 # Editor directories and files
 .vscode/*
@@ -35,3 +36,13 @@ reports/*-materials.png
 *.sln
 *.sw?
 *.tsbuildinfo
+
+# Server credentials and local deployment/migration artifacts
+.deploy/
+deploy/compose.env
+deploy/migration.env
+deploy/keys/
+deploy/*.local.env
+backups/
+deploy/supabase/upstream/volumes/db/data/
+deploy/supabase/upstream/volumes/storage/
