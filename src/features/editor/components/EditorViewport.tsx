@@ -320,8 +320,34 @@ export function EditorViewport({
     setAutoRotate(true);
   }
 
+  const viewportTools = !calibration && (
+    <ViewportTools
+      ruler={ruler}
+      onRulerToggle={onRulerToggle}
+      onResetView={onResetView}
+      onZoomToFit={onZoomToFit}
+      canFit={!!url && partsReport != null}
+      onOpenFile={openLocalFile}
+    />
+  );
+
   if (!localModel && !modelStoragePath) {
-    return <EmptyModelState />;
+    return (
+      <div
+        className="relative flex flex-1 min-h-0"
+        data-testid="editor-empty-model"
+        aria-busy={importing}
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => {
+          e.preventDefault();
+          void modelFilesFromDrop(e.dataTransfer).then(openLocalFile).catch((error) => toast.error(error.message));
+        }}
+      >
+        <EmptyModelState />
+        {importing && <ViewportFallback />}
+        {viewportTools}
+      </div>
+    );
   }
 
   if (!localModel && (scaleStatus !== "confirmed" || scaleFactor == null)) {
@@ -469,16 +495,7 @@ export function EditorViewport({
           </button>
         </div>
       )}
-      {!calibration && (
-        <ViewportTools
-          ruler={ruler}
-          onRulerToggle={onRulerToggle}
-          onResetView={onResetView}
-          onZoomToFit={onZoomToFit}
-          canFit={partsReport != null}
-          onOpenFile={openLocalFile}
-        />
-      )}
+      {viewportTools}
       </div>
     </>
   );
