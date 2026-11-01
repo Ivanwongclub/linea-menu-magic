@@ -125,7 +125,7 @@ export function PartsGroup({
             detail={t("editor.parts.faceCount", { count: group.faces })}
             visible={!hiddenSet.has(group.index)}
             selected={selectedPart === group.index}
-            onSelect={() => select({ kind: "part", id: String(group.index) })}
+            onSelect={() => select(selectedPart === group.index ? null : { kind: "part", id: String(group.index) })}
             onToggle={() => toggleHiddenGroup(group.index)}
           />
         ))}

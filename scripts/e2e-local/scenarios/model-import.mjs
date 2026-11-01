@@ -29,6 +29,16 @@ export default async function ({ page, base, admin, editor, h }) {
   const viewport = page.getByTestId("editor-viewport");
   const parts = async () => JSON.parse(await viewport.getAttribute("data-parts") || "[]");
   const zones = async () => JSON.parse(await viewport.getAttribute("data-zones") || "[]");
+  const outlinePixels = async () => {
+    const png = await viewport.locator("canvas").screenshot();
+    const rgb = await sharp(png).removeAlpha().raw().toBuffer();
+    let count = 0;
+    for (let i = 0; i < rgb.length; i += 3) {
+      const [r, g, b] = rgb.subarray(i, i + 3);
+      if (r > 20 && r < 65 && g > r * 1.7 && g < 130 && b > 200) count++;
+    }
+    return count;
+  };
   const currentProduct = async () => checked(await admin.from("products").select("model_storage_path,model_scale_status,model_raw_bounds").eq("id", product.id).single());
   const files = [payload("coloured.obj", OBJ, "model/obj"), payload("colours.mtl", MTL), {name:"white.png",mimeType:"image/png",buffer:await sharp({create:{width:2,height:2,channels:3,background:"#ffffff"}}).png().toBuffer()}];
   const report = {};
@@ -78,6 +88,13 @@ export default async function ({ page, base, admin, editor, h }) {
     await page.getByTestId("undo").click();
     await poll(async()=>await viewport.getAttribute("data-model-mesh-count")==="2","part undo failed");
     await body.getByTestId("part-select").click();
+    await poll(async()=>await outlinePixels()>25,"selected part has no visible blue outline");
+    assert.equal((await parts())[0].renderedMaterials[0].colour,"#ff0000","selection must preserve source colour");
+    await body.getByTestId("part-select").click();
+    await poll(async()=>await outlinePixels()===0,"deselected part kept its outline");
+    await body.getByTestId("part-select").click();
+    await poll(async()=>await outlinePixels()>25,"reselected part lost its outline");
+    report.selection="selected part is outlined on the actual canvas; deselection clears it without changing materials";
     await page.getByTestId("part-colour-swatch").nth(1).click();
     await poll(async()=> (await zones())[0]?.colourHex==="#FFFFFF"&&(await zones())[0]?.faces===1,"part colour zone failed");
     assert.equal((await zones())[0].faces,1);

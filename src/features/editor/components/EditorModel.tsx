@@ -11,7 +11,7 @@ import type { PickerFinish } from "../hooks/useFinishOptions";
 import { decoratedFaceRotation, withSmoothNormals } from "../lib/prepareModel";
 import { MeshBVH } from "three-mesh-bvh";
 import { applyBakedOcclusion, bakeOcclusion, occlusionKey, type BakeStats } from "../lib/ambientOcclusion";
-import { EMPTY_ZONES, useEditorStore } from "../store/useEditorStore";
+import { EMPTY_ZONES, selectSelectedPartIndex, useEditorStore } from "../store/useEditorStore";
 import { colourMaterial, finishMaterial } from "../lib/finishMaterial";
 import type { Layer, Zone } from "../lib/recipe";
 import { decodeRuns, encodeRuns, facesForGroups, facesForPlane, resolveZones, totalFaces } from "../lib/zones";
@@ -19,6 +19,7 @@ import type { ZoneStyle } from "../lib/shaderPatch";
 import type { LogoSource } from "../hooks/useLogoAssets";
 import { BrandingMeshes, type TextSceneReport } from "./branding/BrandingMeshes";
 import { cornersOf, fitDistance, homeDirection, type BoundsMm } from "../lib/framing";
+import { PartSelectionOutline } from "./PartSelectionOutline";
 
 interface EditorModelProps {
   url: string;
@@ -123,6 +124,7 @@ export function EditorModel({
   onTextReport,
 }: EditorModelProps) {
   const localModel = useEditorStore((s) => s.localModel);
+  const selectedPartIndex = useEditorStore(selectSelectedPartIndex);
   const modelAppearanceMode = useEditorStore((s) => s.recipe.view.model_appearance_mode);
   const format: ModelFormat = modelFormatFromName(sourceName) ?? modelFormatFromName(url) ?? "obj";
   const obj = useLoader(ModelFileLoader, url, (loader) => {
@@ -486,6 +488,8 @@ export function EditorModel({
 
   const size = bounds.getSize(new THREE.Vector3());
   const footprint = Math.max(size.x, size.z) * 2.5;
+  const selectedMesh = selectedPartIndex != null && !hiddenIndices.includes(selectedPartIndex)
+    ? faceData.meshes[selectedPartIndex] ?? null : null;
 
   return (
     <>
@@ -508,6 +512,8 @@ export function EditorModel({
           commitZone();
         }}
       />
+      {/* Each part owns its line buffers; switching to a smaller part must drop the old segments. */}
+      {selectedMesh && <PartSelectionOutline key={selectedMesh.uuid} mesh={selectedMesh} />}
       <BrandingMeshes
         layers={layers}
         logoSources={logoSources}
