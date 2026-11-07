@@ -4,59 +4,35 @@ import { useI18n } from "@/features/i18n/I18nProvider";
 import { cn } from "@/lib/utils";
 import { EMPTY_ZONES, selectSelectedZoneId, selectZones, useEditorStore } from "../../store/useEditorStore";
 import { newZone, type Zone } from "../../lib/recipe";
-import type { ZoneMethod } from "../../lib/zones";
-
-const METHODS: { value: ZoneMethod; label: string }[] = [
-  { value: "plane", label: "editor.zones.methodPlane" },
-  { value: "groups", label: "editor.zones.methodParts" },
-  { value: "paint", label: "editor.zones.methodPaint" },
-];
+import { MAX_ZONES } from "../../lib/shaderPatch";
 
 /**
  * Add zone (Phase 6b R2), in the dock's Zones section since E2 U5: the three
- * ways to say which part of the surface a second finish covers — a plane
- * dragged along the model's height, one or more of its parts, or a brush.
+ * ways to select a surface. Setup is previewed on the model and enters the
+ * recipe only after the buyer confirms it.
  */
 export function AddZoneButton({ defaultPlaneMm }: { defaultPlaneMm: number }) {
   const { t } = useI18n();
-  const addZone = useEditorStore((s) => s.addZone);
+  const startZoneDraft = useEditorStore((s) => s.startZoneDraft);
   const zoneCount = useEditorStore((s) => (s.recipe.zones ?? EMPTY_ZONES).length);
-  const setPaintZone = useEditorStore((s) => s.setPaintZone);
+  const ready = useEditorStore(s => !!s.partsReport);
 
-  const add = (method: ZoneMethod) => {
-    const zone = newZone(randomUUID(), t("editor.zones.defaultName", { n: zoneCount + 1 }), method);
+  const add = () => {
+    const zone = newZone(randomUUID(), t("editor.zones.defaultName", { n: zoneCount + 1 }), "plane");
     if (zone.plane) zone.plane = { ...zone.plane, at_mm: defaultPlaneMm };
-    addZone(zone);
-    setPaintZone(method === "paint" ? zone.id : null);
+    zone.appearance = { mode: "paint", finish_id: null, custom: null, colour_hex: "#3B82F6" };
+    startZoneDraft(zone);
   };
 
   return (
-    <div className="relative" data-testid="add-zone-group">
-      <details className="group">
-        <summary
+    <div data-testid="add-zone-group">
+        <button type="button" onClick={add} disabled={!ready || zoneCount >= MAX_ZONES}
           data-testid="add-zone"
-          className="flex cursor-pointer list-none items-center gap-1 text-xs tracking-[0.05em] text-foreground underline-offset-4 hover:underline"
+          className="flex items-center gap-1 text-xs tracking-[0.05em] text-foreground underline-offset-4 hover:underline disabled:opacity-40"
         >
           <Layers2 className="h-3.5 w-3.5" strokeWidth={1.5} />
           {t("editor.zones.add")}
-        </summary>
-        <div className="absolute right-0 z-20 mt-1 w-44 border border-border bg-background p-1 shadow-sm">
-          {METHODS.map((method) => (
-            <button
-              key={method.value}
-              type="button"
-              data-testid={`add-zone-${method.value}`}
-              onClick={(event) => {
-                add(method.value);
-                (event.currentTarget.closest("details") as HTMLDetailsElement | null)?.removeAttribute("open");
-              }}
-              className="block w-full px-2 py-1 text-left text-[11px] text-foreground hover:bg-secondary"
-            >
-              {t(method.label)}
-            </button>
-          ))}
-        </div>
-      </details>
+        </button>
     </div>
   );
 }
@@ -106,7 +82,7 @@ function ZoneRow({ zone }: { zone: Zone }) {
           onBlur={commit}
           className="min-w-0 flex-1 border-b border-border bg-transparent py-0.5 text-sm tracking-wide text-foreground outline-none focus:border-foreground"
         />
-        <span className="shrink-0 text-[10px] uppercase tracking-[0.1em] text-muted-foreground">{t(`editor.zones.method.${zone.method}`)}</span>
+        <span className="shrink-0 text-[10px] uppercase tracking-[0.1em] text-muted-foreground">{zone.method === "plane" ? `${zone.plane?.axis.toUpperCase() ?? "Y"} · ${t("editor.zones.method.plane")}` : t(`editor.zones.method.${zone.method}`)}</span>
         <button
           type="button"
           data-testid="zone-delete"

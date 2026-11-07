@@ -28,15 +28,20 @@ export function PaintGroupsSection({ markedGroupIndices }: { markedGroupIndices:
   const groups = useEditorStore(s => s.recipe.paint_groups);
   const [open, setOpen] = useState(true);
   const [creating, setCreating] = useState(false);
+  const { setNodeRef } = useDroppable({ id: "new-group", data: { kind: "new-group" } });
+  const drag = useLayerDrag();
+  const dropOver = drag.destination?.create;
+  const selectedGroup = useEditorStore(s => s.selection?.kind === "group" ? s.selection.id : null);
+  useEffect(() => { if (selectedGroup) setOpen(true); }, [selectedGroup]);
 
   return (
-    <DockSection testId="paint-groups-section" toggleTestId="paint-groups-toggle" title={t("editor.groups.title")} count={groups?.length ?? 0} open={open} onToggle={() => setOpen(value => !value)} actions={<button type="button" data-testid="add-paint-group" onClick={() => { setOpen(true); setCreating(true); }} className="flex items-center gap-1 text-xs hover:underline"><Plus className="h-3.5 w-3.5" />{t("editor.groups.add")}</button>}>
+    <div ref={setNodeRef} data-testid="new-paint-group-drop" data-drop-over={dropOver || undefined} className={dropOver ? "bg-blue-50 ring-2 ring-inset ring-blue-600" : undefined}><DockSection testId="paint-groups-section" toggleTestId="paint-groups-toggle" title={t("editor.groups.title")} count={groups?.length ?? 0} open={open} onToggle={() => setOpen(value => !value)} actions={<button type="button" data-testid="add-paint-group" onClick={() => { setOpen(true); setCreating(true); }} className="flex items-center gap-1 text-xs hover:underline"><Plus className="h-3.5 w-3.5" />{t("editor.groups.add")}</button>}>
       {!groups?.length && <p className="text-xs text-muted-foreground">{t("editor.groups.empty")}</p>}
       <ul className="space-y-1.5">
         {groups?.map(group => <PaintGroupRow key={group.id} group={group} markedGroupIndices={markedGroupIndices} />)}
       </ul>
       <PaintGroupDialog open={creating} onOpenChange={setCreating} />
-    </DockSection>
+    </DockSection></div>
   );
 }
 
@@ -89,6 +94,7 @@ function PaintGroupRow({ group, markedGroupIndices }: { group: PaintGroup; marke
           })}
         </ul>
         {layers.length > 0 && <LayerList layers={layers} logoSources={logoSources} />}
+        {!group.members.length && <p className="py-2 text-xs text-muted-foreground">{t("editor.groups.emptyFolder")}</p>}
       </div>}
     </li>
   );
@@ -140,7 +146,7 @@ function PaintGroupForm({ group, onDone }: { group?: PaintGroup; onDone: () => v
       })}
       {!available.length && <p className="text-xs text-muted-foreground">{t("editor.groups.noMembers")}</p>}
     </div>
-    <div className="flex items-center justify-between gap-2"><span className="text-xs text-muted-foreground">{t("editor.groups.selectedCount", { count })}</span><button type="button" data-testid="save-paint-group" disabled={!name.trim() || count < (group ? 1 : 2)} onClick={() => { save({ ...group, id: group?.id ?? randomUUID(), name, members: valid }); onDone(); }} className="border border-foreground bg-foreground px-3 py-1.5 text-xs text-background disabled:opacity-40">{t("editor.groups.save")}</button></div>
+    <div className="flex items-center justify-between gap-2"><span className="text-xs text-muted-foreground">{t("editor.groups.selectedCount", { count })}</span><button type="button" data-testid="save-paint-group" disabled={!name.trim()} onClick={() => { save({ ...group, id: group?.id ?? randomUUID(), name, members: valid }); onDone(); }} className="border border-foreground bg-foreground px-3 py-1.5 text-xs text-background disabled:opacity-40">{t("editor.groups.save")}</button></div>
   </div>;
 }
 

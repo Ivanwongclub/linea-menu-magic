@@ -76,6 +76,8 @@ export async function verifySelectionAppearance({ page, screenshotPath }) {
 
   await page.getByTestId("add-zone").click();
   await page.getByTestId("add-zone-plane").click();
+    await page.getByTestId("zone-draft-reset-colour").click();
+    await page.getByTestId("zone-draft-confirm").click();
   assert.equal(await popup.getAttribute("data-kind"), "zone");
   const zoneFinish = await pickMaterial();
   await poll(async () => (await zones())[0]?.finishId === zoneFinish && (await zones())[0]?.faces > 0, "zone popup did not apply its material");

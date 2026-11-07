@@ -134,6 +134,8 @@ export async function verifyScopedGradient({ page, reapplyMtl, screenshotPath })
 
   await page.getByTestId("add-zone").click();
   await page.getByTestId("add-zone-plane").click();
+    await page.getByTestId("zone-draft-reset-colour").click();
+    await page.getByTestId("zone-draft-confirm").click();
   await page.getByTestId("colour-mode-gradient").click();
   await stopColour(page, "from", "#FF0000");
   await stopColour(page, "to", "#0000FF");

@@ -34,7 +34,7 @@ export async function verifyPaintGroups({ page, reload = false, screenshotPath }
   await page.getByTestId("add-paint-group").click();
   await page.getByTestId("paint-group-name").fill("GP TEST");
   await member("part", String(original[0].index)).check();
-  assert.equal(await page.getByTestId("save-paint-group").isDisabled(), true, "new GP requires at least two members");
+  assert.equal(await page.getByTestId("save-paint-group").isDisabled(), false, "a GP can start with one member and accept later drops");
   await member("part", String(original[1].index)).check();
   await page.getByTestId("save-paint-group").click();
   await page.getByTestId("paint-group-dialog").waitFor({ state: "detached" });

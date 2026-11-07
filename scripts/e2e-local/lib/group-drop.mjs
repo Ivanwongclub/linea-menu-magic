@@ -27,6 +27,32 @@ async function drag({ page, source, target, hover, cancel = false, screenshotPat
   await page.getByTestId("layer-drag-overlay").waitFor({ state: "detached" });
 }
 
+/** The original failure: dropping into Groups while its folder count is zero. */
+export async function verifyEmptyGroupDrop({ page }) {
+  const modifier = process.platform === "darwin" ? "Meta" : "Control";
+  if (await page.getByTestId("parts-toggle").getAttribute("aria-expanded") !== "true") await page.getByTestId("parts-toggle").click();
+  assert.equal(await page.getByTestId("paint-group-row").count(), 0);
+  const root = page.getByTestId("parts-group");
+  const first = root.locator('[data-testid="part-row"][data-index="0"]');
+  const empty = page.getByTestId("new-paint-group-drop");
+  await drag({ page, source: first.getByTestId("part-drag-handle"), target: empty, hover: empty });
+  const folder = page.getByTestId("paint-group-row");
+  await poll(async () => await folder.getByTestId("part-row").count() === 1, "dropping into empty Groups did not create a folder");
+  await page.keyboard.press(`${modifier}+z`);
+  await poll(async () => await folder.count() === 0 && await first.count() === 1, "undo failed to reverse drag-to-create");
+  await page.getByTestId("add-paint-group").click();
+  await page.getByTestId("save-paint-group").click();
+  assert.equal(await folder.getByTestId("part-row").count(), 0, "an empty folder should be allowed");
+  await drag({ page, source: first.getByTestId("part-select"), target: folder.getByTestId("paint-group-select"), hover: folder });
+  await poll(async () => await folder.getByTestId("part-row").count() === 1, "empty GP could not receive the first part");
+  await drag({ page, source: folder.getByTestId("part-drag-handle"), target: page.getByTestId("ungrouped-drop-part"), hover: page.getByTestId("ungrouped-drop-part") });
+  assert.equal(await folder.count(), 1, "moving out the last part should keep the reusable folder");
+  assert.equal(await folder.getByTestId("part-row").count(), 0);
+  await folder.getByTestId("paint-group-select").click();
+  await page.getByTestId("selection-appearance-panel").getByTestId("dissolve-paint-group").click();
+  return { dropIntoEmptySection: true, emptyFolder: true, firstMember: true, retainEmptyFolder: true, undo: true };
+}
+
 /** Use the current three-part model, or a tiny disposable fixture with restore. */
 export async function verifyGroupDrop({ page, screenshotPath, restore }) {
   if (!restore) return verifyLoadedGroupDrop({ page, screenshotPath });

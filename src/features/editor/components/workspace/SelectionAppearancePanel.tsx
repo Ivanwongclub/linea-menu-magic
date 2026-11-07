@@ -12,6 +12,7 @@ import { DEFAULT_APPEARANCE, isLogoLayer, layerAppearance, type LayerAppearance 
 import { useEditorStore, type Selection } from "../../store/useEditorStore";
 import { ModelColourControl } from "../ModelColourControl";
 import { PaintGroupDetails } from "./PaintGroupsSection";
+import { ZoneRegionControls } from "../branding/ZoneRegionControls";
 
 interface Props {
   originalHex: string | null | undefined;
@@ -87,6 +88,7 @@ function SelectedAppearance({ selection, originalHex, sourceAppearance }: Props 
         </button>
       </div>
 
+      {zone && <div className="mb-3 border-b border-border pb-3"><ZoneRegionControls zone={zone} /></div>}
       <ModelColourControl originalHex={originalHex} sourceAppearance={sourceAppearance} />
 
       {group ? <PaintGroupDetails group={group} /> : <>

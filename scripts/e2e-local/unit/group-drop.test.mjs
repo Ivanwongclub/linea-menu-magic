@@ -22,14 +22,24 @@ test("drop transfers a part exactly once and takes the destination fill without 
   assert.deepEqual(before.paint_groups[0].members, [part("0"), part("1")]);
 });
 
-test("dragging out keeps the actual part and its own paint while removing empty source folders", () => {
+test("dragging out keeps the actual part, its own paint and the empty source folder", () => {
   const before = { ...recipe(), part_colours: { "0": "#123456" } };
   before.paint_groups[0] = { ...before.paint_groups[0], members: [part("0")] };
   const after = moveGroupMember(before, part("0"), null);
-  assert.equal(after.paint_groups.length, 1);
-  assert.equal(after.paint_groups[0].id, "g2");
+  assert.equal(after.paint_groups.length, 2);
+  assert.deepEqual(after.paint_groups[0].members, []);
   assert.equal(after.part_colours["0"], "#123456");
   assert.equal(after.layers, before.layers);
+});
+
+test("the empty groups section creates a folder from a dropped member with one undo", () => {
+  state().initialize(emptyRecipe(), "empty-group-drop");
+  state().createPaintGroupForMember(part("0"), "new", "GP 1");
+  assert.deepEqual(state().recipe.paint_groups, [{ id: "new", name: "GP 1", members: [part("0")] }]);
+  state().undo();
+  assert.equal(state().recipe.paint_groups, undefined);
+  state().redo();
+  assert.equal(state().recipe.paint_groups[0].members[0].id, "0");
 });
 
 test("a new branding member takes a GP gradient without losing its material", () => {

@@ -243,6 +243,8 @@ export default async function ({ page, base, admin, editor, h }) {
 
     await page.getByTestId("add-zone").click();
     await page.getByTestId("add-zone-plane").click();
+    await page.getByTestId("zone-draft-reset-colour").click();
+    await page.getByTestId("zone-draft-confirm").click();
     await page.getByTestId("zone-row").waitFor({ timeout: 20000 });
     assert.deepEqual(await selected(), { layers: 0, zones: 1, parts: 0, handles: 0 }, "a new zone is the one selection");
     assert.equal(await properties.getAttribute("data-kind"), "zone", "Properties follows the zone");

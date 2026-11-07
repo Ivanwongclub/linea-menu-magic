@@ -16,13 +16,15 @@ import { EMPTY_ZONES, selectSelectedPartIndex, useEditorStore } from "../store/u
 import { colourMaterial, finishMaterial, materialWithColour, materialWithGradient, applyMaterialGradient } from "../lib/finishMaterial";
 import type { Layer, Zone } from "../lib/recipe";
 import { decodeRuns, encodeRuns, facesForGroups, facesForPlane, resolveZones, totalFaces } from "../lib/zones";
-import type { ZoneStyle } from "../lib/shaderPatch";
+import { applyShaderPatches, clonePatched, type ShaderPatchOptions, type ZoneStyle } from "../lib/shaderPatch";
 import { gradientBoundsFor, type GradientPaint } from "../lib/gradient";
 import { findMemberGroup, unionGradientBounds } from "../lib/paintGroups";
 import type { LogoSource } from "../hooks/useLogoAssets";
 import { BrandingMeshes, type TextSceneReport } from "./branding/BrandingMeshes";
 import { cornersOf, fitDistance, homeDirection, type BoundsMm } from "../lib/framing";
 import { PartSelectionOutline } from "./PartSelectionOutline";
+import { ZoneSelectionPreview } from "./branding/ZoneSelectionPreview";
+import { boundedZonePlane } from "../lib/zones";
 
 interface EditorModelProps {
   url: string;
@@ -53,6 +55,7 @@ interface EditorModelProps {
   /** Phase 6b R2: the zones to mask the part's material with, in order. */
   zones?: Zone[];
   zoneStyles?: ZoneStyle[];
+  showRegionTools?: boolean;
   /** Phase 6b R1/R2: what the model is made of, and what the zones cover. */
   onPartsReport?: (report: PartsReport) => void;
   /** Phase 6b R4: whether the occlusion bake is running, and what it cost. */
@@ -121,6 +124,7 @@ export function EditorModel({
   hiddenGroups,
   zones,
   zoneStyles,
+  showRegionTools = true,
   onPartsReport,
   onOcclusionState,
   onBakeStats,
@@ -139,6 +143,9 @@ export function EditorModel({
   const partGradients = useEditorStore(s => s.recipe.part_gradients);
   const paintGroups = useEditorStore(s => s.recipe.paint_groups);
   const selection = useEditorStore(s => s.selection);
+  const zoneDraft = useEditorStore(s => s.zoneDraft);
+  const zonePicking = useEditorStore(s => s.zonePicking);
+  const editingZone = zoneDraft ?? (selection?.kind === "zone" ? zones?.find(zone => zone.id === selection.id) : null);
   const format: ModelFormat = modelFormatFromName(sourceName) ?? modelFormatFromName(url) ?? "obj";
   const obj = useLoader(ModelFileLoader, url, (loader) => {
     loader.formatHint = format;
@@ -217,6 +224,13 @@ export function EditorModel({
   }, [isMetal, finish, colour, zoneStyleKey, baseColourHex, baseGradient, gradientBounds]);
 
   useEffect(() => () => material.dispose(), [material]);
+  // Surface regions do not extend onto separately editable branding layers.
+  const brandingMaterial = useMemo(() => {
+    const clone = clonePatched(material);
+    applyShaderPatches(clone, { ...(material.userData.shaderPatch as ShaderPatchOptions), zones: null });
+    return clone;
+  }, [material]);
+  useEffect(() => () => brandingMaterial.dispose(), [brandingMaterial]);
 
   const materialCreator = useMemo(() => materialOverride ? new MTLLoader().parse(materialOverride.materialText, "") : null, [materialOverride]);
   useEffect(() => () => {
@@ -255,8 +269,8 @@ export function EditorModel({
     if (!hex && !paint) return null;
     const source = preserveSource && sourceMaterials[index] ? sourceMaterials[index] : material;
     const fill = (entry: THREE.MeshPhysicalMaterial) => paint
-      ? materialWithGradient(entry, paint, true)
-      : materialWithColour(entry, hex!);
+      ? materialWithGradient(entry, paint)
+      : materialWithColour(entry, hex!, false);
     return Array.isArray(source) ? source.map(fill) : fill(source);
   }), [prepared, partColours, partGradients, partGradientBounds, paintGroups, groupPaints, preserveSource, sourceMaterials, material]);
   useEffect(() => () => partMaterials.flat().forEach(entry => entry?.dispose()), [partMaterials]);
@@ -269,11 +283,11 @@ export function EditorModel({
       const hex = ownHex ?? group?.colour_hex ?? baseColourHex;
       const gradient = layer.appearance?.gradient ?? (!ownHex && !group?.colour_hex ? baseGradient : undefined);
       const paint = !layer.appearance?.gradient && !ownHex && group?.gradient ? groupPaints[group.id] : gradient ? { colour: gradient, bounds: [...gradientBounds] as typeof gradientBounds, fitToLayer: !!layer.appearance?.gradient } : undefined;
-      if (paint) coloured[layer.id] = materialWithGradient(layerMaterials?.[layer.id] ?? material, paint, true);
-      else if (hex) coloured[layer.id] = materialWithColour(layerMaterials?.[layer.id] ?? material, hex);
+      if (paint) coloured[layer.id] = materialWithGradient(layerMaterials?.[layer.id] ?? brandingMaterial, paint, true);
+      else if (hex) coloured[layer.id] = materialWithColour(layerMaterials?.[layer.id] ?? brandingMaterial, hex);
     }
     return coloured;
-  }, [layers, baseColourHex, baseGradient, gradientBounds, layerMaterials, material, paintGroups, groupPaints]);
+  }, [layers, baseColourHex, baseGradient, gradientBounds, layerMaterials, brandingMaterial, paintGroups, groupPaints]);
   useEffect(() => () => Object.values(colouredLayerMaterials).forEach(entry => entry.dispose()), [colouredLayerMaterials]);
   const renderedLayerMaterials = useMemo(() => ({ ...layerMaterials, ...colouredLayerMaterials }), [layerMaterials, colouredLayerMaterials]);
 
@@ -359,7 +373,9 @@ export function EditorModel({
   // The slot each face renders in: a later zone wins where two overlap (R2).
   useLayoutEffect(() => {
     const { meshes, counts, total } = faceData;
-    const { slots, overlaps } = resolveZones(total, zoneRuns);
+    const { overlaps } = resolveZones(total, zoneRuns);
+    // Part/brush masks remain face based; the shader evaluates plane masks precisely.
+    const { slots } = resolveZones(total, zoneRuns.map((runs, index) => zones?.[index]?.method === "plane" ? [] : runs));
     let face = 0;
     meshes.forEach((mesh, group) => {
       const count = counts[group];
@@ -383,7 +399,7 @@ export function EditorModel({
       overlaps,
       totalFaces: total,
     });
-  }, [model, faceData, zoneRuns, hiddenIndices, onPartsReport, authoredMaterials, obj, material, sourceMaterials, preserveSource, localModel?.warnings, materialOverride, partMaterials]);
+  }, [model, faceData, zoneRuns, zones, hiddenIndices, onPartsReport, authoredMaterials, obj, material, sourceMaterials, preserveSource, localModel?.warnings, materialOverride, partMaterials]);
 
   /**
    * The occlusion bake, in its worker (6b R4): once per file, hidden set and
@@ -436,6 +452,12 @@ export function EditorModel({
   const updateZone = useEditorStore((s) => s.updateZone);
   const commitZone = useEditorStore((s) => s.commit);
   const painting = useRef(false);
+  useEffect(() => {
+    const stop = () => { if (painting.current) { painting.current = false; useEditorStore.getState().endDrag(); } };
+    window.addEventListener("pointerup", stop);
+    window.addEventListener("pointercancel", stop);
+    return () => { window.removeEventListener("pointerup", stop); window.removeEventListener("pointercancel", stop); stop(); };
+  }, []);
   // R3F still raycasts hidden meshes; only the nearest visible source part is pickable.
   const hitPartIndex = (event: ThreeEvent<PointerEvent | MouseEvent>): number | null => {
     for (const hit of event.intersections) {
@@ -452,7 +474,8 @@ export function EditorModel({
   const paintAt = useCallback(
     (point: THREE.Vector3) => {
       if (!paintZoneId) return;
-      const zone = (zones ?? EMPTY_ZONES).find((z) => z.id === paintZoneId);
+      const state = useEditorStore.getState();
+      const zone = state.zoneDraft?.id === paintZoneId ? state.zoneDraft : (state.recipe.zones ?? EMPTY_ZONES).find((z) => z.id === paintZoneId);
       if (!zone) return;
       const faces = new Set(decodeRuns(zone.faces ?? []));
       let offset = 0;
@@ -484,7 +507,7 @@ export function EditorModel({
       });
       updateZone(paintZoneId, { faces: encodeRuns(faces) });
     },
-    [paintZoneId, zones, faceData, brushRadiusMm, updateZone],
+    [paintZoneId, faceData, brushRadiusMm, updateZone],
   );
 
   // Where the model sits, for Add text's recovered defaults (4j, C8): the
@@ -578,7 +601,7 @@ export function EditorModel({
       <primitive
         object={model}
         onPointerOver={(event: ThreeEvent<PointerEvent>) => {
-          if (paintZoneId || event.buttons || event.pointerType === "touch") return;
+          if (editingZone || paintZoneId || event.buttons || event.pointerType === "touch") return;
           event.stopPropagation();
           setHoveredPart(hitPartIndex(event));
         }}
@@ -588,9 +611,11 @@ export function EditorModel({
         }}
         onPointerDown={(event: ThreeEvent<PointerEvent>) => {
           setHoveredPart(null);
+          if (zonePicking) { event.stopPropagation(); return; }
           if (!paintZoneId) return;
           event.stopPropagation();
           painting.current = true;
+          useEditorStore.getState().beginDrag();
           paintAt(event.point);
         }}
         onPointerMove={(event: ThreeEvent<PointerEvent>) => {
@@ -598,20 +623,38 @@ export function EditorModel({
             if (!painting.current) return;
             event.stopPropagation();
             paintAt(event.point);
-          } else if (!event.buttons && event.pointerType !== "touch") {
+          } else if (!editingZone && !event.buttons && event.pointerType !== "touch") {
             event.stopPropagation();
             setHoveredPart(hitPartIndex(event));
           }
         }}
         onPointerUp={(event: ThreeEvent<PointerEvent>) => {
+          if (zonePicking && editingZone && event.delta <= 4) {
+            event.stopPropagation();
+            const index = hitPartIndex(event);
+            const hit = index == null ? null : event.intersections.find(hit => hit.object === faceData.meshes[index]);
+            if (!hit || index == null) return;
+            if (editingZone.method === "plane" && editingZone.plane) {
+              const frame = { minX: bounds.min.x, maxX: bounds.max.x, minY: bounds.min.y, maxY: bounds.max.y, minZ: bounds.min.z, maxZ: bounds.max.z };
+              updateZone(editingZone.id, { plane: boundedZonePlane(editingZone.plane, frame, hit.point[editingZone.plane.axis]) });
+              useEditorStore.getState().setZonePicking(false);
+            } else if (editingZone.method === "groups") {
+              const groups = new Set(editingZone.groups ?? []);
+              if (groups.has(index)) groups.delete(index); else groups.add(index);
+              updateZone(editingZone.id, { groups: [...groups].sort((a, b) => a - b) });
+            }
+            commitZone();
+            return;
+          }
           if (!painting.current) {
-            if (!paintZoneId && event.delta <= 4 && event.pointerType !== "touch") setHoveredPart(hitPartIndex(event));
+            if (!editingZone && !paintZoneId && event.delta <= 4 && event.pointerType !== "touch") setHoveredPart(hitPartIndex(event));
             return;
           }
           painting.current = false;
-          commitZone();
+          useEditorStore.getState().endDrag();
         }}
         onDoubleClick={(event: ThreeEvent<MouseEvent>) => {
+          if (zoneDraft || zonePicking) { event.stopPropagation(); return; }
           if (event.delta > 4) return;
           const index = hitPartIndex(event);
           // Hidden source meshes may still be raycast hits: treat those as empty canvas.
@@ -631,17 +674,18 @@ export function EditorModel({
         }}
       />
       {/* Each part owns its line buffers; switching to a smaller part must drop the old segments. */}
-      {highlightedMesh && <PartSelectionOutline key={highlightedMesh.uuid} mesh={highlightedMesh} />}
+      {!editingZone && highlightedMesh && <PartSelectionOutline key={highlightedMesh.uuid} mesh={highlightedMesh} />}
       {hoveredPartIndex == null && selection?.kind === "group" && paintGroups?.find(group => group.id === selection.id)?.members.filter(member => member.kind === "part" && !hiddenIndices.includes(Number(member.id))).map(member => {
         const mesh = model.children.filter(child => (child as THREE.Mesh).isMesh)[Number(member.id)] as THREE.Mesh | undefined;
         return mesh ? <PartSelectionOutline key={mesh.uuid} mesh={mesh} /> : null;
       })}
+      {editingZone && (showRegionTools || zoneDraft) && <ZoneSelectionPreview zone={editingZone} meshes={faceData.meshes} counts={faceData.counts} centroids={faceData.centroids} bounds={{ minX: bounds.min.x, maxX: bounds.max.x, minY: bounds.min.y, maxY: bounds.max.y, minZ: bounds.min.z, maxZ: bounds.max.z }} />}
       <BrandingMeshes
         layers={layers}
         logoSources={logoSources}
         model={model}
         faceZ={bounds.max.z}
-        material={material}
+        material={brandingMaterial}
         layerMaterials={renderedLayerMaterials}
         baseColourHex={baseColourHex}
         baseGradient={baseGradient}

@@ -75,6 +75,8 @@ export async function verifyScopedColour({ page, reapplyMtl, screenshotPath }) {
 
   await page.getByTestId("add-zone").click();
   await page.getByTestId("add-zone-plane").click();
+    await page.getByTestId("zone-draft-reset-colour").click();
+    await page.getByTestId("zone-draft-confirm").click();
   assert.equal(await page.getByTestId("model-colour-control").getAttribute("data-scope"), "zone");
   await setHex("#C62653");
   await poll(async () => JSON.parse(await viewport.getAttribute("data-zones") || "[]")[0]?.colourHex === "#C62653", "selected zone did not accept its colour");

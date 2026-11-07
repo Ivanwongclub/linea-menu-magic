@@ -92,18 +92,24 @@ test("renaming a GP keeps deliberate individual overrides, while newly added mem
   assert.deepEqual(changed.part_colours, { "0": "#00FF00" });
 });
 
-test("deleting branding prunes memberships and empty GPs; undo restores everything", () => {
+test("deleting branding prunes memberships but retains reusable empty folders; undo restores everything", () => {
   state().savePaintGroup({ ...group, members: [layer("a")] });
   state().setGradientForTarget(target, gradient);
   state().commit();
   state().removeLayer("a");
-  assert.equal(state().recipe.paint_groups, undefined);
-  assert.equal(state().selection, null);
+  assert.deepEqual(state().recipe.paint_groups[0].members, []);
+  assert.deepEqual(state().selection, target);
   state().undo();
   assert.deepEqual(state().recipe.paint_groups[0].gradient, gradient);
   assert.equal(state().recipe.layers[0].id, "a");
   state().redo();
-  assert.equal(state().recipe.paint_groups, undefined);
+  assert.deepEqual(state().recipe.paint_groups[0].members, []);
+});
+
+test("an empty GP survives recipe normalization and can receive a later member", () => {
+  const before = putPaintGroup(recipe(), { id: "empty", name: "Empty GP", members: [] });
+  assert.deepEqual(normalizeRecipe(JSON.parse(JSON.stringify(before))).paint_groups, before.paint_groups);
+  assert.deepEqual(putPaintGroup(before, { ...before.paint_groups[0], members: [part("0")] }).paint_groups[0].members, [part("0")]);
 });
 
 test("GP membership and gradients survive recipe JSON and restoring old recipes", () => {

@@ -16,6 +16,7 @@ import * as THREE from "three";
 import { oxideColor, twoToneFragmentChunks, twoToneVertexChunks } from "./twoTone.ts";
 import { gradientShaderPatch } from "./gradientShader.ts";
 import type { ColourGradient, GradientBounds, GradientPaint } from "./gradient.ts";
+import type { ZonePlane } from "./zones.ts";
 
 export type BrushKind = "linear" | "radial";
 
@@ -30,6 +31,8 @@ export interface ZoneStyle {
   preserveMaterial?: boolean;
   preserveColour?: boolean;
   gradient?: ColourGradient;
+  /** Classify plane regions at the actual surface point, even on coarse triangles. */
+  plane?: ZonePlane;
 }
 
 export interface ShaderPatchOptions {
@@ -85,8 +88,9 @@ function brushPatch(shader: Shader, kind: BrushKind): void {
 /**
  * Zones (R2): the part keeps one material and one draw call; the face's own
  * zone slot picks the colour, metalness and roughness out of a small uniform
- * array. The slot rides on a per-face attribute, so nothing is duplicated and
- * nothing is cut.
+ * array. Part/brush slots come from the face attribute; planes classify the
+ * fragment's model-frame position. The later matching region wins, without
+ * cutting the source geometry.
  *
  * The lookup is a constant-bounds loop rather than a dynamic index: GLSL ES 1
  * only allows uniform arrays to be indexed by constant expressions, and a
@@ -99,24 +103,37 @@ function zonePatch(shader: Shader, zones: ZoneStyle[]): void {
   uniforms.zoneRoughness = { value: zones.map((z) => z.roughness) };
   uniforms.zonePreserveMaterial = { value: zones.map((z) => z.preserveMaterial ? 1 : 0) };
   uniforms.zonePreserveColour = { value: zones.map(z => z.preserveColour ? 1 : 0) };
-  shader.vertexShader = after(shader.vertexShader, "common", "attribute float zoneIndex;\nvarying float vZoneIndex;");
+  uniforms.zoneIsPlane = { value: zones.map(z => z.plane ? 1 : 0) };
+  uniforms.zonePlane = { value: zones.map(z => {
+    const side = z.plane?.side === "below" ? -1 : 1;
+    return new THREE.Vector4(z.plane?.axis === "x" ? side : 0, z.plane?.axis === "y" ? side : 0, z.plane?.axis === "z" ? side : 0, -(z.plane?.at_mm ?? 0) * side);
+  }) };
+  shader.vertexShader = after(shader.vertexShader, "common", "attribute float zoneIndex;\nvarying float vZoneIndex;\nvarying vec3 vWincycZoneWorld;");
   shader.vertexShader = after(shader.vertexShader, "begin_vertex", "\tvZoneIndex = zoneIndex;");
+  shader.vertexShader = after(shader.vertexShader, "project_vertex", "vWincycZoneWorld = ( modelMatrix * vec4( transformed, 1.0 ) ).xyz;");
   const declarations = `uniform vec3 zoneColor[ ${zones.length} ];
 uniform float zoneMetalness[ ${zones.length} ];
 uniform float zoneRoughness[ ${zones.length} ];
 uniform float zonePreserveMaterial[ ${zones.length} ];
 uniform float zonePreserveColour[ ${zones.length} ];
-varying float vZoneIndex;`;
+uniform float zoneIsPlane[ ${zones.length} ];
+uniform vec4 zonePlane[ ${zones.length} ];
+varying float vZoneIndex;
+varying vec3 vWincycZoneWorld;`;
   shader.fragmentShader = after(shader.fragmentShader, "common", declarations);
   // The slot is constant across a face, but it arrives as an interpolated
   // varying: 1.0 can land as 0.99999 and truncate to nothing, which speckles a
   // zone's edge. Round it instead of truncating.
-  const pick = (target: string, source: string, physical = false) => `	if ( vZoneIndex > 0.5 ) {
+  const pick = (target: string, source: string, physical = false) => `	if ( wincycZoneSlot > 0.5 ) {
 		for ( int zone = 0; zone < ${zones.length}; zone ++ ) {
-			if ( zone == int( vZoneIndex + 0.5 ) - 1 && ${physical ? "zonePreserveMaterial" : "zonePreserveColour"}[ zone ] < 0.5 ) ${target} = ${source}[ zone ];
+			if ( zone == int( wincycZoneSlot + 0.5 ) - 1 && ${physical ? "zonePreserveMaterial" : "zonePreserveColour"}[ zone ] < 0.5 ) ${target} = ${source}[ zone ];
 		}
 	}`;
-  shader.fragmentShader = after(shader.fragmentShader, "color_fragment", pick("diffuseColor.rgb", "zoneColor"));
+  const planeSlots = `float wincycZoneSlot = vZoneIndex;
+for ( int zone = 0; zone < ${zones.length}; zone ++ ) {
+  if ( zoneIsPlane[ zone ] > 0.5 && dot( vec4( vWincycZoneWorld, 1.0 ), zonePlane[ zone ] ) >= 0.0 && float( zone + 1 ) > wincycZoneSlot ) wincycZoneSlot = float( zone + 1 );
+}`;
+  shader.fragmentShader = after(shader.fragmentShader, "color_fragment", planeSlots + "\n" + pick("diffuseColor.rgb", "zoneColor"));
   shader.fragmentShader = after(shader.fragmentShader, "roughnessmap_fragment", pick("roughnessFactor", "zoneRoughness", true));
   shader.fragmentShader = after(shader.fragmentShader, "metalnessmap_fragment", pick("metalnessFactor", "zoneMetalness", true));
 }

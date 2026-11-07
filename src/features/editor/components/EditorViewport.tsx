@@ -33,6 +33,7 @@ import { zoneStyleFor } from "../lib/finishMaterial";
 import { zonesSentence } from "../lib/zones";
 import { finishMarketingName } from "@/features/finishes/finishAxisLine";
 import { SelectionAppearancePanel } from "./workspace/SelectionAppearancePanel";
+import { ZoneCreationPanel } from "./workspace/ZoneCreationPanel";
 
 
 interface EditorViewportProps {
@@ -178,7 +179,9 @@ export function EditorViewport({
   const handleElements = useRef(newHandleElements());
   const selectedLayerId = useEditorStore(selectSelectedLayerId);
   // Hold the model still while a part is being inspected or selected.
-  const isInspecting = useEditorStore((s) => s.selection !== null || s.hoveredPartIndex !== null || s.dragging);
+  const isInspecting = useEditorStore((s) => s.selection !== null || s.hoveredPartIndex !== null || s.dragging || !!s.zoneDraft);
+  const zoneDraft = useEditorStore(s => s.zoneDraft);
+  const regionInteracting = useEditorStore(s => s.zonePicking || !!s.paintZoneId || s.dragging);
   const setHoveredPart = useEditorStore((s) => s.setHoveredPart);
   const modelFrame = useEditorStore((s) => s.modelFrame);
   // U10: the strip reads this from the store now, at the bottom of the
@@ -207,7 +210,7 @@ export function EditorViewport({
   const [bakeStats, setBakeStats] = useState<{ mainThreadMs: number; totalMs: number } | null>(null);
   const zoneStyles = useMemo(() => {
     const byId = new Map((publicFinishes ?? []).map((f) => [f.id, f]));
-    return zones.map((zone) => zoneStyleFor(zone.appearance, byId, baseColourHex, baseGradient) ?? { colorHex: "#FFFFFF", metalness: 0, roughness: 1 });
+    return zones.map((zone) => ({ ...(zoneStyleFor(zone.appearance, byId, baseColourHex, baseGradient) ?? { colorHex: "#FFFFFF", metalness: 0, roughness: 1, preserveMaterial: true, preserveColour: true }), ...(zone.method === "plane" && zone.plane ? { plane: zone.plane } : {}) }));
   }, [zones, publicFinishes, baseColourHex, baseGradient]);
   // R3: what the spec sheet will say — "rim: bright nickel; face: red copper".
   const zoneSentence = useMemo(() => {
@@ -236,6 +239,7 @@ export function EditorViewport({
   const onEmptyDoubleClick = useCallback((event: MouseEvent) => {
     if (event.type !== "dblclick") return;
     const state = useEditorStore.getState();
+    if (state.zoneDraft || state.zonePicking) return;
     state.select(null);
     state.setPaintZone(null);
   }, []);
@@ -436,6 +440,7 @@ export function EditorViewport({
                 id: zone.id,
                 name: zone.name,
                 method: zone.method,
+                plane: zone.plane,
                 faces: partsReport.zoneFaces[index] ?? 0,
                 colourHex: zoneStyles[index]?.colorHex ?? null,
                 mode: zone.appearance.mode,
@@ -480,6 +485,7 @@ export function EditorViewport({
             hiddenGroups={hiddenGroups}
             zones={zones}
             zoneStyles={zoneStyles}
+            showRegionTools={!calibration}
             onPartsReport={setPartsReport}
             onOcclusionState={setOcclusionState}
             onBakeStats={setBakeStats}
@@ -505,6 +511,7 @@ export function EditorViewport({
           <OrbitControls
             ref={controlsRef}
             makeDefault
+            enabled={!regionInteracting}
             enableDamping
             dampingFactor={0.08}
             // Selecting a layer is an interaction too: nothing turns under a handle drag (4i).
@@ -534,7 +541,7 @@ export function EditorViewport({
         </div>
       )}
       {viewportTools}
-      {!calibration && <SelectionAppearancePanel originalHex={originalHex} sourceAppearance={sourceAppearance} />}
+      {zoneDraft ? <ZoneCreationPanel key={zoneDraft.id} /> : !calibration && <SelectionAppearancePanel originalHex={originalHex} sourceAppearance={sourceAppearance} />}
       </div>
     </>
   );

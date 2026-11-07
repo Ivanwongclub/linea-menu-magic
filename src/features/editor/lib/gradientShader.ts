@@ -53,11 +53,11 @@ diffuseColor.rgb *= vColor.rgb;
   };
   let code = "";
   if (base) {
-    const excluded = (zones ?? []).flatMap((zone, index) => !zone.preserveColour || zone.gradient ? [`abs( vZoneIndex - ${index + 1}.0 ) < 0.5`] : []);
+    const excluded = (zones ?? []).flatMap((zone, index) => !zone.preserveColour || zone.gradient ? [`abs( wincycZoneSlot - ${index + 1}.0 ) < 0.5`] : []);
     code += `{\n${excluded.length ? `if ( !( ${excluded.join(" || ")} ) ) {\n` : ""}${fill("wincycBaseGradient", base.colour, base.bounds)}\n${excluded.length ? "}" : ""}\n}\n`;
   }
   zones?.forEach((zone, index) => {
-    if (zone.gradient) code += `if ( abs( vZoneIndex - ${index + 1}.0 ) < 0.5 ) {\n${fill(`wincycZoneGradient${index}`, zone.gradient, zoneBounds)}\n}\n`;
+    if (zone.gradient) code += `if ( abs( wincycZoneSlot - ${index + 1}.0 ) < 0.5 ) {\n${fill(`wincycZoneGradient${index}`, zone.gradient, zoneBounds)}\n}\n`;
   });
   shader.fragmentShader = shader.fragmentShader.replace("#include <common>", `#include <common>\n${declarations}`);
   shader.fragmentShader = shader.fragmentShader.replace("#include <roughnessmap_fragment>", `#include <roughnessmap_fragment>\n${code}`);

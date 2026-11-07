@@ -45,6 +45,7 @@ export function colourMaterial(hex: string | null | undefined, zones: ZoneStyle[
  * chosen — the zone then renders as the part, not as a guess.
  */
 export function zoneStyleFor(appearance: LayerAppearance, finishById: Map<string, PickerFinish>, baseColourHex?: string, baseGradient?: ColourGradient): ZoneStyle | null {
+  if (!appearance.finish_id && !appearance.custom && !appearance.colour_hex && !appearance.gradient) return { colorHex: "#FFFFFF", metalness: 0, roughness: 0, preserveMaterial: true, preserveColour: true };
   const colourHex = appearance.colour_hex ?? baseColourHex;
   const paint = {
     ...(appearance.gradient ? { gradient: appearance.gradient } : {}),
@@ -72,11 +73,11 @@ export function zoneStyleFor(appearance: LayerAppearance, finishById: Map<string
 export const CUSTOM_PAINT = { metalness: 0, roughness: 0.6, clearcoat: 0 } as const;
 
 /** Own colour, same textures and physical/shader settings; never mutate a shared MTL. */
-export function materialWithColour(source: THREE.MeshPhysicalMaterial, hex: string): THREE.MeshPhysicalMaterial {
+export function materialWithColour(source: THREE.MeshPhysicalMaterial, hex: string, overrideZones = true): THREE.MeshPhysicalMaterial {
   const material = clonePatched(source);
   material.color.set(hex);
   const patches = source.userData.shaderPatch as ShaderPatchOptions | undefined;
-  if (patches) applyShaderPatches(material, { ...patches, gradient: undefined, zones: patches.zones?.map(zone => ({ ...zone, colorHex: hex, gradient: undefined, preserveColour: false })) });
+  if (patches) applyShaderPatches(material, { ...patches, gradient: undefined, zones: overrideZones ? patches.zones?.map(zone => ({ ...zone, colorHex: hex, gradient: undefined, preserveColour: false })) : patches.zones });
   return material;
 }
 

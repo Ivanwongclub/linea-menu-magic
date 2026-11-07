@@ -65,6 +65,14 @@ export default async function ({ page, base, admin, editor, h }) {
     const addZone = async (method) => {
       await page.getByTestId("add-zone").click();
       await page.getByTestId(`add-zone-${method}`).click();
+      await page.getByTestId("zone-draft-reset-colour").click();
+      if (method === "paint") return;
+      if (method === "groups") {
+        const parts = JSON.parse(await viewport.getAttribute("data-parts"));
+        const biggest = [...parts].sort((a, b) => b.faces - a.faces)[0];
+        await page.locator(`[data-testid="zone-region-part"][data-index="${biggest.index}"]`).click();
+      }
+      await page.getByTestId("zone-draft-confirm").click();
       await zoneRow().waitFor({ timeout: 10000 });
       await page.waitForTimeout(600);
     };
@@ -93,7 +101,6 @@ export default async function ({ page, base, admin, editor, h }) {
     await addZone("groups");
     const parts = JSON.parse(await viewport.getAttribute("data-parts"));
     const biggest = [...parts].sort((a, b) => b.faces - a.faces)[0];
-    await page.locator(`[data-testid="zone-part"][data-index="${biggest.index}"]`).click();
     await pickZoneFinish(LAYER_PAINT, "Paint colour");
     const groupRecipe = await waitForRecipe(page, admin, designId, (r) => (r.zones ?? [])[0]?.method === "groups" && (r.zones[0].groups ?? []).length === 1, "part zone stored");
     assert.deepEqual(groupRecipe.zones[0].groups, [biggest.index]);
@@ -122,15 +129,14 @@ export default async function ({ page, base, admin, editor, h }) {
     // The panel's own control formats its value (2 dp), so this reads the
     // number, not the text.
     await page.waitForFunction(
-      (mm) => Number(document.querySelector('[data-testid="zone-brush-input"]')?.value) === mm,
+      (mm) => Number(document.querySelector('[data-testid="zone-region-brush-input"]')?.value) === mm,
       BRUSH_MM,
       { timeout: 10000 },
     );
     assert.equal(Number(await viewportBrush.getAttribute("data-value")), BRUSH_MM, "one brush radius, reachable from the model or the panel");
 
-    await page.getByTestId("zone-brush-input").fill(String(BRUSH_MM));
-    await page.getByTestId("zone-brush-input").blur();
-    await pickZoneFinish(BRUSH_PAINT, "Paint colour");
+    await page.getByTestId("zone-region-brush-input").fill(String(BRUSH_MM));
+    await page.getByTestId("zone-region-brush-input").blur();
 
     const at = (x, y) => projectPoint(page, domeCanvas, { x, y, z: domeFaceZ });
     const press = await at(0, 0);
@@ -141,6 +147,9 @@ export default async function ({ page, base, admin, editor, h }) {
     await page.mouse.move(press.x, press.y);
     await page.mouse.down();
     await page.mouse.up();
+    await page.getByTestId("zone-draft-confirm").click();
+    await pickZoneFinish(BRUSH_PAINT, "Paint colour");
+    await page.getByTestId("zone-paint-toggle").click();
     const paintRecipe = await waitForRecipe(page, admin, domeDesign, (r) => ((r.zones ?? [])[0]?.faces ?? []).length > 0, "painted faces stored");
     assert.equal(paintRecipe.zones[0].method, "paint");
     assert.equal(paintRecipe.zones[0].faces.length % 2, 0, "R3: faces are stored as a run list");

@@ -100,6 +100,10 @@ interface EditorState {
   partsReport: PartsReport | null;
   /** Phase 6b R2: the zone the brush is painting into, and how wide the brush is. */
   paintZoneId: string | null;
+  /** An unconfirmed region is previewed on the model, never autosaved. */
+  zoneDraft: Zone | null;
+  zonePicking: boolean;
+  zonePreviewVisible: boolean;
   brushRadiusMm: number;
   /**
    * An anonymous buyer's uploaded SVGs, by layer id (4k R2): they live in the
@@ -130,6 +134,7 @@ interface EditorState {
   savePaintGroup: (group: PaintGroup) => void;
   removePaintGroup: (id: string) => void;
   movePaintGroupMember: (member: PaintGroupMember, groupId: string | null, overLayerId?: string) => void;
+  createPaintGroupForMember: (member: PaintGroupMember, id: string, name: string) => void;
   setRuler: (ruler: boolean) => void;
   /** Phase 6b R1: the factory's own lettering, as a Parts row rather than a staff toggle. */
   setOriginalLettering: (visible: boolean) => void;
@@ -156,6 +161,11 @@ interface EditorState {
   toggleHiddenGroup: (index: number) => void;
   /** Phase 6b R2: zones are edited like layers — live while dragging, one undo entry per change. */
   addZone: (zone: Zone) => void;
+  startZoneDraft: (zone: Zone) => void;
+  confirmZoneDraft: () => void;
+  cancelZoneDraft: () => void;
+  setZonePicking: (picking: boolean) => void;
+  setZonePreviewVisible: (visible: boolean) => void;
   updateZone: (id: string, patch: Partial<Zone>) => void;
   removeZone: (id: string) => void;
   /** Replaces the pending files wholesale — used when a draft is read back. */
@@ -184,6 +194,9 @@ const resetModelState = {
   selection: null,
   hoveredPartIndex: null,
   paintZoneId: null,
+  zoneDraft: null,
+  zonePicking: false,
+  zonePreviewVisible: true,
   dragging: false,
   flushSeq: 0,
 };
@@ -215,6 +228,9 @@ export const useEditorStore = create<EditorState>((set) => ({
   modelSizeMm: null,
   partsReport: null,
   paintZoneId: null,
+  zoneDraft: null,
+  zonePicking: false,
+  zonePreviewVisible: true,
   brushRadiusMm: 1,
   pendingLogos: {},
   localModel: null,
@@ -238,9 +254,9 @@ export const useEditorStore = create<EditorState>((set) => ({
     }),
   // The selection goes: a reloaded version's layers are not the ones that were
   // on screen, even where an id happens to survive.
-  loadRecipe: (recipe) => set((s) => ({ ...discrete(s, () => recipe), ...syncLocalAppearance(s, recipe), selection: null, hoveredPartIndex: null, paintZoneId: null })),
+  loadRecipe: (recipe) => set((s) => ({ ...discrete(s, () => recipe), ...syncLocalAppearance(s, recipe), selection: null, hoveredPartIndex: null, paintZoneId: null, zoneDraft: null, zonePicking: false })),
   setSizeVariantId: (id, ratio = 1) =>
-    set((s) => discrete(s, (r) => ({ ...r, size_variant_id: id, layers: scaleLayers(r.layers, ratio) }))),
+    set((s) => ({ ...discrete(s, (r) => ({ ...r, size_variant_id: id, layers: scaleLayers(r.layers, ratio) })), zoneDraft: null, zonePicking: false, paintZoneId: null })),
   setFinishId: (id) => set((s) => {
     const next = discrete(s, (r) => r.finish_id === id && (!s.localModel || r.view.local_appearance_mode === "finish") ? r : {
       ...r,
@@ -270,6 +286,10 @@ export const useEditorStore = create<EditorState>((set) => ({
     const next = discrete(s, recipe => moveGroupMember(recipe, member, groupId, overLayerId));
     return { ...next, selection: next.recipe === s.recipe ? s.selection : groupId === null ? { ...member } : { kind: "group" as const, id: groupId }, hoveredPartIndex: null };
   }),
+  createPaintGroupForMember: (member, id, name) => set(s => {
+    const next = discrete(s, recipe => moveGroupMember(putPaintGroup(recipe, { id, name, members: [] }), member, id));
+    return { ...next, selection: { kind: "group" as const, id }, hoveredPartIndex: null };
+  }),
   setOriginalLettering: (visible) => set((s) => discrete(s, (r) => ({ ...r, view: { ...r.view, original_lettering: visible } }))),
   addLayer: (layer, pendingLogo) =>
     set((s) => ({
@@ -294,20 +314,21 @@ export const useEditorStore = create<EditorState>((set) => ({
         return { ...r, layers };
       }),
     ),
-  select: (selection) => set({ selection, hoveredPartIndex: null }),
+  select: (selection) => set(s => ({ selection, hoveredPartIndex: null, zoneDraft: null, zonePicking: false, zonePreviewVisible: true, paintZoneId: selection?.kind === "zone" && selection.id === s.paintZoneId ? s.paintZoneId : null })),
   setHoveredPart: (index) => set((s) => s.hoveredPartIndex === index ? s : { hoveredPartIndex: index }),
   commit: () => set((s) => commitHistory(history(s))),
   beginDrag: () => set({ dragging: true }),
   endDrag: () => set((s) => ({ ...commitHistory(history(s)), dragging: false, flushSeq: s.flushSeq + 1 })),
   undo: () =>
     set((s) => {
+      if (s.zoneDraft) return { zoneDraft: null, zonePicking: false, paintZoneId: null, dragging: false };
       const h = undoHistory(history(s));
-      return { ...h, ...syncLocalAppearance(s, h.recipe), selection: keepSelection(s, h.recipe) };
+      return { ...h, ...syncLocalAppearance(s, h.recipe), selection: keepSelection(s, h.recipe), zonePicking: false, paintZoneId: null };
     }),
   redo: () =>
     set((s) => {
       const h = redoHistory(history(s));
-      return { ...h, ...syncLocalAppearance(s, h.recipe), selection: keepSelection(s, h.recipe) };
+      return { ...h, ...syncLocalAppearance(s, h.recipe), selection: keepSelection(s, h.recipe), zonePicking: false, paintZoneId: null };
     }),
   setHiddenGroups: (indices) =>
     set((s) => ({
@@ -326,22 +347,31 @@ export const useEditorStore = create<EditorState>((set) => ({
     }),
   addZone: (zone) =>
     set((s) => ({ ...discrete(s, (r) => ({ ...r, zones: [...(r.zones ?? []), zone] })), selection: { kind: "zone", id: zone.id } })),
+  startZoneDraft: zone => set({ zoneDraft: zone, selection: null, hoveredPartIndex: null, zonePreviewVisible: true, zonePicking: zone.method === "groups", paintZoneId: zone.method === "paint" ? zone.id : null }),
+  confirmZoneDraft: () => set(s => s.zoneDraft ? {
+    ...discrete(s, recipe => ({ ...recipe, zones: [...(recipe.zones ?? []), s.zoneDraft!] })),
+    selection: { kind: "zone" as const, id: s.zoneDraft.id }, zoneDraft: null, zonePicking: false, zonePreviewVisible: false, paintZoneId: null,
+  } : s),
+  cancelZoneDraft: () => set({ zoneDraft: null, zonePicking: false, paintZoneId: null, dragging: false }),
+  setZonePicking: zonePicking => set({ zonePicking, hoveredPartIndex: null }),
+  setZonePreviewVisible: zonePreviewVisible => set({ zonePreviewVisible }),
   // A zone's plane and brush are live edits, like a layer's placement: the
   // pointer-up commits one undo entry.
   updateZone: (id, patch) =>
-    set((s) => ({ recipe: { ...s.recipe, zones: (s.recipe.zones ?? []).map((z) => (z.id === id ? { ...z, ...patch } : z)) } })),
+    set((s) => s.zoneDraft?.id === id ? { zoneDraft: { ...s.zoneDraft, ...patch } } : ({ recipe: { ...s.recipe, zones: (s.recipe.zones ?? []).map((z) => (z.id === id ? { ...z, ...patch } : z)) } })),
   removeZone: (id) =>
     set((s) => ({
       ...discrete(s, (r) => ({ ...r, zones: (r.zones ?? []).filter((z) => z.id !== id) })),
       selection: withoutSelected(s, "zone", id),
       paintZoneId: s.paintZoneId === id ? null : s.paintZoneId,
+      zonePicking: s.selection?.kind === "zone" && s.selection.id === id ? false : s.zonePicking,
     })),
   setModelFrame: (modelFrame) => set({ modelFrame }),
   setModelSizeMm: (modelSizeMm) => set({ modelSizeMm }),
   setPartsReport: (partsReport) => set({ partsReport }),
   // Arming the brush is also a selection: the zone being painted is the zone
   // being edited.
-  setPaintZone: (paintZoneId) => set((s) => ({ paintZoneId, hoveredPartIndex: null, selection: paintZoneId ? { kind: "zone", id: paintZoneId } : s.selection })),
+  setPaintZone: (paintZoneId) => set((s) => ({ paintZoneId, hoveredPartIndex: null, zonePicking: false, selection: paintZoneId && s.zoneDraft?.id !== paintZoneId ? { kind: "zone", id: paintZoneId } : s.selection })),
   setBrushRadius: (brushRadiusMm) => set({ brushRadiusMm }),
   setPendingLogos: (pendingLogos) => set({ pendingLogos }),
   setLocalModel: (localModel) =>

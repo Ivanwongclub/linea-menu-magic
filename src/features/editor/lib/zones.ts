@@ -5,9 +5,10 @@
  * face of the model it loaded.
  *
  * Three ways to say which faces: a plane dragged along an axis, one or more
- * OBJ groups, or a brush. Whichever way, what renders is a face-index set
- * masking the part's material per fragment — geometry is never duplicated and
- * never cut.
+ * OBJ groups, or a brush. Part and brush masks use stable face indices;
+ * planes are evaluated at each surface fragment so a split can cross a
+ * triangle. Source geometry is never cut. Centroids below provide face counts
+ * and overlap summaries for plane regions.
  *
  * Faces are numbered globally, walking the model's groups in file order, so
  * one index set spans the whole part. Sets are stored as a run list —
@@ -25,6 +26,18 @@ export interface ZonePlane {
   /** Model-frame height of the cut, mm. */
   at_mm: number;
   side: "above" | "below";
+}
+
+export type ZoneBounds = { minX: number; maxX: number; minY: number; maxY: number; minZ: number; maxZ: number };
+
+/** Axes are the calibrated model frame, independent of the current camera. */
+export function zoneAxisRange(bounds: ZoneBounds, axis: ZonePlane["axis"]): [number, number] {
+  return axis === "x" ? [bounds.minX, bounds.maxX] : axis === "y" ? [bounds.minY, bounds.maxY] : [bounds.minZ, bounds.maxZ];
+}
+
+export function boundedZonePlane(plane: ZonePlane, bounds: ZoneBounds, value: number): ZonePlane {
+  const [min, max] = zoneAxisRange(bounds, plane.axis);
+  return { ...plane, at_mm: Math.max(min, Math.min(max, Number.isFinite(value) ? value : (min + max) / 2)) };
 }
 
 /** How many faces each group contributes, in file order. */

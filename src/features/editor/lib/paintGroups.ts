@@ -36,7 +36,7 @@ export function normalizePaintGroups(value: unknown, layerIds: Set<string>): Pai
       used.add(key);
       members.push({ kind: member.kind, id: member.id });
     }
-    if (!members.length) continue;
+    if (!members.length && raw.members.length) continue;
     ids.add(raw.id);
     const gradient = normalizeGradient(raw.gradient);
     const colour = typeof raw.colour_hex === "string" ? normalizeHex(raw.colour_hex) : null;
@@ -94,7 +94,7 @@ export function removePaintGroup(recipe: DraftRecipe, id: string): DraftRecipe {
 export function pruneGroupLayer(recipe: DraftRecipe, id: string): DraftRecipe {
   if (!recipe.paint_groups?.some(group => group.members.some(member => member.kind === "layer" && member.id === id))) return recipe;
   const next = { ...recipe };
-  const groups = recipe.paint_groups.map(group => ({ ...group, members: group.members.filter(member => member.kind !== "layer" || member.id !== id) })).filter(group => group.members.length);
+  const groups = recipe.paint_groups.map(group => ({ ...group, members: group.members.filter(member => member.kind !== "layer" || member.id !== id) }));
   if (groups.length) next.paint_groups = groups;
   else delete next.paint_groups;
   return next;
@@ -114,7 +114,7 @@ export function moveGroupMember(recipe: DraftRecipe, member: PaintGroupMember, g
       const members = group.members.filter(candidate => memberKey(candidate) !== memberKey(member));
       if (group.id === groupId) members.push({ ...member });
       return { ...group, members };
-    }).filter(group => group.members.length);
+    });
     next = { ...recipe };
     if (groups.length) next.paint_groups = groups;
     else delete next.paint_groups;
