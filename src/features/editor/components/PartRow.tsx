@@ -1,4 +1,5 @@
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, GripVertical } from "lucide-react";
+import { useDraggable } from "@dnd-kit/core";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { cn } from "@/lib/utils";
 import { DOCK_ROW_PX } from "../lib/rowWindow";
@@ -32,26 +33,31 @@ export function PartRow({
   onToggle: () => void;
 }) {
   const { t } = useI18n();
+  const { setNodeRef, setActivatorNodeRef, attributes, listeners, isDragging } = useDraggable({ id: `part:${index ?? "lettering"}`, disabled: index == null || !onSelect, data: { kind: "member", member: { kind: "part", id: String(index) }, name } });
   return (
     // A fixed height, because past 50 rows a row's place in the list is
     // arithmetic (`lib/rowWindow`), not something the browser lays out.
     <li
+      ref={setNodeRef}
       style={{ height: DOCK_ROW_PX }}
       className={cn(
         "flex items-center gap-2 border-b border-l-2 border-border px-2",
         selected ? "border-l-foreground bg-secondary" : "border-l-transparent",
         hovered && "border-l-blue-600 bg-blue-50 text-blue-700",
+        isDragging && "opacity-40",
       )}
       data-testid={testId}
       data-index={index}
       data-visible={visible}
       data-selected={selected}
       data-hovered={hovered}
+      data-dragging={isDragging || undefined}
       onPointerEnter={onHover}
       onPointerLeave={onHoverEnd}
     >
+      {index != null && onSelect && <button type="button" ref={setActivatorNodeRef} {...attributes} {...listeners} data-testid="part-drag-handle" aria-label={t("editor.groups.dragMember", { name })} title={t("editor.groups.dragHint")} className="shrink-0 cursor-grab touch-none text-muted-foreground active:cursor-grabbing"><GripVertical className="h-3.5 w-3.5" /></button>}
       {onSelect ? (
-        <button type="button" data-testid="part-select" aria-pressed={selected} onClick={onSelect} onDoubleClick={onDoubleSelect} className="flex min-w-0 flex-1 items-center gap-2 text-left">
+        <button type="button" data-testid="part-select" aria-pressed={selected} onPointerDown={event => listeners?.onPointerDown?.(event)} onClick={onSelect} onDoubleClick={onDoubleSelect} className="flex min-w-0 flex-1 touch-none items-center gap-2 text-left">
           <span className="min-w-0 flex-1 truncate text-xs text-foreground">{name}</span>
           <span className="shrink-0 text-[10px] text-muted-foreground">{detail}</span>
         </button>

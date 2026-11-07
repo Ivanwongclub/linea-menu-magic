@@ -5,6 +5,7 @@ import { verifySelectionAppearance } from "../lib/selection-appearance.mjs";
 import { verifyWholeModelGradient, verifyScopedGradient } from "../lib/gradient.mjs";
 import { verifyPaintGroups, verifyContinuousGroupGradient } from "../lib/paint-groups.mjs";
 import { verifyGroupTree } from "../lib/group-tree.mjs";
+import { verifyGroupDrop } from "../lib/group-drop.mjs";
 import { randomUUID } from "node:crypto";
 import { mkdirSync, mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -134,6 +135,7 @@ export default async function ({ page, base, admin, editor, h }) {
     report.scopedGradient = await verifyScopedGradient({ page });
     report.paintGroups = await verifyPaintGroups({ page });
     report.groupTree = await verifyGroupTree({ page });
+    report.groupDrop = await verifyGroupDrop({ page, restore: () => page.getByTestId("view-open-model-input").setInputFiles(files) });
     report.groupContinuity = await verifyContinuousGroupGradient({ page, restore: () => page.getByTestId("view-open-model-input").setInputFiles(files) });
     const beforeSupplement = (await parts()).map(part=>[part.name,part.faces]);
     const beforeSupplementSize = await viewport.getAttribute("data-model-size-mm");

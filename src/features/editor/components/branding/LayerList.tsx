@@ -1,5 +1,4 @@
-import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
-import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, X } from "lucide-react";
 import { useState } from "react";
@@ -19,33 +18,17 @@ import { LayerTextInput } from "./LayerTextInput";
 export function LayerList({ layers, logoSources }: { layers: Layer[]; logoSources: Record<string, LogoSource> }) {
   const { t } = useI18n();
   const selectedLayerId = useEditorStore(selectSelectedLayerId);
-  const moveLayer = useEditorStore((s) => s.moveLayer);
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
-  );
-
-  const onDragEnd = ({ active, over }: DragEndEvent) => {
-    if (!over || active.id === over.id) return;
-    const allLayers = useEditorStore.getState().recipe.layers;
-    moveLayer(
-      allLayers.findIndex((layer) => layer.id === active.id),
-      allLayers.findIndex((layer) => layer.id === over.id),
-    );
-  };
 
   if (layers.length === 0) return <p className="text-xs text-muted-foreground">{t("editor.branding.empty")}</p>;
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-      <SortableContext items={layers.map((l) => l.id)} strategy={verticalListSortingStrategy}>
+      <SortableContext items={layers.map((l) => `layer:${l.id}`)} strategy={verticalListSortingStrategy}>
         <ul className="space-y-1.5" aria-label={t("editor.branding.layers")} data-testid="text-layers">
           {layers.map((layer) => (
             <LayerRow key={layer.id} layer={layer} selected={layer.id === selectedLayerId} logoSource={logoSources[layer.id]} />
           ))}
         </ul>
       </SortableContext>
-    </DndContext>
   );
 }
 
@@ -59,7 +42,8 @@ function LayerRow({ layer, selected, logoSource }: { layer: Layer; selected: boo
     if (isLogoLayer(layer) && layer.content.asset_id) void deleteLogoAsset(layer.content.asset_id);
     removeLayer(layer.id);
   };
-  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({ id: layer.id });
+  const name = isLogoLayer(layer) ? t("editor.branding.logoLayer") : layer.content.value || t("editor.branding.emptyLayer");
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({ id: `layer:${layer.id}`, data: { kind: "member", member: { kind: "layer", id: layer.id }, name } });
 
   return (
     <li
@@ -68,10 +52,11 @@ function LayerRow({ layer, selected, logoSource }: { layer: Layer; selected: boo
       data-testid="text-layer-row"
       data-layer-id={layer.id}
       data-selected={selected}
+      data-dragging={isDragging || undefined}
       className={cn(
         "group flex border bg-background transition-colors",
         selected ? "border-foreground" : "border-border hover:border-foreground/40",
-        isDragging && "relative z-10 shadow-sm",
+        isDragging && "opacity-40",
       )}
     >
       <div className="flex flex-1 min-w-0 items-center">
@@ -99,6 +84,7 @@ function LayerRow({ layer, selected, logoSource }: { layer: Layer; selected: boo
             <button
               type="button"
               aria-pressed={selected}
+              onPointerDown={event => listeners?.onPointerDown?.(event)}
               onClick={() => {
                 select({ kind: "layer", id: layer.id });
                 if (!isLogoLayer(layer)) setEditing(true);

@@ -1,4 +1,5 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useDroppable } from "@dnd-kit/core";
 import { ChevronRight, Folder, FolderOpen, Plus, Settings2, Ungroup } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { randomUUID } from "@/lib/uuid";
@@ -10,6 +11,7 @@ import { useLogoSources } from "../../hooks/useLogoAssets";
 import { LayerList } from "../branding/LayerList";
 import { PartRow } from "../PartRow";
 import { DockSection } from "./DockSection";
+import { useLayerDrag } from "../../hooks/useLayerDrag";
 
 function useAvailableMembers() {
   const { t } = useI18n();
@@ -42,6 +44,10 @@ function PaintGroupRow({ group, markedGroupIndices }: { group: PaintGroup; marke
   const { t } = useI18n();
   const childrenId = useId();
   const row = useRef<HTMLLIElement>(null);
+  const { setNodeRef } = useDroppable({ id: `group:${group.id}`, data: { kind: "group", groupId: group.id } });
+  const bindRow = useCallback((node: HTMLLIElement | null) => { row.current = node; setNodeRef(node); }, [setNodeRef]);
+  const drag = useLayerDrag();
+  const dropOver = !!drag.member && drag.destination?.groupId === group.id;
   const [expanded, setExpanded] = useState(true);
   const selection = useEditorStore(s => s.selection);
   const select = useEditorStore(s => s.select);
@@ -67,7 +73,7 @@ function PaintGroupRow({ group, markedGroupIndices }: { group: PaintGroup; marke
   }, [group.members, selected]);
 
   return (
-    <li ref={row} data-testid="paint-group-row" data-group-id={group.id} data-selected={selected} className={`border ${selected ? "border-blue-600" : "border-border"}`}>
+    <li ref={bindRow} data-testid="paint-group-row" data-group-id={group.id} data-selected={selected} data-drop-over={dropOver || undefined} className={`border ${selected ? "border-blue-600" : "border-border"} ${dropOver ? "bg-blue-50 ring-2 ring-blue-600" : ""}`}>
       <div className={`flex items-center gap-1 px-1.5 py-1.5 ${selected || childSelected ? "bg-blue-50" : "bg-secondary/40"}`}>
         <button type="button" data-testid="paint-group-toggle" aria-expanded={expanded} aria-controls={childrenId} aria-label={t(expanded ? "editor.groups.collapse" : "editor.groups.expand", { name: group.name })} onClick={() => setExpanded(value => !value)} className="flex h-6 w-5 shrink-0 items-center justify-center text-muted-foreground hover:text-foreground"><ChevronRight className={`h-3.5 w-3.5 transition-transform ${expanded ? "rotate-90" : ""}`} /></button>
         <button type="button" data-testid="paint-group-select" aria-pressed={selected} onClick={() => { select({ kind: "group", id: group.id }); setExpanded(true); }} className="flex min-w-0 flex-1 items-center gap-2 text-left text-xs">{expanded ? <FolderOpen className="h-3.5 w-3.5 shrink-0" /> : <Folder className="h-3.5 w-3.5 shrink-0" />}<span className="truncate">{group.name}</span><span className="ml-auto shrink-0 pr-1 text-muted-foreground">{group.members.length}</span></button>

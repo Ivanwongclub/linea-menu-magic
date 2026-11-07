@@ -100,6 +100,49 @@ export function pruneGroupLayer(recipe: DraftRecipe, id: string): DraftRecipe {
   return next;
 }
 
+/** One atomic drop: transfer membership, take the destination fill, and optionally sort. */
+export function moveGroupMember(recipe: DraftRecipe, member: PaintGroupMember, groupId: string | null, overLayerId?: string): DraftRecipe {
+  if (member.kind !== "part" && member.kind !== "layer") return recipe;
+  if (member.kind === "part" ? !/^(0|[1-9]\d*)$/.test(member.id) : !recipe.layers.some(layer => layer.id === member.id)) return recipe;
+  const destination = groupId === null ? undefined : recipe.paint_groups?.find(group => group.id === groupId);
+  if (groupId !== null && !destination) return recipe;
+  const previous = groupForMember(recipe, member);
+  const transferred = (previous?.id ?? null) !== groupId;
+  let next = recipe;
+  if (transferred) {
+    const groups = (recipe.paint_groups ?? []).map(group => {
+      const members = group.members.filter(candidate => memberKey(candidate) !== memberKey(member));
+      if (group.id === groupId) members.push({ ...member });
+      return { ...group, members };
+    }).filter(group => group.members.length);
+    next = { ...recipe };
+    if (groups.length) next.paint_groups = groups;
+    else delete next.paint_groups;
+    if (destination?.gradient || destination?.colour_hex) next = clearMemberPaint(next, { ...destination, members: [member] });
+  }
+  if (member.kind !== "layer") return next;
+  const from = next.layers.findIndex(layer => layer.id === member.id);
+  const target = overLayerId ? next.layers.findIndex(layer => layer.id === overLayerId) : -1;
+  const overParent = overLayerId ? groupForMember(next, { kind: "layer", id: overLayerId }) : undefined;
+  if (target >= 0 && target !== from && (overParent?.id ?? null) === groupId) {
+    const layers = [...next.layers];
+    const [layer] = layers.splice(from, 1);
+    const index = transferred ? layers.findIndex(layer => layer.id === overLayerId) : target;
+    layers.splice(index, 0, layer);
+    return { ...next, layers };
+  }
+  if (transferred) {
+    const ids = new Set(destination ? destination.members.filter(member => member.kind === "layer").map(member => member.id) : next.layers.filter(layer => !groupForMember(next, { kind: "layer", id: layer.id })).map(layer => layer.id));
+    const layers = next.layers.filter(layer => layer.id !== member.id);
+    const last = layers.reduce((index, layer, at) => ids.has(layer.id) ? at : index, -1);
+    if (last >= 0) {
+      layers.splice(last + 1, 0, next.layers[from]);
+      return { ...next, layers };
+    }
+  }
+  return next;
+}
+
 export function unionGradientBounds(values: (GradientBounds | undefined)[], fallback: GradientBounds): GradientBounds {
   const bounds = values.filter((value): value is GradientBounds => !!value && value.every(Number.isFinite));
   return bounds.length ? [Math.min(...bounds.map(value => value[0])), Math.min(...bounds.map(value => value[1])), Math.max(...bounds.map(value => value[2])), Math.max(...bounds.map(value => value[3]))] : [...fallback];

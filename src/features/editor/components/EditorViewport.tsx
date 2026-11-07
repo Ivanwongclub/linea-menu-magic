@@ -178,7 +178,7 @@ export function EditorViewport({
   const handleElements = useRef(newHandleElements());
   const selectedLayerId = useEditorStore(selectSelectedLayerId);
   // Hold the model still while a part is being inspected or selected.
-  const isInspecting = useEditorStore((s) => s.selection !== null || s.hoveredPartIndex !== null);
+  const isInspecting = useEditorStore((s) => s.selection !== null || s.hoveredPartIndex !== null || s.dragging);
   const setHoveredPart = useEditorStore((s) => s.setHoveredPart);
   const modelFrame = useEditorStore((s) => s.modelFrame);
   // U10: the strip reads this from the store now, at the bottom of the

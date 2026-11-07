@@ -14,6 +14,7 @@ import { LayerList } from "../branding/LayerList";
 import { PartsGroup } from "../PartsGroup";
 import { DockSection } from "./DockSection";
 import { PaintGroupsSection } from "./PaintGroupsSection";
+import { LayerDragProvider, UngroupedDropTarget } from "./LayerDragProvider";
 
 /**
  * The layers dock (E2 U5): everything that is on the part, in three sections
@@ -68,7 +69,7 @@ export function LayersDock({
   const { fileInput, logoError, uploading, onLogoFile, signedIn } = useLogoUpload({ faceDiameterMm, minDepthMm });
 
   return (
-    <div className="border border-border" data-testid="layers-dock">
+    <LayerDragProvider><div className="border border-border" data-testid="layers-dock">
       <div className="border-b border-border px-3 py-1.5" data-testid="layers-dock-header">
         <h3 className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">{t("editor.layers.title")}</h3>
       </div>
@@ -77,7 +78,7 @@ export function LayersDock({
           share of the viewport rather than a row count: the rows are three
           different heights, and the panel is as tall as the window is. */}
       <div ref={body} data-testid="layers-dock-body" className="max-h-[40vh] overflow-y-auto overflow-x-hidden">
-        <DockSection
+        <UngroupedDropTarget kind="layer"><DockSection
           testId="branding-group"
           toggleTestId="branding-toggle"
           title={t(groupedLayers.size ? "editor.groups.ungroupedBranding" : "editor.panel.branding")}
@@ -139,7 +140,7 @@ export function LayersDock({
             </p>
           )}
           {rootLayers.length || !layers.length ? <LayerList layers={rootLayers} logoSources={logoSources} /> : <p className="text-xs text-muted-foreground">{t("editor.groups.allBrandingGrouped")}</p>}
-        </DockSection>
+        </DockSection></UngroupedDropTarget>
 
         <PaintGroupsSection markedGroupIndices={markedGroupIndices} />
 
@@ -156,8 +157,8 @@ export function LayersDock({
           <ZoneList />
         </DockSection>
 
-        <PartsGroup markedGroupIndices={markedGroupIndices} open={open.parts} onToggle={toggle("parts")} scrollerRef={body} />
+        <UngroupedDropTarget kind="part"><PartsGroup markedGroupIndices={markedGroupIndices} open={open.parts} onToggle={toggle("parts")} scrollerRef={body} /></UngroupedDropTarget>
       </div>
-    </div>
+    </div></LayerDragProvider>
   );
 }

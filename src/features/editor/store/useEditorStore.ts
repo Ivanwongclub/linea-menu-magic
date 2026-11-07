@@ -6,7 +6,7 @@ import type { PartsReport } from "../components/EditorModel";
 import { applyDiscrete, canRedo, canUndo, commitHistory, redoHistory, startHistory, undoHistory, type History } from "../lib/recipeHistory.ts";
 import { applyScopedColour, applyScopedGradient } from "../lib/scopedColour.ts";
 import type { ColourGradient } from "../lib/gradient.ts";
-import { putPaintGroup, removePaintGroup as deletePaintGroup, pruneGroupLayer, type PaintGroup } from "../lib/paintGroups.ts";
+import { putPaintGroup, removePaintGroup as deletePaintGroup, pruneGroupLayer, moveGroupMember, type PaintGroup, type PaintGroupMember } from "../lib/paintGroups.ts";
 
 /**
  * Where the loaded model sits (4j): the raw → face transform `EditorModel`
@@ -129,6 +129,7 @@ interface EditorState {
   setGradientForTarget: (target: Selection | null, gradient: ColourGradient | null) => void;
   savePaintGroup: (group: PaintGroup) => void;
   removePaintGroup: (id: string) => void;
+  movePaintGroupMember: (member: PaintGroupMember, groupId: string | null, overLayerId?: string) => void;
   setRuler: (ruler: boolean) => void;
   /** Phase 6b R1: the factory's own lettering, as a Parts row rather than a staff toggle. */
   setOriginalLettering: (visible: boolean) => void;
@@ -265,6 +266,10 @@ export const useEditorStore = create<EditorState>((set) => ({
     return { ...next, selection: next.recipe.paint_groups?.some(candidate => candidate.id === group.id) ? { kind: "group" as const, id: group.id } : s.selection, hoveredPartIndex: null };
   }),
   removePaintGroup: id => set(s => ({ ...discrete(s, recipe => deletePaintGroup(recipe, id)), selection: withoutSelected(s, "group", id) })),
+  movePaintGroupMember: (member, groupId, overLayerId) => set(s => {
+    const next = discrete(s, recipe => moveGroupMember(recipe, member, groupId, overLayerId));
+    return { ...next, selection: next.recipe === s.recipe ? s.selection : groupId === null ? { ...member } : { kind: "group" as const, id: groupId }, hoveredPartIndex: null };
+  }),
   setOriginalLettering: (visible) => set((s) => discrete(s, (r) => ({ ...r, view: { ...r.view, original_lettering: visible } }))),
   addLayer: (layer, pendingLogo) =>
     set((s) => ({
