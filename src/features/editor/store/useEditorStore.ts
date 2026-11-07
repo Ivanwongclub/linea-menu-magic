@@ -4,7 +4,8 @@ import type { FaceTransform } from "../lib/recoveredPlacement";
 import type { PendingLogo } from "../hooks/useLogoAssets";
 import type { PartsReport } from "../components/EditorModel";
 import { applyDiscrete, canRedo, canUndo, commitHistory, redoHistory, startHistory, undoHistory, type History } from "../lib/recipeHistory.ts";
-import { applyScopedColour } from "../lib/scopedColour.ts";
+import { applyScopedColour, applyScopedGradient } from "../lib/scopedColour.ts";
+import type { ColourGradient } from "../lib/gradient.ts";
 
 /**
  * Where the loaded model sits (4j): the raw → face transform `EditorModel`
@@ -124,6 +125,7 @@ interface EditorState {
   /** Live colour edit, committed on blur; null restores the material's original colour. */
   setBaseColourHex: (hex: string | null) => void;
   setColourForTarget: (target: Selection | null, hex: string | null) => void;
+  setGradientForTarget: (target: Selection | null, gradient: ColourGradient | null) => void;
   setRuler: (ruler: boolean) => void;
   /** Phase 6b R1: the factory's own lettering, as a Parts row rather than a staff toggle. */
   setOriginalLettering: (visible: boolean) => void;
@@ -253,6 +255,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   setRuler: (ruler) => set((s) => discrete(s, (r) => ({ ...r, view: { ...r.view, ruler } }))),
   setBaseColourHex: (hex) => set((s) => ({ recipe: applyScopedColour(s.recipe, null, hex) })),
   setColourForTarget: (target, hex) => set((s) => ({ recipe: applyScopedColour(s.recipe, target, hex) })),
+  setGradientForTarget: (target, gradient) => set((s) => ({ recipe: applyScopedGradient(s.recipe, target, gradient) })),
   setOriginalLettering: (visible) => set((s) => discrete(s, (r) => ({ ...r, view: { ...r.view, original_lettering: visible } }))),
   addLayer: (layer, pendingLogo) =>
     set((s) => ({

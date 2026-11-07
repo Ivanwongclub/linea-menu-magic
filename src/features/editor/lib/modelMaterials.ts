@@ -40,7 +40,8 @@ export function hasSourceAppearance(root: Group): boolean {
 export function describeSourceMaterials(material: Material | Material[]) {
   return (Array.isArray(material) ? material : [material]).map((entry) => {
     const source = entry as MeshPhongMaterial;
-    return { name: source.name, colour: source.color ? `#${source.color.getHexString()}` : "#ffffff", opacity: source.opacity, textured: !!source.map };
+    const gradient = source.userData.shaderPatch?.gradient;
+    return { name: source.name, colour: source.color ? `#${source.color.getHexString()}` : "#ffffff", opacity: source.opacity, textured: !!source.map, ...(gradient ? { gradient: gradient.colour, gradientBounds: gradient.bounds } : {}) };
   });
 }
 

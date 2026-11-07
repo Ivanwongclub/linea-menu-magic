@@ -2,6 +2,7 @@
 import assert from "node:assert/strict";
 import { verifyScopedColour } from "../lib/scoped-colour.mjs";
 import { verifySelectionAppearance } from "../lib/selection-appearance.mjs";
+import { verifyWholeModelGradient, verifyScopedGradient } from "../lib/gradient.mjs";
 import { randomUUID } from "node:crypto";
 import { mkdirSync, mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -127,6 +128,8 @@ export default async function ({ page, base, admin, editor, h }) {
     assert.equal((await zones()).length,0,"another model must not inherit the catalogue's face masks");
     await verifyScopedColour({ page });
     report.selectionAppearance = await verifySelectionAppearance({ page });
+    report.wholeGradient = await verifyWholeModelGradient({ page });
+    report.scopedGradient = await verifyScopedGradient({ page });
     const beforeSupplement = (await parts()).map(part=>[part.name,part.faces]);
     const beforeSupplementSize = await viewport.getAttribute("data-model-size-mm");
     await h.expectToast(/Materials applied/i,()=>page.getByTestId("view-open-model-input").setInputFiles(payload("colours.mtl",MTL.replace("Kd 1 0 0","Kd 0 1 0"))));

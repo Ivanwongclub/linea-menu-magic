@@ -9,6 +9,7 @@
 
 import type { ZoneMethod, ZonePlane } from "./zones.ts";
 import { normalizeHex } from "./pantone.ts";
+import { normalizeGradient, type ColourGradient } from "./gradient.ts";
 
 /** `free` is a logo's placement: centre, width and rotation, no curve (4k R3). */
 export type TextLayout = "straight" | "circle" | "free";
@@ -112,6 +113,7 @@ export interface LayerAppearance {
   custom: CustomColour | null;
   /** Colour tint independent of the layer/zone's material. */
   colour_hex?: string;
+  gradient?: ColourGradient;
 }
 
 export const DEFAULT_APPEARANCE: LayerAppearance = { mode: "part", finish_id: null, custom: null };
@@ -195,6 +197,8 @@ export interface DraftRecipe {
   base_colour_hex?: string;
   /** Independent colour per source mesh index; shared MTLs remain untouched. */
   part_colours?: Record<string, string>;
+  base_gradient?: ColourGradient;
+  part_gradients?: Record<string, ColourGradient>;
   view: { ruler: boolean; original_lettering?: boolean; model_appearance_mode?: "source" | "finish" | "colour"; /** Temporary imports only; never written to catalogue drafts. */ local_appearance_mode?: "source" | "finish" | "colour" };
   layers: Layer[];
   /** Phase 6b R1: OBJ groups the buyer has hidden; hiding never deletes geometry. */
@@ -269,6 +273,8 @@ export function normalizeRecipe(raw: unknown): DraftRecipe {
     colour_id: id(raw.colour_id),
     ...(typeof raw.base_colour_hex === "string" && normalizeHex(raw.base_colour_hex) ? { base_colour_hex: normalizeHex(raw.base_colour_hex)! } : {}),
     ...(isRecord(raw.part_colours) ? { part_colours: Object.fromEntries(Object.entries(raw.part_colours).flatMap(([index, value]) => /^(0|[1-9]\d*)$/.test(index) && typeof value === "string" && normalizeHex(value) ? [[index, normalizeHex(value)!]] : [])) } : {}),
+    ...(normalizeGradient(raw.base_gradient) ? { base_gradient: normalizeGradient(raw.base_gradient)! } : {}),
+    ...(isRecord(raw.part_gradients) ? { part_gradients: Object.fromEntries(Object.entries(raw.part_gradients).flatMap(([index, value]) => /^(0|[1-9]\d*)$/.test(index) && normalizeGradient(value) ? [[index, normalizeGradient(value)!]] : [])) } : {}),
     // 6b R1: the factory's own lettering is a row in the Parts list now; it
     // stays hidden unless a design says otherwise, as it was before.
     view: {
@@ -290,11 +296,14 @@ export function upgradeLayer(layer: Layer): Layer {
 }
 
 function normalizeAppearanceColour(appearance: LayerAppearance): LayerAppearance {
-  if (!("colour_hex" in appearance)) return appearance;
+  if (!("colour_hex" in appearance) && !("gradient" in appearance)) return appearance;
   const next = { ...appearance };
   const colour = typeof appearance.colour_hex === "string" ? normalizeHex(appearance.colour_hex) : null;
   if (colour) next.colour_hex = colour;
   else delete next.colour_hex;
+  const gradient = normalizeGradient(appearance.gradient);
+  if (gradient) { next.gradient = gradient; delete next.colour_hex; }
+  else delete next.gradient;
   return next;
 }
 

@@ -40,6 +40,16 @@ const finish = {
 const variant = { id: "v1", size_label: null, size_ligne: 24, size_primary_mm: 15.2 };
 const savedAt = "2026-09-23T10:00:00.000Z";
 
+test("version metadata freezes whole-model and per-part gradients", () => {
+  const baseGradient = { from: "#FF0000", to: "#0000FF", angle: 45, midpoint: 0.3 };
+  const partGradients = { "1": { ...baseGradient, angle: 90 } };
+  const snap = buildSnapshot({ product, finish, sizeVariant: variant, colour: null, baseGradient, partGradients, savedAt });
+  baseGradient.from = "#000000";
+  partGradients["1"].angle = 0;
+  assert.equal(snap.base_gradient.from, "#FF0000");
+  assert.equal(snap.part_gradients["1"].angle, 90);
+});
+
 test("a version freezes the product, the finish's material and the model's scale", () => {
   const snap = buildSnapshot({ product, finish, sizeVariant: variant, colour: null, savedAt });
 

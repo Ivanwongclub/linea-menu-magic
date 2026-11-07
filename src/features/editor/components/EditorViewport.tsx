@@ -196,6 +196,7 @@ export function EditorViewport({
   const hiddenGroups = useEditorStore(selectHiddenGroups);
   const zones = useEditorStore(selectZones);
   const baseColourHex = useEditorStore((s) => s.recipe.base_colour_hex);
+  const baseGradient = useEditorStore(s => s.recipe.base_gradient);
   const originalLettering = useEditorStore((s) => s.recipe.view.original_lettering === true);
   const partsReport = useEditorStore((s) => s.partsReport);
   const modelAppearanceMode = useEditorStore(s => s.recipe.view.model_appearance_mode);
@@ -206,8 +207,8 @@ export function EditorViewport({
   const [bakeStats, setBakeStats] = useState<{ mainThreadMs: number; totalMs: number } | null>(null);
   const zoneStyles = useMemo(() => {
     const byId = new Map((publicFinishes ?? []).map((f) => [f.id, f]));
-    return zones.map((zone) => zoneStyleFor(zone.appearance, byId, baseColourHex) ?? { colorHex: "#FFFFFF", metalness: 0, roughness: 1 });
-  }, [zones, publicFinishes, baseColourHex]);
+    return zones.map((zone) => zoneStyleFor(zone.appearance, byId, baseColourHex, baseGradient) ?? { colorHex: "#FFFFFF", metalness: 0, roughness: 1 });
+  }, [zones, publicFinishes, baseColourHex, baseGradient]);
   // R3: what the spec sheet will say — "rim: bright nickel; face: red copper".
   const zoneSentence = useMemo(() => {
     const byId = new Map((publicFinishes ?? []).map((f) => [f.id, f]));
@@ -439,6 +440,7 @@ export function EditorViewport({
                 colourHex: zoneStyles[index]?.colorHex ?? null,
                 mode: zone.appearance.mode,
                 finishId: zone.appearance.finish_id,
+                gradient: zone.appearance.gradient,
               })),
             )
           : undefined

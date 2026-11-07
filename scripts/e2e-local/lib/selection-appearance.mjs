@@ -25,6 +25,7 @@ export async function verifySelectionAppearance({ page, screenshotPath }) {
   await page.getByTestId("part-row").nth(1).getByTestId("part-select").hover();
   assert.equal(await popup.count(), 0, "hover must not open the selection editor");
   await page.getByTestId("part-row").nth(1).getByTestId("part-select").dblclick();
+  assert.equal(await page.getByTestId("part-row").nth(1).getAttribute("data-visible"), "true", "double click must not change visibility when the popup opens");
   assert.equal(await popup.getAttribute("data-target-id"), String(original[1].index));
   assert.equal(await page.getByTestId("model-colour-picker").count(), 1, "only one active colour editor");
   await page.getByTestId("model-colour-hex").fill("#E84567");

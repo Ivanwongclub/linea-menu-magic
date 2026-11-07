@@ -71,7 +71,6 @@ export function EditorPanel({
 }: EditorPanelProps) {
   const { t, language } = useI18n();
   const modelSizeMm = useEditorStore((s) => s.modelSizeMm);
-  const selection = useEditorStore((s) => s.selection);
   const [pickerOpen, setPickerOpen] = useState(false);
   const selectedVariant = product.size_variants.find((v) => v.id === sizeVariantId) ?? null;
   const local = !!localModelName;
@@ -178,7 +177,7 @@ export function EditorPanel({
               )}
             </>
           )}
-          {!selection && <ModelColourControl originalHex={originalColour} sourceAppearance={appearanceMode === "source"} />}
+          <ModelColourControl global originalHex={originalColour} sourceAppearance={appearanceMode === "source"} />
         </PanelGroup>
         {sourceAvailable && materialNames && <p className="text-xs text-muted-foreground" role="status" data-testid="model-material-status">{t("editor.viewport.materialsLoaded", { names: materialNames })}</p>}
         {!!materialWarnings?.length && <p className="text-xs text-amber-700" data-testid="model-material-warnings">{materialWarnings.join(" · ")}</p>}

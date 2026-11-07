@@ -14,6 +14,8 @@
  */
 import * as THREE from "three";
 import { oxideColor, twoToneFragmentChunks, twoToneVertexChunks } from "./twoTone.ts";
+import { gradientShaderPatch } from "./gradientShader.ts";
+import type { ColourGradient, GradientBounds, GradientPaint } from "./gradient.ts";
 
 export type BrushKind = "linear" | "radial";
 
@@ -26,6 +28,8 @@ export interface ZoneStyle {
   roughness: number;
   /** Colour-only zones inherit each mesh's physical material. */
   preserveMaterial?: boolean;
+  preserveColour?: boolean;
+  gradient?: ColourGradient;
 }
 
 export interface ShaderPatchOptions {
@@ -35,6 +39,8 @@ export interface ShaderPatchOptions {
   brush?: BrushKind | null;
   /** Phase 6b R2: one appearance per zone slot, masked per face by the `zoneIndex` attribute. */
   zones?: ZoneStyle[] | null;
+  gradient?: GradientPaint;
+  gradientBounds?: GradientBounds;
 }
 
 type Shader = { vertexShader: string; fragmentShader: string; uniforms: Record<string, { value: unknown }> };
@@ -92,12 +98,14 @@ function zonePatch(shader: Shader, zones: ZoneStyle[]): void {
   uniforms.zoneMetalness = { value: zones.map((z) => z.metalness) };
   uniforms.zoneRoughness = { value: zones.map((z) => z.roughness) };
   uniforms.zonePreserveMaterial = { value: zones.map((z) => z.preserveMaterial ? 1 : 0) };
+  uniforms.zonePreserveColour = { value: zones.map(z => z.preserveColour ? 1 : 0) };
   shader.vertexShader = after(shader.vertexShader, "common", "attribute float zoneIndex;\nvarying float vZoneIndex;");
   shader.vertexShader = after(shader.vertexShader, "begin_vertex", "\tvZoneIndex = zoneIndex;");
   const declarations = `uniform vec3 zoneColor[ ${zones.length} ];
 uniform float zoneMetalness[ ${zones.length} ];
 uniform float zoneRoughness[ ${zones.length} ];
 uniform float zonePreserveMaterial[ ${zones.length} ];
+uniform float zonePreserveColour[ ${zones.length} ];
 varying float vZoneIndex;`;
   shader.fragmentShader = after(shader.fragmentShader, "common", declarations);
   // The slot is constant across a face, but it arrives as an interpolated
@@ -105,7 +113,7 @@ varying float vZoneIndex;`;
   // zone's edge. Round it instead of truncating.
   const pick = (target: string, source: string, physical = false) => `	if ( vZoneIndex > 0.5 ) {
 		for ( int zone = 0; zone < ${zones.length}; zone ++ ) {
-			if ( zone == int( vZoneIndex + 0.5 ) - 1${physical ? " && zonePreserveMaterial[ zone ] < 0.5" : ""} ) ${target} = ${source}[ zone ];
+			if ( zone == int( vZoneIndex + 0.5 ) - 1 && ${physical ? "zonePreserveMaterial" : "zonePreserveColour"}[ zone ] < 0.5 ) ${target} = ${source}[ zone ];
 		}
 	}`;
   shader.fragmentShader = after(shader.fragmentShader, "color_fragment", pick("diffuseColor.rgb", "zoneColor"));
@@ -123,7 +131,8 @@ export function applyShaderPatches(material: THREE.MeshPhysicalMaterial, options
   const brush = options.brush ?? null;
   const zones = options.zones?.length ? options.zones.slice(0, MAX_ZONES) : null;
   material.userData = { ...material.userData, shaderPatch: options };
-  const features = [twoTone ? "two-tone" : null, brush ? `brush-${brush}` : null, zones ? `zones-${zones.length}` : null].filter(Boolean) as string[];
+  const hasGradient = !!options.gradient || !!zones?.some(zone => zone.gradient);
+  const features = [twoTone ? "two-tone" : null, brush ? `brush-${brush}` : null, zones ? `zones-${zones.length}` : null, options.gradient ? "gradient" : null, zones?.some(zone => zone.gradient) ? `zone-gradients-${zones.map(zone => zone.gradient ? 1 : 0).join("")}` : null, hasGradient && zones ? `gradient-masks-${zones.map(zone => zone.preserveColour ? 1 : 0).join("")}` : null].filter(Boolean) as string[];
   if (features.length === 0) {
     material.onBeforeCompile = () => undefined;
     material.customProgramCacheKey = () => "wincyc:plain";
@@ -136,6 +145,7 @@ export function applyShaderPatches(material: THREE.MeshPhysicalMaterial, options
     }
     if (brush) brushPatch(shader as Shader, brush);
     if (zones) zonePatch(shader as Shader, zones);
+    gradientShaderPatch(shader as Shader, options.gradient, zones, options.gradientBounds ?? [-0.5, -0.5, 0.5, 0.5]);
   };
   material.customProgramCacheKey = () => `wincyc:${features.join("+")}`;
 }

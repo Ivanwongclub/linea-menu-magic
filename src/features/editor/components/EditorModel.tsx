@@ -13,10 +13,11 @@ import { decoratedFaceRotation, withSmoothNormals } from "../lib/prepareModel";
 import { MeshBVH } from "three-mesh-bvh";
 import { applyBakedOcclusion, bakeOcclusion, occlusionKey, type BakeStats } from "../lib/ambientOcclusion";
 import { EMPTY_ZONES, selectSelectedPartIndex, useEditorStore } from "../store/useEditorStore";
-import { colourMaterial, finishMaterial, materialWithColour } from "../lib/finishMaterial";
+import { colourMaterial, finishMaterial, materialWithColour, materialWithGradient, applyMaterialGradient } from "../lib/finishMaterial";
 import type { Layer, Zone } from "../lib/recipe";
 import { decodeRuns, encodeRuns, facesForGroups, facesForPlane, resolveZones, totalFaces } from "../lib/zones";
 import type { ZoneStyle } from "../lib/shaderPatch";
+import { gradientBoundsFor } from "../lib/gradient";
 import type { LogoSource } from "../hooks/useLogoAssets";
 import { BrandingMeshes, type TextSceneReport } from "./branding/BrandingMeshes";
 import { cornersOf, fitDistance, homeDirection, type BoundsMm } from "../lib/framing";
@@ -133,6 +134,8 @@ export function EditorModel({
   const modelAppearanceMode = useEditorStore((s) => s.recipe.view.model_appearance_mode);
   const baseColourHex = useEditorStore((s) => s.recipe.base_colour_hex);
   const partColours = useEditorStore((s) => s.recipe.part_colours);
+  const baseGradient = useEditorStore(s => s.recipe.base_gradient);
+  const partGradients = useEditorStore(s => s.recipe.part_gradients);
   const format: ModelFormat = modelFormatFromName(sourceName) ?? modelFormatFromName(url) ?? "obj";
   const obj = useLoader(ModelFileLoader, url, (loader) => {
     loader.formatHint = format;
@@ -158,18 +161,6 @@ export function EditorModel({
   const preserveSource = localModel ? localModel.appearanceMode === "source" : (materialOverride || hasSourceAppearance(obj)) && (!modelAppearanceMode || modelAppearanceMode === "source");
   const twoTone = !preserveSource && !!(isMetal && finish?.two_tone);
 
-  // One builder for the part and for every layer that carries its own finish
-  // (Phase 6a R2, `lib/finishMaterial.ts`).
-  // The zone styles are part of the program, so a new zone rebuilds the material.
-  const zoneStyleKey = JSON.stringify(zoneStyles ?? []);
-  const material = useMemo(() => {
-    const styles = zoneStyles?.length ? zoneStyles : null;
-    return isMetal && finish ? finishMaterial(finish, styles, baseColourHex) : colourMaterial(baseColourHex ?? colour?.hex, styles);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMetal, finish, colour, zoneStyleKey, baseColourHex]);
-
-  useEffect(() => () => material.dispose(), [material]);
-
   // Geometry prep is per loaded file: smooth normals where missing, then the
   // rotation that brings the decorated face to +Z.
   const prepared = useMemo(() => {
@@ -188,6 +179,40 @@ export function EditorModel({
   useEffect(() => () => prepared.traverse((child) => {
     if ((child as THREE.Mesh).isMesh) (child as THREE.Mesh).geometry.dispose();
   }), [prepared]);
+  // Material is assigned separately so changing the finish never rebuilds
+  // the object — which would re-run framing and yank the camera.
+  const { model, renderedSizeMm } = useMemo(() => {
+    const clone = prepared.clone(true);
+
+    // Stored scale, never a force-rescale (E1 collision 1): factor is mm per
+    // raw unit at the reference variant, and variantScale carries any other
+    // variant's product-size change (collision 3).
+    const rawBox = new THREE.Box3().setFromObject(clone);
+    const rawSize = rawBox.getSize(new THREE.Vector3());
+    const scale = scaleFactor * variantScale;
+    clone.scale.setScalar(scale);
+
+    const scaledBox = new THREE.Box3().setFromObject(clone);
+    clone.position.sub(scaledBox.getCenter(new THREE.Vector3()));
+    return { model: clone, renderedSizeMm: Math.max(rawSize.x, rawSize.y) * scale };
+  }, [prepared, scaleFactor, variantScale]);
+
+  const gradientBounds = useMemo(() => gradientBoundsFor(new THREE.Box3().setFromObject(model)), [model]);
+  const partGradientBounds = useMemo(() => model.children.map(child => gradientBoundsFor(new THREE.Box3().setFromObject(child))), [model]);
+
+  // One builder for the part and for every layer that carries its own finish
+  // (Phase 6a R2, `lib/finishMaterial.ts`).
+  // The zone styles are part of the program, so a new zone rebuilds the material.
+  const zoneStyleKey = JSON.stringify(zoneStyles ?? []);
+  const material = useMemo(() => {
+    const styles = zoneStyles?.length ? zoneStyles : null;
+    const base = isMetal && finish ? finishMaterial(finish, styles, baseColourHex) : colourMaterial(baseColourHex ?? colour?.hex, styles);
+    return applyMaterialGradient(base, baseGradient ? { colour: baseGradient, bounds: gradientBounds } : undefined, gradientBounds);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMetal, finish, colour, zoneStyleKey, baseColourHex, baseGradient, gradientBounds]);
+
+  useEffect(() => () => material.dispose(), [material]);
+
   const materialCreator = useMemo(() => materialOverride ? new MTLLoader().parse(materialOverride.materialText, "") : null, [materialOverride]);
   useEffect(() => () => {
     if (!materialCreator) return;
@@ -207,28 +232,39 @@ export function EditorModel({
   const sourceMaterials = useMemo(() => authoredMaterials.map((authored, index) => {
     if (!authored) return null;
     const mesh = prepared.children[index] as THREE.Mesh;
-    const create = (source: THREE.Material) => sourcePhysicalMaterial(source, !!mesh.geometry.getAttribute("color"), zoneStyles?.length ? zoneStyles : null, baseColourHex);
+    const create = (source: THREE.Material) => applyMaterialGradient(
+      sourcePhysicalMaterial(source, !!mesh.geometry.getAttribute("color"), zoneStyles?.length ? zoneStyles : null, baseColourHex),
+      baseGradient ? { colour: baseGradient, bounds: gradientBounds } : undefined, gradientBounds,
+    );
     return Array.isArray(authored) ? authored.map(create) : create(authored);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [prepared, authoredMaterials, zoneStyleKey, baseColourHex]);
+  }), [prepared, authoredMaterials, zoneStyleKey, baseColourHex, baseGradient, gradientBounds]);
   useEffect(() => () => sourceMaterials.flat().forEach((entry) => entry?.dispose()), [sourceMaterials]);
 
   const partMaterials = useMemo(() => prepared.children.map((_, index) => {
     const hex = partColours?.[String(index)];
-    if (!hex) return null;
+    const gradient = partGradients?.[String(index)];
+    if (!hex && !gradient) return null;
     const source = preserveSource && sourceMaterials[index] ? sourceMaterials[index] : material;
-    return Array.isArray(source) ? source.map(entry => materialWithColour(entry, hex)) : materialWithColour(source, hex);
-  }), [prepared, partColours, preserveSource, sourceMaterials, material]);
+    const fill = (entry: THREE.MeshPhysicalMaterial) => gradient
+      ? materialWithGradient(entry, { colour: gradient, bounds: partGradientBounds[index] }, true)
+      : materialWithColour(entry, hex!);
+    return Array.isArray(source) ? source.map(fill) : fill(source);
+  }), [prepared, partColours, partGradients, partGradientBounds, preserveSource, sourceMaterials, material]);
   useEffect(() => () => partMaterials.flat().forEach(entry => entry?.dispose()), [partMaterials]);
 
   const colouredLayerMaterials = useMemo(() => {
     const coloured: Record<string, THREE.MeshPhysicalMaterial> = {};
     for (const layer of layers) {
       const hex = layer.appearance?.colour_hex ?? baseColourHex;
-      if (hex) coloured[layer.id] = materialWithColour(layerMaterials?.[layer.id] ?? material, hex);
+      const gradient = layer.appearance?.gradient ?? (!layer.appearance?.colour_hex ? baseGradient : undefined);
+      if (gradient) coloured[layer.id] = materialWithGradient(layerMaterials?.[layer.id] ?? material, {
+        colour: gradient, bounds: [...gradientBounds], fitToLayer: !!layer.appearance?.gradient,
+      }, true);
+      else if (hex) coloured[layer.id] = materialWithColour(layerMaterials?.[layer.id] ?? material, hex);
     }
     return coloured;
-  }, [layers, baseColourHex, layerMaterials, material]);
+  }, [layers, baseColourHex, baseGradient, gradientBounds, layerMaterials, material]);
   useEffect(() => () => Object.values(colouredLayerMaterials).forEach(entry => entry.dispose()), [colouredLayerMaterials]);
   const renderedLayerMaterials = useMemo(() => ({ ...layerMaterials, ...colouredLayerMaterials }), [layerMaterials, colouredLayerMaterials]);
 
@@ -240,24 +276,6 @@ export function EditorModel({
     if (hideMarked && markedKey) for (const index of markedKey.split(",").map(Number)) hidden.add(index);
     return [...hidden].sort((a, b) => a - b);
   }, [hideMarked, markedKey, partsKey]);
-
-  // Material is assigned separately so changing the finish never rebuilds
-  // the object — which would re-run framing and yank the camera.
-  const { model, renderedSizeMm } = useMemo(() => {
-    const clone = prepared.clone(true);
-
-    // Stored scale, never a force-rescale (E1 collision 1): factor is mm per
-    // raw unit at the reference variant, and variantScale carries any other
-    // variant's product-size change (collision 3).
-    const rawBox = new THREE.Box3().setFromObject(clone);
-    const rawSize = rawBox.getSize(new THREE.Vector3());
-    const scale = scaleFactor * variantScale;
-    clone.scale.setScalar(scale);
-
-    const scaledBox = new THREE.Box3().setFromObject(clone);
-    clone.position.sub(scaledBox.getCenter(new THREE.Vector3()));
-    return { model: clone, renderedSizeMm: Math.max(rawSize.x, rawSize.y) * scale };
-  }, [prepared, scaleFactor, variantScale]);
 
   useEffect(() => {
     onModelSizeMm?.(renderedSizeMm);
@@ -612,6 +630,8 @@ export function EditorModel({
         material={material}
         layerMaterials={renderedLayerMaterials}
         baseColourHex={baseColourHex}
+        baseGradient={baseGradient}
+        gradientBounds={gradientBounds}
         onGroupReady={(group, key) => {
           reliefGroup.current = group;
           setReliefKey(key);
