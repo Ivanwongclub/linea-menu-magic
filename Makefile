@@ -44,6 +44,7 @@ package:
 	  --exclude='*.log' --exclude='*.tsbuildinfo' --exclude=.DS_Store \
 	  --exclude='./supabase/.temp' --exclude='./scripts/e2e-local/.shots' \
 	  --exclude='./scripts/e2e-local/last-failure.png' \
+	  --exclude='./resources/obj' --exclude='./resources/stl' \
 	  --exclude='./deploy/supabase/upstream/volumes/db/data' \
 	  --exclude='./deploy/supabase/upstream/volumes/storage' .
 	COPYFILE_DISABLE=1 tar -rf .deploy/linea3d-src.tar deploy/supabase/upstream/.env.example

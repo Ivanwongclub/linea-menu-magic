@@ -37,7 +37,17 @@ export interface LocalModel {
   resourceUrls?: string[];
   hasSourceAppearance?: boolean;
   warnings?: string[];
+  companionFiles?: File[];
   appearanceMode: "source" | "finish" | "colour";
+}
+
+/** Runtime material sidecars for the current model; never written to the catalogue. */
+export interface ModelMaterialOverride {
+  modelUrl: string;
+  materialText: string;
+  resourceUrls: string[];
+  files: File[];
+  warnings: string[];
 }
 
 interface CatalogueSnapshot extends History {
@@ -95,6 +105,7 @@ interface EditorState {
   pendingLogos: Record<string, PendingLogo>;
   /** Session-only OBJ/STL opened from disk — not saved to the product. */
   localModel: LocalModel | null;
+  modelMaterialOverride: ModelMaterialOverride | null;
   /** Held only while a local file is open; never part of a saved recipe. */
   localCatalogueSnapshot: CatalogueSnapshot | null;
   initialize: (recipe: DraftRecipe, hydratedFor: string) => void;
@@ -140,6 +151,7 @@ interface EditorState {
   /** Replaces the pending files wholesale — used when a draft is read back. */
   setPendingLogos: (logos: Record<string, PendingLogo>) => void;
   setLocalModel: (file: Omit<LocalModel, "appearanceMode"> | null) => void;
+  setModelMaterialOverride: (materials: ModelMaterialOverride) => void;
   setLocalAppearanceMode: (mode: LocalModel["appearanceMode"]) => void;
   setModelAppearanceMode: (mode: LocalModel["appearanceMode"]) => void;
 }
@@ -151,6 +163,9 @@ const syncLocalAppearance = (s: EditorState, recipe: DraftRecipe) =>
 function releaseLocalModel(model: LocalModel | null) {
   if (!model) return;
   for (const url of new Set([model.url, ...(model.resourceUrls ?? [])])) URL.revokeObjectURL(url);
+}
+function releaseMaterialOverride(materials: ModelMaterialOverride | null) {
+  materials?.resourceUrls.forEach((url) => URL.revokeObjectURL(url));
 }
 const resetModelState = {
   modelFrame: null,
@@ -192,14 +207,17 @@ export const useEditorStore = create<EditorState>((set) => ({
   brushRadiusMm: 1,
   pendingLogos: {},
   localModel: null,
+  modelMaterialOverride: null,
   localCatalogueSnapshot: null,
   initialize: (recipe, hydratedFor) =>
     set((s) => {
       releaseLocalModel(s.localModel);
+      releaseMaterialOverride(s.modelMaterialOverride);
       return {
         ...startHistory(recipe),
         ...resetModelState,
         localModel: null,
+        modelMaterialOverride: null,
         localCatalogueSnapshot: null,
         hydratedFor,
         // Files an anonymous draft is still holding belong to the layers it is
@@ -305,6 +323,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   setPendingLogos: (pendingLogos) => set({ pendingLogos }),
   setLocalModel: (localModel) =>
     set((s) => {
+      releaseMaterialOverride(s.modelMaterialOverride);
       if (s.localModel?.url !== localModel?.url) releaseLocalModel(s.localModel);
       if (!localModel) {
         return {
@@ -313,6 +332,7 @@ export const useEditorStore = create<EditorState>((set) => ({
           // the temporary file. Its full undo/redo history comes back too.
           ...(s.localCatalogueSnapshot ?? {}),
           localModel: null,
+          modelMaterialOverride: null,
           localCatalogueSnapshot: null,
         };
       }
@@ -329,9 +349,16 @@ export const useEditorStore = create<EditorState>((set) => ({
         ...resetModelState,
         pendingLogos: {},
         localModel: { ...localModel, appearanceMode: localModel.hasSourceAppearance ? "source" : "finish" },
+        modelMaterialOverride: null,
         localCatalogueSnapshot,
       };
     }),
+  setModelMaterialOverride: (modelMaterialOverride) => set((s) => {
+    releaseMaterialOverride(s.modelMaterialOverride);
+    const key = s.localModel ? "local_appearance_mode" : "model_appearance_mode";
+    const next = discrete(s, (r) => r.view[key] === "source" ? r : { ...r, view: { ...r.view, [key]: "source" as const } });
+    return { ...next, ...syncLocalAppearance(s, next.recipe), modelMaterialOverride };
+  }),
   setLocalAppearanceMode: (appearanceMode) =>
     set((s) => {
       if (!s.localModel) return s;

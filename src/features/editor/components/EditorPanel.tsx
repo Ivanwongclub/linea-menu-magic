@@ -80,6 +80,8 @@ export function EditorPanel({
   const isMetal = appearanceMode ? appearanceMode === "finish" : product.is_metal;
   const sourceAvailable = useEditorStore((s) => !!s.partsReport?.hasSourceAppearance);
   const materialWarnings = useEditorStore((s) => s.partsReport?.materialWarnings);
+  const materialFiles = useEditorStore((s) => s.modelMaterialOverride?.files ?? s.localModel?.companionFiles);
+  const materialNames = materialFiles?.filter((file) => /\.mtl$/i.test(file.name)).map((file) => file.name).join(", ");
   const faceDiameterMm = local ? modelSizeMm ?? 10 : selectedVariant?.size_primary_mm ?? product.size_variants[0]?.size_primary_mm ?? 10;
 
   // E2 U8 / standing ruling 1: the dock renders only what it has, and since
@@ -195,6 +197,7 @@ export function EditorPanel({
             {selectedColour && <p className="text-sm text-foreground">{selectedColour.name}</p>}
           </PanelGroup>
         )}
+        {sourceAvailable && materialNames && <p className="text-xs text-muted-foreground" role="status" data-testid="model-material-status">{t("editor.viewport.materialsLoaded", { names: materialNames })}</p>}
         {!!materialWarnings?.length && <p className="text-xs text-amber-700" data-testid="model-material-warnings">{materialWarnings.join(" · ")}</p>}
 
         {/* E2 U5: what is on the part — branding, zones and the model's own

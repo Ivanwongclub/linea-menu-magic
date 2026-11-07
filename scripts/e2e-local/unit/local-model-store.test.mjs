@@ -77,6 +77,39 @@ test('source appearance can be overridden and undone, and companion URLs are rel
   assert.ok(revoked.includes('blob:source-texture'));
 });
 
+test('supplementing local OBJ materials retains geometry, design edits, selection and the catalogue snapshot', () => {
+  state().setLocalModel({ url: 'blob:original', name: 'model.obj' });
+  state().addLayer(newTextLayer('test-layer', 20, 'Test'));
+  state().setHiddenGroups([1]);
+  state().select({ kind: 'part', id: '0' });
+  const before = state();
+  const materials = { modelUrl: 'blob:original', materialText: 'newmtl Body\nKd 1 0 0', resourceUrls: ['blob:material-image'], files: [], warnings: [] };
+  state().setModelMaterialOverride(materials);
+  assert.equal(state().localModel.url, before.localModel.url);
+  assert.equal(state().localModel.appearanceMode, 'source');
+  assert.deepEqual(state().recipe.layers, before.recipe.layers);
+  assert.deepEqual(state().recipe.hidden_groups, before.recipe.hidden_groups);
+  assert.deepEqual(state().selection, before.selection);
+  assert.equal(state().localCatalogueSnapshot, before.localCatalogueSnapshot);
+  assert.ok(!revoked.includes('blob:original'));
+  state().setLocalModel(null);
+  assert.equal(state().modelMaterialOverride, null);
+  assert.ok(revoked.includes('blob:material-image'));
+});
+
+test('catalogue MTL supplements stay temporary and release resources when changing products', () => {
+  const before = state().recipe;
+  state().setModelMaterialOverride({ modelUrl: 'https://example.test/model.obj', materialText: 'newmtl Body', resourceUrls: ['blob:old-image'], files: [], warnings: [] });
+  assert.equal(state().localModel, null);
+  assert.equal(state().recipe.view.model_appearance_mode, 'source');
+  assert.equal(state().recipe.layers, before.layers);
+  state().setModelMaterialOverride({ modelUrl: 'https://example.test/model.obj', materialText: 'newmtl Body', resourceUrls: ['blob:new-image'], files: [], warnings: [] });
+  assert.ok(revoked.includes('blob:old-image'));
+  state().initialize(emptyRecipe(), 'next-product');
+  assert.equal(state().modelMaterialOverride, null);
+  assert.ok(revoked.includes('blob:new-image'));
+});
+
 beforeEach(() => {
   state().initialize(emptyRecipe(), "test:empty");
   state().setPendingLogos({});

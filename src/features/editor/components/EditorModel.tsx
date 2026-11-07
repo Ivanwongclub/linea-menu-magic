@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, typ
 import { useLoader, useThree, type ThreeEvent } from "@react-three/fiber";
 import { ContactShadows } from "@react-three/drei";
 import * as THREE from "three";
+import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader.js";
 import { ModelFileLoader } from "../lib/ModelFileLoader";
 import { describeSourceMaterials, hasSourceAppearance, sourcePhysicalMaterial } from "../lib/modelMaterials";
 import { modelFormatFromName, type ModelFormat } from "../lib/modelFormat";
@@ -124,6 +125,7 @@ export function EditorModel({
   onTextReport,
 }: EditorModelProps) {
   const localModel = useEditorStore((s) => s.localModel);
+  const materialOverride = useEditorStore((s) => s.modelMaterialOverride?.modelUrl === url ? s.modelMaterialOverride : null);
   const selectedPartIndex = useEditorStore(selectSelectedPartIndex);
   const hoveredPartIndex = useEditorStore((s) => s.hoveredPartIndex);
   const setHoveredPart = useEditorStore((s) => s.setHoveredPart);
@@ -151,7 +153,7 @@ export function EditorModel({
   }, [obj, url]);
   const { camera, gl, size: viewport } = useThree();
 
-  const preserveSource = localModel ? localModel.appearanceMode === "source" : hasSourceAppearance(obj) && (!modelAppearanceMode || modelAppearanceMode === "source");
+  const preserveSource = localModel ? localModel.appearanceMode === "source" : (materialOverride || hasSourceAppearance(obj)) && (!modelAppearanceMode || modelAppearanceMode === "source");
   const twoTone = !preserveSource && !!(isMetal && finish?.two_tone);
 
   // One builder for the part and for every layer that carries its own finish
@@ -184,13 +186,29 @@ export function EditorModel({
   useEffect(() => () => prepared.traverse((child) => {
     if ((child as THREE.Mesh).isMesh) (child as THREE.Mesh).geometry.dispose();
   }), [prepared]);
-  const sourceMaterials = useMemo(() => prepared.children.map((child) => {
+  const materialCreator = useMemo(() => materialOverride ? new MTLLoader().parse(materialOverride.materialText, "") : null, [materialOverride]);
+  useEffect(() => () => {
+    if (!materialCreator) return;
+    const textures = new Set<THREE.Texture>();
+    for (const material of Object.values(materialCreator.materials)) {
+      for (const value of Object.values(material)) if (value instanceof THREE.Texture) textures.add(value);
+      material.dispose();
+    }
+    textures.forEach((texture) => texture.dispose());
+  }, [materialCreator]);
+  const authoredMaterials = useMemo(() => prepared.children.map((child) => {
     const mesh = child as THREE.Mesh;
     if (!mesh.isMesh) return null;
+    const resolve = (source: THREE.Material) => materialCreator?.materialsInfo[source.name] ? materialCreator.create(source.name) : source;
+    return Array.isArray(mesh.material) ? mesh.material.map(resolve) : resolve(mesh.material);
+  }), [prepared, materialCreator]);
+  const sourceMaterials = useMemo(() => authoredMaterials.map((authored, index) => {
+    if (!authored) return null;
+    const mesh = prepared.children[index] as THREE.Mesh;
     const create = (source: THREE.Material) => sourcePhysicalMaterial(source, !!mesh.geometry.getAttribute("color"), zoneStyles?.length ? zoneStyles : null);
-    return Array.isArray(mesh.material) ? mesh.material.map(create) : create(mesh.material);
+    return Array.isArray(authored) ? authored.map(create) : create(authored);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [prepared, zoneStyleKey]);
+  }), [prepared, authoredMaterials, zoneStyleKey]);
   useEffect(() => () => sourceMaterials.flat().forEach((entry) => entry?.dispose()), [sourceMaterials]);
 
   const markedKey = [...markedGroupIndices].sort((a, b) => a - b).join(",");
@@ -310,14 +328,14 @@ export function EditorModel({
     const box = new THREE.Box3().setFromObject(model);
     onPartsReport?.({
       bounds: { minX: box.min.x, maxX: box.max.x, minY: box.min.y, maxY: box.max.y, minZ: box.min.z, maxZ: box.max.z },
-      groups: meshes.map((mesh, index) => ({ index, name: mesh.name || `group_${index + 1}`, faces: counts[index], visible: mesh.visible, materials: describeSourceMaterials((prepared.children.filter((child) => (child as THREE.Mesh).isMesh)[index] as THREE.Mesh).material), renderedMaterials: describeSourceMaterials(mesh.material) })),
-      hasSourceAppearance: hasSourceAppearance(obj),
-      materialWarnings: localModel?.warnings ?? obj.userData.materialWarnings ?? [],
+      groups: meshes.map((mesh, index) => ({ index, name: mesh.name || `group_${index + 1}`, faces: counts[index], visible: mesh.visible, materials: describeSourceMaterials(authoredMaterials[index]!), renderedMaterials: describeSourceMaterials(mesh.material) })),
+      hasSourceAppearance: !!materialOverride || hasSourceAppearance(obj),
+      materialWarnings: materialOverride?.warnings ?? localModel?.warnings ?? obj.userData.materialWarnings ?? [],
       zoneFaces: zoneRuns.map((runs) => decodeRuns(runs).length),
       overlaps,
       totalFaces: total,
     });
-  }, [model, faceData, zoneRuns, hiddenIndices, onPartsReport, prepared, obj, material, sourceMaterials, preserveSource, localModel?.warnings]);
+  }, [model, faceData, zoneRuns, hiddenIndices, onPartsReport, authoredMaterials, obj, material, sourceMaterials, preserveSource, localModel?.warnings, materialOverride]);
 
   /**
    * The occlusion bake, in its worker (6b R4): once per file, hidden set and

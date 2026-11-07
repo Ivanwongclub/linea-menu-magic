@@ -71,3 +71,7 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+## 3D 模型測試資源
+
+原始 OBJ、MTL、貼圖與 STL 統一整理在 `resources/`。檔案清單、MO06 材質比較和匯入方式見 [resources/README.md](resources/README.md)。大型模型保存在本機，按該資料夾的說明另行提供。

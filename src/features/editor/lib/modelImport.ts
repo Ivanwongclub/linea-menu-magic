@@ -1,13 +1,29 @@
 import { modelFormatFromName } from "./modelFormat.ts";
 import { materialLibraries, rewriteMaterialTextures } from "./modelMaterials.ts";
+import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader.js";
 
-export interface ModelImport {
-  file: File;
-  model: File;
+interface MaterialResources {
   materialText: string;
   resourceUrls: string[];
   uploads: { name: string; body: Blob; contentType: string }[];
   warnings: string[];
+}
+
+export interface ModelImport extends MaterialResources {
+  file: File;
+  model: File;
+}
+
+export interface MaterialImport extends MaterialResources {
+  files: File[];
+}
+
+export class MaterialImportError extends Error {
+  code: "needsMtl" | "materialMismatch";
+  constructor(code: MaterialImportError["code"]) {
+    super(code);
+    this.code = code;
+  }
 }
 
 const normalPath = (name: string) => {
@@ -57,8 +73,53 @@ export async function prepareModelImport(files: File[]): Promise<ModelImport> {
     result.uploads.push({ name: "model.stl", body: file, contentType });
     return result;
   }
-  const resolveFile = (name: string, relativeTo = file.webkitRelativePath || file.name): File | undefined => {
-    const parent = normalPath(relativeTo).split("/").slice(0, -1).join("/");
+  const text = await file.text();
+  let libraries = materialLibraries(text, files.map((entry) => entry.name));
+  // Some exports omit mtllib but still provide a single material library.
+  if (!libraries.length) libraries = files.filter((entry) => /\.mtl$/i.test(entry.name)).map((entry) => entry.name);
+  const materials = await prepareMaterialResources(files, libraries, file.webkitRelativePath || file.name);
+  Object.assign(result, materials);
+  if (result.materialText) {
+    const obj = `mtllib materials.mtl\n${text.replace(/^[\t ]*mtllib[\t ]+.*$/gim, "")}`;
+    result.model = new File([obj], file.name, { type: contentType });
+    result.uploads.push({ name: "source.obj", body: file, contentType });
+  }
+  result.uploads.push({ name: "model.obj", body: result.model, contentType });
+  return result;
+}
+
+/** Supplement an existing OBJ without replacing its geometry, scale or design. */
+export async function prepareMaterialImport(files: File[], materialNames: string[], previousFiles: File[] = []): Promise<MaterialImport> {
+  const incomingMaterials = files.filter((file) => /\.mtl$/i.test(file.name));
+  if (incomingMaterials.length) {
+    const text = (await Promise.all(incomingMaterials.map((file) => file.text()))).join("\n");
+    const names = new Set(Object.keys(new MTLLoader().parse(text, "").materialsInfo));
+    if (!materialNames.some((name) => names.has(name))) throw new MaterialImportError("materialMismatch");
+  }
+  const merged = new Map(previousFiles.map((file) => [normalPath(file.webkitRelativePath || file.name).toLowerCase(), file]));
+  for (const file of files) {
+    const key = normalPath(file.webkitRelativePath || file.name).toLowerCase();
+    const sameName = [...merged].filter(([, entry]) => basename(entry.name).toLowerCase() === basename(file.name).toLowerCase());
+    if (!merged.has(key) && sameName.length === 1 && (!file.webkitRelativePath || !sameName[0][1].webkitRelativePath)) merged.delete(sameName[0][0]);
+    merged.set(key, file);
+  }
+  const companions = [...merged.values()];
+  if (companions.length > 100) throw new Error("A model may include at most 100 files.");
+  const libraries = companions.filter((file) => /\.mtl$/i.test(file.name)).map((file) => file.webkitRelativePath || file.name);
+  if (!libraries.length) throw new MaterialImportError("needsMtl");
+  const result = await prepareMaterialResources(companions, libraries, "");
+  const names = new Set(Object.keys(new MTLLoader().parse(result.materialText, "").materialsInfo));
+  if (!materialNames.some((name) => names.has(name))) {
+    result.resourceUrls.forEach((url) => URL.revokeObjectURL(url));
+    throw new MaterialImportError("materialMismatch");
+  }
+  return { ...result, files: companions };
+}
+
+async function prepareMaterialResources(files: File[], libraries: string[], relativeTo: string): Promise<MaterialResources> {
+  const result: MaterialResources = { materialText: "", resourceUrls: [], uploads: [], warnings: [] };
+  const resolveFile = (name: string, base = relativeTo): File | undefined => {
+    const parent = normalPath(base).split("/").slice(0, -1).join("/");
     const target = normalPath(parent ? `${parent}/${name}` : name);
     const exact = files.filter((candidate) => normalPath(candidate.webkitRelativePath || candidate.name) === target);
     if (exact.length === 1) return exact[0];
@@ -67,10 +128,6 @@ export async function prepareModelImport(files: File[]): Promise<ModelImport> {
     if (candidates.length > 1) throw new Error(`Ambiguous companion filename: ${name}`);
     return candidates[0];
   };
-  const text = await file.text();
-  let libraries = materialLibraries(text, files.map((entry) => entry.name));
-  // Some exports omit mtllib but still provide a single material library.
-  if (!libraries.length) libraries = files.filter((entry) => /\.mtl$/i.test(entry.name)).map((entry) => entry.name);
   const localMaterials: string[] = [];
   const storedMaterials: string[] = [];
   const textures = new Map<File, { name: string; url: string }>();
@@ -101,12 +158,8 @@ export async function prepareModelImport(files: File[]): Promise<ModelImport> {
     }
     if (storedMaterials.length) {
       result.materialText = localMaterials.join("\n");
-      const obj = `mtllib materials.mtl\n${text.replace(/^[\t ]*mtllib[\t ]+.*$/gim, "")}`;
-      result.model = new File([obj], file.name, { type: contentType });
-      result.uploads.push({ name: "source.obj", body: file, contentType });
       result.uploads.push({ name: "materials.mtl", body: new Blob([storedMaterials.join("\n")]), contentType: "text/plain" });
     }
-    result.uploads.push({ name: "model.obj", body: result.model, contentType });
     result.warnings = [...new Set(result.warnings)];
     return result;
   } catch (error) {

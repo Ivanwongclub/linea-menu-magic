@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { once } from "node:events";
 import { groupFromModelData, ModelFileLoader } from "../../../src/features/editor/lib/ModelFileLoader.ts";
-import { prepareModelImport, modelFilesFromDrop } from "../../../src/features/editor/lib/modelImport.ts";
+import { prepareModelImport, prepareMaterialImport, MaterialImportError, modelFilesFromDrop } from "../../../src/features/editor/lib/modelImport.ts";
 import { hasSourceAppearance, materialLibraries, sourcePhysicalMaterial } from "../../../src/features/editor/lib/modelMaterials.ts";
 
 // FileLoader's browser progress events are also used by this real HTTP reload test.
@@ -102,6 +102,42 @@ test("missing MTL or texture reports a warning and keeps geometry or diffuse col
 test("MTL filenames with spaces and multiple library declarations resolve", () => {
   assert.deepEqual(materialLibraries("mtllib my colours.mtl\n",["my colours.mtl"]),["my colours.mtl"]);
   assert.deepEqual(materialLibraries("mtllib red.mtl blue.mtl\nmtllib red.mtl"),["red.mtl","blue.mtl"]);
+});
+
+test("a later MTL matches OBJ material names without requiring the original sidecar filename", async () => {
+  const file = new File([MTL], "renamed materials.mtl");
+  const result = await prepareMaterialImport([file], ["Red", "Blue"]);
+  assert.deepEqual(result.warnings, []);
+  const model = groupFromModelData(OBJ, "obj", result.materialText);
+  assert.equal(model.children[0].material.color.getHexString(), "ff0000");
+  assert.equal(model.children[1].material.color.getHexString(), "0000ff");
+  assert.equal(await file.text(), MTL, "the original sidecar bytes must not change");
+});
+
+test("unrelated or empty MTL cannot appear to succeed by reusing a previously matching library", async () => {
+  const previous = [new File([MTL], "colours.mtl")];
+  for (const text of ["newmtl Other\nKd 0 1 0\n", ""]) {
+    await assert.rejects(prepareMaterialImport([new File([text], "other.mtl")], ["Red", "Blue"], previous), error => error instanceof MaterialImportError && error.code === "materialMismatch");
+  }
+  await assert.rejects(prepareMaterialImport([new File([""], "image.png")], ["Red"]), error => error.code === "needsMtl");
+});
+
+test("adding a missing texture later retains the MTL and removes the missing-texture warning", async () => {
+  const mtl = new File([MTL + "map_Kd textures/blue.png\n"], "colours.mtl");
+  const first = await prepareMaterialImport([mtl], ["Red", "Blue"]);
+  assert.match(first.warnings.join(), /Missing texture/);
+  const image = new File([new Uint8Array([1, 2, 3])], "blue.png", { type: "image/png" });
+  const next = await prepareMaterialImport([image], ["Red", "Blue"], first.files);
+  try {
+    assert.deepEqual(next.warnings, []);
+    assert.match(next.materialText, /map_Kd blob:/);
+    assert.equal(next.files.length, 2);
+    const replacement = await prepareMaterialImport([new File(["newmtl Red\nKd 0 1 0\n"], "colours.mtl")], ["Red"], next.files);
+    assert.equal(replacement.files.filter(file => file.name === "colours.mtl").length, 1);
+    assert.equal(groupFromModelData(OBJ, "obj", replacement.materialText).children[0].material.color.getHexString(), "00ff00");
+  } finally {
+    next.resourceUrls.forEach(url => URL.revokeObjectURL(url));
+  }
 });
 
 test("folder-relative textures resolve exactly even when another folder reuses a basename", async () => {

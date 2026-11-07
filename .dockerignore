@@ -22,3 +22,7 @@ deploy/supabase/upstream/volumes/storage
 scripts/e2e-local/.shots
 *.log
 .DS_Store
+
+# Local source models and textures used for import testing.
+resources/obj
+resources/stl

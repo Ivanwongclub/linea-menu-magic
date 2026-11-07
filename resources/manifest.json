@@ -1,0 +1,165 @@
+{
+  "description": "Original local 3D import resources; geometry, materials and texture bytes are unchanged.",
+  "files": [
+    {
+      "path": "obj/MO01/MO01.mtl",
+      "bytes": 311,
+      "sha256": "e4ddb7d1ab9a3b0c3478fc51551620055e24636f94b757abb3be6c0a68948fb2"
+    },
+    {
+      "path": "obj/MO01/MO01.obj",
+      "bytes": 32217399,
+      "sha256": "3a9c0961a37800e5b8a841794005fb68b612a643d8af45fcc524e4b9998a5d88"
+    },
+    {
+      "path": "obj/MO02/MO02.mtl",
+      "bytes": 947,
+      "sha256": "827afc257e57bb014ebbb9ed1f92cb6214e069cc02d4605c1a57cfaac88479ac"
+    },
+    {
+      "path": "obj/MO02/MO02.obj",
+      "bytes": 8869927,
+      "sha256": "07035046d1070810f7fdc20f94d12fed4b1901b51a97aed9e37a4ee6edfbb935"
+    },
+    {
+      "path": "obj/MO03/MO03.mtl",
+      "bytes": 311,
+      "sha256": "5980f9ee0da04626209c972e25af6b713ce9a2dfccae9d9cd1fa3aeaec936992"
+    },
+    {
+      "path": "obj/MO03/MO03.obj",
+      "bytes": 32577028,
+      "sha256": "fea700de8c6b44408e787953821f8b25a7d6965b094746a69ed8b7bc702d4680"
+    },
+    {
+      "path": "obj/MO04/MO04.mtl",
+      "bytes": 311,
+      "sha256": "aa21c0ee2ce015d358c9899b521db1bd305a6ad7a9314a066ed6257669760222"
+    },
+    {
+      "path": "obj/MO04/MO04.obj",
+      "bytes": 2510291,
+      "sha256": "621c83d6f4caefe8a2d4ecc4a24931de726b6b9c45119b6e5d472138cfc3c216"
+    },
+    {
+      "path": "obj/MO05/MO05.mtl",
+      "bytes": 158,
+      "sha256": "84217f555005d32b293285419d3e5217446d0d5b312413d0dfe174ddbd3adf1f"
+    },
+    {
+      "path": "obj/MO05/MO05.obj",
+      "bytes": 1694031,
+      "sha256": "691293bb3e126c34f84b89d7cb7764876432f671fe628f94353808287694fcb0"
+    },
+    {
+      "path": "obj/MO06/MO06.mtl",
+      "bytes": 311,
+      "sha256": "5980f9ee0da04626209c972e25af6b713ce9a2dfccae9d9cd1fa3aeaec936992"
+    },
+    {
+      "path": "obj/MO06/MO06.obj",
+      "bytes": 3940913,
+      "sha256": "22167f8a7e4d164165ad80859c98be07520e452d0deaec7ce4d1b5ef39e5dca7"
+    },
+    {
+      "path": "obj/MO07/MO07.mtl",
+      "bytes": 311,
+      "sha256": "5980f9ee0da04626209c972e25af6b713ce9a2dfccae9d9cd1fa3aeaec936992"
+    },
+    {
+      "path": "obj/MO07/MO07.obj",
+      "bytes": 1828648,
+      "sha256": "1d49a850a4260e5d3a4549e21e212a10cf1b0ad85c3259f07887c5e45f3eb119"
+    },
+    {
+      "path": "obj/MO08/MO08.mtl",
+      "bytes": 311,
+      "sha256": "5980f9ee0da04626209c972e25af6b713ce9a2dfccae9d9cd1fa3aeaec936992"
+    },
+    {
+      "path": "obj/MO08/MO08.obj",
+      "bytes": 3171682,
+      "sha256": "eb80b8ba0269d22167c369840b6a1cf5aaa45cd28908945948e34a584da45aeb"
+    },
+    {
+      "path": "obj/MO09/MO09.mtl",
+      "bytes": 546,
+      "sha256": "dc26b6180c89cff85edc82c5b9333b31f69f8634789a4fbc70820162b33f61c5"
+    },
+    {
+      "path": "obj/MO09/MO09.obj",
+      "bytes": 2896745,
+      "sha256": "27831a1be11cc4f21b2f0bf1bc7ba001affac9d50574b87b1f7efec99027df58"
+    },
+    {
+      "path": "obj/MO09/bump_cross_hatch.png",
+      "bytes": 2095,
+      "sha256": "65bbe92b4d4a08a876e1d05f13b7f1ed3c6545fada19734b32f86417d3cf02ba"
+    },
+    {
+      "path": "obj/MO12/MO12.mtl",
+      "bytes": 311,
+      "sha256": "5980f9ee0da04626209c972e25af6b713ce9a2dfccae9d9cd1fa3aeaec936992"
+    },
+    {
+      "path": "obj/MO12/MO12.obj",
+      "bytes": 2115649,
+      "sha256": "80c113e55b4fb89b19e016d9945b57be48a17526d8c0fa4551e474fcd4922f9c"
+    },
+    {
+      "path": "obj/MO13/FabricWool001_COL_VAR1_HIRES.jpg",
+      "bytes": 5668335,
+      "sha256": "b6ce1f667fa7d3feaa7a3a8c95ba6b21674ff79c6caa5e1dbddca2ff71bfe3f6"
+    },
+    {
+      "path": "obj/MO13/FabricWool001_NRM_HIRES.jpg",
+      "bytes": 7029188,
+      "sha256": "6579a6ab9a4d5817b563f704a66ec77d1515d843c56541c3476dc983c019e429"
+    },
+    {
+      "path": "obj/MO13/MO13.mtl",
+      "bytes": 413,
+      "sha256": "dbbf8d3d0bec5a32e0cfb3235a61555d0713201587cd0a2f96fd9d0add508aca"
+    },
+    {
+      "path": "obj/MO13/MO13.obj",
+      "bytes": 2543252,
+      "sha256": "d52521498e5690066ee77b354ee2f1505f545a81f1c1da07988a95b5cd50aefd"
+    },
+    {
+      "path": "obj/MO14/FabricWool001_COL_VAR1_HIRES.jpg",
+      "bytes": 5668335,
+      "sha256": "b6ce1f667fa7d3feaa7a3a8c95ba6b21674ff79c6caa5e1dbddca2ff71bfe3f6"
+    },
+    {
+      "path": "obj/MO14/FabricWool001_NRM_HIRES.jpg",
+      "bytes": 7029188,
+      "sha256": "6579a6ab9a4d5817b563f704a66ec77d1515d843c56541c3476dc983c019e429"
+    },
+    {
+      "path": "obj/MO14/MO14.mtl",
+      "bytes": 413,
+      "sha256": "817127618ce943a0217cf92eaf206a010bfa6311229ab12c87a25b41f5ea8050"
+    },
+    {
+      "path": "obj/MO14/MO14.obj",
+      "bytes": 132602,
+      "sha256": "a338235873e19f15c5914b7281a06d037bb883b8f1e543ea4ef9134d009f432c"
+    },
+    {
+      "path": "stl/40.stl",
+      "bytes": 1822034,
+      "sha256": "a9cea6178ea20b5b6991d8e08b0d9e02ea90a55f777d9eeee087993ec7851aaa"
+    },
+    {
+      "path": "stl/41.stl",
+      "bytes": 784034,
+      "sha256": "7ef5dbfbd4b06637524a603fe960c581b782b90d7795cacc216f9e970b4e5953"
+    },
+    {
+      "path": "stl/内径12mm合金圈.stl",
+      "bytes": 281684,
+      "sha256": "72b7762ec419186755000c8a5d46d725f9939e656cf632662b087a2ab05d7968"
+    }
+  ]
+}

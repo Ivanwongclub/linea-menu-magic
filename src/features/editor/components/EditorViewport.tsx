@@ -23,7 +23,7 @@ import { HandleProjector, HandlesOverlay, newHandleBridge, newHandleElements } f
 import { selectHiddenGroups, selectSelectedLayerId, selectZones, useEditorStore } from "../store/useEditorStore";
 import { modelFormatFromName } from "../lib/modelFormat";
 import { groupFromModelData, validateModelSurfaces } from "../lib/ModelFileLoader";
-import { prepareModelImport, modelFilesFromDrop, type ModelImport } from "../lib/modelImport";
+import { prepareModelImport, prepareMaterialImport, MaterialImportError, modelFilesFromDrop, type ModelImport, type MaterialImport } from "../lib/modelImport";
 import { hasSourceAppearance } from "../lib/modelMaterials";
 import { useLogoSources } from "../hooks/useLogoAssets";
 import type { ProcessThresholds } from "../lib/manufacturing";
@@ -154,6 +154,7 @@ export function EditorViewport({
 }: EditorViewportProps) {
   const localModel = useEditorStore((s) => s.localModel);
   const setLocalModel = useEditorStore((s) => s.setLocalModel);
+  const setModelMaterialOverride = useEditorStore((s) => s.setModelMaterialOverride);
   const hydratedFor = useEditorStore((s) => s.hydratedFor);
   const catalogUrl = modelStoragePath ? supabase.storage.from("product-models").getPublicUrl(modelStoragePath).data.publicUrl : null;
   const url = localModel?.url ?? catalogUrl;
@@ -261,35 +262,58 @@ export function EditorViewport({
         importContext.current.hydratedFor === context.hydratedFor &&
         useEditorStore.getState().hydratedFor === context.hydratedFor;
       const format = modelFormatFromName(files.find((file) => modelFormatFromName(file.name))?.name);
-      if (!format) {
+      const materialsOnly = !format && files.some((file) => /\.(mtl|png|jpe?g|webp|gif|bmp)$/i.test(file.name));
+      if (!format && !materialsOnly) {
         setImporting(false);
         toast.error(t("editor.viewport.badModelFile"));
         return;
       }
       setImporting(true);
       let parsed: Group | null = null;
-      let bundle: ModelImport | null = null;
+      let bundle: ModelImport | MaterialImport | null = null;
       let adopted = false;
       try {
-        bundle = await prepareModelImport(files);
-        const file = bundle.model;
+        if (materialsOnly) {
+          const state = useEditorStore.getState();
+          const modelUrl = state.localModel?.url ?? catalogUrl;
+          const name = state.localModel?.name ?? modelStoragePath;
+          if (!modelUrl || !state.partsReport) {
+            toast.error(t("editor.viewport.materialsNeedObj"));
+            return;
+          }
+          if (modelFormatFromName(name) !== "obj") {
+            toast.error(t("editor.viewport.materialsNotStl"));
+            return;
+          }
+          const previous = state.modelMaterialOverride?.modelUrl === modelUrl ? state.modelMaterialOverride.files : state.localModel?.companionFiles;
+          bundle = await prepareMaterialImport(files, state.partsReport.groups.flatMap((part) => part.materials?.map((material) => material.name) ?? []), previous);
+          if (!isCurrent() || (useEditorStore.getState().localModel?.url ?? catalogUrl) !== modelUrl) return;
+          setModelMaterialOverride({ modelUrl, materialText: bundle.materialText, resourceUrls: bundle.resourceUrls, files: bundle.files, warnings: bundle.warnings });
+          adopted = true;
+          toast.success(t("editor.viewport.materialsApplied"));
+          if (bundle.warnings.length) toast.warning(bundle.warnings.join(" · "));
+          return;
+        }
+        const modelBundle = await prepareModelImport(files);
+        bundle = modelBundle;
+        const file = modelBundle.model;
         const data = format === "stl" ? await file.arrayBuffer() : await file.text();
         if (!isCurrent()) return;
         parsed = groupFromModelData(data, format, bundle.materialText);
         validateModelSurfaces(parsed);
         if (!isCurrent()) return;
-        setLocalModel({ url: URL.createObjectURL(file), name: file.name, materialText: bundle.materialText, resourceUrls: bundle.resourceUrls, hasSourceAppearance: hasSourceAppearance(parsed), warnings: bundle.warnings });
+        setLocalModel({ url: URL.createObjectURL(file), name: file.name, materialText: bundle.materialText, resourceUrls: bundle.resourceUrls, hasSourceAppearance: hasSourceAppearance(parsed), warnings: bundle.warnings, companionFiles: files.filter((entry) => !modelFormatFromName(entry.name)) });
         adopted = true;
         if (bundle.warnings.length) toast.warning(bundle.warnings.join(" · "));
       } catch (error) {
-        if (isCurrent()) toast.error(`${t("editor.viewport.invalidModelFile")} ${error instanceof Error ? error.message : ""}`);
+        if (isCurrent()) toast.error(error instanceof MaterialImportError ? t(`editor.viewport.${error.code}`) : `${t(materialsOnly ? "editor.viewport.invalidMaterials" : "editor.viewport.invalidModelFile")} ${error instanceof Error ? error.message : ""}`);
       } finally {
         if (parsed) disposeLocalValidation(parsed);
         if (!adopted) bundle?.resourceUrls.forEach((url) => URL.revokeObjectURL(url));
         if (isCurrent()) setImporting(false);
       }
     },
-    [productId, hydratedFor, setLocalModel, t],
+    [productId, hydratedFor, catalogUrl, modelStoragePath, setLocalModel, setModelMaterialOverride, t],
   );
 
   const clearLocalModel = useCallback(() => {

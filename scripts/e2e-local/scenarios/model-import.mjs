@@ -123,6 +123,17 @@ export default async function ({ page, base, admin, editor, h }) {
     await page.getByTestId("local-model-banner").waitFor();
     await poll(async()=> (await parts()).length===2&&(await parts())[0].renderedMaterials[0].colour==="#ff0000","local MTL did not render");
     assert.equal((await zones()).length,0,"another model must not inherit the catalogue's face masks");
+    const beforeSupplement = (await parts()).map(part=>[part.name,part.faces]);
+    const beforeSupplementSize = await viewport.getAttribute("data-model-size-mm");
+    await h.expectToast(/Materials applied/i,()=>page.getByTestId("view-open-model-input").setInputFiles(payload("colours.mtl",MTL.replace("Kd 1 0 0","Kd 0 1 0"))));
+    await poll(async()=> (await parts())[0].renderedMaterials[0].colour==="#00ff00","later MTL did not update the existing OBJ");
+    assert.deepEqual((await parts()).map(part=>[part.name,part.faces]),beforeSupplement,"MTL must not replace geometry or reorder parts");
+    assert.equal(await viewport.getAttribute("data-model-size-mm"),beforeSupplementSize);
+    assert.match(await page.getByTestId("model-material-status").innerText(),/colours.mtl/);
+    await h.expectToast(/do not match/i,()=>page.getByTestId("view-open-model-input").setInputFiles(payload("unrelated.mtl","newmtl Other\nKd 1 1 0\n")));
+    assert.equal((await parts())[0].renderedMaterials[0].colour,"#00ff00","invalid MTL must keep the current appearance");
+    await h.expectToast(/Materials applied/i,()=>page.getByTestId("view-open-model-input").setInputFiles(payload("colours.mtl",MTL)));
+    await poll(async()=> (await parts())[0].renderedMaterials[0].colour==="#ff0000","replacement MTL did not restore red");
     await page.getByTestId("local-model-colour").click();
     await poll(async()=> (await parts()).every(part=>part.renderedMaterials[0].colour==="#111111"),"base colour override failed");
     await page.getByTestId("undo").click();
@@ -131,6 +142,8 @@ export default async function ({ page, base, admin, editor, h }) {
     await poll(async()=> (await parts()).length===2&&(await parts())[1].renderedMaterials[0].textured,"local folder texture did not resolve");
     await page.getByTestId("view-open-model-input").setInputFiles(payload("part.stl",STL,"model/stl"));
     await poll(async()=> (await parts()).length===1&&(await parts())[0].name==="STL","local STL did not render");
+    await h.expectToast(/STL does not use MTL/i,()=>page.getByTestId("view-open-model-input").setInputFiles(payload("colours.mtl",MTL)));
+    assert.equal((await parts())[0].name,"STL");
     assert.equal(Number(await viewport.getAttribute("data-model-size-mm")),20);
     await page.getByTestId("local-model-colour").click();
     await page.getByTestId("colour-swatch").nth(1).click();
