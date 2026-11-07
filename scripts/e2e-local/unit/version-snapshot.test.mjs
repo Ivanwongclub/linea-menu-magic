@@ -50,6 +50,15 @@ test("version metadata freezes whole-model and per-part gradients", () => {
   assert.equal(snap.part_gradients["1"].angle, 90);
 });
 
+test("version metadata freezes GP memberships and their continuous fill", () => {
+  const group = { id: "g", name: "GP 1", members: [{ kind: "part", id: "0" }, { kind: "part", id: "1" }], gradient: { from: "#FF0000", to: "#0000FF", angle: 0, midpoint: 0.5 } };
+  const snap = buildSnapshot({ product, finish, sizeVariant: variant, colour: null, paintGroups: [group], savedAt });
+  group.members[0].id = "9";
+  group.gradient.from = "#000000";
+  assert.equal(snap.paint_groups[0].members[0].id, "0");
+  assert.equal(snap.paint_groups[0].gradient.from, "#FF0000");
+});
+
 test("a version freezes the product, the finish's material and the model's scale", () => {
   const snap = buildSnapshot({ product, finish, sizeVariant: variant, colour: null, savedAt });
 

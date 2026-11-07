@@ -10,6 +10,7 @@
 import type { ZoneMethod, ZonePlane } from "./zones.ts";
 import { normalizeHex } from "./pantone.ts";
 import { normalizeGradient, type ColourGradient } from "./gradient.ts";
+import { normalizePaintGroups, type PaintGroup } from "./paintGroups.ts";
 
 /** `free` is a logo's placement: centre, width and rotation, no curve (4k R3). */
 export type TextLayout = "straight" | "circle" | "free";
@@ -199,6 +200,8 @@ export interface DraftRecipe {
   part_colours?: Record<string, string>;
   base_gradient?: ColourGradient;
   part_gradients?: Record<string, ColourGradient>;
+  /** Colour groups share one fill over their combined footprint; meshes stay separate. */
+  paint_groups?: PaintGroup[];
   view: { ruler: boolean; original_lettering?: boolean; model_appearance_mode?: "source" | "finish" | "colour"; /** Temporary imports only; never written to catalogue drafts. */ local_appearance_mode?: "source" | "finish" | "colour" };
   layers: Layer[];
   /** Phase 6b R1: OBJ groups the buyer has hidden; hiding never deletes geometry. */
@@ -266,6 +269,7 @@ export function normalizeRecipe(raw: unknown): DraftRecipe {
   const view = isRecord(raw.view) ? raw.view : {};
   const version = raw.recipe_version;
   const stored = (version === 2 || version === 3) && Array.isArray(raw.layers) ? (raw.layers as Layer[]) : [];
+  const paintGroups = normalizePaintGroups(raw.paint_groups, new Set(stored.map(layer => layer.id)));
   return {
     recipe_version: RECIPE_VERSION,
     size_variant_id: id(raw.size_variant_id),
@@ -275,6 +279,7 @@ export function normalizeRecipe(raw: unknown): DraftRecipe {
     ...(isRecord(raw.part_colours) ? { part_colours: Object.fromEntries(Object.entries(raw.part_colours).flatMap(([index, value]) => /^(0|[1-9]\d*)$/.test(index) && typeof value === "string" && normalizeHex(value) ? [[index, normalizeHex(value)!]] : [])) } : {}),
     ...(normalizeGradient(raw.base_gradient) ? { base_gradient: normalizeGradient(raw.base_gradient)! } : {}),
     ...(isRecord(raw.part_gradients) ? { part_gradients: Object.fromEntries(Object.entries(raw.part_gradients).flatMap(([index, value]) => /^(0|[1-9]\d*)$/.test(index) && normalizeGradient(value) ? [[index, normalizeGradient(value)!]] : [])) } : {}),
+    ...(paintGroups.length ? { paint_groups: paintGroups } : {}),
     // 6b R1: the factory's own lettering is a row in the Parts list now; it
     // stays hidden unless a design says otherwise, as it was before.
     view: {

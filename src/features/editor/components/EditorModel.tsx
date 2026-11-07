@@ -17,7 +17,8 @@ import { colourMaterial, finishMaterial, materialWithColour, materialWithGradien
 import type { Layer, Zone } from "../lib/recipe";
 import { decodeRuns, encodeRuns, facesForGroups, facesForPlane, resolveZones, totalFaces } from "../lib/zones";
 import type { ZoneStyle } from "../lib/shaderPatch";
-import { gradientBoundsFor } from "../lib/gradient";
+import { gradientBoundsFor, type GradientPaint } from "../lib/gradient";
+import { findMemberGroup, unionGradientBounds } from "../lib/paintGroups";
 import type { LogoSource } from "../hooks/useLogoAssets";
 import { BrandingMeshes, type TextSceneReport } from "./branding/BrandingMeshes";
 import { cornersOf, fitDistance, homeDirection, type BoundsMm } from "../lib/framing";
@@ -136,6 +137,8 @@ export function EditorModel({
   const partColours = useEditorStore((s) => s.recipe.part_colours);
   const baseGradient = useEditorStore(s => s.recipe.base_gradient);
   const partGradients = useEditorStore(s => s.recipe.part_gradients);
+  const paintGroups = useEditorStore(s => s.recipe.paint_groups);
+  const selection = useEditorStore(s => s.selection);
   const format: ModelFormat = modelFormatFromName(sourceName) ?? modelFormatFromName(url) ?? "obj";
   const obj = useLoader(ModelFileLoader, url, (loader) => {
     loader.formatHint = format;
@@ -199,6 +202,8 @@ export function EditorModel({
 
   const gradientBounds = useMemo(() => gradientBoundsFor(new THREE.Box3().setFromObject(model)), [model]);
   const partGradientBounds = useMemo(() => model.children.map(child => gradientBoundsFor(new THREE.Box3().setFromObject(child))), [model]);
+  const groupBounds = useMemo(() => Object.fromEntries((paintGroups ?? []).map(group => [group.id, unionGradientBounds(group.members.filter(member => member.kind === "part").map(member => partGradientBounds[Number(member.id)]), gradientBounds)])), [paintGroups, partGradientBounds, gradientBounds]);
+  const groupPaints = useMemo<Record<string, GradientPaint>>(() => Object.fromEntries((paintGroups ?? []).filter(group => group.gradient).map(group => [group.id, { colour: group.gradient!, bounds: groupBounds[group.id] }])), [paintGroups, groupBounds]);
 
   // One builder for the part and for every layer that carries its own finish
   // (Phase 6a R2, `lib/finishMaterial.ts`).
@@ -242,29 +247,33 @@ export function EditorModel({
   useEffect(() => () => sourceMaterials.flat().forEach((entry) => entry?.dispose()), [sourceMaterials]);
 
   const partMaterials = useMemo(() => prepared.children.map((_, index) => {
-    const hex = partColours?.[String(index)];
+    const group = findMemberGroup(paintGroups, { kind: "part", id: String(index) });
+    const ownHex = partColours?.[String(index)];
     const gradient = partGradients?.[String(index)];
-    if (!hex && !gradient) return null;
+    const paint = gradient ? { colour: gradient, bounds: partGradientBounds[index] } : !ownHex && group?.gradient ? groupPaints[group.id] : undefined;
+    const hex = ownHex ?? group?.colour_hex;
+    if (!hex && !paint) return null;
     const source = preserveSource && sourceMaterials[index] ? sourceMaterials[index] : material;
-    const fill = (entry: THREE.MeshPhysicalMaterial) => gradient
-      ? materialWithGradient(entry, { colour: gradient, bounds: partGradientBounds[index] }, true)
+    const fill = (entry: THREE.MeshPhysicalMaterial) => paint
+      ? materialWithGradient(entry, paint, true)
       : materialWithColour(entry, hex!);
     return Array.isArray(source) ? source.map(fill) : fill(source);
-  }), [prepared, partColours, partGradients, partGradientBounds, preserveSource, sourceMaterials, material]);
+  }), [prepared, partColours, partGradients, partGradientBounds, paintGroups, groupPaints, preserveSource, sourceMaterials, material]);
   useEffect(() => () => partMaterials.flat().forEach(entry => entry?.dispose()), [partMaterials]);
 
   const colouredLayerMaterials = useMemo(() => {
     const coloured: Record<string, THREE.MeshPhysicalMaterial> = {};
     for (const layer of layers) {
-      const hex = layer.appearance?.colour_hex ?? baseColourHex;
-      const gradient = layer.appearance?.gradient ?? (!layer.appearance?.colour_hex ? baseGradient : undefined);
-      if (gradient) coloured[layer.id] = materialWithGradient(layerMaterials?.[layer.id] ?? material, {
-        colour: gradient, bounds: [...gradientBounds], fitToLayer: !!layer.appearance?.gradient,
-      }, true);
+      const group = findMemberGroup(paintGroups, { kind: "layer", id: layer.id });
+      const ownHex = layer.appearance?.colour_hex;
+      const hex = ownHex ?? group?.colour_hex ?? baseColourHex;
+      const gradient = layer.appearance?.gradient ?? (!ownHex && !group?.colour_hex ? baseGradient : undefined);
+      const paint = !layer.appearance?.gradient && !ownHex && group?.gradient ? groupPaints[group.id] : gradient ? { colour: gradient, bounds: [...gradientBounds] as typeof gradientBounds, fitToLayer: !!layer.appearance?.gradient } : undefined;
+      if (paint) coloured[layer.id] = materialWithGradient(layerMaterials?.[layer.id] ?? material, paint, true);
       else if (hex) coloured[layer.id] = materialWithColour(layerMaterials?.[layer.id] ?? material, hex);
     }
     return coloured;
-  }, [layers, baseColourHex, baseGradient, gradientBounds, layerMaterials, material]);
+  }, [layers, baseColourHex, baseGradient, gradientBounds, layerMaterials, material, paintGroups, groupPaints]);
   useEffect(() => () => Object.values(colouredLayerMaterials).forEach(entry => entry.dispose()), [colouredLayerMaterials]);
   const renderedLayerMaterials = useMemo(() => ({ ...layerMaterials, ...colouredLayerMaterials }), [layerMaterials, colouredLayerMaterials]);
 
@@ -617,11 +626,16 @@ export function EditorModel({
           event.stopPropagation();
           event.nativeEvent.stopPropagation();
           event.nativeEvent.preventDefault();
-          select({ kind: "part", id: String(index) });
+          const group = findMemberGroup(paintGroups, { kind: "part", id: String(index) });
+          select(group ? { kind: "group", id: group.id } : { kind: "part", id: String(index) });
         }}
       />
       {/* Each part owns its line buffers; switching to a smaller part must drop the old segments. */}
       {highlightedMesh && <PartSelectionOutline key={highlightedMesh.uuid} mesh={highlightedMesh} />}
+      {hoveredPartIndex == null && selection?.kind === "group" && paintGroups?.find(group => group.id === selection.id)?.members.filter(member => member.kind === "part" && !hiddenIndices.includes(Number(member.id))).map(member => {
+        const mesh = model.children.filter(child => (child as THREE.Mesh).isMesh)[Number(member.id)] as THREE.Mesh | undefined;
+        return mesh ? <PartSelectionOutline key={mesh.uuid} mesh={mesh} /> : null;
+      })}
       <BrandingMeshes
         layers={layers}
         logoSources={logoSources}
@@ -632,6 +646,10 @@ export function EditorModel({
         baseColourHex={baseColourHex}
         baseGradient={baseGradient}
         gradientBounds={gradientBounds}
+        paintGroups={paintGroups}
+        groupPaints={groupPaints}
+        groupBounds={groupBounds}
+        partGradientBounds={partGradientBounds}
         onGroupReady={(group, key) => {
           reliefGroup.current = group;
           setReliefKey(key);

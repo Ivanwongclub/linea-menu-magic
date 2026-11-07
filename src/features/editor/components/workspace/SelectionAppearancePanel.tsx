@@ -11,6 +11,7 @@ import { useLogoSources } from "../../hooks/useLogoAssets";
 import { DEFAULT_APPEARANCE, isLogoLayer, layerAppearance, type LayerAppearance } from "../../lib/recipe";
 import { useEditorStore, type Selection } from "../../store/useEditorStore";
 import { ModelColourControl } from "../ModelColourControl";
+import { PaintGroupDetails } from "./PaintGroupsSection";
 
 interface Props {
   originalHex: string | null | undefined;
@@ -33,13 +34,14 @@ function SelectedAppearance({ selection, originalHex, sourceAppearance }: Props 
   const layer = selection.kind === "layer" ? recipe.layers.find(layer => layer.id === selection.id) : undefined;
   const zone = selection.kind === "zone" ? recipe.zones?.find(zone => zone.id === selection.id) : undefined;
   const part = selection.kind === "part" ? parts?.find(part => String(part.index) === selection.id) : undefined;
+  const group = selection.kind === "group" ? recipe.paint_groups?.find(group => group.id === selection.id) : undefined;
   const logoSources = useLogoSources(recipe.layers);
   const raster = !!layer && logoSources[layer.id]?.kind === "raster";
   const appearance = layer ? layerAppearance(layer) : zone?.appearance ?? partAppearance;
   const selectedFinish = finishes.find(finish => finish.id === appearance.finish_id);
-  const name = part?.name ?? zone?.name ?? (layer ? isLogoLayer(layer) ? t("editor.branding.logoLayer") : layer.content.value || t("editor.branding.emptyLayer") : "");
+  const name = group?.name ?? part?.name ?? zone?.name ?? (layer ? isLogoLayer(layer) ? t("editor.branding.logoLayer") : layer.content.value || t("editor.branding.emptyLayer") : "");
 
-  if (!part && !layer && !zone) return null;
+  if (!part && !layer && !zone && !group) return null;
 
   const changeAppearance = (patch: Partial<LayerAppearance>) => {
     const state = useEditorStore.getState();
@@ -87,6 +89,7 @@ function SelectedAppearance({ selection, originalHex, sourceAppearance }: Props 
 
       <ModelColourControl originalHex={originalHex} sourceAppearance={sourceAppearance} />
 
+      {group ? <PaintGroupDetails group={group} /> : <>
       <div className="mt-3 space-y-2 border-t border-border pt-3" data-testid="selection-material-control" data-finish-id={appearance.finish_id ?? ""} data-mode={appearance.mode}>
         <h4 className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">{t("editor.quickAppearance.material")}</h4>
         <div className="flex items-center gap-2">
@@ -117,6 +120,7 @@ function SelectedAppearance({ selection, originalHex, sourceAppearance }: Props 
           </div>
         </SheetContent>
       </Sheet>
+      </>}
     </aside>
   );
 }

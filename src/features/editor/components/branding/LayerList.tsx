@@ -9,6 +9,7 @@ import { selectSelectedLayerId, useEditorStore } from "../../store/useEditorStor
 import { isLogoLayer, type Layer } from "../../lib/recipe";
 import { deleteLogoAsset, type LogoSource } from "../../hooks/useLogoAssets";
 import { LayerTextInput } from "./LayerTextInput";
+import { PaintGroupBadge } from "../workspace/PaintGroupsSection";
 
 /**
  * The layers on the part, in the order they are applied (E2 U2): the list and
@@ -117,6 +118,7 @@ function LayerRow({ layer, selected, logoSource }: { layer: Layer; selected: boo
             </button>
           )}
         </div>
+        <PaintGroupBadge member={{ kind: "layer", id: layer.id }} />
         <button
           type="button"
           data-testid="text-layer-delete"

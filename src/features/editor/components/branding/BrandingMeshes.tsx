@@ -11,7 +11,9 @@ import type { LogoSource } from "../../hooks/useLogoAssets";
 import { glyphOutlines } from "../../lib/glyphOutlines";
 import { clonePatched } from "../../lib/shaderPatch";
 import type { ShaderPatchOptions } from "../../lib/shaderPatch";
-import { gradientBoundsFor, type ColourGradient, type GradientBounds } from "../../lib/gradient";
+import { gradientBoundsFor, type ColourGradient, type GradientBounds, type GradientPaint } from "../../lib/gradient";
+import { findMemberGroup, unionGradientBounds, type PaintGroup } from "../../lib/paintGroups";
+import { updateGradientBounds } from "../../lib/gradientShader";
 import { materialWithGradient } from "../../lib/finishMaterial";
 import {
   OPENING_LIFT_MM,
@@ -111,6 +113,10 @@ interface BrandingMeshesProps {
   baseColourHex?: string;
   baseGradient?: ColourGradient;
   gradientBounds: GradientBounds;
+  paintGroups?: PaintGroup[];
+  groupPaints: Record<string, GradientPaint>;
+  groupBounds: Record<string, GradientBounds>;
+  partGradientBounds: GradientBounds[];
   /**
    * Phase 6b R4: the relief group and a key that changes when its geometry
    * does — what the occlusion bake casts against, so an engraved recess takes
@@ -359,7 +365,7 @@ function reliefMaterials(): ReliefMaterials {
  * opening mask, a depth punch, and the recess's walls and floor as their own
  * meshes (R2). Geometry only for display — never part of the measured model.
  */
-export function BrandingMeshes({ layers, logoSources, model, faceZ, material, layerMaterials, baseColourHex, baseGradient, gradientBounds, onGroupReady, onReport }: BrandingMeshesProps) {
+export function BrandingMeshes({ layers, logoSources, model, faceZ, material, layerMaterials, baseColourHex, baseGradient, gradientBounds, paintGroups, groupPaints, groupBounds, partGradientBounds, onGroupReady, onReport }: BrandingMeshesProps) {
   const [fonts, setFonts] = useState<Record<string, Font>>({});
   /** Bumped when a raster artwork finishes decoding, so the layout runs again. */
   const [textureVersion, setTextureVersion] = useState(0);
@@ -542,10 +548,13 @@ export function BrandingMeshes({ layers, logoSources, model, faceZ, material, la
           entry.pieces++;
           const geometry = cached(`raster|${logoKey(source.url)}|${layer.content.width_mm}|${heightMm}`, () => new THREE.PlaneGeometry(layer.content.width_mm, heightMm));
           geometry.translate(0, 0, OPENING_LIFT_MM);
-          const colourHex = layer.appearance?.colour_hex ?? baseColourHex;
-          const gradient = layer.appearance?.gradient ?? (!layer.appearance?.colour_hex ? baseGradient : undefined);
-          const raster = gradient ? materialWithGradient(rasterMaterialFor(texture), { colour: gradient, bounds: [...gradientBounds], fitToLayer: !!layer.appearance?.gradient }) : colourHex ? rasterMaterialFor(texture).clone() : rasterMaterialFor(texture);
-          if (gradient) tintedRasters.push(raster);
+          const colourGroup = findMemberGroup(paintGroups, { kind: "layer", id: layer.id });
+          const ownHex = layer.appearance?.colour_hex;
+          const colourHex = ownHex ?? colourGroup?.colour_hex ?? baseColourHex;
+          const gradient = layer.appearance?.gradient ?? (!ownHex && !colourGroup?.colour_hex ? baseGradient : undefined);
+          const paint = !layer.appearance?.gradient && !ownHex && colourGroup?.gradient ? groupPaints[colourGroup.id] : gradient ? { colour: gradient, bounds: [...gradientBounds] as GradientBounds, fitToLayer: !!layer.appearance?.gradient } : undefined;
+          const raster = paint ? materialWithGradient(rasterMaterialFor(texture), paint) : colourHex ? rasterMaterialFor(texture).clone() : rasterMaterialFor(texture);
+          if (paint) tintedRasters.push(raster);
           else if (colourHex) {
             raster.color.set(colourHex);
             tintedRasters.push(raster);
@@ -645,9 +654,13 @@ export function BrandingMeshes({ layers, logoSources, model, faceZ, material, la
         const material = (child as THREE.Mesh).material;
         for (const entry of Array.isArray(material) ? material : [material]) {
           const paint = (entry.userData.shaderPatch as ShaderPatchOptions | undefined)?.gradient;
-          if (paint?.fitToLayer) paint.bounds.splice(0, 4, ...gradientBoundsFor(box));
+          if (paint?.fitToLayer) updateGradientBounds(paint.bounds, gradientBoundsFor(box));
         }
       });
+    }
+    for (const colourGroup of paintGroups ?? []) {
+      const values = colourGroup.members.map(member => member.kind === "part" ? partGradientBounds[Number(member.id)] : layerBoxes.has(member.id) ? gradientBoundsFor(layerBoxes.get(member.id)!) : undefined);
+      updateGradientBounds(groupBounds[colourGroup.id], unionGradientBounds(values, gradientBounds));
     }
     const position = new THREE.Vector3();
     for (const holder of group.children) {
@@ -688,7 +701,7 @@ export function BrandingMeshes({ layers, logoSources, model, faceZ, material, la
       for (const geometry of built) geometry.dispose();
       for (const raster of tintedRasters) raster.dispose();
     };
-  }, [group, layers, logoSources, model, fonts, faceZ, material, layerMaterials, baseColourHex, baseGradient, gradientBounds, materials, textureVersion, onGroupReady, onReport]);
+  }, [group, layers, logoSources, model, fonts, faceZ, material, layerMaterials, baseColourHex, baseGradient, gradientBounds, paintGroups, groupPaints, groupBounds, partGradientBounds, materials, textureVersion, onGroupReady, onReport]);
 
   // Screen x of each glyph centre, in canvas CSS px, kept on the canvas
   // element whenever the camera or the layout changes — the e2e reading-

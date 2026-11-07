@@ -6,6 +6,7 @@ import { colourOverride, gradientOverride, hasColourOverride } from "../lib/scop
 import { isLogoLayer } from "../lib/recipe";
 import { usePublicFinishes } from "../hooks/usePublicFinishes";
 import { GradientColourControl } from "./GradientColourControl";
+import { groupForMember } from "../lib/paintGroups";
 
 /** The model's colour changes independently of its material and surface finish. */
 export function ModelColourControl({ originalHex, sourceAppearance, global = false }: { originalHex: string | null | undefined; sourceAppearance: boolean; global?: boolean }) {
@@ -27,15 +28,17 @@ export function ModelColourControl({ originalHex, sourceAppearance, global = fal
   const part = target?.kind === "part" ? parts?.find(part => String(part.index) === target.id) : undefined;
   const layer = target?.kind === "layer" ? recipe.layers.find(layer => layer.id === target.id) : undefined;
   const zone = target?.kind === "zone" ? recipe.zones?.find(zone => zone.id === target.id) : undefined;
+  const group = target?.kind === "group" ? recipe.paint_groups?.find(group => group.id === target.id) : undefined;
+  const parentGroup = groupForMember(recipe, target);
   const partZone = target?.kind === "part" ? [...(recipe.zones ?? [])].reverse().find(zone => zone.method === "groups" && zone.groups?.length === 1 && String(zone.groups[0]) === target.id) : undefined;
   const appearance = layer?.appearance ?? zone?.appearance ?? partZone?.appearance;
-  const gradient = gradientOverride(recipe, target) ?? (!override ? appearance?.gradient ?? recipe.base_gradient : undefined);
+  const gradient = gradientOverride(recipe, target) ?? (!override ? parentGroup?.gradient ?? (!parentGroup?.colour_hex ? appearance?.gradient ?? recipe.base_gradient : undefined) : undefined);
   const ownFinish = appearance?.finish_id ? finishes?.find(finish => finish.id === appearance.finish_id) : null;
   const inherited = recipe.base_colour_hex ?? appearance?.custom?.hex ?? ownFinish?.base_color_hex ?? ownFinish?.hex_approx ?? (sourceAppearance && part ? part.materials?.[0]?.colour : originalHex);
-  const name = part?.name ?? zone?.name ?? (layer ? isLogoLayer(layer) ? t("editor.branding.logoLayer") : layer.content.value || t("editor.branding.emptyLayer") : "");
+  const name = group?.name ?? part?.name ?? zone?.name ?? (layer ? isLogoLayer(layer) ? t("editor.branding.logoLayer") : layer.content.value || t("editor.branding.emptyLayer") : "");
   const commit = useEditorStore((s) => s.commit);
   const [draft, setDraft] = useState<string | null>(null);
-  const hex = gradient?.from ?? override ?? normalizeHex(inherited ?? "") ?? "#9A9A9A";
+  const hex = gradient?.from ?? override ?? parentGroup?.colour_hex ?? normalizeHex(inherited ?? "") ?? "#9A9A9A";
 
   return (
     <div className="space-y-2 border-t border-border pt-3" data-testid={testId("model-colour-control")} data-hex={hex} data-mode={gradient ? "gradient" : "solid"} data-custom={canReset} data-scope={target?.kind ?? "all"} data-target-id={target?.id}>

@@ -7,6 +7,20 @@ interface Shader {
   uniforms: Record<string, { value: unknown }>;
 }
 
+// Every material in a GP reads the same vector. Text loading/placement can
+// update the union bounds after a source mesh's shader has already compiled.
+const boundsUniforms = new WeakMap<GradientBounds, Vector4>();
+function boundsUniform(bounds: GradientBounds): Vector4 {
+  let uniform = boundsUniforms.get(bounds);
+  if (!uniform) { uniform = new Vector4(...bounds); boundsUniforms.set(bounds, uniform); }
+  return uniform;
+}
+
+export function updateGradientBounds(bounds: GradientBounds, value: GradientBounds): void {
+  bounds.splice(0, 4, ...value);
+  boundsUniforms.get(bounds)?.fromArray(value);
+}
+
 /** One projection keeps a fill continuous across source meshes and text glyphs. */
 export function gradientShaderPatch(shader: Shader, base: GradientPaint | undefined, zones: { gradient?: ColourGradient; preserveColour?: boolean }[] | null, zoneBounds: GradientBounds): void {
   if (!base && !zones?.some(zone => zone.gradient)) return;
@@ -25,7 +39,7 @@ vec3 wincycGradient( vec3 a, vec3 b, vec2 axis, vec4 bounds, float midpoint ) {
     shader.uniforms[`${name}From`] = { value: new Color(colour.from) };
     shader.uniforms[`${name}To`] = { value: new Color(colour.to) };
     shader.uniforms[`${name}Axis`] = { value: new Vector2(Math.cos(radians), Math.sin(radians)) };
-    shader.uniforms[`${name}Bounds`] = { value: new Vector4(...bounds) };
+    shader.uniforms[`${name}Bounds`] = { value: boundsUniform(bounds) };
     shader.uniforms[`${name}Midpoint`] = { value: colour.midpoint };
     declarations += `\nuniform vec3 ${name}From, ${name}To;\nuniform vec2 ${name}Axis;\nuniform vec4 ${name}Bounds;\nuniform float ${name}Midpoint;`;
     // Preserve maps, vertex colours and alpha. PBR lighting follows this fill.

@@ -6,6 +6,7 @@ import type { PartsReport } from "../components/EditorModel";
 import { applyDiscrete, canRedo, canUndo, commitHistory, redoHistory, startHistory, undoHistory, type History } from "../lib/recipeHistory.ts";
 import { applyScopedColour, applyScopedGradient } from "../lib/scopedColour.ts";
 import type { ColourGradient } from "../lib/gradient.ts";
+import { putPaintGroup, removePaintGroup as deletePaintGroup, pruneGroupLayer, type PaintGroup } from "../lib/paintGroups.ts";
 
 /**
  * Where the loaded model sits (4j): the raw → face transform `EditorModel`
@@ -24,7 +25,7 @@ export interface ModelFrame {
  * so a contextual panel has exactly one thing to show. A part's id is its OBJ
  * group index as a string: parts come from the model, not the recipe.
  */
-export type SelectionKind = "layer" | "zone" | "part";
+export type SelectionKind = "layer" | "zone" | "part" | "group";
 
 export interface Selection {
   kind: SelectionKind;
@@ -126,6 +127,8 @@ interface EditorState {
   setBaseColourHex: (hex: string | null) => void;
   setColourForTarget: (target: Selection | null, hex: string | null) => void;
   setGradientForTarget: (target: Selection | null, gradient: ColourGradient | null) => void;
+  savePaintGroup: (group: PaintGroup) => void;
+  removePaintGroup: (id: string) => void;
   setRuler: (ruler: boolean) => void;
   /** Phase 6b R1: the factory's own lettering, as a Parts row rather than a staff toggle. */
   setOriginalLettering: (visible: boolean) => void;
@@ -192,6 +195,7 @@ function keepSelection(s: EditorState, recipe: DraftRecipe): Selection | null {
   if (!selection) return null;
   if (selection.kind === "layer") return recipe.layers.some((l) => l.id === selection.id) ? selection : null;
   if (selection.kind === "zone") return (recipe.zones ?? []).some((z) => z.id === selection.id) ? selection : null;
+  if (selection.kind === "group") return recipe.paint_groups?.some(group => group.id === selection.id) ? selection : null;
   return selection;
 }
 
@@ -256,6 +260,11 @@ export const useEditorStore = create<EditorState>((set) => ({
   setBaseColourHex: (hex) => set((s) => ({ recipe: applyScopedColour(s.recipe, null, hex) })),
   setColourForTarget: (target, hex) => set((s) => ({ recipe: applyScopedColour(s.recipe, target, hex) })),
   setGradientForTarget: (target, gradient) => set((s) => ({ recipe: applyScopedGradient(s.recipe, target, gradient) })),
+  savePaintGroup: group => set(s => {
+    const next = discrete(s, recipe => putPaintGroup(recipe, group));
+    return { ...next, selection: next.recipe.paint_groups?.some(candidate => candidate.id === group.id) ? { kind: "group" as const, id: group.id } : s.selection, hoveredPartIndex: null };
+  }),
+  removePaintGroup: id => set(s => ({ ...discrete(s, recipe => deletePaintGroup(recipe, id)), selection: withoutSelected(s, "group", id) })),
   setOriginalLettering: (visible) => set((s) => discrete(s, (r) => ({ ...r, view: { ...r.view, original_lettering: visible } }))),
   addLayer: (layer, pendingLogo) =>
     set((s) => ({
@@ -266,10 +275,10 @@ export const useEditorStore = create<EditorState>((set) => ({
   updateLayer: (id, patch) =>
     set((s) => ({ recipe: { ...s.recipe, layers: s.recipe.layers.map((l) => (l.id === id ? applyLayerPatch(l, patch) : l)) } })),
   removeLayer: (id) =>
-    set((s) => ({
-      ...discrete(s, (r) => ({ ...r, layers: r.layers.filter((l) => l.id !== id) })),
-      selection: withoutSelected(s, "layer", id),
-    })),
+    set((s) => {
+      const next = discrete(s, r => pruneGroupLayer({ ...r, layers: r.layers.filter(layer => layer.id !== id) }, id));
+      return { ...next, selection: keepSelection(s, next.recipe) };
+    }),
   moveLayer: (from, to) =>
     set((s) =>
       discrete(s, (r) => {

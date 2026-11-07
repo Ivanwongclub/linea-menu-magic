@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { selectHiddenGroups, selectSelectedPartIndex, useEditorStore } from "../store/useEditorStore";
 import { DOCK_ROW_PX, VIRTUALISE_ABOVE, rowWindow, type RowWindow } from "../lib/rowWindow";
 import { DockSection } from "./workspace/DockSection";
+import { PaintGroupBadge } from "./workspace/PaintGroupsSection";
 
 /**
  * Parts (Phase 6b R1), as the layers dock's third section since E2 U5: the
@@ -198,6 +199,7 @@ function PartRow({
       {onSelect ? (
         <button type="button" data-testid="part-select" aria-pressed={selected} onClick={onSelect} onDoubleClick={onDoubleSelect} className="flex min-w-0 flex-1 items-center gap-2 text-left">
           <span className="min-w-0 flex-1 truncate text-xs text-foreground">{name}</span>
+          {index != null && <PaintGroupBadge member={{ kind: "part", id: String(index) }} />}
           <span className="shrink-0 text-[10px] text-muted-foreground">{detail}</span>
         </button>
       ) : (

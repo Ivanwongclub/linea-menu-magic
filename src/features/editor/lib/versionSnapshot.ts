@@ -1,5 +1,6 @@
 import type { PickerFinish } from "../hooks/useFinishOptions";
 import type { EditorColour, EditorProduct, EditorSizeVariant } from "../hooks/useEditorProduct";
+import type { PaintGroup } from "./paintGroups";
 
 /**
  * What a saved version freezes (Phase 1 R2, extended by Phase 4a R3): a
@@ -39,6 +40,7 @@ export interface VersionSnapshot {
   part_colours?: Record<string, string>;
   base_gradient?: import("./gradient").ColourGradient;
   part_gradients?: Record<string, import("./gradient").ColourGradient>;
+  paint_groups?: PaintGroup[];
   /**
    * The OBJ this version renders from and how it is scaled. `sha256` is null
    * until something hashes the file — the editor never reads its bytes (see
@@ -78,6 +80,7 @@ export function buildSnapshot({
   partColours,
   baseGradient,
   partGradients,
+  paintGroups,
   savedAt,
 }: {
   product: EditorProduct;
@@ -88,6 +91,7 @@ export function buildSnapshot({
   partColours?: Record<string, string>;
   baseGradient?: import("./gradient").ColourGradient;
   partGradients?: Record<string, import("./gradient").ColourGradient>;
+  paintGroups?: PaintGroup[];
   savedAt: string;
 }): VersionSnapshot {
   return {
@@ -113,6 +117,7 @@ export function buildSnapshot({
     ...(partColours ? { part_colours: { ...partColours } } : {}),
     ...(baseGradient ? { base_gradient: { ...baseGradient } } : {}),
     ...(partGradients ? { part_gradients: Object.fromEntries(Object.entries(partGradients).map(([index, gradient]) => [index, { ...gradient }])) } : {}),
+    ...(paintGroups?.length ? { paint_groups: paintGroups.map(group => ({ ...group, members: group.members.map(member => ({ ...member })), ...(group.gradient ? { gradient: { ...group.gradient } } : {}) })) } : {}),
     model: {
       storage_path: product.model_storage_path,
       sha256: null,

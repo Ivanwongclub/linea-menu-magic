@@ -13,6 +13,7 @@ import { AddZoneButton, ZoneList } from "../branding/ZonesSection";
 import { LayerList } from "../branding/LayerList";
 import { PartsGroup } from "../PartsGroup";
 import { DockSection } from "./DockSection";
+import { PaintGroupsSection } from "./PaintGroupsSection";
 
 /**
  * The layers dock (E2 U5): everything that is on the part, in three sections
@@ -136,6 +137,8 @@ export function LayersDock({
           )}
           <LayerList layers={layers} logoSources={logoSources} />
         </DockSection>
+
+        <PaintGroupsSection />
 
         <DockSection
           testId="zones-section"

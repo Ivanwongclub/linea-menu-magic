@@ -6,6 +6,7 @@ import { AppearanceRow, ReliefRow } from "../branding/LayerRowControls";
 import { LayerProperties } from "../branding/LayerProperties";
 import { ZoneProperties } from "../branding/ZoneProperties";
 import { PartProperties } from "../PartProperties";
+import { PaintGroupDetails } from "./PaintGroupsSection";
 
 /**
  * One panel that follows the selection (E2 U6): a layer, a zone or one of the
@@ -23,13 +24,15 @@ export function PropertiesPanel({ faceDiameterMm }: { faceDiameterMm: number }) 
   const selection = useEditorStore((s) => s.selection);
   const layers = useEditorStore((s) => s.recipe.layers);
   const zones = useEditorStore(selectZones);
+  const groups = useEditorStore(s => s.recipe.paint_groups);
   const logoSources = useLogoSources(layers);
 
   const layer = selection?.kind === "layer" ? layers.find((l) => l.id === selection.id) ?? null : null;
   const zone = selection?.kind === "zone" ? zones.find((z) => z.id === selection.id) ?? null : null;
   const partIndex = selection?.kind === "part" ? Number(selection.id) : null;
+  const group = selection?.kind === "group" ? groups?.find(group => group.id === selection.id) : undefined;
 
-  const title = layer
+  const title = group ? group.name : layer
     ? isLogoLayer(layer)
       ? t("editor.branding.logoLayer")
       : layer.content.value || t("editor.branding.emptyLayer")
@@ -69,6 +72,7 @@ export function PropertiesPanel({ faceDiameterMm }: { faceDiameterMm: number }) 
       {zone && <ZoneProperties zone={zone} />}
 
       {partIndex != null && <PartProperties index={partIndex} />}
+      {group && <PaintGroupDetails group={group} actions={false} />}
     </div>
   );
 }
