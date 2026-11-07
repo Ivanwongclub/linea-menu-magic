@@ -352,7 +352,7 @@ export default async function ({ page, base, admin, editor, h }) {
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     await page.mouse.down();
     await page.mouse.up();
-    await page.mouse.dblclick(box.x + box.width / 2, box.y + box.height / 2);
+    await page.getByTestId("view-reset").click();
     await page.waitForTimeout(2500);
     const shownVp = (await shownCanvas.getAttribute("data-view-projection")).split(",").map(Number);
     const shownFaceZ = Number(await viewport().getAttribute("data-face-z"));

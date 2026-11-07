@@ -69,6 +69,18 @@ export async function verifyPartHover({ page, viewport, screenshotPath }) {
   await page.mouse.dblclick(...await capPoint());
   await poll(async () => await cap.getAttribute("data-selected") === "true", "Double click did not switch the selection");
   assert.equal(await body.getAttribute("data-selected"), "false");
+  const bounds = await canvas.boundingBox();
+  const blank = [bounds.x + 8, bounds.y + 8];
+  await page.mouse.click(...blank);
+  assert.equal(await cap.getAttribute("data-selected"), "true", "Single click outside must retain selection");
+  const beforeClear = await canvas.getAttribute("data-camera-direction");
+  await page.mouse.dblclick(...blank);
+  await poll(async () => await cap.getAttribute("data-selected") === "false", "Empty-canvas double click did not clear selection");
+  assert.equal(await canvas.getAttribute("data-camera-direction"), beforeClear, "Clearing selection must not reset the view");
+  await moveOff();
+  await poll(async () => await bluePixels() === 0, "Clearing selection left a blue outline");
+  await page.mouse.dblclick(...await capPoint());
+  await poll(async () => await cap.getAttribute("data-selected") === "true", "Part could not be selected after clearing");
   await moveOff();
   await body.getByTestId("part-select").hover();
   await poll(async () => await body.getAttribute("data-hovered") === "true", "Parts-list hover did not preview its model part");
@@ -79,10 +91,11 @@ export async function verifyPartHover({ page, viewport, screenshotPath }) {
   await body.getByTestId("part-visibility").click();
   await moveOff(); await moveBody();
   assert.equal(await body.getAttribute("data-hovered"), "false", "Hidden geometry must not capture hover");
+  await page.mouse.dblclick(...await bodyPoint());
+  await poll(async () => await body.getAttribute("data-selected") === "false", "Hidden geometry blocked outside-selection clearing");
   await moveOff(); await body.getByTestId("part-visibility").click();
-  await body.getByTestId("part-select").click();
   await moveOff();
   await page.getByTestId("view-reset").click();
   await moveOff();
-  return { hover: true, leaveClearsPreview: true, singleClickDoesNotSelect: true, doubleClickSelects: true, doubleClickPreservesCamera: true, hoverKeepsLockedSelection: true, partsListHover: true, partsListDoubleClick: true, hiddenPartsNotPickable: true };
+  return { hover: true, leaveClearsPreview: true, singleClickDoesNotSelect: true, doubleClickSelects: true, doubleClickOutsideClearsSelection: true, outsideSingleClickKeepsSelection: true, doubleClickPreservesCamera: true, hoverKeepsLockedSelection: true, partsListHover: true, partsListDoubleClick: true, hiddenPartsNotPickable: true };
 }

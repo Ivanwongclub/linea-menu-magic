@@ -177,13 +177,13 @@ export default async function ({ page, base, admin, editor, h }) {
     assert.ok(ccw.minDet > 0, `ccw: every world determinant > 0 (min ${ccw.minDet})`);
     assert.ok(ccw.glyphs.every((g) => g.y < 0), "ccw 180° sits on the bottom arc");
 
-    // Home view: stop the idle rotation, double-click back to the framed camera, let damping settle.
+    // Home view: stop idle rotation and use Reset view; double-click now selects parts.
     const canvas = viewport().locator("canvas").first();
     const box = await canvas.boundingBox();
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     await page.mouse.down();
     await page.mouse.up();
-    await page.mouse.dblclick(box.x + box.width / 2, box.y + box.height / 2);
+    await page.getByTestId("view-reset").click();
     await page.waitForTimeout(1800);
     const screenX = JSON.parse(await canvas.getAttribute("data-glyph-screen-x"));
     assert.equal(screenX.length, 4);

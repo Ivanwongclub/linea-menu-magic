@@ -546,9 +546,17 @@ export function EditorModel({
           commitZone();
         }}
         onDoubleClick={(event: ThreeEvent<MouseEvent>) => {
-          if (paintZoneId || event.delta > 4) return;
+          if (event.delta > 4) return;
           const index = hitPartIndex(event);
-          if (index == null) return;
+          // Hidden source meshes may still be raycast hits: treat those as empty canvas.
+          if (index == null) {
+            event.stopPropagation();
+            event.nativeEvent.stopPropagation();
+            select(null);
+            useEditorStore.getState().setPaintZone(null);
+            return;
+          }
+          if (paintZoneId) return;
           event.stopPropagation();
           event.nativeEvent.stopPropagation();
           event.nativeEvent.preventDefault();

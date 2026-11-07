@@ -130,8 +130,8 @@ function AwaitingSetupState({ productId, isCatalogueEditor }: { productId: strin
 /**
  * R2: no floating toolbar over the viewport — tools arrive with their
  * phases. R1: idle auto-rotate until the first pointer/wheel interaction,
- * then it stops for good; double-click re-frames via the camera's saved
- * state (set on model load in `EditorModel`).
+ * then it stops for good. Double-clicking empty canvas clears the selection;
+ * the Reset view tool uses the camera's state saved on model load.
  */
 export function EditorViewport({
   modelStoragePath,
@@ -221,11 +221,17 @@ export function EditorViewport({
   // Calibration screenshots composite any DOM over the canvas; `?calibration=1` hides the viewport chrome.
   const calibration = useSearchParams()[0].get("calibration") === "1";
 
-  // E2 U9. Reset view is the framing saved on load (`controls.saveState()`),
-  // which is what a double-click has always done. Zoom to fit keeps the
+  // E2 U9. Reset view is the framing saved on load (`controls.saveState()`).
+  // Double-click is reserved for selecting/clearing an item. Zoom to fit keeps the
   // direction the buyer turned to and solves the distance again, so a model
   // orbited and zoomed into comes back to frame without losing the angle.
   const onResetView = useCallback(() => controlsRef.current?.reset(), []);
+  const onEmptyDoubleClick = useCallback((event: MouseEvent) => {
+    if (event.type !== "dblclick") return;
+    const state = useEditorStore.getState();
+    state.select(null);
+    state.setPaintZone(null);
+  }, []);
   const invalidateLocalImport = useCallback(() => { importSequence.current++; }, []);
 
   useEffect(() => {
@@ -420,7 +426,7 @@ export function EditorViewport({
           camera={{ fov: 35, position: [20, 20, 60] }}
           dpr={[1, 2]}
           gl={GL_SETTINGS}
-          onDoubleClick={(event) => { if (!event.defaultPrevented) controlsRef.current?.reset(); }}
+          onPointerMissed={onEmptyDoubleClick}
         >
           <ProceduralStudio />
           <CameraReport />
