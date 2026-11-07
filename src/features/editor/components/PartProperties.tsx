@@ -1,9 +1,8 @@
-import { randomUUID } from "@/lib/uuid";
 import { Eye, EyeOff } from "lucide-react";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { cn } from "@/lib/utils";
-import { selectHiddenGroups, selectZones, useEditorStore } from "../store/useEditorStore";
-import { DEFAULT_APPEARANCE, newZone, type LayerAppearance } from "../lib/recipe";
+import { selectHiddenGroups, useEditorStore } from "../store/useEditorStore";
+import { usePartAppearance } from "../hooks/usePartAppearance";
 import { getLocalModelColours } from "../lib/localModelAppearance";
 import { AppearanceControl } from "./branding/AppearanceControl";
 
@@ -17,14 +16,9 @@ export function PartProperties({ index }: { index: number }) {
   const { t, language } = useI18n();
   const report = useEditorStore((s) => s.partsReport);
   const hidden = useEditorStore(selectHiddenGroups);
-  const zones = useEditorStore(selectZones);
+  const { appearance, changeAppearance, covering } = usePartAppearance(index);
   const toggleHiddenGroup = useEditorStore((s) => s.toggleHiddenGroup);
   const localModel = useEditorStore((s) => s.localModel);
-  const addZone = useEditorStore((s) => s.addZone);
-  const updateZone = useEditorStore((s) => s.updateZone);
-  const removeZone = useEditorStore((s) => s.removeZone);
-  const commit = useEditorStore((s) => s.commit);
-  const select = useEditorStore((s) => s.select);
 
   const group = report?.groups.find((g) => g.index === index);
   if (!group) return <p className="text-xs text-muted-foreground">{t("editor.parts.empty")}</p>;
@@ -32,24 +26,6 @@ export function PartProperties({ index }: { index: number }) {
   const visible = !hidden.includes(index);
   const total = report?.totalFaces ?? 0;
   const share = total > 0 ? Math.round((group.faces / total) * 100) : 0;
-  const covering = zones.filter((zone) => zone.method === "groups" && (zone.groups ?? []).includes(index));
-  // A part's appearance uses the same group mask as a zone. Keep it tied to
-  // this source part, rather than painting every mesh with the base material.
-  const partZone = [...covering].reverse().find((zone) => zone.groups?.length === 1);
-  const appearance = partZone?.appearance ?? DEFAULT_APPEARANCE;
-  const changeAppearance = (patch: Partial<LayerAppearance>) => {
-    const next = { ...appearance, ...patch };
-    if (next.mode === "part") {
-      if (partZone) removeZone(partZone.id);
-    } else if (partZone) {
-      updateZone(partZone.id, { appearance: next });
-      commit();
-    } else {
-      const zone = newZone(randomUUID(), group.name, "groups");
-      addZone({ ...zone, groups: [index], appearance: next });
-    }
-    select({ kind: "part", id: String(index) });
-  };
 
   return (
     <div className="space-y-2" data-testid="part-properties" data-index={index} data-visible={visible}>

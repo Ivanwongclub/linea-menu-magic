@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { normalizeHex } from "../lib/pantone";
 import { useEditorStore } from "../store/useEditorStore";
@@ -9,6 +9,7 @@ import { usePublicFinishes } from "../hooks/usePublicFinishes";
 /** The model's colour changes independently of its material and surface finish. */
 export function ModelColourControl({ originalHex, sourceAppearance }: { originalHex: string | null | undefined; sourceAppearance: boolean }) {
   const { t } = useI18n();
+  const pickerId = useId();
   const recipe = useEditorStore((s) => s.recipe);
   const target = useEditorStore((s) => s.selection);
   const parts = useEditorStore((s) => s.partsReport?.groups);
@@ -20,7 +21,8 @@ export function ModelColourControl({ originalHex, sourceAppearance }: { original
   const part = target?.kind === "part" ? parts?.find(part => String(part.index) === target.id) : undefined;
   const layer = target?.kind === "layer" ? recipe.layers.find(layer => layer.id === target.id) : undefined;
   const zone = target?.kind === "zone" ? recipe.zones?.find(zone => zone.id === target.id) : undefined;
-  const appearance = layer?.appearance ?? zone?.appearance;
+  const partZone = target?.kind === "part" ? [...(recipe.zones ?? [])].reverse().find(zone => zone.method === "groups" && zone.groups?.length === 1 && String(zone.groups[0]) === target.id) : undefined;
+  const appearance = layer?.appearance ?? zone?.appearance ?? partZone?.appearance;
   const ownFinish = appearance?.finish_id ? finishes?.find(finish => finish.id === appearance.finish_id) : null;
   const inherited = recipe.base_colour_hex ?? appearance?.custom?.hex ?? ownFinish?.base_color_hex ?? ownFinish?.hex_approx ?? (sourceAppearance && part ? part.materials?.[0]?.colour : originalHex);
   const name = part?.name ?? zone?.name ?? (layer ? isLogoLayer(layer) ? t("editor.branding.logoLayer") : layer.content.value || t("editor.branding.emptyLayer") : "");
@@ -31,7 +33,7 @@ export function ModelColourControl({ originalHex, sourceAppearance }: { original
   return (
     <div className="space-y-2 border-t border-border pt-3" data-testid="model-colour-control" data-hex={hex} data-custom={canReset} data-scope={target?.kind ?? "all"} data-target-id={target?.id}>
       <div className="flex items-baseline justify-between gap-2">
-        <label htmlFor="model-colour-picker" className="block text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+        <label htmlFor={pickerId} className="block text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
           {t("editor.panel.colour")}
         </label>
         <span className="min-w-0 truncate text-xs text-muted-foreground" data-testid="model-colour-target" title={name}>
@@ -39,7 +41,7 @@ export function ModelColourControl({ originalHex, sourceAppearance }: { original
         </span>
       </div>
       <input
-        id="model-colour-picker"
+        id={pickerId}
         data-testid="model-colour-picker"
         type="color"
         value={hex}

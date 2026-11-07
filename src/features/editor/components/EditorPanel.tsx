@@ -178,7 +178,7 @@ export function EditorPanel({
               )}
             </>
           )}
-          <ModelColourControl key={selection ? `${selection.kind}:${selection.id}` : "all"} originalHex={originalColour} sourceAppearance={appearanceMode === "source"} />
+          {!selection && <ModelColourControl originalHex={originalColour} sourceAppearance={appearanceMode === "source"} />}
         </PanelGroup>
         {sourceAvailable && materialNames && <p className="text-xs text-muted-foreground" role="status" data-testid="model-material-status">{t("editor.viewport.materialsLoaded", { names: materialNames })}</p>}
         {!!materialWarnings?.length && <p className="text-xs text-amber-700" data-testid="model-material-warnings">{materialWarnings.join(" · ")}</p>}

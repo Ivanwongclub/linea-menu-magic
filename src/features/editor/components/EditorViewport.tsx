@@ -32,6 +32,7 @@ import { useLayerMaterials } from "../hooks/useLayerMaterials";
 import { zoneStyleFor } from "../lib/finishMaterial";
 import { zonesSentence } from "../lib/zones";
 import { finishMarketingName } from "@/features/finishes/finishAxisLine";
+import { SelectionAppearancePanel } from "./workspace/SelectionAppearancePanel";
 
 
 interface EditorViewportProps {
@@ -197,6 +198,9 @@ export function EditorViewport({
   const baseColourHex = useEditorStore((s) => s.recipe.base_colour_hex);
   const originalLettering = useEditorStore((s) => s.recipe.view.original_lettering === true);
   const partsReport = useEditorStore((s) => s.partsReport);
+  const modelAppearanceMode = useEditorStore(s => s.recipe.view.model_appearance_mode);
+  const sourceAppearance = localModel ? localModel.appearanceMode === "source" : !!partsReport?.hasSourceAppearance && (!modelAppearanceMode || modelAppearanceMode === "source");
+  const originalHex = sourceAppearance ? partsReport?.groups[0]?.materials?.[0]?.colour : isMetal ? finish?.base_color_hex ?? finish?.hex_approx : colour?.hex;
   const setPartsReport = useEditorStore((s) => s.setPartsReport);
   const [occlusionState, setOcclusionState] = useState<"idle" | "pending" | "ready">("idle");
   const [bakeStats, setBakeStats] = useState<{ mainThreadMs: number; totalMs: number } | null>(null);
@@ -528,6 +532,7 @@ export function EditorViewport({
         </div>
       )}
       {viewportTools}
+      {!calibration && <SelectionAppearancePanel originalHex={originalHex} sourceAppearance={sourceAppearance} />}
       </div>
     </>
   );
