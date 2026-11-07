@@ -57,6 +57,9 @@ export function LayersDock({
   const partsReport = useEditorStore((s) => s.partsReport);
   const defaultPlaneMm = partsReport ? (partsReport.bounds.minY + partsReport.bounds.maxY) / 2 : 0;
   const layers = useEditorStore((s) => s.recipe.layers);
+  const paintGroups = useEditorStore(s => s.recipe.paint_groups);
+  const groupedLayers = new Set((paintGroups ?? []).flatMap(group => group.members.filter(member => member.kind === "layer").map(member => member.id)));
+  const rootLayers = layers.filter(layer => !groupedLayers.has(layer.id));
   const zones = useEditorStore((s) => s.recipe.zones);
   const addLayer = useEditorStore((s) => s.addLayer);
   const modelFrame = useEditorStore((s) => s.modelFrame);
@@ -77,8 +80,8 @@ export function LayersDock({
         <DockSection
           testId="branding-group"
           toggleTestId="branding-toggle"
-          title={t("editor.panel.branding")}
-          count={layers.length}
+          title={t(groupedLayers.size ? "editor.groups.ungroupedBranding" : "editor.panel.branding")}
+          count={rootLayers.length}
           open={open.branding}
           onToggle={toggle("branding")}
           actions={
@@ -135,10 +138,10 @@ export function LayersDock({
               {t("editor.branding.logoSignInForImages")}
             </p>
           )}
-          <LayerList layers={layers} logoSources={logoSources} />
+          {rootLayers.length || !layers.length ? <LayerList layers={rootLayers} logoSources={logoSources} /> : <p className="text-xs text-muted-foreground">{t("editor.groups.allBrandingGrouped")}</p>}
         </DockSection>
 
-        <PaintGroupsSection />
+        <PaintGroupsSection markedGroupIndices={markedGroupIndices} />
 
         <DockSection
           testId="zones-section"
@@ -149,6 +152,7 @@ export function LayersDock({
           onToggle={toggle("zones")}
           actions={<AddZoneButton defaultPlaneMm={defaultPlaneMm} />}
         >
+          <p className="mb-2 text-[11px] leading-relaxed text-muted-foreground">{t("editor.zones.scopeHint")}</p>
           <ZoneList />
         </DockSection>
 

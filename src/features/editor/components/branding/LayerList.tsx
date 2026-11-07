@@ -9,7 +9,6 @@ import { selectSelectedLayerId, useEditorStore } from "../../store/useEditorStor
 import { isLogoLayer, type Layer } from "../../lib/recipe";
 import { deleteLogoAsset, type LogoSource } from "../../hooks/useLogoAssets";
 import { LayerTextInput } from "./LayerTextInput";
-import { PaintGroupBadge } from "../workspace/PaintGroupsSection";
 
 /**
  * The layers on the part, in the order they are applied (E2 U2): the list and
@@ -28,9 +27,10 @@ export function LayerList({ layers, logoSources }: { layers: Layer[]; logoSource
 
   const onDragEnd = ({ active, over }: DragEndEvent) => {
     if (!over || active.id === over.id) return;
+    const allLayers = useEditorStore.getState().recipe.layers;
     moveLayer(
-      layers.findIndex((l) => l.id === active.id),
-      layers.findIndex((l) => l.id === over.id),
+      allLayers.findIndex((layer) => layer.id === active.id),
+      allLayers.findIndex((layer) => layer.id === over.id),
     );
   };
 
@@ -118,7 +118,6 @@ function LayerRow({ layer, selected, logoSource }: { layer: Layer; selected: boo
             </button>
           )}
         </div>
-        <PaintGroupBadge member={{ kind: "layer", id: layer.id }} />
         <button
           type="button"
           data-testid="text-layer-delete"

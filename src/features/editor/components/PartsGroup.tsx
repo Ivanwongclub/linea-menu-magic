@@ -1,11 +1,9 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
-import { Eye, EyeOff } from "lucide-react";
 import { useI18n } from "@/features/i18n/I18nProvider";
-import { cn } from "@/lib/utils";
 import { selectHiddenGroups, selectSelectedPartIndex, useEditorStore } from "../store/useEditorStore";
-import { DOCK_ROW_PX, VIRTUALISE_ABOVE, rowWindow, type RowWindow } from "../lib/rowWindow";
+import { VIRTUALISE_ABOVE, rowWindow, type RowWindow } from "../lib/rowWindow";
 import { DockSection } from "./workspace/DockSection";
-import { PaintGroupBadge } from "./workspace/PaintGroupsSection";
+import { PartRow } from "./PartRow";
 
 /**
  * Parts (Phase 6b R1), as the layers dock's third section since E2 U5: the
@@ -50,8 +48,10 @@ export function PartsGroup({
     return () => setHoveredPart(null);
   }, [open, setHoveredPart]);
 
+  const paintGroups = useEditorStore(s => s.recipe.paint_groups);
+  const grouped = new Set((paintGroups ?? []).flatMap(group => group.members.filter(member => member.kind === "part").map(member => Number(member.id))));
   const marked = new Set(markedGroupIndices);
-  const groups = (report?.groups ?? []).filter((group) => !marked.has(group.index));
+  const groups = (report?.groups ?? []).filter((group) => !marked.has(group.index) && !grouped.has(group.index));
   const hiddenSet = new Set(hidden);
   const hiddenCount = groups.filter((g) => hiddenSet.has(g.index)).length + (originalLettering ? 0 : marked.size > 0 ? 1 : 0);
 
@@ -90,7 +90,7 @@ export function PartsGroup({
     <DockSection
       testId="parts-group"
       toggleTestId="parts-toggle"
-      title={t("editor.parts.title")}
+      title={t(grouped.size ? "editor.groups.ungroupedParts" : "editor.parts.title")}
       count={groups.length + (markedGroupIndices.length > 0 ? 1 : 0)}
       open={open}
       onToggle={onToggle}
@@ -143,81 +143,8 @@ export function PartsGroup({
           />
         ))}
         {window_.padBottomPx > 0 && <li aria-hidden="true" style={{ height: window_.padBottomPx }} />}
-        {groups.length === 0 && markedGroupIndices.length === 0 && <li className="py-1 text-xs text-muted-foreground">{t("editor.parts.empty")}</li>}
+        {groups.length === 0 && markedGroupIndices.length === 0 && <li className="py-1 text-xs text-muted-foreground">{t(grouped.size ? "editor.groups.allPartsGrouped" : "editor.parts.empty")}</li>}
       </ul>
     </DockSection>
-  );
-}
-
-function PartRow({
-  testId,
-  index,
-  name,
-  detail,
-  visible,
-  selected,
-  hovered,
-  onHover,
-  onHoverEnd,
-  onSelect,
-  onDoubleSelect,
-  onToggle,
-}: {
-  testId: string;
-  index?: number;
-  name: string;
-  detail: string;
-  visible: boolean;
-  selected?: boolean;
-  hovered?: boolean;
-  onHover?: () => void;
-  onHoverEnd?: () => void;
-  /** The lettering row is the recipe's, not one of the model's parts: it has nothing to select. */
-  onSelect?: () => void;
-  onDoubleSelect?: () => void;
-  onToggle: () => void;
-}) {
-  const { t } = useI18n();
-  return (
-    // A fixed height, because past 50 rows a row's place in the list is
-    // arithmetic (`lib/rowWindow`), not something the browser lays out.
-    <li
-      style={{ height: DOCK_ROW_PX }}
-      className={cn(
-        "flex items-center gap-2 border-b border-l-2 border-border px-2",
-        selected ? "border-l-foreground bg-secondary" : "border-l-transparent",
-        hovered && "border-l-blue-600 bg-blue-50 text-blue-700",
-      )}
-      data-testid={testId}
-      data-index={index}
-      data-visible={visible}
-      data-selected={selected}
-      data-hovered={hovered}
-      onPointerEnter={onHover}
-      onPointerLeave={onHoverEnd}
-    >
-      {onSelect ? (
-        <button type="button" data-testid="part-select" aria-pressed={selected} onClick={onSelect} onDoubleClick={onDoubleSelect} className="flex min-w-0 flex-1 items-center gap-2 text-left">
-          <span className="min-w-0 flex-1 truncate text-xs text-foreground">{name}</span>
-          {index != null && <PaintGroupBadge member={{ kind: "part", id: String(index) }} />}
-          <span className="shrink-0 text-[10px] text-muted-foreground">{detail}</span>
-        </button>
-      ) : (
-        <>
-          <span className="min-w-0 flex-1 truncate text-xs text-foreground">{name}</span>
-          <span className="shrink-0 text-[10px] text-muted-foreground">{detail}</span>
-        </>
-      )}
-      <button
-        type="button"
-        data-testid="part-visibility"
-        aria-pressed={visible}
-        aria-label={t(visible ? "editor.parts.hide" : "editor.parts.show", { name })}
-        onClick={onToggle}
-        className="shrink-0 text-muted-foreground hover:text-foreground"
-      >
-        {visible ? <Eye className="h-3.5 w-3.5" strokeWidth={1.5} /> : <EyeOff className="h-3.5 w-3.5" strokeWidth={1.5} />}
-      </button>
-    </li>
   );
 }

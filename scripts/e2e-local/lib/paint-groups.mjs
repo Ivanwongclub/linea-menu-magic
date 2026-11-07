@@ -29,6 +29,8 @@ export async function verifyPaintGroups({ page, reload = false, screenshotPath }
   const popup = page.getByTestId("selection-appearance-panel");
   const member = (kind, id) => page.locator(`[data-testid="paint-group-member"][data-kind="${kind}"][data-member-id="${id}"]`);
   const modifier = process.platform === "darwin" ? "Meta" : "Control";
+  const partsToggle = page.getByTestId("parts-toggle");
+  if (await partsToggle.getAttribute("aria-expanded") !== "true") await partsToggle.click();
   await page.getByTestId("add-paint-group").click();
   await page.getByTestId("paint-group-name").fill("GP TEST");
   await member("part", String(original[0].index)).check();
@@ -37,11 +39,22 @@ export async function verifyPaintGroups({ page, reload = false, screenshotPath }
   await page.getByTestId("save-paint-group").click();
   await page.getByTestId("paint-group-dialog").waitFor({ state: "detached" });
   assert.equal(await popup.getAttribute("data-kind"), "group");
+  const tree = page.getByTestId("paint-group-row");
+  assert.equal(await tree.getByTestId("part-row").count(), 2, "group members must appear inside the folder");
+  assert.equal(await page.getByTestId("parts-group").getByTestId("part-row").count(), original.length - 2, "grouped parts must leave the ungrouped list");
+  await tree.getByTestId("paint-group-toggle").click();
+  assert.equal(await tree.getByTestId("part-row").count(), 0, "collapsing the folder must hide its child rows");
+  assert.equal(await popup.getAttribute("data-kind"), "group", "collapsing must not change selection or paint");
+  await tree.getByTestId("paint-group-toggle").click();
   assert.equal(await popup.getByTestId("selection-material-control").count(), 0, "a colour GP must keep each member's material");
   await page.keyboard.press(`${modifier}+z`);
   await poll(async () => await page.getByTestId("paint-group-row").count() === 0, "undo did not remove the new GP");
   await page.keyboard.press(`${modifier}+Shift+z`);
   await page.getByTestId("paint-group-select").click();
+  await tree.getByTestId("part-row").first().getByTestId("part-visibility").click();
+  await poll(async () => (await parts())[0].visible === false, "nested part visibility did not hide its source mesh");
+  await tree.getByTestId("part-row").first().getByTestId("part-visibility").click();
+  await poll(async () => (await parts())[0].visible === true, "nested part visibility did not restore its source mesh");
   await page.getByTestId("colour-mode-gradient").click();
   await stopColour(page, "from", "#FF0000");
   await stopColour(page, "to", "#0000FF");
@@ -51,7 +64,6 @@ export async function verifyPaintGroups({ page, reload = false, screenshotPath }
   assert.deepEqual(painted.slice(2).map(part => part.renderedMaterials), original.slice(2).map(part => part.renderedMaterials), "GP coloured a nonmember");
   assert.deepEqual(painted.map(part => part.materials), original.map(part => part.materials), "GP modified original MTL definitions");
 
-  const partsToggle = page.getByTestId("parts-toggle");
   if (await partsToggle.getAttribute("aria-expanded") !== "true") await partsToggle.click();
   await page.getByTestId("part-row").nth(1).getByTestId("part-select").click();
   await page.getByTestId("colour-mode-solid").click();
@@ -82,11 +94,7 @@ export async function verifyPaintGroups({ page, reload = false, screenshotPath }
     await poll(async () => !(await parts())[2].renderedMaterials[0].gradient, "removed GP member retained its fill");
     assert.deepEqual((await parts())[2].renderedMaterials, original[2].renderedMaterials);
   }
-  if (screenshotPath) {
-    await page.getByTestId("selection-appearance-name").click();
-    await page.mouse.move(10, 10);
-    await page.screenshot({ path: screenshotPath });
-  }
+
 
   await page.getByTestId("add-text").click();
   await page.getByTestId("text-layer-inline-content").fill("GP");
@@ -98,7 +106,14 @@ export async function verifyPaintGroups({ page, reload = false, screenshotPath }
   await page.getByTestId("paint-group-name").fill("GP PARTS + TEXT");
   await page.getByTestId("save-paint-group").click();
   await poll(async () => (await reliefs())[0]?.gradient?.to === "#246BFD" && (await reliefs())[0]?.pieces === 2, "branding layer did not inherit its GP gradient");
+  assert.equal(await tree.getByTestId("text-layer-row").count(), 1, "grouped text must appear inside the GP tree");
+  assert.equal(await page.getByTestId("branding-group").getByTestId("text-layer-row").count(), 0, "grouped text must leave the ungrouped list");
   assert.deepEqual((await reliefs())[0].gradientBounds, (await parts())[0].renderedMaterials[0].gradientBounds, "text and source parts did not use one shared footprint");
+  if (screenshotPath) {
+    await page.getByTestId("selection-appearance-name").click();
+    await page.mouse.move(10, 10);
+    await page.screenshot({ path: screenshotPath });
+  }
   if (reload) {
     await page.reload({ waitUntil: "domcontentloaded" });
     await page.getByTestId("paint-group-select").waitFor();

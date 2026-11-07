@@ -42,8 +42,9 @@ export function DockSection({
           type="button"
           data-testid={toggleTestId}
           aria-expanded={open}
+          title={title}
           onClick={onToggle}
-          className="flex min-w-0 shrink-0 items-center gap-1 text-left text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground"
+          className="flex min-w-0 shrink items-center gap-1 text-left text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground"
         >
           <ChevronRight className={cn("h-3.5 w-3.5 shrink-0 transition-transform", open && "rotate-90")} strokeWidth={1.5} />
           <span className="truncate">{title}</span>

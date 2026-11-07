@@ -1,11 +1,14 @@
-import { useState } from "react";
-import { Folder, Plus, Settings2, Ungroup } from "lucide-react";
+import { useEffect, useId, useRef, useState } from "react";
+import { ChevronRight, Folder, FolderOpen, Plus, Settings2, Ungroup } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { randomUUID } from "@/lib/uuid";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { useEditorStore } from "../../store/useEditorStore";
 import { isLogoLayer } from "../../lib/recipe";
-import { findMemberGroup, groupForMember, memberKey, type PaintGroup, type PaintGroupMember } from "../../lib/paintGroups";
+import { groupForMember, memberKey, type PaintGroup, type PaintGroupMember } from "../../lib/paintGroups";
+import { useLogoSources } from "../../hooks/useLogoAssets";
+import { LayerList } from "../branding/LayerList";
+import { PartRow } from "../PartRow";
 import { DockSection } from "./DockSection";
 
 function useAvailableMembers() {
@@ -18,12 +21,9 @@ function useAvailableMembers() {
   ];
 }
 
-export function PaintGroupsSection() {
+export function PaintGroupsSection({ markedGroupIndices }: { markedGroupIndices: number[] }) {
   const { t } = useI18n();
   const groups = useEditorStore(s => s.recipe.paint_groups);
-  const selection = useEditorStore(s => s.selection);
-  const select = useEditorStore(s => s.select);
-  const available = useAvailableMembers();
   const [open, setOpen] = useState(true);
   const [creating, setCreating] = useState(false);
 
@@ -31,18 +31,60 @@ export function PaintGroupsSection() {
     <DockSection testId="paint-groups-section" toggleTestId="paint-groups-toggle" title={t("editor.groups.title")} count={groups?.length ?? 0} open={open} onToggle={() => setOpen(value => !value)} actions={<button type="button" data-testid="add-paint-group" onClick={() => { setOpen(true); setCreating(true); }} className="flex items-center gap-1 text-xs hover:underline"><Plus className="h-3.5 w-3.5" />{t("editor.groups.add")}</button>}>
       {!groups?.length && <p className="text-xs text-muted-foreground">{t("editor.groups.empty")}</p>}
       <ul className="space-y-1.5">
-        {groups?.map(group => (
-          <li key={group.id} data-testid="paint-group-row" data-group-id={group.id} data-selected={selection?.kind === "group" && selection.id === group.id} className={`border px-2 py-1.5 ${selection?.kind === "group" && selection.id === group.id ? "border-blue-600 bg-blue-50" : "border-border"}`}>
-            <div className="flex items-center gap-2">
-              <button type="button" data-testid="paint-group-select" onClick={() => select({ kind: "group", id: group.id })} className="flex min-w-0 flex-1 items-center gap-2 text-left text-xs"><Folder className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{group.name}</span><span className="ml-auto shrink-0 text-muted-foreground">{group.members.length}</span></button>
-              <EditPaintGroupButton group={group} iconOnly />
-            </div>
-            <p className="mt-1 truncate pl-5 text-[10px] text-muted-foreground" title={group.members.map(member => available.find(item => memberKey(item) === memberKey(member))?.name ?? member.id).join(" · ")}>{group.members.map(member => available.find(item => memberKey(item) === memberKey(member))?.name ?? member.id).join(" · ")}</p>
-          </li>
-        ))}
+        {groups?.map(group => <PaintGroupRow key={group.id} group={group} markedGroupIndices={markedGroupIndices} />)}
       </ul>
       <PaintGroupDialog open={creating} onOpenChange={setCreating} />
     </DockSection>
+  );
+}
+
+function PaintGroupRow({ group, markedGroupIndices }: { group: PaintGroup; markedGroupIndices: number[] }) {
+  const { t } = useI18n();
+  const childrenId = useId();
+  const row = useRef<HTMLLIElement>(null);
+  const [expanded, setExpanded] = useState(true);
+  const selection = useEditorStore(s => s.selection);
+  const select = useEditorStore(s => s.select);
+  const parts = useEditorStore(s => s.partsReport?.groups);
+  const allLayers = useEditorStore(s => s.recipe.layers);
+  const originalLettering = useEditorStore(s => s.recipe.view.original_lettering === true);
+  const setOriginalLettering = useEditorStore(s => s.setOriginalLettering);
+  const toggleHiddenGroup = useEditorStore(s => s.toggleHiddenGroup);
+  const setHoveredPart = useEditorStore(s => s.setHoveredPart);
+  const hovered = useEditorStore(s => s.hoveredPartIndex);
+  const layers = allLayers.filter(layer => group.members.some(member => member.kind === "layer" && member.id === layer.id));
+  const logoSources = useLogoSources(layers);
+  const selected = selection?.kind === "group" && selection.id === group.id;
+  const childSelected = group.members.some(member => member.kind === selection?.kind && member.id === selection.id);
+
+  // New membership and canvas group selection reveal the actual folder,
+  // even when the dock was scrolled to the model's ungrouped parts.
+  useEffect(() => {
+    if (!selected) return;
+    setExpanded(true);
+    const frame = requestAnimationFrame(() => row.current?.scrollIntoView({ block: "nearest" }));
+    return () => cancelAnimationFrame(frame);
+  }, [group.members, selected]);
+
+  return (
+    <li ref={row} data-testid="paint-group-row" data-group-id={group.id} data-selected={selected} className={`border ${selected ? "border-blue-600" : "border-border"}`}>
+      <div className={`flex items-center gap-1 px-1.5 py-1.5 ${selected || childSelected ? "bg-blue-50" : "bg-secondary/40"}`}>
+        <button type="button" data-testid="paint-group-toggle" aria-expanded={expanded} aria-controls={childrenId} aria-label={t(expanded ? "editor.groups.collapse" : "editor.groups.expand", { name: group.name })} onClick={() => setExpanded(value => !value)} className="flex h-6 w-5 shrink-0 items-center justify-center text-muted-foreground hover:text-foreground"><ChevronRight className={`h-3.5 w-3.5 transition-transform ${expanded ? "rotate-90" : ""}`} /></button>
+        <button type="button" data-testid="paint-group-select" aria-pressed={selected} onClick={() => { select({ kind: "group", id: group.id }); setExpanded(true); }} className="flex min-w-0 flex-1 items-center gap-2 text-left text-xs">{expanded ? <FolderOpen className="h-3.5 w-3.5 shrink-0" /> : <Folder className="h-3.5 w-3.5 shrink-0" />}<span className="truncate">{group.name}</span><span className="ml-auto shrink-0 pr-1 text-muted-foreground">{group.members.length}</span></button>
+        <EditPaintGroupButton group={group} iconOnly />
+      </div>
+      {expanded && <div id={childrenId} data-testid="paint-group-children" className="mb-2 ml-4 mr-2 space-y-1.5 border-l border-border pl-2">
+        <ul>
+          {group.members.filter(member => member.kind === "part").map(member => {
+            const part = parts?.find(part => String(part.index) === member.id);
+            if (!part) return null;
+            const active = selection?.kind === "part" && selection.id === member.id;
+            return <PartRow key={member.id} testId="part-row" index={part.index} name={part.name} detail={t("editor.parts.faceCount", { count: part.faces })} visible={part.visible} selected={active} hovered={hovered === part.index} onHover={() => setHoveredPart(part.visible ? part.index : null)} onHoverEnd={() => { if (useEditorStore.getState().hoveredPartIndex === part.index) setHoveredPart(null); }} onSelect={() => select(active ? null : { kind: "part", id: member.id })} onDoubleSelect={() => select({ kind: "part", id: member.id })} onToggle={() => markedGroupIndices.includes(part.index) ? setOriginalLettering(!originalLettering) : toggleHiddenGroup(part.index)} />;
+          })}
+        </ul>
+        {layers.length > 0 && <LayerList layers={layers} logoSources={logoSources} />}
+      </div>}
+    </li>
   );
 }
 
@@ -94,12 +136,6 @@ function PaintGroupForm({ group, onDone }: { group?: PaintGroup; onDone: () => v
     </div>
     <div className="flex items-center justify-between gap-2"><span className="text-xs text-muted-foreground">{t("editor.groups.selectedCount", { count })}</span><button type="button" data-testid="save-paint-group" disabled={!name.trim() || count < (group ? 1 : 2)} onClick={() => { save({ ...group, id: group?.id ?? randomUUID(), name, members: valid }); onDone(); }} className="border border-foreground bg-foreground px-3 py-1.5 text-xs text-background disabled:opacity-40">{t("editor.groups.save")}</button></div>
   </div>;
-}
-
-export function PaintGroupBadge({ member }: { member: PaintGroupMember }) {
-  const groups = useEditorStore(s => s.recipe.paint_groups);
-  const group = findMemberGroup(groups, member);
-  return group ? <span data-testid="paint-group-badge" title={group.name} className="max-w-16 truncate border border-border px-1 text-[9px] text-muted-foreground">{group.name}</span> : null;
 }
 
 export function PaintGroupDetails({ group, actions = true }: { group: PaintGroup; actions?: boolean }) {
