@@ -5,6 +5,7 @@ import { mkdirSync, mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import sharp from "sharp";
+import { verifyPartHover } from "../lib/part-hover.mjs";
 
 const OBJ = "mtllib colours.mtl\nv -10 -10 0\nv 10 -10 0\nv 10 10 0\nv -10 10 0\nvt 0 0\nvt 1 0\nvt 1 1\nvt 0 1\no Body\nusemtl Red\nf 1/1 2/2 3/3\no Cap\nusemtl Blue\nf 1/1 3/3 4/4\n";
 const MTL = "newmtl Red\nKd 1 0 0\nNs 10\nnewmtl Blue\nKd 0 0 1\nNs 10\nmap_Kd white.png\n";
@@ -82,6 +83,7 @@ export default async function ({ page, base, admin, editor, h }) {
     assert.ok(red>100&&blue>100,`canvas must actually show both colours: ${red}/${blue}`);
     report.render={parts:2,materials:["Red","Blue"],texture:true,redPixels:red,bluePixels:blue};
     await page.getByTestId("parts-toggle").click();
+    report.hoverPicking = await verifyPartHover({ page, viewport });
     const body=page.getByTestId("part-row").filter({has:page.locator('[data-testid="part-select"]',{hasText:"Body"})});
     await body.getByTestId("part-visibility").click();
     await poll(async()=>await viewport.getAttribute("data-model-mesh-count")==="1","part hide failed");

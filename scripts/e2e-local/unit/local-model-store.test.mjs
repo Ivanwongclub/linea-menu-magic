@@ -20,6 +20,51 @@ test('appearance choice survives stored-recipe normalization', () => {
   }
 });
 
+test('hovering a part previews it without changing selection, recipe or undo history', () => {
+  state().select({ kind: 'part', id: '0' });
+  const original = catalogueState();
+  state().setHoveredPart(2);
+  assert.equal(state().hoveredPartIndex, 2);
+  assert.deepEqual(catalogueState(), original);
+  state().setHoveredPart(null);
+  assert.deepEqual(catalogueState(), original);
+  assert.equal(state().hoveredPartIndex, null);
+});
+
+test('committing a selection clears the transient preview and retains the chosen part', () => {
+  state().setHoveredPart(1);
+  state().select({ kind: 'part', id: '1' });
+  assert.equal(state().hoveredPartIndex, null);
+  assert.deepEqual(state().selection, { kind: 'part', id: '1' });
+});
+
+test('hiding a hovered part and starting a paint operation clear its preview', () => {
+  state().setHoveredPart(2);
+  state().toggleHiddenGroup(2);
+  assert.equal(state().hoveredPartIndex, null);
+  state().setHoveredPart(1);
+  state().setHiddenGroups([1, 2]);
+  assert.equal(state().hoveredPartIndex, null);
+  state().setHoveredPart(0);
+  state().setPaintZone('zone');
+  assert.equal(state().hoveredPartIndex, null);
+});
+
+test('hover never carries across imported files, restored catalogue models or loaded versions', () => {
+  state().setHoveredPart(2);
+  state().setLocalModel({ url: 'blob:hover-test', name: 'preview.obj' });
+  assert.equal(state().hoveredPartIndex, null);
+  state().setHoveredPart(1);
+  state().setLocalModel(null);
+  assert.equal(state().hoveredPartIndex, null);
+  state().setHoveredPart(0);
+  state().loadRecipe(emptyRecipe());
+  assert.equal(state().hoveredPartIndex, null);
+  state().setHoveredPart(3);
+  state().initialize(emptyRecipe(), 'next-product');
+  assert.equal(state().hoveredPartIndex, null);
+});
+
 test('source appearance can be overridden and undone, and companion URLs are released with the model', () => {
   state().setLocalModel({url:'blob:source-obj',name:'source.obj',materialText:'newmtl Red\nKd 1 0 0',resourceUrls:['blob:source-texture'],hasSourceAppearance:true});
   assert.equal(state().localModel.appearanceMode,'source');

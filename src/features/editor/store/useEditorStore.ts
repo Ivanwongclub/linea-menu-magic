@@ -64,6 +64,8 @@ interface EditorState {
   recipe: DraftRecipe;
   /** The one selected thing, or nothing (E2 U1). */
   selection: Selection | null;
+  /** Hover preview is transient: it never changes the selected item or the recipe. */
+  hoveredPartIndex: number | null;
   /** The design id (or `new:<slug>`) `initialize` last ran for — autosave hydrates only after it matches (collision 24). */
   hydratedFor: string | null;
   past: DraftRecipe[];
@@ -117,6 +119,7 @@ interface EditorState {
   moveLayer: (from: number, to: number) => void;
   /** Selects a layer, a zone or a part — or nothing. */
   select: (selection: Selection | null) => void;
+  setHoveredPart: (index: number | null) => void;
   commit: () => void;
   beginDrag: () => void;
   endDrag: () => void;
@@ -154,6 +157,7 @@ const resetModelState = {
   modelSizeMm: null,
   partsReport: null,
   selection: null,
+  hoveredPartIndex: null,
   paintZoneId: null,
   dragging: false,
   flushSeq: 0,
@@ -177,6 +181,7 @@ const withoutSelected = (s: EditorState, kind: SelectionKind, id: string): Selec
 export const useEditorStore = create<EditorState>((set) => ({
   ...startHistory(emptyRecipe()),
   selection: null,
+  hoveredPartIndex: null,
   hydratedFor: null,
   dragging: false,
   flushSeq: 0,
@@ -204,7 +209,7 @@ export const useEditorStore = create<EditorState>((set) => ({
     }),
   // The selection goes: a reloaded version's layers are not the ones that were
   // on screen, even where an id happens to survive.
-  loadRecipe: (recipe) => set((s) => ({ ...discrete(s, () => recipe), ...syncLocalAppearance(s, recipe), selection: null, paintZoneId: null })),
+  loadRecipe: (recipe) => set((s) => ({ ...discrete(s, () => recipe), ...syncLocalAppearance(s, recipe), selection: null, hoveredPartIndex: null, paintZoneId: null })),
   setSizeVariantId: (id, ratio = 1) =>
     set((s) => discrete(s, (r) => ({ ...r, size_variant_id: id, layers: scaleLayers(r.layers, ratio) }))),
   setFinishId: (id) => set((s) => {
@@ -248,7 +253,8 @@ export const useEditorStore = create<EditorState>((set) => ({
         return { ...r, layers };
       }),
     ),
-  select: (selection) => set({ selection }),
+  select: (selection) => set({ selection, hoveredPartIndex: null }),
+  setHoveredPart: (index) => set((s) => s.hoveredPartIndex === index ? s : { hoveredPartIndex: index }),
   commit: () => set((s) => commitHistory(history(s))),
   beginDrag: () => set({ dragging: true }),
   endDrag: () => set((s) => ({ ...commitHistory(history(s)), dragging: false, flushSeq: s.flushSeq + 1 })),
@@ -263,16 +269,20 @@ export const useEditorStore = create<EditorState>((set) => ({
       return { ...h, ...syncLocalAppearance(s, h.recipe), selection: keepSelection(s, h.recipe) };
     }),
   setHiddenGroups: (indices) =>
-    set((s) => discrete(s, (r) => ({ ...r, hidden_groups: [...new Set(indices)].sort((a, b) => a - b) }))),
+    set((s) => ({
+      ...discrete(s, (r) => ({ ...r, hidden_groups: [...new Set(indices)].sort((a, b) => a - b) })),
+      hoveredPartIndex: s.hoveredPartIndex != null && indices.includes(s.hoveredPartIndex) ? null : s.hoveredPartIndex,
+    })),
   toggleHiddenGroup: (index) =>
-    set((s) =>
-      discrete(s, (r) => {
+    set((s) => {
+      const next = discrete(s, (r) => {
         const hidden = new Set(r.hidden_groups ?? []);
         if (hidden.has(index)) hidden.delete(index);
         else hidden.add(index);
         return { ...r, hidden_groups: [...hidden].sort((a, b) => a - b) };
-      }),
-    ),
+      });
+      return { ...next, hoveredPartIndex: next.recipe.hidden_groups?.includes(s.hoveredPartIndex ?? -1) ? null : s.hoveredPartIndex };
+    }),
   addZone: (zone) =>
     set((s) => ({ ...discrete(s, (r) => ({ ...r, zones: [...(r.zones ?? []), zone] })), selection: { kind: "zone", id: zone.id } })),
   // A zone's plane and brush are live edits, like a layer's placement: the
@@ -290,7 +300,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   setPartsReport: (partsReport) => set({ partsReport }),
   // Arming the brush is also a selection: the zone being painted is the zone
   // being edited.
-  setPaintZone: (paintZoneId) => set((s) => ({ paintZoneId, selection: paintZoneId ? { kind: "zone", id: paintZoneId } : s.selection })),
+  setPaintZone: (paintZoneId) => set((s) => ({ paintZoneId, hoveredPartIndex: null, selection: paintZoneId ? { kind: "zone", id: paintZoneId } : s.selection })),
   setBrushRadius: (brushRadiusMm) => set({ brushRadiusMm }),
   setPendingLogos: (pendingLogos) => set({ pendingLogos }),
   setLocalModel: (localModel) =>

@@ -175,9 +175,9 @@ export function EditorViewport({
   const handleBridge = useRef(newHandleBridge());
   const handleElements = useRef(newHandleElements());
   const selectedLayerId = useEditorStore(selectSelectedLayerId);
-  // Any selection is an interaction: nothing turns while the buyer is working
-  // on a layer, a zone or a part (E2 U1).
-  const hasSelection = useEditorStore((s) => s.selection !== null);
+  // Hold the model still while a part is being inspected or selected.
+  const isInspecting = useEditorStore((s) => s.selection !== null || s.hoveredPartIndex !== null);
+  const setHoveredPart = useEditorStore((s) => s.setHoveredPart);
   const modelFrame = useEditorStore((s) => s.modelFrame);
   // U10: the strip reads this from the store now, at the bottom of the
   // workspace rather than inside this column.
@@ -367,6 +367,7 @@ export function EditorViewport({
     <div
       className="relative flex-1 min-h-0 overflow-hidden bg-secondary"
       data-testid="editor-viewport"
+      onPointerLeave={() => setHoveredPart(null)}
       aria-busy={importing}
       data-model-importing={importing || undefined}
       onDragOver={(e) => e.preventDefault()}
@@ -419,7 +420,7 @@ export function EditorViewport({
           camera={{ fov: 35, position: [20, 20, 60] }}
           dpr={[1, 2]}
           gl={GL_SETTINGS}
-          onDoubleClick={() => controlsRef.current?.reset()}
+          onDoubleClick={(event) => { if (!event.defaultPrevented) controlsRef.current?.reset(); }}
         >
           <ProceduralStudio />
           <CameraReport />
@@ -470,9 +471,9 @@ export function EditorViewport({
             enableDamping
             dampingFactor={0.08}
             // Selecting a layer is an interaction too: nothing turns under a handle drag (4i).
-            autoRotate={autoRotate && !hasSelection}
+            autoRotate={autoRotate && !isInspecting}
             autoRotateSpeed={0.6}
-            onStart={() => setAutoRotate(false)}
+            onStart={() => { setAutoRotate(false); setHoveredPart(null); }}
           />
         </Canvas>
       </Suspense>

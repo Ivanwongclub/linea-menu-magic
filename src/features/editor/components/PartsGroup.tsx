@@ -42,6 +42,12 @@ export function PartsGroup({
   const setOriginalLettering = useEditorStore((s) => s.setOriginalLettering);
   const select = useEditorStore((s) => s.select);
   const selectedPart = useEditorStore(selectSelectedPartIndex);
+  const hoveredPart = useEditorStore((s) => s.hoveredPartIndex);
+  const setHoveredPart = useEditorStore((s) => s.setHoveredPart);
+  useEffect(() => {
+    if (!open) setHoveredPart(null);
+    return () => setHoveredPart(null);
+  }, [open, setHoveredPart]);
 
   const marked = new Set(markedGroupIndices);
   const groups = (report?.groups ?? []).filter((group) => !marked.has(group.index));
@@ -125,7 +131,13 @@ export function PartsGroup({
             detail={t("editor.parts.faceCount", { count: group.faces })}
             visible={!hiddenSet.has(group.index)}
             selected={selectedPart === group.index}
+            hovered={hoveredPart === group.index}
+            onHover={() => setHoveredPart(!hiddenSet.has(group.index) ? group.index : null)}
+            onHoverEnd={() => {
+              if (useEditorStore.getState().hoveredPartIndex === group.index) setHoveredPart(null);
+            }}
             onSelect={() => select(selectedPart === group.index ? null : { kind: "part", id: String(group.index) })}
+            onDoubleSelect={() => select({ kind: "part", id: String(group.index) })}
             onToggle={() => toggleHiddenGroup(group.index)}
           />
         ))}
@@ -143,7 +155,11 @@ function PartRow({
   detail,
   visible,
   selected,
+  hovered,
+  onHover,
+  onHoverEnd,
   onSelect,
+  onDoubleSelect,
   onToggle,
 }: {
   testId: string;
@@ -152,8 +168,12 @@ function PartRow({
   detail: string;
   visible: boolean;
   selected?: boolean;
+  hovered?: boolean;
+  onHover?: () => void;
+  onHoverEnd?: () => void;
   /** The lettering row is the recipe's, not one of the model's parts: it has nothing to select. */
   onSelect?: () => void;
+  onDoubleSelect?: () => void;
   onToggle: () => void;
 }) {
   const { t } = useI18n();
@@ -165,14 +185,18 @@ function PartRow({
       className={cn(
         "flex items-center gap-2 border-b border-l-2 border-border px-2",
         selected ? "border-l-foreground bg-secondary" : "border-l-transparent",
+        hovered && "border-l-blue-600 bg-blue-50 text-blue-700",
       )}
       data-testid={testId}
       data-index={index}
       data-visible={visible}
       data-selected={selected}
+      data-hovered={hovered}
+      onPointerEnter={onHover}
+      onPointerLeave={onHoverEnd}
     >
       {onSelect ? (
-        <button type="button" data-testid="part-select" aria-pressed={selected} onClick={onSelect} className="flex min-w-0 flex-1 items-center gap-2 text-left">
+        <button type="button" data-testid="part-select" aria-pressed={selected} onClick={onSelect} onDoubleClick={onDoubleSelect} className="flex min-w-0 flex-1 items-center gap-2 text-left">
           <span className="min-w-0 flex-1 truncate text-xs text-foreground">{name}</span>
           <span className="shrink-0 text-[10px] text-muted-foreground">{detail}</span>
         </button>

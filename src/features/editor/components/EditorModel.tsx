@@ -125,6 +125,9 @@ export function EditorModel({
 }: EditorModelProps) {
   const localModel = useEditorStore((s) => s.localModel);
   const selectedPartIndex = useEditorStore(selectSelectedPartIndex);
+  const hoveredPartIndex = useEditorStore((s) => s.hoveredPartIndex);
+  const setHoveredPart = useEditorStore((s) => s.setHoveredPart);
+  const select = useEditorStore((s) => s.select);
   const modelAppearanceMode = useEditorStore((s) => s.recipe.view.model_appearance_mode);
   const format: ModelFormat = modelFormatFromName(sourceName) ?? modelFormatFromName(url) ?? "obj";
   const obj = useLoader(ModelFileLoader, url, (loader) => {
@@ -367,6 +370,18 @@ export function EditorModel({
   const updateZone = useEditorStore((s) => s.updateZone);
   const commitZone = useEditorStore((s) => s.commit);
   const painting = useRef(false);
+  // R3F still raycasts hidden meshes; only the nearest visible source part is pickable.
+  const hitPartIndex = (event: ThreeEvent<PointerEvent | MouseEvent>): number | null => {
+    for (const hit of event.intersections) {
+      const index = faceData.meshes.indexOf(hit.object as THREE.Mesh);
+      if (index >= 0 && faceData.meshes[index].visible && !hiddenIndices.includes(index)) return index;
+    }
+    return null;
+  };
+  useEffect(() => () => setHoveredPart(null), [model, setHoveredPart]);
+  useEffect(() => {
+    if (hoveredPartIndex != null && (hiddenIndices.includes(hoveredPartIndex) || !faceData.meshes[hoveredPartIndex])) setHoveredPart(null);
+  }, [hoveredPartIndex, hiddenIndices, faceData, setHoveredPart]);
 
   const paintAt = useCallback(
     (point: THREE.Vector3) => {
@@ -488,32 +503,60 @@ export function EditorModel({
 
   const size = bounds.getSize(new THREE.Vector3());
   const footprint = Math.max(size.x, size.z) * 2.5;
-  const selectedMesh = selectedPartIndex != null && !hiddenIndices.includes(selectedPartIndex)
-    ? faceData.meshes[selectedPartIndex] ?? null : null;
+  const highlightedPartIndex = hoveredPartIndex ?? selectedPartIndex;
+  const highlightedMesh = highlightedPartIndex != null && !hiddenIndices.includes(highlightedPartIndex)
+    ? faceData.meshes[highlightedPartIndex] ?? null : null;
 
   return (
     <>
       <primitive
         object={model}
+        onPointerOver={(event: ThreeEvent<PointerEvent>) => {
+          if (paintZoneId || event.buttons || event.pointerType === "touch") return;
+          event.stopPropagation();
+          setHoveredPart(hitPartIndex(event));
+        }}
+        onPointerOut={(event: ThreeEvent<PointerEvent>) => {
+          const index = faceData.meshes.indexOf(event.object as THREE.Mesh);
+          if (useEditorStore.getState().hoveredPartIndex === index) setHoveredPart(null);
+        }}
         onPointerDown={(event: ThreeEvent<PointerEvent>) => {
+          setHoveredPart(null);
           if (!paintZoneId) return;
           event.stopPropagation();
           painting.current = true;
           paintAt(event.point);
         }}
         onPointerMove={(event: ThreeEvent<PointerEvent>) => {
-          if (!paintZoneId || !painting.current) return;
-          event.stopPropagation();
-          paintAt(event.point);
+          if (paintZoneId) {
+            if (!painting.current) return;
+            event.stopPropagation();
+            paintAt(event.point);
+          } else if (!event.buttons && event.pointerType !== "touch") {
+            event.stopPropagation();
+            setHoveredPart(hitPartIndex(event));
+          }
         }}
-        onPointerUp={() => {
-          if (!painting.current) return;
+        onPointerUp={(event: ThreeEvent<PointerEvent>) => {
+          if (!painting.current) {
+            if (!paintZoneId && event.delta <= 4 && event.pointerType !== "touch") setHoveredPart(hitPartIndex(event));
+            return;
+          }
           painting.current = false;
           commitZone();
         }}
+        onDoubleClick={(event: ThreeEvent<MouseEvent>) => {
+          if (paintZoneId || event.delta > 4) return;
+          const index = hitPartIndex(event);
+          if (index == null) return;
+          event.stopPropagation();
+          event.nativeEvent.stopPropagation();
+          event.nativeEvent.preventDefault();
+          select({ kind: "part", id: String(index) });
+        }}
       />
       {/* Each part owns its line buffers; switching to a smaller part must drop the old segments. */}
-      {selectedMesh && <PartSelectionOutline key={selectedMesh.uuid} mesh={selectedMesh} />}
+      {highlightedMesh && <PartSelectionOutline key={highlightedMesh.uuid} mesh={highlightedMesh} />}
       <BrandingMeshes
         layers={layers}
         logoSources={logoSources}
