@@ -1,8 +1,8 @@
 import * as THREE from "three";
 import type { PickerFinish } from "../hooks/useFinishOptions";
 import type { LayerAppearance } from "./recipe";
-import { applyShaderPatches, brushForSurface, type ZoneStyle } from "./shaderPatch";
-import { NON_METAL_ROUGHNESS } from "./renderSettings";
+import { applyShaderPatches, brushForSurface, type ZoneStyle } from "./shaderPatch.ts";
+import { NON_METAL_ROUGHNESS } from "./renderSettings.ts";
 
 /**
  * One finish row → one material, for the part and for a layer alike
@@ -12,9 +12,9 @@ import { NON_METAL_ROUGHNESS } from "./renderSettings";
  * clearcoat, plus the two-tone and brushed shader patches through the one
  * composer (E1 §6 R7).
  */
-export function finishMaterial(finish: PickerFinish, zones: ZoneStyle[] | null = null): THREE.MeshPhysicalMaterial {
+export function finishMaterial(finish: PickerFinish, zones: ZoneStyle[] | null = null, colourHex?: string | null): THREE.MeshPhysicalMaterial {
   const material = new THREE.MeshPhysicalMaterial({
-    color: finish.base_color_hex ?? finish.hex_approx ?? "#9a9a9a",
+    color: colourHex ?? finish.base_color_hex ?? finish.hex_approx ?? "#9a9a9a",
     metalness: finish.metalness,
     roughness: finish.roughness,
     anisotropy: finish.anisotropy,

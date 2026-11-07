@@ -16,6 +16,7 @@ import { VersionsSection } from "./workspace/VersionsSection";
 import type { PickerFinish } from "../hooks/useFinishOptions";
 import type { EditorColour, EditorProduct, EditorSizeVariant } from "../hooks/useEditorProduct";
 import { useEditorStore } from "../store/useEditorStore";
+import { ModelColourControl } from "./ModelColourControl";
 
 interface EditorPanelProps {
   product: EditorProduct;
@@ -24,9 +25,7 @@ interface EditorPanelProps {
   finishOptions: PickerFinish[];
   selectedFinish: PickerFinish | null;
   onSelectFinish: (finish: PickerFinish) => void;
-  colours: EditorColour[];
   selectedColour: EditorColour | null;
-  onSelectColour: (colour: EditorColour) => void;
   localModelName?: string;
   appearanceMode?: "source" | "finish" | "colour";
   onAppearanceModeChange?: (mode: "source" | "finish" | "colour") => void;
@@ -64,9 +63,7 @@ export function EditorPanel({
   finishOptions,
   selectedFinish,
   onSelectFinish,
-  colours,
   selectedColour,
-  onSelectColour,
   localModelName,
   appearanceMode,
   onAppearanceModeChange,
@@ -79,6 +76,9 @@ export function EditorPanel({
   const local = !!localModelName;
   const isMetal = appearanceMode ? appearanceMode === "finish" : product.is_metal;
   const sourceAvailable = useEditorStore((s) => !!s.partsReport?.hasSourceAppearance);
+  const sourceColour = useEditorStore((s) => s.partsReport?.groups[0]?.materials?.[0]?.colour);
+  const materialMode = local || product.is_metal ? "finish" : "colour";
+  const originalColour = appearanceMode === "source" ? sourceColour : isMetal ? selectedFinish?.base_color_hex ?? selectedFinish?.hex_approx : selectedColour?.hex;
   const materialWarnings = useEditorStore((s) => s.partsReport?.materialWarnings);
   const materialFiles = useEditorStore((s) => s.modelMaterialOverride?.files ?? s.localModel?.companionFiles);
   const materialNames = materialFiles?.filter((file) => /\.mtl$/i.test(file.name)).map((file) => file.name).join(", ");
@@ -133,70 +133,52 @@ export function EditorPanel({
           )}
         </PanelGroup>
 
-        {(local || sourceAvailable) && (
+        {sourceAvailable && (
           <div className="flex border border-border" role="group" aria-label={t("editor.appearance.label")} data-testid="local-model-appearance">
-            {([...(sourceAvailable ? ["source" as const] : []), ...(local ? ["finish" as const, "colour" as const] : [product.is_metal ? "finish" as const : "colour" as const])]).map((mode) => (
-              <button
-                key={mode}
-                type="button"
-                data-testid={`local-model-${mode}`}
-                aria-pressed={appearanceMode === mode}
-                onClick={() => onAppearanceModeChange?.(mode)}
-                className={`flex-1 px-3 py-2 text-xs ${appearanceMode === mode ? "bg-foreground text-background" : "text-foreground hover:bg-secondary"}`}
-              >
-                {t(`editor.panel.${mode}`)}
-              </button>
-            ))}
+            {(["source", materialMode] as const).map((mode) => {
+              const active = mode === "source" ? appearanceMode === "source" : appearanceMode !== "source";
+              return (
+                <button
+                  key={mode}
+                  type="button"
+                  data-testid={mode === "source" ? "local-model-source" : "local-model-finish"}
+                  aria-pressed={active}
+                  onClick={() => onAppearanceModeChange?.(mode)}
+                  className={`flex-1 px-3 py-2 text-xs ${active ? "bg-foreground text-background" : "text-foreground hover:bg-secondary"}`}
+                >
+                  {t(mode === "source" ? "editor.panel.source" : "editor.panel.finish")}
+                </button>
+              );
+            })}
           </div>
         )}
 
-        {appearanceMode === "source" ? (
-          <PanelGroup group="source" title={t("editor.panel.source")}>
+        <PanelGroup group={appearanceMode === "source" ? "source" : "finish"} title={t(appearanceMode === "source" ? "editor.panel.source" : "editor.panel.finish")}>
+          {appearanceMode === "source" ? (
             <p className="text-xs text-muted-foreground">{t("editor.panel.sourceHint")}</p>
-          </PanelGroup>
-        ) : isMetal ? (
-          <PanelGroup group="finish" title={t("editor.panel.finish")}>
-            {selectedFinish ? (
-              <div className="flex gap-3">
-                <FinishSwatch finish={selectedFinish} className="w-14 h-14 shrink-0 border border-border" />
-                <div className="space-y-0.5 min-w-0">
-                  <p className="text-sm text-foreground truncate">{finishMarketingName(selectedFinish, language)}</p>
-                  <p className="text-xs text-muted-foreground">{finishAxisLine(selectedFinish, language)}</p>
+          ) : (
+            <>
+              {selectedFinish ? (
+                <div className="flex gap-3">
+                  <FinishSwatch finish={selectedFinish} className="w-14 h-14 shrink-0 border border-border" />
+                  <div className="space-y-0.5 min-w-0">
+                    <p className="text-sm text-foreground truncate">{finishMarketingName(selectedFinish, language)}</p>
+                    <p className="text-xs text-muted-foreground">{finishAxisLine(selectedFinish, language)}</p>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <p className="text-xs text-muted-foreground">{t("editor.finish.noneAvailable")}</p>
-            )}
-            <p className="text-xs text-muted-foreground">{t("editor.finish.swatchDisclaimer")}</p>
-            {finishOptions.length > 0 && (
-              <Button data-testid="change-finish" variant="outline" size="sm" className="rounded-none text-xs tracking-[0.05em]" onClick={() => setPickerOpen(true)}>
-                {t("editor.finish.changeFinish")}
-              </Button>
-            )}
-          </PanelGroup>
-        ) : (
-          <PanelGroup group="colour" title={t("editor.panel.colour")}>
-            {colours.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {colours.map((c) => (
-                  <button
-                    key={c.id}
-                    type="button"
-                    data-testid="colour-swatch"
-                    aria-pressed={c.id === selectedColour?.id}
-                    onClick={() => onSelectColour(c)}
-                    title={c.name}
-                    className={`w-9 h-9 border ${c.id === selectedColour?.id ? "border-foreground" : "border-border"}`}
-                    style={{ backgroundColor: c.hex ?? undefined }}
-                  />
-                ))}
-              </div>
-            ) : (
-              <p className="text-xs text-muted-foreground">{t("editor.colour.noneAvailable")}</p>
-            )}
-            {selectedColour && <p className="text-sm text-foreground">{selectedColour.name}</p>}
-          </PanelGroup>
-        )}
+              ) : isMetal ? (
+                <p className="text-xs text-muted-foreground">{t("editor.finish.noneAvailable")}</p>
+              ) : null}
+              {isMetal && <p className="text-xs text-muted-foreground">{t("editor.finish.swatchDisclaimer")}</p>}
+              {finishOptions.length > 0 && (
+                <Button data-testid="change-finish" variant="outline" size="sm" className="rounded-none text-xs tracking-[0.05em]" onClick={() => setPickerOpen(true)}>
+                  {t("editor.finish.changeFinish")}
+                </Button>
+              )}
+            </>
+          )}
+          <ModelColourControl originalHex={originalColour} />
+        </PanelGroup>
         {sourceAvailable && materialNames && <p className="text-xs text-muted-foreground" role="status" data-testid="model-material-status">{t("editor.viewport.materialsLoaded", { names: materialNames })}</p>}
         {!!materialWarnings?.length && <p className="text-xs text-amber-700" data-testid="model-material-warnings">{materialWarnings.join(" · ")}</p>}
 

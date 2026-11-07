@@ -75,7 +75,7 @@ export function EditorNewPage({ productSlug }: { productSlug: string | null }) {
   const { isStaff, loading: staffLoading } = useDesignerStaffStatus();
   const { isEditor: isCatalogueEditor } = useCatalogueEditorStatus();
   const { data: product, isLoading, error } = useEditorProductBySlug(productSlug);
-  const { finishOptions, selectedFinish, colours, selectedColour, isMetal, localModel, appearanceMode, setAppearanceMode, onSelectFinish, onSelectColour } = useEditorAppearance(product);
+  const { finishOptions, selectedFinish, selectedColour, isMetal, localModel, appearanceMode, setAppearanceMode, onSelectFinish } = useEditorAppearance(product);
 
   const recipe = useEditorStore((s) => s.recipe);
   const hydratedFor = useEditorStore((s) => s.hydratedFor);
@@ -245,9 +245,7 @@ export function EditorNewPage({ productSlug }: { productSlug: string | null }) {
           finishOptions={finishOptions}
           selectedFinish={selectedFinish}
           onSelectFinish={onSelectFinish}
-          colours={colours}
           selectedColour={selectedColour}
-          onSelectColour={onSelectColour}
         />
       }
     />

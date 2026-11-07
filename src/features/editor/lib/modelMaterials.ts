@@ -45,11 +45,11 @@ export function describeSourceMaterials(material: Material | Material[]) {
 }
 
 /** Convert the MTL preview to the editor's shader model so per-face zones still work. */
-export function sourcePhysicalMaterial(source: Material, vertexColors: boolean, zones: ZoneStyle[] | null): MeshPhysicalMaterial {
+export function sourcePhysicalMaterial(source: Material, vertexColors: boolean, zones: ZoneStyle[] | null, colourHex?: string | null): MeshPhysicalMaterial {
   const original = source as MeshPhongMaterial;
   const material = new MeshPhysicalMaterial({
     name: source.name,
-    color: original.color ?? "#ffffff",
+    color: colourHex ?? original.color ?? "#ffffff",
     emissive: original.emissive ?? "#000000",
     map: original.map ?? null,
     emissiveMap: original.emissiveMap ?? null,

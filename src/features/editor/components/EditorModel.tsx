@@ -131,6 +131,7 @@ export function EditorModel({
   const setHoveredPart = useEditorStore((s) => s.setHoveredPart);
   const select = useEditorStore((s) => s.select);
   const modelAppearanceMode = useEditorStore((s) => s.recipe.view.model_appearance_mode);
+  const baseColourHex = useEditorStore((s) => s.recipe.base_colour_hex);
   const format: ModelFormat = modelFormatFromName(sourceName) ?? modelFormatFromName(url) ?? "obj";
   const obj = useLoader(ModelFileLoader, url, (loader) => {
     loader.formatHint = format;
@@ -162,9 +163,9 @@ export function EditorModel({
   const zoneStyleKey = JSON.stringify(zoneStyles ?? []);
   const material = useMemo(() => {
     const styles = zoneStyles?.length ? zoneStyles : null;
-    return isMetal && finish ? finishMaterial(finish, styles) : colourMaterial(colour?.hex, styles);
+    return isMetal && finish ? finishMaterial(finish, styles, baseColourHex) : colourMaterial(baseColourHex ?? colour?.hex, styles);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMetal, finish, colour, zoneStyleKey]);
+  }, [isMetal, finish, colour, zoneStyleKey, baseColourHex]);
 
   useEffect(() => () => material.dispose(), [material]);
 
@@ -205,10 +206,10 @@ export function EditorModel({
   const sourceMaterials = useMemo(() => authoredMaterials.map((authored, index) => {
     if (!authored) return null;
     const mesh = prepared.children[index] as THREE.Mesh;
-    const create = (source: THREE.Material) => sourcePhysicalMaterial(source, !!mesh.geometry.getAttribute("color"), zoneStyles?.length ? zoneStyles : null);
+    const create = (source: THREE.Material) => sourcePhysicalMaterial(source, !!mesh.geometry.getAttribute("color"), zoneStyles?.length ? zoneStyles : null, baseColourHex);
     return Array.isArray(authored) ? authored.map(create) : create(authored);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [prepared, authoredMaterials, zoneStyleKey]);
+  }), [prepared, authoredMaterials, zoneStyleKey, baseColourHex]);
   useEffect(() => () => sourceMaterials.flat().forEach((entry) => entry?.dispose()), [sourceMaterials]);
 
   const markedKey = [...markedGroupIndices].sort((a, b) => a - b).join(",");

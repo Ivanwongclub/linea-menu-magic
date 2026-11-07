@@ -34,6 +34,8 @@ export interface VersionSnapshot {
   finish: { id: string; cyc_code: string | null; marketing_name: string | null; material: SnapshotFinishMaterial } | null;
   size_variant: { id: string; size_label: string | null; size_ligne: number | null; size_primary_mm: number } | null;
   colour: { id: string; name: string; hex: string | null } | null;
+  /** Independent colour override saved alongside the material's original appearance. */
+  base_colour_hex?: string;
   /**
    * The OBJ this version renders from and how it is scaled. `sha256` is null
    * until something hashes the file — the editor never reads its bytes (see
@@ -69,12 +71,14 @@ export function buildSnapshot({
   finish,
   sizeVariant,
   colour,
+  baseColourHex,
   savedAt,
 }: {
   product: EditorProduct;
   finish: PickerFinish | null;
   sizeVariant: EditorSizeVariant | null;
   colour: EditorColour | null;
+  baseColourHex?: string;
   savedAt: string;
 }): VersionSnapshot {
   return {
@@ -96,6 +100,7 @@ export function buildSnapshot({
         }
       : null,
     colour: colour && !product.is_metal ? { id: colour.id, name: colour.name, hex: colour.hex } : null,
+    ...(baseColourHex ? { base_colour_hex: baseColourHex } : {}),
     model: {
       storage_path: product.model_storage_path,
       sha256: null,

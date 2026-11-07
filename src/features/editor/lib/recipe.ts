@@ -8,6 +8,7 @@
  */
 
 import type { ZoneMethod, ZonePlane } from "./zones.ts";
+import { normalizeHex } from "./pantone.ts";
 
 /** `free` is a logo's placement: centre, width and rotation, no curve (4k R3). */
 export type TextLayout = "straight" | "circle" | "free";
@@ -188,6 +189,8 @@ export interface DraftRecipe {
   size_variant_id: string | null;
   finish_id: string | null;
   colour_id: string | null;
+  /** Independent model colour; absent keeps the selected material's authored colour. */
+  base_colour_hex?: string;
   view: { ruler: boolean; original_lettering?: boolean; model_appearance_mode?: "source" | "finish" | "colour"; /** Temporary imports only; never written to catalogue drafts. */ local_appearance_mode?: "source" | "finish" | "colour" };
   layers: Layer[];
   /** Phase 6b R1: OBJ groups the buyer has hidden; hiding never deletes geometry. */
@@ -260,6 +263,7 @@ export function normalizeRecipe(raw: unknown): DraftRecipe {
     size_variant_id: id(raw.size_variant_id),
     finish_id: id(raw.finish_id),
     colour_id: id(raw.colour_id),
+    ...(typeof raw.base_colour_hex === "string" && normalizeHex(raw.base_colour_hex) ? { base_colour_hex: normalizeHex(raw.base_colour_hex)! } : {}),
     // 6b R1: the factory's own lettering is a row in the Parts list now; it
     // stays hidden unless a design says otherwise, as it was before.
     view: {

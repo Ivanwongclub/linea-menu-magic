@@ -56,7 +56,7 @@ export function EditorDesignPage({ designId }: { designId: string }) {
   });
 
   const { data: product, isLoading: productLoading } = useEditorProductById(designQuery.data?.product_id ?? null);
-  const { finishOptions, selectedFinish, colours, selectedColour, isMetal, localModel, appearanceMode, setAppearanceMode, onSelectFinish, onSelectColour } = useEditorAppearance(product);
+  const { finishOptions, selectedFinish, selectedColour, isMetal, localModel, appearanceMode, setAppearanceMode, onSelectFinish } = useEditorAppearance(product);
   const { isEditor: isCatalogueEditor } = useCatalogueEditorStatus();
 
   const recipe = useEditorStore((s) => s.recipe);
@@ -161,9 +161,7 @@ export function EditorDesignPage({ designId }: { designId: string }) {
           finishOptions={finishOptions}
           selectedFinish={selectedFinish}
           onSelectFinish={onSelectFinish}
-          colours={colours}
           selectedColour={selectedColour}
-          onSelectColour={onSelectColour}
           designId={localModel ? null : designId}
         />
       }

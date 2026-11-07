@@ -169,13 +169,13 @@ export default async function ({ page, base, admin, editor, h }) {
       "exactly the two attached finishes, not the unattached public ones",
     );
 
-    /* ---- non-metal product: COLOUR, not FINISH ---- */
+    /* ---- non-metal product: the same material frame carries free colour editing ---- */
     await page.goto(`${base}/designer-studio/editor/new?product=${colourProduct.slug}`, { waitUntil: "networkidle" });
     await page.getByTestId("editor-viewport").locator("canvas").first().waitFor({ timeout: 20000 });
     const colourPanel = page.getByTestId("editor-panel");
-    assert.equal(await colourPanel.locator('[data-testid="panel-group"][data-group="colour"]').count(), 1, "a non-metal product gets COLOUR");
-    assert.equal(await colourPanel.locator('[data-testid="panel-group"][data-group="finish"]').count(), 0, "and not FINISH");
-    assert.ok(await page.getByTestId("colour-swatch").first().count(), "colour swatches render");
+    assert.equal(await colourPanel.locator('[data-testid="panel-group"][data-group="colour"]').count(), 0, "no separate colour panel");
+    assert.equal(await colourPanel.locator('[data-testid="panel-group"][data-group="finish"]').count(), 1, "one material/colour frame");
+    assert.equal(await page.getByTestId("model-colour-picker").count(), 1, "arbitrary colour picker renders");
     assert.equal(await page.getByTestId("ruler-toggle").count(), 1, "ruler toggle is present (collision 18)");
 
     /* ---- signed in: selecting a finish updates draft_recipe.finish_id ---- */
@@ -200,7 +200,7 @@ export default async function ({ page, base, admin, editor, h }) {
 
     return {
       metal: { attachedShown: shownCodes.length },
-      colour: "COLOUR group shown for non-metal",
+      colour: "Free colour control inside the material frame",
       autosave: { designId, finishId: design.draft_recipe?.finish_id },
     };
   } finally {

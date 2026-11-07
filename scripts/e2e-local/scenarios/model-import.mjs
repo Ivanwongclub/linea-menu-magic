@@ -134,7 +134,8 @@ export default async function ({ page, base, admin, editor, h }) {
     assert.equal((await parts())[0].renderedMaterials[0].colour,"#00ff00","invalid MTL must keep the current appearance");
     await h.expectToast(/Materials applied/i,()=>page.getByTestId("view-open-model-input").setInputFiles(payload("colours.mtl",MTL)));
     await poll(async()=> (await parts())[0].renderedMaterials[0].colour==="#ff0000","replacement MTL did not restore red");
-    await page.getByTestId("local-model-colour").click();
+    await page.getByTestId("model-colour-hex").fill("#111111");
+    await page.getByTestId("model-colour-hex").press("Tab");
     await poll(async()=> (await parts()).every(part=>part.renderedMaterials[0].colour==="#111111"),"base colour override failed");
     await page.getByTestId("undo").click();
     await poll(async()=> (await parts())[0].renderedMaterials[0].colour==="#ff0000","undo did not restore original materials");
@@ -145,8 +146,8 @@ export default async function ({ page, base, admin, editor, h }) {
     await h.expectToast(/STL does not use MTL/i,()=>page.getByTestId("view-open-model-input").setInputFiles(payload("colours.mtl",MTL)));
     assert.equal((await parts())[0].name,"STL");
     assert.equal(Number(await viewport.getAttribute("data-model-size-mm")),20);
-    await page.getByTestId("local-model-colour").click();
-    await page.getByTestId("colour-swatch").nth(1).click();
+    await page.getByTestId("model-colour-hex").fill("#FFFFFF");
+    await page.getByTestId("model-colour-hex").press("Tab");
     await poll(async()=> (await parts())[0].renderedMaterials[0].colour==="#ffffff","STL colour edit failed");
     await page.getByTestId("view-fit").click();
     await page.getByTestId("view-reset").click();

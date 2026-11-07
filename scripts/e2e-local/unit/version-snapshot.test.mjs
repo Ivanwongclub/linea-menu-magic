@@ -101,3 +101,9 @@ test("a metal product stores no colour, and a design with neither stores nulls",
   assert.equal(bare.size_variant, null);
   assert.equal(bare.model.storage_path, "models/p1/polo.obj");
 });
+
+test("a version freezes its custom colour independently of the finish's original colour", () => {
+  const snap = buildSnapshot({ product, finish, sizeVariant: variant, colour: null, baseColourHex: "#167AC6", savedAt });
+  assert.equal(snap.base_colour_hex, "#167AC6");
+  assert.equal(snap.finish.material.base_color_hex, "#4C5155");
+});
