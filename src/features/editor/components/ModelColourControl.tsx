@@ -2,21 +2,42 @@ import { useState } from "react";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { normalizeHex } from "../lib/pantone";
 import { useEditorStore } from "../store/useEditorStore";
+import { colourOverride, hasColourOverride } from "../lib/scopedColour";
+import { isLogoLayer } from "../lib/recipe";
+import { usePublicFinishes } from "../hooks/usePublicFinishes";
 
 /** The model's colour changes independently of its material and surface finish. */
-export function ModelColourControl({ originalHex }: { originalHex: string | null | undefined }) {
+export function ModelColourControl({ originalHex, sourceAppearance }: { originalHex: string | null | undefined; sourceAppearance: boolean }) {
   const { t } = useI18n();
-  const override = useEditorStore((s) => s.recipe.base_colour_hex);
-  const setColour = useEditorStore((s) => s.setBaseColourHex);
+  const recipe = useEditorStore((s) => s.recipe);
+  const target = useEditorStore((s) => s.selection);
+  const parts = useEditorStore((s) => s.partsReport?.groups);
+  const setColourForTarget = useEditorStore((s) => s.setColourForTarget);
+  const { data: finishes } = usePublicFinishes();
+  const setColour = (hex: string | null) => setColourForTarget(target, hex);
+  const override = colourOverride(recipe, target);
+  const canReset = hasColourOverride(recipe, target);
+  const part = target?.kind === "part" ? parts?.find(part => String(part.index) === target.id) : undefined;
+  const layer = target?.kind === "layer" ? recipe.layers.find(layer => layer.id === target.id) : undefined;
+  const zone = target?.kind === "zone" ? recipe.zones?.find(zone => zone.id === target.id) : undefined;
+  const appearance = layer?.appearance ?? zone?.appearance;
+  const ownFinish = appearance?.finish_id ? finishes?.find(finish => finish.id === appearance.finish_id) : null;
+  const inherited = recipe.base_colour_hex ?? appearance?.custom?.hex ?? ownFinish?.base_color_hex ?? ownFinish?.hex_approx ?? (sourceAppearance && part ? part.materials?.[0]?.colour : originalHex);
+  const name = part?.name ?? zone?.name ?? (layer ? isLogoLayer(layer) ? t("editor.branding.logoLayer") : layer.content.value || t("editor.branding.emptyLayer") : "");
   const commit = useEditorStore((s) => s.commit);
   const [draft, setDraft] = useState<string | null>(null);
-  const hex = override ?? normalizeHex(originalHex ?? "") ?? "#9A9A9A";
+  const hex = override ?? normalizeHex(inherited ?? "") ?? "#9A9A9A";
 
   return (
-    <div className="space-y-2 border-t border-border pt-3" data-testid="model-colour-control" data-hex={hex} data-custom={!!override}>
-      <label htmlFor="model-colour-picker" className="block text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
-        {t("editor.panel.colour")}
-      </label>
+    <div className="space-y-2 border-t border-border pt-3" data-testid="model-colour-control" data-hex={hex} data-custom={canReset} data-scope={target?.kind ?? "all"} data-target-id={target?.id}>
+      <div className="flex items-baseline justify-between gap-2">
+        <label htmlFor="model-colour-picker" className="block text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+          {t("editor.panel.colour")}
+        </label>
+        <span className="min-w-0 truncate text-xs text-muted-foreground" data-testid="model-colour-target" title={name}>
+          {target ? t("editor.colour.scopeSelected", { name }) : t("editor.colour.scopeAll")}
+        </span>
+      </div>
       <input
         id="model-colour-picker"
         data-testid="model-colour-picker"
@@ -50,11 +71,11 @@ export function ModelColourControl({ originalHex }: { originalHex: string | null
         <button
           type="button"
           data-testid="model-colour-reset"
-          disabled={!override}
+          disabled={!canReset}
           onClick={() => { setColour(null); commit(); }}
           className="shrink-0 text-xs text-foreground underline underline-offset-4 disabled:text-muted-foreground disabled:no-underline"
         >
-          {t("editor.colour.reset")}
+          {t(target ? "editor.colour.resetSelected" : "editor.colour.reset")}
         </button>
       </div>
     </div>

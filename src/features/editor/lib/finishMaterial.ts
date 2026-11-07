@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import type { PickerFinish } from "../hooks/useFinishOptions";
 import type { LayerAppearance } from "./recipe";
-import { applyShaderPatches, brushForSurface, type ZoneStyle } from "./shaderPatch.ts";
+import { applyShaderPatches, brushForSurface, clonePatched, type ShaderPatchOptions, type ZoneStyle } from "./shaderPatch.ts";
 import { NON_METAL_ROUGHNESS } from "./renderSettings.ts";
 
 /**
@@ -43,14 +43,15 @@ export function colourMaterial(hex: string | null | undefined, zones: ZoneStyle[
  * or a custom colour's matt enamel approximation. Null while nothing is
  * chosen — the zone then renders as the part, not as a guess.
  */
-export function zoneStyleFor(appearance: LayerAppearance, finishById: Map<string, PickerFinish>): ZoneStyle | null {
+export function zoneStyleFor(appearance: LayerAppearance, finishById: Map<string, PickerFinish>, baseColourHex?: string): ZoneStyle | null {
+  const colourHex = appearance.colour_hex ?? baseColourHex;
   if (appearance.custom) {
-    return { colorHex: appearance.custom.hex, metalness: CUSTOM_PAINT.metalness, roughness: CUSTOM_PAINT.roughness };
+    return { colorHex: colourHex ?? appearance.custom.hex, metalness: CUSTOM_PAINT.metalness, roughness: CUSTOM_PAINT.roughness };
   }
   const finish = appearance.finish_id ? finishById.get(appearance.finish_id) : undefined;
-  if (!finish) return null;
+  if (!finish) return colourHex ? { colorHex: colourHex, metalness: 0, roughness: 0, preserveMaterial: true } : null;
   return {
-    colorHex: finish.base_color_hex ?? finish.hex_approx ?? "#9a9a9a",
+    colorHex: colourHex ?? finish.base_color_hex ?? finish.hex_approx ?? "#9a9a9a",
     metalness: finish.metalness,
     roughness: finish.roughness,
   };
@@ -63,6 +64,15 @@ export function zoneStyleFor(appearance: LayerAppearance, finishById: Map<string
  * which is why it always carries "to be confirmed".
  */
 export const CUSTOM_PAINT = { metalness: 0, roughness: 0.6, clearcoat: 0 } as const;
+
+/** Own colour, same textures and physical/shader settings; never mutate a shared MTL. */
+export function materialWithColour(source: THREE.MeshPhysicalMaterial, hex: string): THREE.MeshPhysicalMaterial {
+  const material = clonePatched(source);
+  material.color.set(hex);
+  const patches = source.userData.shaderPatch as ShaderPatchOptions | undefined;
+  if (patches?.zones?.length) applyShaderPatches(material, { ...patches, zones: patches.zones.map(zone => ({ ...zone, colorHex: hex })) });
+  return material;
+}
 
 export function customPaintMaterial(hex: string): THREE.MeshPhysicalMaterial {
   const material = new THREE.MeshPhysicalMaterial({

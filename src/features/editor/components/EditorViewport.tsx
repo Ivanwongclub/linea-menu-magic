@@ -194,6 +194,7 @@ export function EditorViewport({
   // the same public-finish query the appearance picker uses.
   const hiddenGroups = useEditorStore(selectHiddenGroups);
   const zones = useEditorStore(selectZones);
+  const baseColourHex = useEditorStore((s) => s.recipe.base_colour_hex);
   const originalLettering = useEditorStore((s) => s.recipe.view.original_lettering === true);
   const partsReport = useEditorStore((s) => s.partsReport);
   const setPartsReport = useEditorStore((s) => s.setPartsReport);
@@ -201,8 +202,8 @@ export function EditorViewport({
   const [bakeStats, setBakeStats] = useState<{ mainThreadMs: number; totalMs: number } | null>(null);
   const zoneStyles = useMemo(() => {
     const byId = new Map((publicFinishes ?? []).map((f) => [f.id, f]));
-    return zones.map((zone) => zoneStyleFor(zone.appearance, byId) ?? { colorHex: "#FFFFFF", metalness: 0, roughness: 1 });
-  }, [zones, publicFinishes]);
+    return zones.map((zone) => zoneStyleFor(zone.appearance, byId, baseColourHex) ?? { colorHex: "#FFFFFF", metalness: 0, roughness: 1 });
+  }, [zones, publicFinishes, baseColourHex]);
   // R3: what the spec sheet will say — "rim: bright nickel; face: red copper".
   const zoneSentence = useMemo(() => {
     const byId = new Map((publicFinishes ?? []).map((f) => [f.id, f]));

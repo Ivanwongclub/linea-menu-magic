@@ -24,6 +24,8 @@ export interface ZoneStyle {
   colorHex: string;
   metalness: number;
   roughness: number;
+  /** Colour-only zones inherit each mesh's physical material. */
+  preserveMaterial?: boolean;
 }
 
 export interface ShaderPatchOptions {
@@ -89,24 +91,26 @@ function zonePatch(shader: Shader, zones: ZoneStyle[]): void {
   uniforms.zoneColor = { value: zones.map((z) => new THREE.Color(z.colorHex)) };
   uniforms.zoneMetalness = { value: zones.map((z) => z.metalness) };
   uniforms.zoneRoughness = { value: zones.map((z) => z.roughness) };
+  uniforms.zonePreserveMaterial = { value: zones.map((z) => z.preserveMaterial ? 1 : 0) };
   shader.vertexShader = after(shader.vertexShader, "common", "attribute float zoneIndex;\nvarying float vZoneIndex;");
   shader.vertexShader = after(shader.vertexShader, "begin_vertex", "\tvZoneIndex = zoneIndex;");
   const declarations = `uniform vec3 zoneColor[ ${zones.length} ];
 uniform float zoneMetalness[ ${zones.length} ];
 uniform float zoneRoughness[ ${zones.length} ];
+uniform float zonePreserveMaterial[ ${zones.length} ];
 varying float vZoneIndex;`;
   shader.fragmentShader = after(shader.fragmentShader, "common", declarations);
   // The slot is constant across a face, but it arrives as an interpolated
   // varying: 1.0 can land as 0.99999 and truncate to nothing, which speckles a
   // zone's edge. Round it instead of truncating.
-  const pick = (target: string, source: string) => `	if ( vZoneIndex > 0.5 ) {
+  const pick = (target: string, source: string, physical = false) => `	if ( vZoneIndex > 0.5 ) {
 		for ( int zone = 0; zone < ${zones.length}; zone ++ ) {
-			if ( zone == int( vZoneIndex + 0.5 ) - 1 ) ${target} = ${source}[ zone ];
+			if ( zone == int( vZoneIndex + 0.5 ) - 1${physical ? " && zonePreserveMaterial[ zone ] < 0.5" : ""} ) ${target} = ${source}[ zone ];
 		}
 	}`;
   shader.fragmentShader = after(shader.fragmentShader, "color_fragment", pick("diffuseColor.rgb", "zoneColor"));
-  shader.fragmentShader = after(shader.fragmentShader, "roughnessmap_fragment", pick("roughnessFactor", "zoneRoughness"));
-  shader.fragmentShader = after(shader.fragmentShader, "metalnessmap_fragment", pick("metalnessFactor", "zoneMetalness"));
+  shader.fragmentShader = after(shader.fragmentShader, "roughnessmap_fragment", pick("roughnessFactor", "zoneRoughness", true));
+  shader.fragmentShader = after(shader.fragmentShader, "metalnessmap_fragment", pick("metalnessFactor", "zoneMetalness", true));
 }
 
 /**

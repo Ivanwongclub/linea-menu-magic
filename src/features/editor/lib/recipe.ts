@@ -110,6 +110,8 @@ export interface LayerAppearance {
   mode: AppearanceMode;
   finish_id: string | null;
   custom: CustomColour | null;
+  /** Colour tint independent of the layer/zone's material. */
+  colour_hex?: string;
 }
 
 export const DEFAULT_APPEARANCE: LayerAppearance = { mode: "part", finish_id: null, custom: null };
@@ -191,6 +193,8 @@ export interface DraftRecipe {
   colour_id: string | null;
   /** Independent model colour; absent keeps the selected material's authored colour. */
   base_colour_hex?: string;
+  /** Independent colour per source mesh index; shared MTLs remain untouched. */
+  part_colours?: Record<string, string>;
   view: { ruler: boolean; original_lettering?: boolean; model_appearance_mode?: "source" | "finish" | "colour"; /** Temporary imports only; never written to catalogue drafts. */ local_appearance_mode?: "source" | "finish" | "colour" };
   layers: Layer[];
   /** Phase 6b R1: OBJ groups the buyer has hidden; hiding never deletes geometry. */
@@ -264,6 +268,7 @@ export function normalizeRecipe(raw: unknown): DraftRecipe {
     finish_id: id(raw.finish_id),
     colour_id: id(raw.colour_id),
     ...(typeof raw.base_colour_hex === "string" && normalizeHex(raw.base_colour_hex) ? { base_colour_hex: normalizeHex(raw.base_colour_hex)! } : {}),
+    ...(isRecord(raw.part_colours) ? { part_colours: Object.fromEntries(Object.entries(raw.part_colours).flatMap(([index, value]) => /^(0|[1-9]\d*)$/.test(index) && typeof value === "string" && normalizeHex(value) ? [[index, normalizeHex(value)!]] : [])) } : {}),
     // 6b R1: the factory's own lettering is a row in the Parts list now; it
     // stays hidden unless a design says otherwise, as it was before.
     view: {
@@ -274,14 +279,23 @@ export function normalizeRecipe(raw: unknown): DraftRecipe {
     },
     layers: stored.map(upgradeLayer),
     hidden_groups: Array.isArray(raw.hidden_groups) ? (raw.hidden_groups as unknown[]).map(Number).filter((n) => Number.isInteger(n) && n >= 0) : [],
-    zones: Array.isArray(raw.zones) ? (raw.zones as Zone[]) : [],
+    zones: Array.isArray(raw.zones) ? (raw.zones as Zone[]).map(zone => zone?.appearance ? { ...zone, appearance: normalizeAppearanceColour(zone.appearance) } : zone) : [],
   };
 }
 
 /** A layer as v3 stores it: relief and appearance both present and agreeing. */
 export function upgradeLayer(layer: Layer): Layer {
   const { relief, appearance } = reconcileAppearance(layerRelief(layer), layerAppearance(layer), "relief");
-  return { ...layer, relief, appearance, fill: null };
+  return { ...layer, relief, appearance: normalizeAppearanceColour(appearance), fill: null };
+}
+
+function normalizeAppearanceColour(appearance: LayerAppearance): LayerAppearance {
+  if (!("colour_hex" in appearance)) return appearance;
+  const next = { ...appearance };
+  const colour = typeof appearance.colour_hex === "string" ? normalizeHex(appearance.colour_hex) : null;
+  if (colour) next.colour_hex = colour;
+  else delete next.colour_hex;
+  return next;
 }
 
 /** The recovered placement a new layer starts from (4j, C8); every field it sets is labelled `recovered`. */

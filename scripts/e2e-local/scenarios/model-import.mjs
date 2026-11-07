@@ -1,5 +1,6 @@
 // Real browser upload/edit/save/reload coverage. Owns and removes its QA product/files.
 import assert from "node:assert/strict";
+import { verifyScopedColour } from "../lib/scoped-colour.mjs";
 import { randomUUID } from "node:crypto";
 import { mkdirSync, mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -123,6 +124,7 @@ export default async function ({ page, base, admin, editor, h }) {
     await page.getByTestId("local-model-banner").waitFor();
     await poll(async()=> (await parts()).length===2&&(await parts())[0].renderedMaterials[0].colour==="#ff0000","local MTL did not render");
     assert.equal((await zones()).length,0,"another model must not inherit the catalogue's face masks");
+    await verifyScopedColour({ page });
     const beforeSupplement = (await parts()).map(part=>[part.name,part.faces]);
     const beforeSupplementSize = await viewport.getAttribute("data-model-size-mm");
     await h.expectToast(/Materials applied/i,()=>page.getByTestId("view-open-model-input").setInputFiles(payload("colours.mtl",MTL.replace("Kd 1 0 0","Kd 0 1 0"))));

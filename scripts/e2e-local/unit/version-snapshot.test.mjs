@@ -107,3 +107,10 @@ test("a version freezes its custom colour independently of the finish's original
   assert.equal(snap.base_colour_hex, "#167AC6");
   assert.equal(snap.finish.material.base_color_hex, "#4C5155");
 });
+
+test("a version keeps a copy of independent source-part colours", () => {
+  const partColours = { "1": "#167AC6" };
+  const snap = buildSnapshot({ product, finish, sizeVariant: variant, colour: null, partColours, savedAt });
+  partColours["1"] = "#FF0000";
+  assert.deepEqual(snap.part_colours, { "1": "#167AC6" });
+});

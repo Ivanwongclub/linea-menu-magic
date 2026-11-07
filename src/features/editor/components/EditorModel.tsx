@@ -13,7 +13,7 @@ import { decoratedFaceRotation, withSmoothNormals } from "../lib/prepareModel";
 import { MeshBVH } from "three-mesh-bvh";
 import { applyBakedOcclusion, bakeOcclusion, occlusionKey, type BakeStats } from "../lib/ambientOcclusion";
 import { EMPTY_ZONES, selectSelectedPartIndex, useEditorStore } from "../store/useEditorStore";
-import { colourMaterial, finishMaterial } from "../lib/finishMaterial";
+import { colourMaterial, finishMaterial, materialWithColour } from "../lib/finishMaterial";
 import type { Layer, Zone } from "../lib/recipe";
 import { decodeRuns, encodeRuns, facesForGroups, facesForPlane, resolveZones, totalFaces } from "../lib/zones";
 import type { ZoneStyle } from "../lib/shaderPatch";
@@ -132,6 +132,7 @@ export function EditorModel({
   const select = useEditorStore((s) => s.select);
   const modelAppearanceMode = useEditorStore((s) => s.recipe.view.model_appearance_mode);
   const baseColourHex = useEditorStore((s) => s.recipe.base_colour_hex);
+  const partColours = useEditorStore((s) => s.recipe.part_colours);
   const format: ModelFormat = modelFormatFromName(sourceName) ?? modelFormatFromName(url) ?? "obj";
   const obj = useLoader(ModelFileLoader, url, (loader) => {
     loader.formatHint = format;
@@ -212,6 +213,25 @@ export function EditorModel({
   }), [prepared, authoredMaterials, zoneStyleKey, baseColourHex]);
   useEffect(() => () => sourceMaterials.flat().forEach((entry) => entry?.dispose()), [sourceMaterials]);
 
+  const partMaterials = useMemo(() => prepared.children.map((_, index) => {
+    const hex = partColours?.[String(index)];
+    if (!hex) return null;
+    const source = preserveSource && sourceMaterials[index] ? sourceMaterials[index] : material;
+    return Array.isArray(source) ? source.map(entry => materialWithColour(entry, hex)) : materialWithColour(source, hex);
+  }), [prepared, partColours, preserveSource, sourceMaterials, material]);
+  useEffect(() => () => partMaterials.flat().forEach(entry => entry?.dispose()), [partMaterials]);
+
+  const colouredLayerMaterials = useMemo(() => {
+    const coloured: Record<string, THREE.MeshPhysicalMaterial> = {};
+    for (const layer of layers) {
+      const hex = layer.appearance?.colour_hex ?? baseColourHex;
+      if (hex) coloured[layer.id] = materialWithColour(layerMaterials?.[layer.id] ?? material, hex);
+    }
+    return coloured;
+  }, [layers, baseColourHex, layerMaterials, material]);
+  useEffect(() => () => Object.values(colouredLayerMaterials).forEach(entry => entry.dispose()), [colouredLayerMaterials]);
+  const renderedLayerMaterials = useMemo(() => ({ ...layerMaterials, ...colouredLayerMaterials }), [layerMaterials, colouredLayerMaterials]);
+
   const markedKey = [...markedGroupIndices].sort((a, b) => a - b).join(",");
   const partsKey = [...(hiddenGroups ?? [])].sort((a, b) => a - b).join(",");
   // The lettering bundle and the Parts list are one hidden set (6b R1).
@@ -246,9 +266,9 @@ export function EditorModel({
   useLayoutEffect(() => {
     model.children.forEach((child, index) => {
       const mesh = child as THREE.Mesh;
-      if (mesh.isMesh) mesh.material = preserveSource && sourceMaterials[index] ? sourceMaterials[index] : material;
+      if (mesh.isMesh) mesh.material = partMaterials[index] ?? (preserveSource && sourceMaterials[index] ? sourceMaterials[index] : material);
     });
-  }, [model, material, preserveSource, sourceMaterials]);
+  }, [model, material, preserveSource, sourceMaterials, partMaterials]);
 
   // The buyer view (4j): marked branding groups are not drawn. The rotation
   // was already computed on the full model (collision 10), and the framing
@@ -336,7 +356,7 @@ export function EditorModel({
       overlaps,
       totalFaces: total,
     });
-  }, [model, faceData, zoneRuns, hiddenIndices, onPartsReport, authoredMaterials, obj, material, sourceMaterials, preserveSource, localModel?.warnings, materialOverride]);
+  }, [model, faceData, zoneRuns, hiddenIndices, onPartsReport, authoredMaterials, obj, material, sourceMaterials, preserveSource, localModel?.warnings, materialOverride, partMaterials]);
 
   /**
    * The occlusion bake, in its worker (6b R4): once per file, hidden set and
@@ -590,7 +610,8 @@ export function EditorModel({
         model={model}
         faceZ={bounds.max.z}
         material={material}
-        layerMaterials={layerMaterials}
+        layerMaterials={renderedLayerMaterials}
+        baseColourHex={baseColourHex}
         onGroupReady={(group, key) => {
           reliefGroup.current = group;
           setReliefKey(key);

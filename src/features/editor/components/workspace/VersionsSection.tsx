@@ -51,7 +51,7 @@ export function VersionsSection({ designId, product, finish, sizeVariant, colour
       const row = await saveVersion.mutateAsync({
         label,
         recipe,
-        snapshot: buildSnapshot({ product, finish, sizeVariant, colour, baseColourHex: recipe.base_colour_hex, savedAt: new Date().toISOString() }),
+        snapshot: buildSnapshot({ product, finish, sizeVariant, colour, baseColourHex: recipe.base_colour_hex, partColours: recipe.part_colours, savedAt: new Date().toISOString() }),
       });
       setLabel("");
       setLoadedId(row.id);

@@ -103,6 +103,7 @@ interface BrandingMeshesProps {
   material: THREE.MeshPhysicalMaterial;
   /** Phase 6a R2: the material a layer carries its own appearance in; absent means the part's own. */
   layerMaterials?: Record<string, THREE.MeshPhysicalMaterial>;
+  baseColourHex?: string;
   /**
    * Phase 6b R4: the relief group and a key that changes when its geometry
    * does — what the occlusion bake casts against, so an engraved recess takes
@@ -351,7 +352,7 @@ function reliefMaterials(): ReliefMaterials {
  * opening mask, a depth punch, and the recess's walls and floor as their own
  * meshes (R2). Geometry only for display — never part of the measured model.
  */
-export function BrandingMeshes({ layers, logoSources, model, faceZ, material, layerMaterials, onGroupReady, onReport }: BrandingMeshesProps) {
+export function BrandingMeshes({ layers, logoSources, model, faceZ, material, layerMaterials, baseColourHex, onGroupReady, onReport }: BrandingMeshesProps) {
   const [fonts, setFonts] = useState<Record<string, Font>>({});
   /** Bumped when a raster artwork finishes decoding, so the layout runs again. */
   const [textureVersion, setTextureVersion] = useState(0);
@@ -362,6 +363,7 @@ export function BrandingMeshes({ layers, logoSources, model, faceZ, material, la
 
   // Derived materials (recess interiors, printed ink) are rebuilt when the
   // part's material is — one set for the part and every layer appearance.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const materials: ReliefMaterials = useMemo(() => reliefMaterials(), [material]);
   useEffect(() => () => materials.dispose(), [materials]);
 
@@ -396,6 +398,7 @@ export function BrandingMeshes({ layers, logoSources, model, faceZ, material, la
     const logos: LogoReport[] = [];
     const reliefs = new Map<string, ReliefReport>();
     const built: THREE.BufferGeometry[] = [];
+    const tintedRasters: THREE.MeshPhysicalMaterial[] = [];
 
     /** The highest surface under a set of face-frame points (a logo's footprint). */
     const surfaceUnder = (points: [number, number][]) => {
@@ -530,7 +533,13 @@ export function BrandingMeshes({ layers, logoSources, model, faceZ, material, la
           entry.pieces++;
           const geometry = cached(`raster|${logoKey(source.url)}|${layer.content.width_mm}|${heightMm}`, () => new THREE.PlaneGeometry(layer.content.width_mm, heightMm));
           geometry.translate(0, 0, OPENING_LIFT_MM);
-          holder.add(new THREE.Mesh(geometry, rasterMaterialFor(texture)));
+          const colourHex = layer.appearance?.colour_hex ?? baseColourHex;
+          const raster = colourHex ? rasterMaterialFor(texture).clone() : rasterMaterialFor(texture);
+          if (colourHex) {
+            raster.color.set(colourHex);
+            tintedRasters.push(raster);
+          }
+          holder.add(new THREE.Mesh(geometry, raster));
         } else {
           const artwork = logoArtwork(source.svg);
           if (!artwork) continue;
@@ -643,8 +652,9 @@ export function BrandingMeshes({ layers, logoSources, model, faceZ, material, la
     // Relief geometry is cached and shared; only the flat measuring copies are ours.
     return () => {
       for (const geometry of built) geometry.dispose();
+      for (const raster of tintedRasters) raster.dispose();
     };
-  }, [group, layers, logoSources, model, fonts, faceZ, material, layerMaterials, materials, textureVersion, onGroupReady, onReport]);
+  }, [group, layers, logoSources, model, fonts, faceZ, material, layerMaterials, baseColourHex, materials, textureVersion, onGroupReady, onReport]);
 
   // Screen x of each glyph centre, in canvas CSS px, kept on the canvas
   // element whenever the camera or the layout changes — the e2e reading-
