@@ -7,6 +7,7 @@ import { useWorkspaceLayout } from "../../hooks/useWorkspaceLayout";
 import { widthFromDrag } from "../../lib/workspaceLayout";
 import { DocumentBar } from "./DocumentBar";
 import type { AutosaveStatus } from "../../hooks/useAutosaveDraft";
+import { useUndoShortcuts } from "../../hooks/useUndoShortcuts";
 
 interface WorkspaceShellProps {
   banner?: ReactNode;
@@ -44,6 +45,8 @@ interface WorkspaceShellProps {
  * index.css), so the viewport's bottom edge can't drift below the fold.
  */
 export function WorkspaceShell({ banner, viewport, panel, strip, document }: WorkspaceShellProps) {
+  // Anonymous previews have no DocumentBar, but need the same editing shortcuts.
+  useUndoShortcuts();
   const { t } = useI18n();
   // Calibration screenshots are measured in pixels: they always get the
   // default layout, and the chrome that would change it is not drawn.

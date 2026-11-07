@@ -85,7 +85,8 @@ export function LayersDock({
               <button
                 type="button"
                 data-testid="add-text"
-                onClick={() =>
+                onClick={() => {
+                  setOpen((previous) => ({ ...previous, branding: true }));
                   // 4j: where the factory lettering was, once the model is on screen; E1 §3.3 fallbacks otherwise.
                   addLayer(
                     newTextLayer(
@@ -95,8 +96,8 @@ export function LayersDock({
                       recoveredDefaults(reference, modelFrame?.transform ?? null, scaleFactor, modelFrame?.markedGlyphCentres ?? []),
                       minDepthMm,
                     ),
-                  )
-                }
+                  );
+                }}
                 className="flex items-center gap-1 text-xs tracking-[0.05em] text-foreground underline-offset-4 hover:underline"
               >
                 <Plus className="h-3.5 w-3.5" strokeWidth={1.5} />

@@ -2,17 +2,19 @@ import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, us
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, X } from "lucide-react";
+import { useState } from "react";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { cn } from "@/lib/utils";
 import { selectSelectedLayerId, useEditorStore } from "../../store/useEditorStore";
 import { isLogoLayer, type Layer } from "../../lib/recipe";
 import { deleteLogoAsset, type LogoSource } from "../../hooks/useLogoAssets";
+import { LayerTextInput } from "./LayerTextInput";
 
 /**
  * The layers on the part, in the order they are applied (E2 U2): the list and
- * its rows, nothing else. Selecting a row is what the Properties panel reads
- * (U6), so a row carries a name, a grip and a delete — its relief, appearance
- * and placement are shown there, for the selected layer only.
+ * its rows. A text label edits in place; its relief, appearance and placement
+ * remain in Properties (U6). Clicking a name or adding a blank layer focuses
+ * the inline input so typing never depends on finding the panel below.
  */
 export function LayerList({ layers, logoSources }: { layers: Layer[]; logoSources: Record<string, LogoSource> }) {
   const { t } = useI18n();
@@ -50,6 +52,7 @@ function LayerRow({ layer, selected, logoSource }: { layer: Layer; selected: boo
   const { t } = useI18n();
   const select = useEditorStore((s) => s.select);
   const removeLayer = useEditorStore((s) => s.removeLayer);
+  const [editing, setEditing] = useState(selected && !isLogoLayer(layer) && !layer.content.value);
   const onDelete = () => {
     // A logo's file goes with its layer (4k R7); an undo puts both back.
     if (isLogoLayer(layer) && layer.content.asset_id) void deleteLogoAsset(layer.content.asset_id);
@@ -70,7 +73,7 @@ function LayerRow({ layer, selected, logoSource }: { layer: Layer; selected: boo
         isDragging && "relative z-10 shadow-sm",
       )}
     >
-      <div className="flex items-center">
+      <div className="flex flex-1 min-w-0 items-center">
         <button
           type="button"
           ref={setActivatorNodeRef}
@@ -82,24 +85,38 @@ function LayerRow({ layer, selected, logoSource }: { layer: Layer; selected: boo
         >
           <GripVertical className="w-3.5 h-3.5" strokeWidth={1.5} />
         </button>
-        <button
-          type="button"
-          data-testid="text-layer-select"
-          aria-pressed={selected}
-          onClick={() => select({ kind: "layer", id: layer.id })}
-          className="flex-1 min-w-0 py-2 pr-2 text-left"
-        >
-          {isLogoLayer(layer) ? (
-            <span className="flex items-center gap-2">
-              <LogoThumbnail source={logoSource} />
-              <span className="truncate text-sm tracking-wide text-foreground">{t("editor.branding.logoLayer")}</span>
-            </span>
+        <div data-testid="text-layer-select" className="flex-1 min-w-0">
+          {!isLogoLayer(layer) && editing ? (
+            <LayerTextInput
+              layer={layer}
+              testId="text-layer-inline-content"
+              autoFocus
+              onFinish={() => setEditing(false)}
+              className="block w-full min-w-0 bg-transparent py-2 pr-2 text-sm tracking-wide text-foreground outline-none placeholder:text-muted-foreground placeholder:italic"
+            />
           ) : (
-            <span className={cn("block truncate text-sm tracking-wide", layer.content.value ? "text-foreground" : "text-muted-foreground italic")}>
-              {layer.content.value || t("editor.branding.emptyLayer")}
-            </span>
+            <button
+              type="button"
+              aria-pressed={selected}
+              onClick={() => {
+                select({ kind: "layer", id: layer.id });
+                if (!isLogoLayer(layer)) setEditing(true);
+              }}
+              className="block w-full min-w-0 py-2 pr-2 text-left"
+            >
+              {isLogoLayer(layer) ? (
+                <span className="flex items-center gap-2">
+                  <LogoThumbnail source={logoSource} />
+                  <span className="truncate text-sm tracking-wide text-foreground">{t("editor.branding.logoLayer")}</span>
+                </span>
+              ) : (
+                <span className={cn("block truncate text-sm tracking-wide", layer.content.value ? "text-foreground" : "text-muted-foreground italic")}>
+                  {layer.content.value || t("editor.branding.emptyLayer")}
+                </span>
+              )}
+            </button>
           )}
-        </button>
+        </div>
         <button
           type="button"
           data-testid="text-layer-delete"

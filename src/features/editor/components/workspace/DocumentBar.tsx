@@ -4,7 +4,6 @@ import { ChevronLeft, MoreHorizontal, PanelLeft, PanelRight, PanelRightClose, Re
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { cn } from "@/lib/utils";
 import { selectCanRedo, selectCanUndo, useEditorStore } from "../../store/useEditorStore";
-import { useUndoShortcuts } from "../../hooks/useUndoShortcuts";
 import type { AutosaveStatus } from "../../hooks/useAutosaveDraft";
 import type { DockSide } from "../../lib/workspaceLayout";
 
@@ -25,8 +24,8 @@ export interface DocumentBarProps {
  *
  * Undo and redo are document verbs, not view tools (E2 §3.4 item 4), so they
  * live here beside the name rather than in a layer group's header or in U9's
- * floating cluster — and the keyboard shortcuts are bound here with them, so
- * history is owned where its buttons are. Autosave moved here from the Output
+ * floating cluster. The workspace binds their keyboard shortcuts for both
+ * signed-in designs and anonymous previews. Autosave moved here from the Output
  * dock for the same reason: it is the document's state, and the dock is now
  * just the versions it holds.
  *
@@ -45,7 +44,6 @@ export function DocumentBar({ name, saveStatus, designsLink = false, side, onDoc
   const redo = useEditorStore((s) => s.redo);
   const canUndo = useEditorStore(selectCanUndo);
   const canRedo = useEditorStore(selectCanRedo);
-  useUndoShortcuts();
 
   const saving = saveStatus && saveStatus !== "idle" ? saveStatus : null;
   const close = () => setMenuOpen(false);

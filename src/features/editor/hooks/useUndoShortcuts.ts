@@ -1,25 +1,29 @@
 import { useEffect } from "react";
-import { useEditorStore } from "../store/useEditorStore";
+import { useEditorStore } from "../store/useEditorStore.ts";
 
 /**
- * Cmd/Ctrl+Z and Shift+Cmd/Ctrl+Z (4i R2), anywhere in the editor. A focused
- * field is blurred first so its edit commits as its own entry, then undone.
+ * Cmd/Ctrl+Z and Shift+Cmd/Ctrl+Z (4i R2), anywhere in the editor.
+ * Text inputs retain focus; undoHistory commits their live edit itself.
+ * Numeric fields still blur first to settle their local precision drafts.
  *
- * Extracted from `BrandingGroup` in E2 U2: history is the document's, not a
- * layer group's, and U7 moves the buttons to the document bar.
+ * Owned by WorkspaceShell, including anonymous previews without a document bar.
  */
 export function useUndoShortcuts(): void {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (!(event.metaKey || event.ctrlKey) || event.altKey || event.key.toLowerCase() !== "z") return;
-      event.preventDefault();
-      const active = document.activeElement as HTMLElement | null;
-      if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA")) active.blur();
-      const { undo, redo } = useEditorStore.getState();
-      if (event.shiftKey) redo();
-      else undo();
+      handleUndoShortcut(event, document.activeElement as HTMLElement | null);
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
+}
+
+export function handleUndoShortcut(event: KeyboardEvent, active: HTMLElement | null): void {
+  if (event.defaultPrevented || event.isComposing || event.keyCode === 229) return;
+  if (!(event.metaKey || event.ctrlKey) || event.altKey || event.key.toLowerCase() !== "z") return;
+  event.preventDefault();
+  if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA") && !active.hasAttribute("data-layer-text-input")) active.blur();
+  const { undo, redo } = useEditorStore.getState();
+  if (event.shiftKey) redo();
+  else undo();
 }

@@ -5,6 +5,7 @@ import { BUNDLED_FONTS } from "../../lib/fonts";
 import { isLogoLayer, type Layer, type TextLayout } from "../../lib/recipe";
 import { cn } from "@/lib/utils";
 import { PositionAndCurve } from "./PositionAndCurve";
+import { LayerTextInput } from "./LayerTextInput";
 
 /**
  * Everything about the *selected* layer (E2 U2): its words, its font, its
@@ -38,14 +39,10 @@ export function LayerProperties({ layer, faceDiameterMm }: { layer: Layer; faceD
         <label htmlFor={`text-${layer.id}`} className={FIELD_LABEL}>
           {t("editor.branding.text")}
         </label>
-        <input
+        <LayerTextInput
+          layer={layer}
           id={`text-${layer.id}`}
-          data-testid="text-layer-content"
-          autoComplete="off"
-          spellCheck={false}
-          value={layer.content.value}
-          onChange={(e) => updateLayer(layer.id, { content: { value: e.target.value } })}
-          onBlur={commit}
+          testId="text-layer-content"
           className="w-full border-b border-border bg-transparent py-1 text-base tracking-wide text-foreground outline-none focus:border-foreground transition-colors"
         />
       </div>

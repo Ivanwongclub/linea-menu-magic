@@ -13,6 +13,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { POLO_OBJ } from "../lib/calibration.mjs";
 import { parseObjRawBounds } from "../../../src/features/admin/lib/objBounds.ts";
+import { verifyTextInput } from "../lib/text-input.mjs";
 
 const OTHER = { email: "e2e-text-other-owner@local.test", password: "E2eOther!2026" };
 
@@ -132,6 +133,7 @@ export default async function ({ page, base, admin, editor, h }) {
     // E2 U1/U3: exactly one thing is selected, and it is the row just added —
     // read by attribute rather than by ordinal.
     assert.equal(await page.locator('[data-testid="text-layer-row"][data-selected="true"]').count(), 1, "the new layer is the one selection");
+    await verifyTextInput({ page });
     await page.getByTestId("text-layer-content").fill("POLO");
     assert.equal(await glyphCount(4), 4, "anonymous POLO renders 4 glyph meshes");
     // Text size sits behind "Position and curve" since 4h.
