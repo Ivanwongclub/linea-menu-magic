@@ -8,6 +8,7 @@ import { verifyGroupTree } from "../lib/group-tree.mjs";
 import { verifyGroupDrop, verifyEmptyGroupDrop } from "../lib/group-drop.mjs";
 import { verifyRegionEditing } from "../lib/zone-region.mjs";
 import { verifyMemberGradient } from "../lib/member-gradient.mjs";
+import { verifyBrightnessGradient } from "../lib/brightness-gradient.mjs";
 import { randomUUID } from "node:crypto";
 import { mkdirSync, mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -140,6 +141,7 @@ export default async function ({ page, base, admin, editor, h }) {
     report.emptyGroupDrop = await verifyEmptyGroupDrop({ page });
     report.groupDrop = await verifyGroupDrop({ page, restore: () => page.getByTestId("view-open-model-input").setInputFiles(files) });
     report.memberGradient = await verifyMemberGradient({ page, restore: () => page.getByTestId("view-open-model-input").setInputFiles(files) });
+    report.brightnessGradient = await verifyBrightnessGradient({ page, restore: () => page.getByTestId("view-open-model-input").setInputFiles(files) });
     report.regionEditing = await verifyRegionEditing({ page, restore: () => page.getByTestId("view-open-model-input").setInputFiles(files) });
     report.groupContinuity = await verifyContinuousGroupGradient({ page, restore: () => page.getByTestId("view-open-model-input").setInputFiles(files) });
     const beforeSupplement = (await parts()).map(part=>[part.name,part.faces]);

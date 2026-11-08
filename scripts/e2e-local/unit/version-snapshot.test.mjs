@@ -40,6 +40,13 @@ const finish = {
 const variant = { id: "v1", size_label: null, size_ligne: 24, size_primary_mm: 15.2 };
 const savedAt = "2026-09-23T10:00:00.000Z";
 
+test("saved versions freeze nested brightness settings for whole models, parts and groups", () => {
+  const gradient = { from: "#003366", to: "#80B3E6", angle: 0, midpoint: 0.5, brightness: { colour: "#0066CC", from: -50, to: 50 } };
+  const snap = buildSnapshot({ product, finish, sizeVariant: variant, colour: null, baseGradient: gradient, partGradients: { "1": gradient }, paintGroups: [{ id: "gp", name: "GP", members: [{ kind: "part", id: "0" }], gradient, gradient_mode: "members" }], savedAt });
+  gradient.brightness.from = -100; gradient.brightness.colour = "#FF0000";
+  for (const value of [snap.base_gradient, snap.part_gradients["1"], snap.paint_groups[0].gradient]) assert.deepEqual(value.brightness, { colour: "#0066CC", from: -50, to: 50 });
+});
+
 test("version metadata freezes whole-model and per-part gradients", () => {
   const baseGradient = { from: "#FF0000", to: "#0000FF", angle: 45, midpoint: 0.3 };
   const partGradients = { "1": { ...baseGradient, angle: 90 } };

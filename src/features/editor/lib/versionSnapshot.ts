@@ -13,6 +13,8 @@ import type { PaintGroup } from "./paintGroups";
  */
 export const SNAPSHOT_VERSION = 1;
 
+const cloneGradient = (gradient: import("./gradient").ColourGradient) => ({ ...gradient, ...(gradient.brightness ? { brightness: { ...gradient.brightness } } : {}) });
+
 /** The material columns `finishMaterial` reads — the ones that decide what the version looks like. */
 export interface SnapshotFinishMaterial {
   base_color_hex: string | null;
@@ -115,9 +117,9 @@ export function buildSnapshot({
     colour: colour && !product.is_metal ? { id: colour.id, name: colour.name, hex: colour.hex } : null,
     ...(baseColourHex ? { base_colour_hex: baseColourHex } : {}),
     ...(partColours ? { part_colours: { ...partColours } } : {}),
-    ...(baseGradient ? { base_gradient: { ...baseGradient } } : {}),
-    ...(partGradients ? { part_gradients: Object.fromEntries(Object.entries(partGradients).map(([index, gradient]) => [index, { ...gradient }])) } : {}),
-    ...(paintGroups?.length ? { paint_groups: paintGroups.map(group => ({ ...group, members: group.members.map(member => ({ ...member })), ...(group.gradient ? { gradient: { ...group.gradient } } : {}) })) } : {}),
+    ...(baseGradient ? { base_gradient: cloneGradient(baseGradient) } : {}),
+    ...(partGradients ? { part_gradients: Object.fromEntries(Object.entries(partGradients).map(([index, gradient]) => [index, cloneGradient(gradient)])) } : {}),
+    ...(paintGroups?.length ? { paint_groups: paintGroups.map(group => ({ ...group, members: group.members.map(member => ({ ...member })), ...(group.gradient ? { gradient: cloneGradient(group.gradient) } : {}) })) } : {}),
     model: {
       storage_path: product.model_storage_path,
       sha256: null,
