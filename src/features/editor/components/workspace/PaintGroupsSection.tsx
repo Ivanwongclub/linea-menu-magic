@@ -156,7 +156,7 @@ export function PaintGroupDetails({ group, actions = true }: { group: PaintGroup
   return <div className="mt-3 space-y-2 border-t border-border pt-3" data-testid="paint-group-details">
     <p className="text-xs text-foreground">{t("editor.groups.selectedCount", { count: group.members.length })}</p>
     <ul className="max-h-24 space-y-1 overflow-y-auto text-xs text-muted-foreground">{group.members.map(member => <li key={memberKey(member)} className="truncate">{available.find(item => memberKey(item) === memberKey(member))?.name ?? member.id}</li>)}</ul>
-    <p className="text-[11px] leading-relaxed text-muted-foreground">{t("editor.groups.fillHint")}</p>
+    <p className="text-[11px] leading-relaxed text-muted-foreground">{t(group.gradient_mode === "members" ? "editor.gradient.membersHint" : "editor.groups.fillHint")}</p>
     {actions && <div className="flex flex-wrap items-center justify-between gap-2"><EditPaintGroupButton group={group} /><DissolvePaintGroupButton id={group.id} /></div>}
   </div>;
 }

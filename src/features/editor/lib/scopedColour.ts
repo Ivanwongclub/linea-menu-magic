@@ -48,6 +48,7 @@ function applyPaint(recipe: DraftRecipe, target: ColourTarget | null, hex: strin
     const updated = { ...group };
     delete updated.colour_hex;
     delete updated.gradient;
+    if (!gradient) delete updated.gradient_mode;
     if (hex) updated.colour_hex = hex;
     if (gradient) updated.gradient = gradient;
     const next = same ? recipe : { ...recipe, paint_groups: recipe.paint_groups!.map(group => group.id === target.id ? updated : group) };
@@ -69,6 +70,7 @@ function applyPaint(recipe: DraftRecipe, target: ColourTarget | null, hex: strin
         const copy = { ...group };
         delete copy.colour_hex;
         delete copy.gradient;
+        delete copy.gradient_mode;
         return copy;
       });
     }
@@ -104,4 +106,19 @@ export function applyScopedColour(recipe: DraftRecipe, target: ColourTarget | nu
 export function applyScopedGradient(recipe: DraftRecipe, target: ColourTarget | null, value: ColourGradient | null): DraftRecipe {
   const gradient = value === null ? null : normalizeGradient(value);
   return value !== null && !gradient ? recipe : applyPaint(recipe, target, null, gradient);
+}
+
+/** Switch the GP distribution and reapply its fill in one undoable operation. */
+export function applyGroupGradientMode(recipe: DraftRecipe, id: string, mode: "continuous" | "members", value: ColourGradient): DraftRecipe {
+  const gradient = normalizeGradient(value);
+  if (!gradient || !recipe.paint_groups?.some(group => group.id === id)) return recipe;
+  const next = applyScopedGradient(recipe, { kind: "group", id }, gradient);
+  const groups = next.paint_groups!.map(group => {
+    if (group.id !== id) return group;
+    const copy = { ...group };
+    if (mode === "members") copy.gradient_mode = "members";
+    else delete copy.gradient_mode;
+    return copy;
+  });
+  return { ...next, paint_groups: groups };
 }

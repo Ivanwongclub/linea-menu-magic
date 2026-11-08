@@ -12,7 +12,7 @@ import { glyphOutlines } from "../../lib/glyphOutlines";
 import { clonePatched } from "../../lib/shaderPatch";
 import type { ShaderPatchOptions } from "../../lib/shaderPatch";
 import { gradientBoundsFor, type ColourGradient, type GradientBounds, type GradientPaint } from "../../lib/gradient";
-import { findMemberGroup, unionGradientBounds, type PaintGroup } from "../../lib/paintGroups";
+import { findMemberGroup, memberGradientColour, unionGradientBounds, type PaintGroup } from "../../lib/paintGroups";
 import { updateGradientBounds } from "../../lib/gradientShader";
 import { materialWithGradient } from "../../lib/finishMaterial";
 import {
@@ -550,8 +550,9 @@ export function BrandingMeshes({ layers, logoSources, model, faceZ, material, la
           geometry.translate(0, 0, OPENING_LIFT_MM);
           const colourGroup = findMemberGroup(paintGroups, { kind: "layer", id: layer.id });
           const ownHex = layer.appearance?.colour_hex;
-          const colourHex = ownHex ?? colourGroup?.colour_hex ?? baseColourHex;
-          const gradient = layer.appearance?.gradient ?? (!ownHex && !colourGroup?.colour_hex ? baseGradient : undefined);
+          const memberHex = memberGradientColour(colourGroup, { kind: "layer", id: layer.id }, layers);
+          const colourHex = ownHex ?? memberHex ?? colourGroup?.colour_hex ?? baseColourHex;
+          const gradient = layer.appearance?.gradient ?? (!ownHex && !memberHex && !colourGroup?.colour_hex ? baseGradient : undefined);
           const paint = !layer.appearance?.gradient && !ownHex && colourGroup?.gradient ? groupPaints[colourGroup.id] : gradient ? { colour: gradient, bounds: [...gradientBounds] as GradientBounds, fitToLayer: !!layer.appearance?.gradient } : undefined;
           const raster = paint ? materialWithGradient(rasterMaterialFor(texture), paint) : colourHex ? rasterMaterialFor(texture).clone() : rasterMaterialFor(texture);
           if (paint) tintedRasters.push(raster);

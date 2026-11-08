@@ -18,7 +18,7 @@ import type { Layer, Zone } from "../lib/recipe";
 import { decodeRuns, encodeRuns, facesForGroups, facesForPlane, resolveZones, totalFaces } from "../lib/zones";
 import { applyShaderPatches, clonePatched, type ShaderPatchOptions, type ZoneStyle } from "../lib/shaderPatch";
 import { gradientBoundsFor, type GradientPaint } from "../lib/gradient";
-import { findMemberGroup, unionGradientBounds } from "../lib/paintGroups";
+import { findMemberGroup, memberGradientColour, unionGradientBounds } from "../lib/paintGroups";
 import type { LogoSource } from "../hooks/useLogoAssets";
 import { BrandingMeshes, type TextSceneReport } from "./branding/BrandingMeshes";
 import { cornersOf, fitDistance, homeDirection, type BoundsMm } from "../lib/framing";
@@ -210,7 +210,10 @@ export function EditorModel({
   const gradientBounds = useMemo(() => gradientBoundsFor(new THREE.Box3().setFromObject(model)), [model]);
   const partGradientBounds = useMemo(() => model.children.map(child => gradientBoundsFor(new THREE.Box3().setFromObject(child))), [model]);
   const groupBounds = useMemo(() => Object.fromEntries((paintGroups ?? []).map(group => [group.id, unionGradientBounds(group.members.filter(member => member.kind === "part").map(member => partGradientBounds[Number(member.id)]), gradientBounds)])), [paintGroups, partGradientBounds, gradientBounds]);
-  const groupPaints = useMemo<Record<string, GradientPaint>>(() => Object.fromEntries((paintGroups ?? []).filter(group => group.gradient).map(group => [group.id, { colour: group.gradient!, bounds: groupBounds[group.id] }])), [paintGroups, groupBounds]);
+  const groupPaints = useMemo<Record<string, GradientPaint>>(() => Object.fromEntries((paintGroups ?? []).filter(group => group.gradient && group.gradient_mode !== "members").map(group => [group.id, { colour: group.gradient!, bounds: groupBounds[group.id] }])), [paintGroups, groupBounds]);
+  // Text edits do not change distribution order or rebuild the source-part materials.
+  const layerOrderKey = JSON.stringify(layers.map(layer => layer.id));
+  const memberLayerOrder = useMemo(() => (JSON.parse(layerOrderKey) as string[]).map(id => ({ id })), [layerOrderKey]);
 
   // One builder for the part and for every layer that carries its own finish
   // (Phase 6a R2, `lib/finishMaterial.ts`).
@@ -265,14 +268,14 @@ export function EditorModel({
     const ownHex = partColours?.[String(index)];
     const gradient = partGradients?.[String(index)];
     const paint = gradient ? { colour: gradient, bounds: partGradientBounds[index] } : !ownHex && group?.gradient ? groupPaints[group.id] : undefined;
-    const hex = ownHex ?? group?.colour_hex;
+    const hex = ownHex ?? memberGradientColour(group, { kind: "part", id: String(index) }, memberLayerOrder) ?? group?.colour_hex;
     if (!hex && !paint) return null;
     const source = preserveSource && sourceMaterials[index] ? sourceMaterials[index] : material;
     const fill = (entry: THREE.MeshPhysicalMaterial) => paint
       ? materialWithGradient(entry, paint)
       : materialWithColour(entry, hex!, false);
     return Array.isArray(source) ? source.map(fill) : fill(source);
-  }), [prepared, partColours, partGradients, partGradientBounds, paintGroups, groupPaints, preserveSource, sourceMaterials, material]);
+  }), [prepared, partColours, partGradients, partGradientBounds, paintGroups, groupPaints, preserveSource, sourceMaterials, material, memberLayerOrder]);
   useEffect(() => () => partMaterials.flat().forEach(entry => entry?.dispose()), [partMaterials]);
 
   const colouredLayerMaterials = useMemo(() => {
@@ -280,8 +283,9 @@ export function EditorModel({
     for (const layer of layers) {
       const group = findMemberGroup(paintGroups, { kind: "layer", id: layer.id });
       const ownHex = layer.appearance?.colour_hex;
-      const hex = ownHex ?? group?.colour_hex ?? baseColourHex;
-      const gradient = layer.appearance?.gradient ?? (!ownHex && !group?.colour_hex ? baseGradient : undefined);
+      const memberHex = memberGradientColour(group, { kind: "layer", id: layer.id }, layers);
+      const hex = ownHex ?? memberHex ?? group?.colour_hex ?? baseColourHex;
+      const gradient = layer.appearance?.gradient ?? (!ownHex && !memberHex && !group?.colour_hex ? baseGradient : undefined);
       const paint = !layer.appearance?.gradient && !ownHex && group?.gradient ? groupPaints[group.id] : gradient ? { colour: gradient, bounds: [...gradientBounds] as typeof gradientBounds, fitToLayer: !!layer.appearance?.gradient } : undefined;
       if (paint) coloured[layer.id] = materialWithGradient(layerMaterials?.[layer.id] ?? brandingMaterial, paint, true);
       else if (hex) coloured[layer.id] = materialWithColour(layerMaterials?.[layer.id] ?? brandingMaterial, hex);

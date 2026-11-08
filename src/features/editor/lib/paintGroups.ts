@@ -1,5 +1,5 @@
-import type { DraftRecipe } from "./recipe.ts";
-import { normalizeGradient, type ColourGradient, type GradientBounds } from "./gradient.ts";
+import type { DraftRecipe, Layer } from "./recipe.ts";
+import { gradientColourAt, normalizeGradient, type ColourGradient, type GradientBounds } from "./gradient.ts";
 import { normalizeHex } from "./pantone.ts";
 
 export interface PaintGroupMember { kind: "part" | "layer"; id: string }
@@ -9,6 +9,8 @@ export interface PaintGroup {
   members: PaintGroupMember[];
   colour_hex?: string;
   gradient?: ColourGradient;
+  /** Absent retains the existing spatial gradient; members assigns one solid per row. */
+  gradient_mode?: "members";
 }
 
 export const memberKey = (member: PaintGroupMember) => `${member.kind}:${member.id}`;
@@ -19,6 +21,19 @@ export function findMemberGroup(groups: PaintGroup[] | undefined, target: { kind
 }
 
 export const groupForMember = (recipe: DraftRecipe, target: { kind: string; id: string } | null) => findMemberGroup(recipe.paint_groups, target);
+
+/** Match the folder: source parts first, followed by branding in its sortable order. */
+export function orderedGroupMembers(group: PaintGroup, layers: Pick<Layer, "id">[]): PaintGroupMember[] {
+  const layerIds = new Set(group.members.filter(member => member.kind === "layer").map(member => member.id));
+  return [...group.members.filter(member => member.kind === "part"), ...layers.filter(layer => layerIds.has(layer.id)).map(layer => ({ kind: "layer" as const, id: layer.id }))];
+}
+
+export function memberGradientColour(group: PaintGroup | undefined, member: { kind: string; id: string } | null, layers: Pick<Layer, "id">[]): string | undefined {
+  if (!group?.gradient || group.gradient_mode !== "members" || !member) return undefined;
+  const members = orderedGroupMembers(group, layers);
+  const index = members.findIndex(item => item.kind === member.kind && item.id === member.id);
+  return index < 0 ? undefined : gradientColourAt(group.gradient, members.length < 2 ? 0 : index / (members.length - 1));
+}
 
 /** Read older recipes unchanged; reject duplicate, dangling and nested members. */
 export function normalizePaintGroups(value: unknown, layerIds: Set<string>): PaintGroup[] {
@@ -40,7 +55,7 @@ export function normalizePaintGroups(value: unknown, layerIds: Set<string>): Pai
     ids.add(raw.id);
     const gradient = normalizeGradient(raw.gradient);
     const colour = typeof raw.colour_hex === "string" ? normalizeHex(raw.colour_hex) : null;
-    groups.push({ id: raw.id, name: typeof raw.name === "string" && raw.name.trim() ? raw.name.trim().slice(0, 80) : `GP ${groups.length + 1}`, members, ...(gradient ? { gradient } : colour ? { colour_hex: colour } : {}) });
+    groups.push({ id: raw.id, name: typeof raw.name === "string" && raw.name.trim() ? raw.name.trim().slice(0, 80) : `GP ${groups.length + 1}`, members, ...(gradient ? { gradient, ...(raw.gradient_mode === "members" ? { gradient_mode: "members" as const } : {}) } : colour ? { colour_hex: colour } : {}) });
   }
   return groups;
 }

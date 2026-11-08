@@ -4,7 +4,7 @@ import { useI18n } from "@/features/i18n/I18nProvider";
 import { gradientCss, type ColourGradient } from "../lib/gradient";
 import { normalizeHex } from "../lib/pantone";
 
-export function GradientColourControl({ gradient, onChange, onCommit, testIds = true }: { gradient: ColourGradient; onChange: (gradient: ColourGradient) => void; onCommit: () => void; testIds?: boolean }) {
+export function GradientColourControl({ gradient, onChange, onCommit, testIds = true, memberColours }: { gradient: ColourGradient; onChange: (gradient: ColourGradient) => void; onCommit: () => void; testIds?: boolean; memberColours?: { key: string; name: string; hex: string }[] }) {
   const { t } = useI18n();
   const id = useId();
   const testId = (name: string) => testIds ? name : undefined;
@@ -16,7 +16,9 @@ export function GradientColourControl({ gradient, onChange, onCommit, testIds = 
   return (
     <div className="space-y-3" data-testid={testId("gradient-control")} data-from={gradient.from} data-to={gradient.to} data-angle={gradient.angle} data-midpoint={gradient.midpoint}>
       <div>
-        <div className="h-8 border border-border" style={{ background: gradientCss({ ...gradient, angle: 0 }) }} data-testid={testId("gradient-preview")} aria-label={t("editor.gradient.preview")} />
+        <div className="flex h-8 border border-border" style={{ background: memberColours?.length ? undefined : gradientCss({ ...gradient, angle: 0 }) }} data-testid={testId("gradient-preview")} aria-label={t("editor.gradient.preview")}>
+          {memberColours?.map(member => <span key={member.key} className="flex-1" style={{ background: member.hex }} title={`${member.name}: ${member.hex}`} />)}
+        </div>
         <div className="mt-1 flex items-center justify-between gap-2">
           {(["from", "to"] as const).map(endpoint => (
             <button key={endpoint} type="button" data-testid={testId(`gradient-stop-${endpoint}`)} aria-pressed={stop === endpoint} onClick={() => { setStop(endpoint); setDraft(null); }} className={`flex items-center gap-1.5 px-1 py-1 text-xs ${stop === endpoint ? "text-foreground underline underline-offset-4" : "text-muted-foreground"}`}>
@@ -39,7 +41,7 @@ export function GradientColourControl({ gradient, onChange, onCommit, testIds = 
           if (colour) change({ [stop]: colour });
         }} onBlur={() => { setDraft(null); onCommit(); }} onKeyDown={event => { if (event.key === "Enter" && !event.nativeEvent.isComposing) event.currentTarget.blur(); }} className="min-w-0 flex-1 border border-border bg-transparent px-2 py-1.5 font-mono text-xs uppercase outline-none focus:border-foreground" />
       </div>
-      <div className="space-y-1.5">
+      {memberColours === undefined && <div className="space-y-1.5">
         <div className="flex items-center justify-between gap-2 text-xs">
           <label htmlFor={`${id}-angle`} className="text-muted-foreground">{t("editor.gradient.angle")}</label>
           <span>{gradient.angle}°</span>
@@ -48,7 +50,7 @@ export function GradientColourControl({ gradient, onChange, onCommit, testIds = 
         <div className="flex gap-1">
           {[0, 45, 90].map(angle => <button key={angle} type="button" data-testid={testId(`gradient-angle-${angle}`)} aria-pressed={gradient.angle === angle} onClick={() => { change({ angle }); onCommit(); }} className={`flex-1 border px-2 py-1 text-xs ${gradient.angle === angle ? "border-foreground bg-secondary" : "border-border text-muted-foreground"}`}>{angle}°</button>)}
         </div>
-      </div>
+      </div>}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between gap-2 text-xs">
           <label htmlFor={`${id}-midpoint`} className="text-muted-foreground">{t("editor.gradient.midpoint")}</label>
@@ -61,6 +63,12 @@ export function GradientColourControl({ gradient, onChange, onCommit, testIds = 
         <button type="button" data-testid={testId("gradient-darken")} onClick={() => { change({ to: "#000000" }); onCommit(); }} className="border border-border px-2 py-1 text-xs hover:border-foreground">{t("editor.gradient.toDark")}</button>
         <button type="button" data-testid={testId("gradient-black-white")} onClick={() => { onChange({ from: "#000000", to: "#FFFFFF", angle: gradient.angle, midpoint: 0.5 }); onCommit(); }} className="border border-border px-2 py-1 text-xs hover:border-foreground">{t("editor.gradient.blackWhite")}</button>
       </div>
+      {memberColours && <div className="space-y-2 border-t border-border pt-2">
+        <p className="text-[11px] leading-relaxed text-muted-foreground">{t("editor.gradient.membersHint")}</p>
+        <ol className="max-h-40 space-y-1 overflow-y-auto" data-testid={testId("gradient-member-colours")}>
+          {memberColours.map((member, index) => <li key={member.key} data-testid={testId("gradient-member-colour")} data-member-key={member.key} data-hex={member.hex} className="flex items-center gap-2 text-xs"><span className="h-4 w-4 shrink-0 border border-border" style={{ background: member.hex }} /><span className="min-w-0 flex-1 truncate" title={member.name}>{index + 1}. {member.name}</span><span className="font-mono text-[10px] text-muted-foreground">{member.hex}</span></li>)}
+        </ol>
+      </div>}
     </div>
   );
 }

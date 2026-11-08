@@ -37,6 +37,17 @@ export function gradientCss(gradient: ColourGradient): string {
   return `linear-gradient(${90 - gradient.angle}deg, ${gradient.from} 0%, ${gradient.midpoint * 100}%, ${gradient.to} 100%)`;
 }
 
+/** Sample the displayed HEX ramp for an evenly spaced series of solid fills. */
+export function gradientColourAt(gradient: ColourGradient, position: number): string {
+  const t = Math.max(0, Math.min(1, position));
+  const amount = t <= gradient.midpoint ? 0.5 * t / gradient.midpoint : 0.5 + 0.5 * (t - gradient.midpoint) / (1 - gradient.midpoint);
+  const channels = [1, 3, 5].map(at => {
+    const from = parseInt(gradient.from.slice(at, at + 2), 16), to = parseInt(gradient.to.slice(at, at + 2), 16);
+    return Math.round(from + (to - from) * amount).toString(16).padStart(2, "0");
+  });
+  return `#${channels.join("")}`.toUpperCase();
+}
+
 /** The same projection used by the GPU, also useful for endpoint/angle checks. */
 export function gradientAmount(x: number, y: number, bounds: GradientBounds, gradient: ColourGradient): number {
   const radians = gradient.angle * Math.PI / 180;

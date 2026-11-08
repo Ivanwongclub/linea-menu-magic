@@ -4,7 +4,7 @@ import type { FaceTransform } from "../lib/recoveredPlacement";
 import type { PendingLogo } from "../hooks/useLogoAssets";
 import type { PartsReport } from "../components/EditorModel";
 import { applyDiscrete, canRedo, canUndo, commitHistory, redoHistory, startHistory, undoHistory, type History } from "../lib/recipeHistory.ts";
-import { applyScopedColour, applyScopedGradient } from "../lib/scopedColour.ts";
+import { applyScopedColour, applyScopedGradient, applyGroupGradientMode } from "../lib/scopedColour.ts";
 import type { ColourGradient } from "../lib/gradient.ts";
 import { putPaintGroup, removePaintGroup as deletePaintGroup, pruneGroupLayer, moveGroupMember, type PaintGroup, type PaintGroupMember } from "../lib/paintGroups.ts";
 
@@ -131,6 +131,7 @@ interface EditorState {
   setBaseColourHex: (hex: string | null) => void;
   setColourForTarget: (target: Selection | null, hex: string | null) => void;
   setGradientForTarget: (target: Selection | null, gradient: ColourGradient | null) => void;
+  setGroupGradientMode: (id: string, mode: "continuous" | "members", gradient: ColourGradient) => void;
   savePaintGroup: (group: PaintGroup) => void;
   removePaintGroup: (id: string) => void;
   movePaintGroupMember: (member: PaintGroupMember, groupId: string | null, overLayerId?: string) => void;
@@ -277,6 +278,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   setBaseColourHex: (hex) => set((s) => ({ recipe: applyScopedColour(s.recipe, null, hex) })),
   setColourForTarget: (target, hex) => set((s) => ({ recipe: applyScopedColour(s.recipe, target, hex) })),
   setGradientForTarget: (target, gradient) => set((s) => ({ recipe: applyScopedGradient(s.recipe, target, gradient) })),
+  setGroupGradientMode: (id, mode, gradient) => set(s => discrete(s, recipe => applyGroupGradientMode(recipe, id, mode, gradient))),
   savePaintGroup: group => set(s => {
     const next = discrete(s, recipe => putPaintGroup(recipe, group));
     return { ...next, selection: next.recipe.paint_groups?.some(candidate => candidate.id === group.id) ? { kind: "group" as const, id: group.id } : s.selection, hoveredPartIndex: null };
