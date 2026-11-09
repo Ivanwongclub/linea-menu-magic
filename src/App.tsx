@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CookieProvider } from "@/features/cookies/CookieProvider";
 import CookieBanner from "@/features/cookies/CookieBanner";
+import StagingAnalytics from "@/features/analytics/StagingAnalytics";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/features/auth/AuthProvider";
 import RequireBrandAuth from "@/features/auth/RequireBrandAuth";
@@ -200,10 +201,6 @@ function RouteAndNetworkWarmup() {
   return null;
 }
 
-// ANALYTICS PLACEHOLDER
-// Wire tracking scripts here once consent is granted.
-// Use consent.analytics for GA4, consent.marketing for Meta/LinkedIn.
-
 const App = () => (
   <I18nProvider>
     <CookieProvider>
@@ -213,6 +210,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <StagingAnalytics />
             <AuthProvider>
               <RouteAndNetworkWarmup />
               <ScrollToTop />
