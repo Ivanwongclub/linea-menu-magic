@@ -11,13 +11,11 @@ include:
 
 services:
   frontend:
+    image: linea3d-frontend:release
+    platform: linux/amd64
     build:
       context: .
       dockerfile: deploy/frontend/Dockerfile
-      args:
-        VITE_SUPABASE_URL: ${SUPABASE_PUBLIC_URL:?Run make setup PUBLIC_URL=YOUR_PUBLIC_URL first}
-        VITE_SUPABASE_PUBLISHABLE_KEY: ${ANON_KEY:?Generate deploy/compose.env first}
-        VITE_SUPABASE_IMAGE_TRANSFORMS: ${VITE_SUPABASE_IMAGE_TRANSFORMS:-true}
     restart: unless-stopped
     depends_on:
       api-gw:

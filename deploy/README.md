@@ -1,8 +1,10 @@
 # 3D Editor — Docker Compose 部署
 
-前端在服務器上用多階段 Docker build 編譯，再由 Nginx 提供。Supabase
-採用官方 `self-hosted/v0.8.3` 固定版本（PostgreSQL 17），來源和修改方式見
-[supabase/UPSTREAM.md](supabase/UPSTREAM.md)。網站與 API 使用同一網址。
+前端在本機編成 `linux/amd64` 映像，再由伺服器上的 Nginx 提供。公開的
+80 和 443 由 Caddy 接住，並向 Let's Encrypt 申請 `wincyc.tunebrighthk.com`
+的證書。Supabase 採用官方 `self-hosted/v0.8.3` 固定版本（PostgreSQL 17），
+來源和修改方式見 [supabase/UPSTREAM.md](supabase/UPSTREAM.md)。網站與 API
+使用同一網址。
 
 ## 日常部署：本機執行
 
@@ -12,13 +14,12 @@
 make deploy
 ```
 
-流程是 **打包源碼 → SCP 上傳 → 服務器解壓 → 拉取固定版本 Supabase 鏡像 →
-Docker build 前端 → 啟動服務及等待健康檢查 → 重新載入後端 functions**。
-本機不編譯前端、不上傳 Docker 鏡像。Supabase 使用官方鏡像，項目自己的
-Edge Functions 透過掛載源碼執行，重建 functions 容器後生效。
+流程是 **本機建前端映像 → 打包源碼並上傳 → 把映像送進伺服器 → 清掉用不到的舊映像 →
+套上公開網址 → Caddy 監聽 80/443 → 啟動並等待健康檢查**。伺服器不再編譯前端。
+Supabase 仍用官方映像。Edge Functions 透過掛載源碼執行。
 
 目前預設 `ubuntu@54.179.199.234`、目錄 `/opt/linea3d`，網站是
-<http://54.179.199.234>。需要時可覆寫：
+<https://wincyc.tunebrighthk.com>。需要時可覆寫：
 
 ```sh
 make deploy SERVER=ubuntu@OTHER_IP REMOTE_DIR=/opt/linea3d SSH_KEY=/path/to/key.pem
@@ -45,8 +46,8 @@ Supabase 公開設定範本。服務器原有 `deploy/compose.env` 及 Docker na
 # 只在首次執行；替換成實際對外網址。此例使用目前的主機 IP 和 HTTP 80。
 make setup PUBLIC_URL=http://54.179.199.234 WEB_PORT=80
 
-# 在服務器下載 Supabase 鏡像、安裝前端依賴、編譯及啟動。
-make rebuild
+# 在服務器使用已經送上去的前端映像，並由 Caddy 公開 80/443。
+make start
 
 make status
 ```
@@ -225,20 +226,11 @@ ssh -i deploy/keys/3deditor-key.pem.cer -L 8000:127.0.0.1:8000 ubuntu@54.179.199
 目前 SSH 仍在初始交換階段被重設，尚未通過登入驗證，因此保留原有正式金鑰。
 本機的候選檔及備份同樣留在被 Git／Docker／部署包排除的 `deploy/keys/`。
 
-## 之後加入 HTTPS
+## HTTPS
 
-把域名 DNS 指向主機，開放 TCP 80/443，將 `SITE_URL`、`SUPABASE_PUBLIC_URL`
-改為 `https://你的域名`，`API_EXTERNAL_URL` 改為該網址加 `/auth/v1`，並更新
-`ADDITIONAL_REDIRECT_URLS`，然後執行：
-
-```sh
-docker compose --env-file deploy/compose.env \
-  -f compose.yaml -f deploy/compose.https.yaml up -d --build --wait
-```
-
-Caddy 會申請及續期證書，前端不再直接發布 HTTP 端口。之後操作同一部署時也
-要帶同這兩個 `-f`。如果服務器已有 Nginx/Traefik，亦可沿用既有反向代理，
-把網站轉發至前端端口並保留 WebSocket、Host 和 X-Forwarded-Proto。
+`make deploy` 會把公開網址寫進伺服器的 `deploy/compose.env`，並用
+`deploy/compose.https.yaml` 啟動 Caddy。Caddy 申請及續期 Let's Encrypt 證書，
+佔用主機的 80 和 443。容器裡的 Nginx 不再直接對主機開端口。
 
 ## 重啟、更新與備份
 
