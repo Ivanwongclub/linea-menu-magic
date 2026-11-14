@@ -405,6 +405,52 @@ function markEdited(layer: Layer, patch: LayerPatch): Layer["provenance"] {
   return next;
 }
 
+/** What 「複製樣式」 carries: look and relief, never the words or the position. */
+export interface LayerStyleCopy {
+  appearance: LayerAppearance;
+  relief: LayerRelief;
+  /** Present only when the source is text, and applied only onto other text. */
+  text?: { style: TextLayer["style"]; fontKey: string };
+}
+
+function cloneAppearance(appearance: LayerAppearance): LayerAppearance {
+  return {
+    mode: appearance.mode,
+    finish_id: appearance.finish_id,
+    custom: appearance.custom ? { ...appearance.custom } : null,
+    ...(appearance.colour_hex ? { colour_hex: appearance.colour_hex } : {}),
+    ...(appearance.gradient ? { gradient: { ...appearance.gradient, ...(appearance.gradient.brightness ? { brightness: { ...appearance.gradient.brightness } } : {}) } } : {}),
+  };
+}
+
+export function copyLayerStyle(layer: Layer): LayerStyleCopy {
+  return {
+    appearance: cloneAppearance(layerAppearance(layer)),
+    relief: { ...layerRelief(layer) },
+    ...(isTextLayer(layer) ? { text: { style: { ...layer.style }, fontKey: layer.content.font.key } } : {}),
+  };
+}
+
+/**
+ * Replace the target's look with the copied one. A raster logo stays printed:
+ * it has no outline to emboss. Text size and font move only between text layers.
+ */
+export function applyLayerStyle(layer: Layer, style: LayerStyleCopy, raster: boolean): Layer {
+  const appearance = cloneAppearance(style.appearance);
+  const relief = { ...style.relief };
+  if (raster) {
+    appearance.mode = "printed";
+    relief.type = "printed";
+  }
+  const reconciled = reconcileAppearance(relief, appearance, "appearance");
+  const next = applyLayerPatch(layer, {
+    relief: reconciled.relief,
+    appearance: reconciled.appearance,
+    ...(style.text && isTextLayer(layer) ? { style: { ...style.text.style }, content: { font: { source: "bundled", key: style.text.fontKey } } } : {}),
+  });
+  return { ...next, appearance: reconciled.appearance, relief: reconciled.relief };
+}
+
 export function applyLayerPatch<T extends Layer>(layer: T, patch: LayerPatch): T {
   // Relief and appearance are reconciled together (R1): Printed is both.
   const changed = patch.appearance ? "appearance" : "relief";

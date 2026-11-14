@@ -14,6 +14,8 @@ import { useEditorStore, type Selection } from "../../store/useEditorStore";
 import { ModelColourControl } from "../ModelColourControl";
 import { PaintGroupDetails } from "./PaintGroupsSection";
 import { ZoneRegionControls } from "../branding/ZoneRegionControls";
+import { CopyLayerStyleButton } from "../branding/CopyLayerStyleButton";
+import { CopyPartStyleButton } from "../CopyPartStyleButton";
 
 interface Props {
   originalHex: string | null | undefined;
@@ -89,7 +91,9 @@ function SelectedAppearance({ selection, originalHex, sourceAppearance }: Props 
         </button>
       </div>
 
+      {part && <div className="mb-3"><CopyPartStyleButton index={part.index} /></div>}
       {part && <IsolatePartButton index={part.index} />}
+      {layer && <div className="mb-3"><CopyLayerStyleButton layerId={layer.id} /></div>}
       {zone && <div className="mb-3 border-b border-border pb-3"><ZoneRegionControls zone={zone} /></div>}
       <ModelColourControl originalHex={originalHex} sourceAppearance={sourceAppearance} />
 

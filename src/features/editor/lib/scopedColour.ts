@@ -1,7 +1,8 @@
-import type { DraftRecipe, LayerAppearance } from "./recipe.ts";
+import { newZone, type DraftRecipe, type LayerAppearance } from "./recipe.ts";
 import { normalizeHex } from "./pantone.ts";
 import { normalizeGradient, type ColourGradient } from "./gradient.ts";
-import { clearMemberPaint } from "./paintGroups.ts";
+import { clearMemberPaint, groupForMember, memberGradientColour } from "./paintGroups.ts";
+import { MAX_ZONES } from "./shaderPatch.ts";
 
 export type ColourTarget = { kind: "part" | "layer" | "zone" | "group"; id: string };
 
@@ -106,6 +107,79 @@ export function applyScopedColour(recipe: DraftRecipe, target: ColourTarget | nu
 export function applyScopedGradient(recipe: DraftRecipe, target: ColourTarget | null, value: ColourGradient | null): DraftRecipe {
   const gradient = value === null ? null : normalizeGradient(value);
   return value !== null && !gradient ? recipe : applyPaint(recipe, target, null, gradient);
+}
+
+function cloneGradient(gradient: ColourGradient): ColourGradient {
+  return { ...gradient, ...(gradient.brightness ? { brightness: { ...gradient.brightness } } : {}) };
+}
+
+function singlePartZone(recipe: DraftRecipe, id: string) {
+  return [...(recipe.zones ?? [])].reverse().find((zone) => zone.method === "groups" && zone.groups?.length === 1 && String(zone.groups[0]) === id);
+}
+
+/** The fill this part actually shows, including a group or whole-model colour it inherits. */
+function resolvedPartPaint(recipe: DraftRecipe, id: string): { hex: string | null; gradient: ColourGradient | null } {
+  const target = { kind: "part" as const, id };
+  const ownGradient = gradientOverride(recipe, target);
+  const ownHex = colourOverride(recipe, target);
+  if (ownGradient) return { hex: null, gradient: cloneGradient(ownGradient) };
+  if (ownHex) return { hex: ownHex, gradient: null };
+  const group = groupForMember(recipe, target);
+  const memberHex = memberGradientColour(group, target, recipe.layers);
+  if (memberHex) return { hex: memberHex, gradient: null };
+  if (group?.colour_hex) return { hex: group.colour_hex, gradient: null };
+  if (group?.gradient) return { hex: null, gradient: cloneGradient(group.gradient) };
+  const zone = singlePartZone(recipe, id);
+  if (zone?.appearance.gradient) return { hex: null, gradient: cloneGradient(zone.appearance.gradient) };
+  if (zone?.appearance.colour_hex) return { hex: zone.appearance.colour_hex, gradient: null };
+  if (recipe.base_gradient) return { hex: null, gradient: cloneGradient(recipe.base_gradient) };
+  if (recipe.base_colour_hex) return { hex: recipe.base_colour_hex, gradient: null };
+  return { hex: null, gradient: null };
+}
+
+function materialOf(appearance: LayerAppearance): LayerAppearance {
+  return { mode: appearance.mode, finish_id: appearance.finish_id, custom: appearance.custom ? { ...appearance.custom } : null };
+}
+
+/** A copied part look. It is not saved; paste writes it onto the part you choose. */
+export interface PartStyleClip {
+  sourceIndex: number;
+  sourceName: string;
+  hex: string | null;
+  gradient: ColourGradient | null;
+  material: LayerAppearance | null;
+}
+
+export function capturePartStyle(recipe: DraftRecipe, index: number, name: string, fallbackHex: string | null): PartStyleClip {
+  const paint = resolvedPartPaint(recipe, String(index));
+  const sourceZone = singlePartZone(recipe, String(index));
+  return {
+    sourceIndex: index,
+    sourceName: name,
+    hex: paint.gradient ? null : paint.hex ?? fallbackHex,
+    gradient: paint.gradient,
+    material: sourceZone && sourceZone.appearance.mode !== "part" ? materialOf(sourceZone.appearance) : null,
+  };
+}
+
+/** Put a copied look onto the chosen parts. One recipe update, so one undo. */
+export function applyPartStyleClip(recipe: DraftRecipe, clip: PartStyleClip, targetIndices: number[]): DraftRecipe {
+  const targets = [...new Set(targetIndices.filter((index) => index !== clip.sourceIndex && Number.isInteger(index) && index >= 0))];
+  if (!targets.length) return recipe;
+  let next = recipe;
+  for (const index of targets) next = applyPaint(next, { kind: "part", id: String(index) }, clip.gradient ? null : clip.hex, clip.gradient);
+  let zones = [...(next.zones ?? [])];
+  for (const index of targets) {
+    const id = String(index);
+    const existing = [...zones].reverse().find((zone) => zone.method === "groups" && zone.groups?.length === 1 && String(zone.groups[0]) === id);
+    if (!clip.material) {
+      if (existing) zones = zones.filter((zone) => zone.id !== existing.id);
+      continue;
+    }
+    if (existing) zones = zones.map((zone) => (zone.id === existing.id ? { ...zone, appearance: { ...clip.material! } } : zone));
+    else if (zones.length < MAX_ZONES) zones.push({ ...newZone(crypto.randomUUID(), id, "groups"), groups: [index], appearance: { ...clip.material } });
+  }
+  return { ...next, zones };
 }
 
 /** Switch the GP distribution and reapply its fill in one undoable operation. */

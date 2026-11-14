@@ -25,6 +25,7 @@ import { modelFormatFromName } from "../lib/modelFormat";
 import { groupFromModelData, validateModelSurfaces } from "../lib/ModelFileLoader";
 import { prepareModelImport, prepareMaterialImport, MaterialImportError, modelFilesFromDrop, type ModelImport, type MaterialImport } from "../lib/modelImport";
 import { hasSourceAppearance } from "../lib/modelMaterials";
+import { gradientCss } from "../lib/gradient";
 import { useLogoSources } from "../hooks/useLogoAssets";
 import type { ProcessThresholds } from "../lib/manufacturing";
 import { usePublicFinishes } from "../hooks/usePublicFinishes";
@@ -199,6 +200,9 @@ export function EditorViewport({
   const hiddenGroups = useEditorStore(selectHiddenGroups);
   const isolatedPartIndex = useEditorStore((s) => s.isolatedPartIndex);
   const toggleIsolatePart = useEditorStore((s) => s.toggleIsolatePart);
+  const copiedPartStyle = useEditorStore((s) => s.copiedPartStyle);
+  const partStylePastedOn = useEditorStore((s) => s.partStylePastedOn);
+  const clearCopiedPartStyle = useEditorStore((s) => s.clearCopiedPartStyle);
   const zones = useEditorStore(selectZones);
   const baseColourHex = useEditorStore((s) => s.recipe.base_colour_hex);
   const baseGradient = useEditorStore(s => s.recipe.base_gradient);
@@ -565,6 +569,22 @@ export function EditorViewport({
               <span className="text-sm text-foreground">
                 {isolatedPart ? t("editor.parts.isolating", { name: isolatedPart.name }) : selectedPart ? t("editor.parts.isolatePicked", { name: selectedPart.name }) : t("editor.parts.isolateHint")}
               </span>
+            </div>
+          )}
+          {!calibration && copiedPartStyle && (
+            <div className="flex items-center gap-2 border-2 border-foreground bg-background px-2 py-2 shadow-md" data-testid="style-clip-banner" data-source={copiedPartStyle.sourceIndex}>
+              <span
+                className="h-5 w-5 shrink-0 border border-foreground"
+                style={{ background: copiedPartStyle.gradient ? gradientCss(copiedPartStyle.gradient) : copiedPartStyle.hex ?? "#9a9a9a" }}
+              />
+              <span className="text-sm text-foreground">
+                {partStylePastedOn ? t("editor.parts.pasted", { name: partStylePastedOn }) : t("editor.parts.copied", { name: copiedPartStyle.sourceName })}
+                {" · "}
+                {t("editor.parts.copiedHint")}
+              </span>
+              <button type="button" data-testid="clear-copied-style" onClick={clearCopiedPartStyle} className="shrink-0 border border-foreground px-2 py-1 text-sm text-foreground">
+                {t("editor.parts.clearCopy")}
+              </button>
             </div>
           )}
         </div>

@@ -6,6 +6,7 @@ import { isLogoLayer, type Layer, type TextLayout } from "../../lib/recipe";
 import { cn } from "@/lib/utils";
 import { PositionAndCurve } from "./PositionAndCurve";
 import { LayerTextInput } from "./LayerTextInput";
+import { CopyLayerStyleButton } from "./CopyLayerStyleButton";
 
 /**
  * Everything about the *selected* layer (E2 U2): its words, its font, its
@@ -28,6 +29,7 @@ export function LayerProperties({ layer, faceDiameterMm }: { layer: Layer; faceD
     // A logo has no content to type: its placement is all there is (4k R3).
     return (
       <div className="space-y-4 pt-1" data-testid="logo-layer-editor">
+        <CopyLayerStyleButton layerId={layer.id} />
         <PositionAndCurve layer={layer} faceDiameterMm={faceDiameterMm} />
       </div>
     );
@@ -35,6 +37,7 @@ export function LayerProperties({ layer, faceDiameterMm }: { layer: Layer; faceD
 
   return (
     <div className="space-y-4 pt-1" data-testid="text-layer-editor">
+      <CopyLayerStyleButton layerId={layer.id} />
       <div className="space-y-1">
         <label htmlFor={`text-${layer.id}`} className={FIELD_LABEL}>
           {t("editor.branding.text")}

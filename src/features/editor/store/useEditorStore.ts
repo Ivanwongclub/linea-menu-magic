@@ -1,10 +1,10 @@
 import { create } from "zustand";
-import { applyLayerPatch, emptyRecipe, scaleLayers, type DraftRecipe, type Layer, type LayerPatch, type Zone } from "../lib/recipe.ts";
+import { applyLayerPatch, applyLayerStyle, copyLayerStyle, emptyRecipe, scaleLayers, type DraftRecipe, type Layer, type LayerPatch, type Zone } from "../lib/recipe.ts";
 import type { FaceTransform } from "../lib/recoveredPlacement";
 import type { PendingLogo } from "../hooks/useLogoAssets";
 import type { PartsReport } from "../components/EditorModel";
 import { applyDiscrete, canRedo, canUndo, commitHistory, redoHistory, startHistory, undoHistory, type History } from "../lib/recipeHistory.ts";
-import { applyScopedColour, applyScopedGradient, applyGroupGradientMode } from "../lib/scopedColour.ts";
+import { applyPartStyleClip, capturePartStyle, applyScopedColour, applyScopedGradient, applyGroupGradientMode, type PartStyleClip } from "../lib/scopedColour.ts";
 import type { ColourGradient } from "../lib/gradient.ts";
 import { putPaintGroup, removePaintGroup as deletePaintGroup, pruneGroupLayer, moveGroupMember, type PaintGroup, type PaintGroupMember } from "../lib/paintGroups.ts";
 
@@ -103,6 +103,10 @@ interface EditorState {
    * so it never autosaves as a hidden part on the spec sheet.
    */
   isolatedPartIndex: number | null;
+  /** Runtime only. Copy remembers a part; paste writes it onto the part you pick. */
+  copiedPartStyle: PartStyleClip | null;
+  /** The part name last pasted, so the banner can say it landed. */
+  partStylePastedOn: string | null;
   /** Phase 6b R2: the zone the brush is painting into, and how wide the brush is. */
   paintZoneId: string | null;
   /** An unconfirmed region is previewed on the model, never autosaved. */
@@ -147,6 +151,14 @@ interface EditorState {
   addLayer: (layer: Layer, pendingLogo?: PendingLogo) => void;
   /** A live edit; call `commit` when it is done. */
   updateLayer: (id: string, patch: LayerPatch) => void;
+  /** One undo step: this layer's look goes onto every other layer. Raster ids stay printed. */
+  applyLayerStyleToOthers: (id: string, rasterLayerIds: string[]) => void;
+  /** Remember this part's colour and material. Does not change the model. */
+  copyPartStyle: (index: number) => void;
+  /** Write the copied look onto this part. */
+  pastePartStyle: (index: number) => void;
+  /** Forget the copied look. Parts already pasted stay as they are. */
+  clearCopiedPartStyle: () => void;
   removeLayer: (id: string) => void;
   moveLayer: (from: number, to: number) => void;
   /** Selects a layer, a zone or a part — or nothing. */
@@ -202,6 +214,8 @@ const resetModelState = {
   selection: null,
   hoveredPartIndex: null,
   isolatedPartIndex: null,
+  copiedPartStyle: null,
+  partStylePastedOn: null,
   paintZoneId: null,
   zoneDraft: null,
   zonePicking: false,
@@ -231,6 +245,8 @@ export const useEditorStore = create<EditorState>((set) => ({
   selection: null,
   hoveredPartIndex: null,
   isolatedPartIndex: null,
+  copiedPartStyle: null,
+  partStylePastedOn: null,
   hydratedFor: null,
   dragging: false,
   flushSeq: 0,
@@ -310,6 +326,30 @@ export const useEditorStore = create<EditorState>((set) => ({
     })),
   updateLayer: (id, patch) =>
     set((s) => ({ recipe: { ...s.recipe, layers: s.recipe.layers.map((l) => (l.id === id ? applyLayerPatch(l, patch) : l)) } })),
+  copyPartStyle: (index) =>
+    set((s) => {
+      const group = s.partsReport?.groups.find((part) => part.index === index);
+      const fallback = group?.renderedMaterials?.[0]?.colour ?? group?.materials?.[0]?.colour ?? null;
+      return { copiedPartStyle: capturePartStyle(s.recipe, index, group?.name ?? String(index), fallback), partStylePastedOn: null };
+    }),
+  pastePartStyle: (index) =>
+    set((s) => {
+      const clip = s.copiedPartStyle;
+      if (!clip || clip.sourceIndex === index) return s;
+      const name = s.partsReport?.groups.find((part) => part.index === index)?.name ?? String(index);
+      return { ...discrete(s, (recipe) => applyPartStyleClip(recipe, clip, [index])), partStylePastedOn: name };
+    }),
+  clearCopiedPartStyle: () => set({ copiedPartStyle: null, partStylePastedOn: null }),
+  applyLayerStyleToOthers: (id, rasterLayerIds) =>
+    set((s) => {
+      const raster = new Set(rasterLayerIds);
+      return discrete(s, (recipe) => {
+        const source = recipe.layers.find((layer) => layer.id === id);
+        if (!source || recipe.layers.length < 2) return recipe;
+        const style = copyLayerStyle(source);
+        return { ...recipe, layers: recipe.layers.map((layer) => (layer.id === id ? layer : applyLayerStyle(layer, style, raster.has(layer.id)))) };
+      });
+    }),
   removeLayer: (id) =>
     set((s) => {
       const next = discrete(s, r => pruneGroupLayer({ ...r, layers: r.layers.filter(layer => layer.id !== id) }, id));

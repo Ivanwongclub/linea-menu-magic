@@ -5,6 +5,7 @@ import { selectHiddenGroups, useEditorStore } from "../store/useEditorStore";
 import { usePartAppearance } from "../hooks/usePartAppearance";
 import { getLocalModelColours } from "../lib/localModelAppearance";
 import { AppearanceControl } from "./branding/AppearanceControl";
+import { CopyPartStyleButton } from "./CopyPartStyleButton";
 
 /**
  * A part of the model, once it is the selection (E2 U6). A part is the file's,
@@ -56,6 +57,8 @@ export function PartProperties({ index }: { index: number }) {
           ))}
         </div>
       )}
+
+      <CopyPartStyleButton index={index} />
 
       <button
         type="button"
