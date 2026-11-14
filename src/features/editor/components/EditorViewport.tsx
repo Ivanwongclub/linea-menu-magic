@@ -20,7 +20,7 @@ import { centreOf, cornersOf, diagonalOf, fitDistance } from "../lib/framing";
 import { ProceduralStudio } from "./ProceduralStudio";
 import { CameraReport } from "./CameraReport";
 import { HandleProjector, HandlesOverlay, newHandleBridge, newHandleElements } from "./branding/Handles";
-import { selectHiddenGroups, selectSelectedLayerId, selectZones, useEditorStore } from "../store/useEditorStore";
+import { hiddenGroupsForView, selectHiddenGroups, selectSelectedLayerId, selectSelectedPartIndex, selectZones, useEditorStore } from "../store/useEditorStore";
 import { modelFormatFromName } from "../lib/modelFormat";
 import { groupFromModelData, validateModelSurfaces } from "../lib/ModelFileLoader";
 import { prepareModelImport, prepareMaterialImport, MaterialImportError, modelFilesFromDrop, type ModelImport, type MaterialImport } from "../lib/modelImport";
@@ -197,11 +197,18 @@ export function EditorViewport({
   // Phase 6b: parts and zones come from the recipe, and the zones' styles from
   // the same public-finish query the appearance picker uses.
   const hiddenGroups = useEditorStore(selectHiddenGroups);
+  const isolatedPartIndex = useEditorStore((s) => s.isolatedPartIndex);
+  const toggleIsolatePart = useEditorStore((s) => s.toggleIsolatePart);
   const zones = useEditorStore(selectZones);
   const baseColourHex = useEditorStore((s) => s.recipe.base_colour_hex);
   const baseGradient = useEditorStore(s => s.recipe.base_gradient);
   const originalLettering = useEditorStore((s) => s.recipe.view.original_lettering === true);
   const partsReport = useEditorStore((s) => s.partsReport);
+  const viewHiddenGroups = hiddenGroupsForView(partsReport?.groups.map((group) => group.index) ?? [], hiddenGroups, isolatedPartIndex);
+  const isolatedPart = isolatedPartIndex == null ? null : partsReport?.groups.find((group) => group.index === isolatedPartIndex) ?? null;
+  const selectedPartIndex = useEditorStore(selectSelectedPartIndex);
+  const selectedPart = selectedPartIndex == null ? null : partsReport?.groups.find((group) => group.index === selectedPartIndex) ?? null;
+  const isolateTarget = isolatedPart ?? selectedPart;
   const modelAppearanceMode = useEditorStore(s => s.recipe.view.model_appearance_mode);
   const sourceAppearance = localModel ? localModel.appearanceMode === "source" : !!partsReport?.hasSourceAppearance && (!modelAppearanceMode || modelAppearanceMode === "source");
   const originalHex = sourceAppearance ? partsReport?.groups[0]?.materials?.[0]?.colour : isMetal ? finish?.base_color_hex ?? finish?.hex_approx : colour?.hex;
@@ -452,6 +459,7 @@ export function EditorViewport({
       }
       data-zone-overlaps={partsReport ? JSON.stringify(partsReport.overlaps) : undefined}
       data-zone-sentence={zoneSentence || undefined}
+      data-isolated-part={isolatedPart?.index}
       data-total-faces={partsReport?.totalFaces}
       data-occlusion={occlusionState}
       data-occlusion-main-ms={bakeStats ? Math.round(bakeStats.mainThreadMs) : undefined}
@@ -482,7 +490,7 @@ export function EditorViewport({
             onFaceZ={setFaceZ}
             markedGroupIndices={localModel ? [] : markedGroupIndices}
             hideMarked={!originalLettering}
-            hiddenGroups={hiddenGroups}
+            hiddenGroups={viewHiddenGroups}
             zones={zones}
             zoneStyles={zoneStyles}
             showRegionTools={!calibration}
@@ -532,12 +540,33 @@ export function EditorViewport({
       {ruler && rulerMeasurements && (
         <RulerLabels measurements={rulerMeasurements} sizeLigne={sizeLigne} sizeLabel={sizeLabel} labels={rulerLabels} layer={selectedLayer} relief={selectedRelief} />
       )}
-      {localModel && (
-        <div className="absolute top-3 left-3 z-10 flex items-center gap-2 border border-border bg-background/90 px-2.5 py-1.5 text-xs text-foreground" data-testid="local-model-banner">
-          <span>{t("editor.viewport.localFileBanner", { name: localModel.name })}</span>
-          <button type="button" className="underline underline-offset-2" onClick={clearLocalModel}>
-            {t("editor.viewport.localFileClear")}
-          </button>
+      {(localModel || !calibration) && (
+        <div className="absolute top-3 left-3 z-10 flex max-w-[calc(100%_-_1.5rem)] flex-col items-start gap-2">
+          {localModel && (
+            <div className="flex items-center gap-2 border border-border bg-background/90 px-2.5 py-1.5 text-xs text-foreground" data-testid="local-model-banner">
+              <span>{t("editor.viewport.localFileBanner", { name: localModel.name })}</span>
+              <button type="button" className="underline underline-offset-2" onClick={clearLocalModel}>
+                {t("editor.viewport.localFileClear")}
+              </button>
+            </div>
+          )}
+          {!calibration && (
+            <div className="flex items-center gap-2 border-2 border-foreground bg-background px-2 py-2 shadow-md" data-testid="isolate-banner" data-index={isolateTarget?.index}>
+              <button
+                type="button"
+                data-testid="viewport-isolate"
+                aria-pressed={!!isolatedPart}
+                disabled={!isolateTarget}
+                onClick={() => { if (isolateTarget) toggleIsolatePart(isolateTarget.index); }}
+                className={`shrink-0 px-3 py-1.5 text-sm ${isolateTarget ? "bg-foreground text-background" : "bg-secondary text-muted-foreground"}`}
+              >
+                {t(isolatedPart ? "editor.parts.showAll" : "editor.parts.isolate")}
+              </button>
+              <span className="text-sm text-foreground">
+                {isolatedPart ? t("editor.parts.isolating", { name: isolatedPart.name }) : selectedPart ? t("editor.parts.isolatePicked", { name: selectedPart.name }) : t("editor.parts.isolateHint")}
+              </span>
+            </div>
+          )}
         </div>
       )}
       {viewportTools}

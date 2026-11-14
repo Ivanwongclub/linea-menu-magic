@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Palette, X } from "lucide-react";
+import { Focus, Palette, X } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useI18n } from "@/features/i18n/I18nProvider";
+import { cn } from "@/lib/utils";
 import { FinishSelectionPicker } from "@/features/finishes/FinishSelectionPicker";
 import { FinishSwatch } from "@/features/finishes/FinishSwatch";
 import { finishMarketingName } from "@/features/finishes/finishAxisLine";
@@ -88,6 +89,7 @@ function SelectedAppearance({ selection, originalHex, sourceAppearance }: Props 
         </button>
       </div>
 
+      {part && <IsolatePartButton index={part.index} />}
       {zone && <div className="mb-3 border-b border-border pb-3"><ZoneRegionControls zone={zone} /></div>}
       <ModelColourControl originalHex={originalHex} sourceAppearance={sourceAppearance} />
 
@@ -124,5 +126,26 @@ function SelectedAppearance({ selection, originalHex, sourceAppearance }: Props 
       </Sheet>
       </>}
     </aside>
+  );
+}
+
+function IsolatePartButton({ index }: { index: number }) {
+  const { t } = useI18n();
+  const isolating = useEditorStore((s) => s.isolatedPartIndex === index);
+  const toggleIsolatePart = useEditorStore((s) => s.toggleIsolatePart);
+  return (
+    <button
+      type="button"
+      data-testid="selection-isolate"
+      aria-pressed={isolating}
+      onClick={() => toggleIsolatePart(index)}
+      className={cn(
+        "mb-3 flex w-full items-center justify-center gap-1.5 border px-3 py-2 text-sm",
+        isolating ? "border-foreground bg-background text-foreground" : "border-foreground bg-foreground text-background",
+      )}
+    >
+      <Focus className="h-4 w-4" strokeWidth={1.5} />
+      {t(isolating ? "editor.parts.showAll" : "editor.parts.isolate")}
+    </button>
   );
 }

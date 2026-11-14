@@ -1,4 +1,4 @@
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Focus } from "lucide-react";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { cn } from "@/lib/utils";
 import { selectHiddenGroups, useEditorStore } from "../store/useEditorStore";
@@ -18,12 +18,15 @@ export function PartProperties({ index }: { index: number }) {
   const hidden = useEditorStore(selectHiddenGroups);
   const { appearance, changeAppearance, covering } = usePartAppearance(index);
   const toggleHiddenGroup = useEditorStore((s) => s.toggleHiddenGroup);
+  const isolatedPartIndex = useEditorStore((s) => s.isolatedPartIndex);
+  const toggleIsolatePart = useEditorStore((s) => s.toggleIsolatePart);
   const localModel = useEditorStore((s) => s.localModel);
 
   const group = report?.groups.find((g) => g.index === index);
   if (!group) return <p className="text-xs text-muted-foreground">{t("editor.parts.empty")}</p>;
 
   const visible = !hidden.includes(index);
+  const isolating = isolatedPartIndex === index;
   const total = report?.totalFaces ?? 0;
   const share = total > 0 ? Math.round((group.faces / total) * 100) : 0;
 
@@ -66,6 +69,20 @@ export function PartProperties({ index }: { index: number }) {
       >
         {visible ? <Eye className="h-3.5 w-3.5" strokeWidth={1.5} /> : <EyeOff className="h-3.5 w-3.5" strokeWidth={1.5} />}
         {t(visible ? "editor.parts.hideThis" : "editor.parts.showThis")}
+      </button>
+
+      <button
+        type="button"
+        data-testid="part-isolate"
+        aria-pressed={isolating}
+        onClick={() => toggleIsolatePart(index)}
+        className={cn(
+          "flex w-full items-center justify-center gap-1.5 border px-2 py-1 text-[11px] tracking-[0.05em] transition-colors",
+          isolating ? "border-foreground bg-foreground text-background" : "border-border text-foreground hover:border-foreground",
+        )}
+      >
+        <Focus className="h-3.5 w-3.5" strokeWidth={1.5} />
+        {t(isolating ? "editor.parts.showAll" : "editor.parts.isolate")}
       </button>
 
       {(localModel || report?.hasSourceAppearance) && (

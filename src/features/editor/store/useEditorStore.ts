@@ -98,6 +98,11 @@ interface EditorState {
   modelSizeMm: number | null;
   /** Phase 6b R1: the model's own parts, as the scene reports them. Runtime only. */
   partsReport: PartsReport | null;
+  /**
+   * View-only solo: the one part drawn on the model. Not part of the recipe,
+   * so it never autosaves as a hidden part on the spec sheet.
+   */
+  isolatedPartIndex: number | null;
   /** Phase 6b R2: the zone the brush is painting into, and how wide the brush is. */
   paintZoneId: string | null;
   /** An unconfirmed region is previewed on the model, never autosaved. */
@@ -160,6 +165,8 @@ interface EditorState {
   /** Phase 6b R1: which OBJ groups the buyer has hidden. */
   setHiddenGroups: (indices: number[]) => void;
   toggleHiddenGroup: (index: number) => void;
+  /** Show only this part. The same part again restores the recipe's visibility. */
+  toggleIsolatePart: (index: number) => void;
   /** Phase 6b R2: zones are edited like layers — live while dragging, one undo entry per change. */
   addZone: (zone: Zone) => void;
   startZoneDraft: (zone: Zone) => void;
@@ -194,6 +201,7 @@ const resetModelState = {
   partsReport: null,
   selection: null,
   hoveredPartIndex: null,
+  isolatedPartIndex: null,
   paintZoneId: null,
   zoneDraft: null,
   zonePicking: false,
@@ -222,6 +230,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   ...startHistory(emptyRecipe()),
   selection: null,
   hoveredPartIndex: null,
+  isolatedPartIndex: null,
   hydratedFor: null,
   dragging: false,
   flushSeq: 0,
@@ -347,6 +356,7 @@ export const useEditorStore = create<EditorState>((set) => ({
       });
       return { ...next, hoveredPartIndex: next.recipe.hidden_groups?.includes(s.hoveredPartIndex ?? -1) ? null : s.hoveredPartIndex };
     }),
+  toggleIsolatePart: (index) => set((s) => ({ isolatedPartIndex: s.isolatedPartIndex === index ? null : index, hoveredPartIndex: null })),
   addZone: (zone) =>
     set((s) => ({ ...discrete(s, (r) => ({ ...r, zones: [...(r.zones ?? []), zone] })), selection: { kind: "zone", id: zone.id } })),
   startZoneDraft: zone => set({ zoneDraft: zone, selection: null, hoveredPartIndex: null, zonePreviewVisible: true, zonePicking: zone.method === "groups", paintZoneId: zone.method === "paint" ? zone.id : null }),
@@ -436,6 +446,12 @@ export const EMPTY_OVERLAPS: [number, number][] = [];
 
 export const selectZones = (s: EditorState): Zone[] => s.recipe.zones ?? EMPTY_ZONES;
 export const selectHiddenGroups = (s: EditorState): number[] => s.recipe.hidden_groups ?? EMPTY_NUMBERS;
+
+/** Recipe hides, unless one part is soloed. Solo never writes `hidden_groups`. */
+export function hiddenGroupsForView(groupIndices: number[], recipeHidden: number[], isolatedPartIndex: number | null): number[] {
+  if (isolatedPartIndex == null || !groupIndices.includes(isolatedPartIndex)) return recipeHidden;
+  return groupIndices.filter((index) => index !== isolatedPartIndex);
+}
 export const selectZoneOverlaps = (s: EditorState): [number, number][] => s.partsReport?.overlaps ?? EMPTY_OVERLAPS;
 
 /** The selected layer / zone / part, or null when something else is selected. */

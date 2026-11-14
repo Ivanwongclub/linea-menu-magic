@@ -4,7 +4,7 @@ import { ChevronRight, Folder, FolderOpen, Plus, Settings2, Ungroup } from "luci
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { randomUUID } from "@/lib/uuid";
 import { useI18n } from "@/features/i18n/I18nProvider";
-import { useEditorStore } from "../../store/useEditorStore";
+import { selectHiddenGroups, useEditorStore } from "../../store/useEditorStore";
 import { isLogoLayer } from "../../lib/recipe";
 import { groupForMember, memberKey, type PaintGroup, type PaintGroupMember } from "../../lib/paintGroups";
 import { useLogoSources } from "../../hooks/useLogoAssets";
@@ -61,6 +61,7 @@ function PaintGroupRow({ group, markedGroupIndices }: { group: PaintGroup; marke
   const originalLettering = useEditorStore(s => s.recipe.view.original_lettering === true);
   const setOriginalLettering = useEditorStore(s => s.setOriginalLettering);
   const toggleHiddenGroup = useEditorStore(s => s.toggleHiddenGroup);
+  const hidden = useEditorStore(selectHiddenGroups);
   const setHoveredPart = useEditorStore(s => s.setHoveredPart);
   const hovered = useEditorStore(s => s.hoveredPartIndex);
   const layers = allLayers.filter(layer => group.members.some(member => member.kind === "layer" && member.id === layer.id));
@@ -90,7 +91,8 @@ function PaintGroupRow({ group, markedGroupIndices }: { group: PaintGroup; marke
             const part = parts?.find(part => String(part.index) === member.id);
             if (!part) return null;
             const active = selection?.kind === "part" && selection.id === member.id;
-            return <PartRow key={member.id} testId="part-row" index={part.index} name={part.name} detail={t("editor.parts.faceCount", { count: part.faces })} visible={part.visible} selected={active} hovered={hovered === part.index} onHover={() => setHoveredPart(part.visible ? part.index : null)} onHoverEnd={() => { if (useEditorStore.getState().hoveredPartIndex === part.index) setHoveredPart(null); }} onSelect={() => select(active ? null : { kind: "part", id: member.id })} onDoubleSelect={() => select({ kind: "part", id: member.id })} onToggle={() => markedGroupIndices.includes(part.index) ? setOriginalLettering(!originalLettering) : toggleHiddenGroup(part.index)} />;
+            const shown = markedGroupIndices.includes(part.index) ? originalLettering : !hidden.includes(part.index);
+            return <PartRow key={member.id} testId="part-row" index={part.index} name={part.name} detail={t("editor.parts.faceCount", { count: part.faces })} visible={shown} selected={active} hovered={hovered === part.index} onHover={() => setHoveredPart(shown ? part.index : null)} onHoverEnd={() => { if (useEditorStore.getState().hoveredPartIndex === part.index) setHoveredPart(null); }} onSelect={() => select(active ? null : { kind: "part", id: member.id })} onDoubleSelect={() => select({ kind: "part", id: member.id })} onToggle={() => markedGroupIndices.includes(part.index) ? setOriginalLettering(!originalLettering) : toggleHiddenGroup(part.index)} />;
           })}
         </ul>
         {layers.length > 0 && <LayerList layers={layers} logoSources={logoSources} />}
