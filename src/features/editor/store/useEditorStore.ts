@@ -9,6 +9,41 @@ import type { ColourGradient } from "../lib/gradient.ts";
 import { putPaintGroup, removePaintGroup as deletePaintGroup, pruneGroupLayer, moveGroupMember, type PaintGroup, type PaintGroupMember } from "../lib/paintGroups.ts";
 import { normalizeHex } from "../lib/pantone.ts";
 
+export type WireframeLineStyle = "solid" | "dashed" | "dotted";
+
+/** View-only outline for one part or branding layer. Never part of the recipe. */
+export interface OutlineSettings {
+  enabled: boolean;
+  hex: string;
+  widthPx: number;
+  style: WireframeLineStyle;
+  /** Hide surface fill; keep crease edges only. */
+  hideFill: boolean;
+}
+
+export const DEFAULT_OUTLINE: OutlineSettings = {
+  enabled: false,
+  hex: "#111111",
+  widthPx: 1.5,
+  style: "solid",
+  hideFill: false,
+};
+
+function clampOutlineWidth(px: number) {
+  return Math.min(8, Math.max(1, Math.round(px * 2) / 2));
+}
+
+function mergeOutline(current: OutlineSettings | undefined, patch: Partial<OutlineSettings>): OutlineSettings {
+  const next = { ...DEFAULT_OUTLINE, ...current, ...patch };
+  if (patch.hex != null) {
+    const colour = normalizeHex(patch.hex);
+    if (!colour) return { ...DEFAULT_OUTLINE, ...current };
+    next.hex = colour;
+  }
+  if (patch.widthPx != null) next.widthPx = clampOutlineWidth(patch.widthPx);
+  return next;
+}
+
 /**
  * Where the loaded model sits (4j): the raw → face transform `EditorModel`
  * applied and the face-frame centres of the marked branding glyphs. Runtime
@@ -114,6 +149,10 @@ interface EditorState {
   paintBucketArmed: boolean;
   /** The next part click clears that part's own colour. */
   eraserArmed: boolean;
+  /** The next part click selects every part that shares its colour. */
+  sameColourArmed: boolean;
+  /** Parts gathered by the same-colour tool. Paint and erase write to all of them. */
+  matchedPartIndices: number[];
   /** The next part click is shown on its own. */
   isolateToolArmed: boolean;
   /** Kept so older resets stay shaped the same. The bucket no longer blocks on a selection. */
@@ -124,6 +163,10 @@ interface EditorState {
   paintTargetName: string | null;
   /** View-only canvas colour behind the model. Never part of the recipe. */
   viewportBackgroundHex: string;
+  /** Per-part outline. Key = part index string. Never part of the recipe. */
+  outlineParts: Record<string, OutlineSettings>;
+  /** Per branding-layer outline. Never part of the recipe. */
+  outlineLayers: Record<string, OutlineSettings>;
   /** Phase 6b R2: the zone the brush is painting into, and how wide the brush is. */
   paintZoneId: string | null;
   /** An unconfirmed region is previewed on the model, never autosaved. */
@@ -180,14 +223,22 @@ interface EditorState {
   clearCopiedPartStyle: () => void;
   /** View-only. Does not touch the recipe. */
   setViewportBackgroundHex: (hex: string) => void;
+  /** View-only outline for one part. Does not touch the recipe. */
+  patchOutlinePart: (index: number, patch: Partial<OutlineSettings>) => void;
+  /** View-only outline for one branding layer. Does not touch the recipe. */
+  patchOutlineLayer: (id: string, patch: Partial<OutlineSettings>) => void;
+  toggleWireframePart: (index: number) => void;
+  toggleWireframeLayer: (id: string) => void;
   /** One tool at a time. The foreground colour stays. */
-  setEditorTool: (tool: "select" | "eyedropper" | "bucket" | "eraser" | "isolate") => void;
+  setEditorTool: (tool: "select" | "eyedropper" | "bucket" | "eraser" | "sameColour" | "isolate") => void;
   /** Read this part and paint it onto the other selected part. Stays the eyedropper. */
   sampleEyedropper: (index: number) => void;
   /** Paint the foreground colour onto this part. One undo step. */
   paintPart: (index: number) => void;
   /** Clear this part's own colour. One undo step. A lock keeps it. */
   erasePart: (index: number) => void;
+  /** Select this part and every other part that shows the same colour. */
+  selectSameColour: (index: number) => void;
   removeLayer: (id: string) => void;
   moveLayer: (from: number, to: number) => void;
   /** Selects a layer, a zone or a part — or nothing. */
@@ -246,6 +297,29 @@ function eyedropperPick(s: EditorState, index: number): EditorState | Partial<Ed
   const name = paint ? s.partsReport?.groups.find((part) => String(part.index) === selectedId)?.name ?? selectedId : null;
   return { ...painted, eyedropperNotice: colour, paintTargetName: name };
 }
+
+function partsMatchingColour(s: EditorState, index: number): number[] {
+  const colour = partColourAt(s, index);
+  if (!colour) return [index];
+  const hex = colour.hex.toUpperCase();
+  return (s.partsReport?.groups ?? [])
+    .filter((part) => partColourAt(s, part.index)?.hex.toUpperCase() === hex)
+    .map((part) => part.index);
+}
+
+function paintIndices(s: EditorState, indices: number[], hex: string | null): EditorState | Partial<EditorState> {
+  const targets = [...new Set(indices)].filter((index) => Number.isInteger(index) && index >= 0 && !isColourLocked(s.recipe, { kind: "part", id: String(index) }));
+  if (!targets.length) return s;
+  const name = s.partsReport?.groups.find((part) => part.index === targets[0])?.name ?? String(targets[0]);
+  return {
+    ...discrete(s, (recipe) => {
+      let next = recipe;
+      for (const index of targets) next = applyScopedColour(next, { kind: "part", id: String(index) }, hex);
+      return next;
+    }),
+    paintTargetName: hex ? name : null,
+  };
+}
 const syncLocalAppearance = (s: EditorState, recipe: DraftRecipe) =>
   s.localModel ? { localModel: { ...s.localModel, appearanceMode: recipe.view.local_appearance_mode ?? (s.localModel.hasSourceAppearance ? "source" : "finish") } } : {};
 function releaseLocalModel(model: LocalModel | null) {
@@ -267,6 +341,8 @@ const resetModelState = {
   eyedropperArmed: false,
   paintBucketArmed: false,
   eraserArmed: false,
+  sameColourArmed: false,
+  matchedPartIndices: [],
   isolateToolArmed: false,
   eyedropperNeedSelection: false,
   eyedropperNotice: null,
@@ -305,11 +381,15 @@ export const useEditorStore = create<EditorState>((set) => ({
   eyedropperArmed: false,
   paintBucketArmed: false,
   eraserArmed: false,
+  sameColourArmed: false,
+  matchedPartIndices: [],
   isolateToolArmed: false,
   eyedropperNeedSelection: false,
   eyedropperNotice: null,
   paintTargetName: null,
   viewportBackgroundHex: "#F4F4F5",
+  outlineParts: {},
+  outlineLayers: {},
   hydratedFor: null,
   dragging: false,
   flushSeq: 0,
@@ -364,7 +444,13 @@ export const useEditorStore = create<EditorState>((set) => ({
   }),
   setRuler: (ruler) => set((s) => discrete(s, (r) => ({ ...r, view: { ...r.view, ruler } }))),
   setBaseColourHex: (hex) => set((s) => isColourLocked(s.recipe, null) ? s : { recipe: applyScopedColour(s.recipe, null, hex) }),
-  setColourForTarget: (target, hex) => set((s) => isColourLocked(s.recipe, target) ? s : { recipe: applyScopedColour(s.recipe, target, hex) }),
+  setColourForTarget: (target, hex) => set((s) => {
+    if (isColourLocked(s.recipe, target)) return s;
+    if (target?.kind === "part" && s.matchedPartIndices.includes(Number(target.id))) {
+      return paintIndices(s, s.matchedPartIndices, hex);
+    }
+    return { recipe: applyScopedColour(s.recipe, target, hex) };
+  }),
   setGradientForTarget: (target, gradient) => set((s) => isColourLocked(s.recipe, target) ? s : { recipe: applyScopedGradient(s.recipe, target, gradient) }),
   toggleColourLock: (target) => set((s) => discrete(s, (recipe) => {
     const id = colourLockId(target);
@@ -416,17 +502,47 @@ export const useEditorStore = create<EditorState>((set) => ({
     const colour = normalizeHex(hex);
     return colour && colour !== s.viewportBackgroundHex ? { viewportBackgroundHex: colour } : s;
   }),
-  setEditorTool: (tool) => set({ eyedropperArmed: tool === "eyedropper", paintBucketArmed: tool === "bucket", eraserArmed: tool === "eraser", isolateToolArmed: tool === "isolate", paintTargetName: null }),
+  patchOutlinePart: (index, patch) => set((s) => {
+    const key = String(index);
+    return { outlineParts: { ...s.outlineParts, [key]: mergeOutline(s.outlineParts[key], patch) } };
+  }),
+  patchOutlineLayer: (id, patch) => set((s) => {
+    return { outlineLayers: { ...s.outlineLayers, [id]: mergeOutline(s.outlineLayers[id], patch) } };
+  }),
+  toggleWireframePart: (index) => set((s) => {
+    const key = String(index);
+    const current = s.outlineParts[key];
+    return { outlineParts: { ...s.outlineParts, [key]: mergeOutline(current, { enabled: !(current?.enabled ?? false) }) } };
+  }),
+  toggleWireframeLayer: (id) => set((s) => {
+    const current = s.outlineLayers[id];
+    return { outlineLayers: { ...s.outlineLayers, [id]: mergeOutline(current, { enabled: !(current?.enabled ?? false) }) } };
+  }),
+  setEditorTool: (tool) => set((s) => ({
+    eyedropperArmed: tool === "eyedropper",
+    paintBucketArmed: tool === "bucket",
+    eraserArmed: tool === "eraser",
+    sameColourArmed: tool === "sameColour",
+    isolateToolArmed: tool === "isolate",
+    paintTargetName: null,
+    matchedPartIndices: tool === "bucket" || tool === "eraser" || tool === "sameColour" ? s.matchedPartIndices : [],
+  })),
   sampleEyedropper: (index) => set((s) => eyedropperPick(s, index)),
   paintPart: (index) => set((s) => {
     const hex = s.eyedropperNotice?.hex;
-    if (!s.paintBucketArmed || !hex || isColourLocked(s.recipe, { kind: "part", id: String(index) })) return s;
-    const name = s.partsReport?.groups.find((part) => part.index === index)?.name ?? String(index);
-    return { ...discrete(s, (recipe) => applyScopedColour(recipe, { kind: "part", id: String(index) }, hex)), paintTargetName: name };
+    if (!s.paintBucketArmed || !hex) return s;
+    const targets = s.matchedPartIndices.includes(index) ? s.matchedPartIndices : [index];
+    return paintIndices(s, targets, hex);
   }),
   erasePart: (index) => set((s) => {
-    if (!s.eraserArmed || isColourLocked(s.recipe, { kind: "part", id: String(index) })) return s;
-    return discrete(s, (recipe) => applyScopedColour(recipe, { kind: "part", id: String(index) }, null));
+    if (!s.eraserArmed) return s;
+    const targets = s.matchedPartIndices.includes(index) ? s.matchedPartIndices : [index];
+    return paintIndices(s, targets, null);
+  }),
+  selectSameColour: (index) => set((s) => {
+    if (!s.sameColourArmed) return s;
+    const matched = partsMatchingColour(s, index);
+    return { selection: { kind: "part", id: String(index) }, matchedPartIndices: matched, hoveredPartIndex: null, paintTargetName: null };
   }),
   applyLayerStyleToOthers: (id, rasterLayerIds) =>
     set((s) => {
@@ -455,22 +571,28 @@ export const useEditorStore = create<EditorState>((set) => ({
     ),
   select: (selection) => set(s => {
     if (s.eyedropperArmed && selection?.kind === "part") return eyedropperPick(s, Number(selection.id));
+    if (s.sameColourArmed && selection?.kind === "part") {
+      const matched = partsMatchingColour(s, Number(selection.id));
+      return { selection, matchedPartIndices: matched, hoveredPartIndex: null, paintTargetName: null };
+    }
     if (s.isolateToolArmed && selection?.kind === "part") {
       const index = Number(selection.id);
       return { isolatedPartIndex: s.isolatedPartIndex === index ? null : index, hoveredPartIndex: null };
     }
     if (s.paintBucketArmed && selection?.kind === "part") {
       const hex = s.eyedropperNotice?.hex;
-      if (!hex || isColourLocked(s.recipe, { kind: "part", id: selection.id })) return s;
-      const name = s.partsReport?.groups.find((part) => part.index === Number(selection.id))?.name ?? selection.id;
-      return { ...discrete(s, (recipe) => applyScopedColour(recipe, { kind: "part", id: selection.id }, hex)), paintTargetName: name };
+      if (!hex) return s;
+      const index = Number(selection.id);
+      const targets = s.matchedPartIndices.includes(index) ? s.matchedPartIndices : [index];
+      return paintIndices(s, targets, hex);
     }
     if (s.eraserArmed && selection?.kind === "part") {
-      if (isColourLocked(s.recipe, { kind: "part", id: selection.id })) return s;
-      return discrete(s, (recipe) => applyScopedColour(recipe, { kind: "part", id: selection.id }, null));
+      const index = Number(selection.id);
+      const targets = s.matchedPartIndices.includes(index) ? s.matchedPartIndices : [index];
+      return paintIndices(s, targets, null);
     }
-    if (s.eyedropperArmed || s.paintBucketArmed || s.eraserArmed || s.isolateToolArmed) return s;
-    return { selection, hoveredPartIndex: null, zoneDraft: null, zonePicking: false, zonePreviewVisible: true, paintZoneId: selection?.kind === "zone" && selection.id === s.paintZoneId ? s.paintZoneId : null, eyedropperNeedSelection: false };
+    if (s.eyedropperArmed || s.paintBucketArmed || s.eraserArmed || s.sameColourArmed || s.isolateToolArmed) return s;
+    return { selection, matchedPartIndices: [], hoveredPartIndex: null, zoneDraft: null, zonePicking: false, zonePreviewVisible: true, paintZoneId: selection?.kind === "zone" && selection.id === s.paintZoneId ? s.paintZoneId : null, eyedropperNeedSelection: false };
   }),
   setHoveredPart: (index) => set((s) => s.hoveredPartIndex === index ? s : { hoveredPartIndex: index }),
   commit: () => set((s) => commitHistory(history(s))),
@@ -604,6 +726,14 @@ export const selectZoneOverlaps = (s: EditorState): [number, number][] => s.part
 export const selectSelectedLayerId = (s: EditorState): string | null => (s.selection?.kind === "layer" ? s.selection.id : null);
 export const selectSelectedZoneId = (s: EditorState): string | null => (s.selection?.kind === "zone" ? s.selection.id : null);
 export const selectSelectedPartIndex = (s: EditorState): number | null => (s.selection?.kind === "part" ? Number(s.selection.id) : null);
+
+export function outlineForPart(s: Pick<EditorState, "outlineParts">, index: number): OutlineSettings {
+  return s.outlineParts[String(index)] ?? DEFAULT_OUTLINE;
+}
+
+export function outlineForLayer(s: Pick<EditorState, "outlineLayers">, id: string): OutlineSettings {
+  return s.outlineLayers[id] ?? DEFAULT_OUTLINE;
+}
 
 export const selectCanUndo = (s: EditorState) => canUndo(history(s));
 export const selectCanRedo = (s: EditorState) => canRedo(history(s));

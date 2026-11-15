@@ -1,8 +1,9 @@
-import { Eye, EyeOff, GripVertical } from "lucide-react";
+import { Eye, EyeOff, Grid2X2, GripVertical } from "lucide-react";
 import { useDraggable } from "@dnd-kit/core";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { cn } from "@/lib/utils";
 import { DOCK_ROW_PX } from "../lib/rowWindow";
+import { useEditorStore } from "../store/useEditorStore";
 
 export function PartRow({
   testId,
@@ -33,6 +34,9 @@ export function PartRow({
   onToggle: () => void;
 }) {
   const { t } = useI18n();
+  const wireframeOn = useEditorStore((s) => index != null && (s.outlineParts[String(index)]?.enabled ?? false));
+  const toggleWireframePart = useEditorStore((s) => s.toggleWireframePart);
+  const select = useEditorStore((s) => s.select);
   const { setNodeRef, setActivatorNodeRef, attributes, listeners, isDragging } = useDraggable({ id: `part:${index ?? "lettering"}`, disabled: index == null || !onSelect, data: { kind: "member", member: { kind: "part", id: String(index) }, name } });
   return (
     // A fixed height, because past 50 rows a row's place in the list is
@@ -66,6 +70,22 @@ export function PartRow({
           <span className="min-w-0 flex-1 truncate text-xs text-foreground">{name}</span>
           <span className="shrink-0 text-[10px] text-muted-foreground">{detail}</span>
         </>
+      )}
+      {index != null && (
+        <button
+          type="button"
+          data-testid="part-wireframe"
+          aria-pressed={wireframeOn}
+          aria-label={t("editor.wireframe.partToggle", { name })}
+          title={t("editor.wireframe.partToggleTip")}
+          onClick={() => {
+            toggleWireframePart(index);
+            select({ kind: "part", id: String(index) });
+          }}
+          className={cn("shrink-0", wireframeOn ? "text-foreground" : "text-muted-foreground hover:text-foreground")}
+        >
+          <Grid2X2 className="h-3.5 w-3.5" strokeWidth={1.5} />
+        </button>
       )}
       <button
         type="button"

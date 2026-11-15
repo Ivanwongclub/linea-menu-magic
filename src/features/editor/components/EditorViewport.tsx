@@ -212,10 +212,11 @@ export function EditorViewport({
   const eyedropperArmed = useEditorStore((s) => s.eyedropperArmed);
   const paintBucketArmed = useEditorStore((s) => s.paintBucketArmed);
   const eraserArmed = useEditorStore((s) => s.eraserArmed);
+  const sameColourArmed = useEditorStore((s) => s.sameColourArmed);
   const isolateToolArmed = useEditorStore((s) => s.isolateToolArmed);
   const setEditorTool = useEditorStore((s) => s.setEditorTool);
   useEffect(() => {
-    if (!eyedropperArmed && !paintBucketArmed && !eraserArmed && !isolateToolArmed) return;
+    if (!eyedropperArmed && !paintBucketArmed && !eraserArmed && !sameColourArmed && !isolateToolArmed) return;
     const onKey = (event: KeyboardEvent) => {
       if (event.key !== "Escape" || event.isComposing) return;
       event.preventDefault();
@@ -224,7 +225,7 @@ export function EditorViewport({
     };
     window.addEventListener("keydown", onKey, true);
     return () => window.removeEventListener("keydown", onKey, true);
-  }, [eyedropperArmed, paintBucketArmed, eraserArmed, isolateToolArmed, setEditorTool]);
+  }, [eyedropperArmed, paintBucketArmed, eraserArmed, sameColourArmed, isolateToolArmed, setEditorTool]);
   const zones = useEditorStore(selectZones);
   const baseColourHex = useEditorStore((s) => s.recipe.base_colour_hex);
   const baseGradient = useEditorStore(s => s.recipe.base_gradient);

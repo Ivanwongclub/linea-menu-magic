@@ -64,6 +64,7 @@ function PaintGroupRow({ group, markedGroupIndices }: { group: PaintGroup; marke
   const hidden = useEditorStore(selectHiddenGroups);
   const setHoveredPart = useEditorStore(s => s.setHoveredPart);
   const hovered = useEditorStore(s => s.hoveredPartIndex);
+  const matchedParts = useEditorStore(s => s.matchedPartIndices);
   const layers = allLayers.filter(layer => group.members.some(member => member.kind === "layer" && member.id === layer.id));
   const logoSources = useLogoSources(layers);
   const selected = selection?.kind === "group" && selection.id === group.id;
@@ -92,7 +93,7 @@ function PaintGroupRow({ group, markedGroupIndices }: { group: PaintGroup; marke
             if (!part) return null;
             const active = selection?.kind === "part" && selection.id === member.id;
             const shown = markedGroupIndices.includes(part.index) ? originalLettering : !hidden.includes(part.index);
-            return <PartRow key={member.id} testId="part-row" index={part.index} name={part.name} detail={t("editor.parts.faceCount", { count: part.faces })} visible={shown} selected={active} hovered={hovered === part.index} onHover={() => setHoveredPart(shown ? part.index : null)} onHoverEnd={() => { if (useEditorStore.getState().hoveredPartIndex === part.index) setHoveredPart(null); }} onSelect={() => { const tool = useEditorStore.getState(); select(tool.eyedropperArmed || tool.paintBucketArmed || tool.eraserArmed || tool.isolateToolArmed || !active ? { kind: "part", id: member.id } : null); }} onDoubleSelect={() => select({ kind: "part", id: member.id })} onToggle={() => markedGroupIndices.includes(part.index) ? setOriginalLettering(!originalLettering) : toggleHiddenGroup(part.index)} />;
+            return <PartRow key={member.id} testId="part-row" index={part.index} name={part.name} detail={t("editor.parts.faceCount", { count: part.faces })} visible={shown} selected={active || matchedParts.includes(part.index)} hovered={hovered === part.index} onHover={() => setHoveredPart(shown ? part.index : null)} onHoverEnd={() => { if (useEditorStore.getState().hoveredPartIndex === part.index) setHoveredPart(null); }} onSelect={() => { const tool = useEditorStore.getState(); select(tool.eyedropperArmed || tool.paintBucketArmed || tool.eraserArmed || tool.sameColourArmed || tool.isolateToolArmed || !active ? { kind: "part", id: member.id } : null); }} onDoubleSelect={() => select({ kind: "part", id: member.id })} onToggle={() => markedGroupIndices.includes(part.index) ? setOriginalLettering(!originalLettering) : toggleHiddenGroup(part.index)} />;
           })}
         </ul>
         {layers.length > 0 && <LayerList layers={layers} logoSources={logoSources} />}

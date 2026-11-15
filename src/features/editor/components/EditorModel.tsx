@@ -12,7 +12,7 @@ import type { PickerFinish } from "../hooks/useFinishOptions";
 import { decoratedFaceRotation, withSmoothNormals } from "../lib/prepareModel";
 import { MeshBVH } from "three-mesh-bvh";
 import { applyBakedOcclusion, bakeOcclusion, occlusionKey, type BakeStats } from "../lib/ambientOcclusion";
-import { EMPTY_ZONES, selectSelectedPartIndex, useEditorStore } from "../store/useEditorStore";
+import { DEFAULT_OUTLINE, EMPTY_ZONES, outlineForLayer, outlineForPart, selectSelectedPartIndex, useEditorStore } from "../store/useEditorStore";
 import { colourMaterial, finishMaterial, materialWithColour, materialWithGradient, applyMaterialGradient } from "../lib/finishMaterial";
 import type { Layer, Zone } from "../lib/recipe";
 import { decodeRuns, encodeRuns, facesForGroups, facesForPlane, resolveZones, totalFaces } from "../lib/zones";
@@ -23,7 +23,9 @@ import type { LogoSource } from "../hooks/useLogoAssets";
 import { BrandingMeshes, type TextSceneReport } from "./branding/BrandingMeshes";
 import { cornersOf, fitDistance, homeDirection, type BoundsMm } from "../lib/framing";
 import { PartSelectionOutline } from "./PartSelectionOutline";
+import { WireframeOverlay, type OutlineMeshItem } from "./WireframeOverlay";
 import { ZoneSelectionPreview } from "./branding/ZoneSelectionPreview";
+import { brandingLayerId } from "../lib/wireframeMeshes";
 import { boundedZonePlane } from "../lib/zones";
 
 interface EditorModelProps {
@@ -610,9 +612,71 @@ export function EditorModel({
 
   const size = bounds.getSize(new THREE.Vector3());
   const footprint = Math.max(size.x, size.z) * 2.5;
+  const matchedPartIndices = useEditorStore((s) => s.matchedPartIndices);
   const highlightedPartIndex = hoveredPartIndex ?? selectedPartIndex;
   const highlightedMesh = highlightedPartIndex != null && !hiddenIndices.includes(highlightedPartIndex)
     ? faceData.meshes[highlightedPartIndex] ?? null : null;
+  const matchedMeshes = matchedPartIndices
+    .filter((index) => index !== highlightedPartIndex && !hiddenIndices.includes(index))
+    .map((index) => faceData.meshes[index])
+    .filter((mesh): mesh is THREE.Mesh => !!mesh);
+  const outlineParts = useEditorStore((s) => s.outlineParts);
+  const outlineLayers = useEditorStore((s) => s.outlineLayers);
+  const outlineItems = useMemo(() => {
+    const items: OutlineMeshItem[] = [];
+    faceData.meshes.forEach((mesh, index) => {
+      if (!mesh.visible || hiddenIndices.includes(index)) return;
+      const settings = outlineForPart({ outlineParts }, index);
+      if (settings.enabled) items.push({ mesh, settings });
+    });
+    // `reliefKey` forces a re-read after BrandingMeshes rebuilds holders.
+    const root = reliefKey ? reliefGroup.current : null;
+    if (root) {
+      const seen = new Set<THREE.Mesh>();
+      root.traverse((object) => {
+        const mesh = object as THREE.Mesh;
+        if (!mesh.isMesh || !mesh.visible || seen.has(mesh)) return;
+        const id = brandingLayerId(mesh);
+        if (!id) return;
+        const settings = outlineForLayer({ outlineLayers }, id);
+        if (!settings.enabled) return;
+        seen.add(mesh);
+        items.push({ mesh, settings });
+      });
+    }
+    return items;
+  }, [faceData.meshes, hiddenIndices, outlineParts, outlineLayers, reliefKey]);
+
+  useEffect(() => {
+    const applyFill = (mesh: THREE.Mesh, hide: boolean) => {
+      const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+      for (const material of materials) {
+        if (material) material.colorWrite = !hide;
+      }
+    };
+    faceData.meshes.forEach((mesh, index) => {
+      const settings = outlineParts[String(index)] ?? DEFAULT_OUTLINE;
+      applyFill(mesh, settings.enabled && settings.hideFill);
+    });
+    const root = reliefGroup.current;
+    if (root) {
+      root.traverse((object) => {
+        const mesh = object as THREE.Mesh;
+        if (!mesh.isMesh) return;
+        const id = brandingLayerId(mesh);
+        if (!id) return;
+        const settings = outlineLayers[id] ?? DEFAULT_OUTLINE;
+        applyFill(mesh, settings.enabled && settings.hideFill);
+      });
+    }
+    return () => {
+      faceData.meshes.forEach((mesh) => applyFill(mesh, false));
+      root?.traverse((object) => {
+        const mesh = object as THREE.Mesh;
+        if (mesh.isMesh) applyFill(mesh, false);
+      });
+    };
+  }, [faceData.meshes, outlineParts, outlineLayers, reliefKey]);
 
   return (
     <>
@@ -666,7 +730,7 @@ export function EditorModel({
           }
           if (!painting.current) {
             const tool = useEditorStore.getState();
-            if ((tool.eyedropperArmed || tool.paintBucketArmed || tool.eraserArmed || tool.isolateToolArmed) && event.delta <= 4 && !paintZoneId) {
+            if ((tool.eyedropperArmed || tool.paintBucketArmed || tool.eraserArmed || tool.sameColourArmed || tool.isolateToolArmed) && event.delta <= 4 && !paintZoneId) {
               event.stopPropagation();
               const index = hitPartIndex(event);
               if (index != null) {
@@ -674,6 +738,7 @@ export function EditorModel({
                 if (tool.eyedropperArmed) tool.sampleEyedropper(index);
                 else if (tool.paintBucketArmed) tool.paintPart(index);
                 else if (tool.eraserArmed) tool.erasePart(index);
+                else if (tool.sameColourArmed) tool.selectSameColour(index);
                 else tool.toggleIsolatePart(index);
               }
               return;
@@ -710,8 +775,10 @@ export function EditorModel({
           select(group ? { kind: "group", id: group.id } : { kind: "part", id: String(index) });
         }}
       />
+      {outlineItems.length > 0 && <WireframeOverlay items={outlineItems} />}
       {/* Each part owns its line buffers; switching to a smaller part must drop the old segments. */}
       {!editingZone && highlightedMesh && <PartSelectionOutline key={highlightedMesh.uuid} mesh={highlightedMesh} />}
+      {!editingZone && matchedMeshes.map((mesh) => <PartSelectionOutline key={`match-${mesh.uuid}`} mesh={mesh} />)}
       {hoveredPartIndex == null && selection?.kind === "group" && paintGroups?.find(group => group.id === selection.id)?.members.filter(member => member.kind === "part" && !hiddenIndices.includes(Number(member.id))).map(member => {
         const mesh = model.children.filter(child => (child as THREE.Mesh).isMesh)[Number(member.id)] as THREE.Mesh | undefined;
         return mesh ? <PartSelectionOutline key={mesh.uuid} mesh={mesh} /> : null;

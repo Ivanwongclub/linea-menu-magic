@@ -17,6 +17,7 @@ import type { PickerFinish } from "../hooks/useFinishOptions";
 import type { EditorColour, EditorProduct, EditorSizeVariant } from "../hooks/useEditorProduct";
 import { useEditorStore } from "../store/useEditorStore";
 import { ModelColourControl } from "./ModelColourControl";
+import { OutlineModule } from "./OutlineModule";
 
 interface EditorPanelProps {
   product: EditorProduct;
@@ -181,6 +182,11 @@ export function EditorPanel({
         </PanelGroup>
         {sourceAvailable && materialNames && <p className="text-xs text-muted-foreground" role="status" data-testid="model-material-status">{t("editor.viewport.materialsLoaded", { names: materialNames })}</p>}
         {!!materialWarnings?.length && <p className="text-xs text-amber-700" data-testid="model-material-warnings">{materialWarnings.join(" · ")}</p>}
+
+        {/* Outline is edge chrome, not fill: keep it out of finish/colour. */}
+        <PanelGroup group="outline" title={t("editor.outline.title")}>
+          <OutlineModule />
+        </PanelGroup>
 
         {/* E2 U5: what is on the part — branding, zones and the model's own
             parts (6b R1) — in one dock with a height of its own, so what

@@ -1,6 +1,6 @@
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, X } from "lucide-react";
+import { Grid2X2, GripVertical, X } from "lucide-react";
 import { useState } from "react";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { cn } from "@/lib/utils";
@@ -36,6 +36,8 @@ function LayerRow({ layer, selected, logoSource }: { layer: Layer; selected: boo
   const { t } = useI18n();
   const select = useEditorStore((s) => s.select);
   const removeLayer = useEditorStore((s) => s.removeLayer);
+  const wireframeOn = useEditorStore((s) => s.outlineLayers[layer.id]?.enabled ?? false);
+  const toggleWireframeLayer = useEditorStore((s) => s.toggleWireframeLayer);
   const [editing, setEditing] = useState(selected && !isLogoLayer(layer) && !layer.content.value);
   const onDelete = () => {
     // A logo's file goes with its layer (4k R7); an undo puts both back.
@@ -104,6 +106,20 @@ function LayerRow({ layer, selected, logoSource }: { layer: Layer; selected: boo
             </button>
           )}
         </div>
+        <button
+          type="button"
+          data-testid="text-layer-wireframe"
+          aria-pressed={wireframeOn}
+          aria-label={t("editor.wireframe.layerToggle", { name })}
+          title={t("editor.wireframe.layerToggleTip")}
+          onClick={() => {
+            toggleWireframeLayer(layer.id);
+            select({ kind: "layer", id: layer.id });
+          }}
+          className={cn("self-stretch px-2", wireframeOn ? "text-foreground" : "text-muted-foreground hover:text-foreground")}
+        >
+          <Grid2X2 className="w-3.5 h-3.5" strokeWidth={1.5} />
+        </button>
         <button
           type="button"
           data-testid="text-layer-delete"

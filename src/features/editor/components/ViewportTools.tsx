@@ -16,6 +16,9 @@ import { RulerToggle } from "./RulerToggle";
  * change nothing about what gets made. Undo and redo are document verbs and
  * stayed in the document bar in U7.
  *
+ * Outline (外框) lives in the side panel as its own module — not here. Colour
+ * and finish stay with appearance; this cluster is camera and file only.
+ *
  * The brush size joins the cluster only while a paint zone is armed, because
  * that is the one moment the pointer is on the model and the control is a
  * hand's width away in the panel. The zone's own `zone-brush` stays where it

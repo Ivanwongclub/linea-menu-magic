@@ -41,6 +41,7 @@ export function PartsGroup({
   const setOriginalLettering = useEditorStore((s) => s.setOriginalLettering);
   const select = useEditorStore((s) => s.select);
   const selectedPart = useEditorStore(selectSelectedPartIndex);
+  const matchedParts = useEditorStore((s) => s.matchedPartIndices);
   const hoveredPart = useEditorStore((s) => s.hoveredPartIndex);
   const setHoveredPart = useEditorStore((s) => s.setHoveredPart);
   useEffect(() => {
@@ -131,7 +132,7 @@ export function PartsGroup({
             name={group.name}
             detail={t("editor.parts.faceCount", { count: group.faces })}
             visible={!hiddenSet.has(group.index)}
-            selected={selectedPart === group.index}
+            selected={selectedPart === group.index || matchedParts.includes(group.index)}
             hovered={hoveredPart === group.index}
             onHover={() => setHoveredPart(!hiddenSet.has(group.index) ? group.index : null)}
             onHoverEnd={() => {
@@ -139,7 +140,7 @@ export function PartsGroup({
             }}
             onSelect={() => {
               const tool = useEditorStore.getState();
-              select(tool.eyedropperArmed || tool.paintBucketArmed || tool.eraserArmed || tool.isolateToolArmed || selectedPart !== group.index ? { kind: "part", id: String(group.index) } : null);
+              select(tool.eyedropperArmed || tool.paintBucketArmed || tool.eraserArmed || tool.sameColourArmed || tool.isolateToolArmed || selectedPart !== group.index ? { kind: "part", id: String(group.index) } : null);
             }}
             onDoubleSelect={() => select({ kind: "part", id: String(group.index) })}
             onToggle={() => toggleHiddenGroup(group.index)}
