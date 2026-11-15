@@ -1,4 +1,4 @@
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { normalizeHex } from "../lib/pantone";
 import { useEditorStore } from "../store/useEditorStore";
@@ -40,6 +40,10 @@ export function ModelColourControl({ originalHex, sourceAppearance, global = fal
   const commit = useEditorStore((s) => s.commit);
   const [draft, setDraft] = useState<string | null>(null);
   const hex = gradient?.from ?? override ?? parentMemberHex ?? parentGroup?.colour_hex ?? normalizeHex(inherited ?? "") ?? "#9A9A9A";
+  useEffect(() => {
+    if (document.activeElement instanceof HTMLInputElement && document.activeElement.dataset.testid === "model-colour-hex") return;
+    setDraft(null);
+  }, [hex]);
   const memberMode = !!gradient && group?.gradient_mode === "members";
   const startGradient = gradient ?? { from: hex, to: hex.toUpperCase() === "#FFFFFF" ? "#000000" : "#FFFFFF", angle: 0, midpoint: 0.5 };
   const memberColours = memberMode && group ? orderedGroupMembers(group, recipe.layers).map(member => {

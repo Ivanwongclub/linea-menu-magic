@@ -150,6 +150,12 @@ export interface PartStyleClip {
   material: LayerAppearance | null;
 }
 
+/** The solid colour this part is showing. A gradient gives its start colour. */
+export function visiblePartHex(recipe: DraftRecipe, index: number, fallbackHex: string | null): string | null {
+  const paint = resolvedPartPaint(recipe, String(index));
+  return normalizeHex(paint.gradient?.from ?? paint.hex ?? fallbackHex ?? "");
+}
+
 export function capturePartStyle(recipe: DraftRecipe, index: number, name: string, fallbackHex: string | null): PartStyleClip {
   const paint = resolvedPartPaint(recipe, String(index));
   const sourceZone = singlePartZone(recipe, String(index));

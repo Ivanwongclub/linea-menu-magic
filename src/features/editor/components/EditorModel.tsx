@@ -456,6 +456,7 @@ export function EditorModel({
   const updateZone = useEditorStore((s) => s.updateZone);
   const commitZone = useEditorStore((s) => s.commit);
   const painting = useRef(false);
+  const suppressSelect = useRef(false);
   useEffect(() => {
     const stop = () => { if (painting.current) { painting.current = false; useEditorStore.getState().endDrag(); } };
     window.addEventListener("pointerup", stop);
@@ -651,6 +652,18 @@ export function EditorModel({
             return;
           }
           if (!painting.current) {
+            const tool = useEditorStore.getState();
+            if ((tool.eyedropperArmed || tool.paintBucketArmed || tool.isolateToolArmed) && event.delta <= 4 && !paintZoneId) {
+              event.stopPropagation();
+              const index = hitPartIndex(event);
+              if (index != null) {
+                suppressSelect.current = true;
+                if (tool.eyedropperArmed) tool.sampleEyedropper(index);
+                else if (tool.paintBucketArmed) tool.paintPart(index);
+                else tool.toggleIsolatePart(index);
+              }
+              return;
+            }
             if (!editingZone && !paintZoneId && event.delta <= 4 && event.pointerType !== "touch") setHoveredPart(hitPartIndex(event));
             return;
           }
@@ -658,6 +671,12 @@ export function EditorModel({
           useEditorStore.getState().endDrag();
         }}
         onDoubleClick={(event: ThreeEvent<MouseEvent>) => {
+          if (suppressSelect.current) {
+            suppressSelect.current = false;
+            event.stopPropagation();
+            event.nativeEvent.stopPropagation();
+            return;
+          }
           if (zoneDraft || zonePicking) { event.stopPropagation(); return; }
           if (event.delta > 4) return;
           const index = hitPartIndex(event);

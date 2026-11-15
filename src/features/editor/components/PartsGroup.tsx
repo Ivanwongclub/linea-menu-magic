@@ -137,7 +137,10 @@ export function PartsGroup({
             onHoverEnd={() => {
               if (useEditorStore.getState().hoveredPartIndex === group.index) setHoveredPart(null);
             }}
-            onSelect={() => select(selectedPart === group.index ? null : { kind: "part", id: String(group.index) })}
+            onSelect={() => {
+              const tool = useEditorStore.getState();
+              select(tool.eyedropperArmed || tool.paintBucketArmed || tool.isolateToolArmed || selectedPart !== group.index ? { kind: "part", id: String(group.index) } : null);
+            }}
             onDoubleSelect={() => select({ kind: "part", id: String(group.index) })}
             onToggle={() => toggleHiddenGroup(group.index)}
           />

@@ -4,6 +4,10 @@ import { OrbitControls } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { toast } from "sonner";
 import { Box } from "lucide-react";
+import { EditorToolbox } from "./EditorToolbox";
+
+const eyedropperCursor = `url("data:image/svg+xml,${encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><path fill='#fff' stroke='#111' stroke-width='1.6' stroke-linejoin='round' d='M21 3l8 8-2.4 2.4-1.6-1.6-8.4 8.4-.9 3.6-4.2-4.2 3.6-.9 8.4-8.4-1.6-1.6z'/><path fill='#111' d='M5.5 26.5l2.2-.6.6 2.2z'/></svg>")}") 6 28, crosshair`;
+const bucketCursor = `url("data:image/svg+xml,${encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><path fill='#fff' stroke='#111' stroke-width='1.5' d='M9 12h14l-1.4 13H10.4z'/><path fill='none' stroke='#111' stroke-width='1.5' d='M11 12c0-5 10-5 10 0'/><path fill='#111' d='M5 27h4v2H5z'/></svg>")}") 6 28, crosshair`;
 import { Link, useSearchParams } from "react-router-dom";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,7 +24,7 @@ import { centreOf, cornersOf, diagonalOf, fitDistance } from "../lib/framing";
 import { ProceduralStudio } from "./ProceduralStudio";
 import { CameraReport } from "./CameraReport";
 import { HandleProjector, HandlesOverlay, newHandleBridge, newHandleElements } from "./branding/Handles";
-import { hiddenGroupsForView, selectHiddenGroups, selectSelectedLayerId, selectSelectedPartIndex, selectZones, useEditorStore } from "../store/useEditorStore";
+import { hiddenGroupsForView, selectHiddenGroups, selectSelectedLayerId, selectZones, useEditorStore } from "../store/useEditorStore";
 import { modelFormatFromName } from "../lib/modelFormat";
 import { groupFromModelData, validateModelSurfaces } from "../lib/ModelFileLoader";
 import { prepareModelImport, prepareMaterialImport, MaterialImportError, modelFilesFromDrop, type ModelImport, type MaterialImport } from "../lib/modelImport";
@@ -199,10 +203,24 @@ export function EditorViewport({
   // the same public-finish query the appearance picker uses.
   const hiddenGroups = useEditorStore(selectHiddenGroups);
   const isolatedPartIndex = useEditorStore((s) => s.isolatedPartIndex);
-  const toggleIsolatePart = useEditorStore((s) => s.toggleIsolatePart);
   const copiedPartStyle = useEditorStore((s) => s.copiedPartStyle);
   const partStylePastedOn = useEditorStore((s) => s.partStylePastedOn);
   const clearCopiedPartStyle = useEditorStore((s) => s.clearCopiedPartStyle);
+  const eyedropperArmed = useEditorStore((s) => s.eyedropperArmed);
+  const paintBucketArmed = useEditorStore((s) => s.paintBucketArmed);
+  const isolateToolArmed = useEditorStore((s) => s.isolateToolArmed);
+  const setEditorTool = useEditorStore((s) => s.setEditorTool);
+  useEffect(() => {
+    if (!eyedropperArmed && !paintBucketArmed && !isolateToolArmed) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || event.isComposing) return;
+      event.preventDefault();
+      event.stopPropagation();
+      setEditorTool("select");
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [eyedropperArmed, paintBucketArmed, isolateToolArmed, setEditorTool]);
   const zones = useEditorStore(selectZones);
   const baseColourHex = useEditorStore((s) => s.recipe.base_colour_hex);
   const baseGradient = useEditorStore(s => s.recipe.base_gradient);
@@ -210,9 +228,6 @@ export function EditorViewport({
   const partsReport = useEditorStore((s) => s.partsReport);
   const viewHiddenGroups = hiddenGroupsForView(partsReport?.groups.map((group) => group.index) ?? [], hiddenGroups, isolatedPartIndex);
   const isolatedPart = isolatedPartIndex == null ? null : partsReport?.groups.find((group) => group.index === isolatedPartIndex) ?? null;
-  const selectedPartIndex = useEditorStore(selectSelectedPartIndex);
-  const selectedPart = selectedPartIndex == null ? null : partsReport?.groups.find((group) => group.index === selectedPartIndex) ?? null;
-  const isolateTarget = isolatedPart ?? selectedPart;
   const modelAppearanceMode = useEditorStore(s => s.recipe.view.model_appearance_mode);
   const sourceAppearance = localModel ? localModel.appearanceMode === "source" : !!partsReport?.hasSourceAppearance && (!modelAppearanceMode || modelAppearanceMode === "source");
   const originalHex = sourceAppearance ? partsReport?.groups[0]?.materials?.[0]?.colour : isMetal ? finish?.base_color_hex ?? finish?.hex_approx : colour?.hex;
@@ -417,6 +432,8 @@ export function EditorViewport({
     <>
     <div
       className="relative flex-1 min-h-0 overflow-hidden bg-secondary"
+      data-eyedropper={eyedropperArmed ? "1" : undefined}
+      data-bucket={paintBucketArmed ? "1" : undefined}
       data-testid="editor-viewport"
       onPointerLeave={() => setHoveredPart(null)}
       aria-busy={importing}
@@ -544,31 +561,17 @@ export function EditorViewport({
       {ruler && rulerMeasurements && (
         <RulerLabels measurements={rulerMeasurements} sizeLigne={sizeLigne} sizeLabel={sizeLabel} labels={rulerLabels} layer={selectedLayer} relief={selectedRelief} />
       )}
+      {!calibration && <EditorToolbox />}
+      {(eyedropperArmed || paintBucketArmed) && <style>{`[data-testid="editor-viewport"], [data-testid="editor-viewport"] canvas { cursor: ${eyedropperArmed ? eyedropperCursor : bucketCursor} !important; }`}</style>}
       {(localModel || !calibration) && (
-        <div className="absolute top-3 left-3 z-10 flex max-w-[calc(100%_-_1.5rem)] flex-col items-start gap-2">
+        <div className="absolute top-3 left-14 z-10 flex max-w-[calc(100%_-_4.5rem)] flex-col items-start gap-2">
+          <div className="flex min-w-0 flex-col items-start gap-2">
           {localModel && (
             <div className="flex items-center gap-2 border border-border bg-background/90 px-2.5 py-1.5 text-xs text-foreground" data-testid="local-model-banner">
               <span>{t("editor.viewport.localFileBanner", { name: localModel.name })}</span>
               <button type="button" className="underline underline-offset-2" onClick={clearLocalModel}>
                 {t("editor.viewport.localFileClear")}
               </button>
-            </div>
-          )}
-          {!calibration && (
-            <div className="flex items-center gap-2 border-2 border-foreground bg-background px-2 py-2 shadow-md" data-testid="isolate-banner" data-index={isolateTarget?.index}>
-              <button
-                type="button"
-                data-testid="viewport-isolate"
-                aria-pressed={!!isolatedPart}
-                disabled={!isolateTarget}
-                onClick={() => { if (isolateTarget) toggleIsolatePart(isolateTarget.index); }}
-                className={`shrink-0 px-3 py-1.5 text-sm ${isolateTarget ? "bg-foreground text-background" : "bg-secondary text-muted-foreground"}`}
-              >
-                {t(isolatedPart ? "editor.parts.showAll" : "editor.parts.isolate")}
-              </button>
-              <span className="text-sm text-foreground">
-                {isolatedPart ? t("editor.parts.isolating", { name: isolatedPart.name }) : selectedPart ? t("editor.parts.isolatePicked", { name: selectedPart.name }) : t("editor.parts.isolateHint")}
-              </span>
             </div>
           )}
           {!calibration && copiedPartStyle && (
@@ -587,6 +590,7 @@ export function EditorViewport({
               </button>
             </div>
           )}
+          </div>
         </div>
       )}
       {viewportTools}
