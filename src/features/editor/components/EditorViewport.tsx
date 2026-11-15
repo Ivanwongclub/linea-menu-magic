@@ -262,8 +262,8 @@ export function EditorViewport({
   const selectedPartBounds = selectedPartIndex == null ? null : partsReport?.groups.find((group) => group.index === selectedPartIndex)?.bounds ?? null;
   const setRuler = useEditorStore((s) => s.setRuler);
   useEffect(() => {
-    if (selectedPartIndex != null) setRuler(true);
-  }, [selectedPartIndex, setRuler]);
+    if (selectedPartIndex != null || selectedLayerId != null) setRuler(true);
+  }, [selectedPartIndex, selectedLayerId, setRuler]);
   // Calibration screenshots composite any DOM over the canvas; `?calibration=1` hides the viewport chrome.
   const calibration = useSearchParams()[0].get("calibration") === "1";
 

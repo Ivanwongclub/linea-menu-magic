@@ -94,9 +94,8 @@ function axisLines(box: PartBoundsMm) {
 }
 
 /**
- * The product's diameter and thickness (E1 §5 row 4e), or — when a part is
- * selected — that part's X / Y / Z extents, plus the selected branding layer's
- * face dimensions (4j R5). Helper lines stay on render layer 1.
+ * Selected part → that part's X / Y / Z. Selected branding layer → that
+ * layer's face measures. Nothing selected → the whole model's X / Y / Z.
  */
 export function RulerOverlay({ measurements, labels, obstacles, layer, partBounds, faceZ, relief }: RulerOverlayProps) {
   const { camera, size } = useThree();
@@ -113,34 +112,26 @@ export function RulerOverlay({ measurements, labels, obstacles, layer, partBound
     }
   });
 
+  const layerMode = !partBounds && !!layer;
+  const box: PartBoundsMm | null = layerMode
+    ? null
+    : partBounds ?? {
+        minX: measurements.minX,
+        maxX: measurements.maxX,
+        minY: measurements.minY,
+        maxY: measurements.maxY,
+        minZ: measurements.minZ,
+        maxZ: measurements.maxZ,
+      };
+  const axes = box ? axisLines(box) : null;
   const faceRadius = measurements.diameterMm / 2;
-  const dims = !partBounds && layer ? layerDimensions(layer, faceRadius) : [];
+  const dims = layerMode ? layerDimensions(layer!, faceRadius) : [];
   const lift = faceZ + 0.05;
   const dimPoints = (d: LayerDimension): [number, number, number][] => [
     [d.from.x, d.from.y, lift],
     [d.to.x, d.to.y, lift],
   ];
-  const reliefLinePoints = !partBounds ? reliefCallout(layer, relief) : null;
-  const axes = partBounds ? axisLines(partBounds) : null;
-
-  const { minX, maxX, minY, maxY, minZ, maxZ } = measurements;
-  const thicknessX = maxX + MARGIN_MM;
-  const centerZ = (minZ + maxZ) / 2;
-  const centerY = (minY + maxY) / 2;
-  const diameterAlongX = maxX - minX >= (maxY - minY) * 0.99;
-  const diameterY = minY - MARGIN_MM;
-  const diameterX = minX - MARGIN_MM;
-  const diameterLinePoints: [number, number, number][] = diameterAlongX
-    ? [[minX, diameterY, 0], [maxX, diameterY, 0]]
-    : [[diameterX, minY, 0], [diameterX, maxY, 0]];
-  const diameterTick = (mainAxisValue: number): [number, number, number][] =>
-    diameterAlongX
-      ? [[mainAxisValue, diameterY - TICK_MM, 0], [mainAxisValue, diameterY + TICK_MM, 0]]
-      : [[diameterX - TICK_MM, mainAxisValue, 0], [diameterX + TICK_MM, mainAxisValue, 0]];
-  const thicknessPoints: [number, number, number][] = [
-    [thicknessX, centerY, minZ],
-    [thicknessX, centerY, maxZ],
-  ];
+  const reliefLinePoints = layerMode ? reliefCallout(layer, relief) : null;
 
   const scratch = useRef(new Vector3());
   const last = useRef("");
@@ -162,19 +153,18 @@ export function RulerOverlay({ measurements, labels, obstacles, layer, partBound
       if (axisY) entries.push([axisY, line(axes.y, axisY), "beside"]);
       if (axisZ) entries.push([axisZ, line(axes.z, axisZ), "beside"]);
     } else {
-      const { diameter, thickness } = labels.current;
-      if (!diameter || !thickness) return;
-      entries.push([diameter, line(diameterLinePoints, diameter), "below"]);
-      entries.push([thickness, line(thicknessPoints, thickness), "beside"]);
-      for (const dim of dims) {
-        const el = labels.current.layer[dim.kind];
-        if (el) entries.push([el, line(dimPoints(dim), el), "beside"]);
+      for (const el of [labels.current.axisX, labels.current.axisY, labels.current.axisZ]) {
+        if (el) el.style.visibility = "hidden";
       }
-      const reliefLabel = labels.current.relief;
-      if (reliefLabel && reliefLinePoints) entries.push([reliefLabel, line(reliefLinePoints, reliefLabel), "beside"]);
     }
+    for (const dim of dims) {
+      const el = labels.current.layer[dim.kind];
+      if (el) entries.push([el, line(dimPoints(dim), el), "beside"]);
+    }
+    const reliefLabel = labels.current.relief;
+    if (reliefLabel && reliefLinePoints) entries.push([reliefLabel, line(reliefLinePoints, reliefLabel), "beside"]);
     if (!entries.length) return;
-    const centre = project(axes ? axes.centre : [(minX + maxX) / 2, centerY, centerZ]);
+    const centre = project(axes?.centre ?? [layer!.placement.centre_mm.x, layer!.placement.centre_mm.y, faceZ]);
     const placed = layoutLabels(
       entries.map(([, l, place]) => ({ line: l, place })),
       centre,
@@ -193,7 +183,7 @@ export function RulerOverlay({ measurements, labels, obstacles, layer, partBound
 
   return (
     <group ref={groupRef}>
-      {axes ? (
+      {axes && (
         <>
           <Line points={axes.x} color="#c62828" lineWidth={1.5} />
           <Line points={axes.xTickA} color="#c62828" lineWidth={1.5} />
@@ -205,20 +195,11 @@ export function RulerOverlay({ measurements, labels, obstacles, layer, partBound
           <Line points={axes.zTickA} color="#1565c0" lineWidth={1.5} />
           <Line points={axes.zTickB} color="#1565c0" lineWidth={1.5} />
         </>
-      ) : (
-        <>
-          <Line points={diameterLinePoints} color="#1a1a1a" lineWidth={1.5} />
-          <Line points={diameterTick(diameterAlongX ? minX : minY)} color="#1a1a1a" lineWidth={1.5} />
-          <Line points={diameterTick(diameterAlongX ? maxX : maxY)} color="#1a1a1a" lineWidth={1.5} />
-          <Line points={thicknessPoints} color="#1a1a1a" lineWidth={1.5} />
-          <Line points={[[thicknessX - TICK_MM, centerY, minZ], [thicknessX + TICK_MM, centerY, minZ]]} color="#1a1a1a" lineWidth={1.5} />
-          <Line points={[[thicknessX - TICK_MM, centerY, maxZ], [thicknessX + TICK_MM, centerY, maxZ]]} color="#1a1a1a" lineWidth={1.5} />
-          {reliefLinePoints && <Line points={reliefLinePoints} color="#1a1a1a" lineWidth={1.5} depthTest={false} />}
-          {dims.map((dim) => (
-            <Line key={dim.kind} points={dimPoints(dim)} color="#1a1a1a" lineWidth={1.25} dashed dashSize={0.2} gapSize={0.12} depthTest={false} />
-          ))}
-        </>
       )}
+      {reliefLinePoints && <Line points={reliefLinePoints} color="#1a1a1a" lineWidth={1.5} depthTest={false} />}
+      {dims.map((dim) => (
+        <Line key={dim.kind} points={dimPoints(dim)} color="#1a1a1a" lineWidth={1.25} dashed dashSize={0.2} gapSize={0.12} depthTest={false} />
+      ))}
     </group>
   );
 }
@@ -256,33 +237,40 @@ const LABEL_CLASS =
 /** The ruler's DOM labels, over the canvas; `RulerOverlay` positions them. Hidden until first placed. */
 export function RulerLabels({ measurements, sizeLigne, sizeLabel, labels, layer, partBounds, relief }: RulerLabelsProps) {
   const { t } = useI18n();
-  const dims = !partBounds && layer ? layerDimensions(layer, measurements.diameterMm / 2) : [];
-  const reliefDepth = !partBounds && layer && relief?.anchor ? layerRelief(layer) : null;
-  const axes = partBounds ? axisLines(partBounds) : null;
+  const layerMode = !partBounds && !!layer;
+  const dims = layerMode ? layerDimensions(layer!, measurements.diameterMm / 2) : [];
+  const reliefDepth = layerMode && relief?.anchor ? layerRelief(layer!) : null;
+  const axes = layerMode
+    ? null
+    : axisLines(partBounds ?? {
+        minX: measurements.minX,
+        maxX: measurements.maxX,
+        minY: measurements.minY,
+        maxY: measurements.maxY,
+        minZ: measurements.minZ,
+        maxZ: measurements.maxZ,
+      });
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden" data-testid="ruler-labels" data-mode={axes ? "part-axes" : "product"}>
-      {axes ? (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden" data-testid="ruler-labels" data-mode={partBounds ? "part-axes" : layerMode ? "layer" : "product-axes"}>
+      {axes && (
         <>
           <span ref={(el) => (labels.current.axisX = el)} className={LABEL_CLASS} style={{ visibility: "hidden" }} data-testid="ruler-axis-x" data-value-mm={axes.size.x}>{t("editor.ruler.axisX", { value: `${axes.size.x.toFixed(2)} mm` })}</span>
           <span ref={(el) => (labels.current.axisY = el)} className={LABEL_CLASS} style={{ visibility: "hidden" }} data-testid="ruler-axis-y" data-value-mm={axes.size.y}>{t("editor.ruler.axisY", { value: `${axes.size.y.toFixed(2)} mm` })}</span>
           <span ref={(el) => (labels.current.axisZ = el)} className={LABEL_CLASS} style={{ visibility: "hidden" }} data-testid="ruler-axis-z" data-value-mm={axes.size.z}>{t("editor.ruler.axisZ", { value: `${axes.size.z.toFixed(2)} mm` })}</span>
         </>
-      ) : (
-        <>
-          <span ref={(el) => (labels.current.diameter = el)} className={LABEL_CLASS} style={{ visibility: "hidden" }} data-testid="ruler-diameter-label">{diameterLabel(measurements.diameterMm, sizeLigne, sizeLabel)}</span>
-          <span ref={(el) => (labels.current.thickness = el)} className={LABEL_CLASS} style={{ visibility: "hidden" }} data-testid="ruler-thickness-label">{measurements.thicknessMm.toFixed(2)} mm</span>
-          {reliefDepth && (
-            <span ref={(el) => (labels.current.relief = el)} className={LABEL_CLASS} style={{ visibility: "hidden" }} data-testid="ruler-relief-label" data-relief={reliefDepth.type} data-value-mm={reliefDepth.depth_mm}>
-              {t(reliefDepth.type === "emboss" ? "editor.ruler.embossHeight" : "editor.ruler.engraveDepth", { value: `${reliefDepth.depth_mm.toFixed(2)} mm` })}
-            </span>
-          )}
-          {dims.map((dim) => (
-            <span key={`${layer?.id}-${dim.kind}`} ref={(el) => (labels.current.layer[dim.kind] = el)} className={LABEL_CLASS} style={{ visibility: "hidden" }} data-testid={LAYER_LABEL_TESTID[dim.kind]} data-value-mm={dim.valueMm}>
-              {t(LAYER_LABEL_KEY[dim.kind], { value: `${dim.valueMm.toFixed(2)} mm` })}
-            </span>
-          ))}
-        </>
       )}
+      {reliefDepth && (
+        <span ref={(el) => (labels.current.relief = el)} className={LABEL_CLASS} style={{ visibility: "hidden" }} data-testid="ruler-relief-label" data-relief={reliefDepth.type} data-value-mm={reliefDepth.depth_mm}>
+          {t(reliefDepth.type === "emboss" ? "editor.ruler.embossHeight" : "editor.ruler.engraveDepth", { value: `${reliefDepth.depth_mm.toFixed(2)} mm` })}
+        </span>
+      )}
+      {dims.map((dim) => (
+        <span key={`${layer?.id}-${dim.kind}`} ref={(el) => (labels.current.layer[dim.kind] = el)} className={LABEL_CLASS} style={{ visibility: "hidden" }} data-testid={LAYER_LABEL_TESTID[dim.kind]} data-value-mm={dim.valueMm}>
+          {t(LAYER_LABEL_KEY[dim.kind], { value: `${dim.valueMm.toFixed(2)} mm` })}
+        </span>
+      ))}
+      <span ref={(el) => (labels.current.diameter = el)} className="hidden" data-testid="ruler-diameter-label" aria-hidden="true">{diameterLabel(measurements.diameterMm, sizeLigne, sizeLabel)}</span>
+      <span ref={(el) => (labels.current.thickness = el)} className="hidden" data-testid="ruler-thickness-label" aria-hidden="true">{measurements.thicknessMm.toFixed(2)} mm</span>
     </div>
   );
 }
