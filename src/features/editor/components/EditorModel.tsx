@@ -653,13 +653,14 @@ export function EditorModel({
           }
           if (!painting.current) {
             const tool = useEditorStore.getState();
-            if ((tool.eyedropperArmed || tool.paintBucketArmed || tool.isolateToolArmed) && event.delta <= 4 && !paintZoneId) {
+            if ((tool.eyedropperArmed || tool.paintBucketArmed || tool.eraserArmed || tool.isolateToolArmed) && event.delta <= 4 && !paintZoneId) {
               event.stopPropagation();
               const index = hitPartIndex(event);
               if (index != null) {
                 suppressSelect.current = true;
                 if (tool.eyedropperArmed) tool.sampleEyedropper(index);
                 else if (tool.paintBucketArmed) tool.paintPart(index);
+                else if (tool.eraserArmed) tool.erasePart(index);
                 else tool.toggleIsolatePart(index);
               }
               return;

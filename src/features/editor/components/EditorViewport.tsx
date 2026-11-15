@@ -8,6 +8,7 @@ import { EditorToolbox } from "./EditorToolbox";
 
 const eyedropperCursor = `url("data:image/svg+xml,${encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><path fill='#fff' stroke='#111' stroke-width='1.6' stroke-linejoin='round' d='M21 3l8 8-2.4 2.4-1.6-1.6-8.4 8.4-.9 3.6-4.2-4.2 3.6-.9 8.4-8.4-1.6-1.6z'/><path fill='#111' d='M5.5 26.5l2.2-.6.6 2.2z'/></svg>")}") 6 28, crosshair`;
 const bucketCursor = `url("data:image/svg+xml,${encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><path fill='#fff' stroke='#111' stroke-width='1.5' d='M9 12h14l-1.4 13H10.4z'/><path fill='none' stroke='#111' stroke-width='1.5' d='M11 12c0-5 10-5 10 0'/><path fill='#111' d='M5 27h4v2H5z'/></svg>")}") 6 28, crosshair`;
+const eraserCursor = `url("data:image/svg+xml,${encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><path fill='#fff' stroke='#111' stroke-width='1.5' d='M7 19l8-8 8 8-4 4H11z'/><path fill='#111' d='M6 25h14v2H6z'/></svg>")}") 6 28, crosshair`;
 import { Link, useSearchParams } from "react-router-dom";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { supabase } from "@/integrations/supabase/client";
@@ -208,10 +209,11 @@ export function EditorViewport({
   const clearCopiedPartStyle = useEditorStore((s) => s.clearCopiedPartStyle);
   const eyedropperArmed = useEditorStore((s) => s.eyedropperArmed);
   const paintBucketArmed = useEditorStore((s) => s.paintBucketArmed);
+  const eraserArmed = useEditorStore((s) => s.eraserArmed);
   const isolateToolArmed = useEditorStore((s) => s.isolateToolArmed);
   const setEditorTool = useEditorStore((s) => s.setEditorTool);
   useEffect(() => {
-    if (!eyedropperArmed && !paintBucketArmed && !isolateToolArmed) return;
+    if (!eyedropperArmed && !paintBucketArmed && !eraserArmed && !isolateToolArmed) return;
     const onKey = (event: KeyboardEvent) => {
       if (event.key !== "Escape" || event.isComposing) return;
       event.preventDefault();
@@ -220,7 +222,7 @@ export function EditorViewport({
     };
     window.addEventListener("keydown", onKey, true);
     return () => window.removeEventListener("keydown", onKey, true);
-  }, [eyedropperArmed, paintBucketArmed, isolateToolArmed, setEditorTool]);
+  }, [eyedropperArmed, paintBucketArmed, eraserArmed, isolateToolArmed, setEditorTool]);
   const zones = useEditorStore(selectZones);
   const baseColourHex = useEditorStore((s) => s.recipe.base_colour_hex);
   const baseGradient = useEditorStore(s => s.recipe.base_gradient);
@@ -434,6 +436,7 @@ export function EditorViewport({
       className="relative flex-1 min-h-0 overflow-hidden bg-secondary"
       data-eyedropper={eyedropperArmed ? "1" : undefined}
       data-bucket={paintBucketArmed ? "1" : undefined}
+      data-eraser={eraserArmed ? "1" : undefined}
       data-testid="editor-viewport"
       onPointerLeave={() => setHoveredPart(null)}
       aria-busy={importing}
@@ -562,7 +565,7 @@ export function EditorViewport({
         <RulerLabels measurements={rulerMeasurements} sizeLigne={sizeLigne} sizeLabel={sizeLabel} labels={rulerLabels} layer={selectedLayer} relief={selectedRelief} />
       )}
       {!calibration && <EditorToolbox />}
-      {(eyedropperArmed || paintBucketArmed) && <style>{`[data-testid="editor-viewport"], [data-testid="editor-viewport"] canvas { cursor: ${eyedropperArmed ? eyedropperCursor : bucketCursor} !important; }`}</style>}
+      {(eyedropperArmed || paintBucketArmed || eraserArmed) && <style>{`[data-testid="editor-viewport"], [data-testid="editor-viewport"] canvas { cursor: ${eyedropperArmed ? eyedropperCursor : paintBucketArmed ? bucketCursor : eraserCursor} !important; }`}</style>}
       {(localModel || !calibration) && (
         <div className="absolute top-3 left-14 z-10 flex max-w-[calc(100%_-_4.5rem)] flex-col items-start gap-2">
           <div className="flex min-w-0 flex-col items-start gap-2">

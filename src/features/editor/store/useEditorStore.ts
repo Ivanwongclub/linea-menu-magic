@@ -111,6 +111,8 @@ interface EditorState {
   eyedropperArmed: boolean;
   /** The next part click is painted with the foreground colour. */
   paintBucketArmed: boolean;
+  /** The next part click clears that part's own colour. */
+  eraserArmed: boolean;
   /** The next part click is shown on its own. */
   isolateToolArmed: boolean;
   /** Kept so older resets stay shaped the same. The bucket no longer blocks on a selection. */
@@ -174,11 +176,13 @@ interface EditorState {
   /** Forget the copied look. Parts already pasted stay as they are. */
   clearCopiedPartStyle: () => void;
   /** One tool at a time. The foreground colour stays. */
-  setEditorTool: (tool: "select" | "eyedropper" | "bucket" | "isolate") => void;
-  /** Read this part into the foreground colour. Does not paint. */
+  setEditorTool: (tool: "select" | "eyedropper" | "bucket" | "eraser" | "isolate") => void;
+  /** Read this part and paint it onto the other selected part. Stays the eyedropper. */
   sampleEyedropper: (index: number) => void;
   /** Paint the foreground colour onto this part. One undo step. */
   paintPart: (index: number) => void;
+  /** Clear this part's own colour. One undo step. A lock keeps it. */
+  erasePart: (index: number) => void;
   removeLayer: (id: string) => void;
   moveLayer: (from: number, to: number) => void;
   /** Selects a layer, a zone or a part — or nothing. */
@@ -225,6 +229,18 @@ function partColourAt(s: EditorState, index: number): { name: string; hex: strin
   const hex = visiblePartHex(s.recipe, index, fallback);
   return hex ? { name: group?.name ?? String(index), hex } : null;
 }
+
+/** Sample this part and paint it onto the other selected part. The eyedropper stays on. */
+function eyedropperPick(s: EditorState, index: number): EditorState | Partial<EditorState> {
+  if (!s.eyedropperArmed) return s;
+  const colour = partColourAt(s, index);
+  if (!colour) return s;
+  const selectedId = s.selection?.kind === "part" ? s.selection.id : null;
+  const paint = !!selectedId && selectedId !== String(index) && !isColourLocked(s.recipe, { kind: "part", id: selectedId });
+  const painted = paint ? discrete(s, (recipe) => applyScopedColour(recipe, { kind: "part", id: selectedId }, colour.hex)) : {};
+  const name = paint ? s.partsReport?.groups.find((part) => String(part.index) === selectedId)?.name ?? selectedId : null;
+  return { ...painted, eyedropperNotice: colour, paintTargetName: name };
+}
 const syncLocalAppearance = (s: EditorState, recipe: DraftRecipe) =>
   s.localModel ? { localModel: { ...s.localModel, appearanceMode: recipe.view.local_appearance_mode ?? (s.localModel.hasSourceAppearance ? "source" : "finish") } } : {};
 function releaseLocalModel(model: LocalModel | null) {
@@ -245,6 +261,7 @@ const resetModelState = {
   partStylePastedOn: null,
   eyedropperArmed: false,
   paintBucketArmed: false,
+  eraserArmed: false,
   isolateToolArmed: false,
   eyedropperNeedSelection: false,
   eyedropperNotice: null,
@@ -282,6 +299,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   partStylePastedOn: null,
   eyedropperArmed: false,
   paintBucketArmed: false,
+  eraserArmed: false,
   isolateToolArmed: false,
   eyedropperNeedSelection: false,
   eyedropperNotice: null,
@@ -388,17 +406,17 @@ export const useEditorStore = create<EditorState>((set) => ({
       return { ...discrete(s, (recipe) => applyPartStyleClip(recipe, clip, [index])), partStylePastedOn: name };
     }),
   clearCopiedPartStyle: () => set({ copiedPartStyle: null, partStylePastedOn: null }),
-  setEditorTool: (tool) => set({ eyedropperArmed: tool === "eyedropper", paintBucketArmed: tool === "bucket", isolateToolArmed: tool === "isolate", paintTargetName: null }),
-  sampleEyedropper: (index) => set((s) => {
-    if (!s.eyedropperArmed) return s;
-    const colour = partColourAt(s, index);
-    return colour ? { eyedropperNotice: colour, paintTargetName: null } : s;
-  }),
+  setEditorTool: (tool) => set({ eyedropperArmed: tool === "eyedropper", paintBucketArmed: tool === "bucket", eraserArmed: tool === "eraser", isolateToolArmed: tool === "isolate", paintTargetName: null }),
+  sampleEyedropper: (index) => set((s) => eyedropperPick(s, index)),
   paintPart: (index) => set((s) => {
     const hex = s.eyedropperNotice?.hex;
     if (!s.paintBucketArmed || !hex || isColourLocked(s.recipe, { kind: "part", id: String(index) })) return s;
     const name = s.partsReport?.groups.find((part) => part.index === index)?.name ?? String(index);
     return { ...discrete(s, (recipe) => applyScopedColour(recipe, { kind: "part", id: String(index) }, hex)), paintTargetName: name };
+  }),
+  erasePart: (index) => set((s) => {
+    if (!s.eraserArmed || isColourLocked(s.recipe, { kind: "part", id: String(index) })) return s;
+    return discrete(s, (recipe) => applyScopedColour(recipe, { kind: "part", id: String(index) }, null));
   }),
   applyLayerStyleToOthers: (id, rasterLayerIds) =>
     set((s) => {
@@ -426,10 +444,7 @@ export const useEditorStore = create<EditorState>((set) => ({
       }),
     ),
   select: (selection) => set(s => {
-    if (s.eyedropperArmed && selection?.kind === "part") {
-      const colour = partColourAt(s, Number(selection.id));
-      return colour ? { eyedropperNotice: colour, paintTargetName: null } : s;
-    }
+    if (s.eyedropperArmed && selection?.kind === "part") return eyedropperPick(s, Number(selection.id));
     if (s.isolateToolArmed && selection?.kind === "part") {
       const index = Number(selection.id);
       return { isolatedPartIndex: s.isolatedPartIndex === index ? null : index, hoveredPartIndex: null };
@@ -440,7 +455,11 @@ export const useEditorStore = create<EditorState>((set) => ({
       const name = s.partsReport?.groups.find((part) => part.index === Number(selection.id))?.name ?? selection.id;
       return { ...discrete(s, (recipe) => applyScopedColour(recipe, { kind: "part", id: selection.id }, hex)), paintTargetName: name };
     }
-    if (s.eyedropperArmed || s.paintBucketArmed || s.isolateToolArmed) return s;
+    if (s.eraserArmed && selection?.kind === "part") {
+      if (isColourLocked(s.recipe, { kind: "part", id: selection.id })) return s;
+      return discrete(s, (recipe) => applyScopedColour(recipe, { kind: "part", id: selection.id }, null));
+    }
+    if (s.eyedropperArmed || s.paintBucketArmed || s.eraserArmed || s.isolateToolArmed) return s;
     return { selection, hoveredPartIndex: null, zoneDraft: null, zonePicking: false, zonePreviewVisible: true, paintZoneId: selection?.kind === "zone" && selection.id === s.paintZoneId ? s.paintZoneId : null, eyedropperNeedSelection: false };
   }),
   setHoveredPart: (index) => set((s) => s.hoveredPartIndex === index ? s : { hoveredPartIndex: index }),

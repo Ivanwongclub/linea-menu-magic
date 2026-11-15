@@ -139,7 +139,7 @@ export function PartsGroup({
             }}
             onSelect={() => {
               const tool = useEditorStore.getState();
-              select(tool.eyedropperArmed || tool.paintBucketArmed || tool.isolateToolArmed || selectedPart !== group.index ? { kind: "part", id: String(group.index) } : null);
+              select(tool.eyedropperArmed || tool.paintBucketArmed || tool.eraserArmed || tool.isolateToolArmed || selectedPart !== group.index ? { kind: "part", id: String(group.index) } : null);
             }}
             onDoubleSelect={() => select({ kind: "part", id: String(group.index) })}
             onToggle={() => toggleHiddenGroup(group.index)}

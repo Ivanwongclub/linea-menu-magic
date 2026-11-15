@@ -1,30 +1,41 @@
-import { useEffect, useRef, useState } from "react";
-import { MousePointer2, PaintBucket, Pipette } from "lucide-react";
+import { useEffect, useRef, useState, type PointerEvent } from "react";
+import { Eraser, MousePointer2, PaintBucket, Pipette } from "lucide-react";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { useEditorStore } from "../store/useEditorStore";
 
-type ColourTool = "eyedropper" | "bucket";
+type ColourTool = "eyedropper" | "bucket" | "eraser";
 
-/** Left rail. Select is its own slot. Eyedropper and paint share one slot. */
+/** Left rail. Select is its own slot. Eyedropper, paint, and eraser share one slot. */
 export function EditorToolbox() {
   const { t } = useI18n();
   const eyedropper = useEditorStore((s) => s.eyedropperArmed);
   const bucket = useEditorStore((s) => s.paintBucketArmed);
+  const eraser = useEditorStore((s) => s.eraserArmed);
   const notice = useEditorStore((s) => s.eyedropperNotice);
   const setTool = useEditorStore((s) => s.setEditorTool);
   const [slot, setSlot] = useState<ColourTool>("eyedropper");
   const [open, setOpen] = useState(false);
   const group = useRef<HTMLDivElement>(null);
-  const shown: ColourTool = eyedropper ? "eyedropper" : bucket ? "bucket" : slot;
+  const shown: ColourTool = eyedropper ? "eyedropper" : bucket ? "bucket" : eraser ? "eraser" : slot;
   const face = (on: boolean) => `flex h-9 w-9 items-center justify-center border border-foreground ${on ? "bg-foreground text-background" : "text-foreground hover:bg-secondary"}`;
+  const tools = {
+    eyedropper: { icon: Pipette, label: t("editor.colour.eyedropper"), testId: "eyedropper-button", menuId: "tool-slot-eyedropper" },
+    bucket: { icon: PaintBucket, label: t("editor.tools.bucket"), testId: "tool-bucket", menuId: "tool-slot-bucket" },
+    eraser: { icon: Eraser, label: t("editor.tools.eraser"), testId: "tool-eraser", menuId: "tool-slot-eraser" },
+  } as const;
+  const current = tools[shown];
+  const CurrentIcon = current.icon;
 
   useEffect(() => {
     if (!open) return;
     const close = (event: PointerEvent) => {
       if (!group.current?.contains(event.target as Node)) setOpen(false);
     };
-    window.addEventListener("pointerdown", close);
-    return () => window.removeEventListener("pointerdown", close);
+    const id = window.setTimeout(() => window.addEventListener("pointerdown", close), 0);
+    return () => {
+      window.clearTimeout(id);
+      window.removeEventListener("pointerdown", close);
+    };
   }, [open]);
 
   const pick = (tool: ColourTool) => {
@@ -32,29 +43,34 @@ export function EditorToolbox() {
     setTool(tool);
     setOpen(false);
   };
+  const openSlot = (event: PointerEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    setOpen(true);
+    setTool(shown);
+  };
 
   return (
     <div role="toolbar" aria-label={t("editor.tools.title")} data-testid="editor-toolbox" className="absolute inset-y-0 left-0 z-20 flex w-12 flex-col items-center border-r border-foreground bg-background py-2">
-      <button type="button" data-testid="tool-select" aria-pressed={!eyedropper && !bucket} aria-label={t("editor.tools.select")} title={t("editor.tools.select")} onClick={() => { setOpen(false); setTool("select"); }} className={face(!eyedropper && !bucket)}>
+      <button type="button" data-testid="tool-select" aria-pressed={!eyedropper && !bucket && !eraser} aria-label={t("editor.tools.select")} title={t("editor.tools.select")} onClick={() => { setOpen(false); setTool("select"); }} className={face(!eyedropper && !bucket && !eraser)}>
         <MousePointer2 className="h-4 w-4" strokeWidth={1.5} />
       </button>
       <div ref={group} className="relative -mt-px" data-testid="tool-colour-slot" data-tool={shown}>
-        <button type="button" data-testid={shown === "eyedropper" ? "eyedropper-button" : "tool-bucket"} aria-pressed={eyedropper || bucket} aria-label={shown === "eyedropper" ? t("editor.colour.eyedropper") : t("editor.tools.bucket")} title={shown === "eyedropper" ? t("editor.colour.eyedropper") : t("editor.tools.bucket")} onClick={() => pick(shown)} className={face(eyedropper || bucket)}>
-          {shown === "eyedropper" ? <Pipette className="h-4 w-4" strokeWidth={1.5} /> : <PaintBucket className="h-4 w-4" strokeWidth={1.5} />}
-        </button>
-        <button type="button" data-testid="tool-slot-switch" aria-expanded={open} aria-label={t("editor.tools.switchColour")} title={t("editor.tools.switchColour")} onClick={() => setOpen((value) => !value)} className={`absolute bottom-0 right-0 flex h-3 w-3 items-end justify-end ${eyedropper || bucket ? "text-background" : "text-foreground"}`}>
-          <span className="block h-0 w-0 border-b-[5px] border-l-[5px] border-b-current border-l-transparent" />
+        <button type="button" data-testid={current.testId} data-switch="tool-slot-switch" aria-pressed={eyedropper || bucket || eraser} aria-expanded={open} aria-label={current.label} title={t("editor.tools.switchColour")} onPointerDown={openSlot} onClick={openSlot} className={`relative ${face(eyedropper || bucket || eraser)}`}>
+          <CurrentIcon className="h-4 w-4" strokeWidth={1.5} />
+          <span className={`pointer-events-none absolute bottom-0.5 right-0.5 block h-0 w-0 border-b-[5px] border-l-[5px] border-l-transparent ${eyedropper || bucket || eraser ? "border-b-background" : "border-b-foreground"}`} />
         </button>
         {open && (
           <div role="menu" data-testid="tool-slot-menu" className="absolute left-full top-0 z-30 ml-1 flex w-max flex-col border border-foreground bg-background text-foreground">
-            <button type="button" role="menuitem" data-testid="tool-slot-eyedropper" onClick={() => pick("eyedropper")} className={`flex items-center gap-2 whitespace-nowrap px-2 py-1.5 text-xs hover:bg-secondary ${shown === "eyedropper" ? "bg-secondary" : ""}`}>
-              <Pipette className="h-4 w-4" strokeWidth={1.5} />
-              {t("editor.colour.eyedropper")}
-            </button>
-            <button type="button" role="menuitem" data-testid="tool-slot-bucket" onClick={() => pick("bucket")} className={`flex items-center gap-2 whitespace-nowrap border-t border-foreground px-2 py-1.5 text-xs hover:bg-secondary ${shown === "bucket" ? "bg-secondary" : ""}`}>
-              <PaintBucket className="h-4 w-4" strokeWidth={1.5} />
-              {t("editor.tools.bucket")}
-            </button>
+            {(Object.keys(tools) as ColourTool[]).map((tool, index) => {
+              const item = tools[tool];
+              const Icon = item.icon;
+              return (
+                <button key={tool} type="button" role="menuitem" data-testid={item.menuId} onClick={() => pick(tool)} className={`flex items-center gap-2 whitespace-nowrap px-2 py-1.5 text-xs hover:bg-secondary ${index > 0 ? "border-t border-foreground" : ""} ${shown === tool ? "bg-secondary" : ""}`}>
+                  <Icon className="h-4 w-4" strokeWidth={1.5} />
+                  {item.label}
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
