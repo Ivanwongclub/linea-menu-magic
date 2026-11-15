@@ -198,6 +198,8 @@ export interface DraftRecipe {
   base_colour_hex?: string;
   /** Independent colour per source mesh index; shared MTLs remain untouched. */
   part_colours?: Record<string, string>;
+  /** Targets whose colour the eyedropper, bucket, and sliders must not change. `all` is the whole model. */
+  colour_locks?: string[];
   base_gradient?: ColourGradient;
   part_gradients?: Record<string, ColourGradient>;
   /** Colour groups share one fill over their combined footprint; meshes stay separate. */
@@ -277,6 +279,7 @@ export function normalizeRecipe(raw: unknown): DraftRecipe {
     colour_id: id(raw.colour_id),
     ...(typeof raw.base_colour_hex === "string" && normalizeHex(raw.base_colour_hex) ? { base_colour_hex: normalizeHex(raw.base_colour_hex)! } : {}),
     ...(isRecord(raw.part_colours) ? { part_colours: Object.fromEntries(Object.entries(raw.part_colours).flatMap(([index, value]) => /^(0|[1-9]\d*)$/.test(index) && typeof value === "string" && normalizeHex(value) ? [[index, normalizeHex(value)!]] : [])) } : {}),
+    ...(() => { const locks = Array.isArray(raw.colour_locks) ? [...new Set((raw.colour_locks as unknown[]).filter((item): item is string => typeof item === "string" && /^(all|(part|layer|zone|group):[\w-]+)$/.test(item)))].slice(0, 64) : []; return locks.length ? { colour_locks: locks } : {}; })(),
     ...(normalizeGradient(raw.base_gradient) ? { base_gradient: normalizeGradient(raw.base_gradient)! } : {}),
     ...(isRecord(raw.part_gradients) ? { part_gradients: Object.fromEntries(Object.entries(raw.part_gradients).flatMap(([index, value]) => /^(0|[1-9]\d*)$/.test(index) && normalizeGradient(value) ? [[index, normalizeGradient(value)!]] : [])) } : {}),
     ...(paintGroups.length ? { paint_groups: paintGroups } : {}),

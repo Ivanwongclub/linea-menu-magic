@@ -1,8 +1,10 @@
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import { Lock, LockOpen } from "lucide-react";
 import { useI18n } from "@/features/i18n/I18nProvider";
 import { normalizeHex } from "../lib/pantone";
+import { hexToHsb, hsbToHex } from "../lib/hsb";
 import { useEditorStore } from "../store/useEditorStore";
-import { colourOverride, gradientOverride, hasColourOverride } from "../lib/scopedColour";
+import { colourOverride, gradientOverride, hasColourOverride, isColourLocked } from "../lib/scopedColour";
 import { isLogoLayer } from "../lib/recipe";
 import { usePublicFinishes } from "../hooks/usePublicFinishes";
 import { GradientColourControl } from "./GradientColourControl";
@@ -21,6 +23,8 @@ export function ModelColourControl({ originalHex, sourceAppearance, global = fal
   const parts = useEditorStore((s) => s.partsReport?.groups);
   const setColourForTarget = useEditorStore((s) => s.setColourForTarget);
   const setGradientForTarget = useEditorStore(s => s.setGradientForTarget);
+  const toggleColourLock = useEditorStore((s) => s.toggleColourLock);
+  const locked = isColourLocked(recipe, target);
   const { data: finishes } = usePublicFinishes();
   const setColour = (hex: string | null) => setColourForTarget(target, hex);
   const override = colourOverride(recipe, target);
@@ -40,6 +44,11 @@ export function ModelColourControl({ originalHex, sourceAppearance, global = fal
   const commit = useEditorStore((s) => s.commit);
   const [draft, setDraft] = useState<string | null>(null);
   const hex = gradient?.from ?? override ?? parentMemberHex ?? parentGroup?.colour_hex ?? normalizeHex(inherited ?? "") ?? "#9A9A9A";
+  const hsb = hexToHsb(hex);
+  const hueHold = useRef(hsb.h);
+  if (hsb.s > 0) hueHold.current = hsb.h;
+  const hue = hsb.s === 0 ? hueHold.current : hsb.h;
+  const slide = (nextHue: number, saturation: number, brightness: number) => { hueHold.current = nextHue; setColour(hsbToHex(nextHue, saturation, brightness)); };
   useEffect(() => {
     if (document.activeElement instanceof HTMLInputElement && document.activeElement.dataset.testid === "model-colour-hex") return;
     setDraft(null);
@@ -53,15 +62,21 @@ export function ModelColourControl({ originalHex, sourceAppearance, global = fal
   }) : undefined;
 
   return (
-    <div className="space-y-2 border-t border-border pt-3" data-testid={testId("model-colour-control")} data-hex={hex} data-mode={gradient ? "gradient" : "solid"} data-distribution={memberMode ? "members" : "continuous"} data-custom={canReset} data-scope={target?.kind ?? "all"} data-target-id={target?.id}>
+    <div className="space-y-2 border-t border-border pt-3" data-testid={testId("model-colour-control")} data-hex={hex} data-mode={gradient ? "gradient" : "solid"} data-distribution={memberMode ? "members" : "continuous"} data-custom={canReset} data-scope={target?.kind ?? "all"} data-target-id={target?.id} data-locked={locked ? "1" : undefined}>
       <div className="flex items-baseline justify-between gap-2">
         <label htmlFor={pickerId} className="block text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
           {t("editor.panel.colour")}
         </label>
-        <span className="min-w-0 truncate text-xs text-muted-foreground" data-testid={testId("model-colour-target")} title={name}>
-          {target ? t("editor.colour.scopeSelected", { name }) : t("editor.colour.scopeAll")}
+        <span className="flex min-w-0 items-center gap-2">
+          <span className="min-w-0 truncate text-xs text-muted-foreground" data-testid={testId("model-colour-target")} title={name}>
+            {target ? t("editor.colour.scopeSelected", { name }) : t("editor.colour.scopeAll")}
+          </span>
+          <button type="button" data-testid={testId("model-colour-lock")} aria-pressed={locked} aria-label={t(locked ? "editor.colour.unlock" : "editor.colour.lock")} title={t(locked ? "editor.colour.unlock" : "editor.colour.lock")} onClick={() => toggleColourLock(target)} className={`flex h-6 w-6 shrink-0 items-center justify-center border border-foreground ${locked ? "bg-foreground text-background" : "text-foreground"}`}>
+            {locked ? <Lock className="h-3.5 w-3.5" strokeWidth={1.5} /> : <LockOpen className="h-3.5 w-3.5" strokeWidth={1.5} />}
+          </button>
         </span>
       </div>
+      <fieldset disabled={locked} className="m-0 min-w-0 space-y-2 border-0 p-0 disabled:opacity-50">
       <div role="group" aria-label={t("editor.gradient.fillType")} className="flex border border-border">
         <button type="button" data-testid={testId("colour-mode-solid")} aria-pressed={!gradient} onClick={() => { if (gradient) { setColour(gradient.from); commit(); } }} className={`flex-1 px-2 py-1.5 text-xs ${!gradient ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}>{t("editor.gradient.solid")}</button>
         <button type="button" data-testid={testId("colour-mode-gradient")} aria-pressed={!!gradient && !memberMode} onClick={() => { if (!gradient || memberMode) { if (group) useEditorStore.getState().setGroupGradientMode(group.id, "continuous", startGradient); else { setGradientForTarget(target, startGradient); commit(); } setDraft(null); } }} className={`flex-1 px-2 py-1.5 text-xs ${gradient && !memberMode ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}>{t("editor.gradient.linear")}</button>
@@ -99,6 +114,18 @@ export function ModelColourControl({ originalHex, sourceAppearance, global = fal
           className="min-w-0 flex-1 border border-border bg-transparent px-2 py-1 font-mono text-xs uppercase text-foreground outline-none focus:border-foreground"
         />
       </div>
+      {(["h", "s", "b"] as const).map((channel) => {
+        const label = t(channel === "h" ? "editor.colour.hue" : channel === "s" ? "editor.colour.saturation" : "editor.colour.brightness");
+        const value = channel === "h" ? hue : channel === "s" ? hsb.s : hsb.b;
+        const max = channel === "h" ? 360 : 100;
+        return (
+          <label key={channel} className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span className="w-12 shrink-0">{label}</span>
+            <input type="range" min={0} max={max} value={value} aria-label={label} data-testid={testId(channel === "h" ? "model-colour-hue" : channel === "s" ? "model-colour-saturation" : "model-colour-brightness")} onChange={(event) => { const next = Number(event.currentTarget.value); slide(channel === "h" ? next : hue, channel === "s" ? next : hsb.s, channel === "b" ? next : hsb.b); }} onPointerUp={commit} onBlur={commit} className="min-w-0 flex-1 accent-foreground" />
+            <span className="w-8 text-right font-mono text-foreground">{value}</span>
+          </label>
+        );
+      })}
       </>}
       <div className="flex justify-end">
         <button
@@ -111,6 +138,7 @@ export function ModelColourControl({ originalHex, sourceAppearance, global = fal
           {t(target ? "editor.colour.resetSelected" : "editor.colour.reset")}
         </button>
       </div>
+      </fieldset>
     </div>
   );
 }

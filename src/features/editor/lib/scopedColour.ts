@@ -6,6 +6,15 @@ import { MAX_ZONES } from "./shaderPatch.ts";
 
 export type ColourTarget = { kind: "part" | "layer" | "zone" | "group"; id: string };
 
+export function colourLockId(target: ColourTarget | null): string {
+  return target ? `${target.kind}:${target.id}` : "all";
+}
+
+/** True only for this target. Locking the whole model does not lock one part. */
+export function isColourLocked(recipe: DraftRecipe, target: ColourTarget | null): boolean {
+  return (recipe.colour_locks ?? []).includes(colourLockId(target));
+}
+
 export function colourOverride(recipe: DraftRecipe, target: ColourTarget | null): string | undefined {
   if (!target) return recipe.base_colour_hex;
   if (target.kind === "part") return recipe.part_colours?.[target.id];
@@ -170,7 +179,7 @@ export function capturePartStyle(recipe: DraftRecipe, index: number, name: strin
 
 /** Put a copied look onto the chosen parts. One recipe update, so one undo. */
 export function applyPartStyleClip(recipe: DraftRecipe, clip: PartStyleClip, targetIndices: number[]): DraftRecipe {
-  const targets = [...new Set(targetIndices.filter((index) => index !== clip.sourceIndex && Number.isInteger(index) && index >= 0))];
+  const targets = [...new Set(targetIndices.filter((index) => index !== clip.sourceIndex && Number.isInteger(index) && index >= 0 && !isColourLocked(recipe, { kind: "part", id: String(index) })))];
   if (!targets.length) return recipe;
   let next = recipe;
   for (const index of targets) next = applyPaint(next, { kind: "part", id: String(index) }, clip.gradient ? null : clip.hex, clip.gradient);

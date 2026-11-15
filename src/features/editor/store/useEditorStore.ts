@@ -4,7 +4,7 @@ import type { FaceTransform } from "../lib/recoveredPlacement";
 import type { PendingLogo } from "../hooks/useLogoAssets";
 import type { PartsReport } from "../components/EditorModel";
 import { applyDiscrete, canRedo, canUndo, commitHistory, redoHistory, startHistory, undoHistory, type History } from "../lib/recipeHistory.ts";
-import { applyPartStyleClip, capturePartStyle, visiblePartHex, applyScopedColour, applyScopedGradient, applyGroupGradientMode, type PartStyleClip } from "../lib/scopedColour.ts";
+import { applyPartStyleClip, capturePartStyle, visiblePartHex, applyScopedColour, applyScopedGradient, applyGroupGradientMode, colourLockId, isColourLocked, type PartStyleClip } from "../lib/scopedColour.ts";
 import type { ColourGradient } from "../lib/gradient.ts";
 import { putPaintGroup, removePaintGroup as deletePaintGroup, pruneGroupLayer, moveGroupMember, type PaintGroup, type PaintGroupMember } from "../lib/paintGroups.ts";
 
@@ -152,6 +152,8 @@ interface EditorState {
   setBaseColourHex: (hex: string | null) => void;
   setColourForTarget: (target: Selection | null, hex: string | null) => void;
   setGradientForTarget: (target: Selection | null, gradient: ColourGradient | null) => void;
+  /** One undo step. A locked target keeps its colour. */
+  toggleColourLock: (target: Selection | null) => void;
   setGroupGradientMode: (id: string, mode: "continuous" | "members", gradient: ColourGradient) => void;
   savePaintGroup: (group: PaintGroup) => void;
   removePaintGroup: (id: string) => void;
@@ -337,10 +339,19 @@ export const useEditorStore = create<EditorState>((set) => ({
     return { ...next, ...syncLocalAppearance(s, next.recipe) };
   }),
   setRuler: (ruler) => set((s) => discrete(s, (r) => ({ ...r, view: { ...r.view, ruler } }))),
-  setBaseColourHex: (hex) => set((s) => ({ recipe: applyScopedColour(s.recipe, null, hex) })),
-  setColourForTarget: (target, hex) => set((s) => ({ recipe: applyScopedColour(s.recipe, target, hex) })),
-  setGradientForTarget: (target, gradient) => set((s) => ({ recipe: applyScopedGradient(s.recipe, target, gradient) })),
-  setGroupGradientMode: (id, mode, gradient) => set(s => discrete(s, recipe => applyGroupGradientMode(recipe, id, mode, gradient))),
+  setBaseColourHex: (hex) => set((s) => isColourLocked(s.recipe, null) ? s : { recipe: applyScopedColour(s.recipe, null, hex) }),
+  setColourForTarget: (target, hex) => set((s) => isColourLocked(s.recipe, target) ? s : { recipe: applyScopedColour(s.recipe, target, hex) }),
+  setGradientForTarget: (target, gradient) => set((s) => isColourLocked(s.recipe, target) ? s : { recipe: applyScopedGradient(s.recipe, target, gradient) }),
+  toggleColourLock: (target) => set((s) => discrete(s, (recipe) => {
+    const id = colourLockId(target);
+    const locks = recipe.colour_locks ?? [];
+    const next = locks.includes(id) ? locks.filter((item) => item !== id) : [...locks, id];
+    const copy = { ...recipe };
+    if (next.length) copy.colour_locks = next;
+    else delete copy.colour_locks;
+    return copy;
+  })),
+  setGroupGradientMode: (id, mode, gradient) => set(s => isColourLocked(s.recipe, { kind: "group", id }) ? s : discrete(s, recipe => applyGroupGradientMode(recipe, id, mode, gradient))),
   savePaintGroup: group => set(s => {
     const next = discrete(s, recipe => putPaintGroup(recipe, group));
     return { ...next, selection: next.recipe.paint_groups?.some(candidate => candidate.id === group.id) ? { kind: "group" as const, id: group.id } : s.selection, hoveredPartIndex: null };
@@ -385,7 +396,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   }),
   paintPart: (index) => set((s) => {
     const hex = s.eyedropperNotice?.hex;
-    if (!s.paintBucketArmed || !hex) return s;
+    if (!s.paintBucketArmed || !hex || isColourLocked(s.recipe, { kind: "part", id: String(index) })) return s;
     const name = s.partsReport?.groups.find((part) => part.index === index)?.name ?? String(index);
     return { ...discrete(s, (recipe) => applyScopedColour(recipe, { kind: "part", id: String(index) }, hex)), paintTargetName: name };
   }),
@@ -425,7 +436,7 @@ export const useEditorStore = create<EditorState>((set) => ({
     }
     if (s.paintBucketArmed && selection?.kind === "part") {
       const hex = s.eyedropperNotice?.hex;
-      if (!hex) return s;
+      if (!hex || isColourLocked(s.recipe, { kind: "part", id: selection.id })) return s;
       const name = s.partsReport?.groups.find((part) => part.index === Number(selection.id))?.name ?? selection.id;
       return { ...discrete(s, (recipe) => applyScopedColour(recipe, { kind: "part", id: selection.id }, hex)), paintTargetName: name };
     }
