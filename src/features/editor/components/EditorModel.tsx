@@ -73,12 +73,14 @@ interface EditorModelProps {
 }
 
 /** What the Parts list and the strip read back (6b R1/R2/R7). */
+export type PartBoundsMm = { minX: number; maxX: number; minY: number; maxY: number; minZ: number; maxZ: number };
+
 export interface PartsReport {
-  groups: { index: number; name: string; faces: number; visible: boolean; materials?: ReturnType<typeof describeSourceMaterials>; renderedMaterials?: ReturnType<typeof describeSourceMaterials> }[];
+  groups: { index: number; name: string; faces: number; visible: boolean; bounds: PartBoundsMm; materials?: ReturnType<typeof describeSourceMaterials>; renderedMaterials?: ReturnType<typeof describeSourceMaterials> }[];
   hasSourceAppearance?: boolean;
   materialWarnings?: string[];
   /** The model's own extent, mm — the plane zone's slider range. */
-  bounds: { minX: number; maxX: number; minY: number; maxY: number; minZ: number; maxZ: number };
+  bounds: PartBoundsMm;
   /** Faces each zone actually covers, in zone order, and the pairs that overlap. */
   zoneFaces: number[];
   overlaps: [number, number][];
@@ -396,7 +398,18 @@ export function EditorModel({
     const box = new THREE.Box3().setFromObject(model);
     onPartsReport?.({
       bounds: { minX: box.min.x, maxX: box.max.x, minY: box.min.y, maxY: box.max.y, minZ: box.min.z, maxZ: box.max.z },
-      groups: meshes.map((mesh, index) => ({ index, name: mesh.name || `group_${index + 1}`, faces: counts[index], visible: mesh.visible, materials: describeSourceMaterials(authoredMaterials[index]!), renderedMaterials: describeSourceMaterials(mesh.material) })),
+      groups: meshes.map((mesh, index) => {
+        const partBox = new THREE.Box3().setFromObject(mesh);
+        return {
+          index,
+          name: mesh.name || `group_${index + 1}`,
+          faces: counts[index],
+          visible: mesh.visible,
+          bounds: { minX: partBox.min.x, maxX: partBox.max.x, minY: partBox.min.y, maxY: partBox.max.y, minZ: partBox.min.z, maxZ: partBox.max.z },
+          materials: describeSourceMaterials(authoredMaterials[index]!),
+          renderedMaterials: describeSourceMaterials(mesh.material),
+        };
+      }),
       hasSourceAppearance: !!materialOverride || hasSourceAppearance(obj),
       materialWarnings: materialOverride?.warnings ?? localModel?.warnings ?? obj.userData.materialWarnings ?? [],
       zoneFaces: zoneRuns.map((runs) => decodeRuns(runs).length),

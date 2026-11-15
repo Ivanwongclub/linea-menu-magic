@@ -7,7 +7,7 @@ import { layoutLabels, type DimensionLine, type LabelItem, type Point, type Rect
 import { layerDimensions, type LayerDimension } from "../lib/layerMeasurements";
 import type { Layer } from "../lib/recipe";
 import { useI18n } from "@/features/i18n/I18nProvider";
-import type { RulerMeasurements } from "./EditorModel";
+import type { PartBoundsMm, RulerMeasurements } from "./EditorModel";
 import type { ReliefReport } from "./branding/BrandingMeshes";
 import { layerRelief } from "../lib/recipe";
 
@@ -15,6 +15,9 @@ import { layerRelief } from "../lib/recipe";
 export interface RulerLabelElements {
   diameter: HTMLElement | null;
   thickness: HTMLElement | null;
+  axisX: HTMLElement | null;
+  axisY: HTMLElement | null;
+  axisZ: HTMLElement | null;
   /** The selected layer's dimensions (4j), by kind. */
   layer: Partial<Record<LayerDimension["kind"], HTMLElement | null>>;
   /** The relief callout (Phase 5 R4). */
@@ -22,7 +25,7 @@ export interface RulerLabelElements {
 }
 
 export function newRulerLabelElements(): RulerLabelElements {
-  return { diameter: null, thickness: null, layer: {}, relief: null };
+  return { diameter: null, thickness: null, axisX: null, axisY: null, axisZ: null, layer: {}, relief: null };
 }
 
 interface RulerOverlayProps {
@@ -32,6 +35,8 @@ interface RulerOverlayProps {
   obstacles?: MutableRefObject<{ rects: Rect[] }>;
   /** The selected layer, whose dimensions join the product's (4j R5); none when nothing is selected. */
   layer: Layer | null;
+  /** When a part is selected, its own box replaces the whole-model diameter / thickness. */
+  partBounds?: PartBoundsMm | null;
   /** The face top, where the layer's dimension lines are drawn. */
   faceZ: number;
   /** What the selected layer's relief became on screen, and where it stands (Phase 5 R4). */
@@ -65,62 +70,63 @@ export function diameterLabel(mm: number, sizeLigne: number | null, sizeLabel: s
   return `${mm.toFixed(2)} mm${ligneText}`;
 }
 
+function axisLines(box: PartBoundsMm) {
+  const { minX, maxX, minY, maxY, minZ, maxZ } = box;
+  const cx = (minX + maxX) / 2;
+  const cy = (minY + maxY) / 2;
+  const cz = (minZ + maxZ) / 2;
+  const xY = minY - MARGIN_MM;
+  const yX = minX - MARGIN_MM;
+  const zX = maxX + MARGIN_MM;
+  return {
+    size: { x: maxX - minX, y: maxY - minY, z: maxZ - minZ },
+    x: [[minX, xY, cz], [maxX, xY, cz]] as [number, number, number][],
+    xTickA: [[minX, xY - TICK_MM, cz], [minX, xY + TICK_MM, cz]] as [number, number, number][],
+    xTickB: [[maxX, xY - TICK_MM, cz], [maxX, xY + TICK_MM, cz]] as [number, number, number][],
+    y: [[yX, minY, cz], [yX, maxY, cz]] as [number, number, number][],
+    yTickA: [[yX - TICK_MM, minY, cz], [yX + TICK_MM, minY, cz]] as [number, number, number][],
+    yTickB: [[yX - TICK_MM, maxY, cz], [yX + TICK_MM, maxY, cz]] as [number, number, number][],
+    z: [[zX, cy, minZ], [zX, cy, maxZ]] as [number, number, number][],
+    zTickA: [[zX - TICK_MM, cy, minZ], [zX + TICK_MM, cy, minZ]] as [number, number, number][],
+    zTickB: [[zX - TICK_MM, cy, maxZ], [zX + TICK_MM, cy, maxZ]] as [number, number, number][],
+    centre: [cx, cy, cz] as [number, number, number],
+  };
+}
+
 /**
- * The product's diameter and thickness (E1 §5 row 4e), plus — for the
- * selected layer only — its branding radius, letter height and edge margin
- * (4j R5), drawn on the face. C5:
- * helper lines as screen-space `Line2` (drei's `Line`, `worldUnits` off by
- * default) on render layer 1, so they're excluded from `ContactShadows` (its
- * shadow camera stays on layer 0), raycasts (the default `Raycaster` stays
- * on layer 0) and any future exporter (which walks `EditorModel`'s own
- * object, never this sibling group). Never geometry.
- *
- * R2 (4h): the labels are plain DOM over the canvas, placed per frame in
- * screen space by `layoutRulerLabels` — the diameter label centred below its
- * line, the thickness label beside its own line away from the model, and
- * pushed apart when they would overlap. Each label carries the projected line
- * it belongs to (`data-line`) for the e2e no-overlap check.
+ * The product's diameter and thickness (E1 §5 row 4e), or — when a part is
+ * selected — that part's X / Y / Z extents, plus the selected branding layer's
+ * face dimensions (4j R5). Helper lines stay on render layer 1.
  */
-export function RulerOverlay({ measurements, labels, obstacles, layer, faceZ, relief }: RulerOverlayProps) {
+export function RulerOverlay({ measurements, labels, obstacles, layer, partBounds, faceZ, relief }: RulerOverlayProps) {
   const { camera, size } = useThree();
   const groupRef = useRef<Group>(null);
 
-  // Every render: the layer's lines mount and unmount with the selection,
-  // and each must land on the ruler layer.
   useEffect(() => {
     camera.layers.enable(RULER_LAYER);
     const group = groupRef.current;
     if (group) {
       group.traverse((child) => {
         child.layers.set(RULER_LAYER);
-        // Dimension lines are UI, never a raycast/selection target.
         child.raycast = () => {};
       });
     }
   });
 
   const faceRadius = measurements.diameterMm / 2;
-  const dims = layer ? layerDimensions(layer, faceRadius) : [];
+  const dims = !partBounds && layer ? layerDimensions(layer, faceRadius) : [];
   const lift = faceZ + 0.05;
   const dimPoints = (d: LayerDimension): [number, number, number][] => [
     [d.from.x, d.from.y, lift],
     [d.to.x, d.to.y, lift],
   ];
-
-  // R4: the emboss height / engrave depth, drawn where the layer actually
-  // stands, along that point's own surface normal.
-  const reliefLinePoints = reliefCallout(layer, relief);
+  const reliefLinePoints = !partBounds ? reliefCallout(layer, relief) : null;
+  const axes = partBounds ? axisLines(partBounds) : null;
 
   const { minX, maxX, minY, maxY, minZ, maxZ } = measurements;
-  // Opposite sides: the diameter line (below, or left when it runs along Y)
-  // and the thickness line (right) never share a corner.
   const thicknessX = maxX + MARGIN_MM;
   const centerZ = (minZ + maxZ) / 2;
   const centerY = (minY + maxY) / 2;
-
-  // The diameter line follows whichever in-face axis is actually the larger
-  // one — `diameterMm` is `max(sizeX, sizeY)` (EditorModel) — preferring X
-  // for a round part, whose two extents differ only by tessellation.
   const diameterAlongX = maxX - minX >= (maxY - minY) * 0.99;
   const diameterY = minY - MARGIN_MM;
   const diameterX = minX - MARGIN_MM;
@@ -129,14 +135,8 @@ export function RulerOverlay({ measurements, labels, obstacles, layer, faceZ, re
     : [[diameterX, minY, 0], [diameterX, maxY, 0]];
   const diameterTick = (mainAxisValue: number): [number, number, number][] =>
     diameterAlongX
-      ? [
-          [mainAxisValue, diameterY - TICK_MM, 0],
-          [mainAxisValue, diameterY + TICK_MM, 0],
-        ]
-      : [
-          [diameterX - TICK_MM, mainAxisValue, 0],
-          [diameterX + TICK_MM, mainAxisValue, 0],
-        ];
+      ? [[mainAxisValue, diameterY - TICK_MM, 0], [mainAxisValue, diameterY + TICK_MM, 0]]
+      : [[diameterX - TICK_MM, mainAxisValue, 0], [diameterX + TICK_MM, mainAxisValue, 0]];
   const thicknessPoints: [number, number, number][] = [
     [thicknessX, centerY, minZ],
     [thicknessX, centerY, maxZ],
@@ -145,8 +145,6 @@ export function RulerOverlay({ measurements, labels, obstacles, layer, faceZ, re
   const scratch = useRef(new Vector3());
   const last = useRef("");
   useFrame(() => {
-    const { diameter, thickness } = labels.current;
-    if (!diameter || !thickness) return;
     const project = ([x, y, z]: [number, number, number]): Point => {
       const v = scratch.current.set(x, y, z).project(camera);
       return { x: ((v.x + 1) / 2) * size.width, y: ((1 - v.y) / 2) * size.height };
@@ -157,19 +155,26 @@ export function RulerOverlay({ measurements, labels, obstacles, layer, faceZ, re
       width: el.offsetWidth,
       height: el.offsetHeight,
     });
-    const d = line(diameterLinePoints, diameter);
-    const t = line(thicknessPoints, thickness);
-    const centre = project([(minX + maxX) / 2, centerY, centerZ]);
-    const entries: [HTMLElement, DimensionLine, LabelItem["place"]][] = [
-      [diameter, d, "below"],
-      [thickness, t, "beside"],
-    ];
-    for (const dim of dims) {
-      const el = labels.current.layer[dim.kind];
-      if (el) entries.push([el, line(dimPoints(dim), el), "beside"]);
+    const entries: [HTMLElement, DimensionLine, LabelItem["place"]][] = [];
+    if (axes) {
+      const { axisX, axisY, axisZ } = labels.current;
+      if (axisX) entries.push([axisX, line(axes.x, axisX), "below"]);
+      if (axisY) entries.push([axisY, line(axes.y, axisY), "beside"]);
+      if (axisZ) entries.push([axisZ, line(axes.z, axisZ), "beside"]);
+    } else {
+      const { diameter, thickness } = labels.current;
+      if (!diameter || !thickness) return;
+      entries.push([diameter, line(diameterLinePoints, diameter), "below"]);
+      entries.push([thickness, line(thicknessPoints, thickness), "beside"]);
+      for (const dim of dims) {
+        const el = labels.current.layer[dim.kind];
+        if (el) entries.push([el, line(dimPoints(dim), el), "beside"]);
+      }
+      const reliefLabel = labels.current.relief;
+      if (reliefLabel && reliefLinePoints) entries.push([reliefLabel, line(reliefLinePoints, reliefLabel), "beside"]);
     }
-    const reliefLabel = labels.current.relief;
-    if (reliefLabel && reliefLinePoints) entries.push([reliefLabel, line(reliefLinePoints, reliefLabel), "beside"]);
+    if (!entries.length) return;
+    const centre = project(axes ? axes.centre : [(minX + maxX) / 2, centerY, centerZ]);
     const placed = layoutLabels(
       entries.map(([, l, place]) => ({ line: l, place })),
       centre,
@@ -188,25 +193,32 @@ export function RulerOverlay({ measurements, labels, obstacles, layer, faceZ, re
 
   return (
     <group ref={groupRef}>
-      {/* Diameter: the larger model-local in-face axis (C4). */}
-      <Line points={diameterLinePoints} color="#1a1a1a" lineWidth={1.5} />
-      <Line points={diameterTick(diameterAlongX ? minX : minY)} color="#1a1a1a" lineWidth={1.5} />
-      <Line points={diameterTick(diameterAlongX ? maxX : maxY)} color="#1a1a1a" lineWidth={1.5} />
-
-      {/* Thickness: model-local Z extent (the decorated face's normal axis), shown to the side. */}
-      <Line points={thicknessPoints} color="#1a1a1a" lineWidth={1.5} />
-      <Line points={[[thicknessX - TICK_MM, centerY, minZ], [thicknessX + TICK_MM, centerY, minZ]]} color="#1a1a1a" lineWidth={1.5} />
-      <Line points={[[thicknessX - TICK_MM, centerY, maxZ], [thicknessX + TICK_MM, centerY, maxZ]]} color="#1a1a1a" lineWidth={1.5} />
-
-      {/* The relief callout, along the surface normal (Phase 5 R4). */}
-      {reliefLinePoints && (
-        <Line points={reliefLinePoints} color="#1a1a1a" lineWidth={1.5} depthTest={false} />
+      {axes ? (
+        <>
+          <Line points={axes.x} color="#c62828" lineWidth={1.5} />
+          <Line points={axes.xTickA} color="#c62828" lineWidth={1.5} />
+          <Line points={axes.xTickB} color="#c62828" lineWidth={1.5} />
+          <Line points={axes.y} color="#2e7d32" lineWidth={1.5} />
+          <Line points={axes.yTickA} color="#2e7d32" lineWidth={1.5} />
+          <Line points={axes.yTickB} color="#2e7d32" lineWidth={1.5} />
+          <Line points={axes.z} color="#1565c0" lineWidth={1.5} />
+          <Line points={axes.zTickA} color="#1565c0" lineWidth={1.5} />
+          <Line points={axes.zTickB} color="#1565c0" lineWidth={1.5} />
+        </>
+      ) : (
+        <>
+          <Line points={diameterLinePoints} color="#1a1a1a" lineWidth={1.5} />
+          <Line points={diameterTick(diameterAlongX ? minX : minY)} color="#1a1a1a" lineWidth={1.5} />
+          <Line points={diameterTick(diameterAlongX ? maxX : maxY)} color="#1a1a1a" lineWidth={1.5} />
+          <Line points={thicknessPoints} color="#1a1a1a" lineWidth={1.5} />
+          <Line points={[[thicknessX - TICK_MM, centerY, minZ], [thicknessX + TICK_MM, centerY, minZ]]} color="#1a1a1a" lineWidth={1.5} />
+          <Line points={[[thicknessX - TICK_MM, centerY, maxZ], [thicknessX + TICK_MM, centerY, maxZ]]} color="#1a1a1a" lineWidth={1.5} />
+          {reliefLinePoints && <Line points={reliefLinePoints} color="#1a1a1a" lineWidth={1.5} depthTest={false} />}
+          {dims.map((dim) => (
+            <Line key={dim.kind} points={dimPoints(dim)} color="#1a1a1a" lineWidth={1.25} dashed dashSize={0.2} gapSize={0.12} depthTest={false} />
+          ))}
+        </>
       )}
-
-      {/* The selected layer's dimensions, on the face (4j R5). */}
-      {dims.map((dim) => (
-        <Line key={dim.kind} points={dimPoints(dim)} color="#1a1a1a" lineWidth={1.25} dashed dashSize={0.2} gapSize={0.12} depthTest={false} />
-      ))}
     </group>
   );
 }
@@ -218,6 +230,7 @@ interface RulerLabelsProps {
   sizeLabel: string | null;
   labels: MutableRefObject<RulerLabelElements>;
   layer: Layer | null;
+  partBounds?: PartBoundsMm | null;
   relief: ReliefReport | null;
 }
 
@@ -241,52 +254,35 @@ const LABEL_CLASS =
   "absolute left-0 top-0 text-[11px] whitespace-nowrap bg-background/90 px-1 py-0.5 border border-border text-foreground will-change-transform";
 
 /** The ruler's DOM labels, over the canvas; `RulerOverlay` positions them. Hidden until first placed. */
-export function RulerLabels({ measurements, sizeLigne, sizeLabel, labels, layer, relief }: RulerLabelsProps) {
+export function RulerLabels({ measurements, sizeLigne, sizeLabel, labels, layer, partBounds, relief }: RulerLabelsProps) {
   const { t } = useI18n();
-  const dims = layer ? layerDimensions(layer, measurements.diameterMm / 2) : [];
-  const reliefDepth = layer && relief?.anchor ? layerRelief(layer) : null;
+  const dims = !partBounds && layer ? layerDimensions(layer, measurements.diameterMm / 2) : [];
+  const reliefDepth = !partBounds && layer && relief?.anchor ? layerRelief(layer) : null;
+  const axes = partBounds ? axisLines(partBounds) : null;
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden" data-testid="ruler-labels">
-      <span
-        ref={(el) => (labels.current.diameter = el)}
-        className={LABEL_CLASS}
-        style={{ visibility: "hidden" }}
-        data-testid="ruler-diameter-label"
-      >
-        {diameterLabel(measurements.diameterMm, sizeLigne, sizeLabel)}
-      </span>
-      <span
-        ref={(el) => (labels.current.thickness = el)}
-        className={LABEL_CLASS}
-        style={{ visibility: "hidden" }}
-        data-testid="ruler-thickness-label"
-      >
-        {measurements.thicknessMm.toFixed(2)} mm
-      </span>
-      {reliefDepth && (
-        <span
-          ref={(el) => (labels.current.relief = el)}
-          className={LABEL_CLASS}
-          style={{ visibility: "hidden" }}
-          data-testid="ruler-relief-label"
-          data-relief={reliefDepth.type}
-          data-value-mm={reliefDepth.depth_mm}
-        >
-          {t(reliefDepth.type === "emboss" ? "editor.ruler.embossHeight" : "editor.ruler.engraveDepth", { value: `${reliefDepth.depth_mm.toFixed(2)} mm` })}
-        </span>
+    <div className="pointer-events-none absolute inset-0 overflow-hidden" data-testid="ruler-labels" data-mode={axes ? "part-axes" : "product"}>
+      {axes ? (
+        <>
+          <span ref={(el) => (labels.current.axisX = el)} className={LABEL_CLASS} style={{ visibility: "hidden" }} data-testid="ruler-axis-x" data-value-mm={axes.size.x}>{t("editor.ruler.axisX", { value: `${axes.size.x.toFixed(2)} mm` })}</span>
+          <span ref={(el) => (labels.current.axisY = el)} className={LABEL_CLASS} style={{ visibility: "hidden" }} data-testid="ruler-axis-y" data-value-mm={axes.size.y}>{t("editor.ruler.axisY", { value: `${axes.size.y.toFixed(2)} mm` })}</span>
+          <span ref={(el) => (labels.current.axisZ = el)} className={LABEL_CLASS} style={{ visibility: "hidden" }} data-testid="ruler-axis-z" data-value-mm={axes.size.z}>{t("editor.ruler.axisZ", { value: `${axes.size.z.toFixed(2)} mm` })}</span>
+        </>
+      ) : (
+        <>
+          <span ref={(el) => (labels.current.diameter = el)} className={LABEL_CLASS} style={{ visibility: "hidden" }} data-testid="ruler-diameter-label">{diameterLabel(measurements.diameterMm, sizeLigne, sizeLabel)}</span>
+          <span ref={(el) => (labels.current.thickness = el)} className={LABEL_CLASS} style={{ visibility: "hidden" }} data-testid="ruler-thickness-label">{measurements.thicknessMm.toFixed(2)} mm</span>
+          {reliefDepth && (
+            <span ref={(el) => (labels.current.relief = el)} className={LABEL_CLASS} style={{ visibility: "hidden" }} data-testid="ruler-relief-label" data-relief={reliefDepth.type} data-value-mm={reliefDepth.depth_mm}>
+              {t(reliefDepth.type === "emboss" ? "editor.ruler.embossHeight" : "editor.ruler.engraveDepth", { value: `${reliefDepth.depth_mm.toFixed(2)} mm` })}
+            </span>
+          )}
+          {dims.map((dim) => (
+            <span key={`${layer?.id}-${dim.kind}`} ref={(el) => (labels.current.layer[dim.kind] = el)} className={LABEL_CLASS} style={{ visibility: "hidden" }} data-testid={LAYER_LABEL_TESTID[dim.kind]} data-value-mm={dim.valueMm}>
+              {t(LAYER_LABEL_KEY[dim.kind], { value: `${dim.valueMm.toFixed(2)} mm` })}
+            </span>
+          ))}
+        </>
       )}
-      {dims.map((dim) => (
-        <span
-          key={`${layer?.id}-${dim.kind}`}
-          ref={(el) => (labels.current.layer[dim.kind] = el)}
-          className={LABEL_CLASS}
-          style={{ visibility: "hidden" }}
-          data-testid={LAYER_LABEL_TESTID[dim.kind]}
-          data-value-mm={dim.valueMm}
-        >
-          {t(LAYER_LABEL_KEY[dim.kind], { value: `${dim.valueMm.toFixed(2)} mm` })}
-        </span>
-      ))}
     </div>
   );
 }

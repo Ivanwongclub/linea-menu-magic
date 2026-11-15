@@ -7,6 +7,7 @@ import { applyDiscrete, canRedo, canUndo, commitHistory, redoHistory, startHisto
 import { applyPartStyleClip, capturePartStyle, visiblePartHex, applyScopedColour, applyScopedGradient, applyGroupGradientMode, colourLockId, isColourLocked, type PartStyleClip } from "../lib/scopedColour.ts";
 import type { ColourGradient } from "../lib/gradient.ts";
 import { putPaintGroup, removePaintGroup as deletePaintGroup, pruneGroupLayer, moveGroupMember, type PaintGroup, type PaintGroupMember } from "../lib/paintGroups.ts";
+import { normalizeHex } from "../lib/pantone.ts";
 
 /**
  * Where the loaded model sits (4j): the raw → face transform `EditorModel`
@@ -121,6 +122,8 @@ interface EditorState {
   eyedropperNotice: { name: string; hex: string } | null;
   /** The part last painted, so the hint can say where the colour landed. */
   paintTargetName: string | null;
+  /** View-only canvas colour behind the model. Never part of the recipe. */
+  viewportBackgroundHex: string;
   /** Phase 6b R2: the zone the brush is painting into, and how wide the brush is. */
   paintZoneId: string | null;
   /** An unconfirmed region is previewed on the model, never autosaved. */
@@ -175,6 +178,8 @@ interface EditorState {
   pastePartStyle: (index: number) => void;
   /** Forget the copied look. Parts already pasted stay as they are. */
   clearCopiedPartStyle: () => void;
+  /** View-only. Does not touch the recipe. */
+  setViewportBackgroundHex: (hex: string) => void;
   /** One tool at a time. The foreground colour stays. */
   setEditorTool: (tool: "select" | "eyedropper" | "bucket" | "eraser" | "isolate") => void;
   /** Read this part and paint it onto the other selected part. Stays the eyedropper. */
@@ -304,6 +309,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   eyedropperNeedSelection: false,
   eyedropperNotice: null,
   paintTargetName: null,
+  viewportBackgroundHex: "#F4F4F5",
   hydratedFor: null,
   dragging: false,
   flushSeq: 0,
@@ -406,6 +412,10 @@ export const useEditorStore = create<EditorState>((set) => ({
       return { ...discrete(s, (recipe) => applyPartStyleClip(recipe, clip, [index])), partStylePastedOn: name };
     }),
   clearCopiedPartStyle: () => set({ copiedPartStyle: null, partStylePastedOn: null }),
+  setViewportBackgroundHex: (hex) => set((s) => {
+    const colour = normalizeHex(hex);
+    return colour && colour !== s.viewportBackgroundHex ? { viewportBackgroundHex: colour } : s;
+  }),
   setEditorTool: (tool) => set({ eyedropperArmed: tool === "eyedropper", paintBucketArmed: tool === "bucket", eraserArmed: tool === "eraser", isolateToolArmed: tool === "isolate", paintTargetName: null }),
   sampleEyedropper: (index) => set((s) => eyedropperPick(s, index)),
   paintPart: (index) => set((s) => {

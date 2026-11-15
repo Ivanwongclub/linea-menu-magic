@@ -5,6 +5,7 @@ import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { toast } from "sonner";
 import { Box } from "lucide-react";
 import { EditorToolbox } from "./EditorToolbox";
+import { ViewportBackground } from "./ViewportBackground";
 
 const eyedropperCursor = `url("data:image/svg+xml,${encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><path fill='#fff' stroke='#111' stroke-width='1.6' stroke-linejoin='round' d='M21 3l8 8-2.4 2.4-1.6-1.6-8.4 8.4-.9 3.6-4.2-4.2 3.6-.9 8.4-8.4-1.6-1.6z'/><path fill='#111' d='M5.5 26.5l2.2-.6.6 2.2z'/></svg>")}") 6 28, crosshair`;
 const bucketCursor = `url("data:image/svg+xml,${encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><path fill='#fff' stroke='#111' stroke-width='1.5' d='M9 12h14l-1.4 13H10.4z'/><path fill='none' stroke='#111' stroke-width='1.5' d='M11 12c0-5 10-5 10 0'/><path fill='#111' d='M5 27h4v2H5z'/></svg>")}") 6 28, crosshair`;
@@ -25,7 +26,7 @@ import { centreOf, cornersOf, diagonalOf, fitDistance } from "../lib/framing";
 import { ProceduralStudio } from "./ProceduralStudio";
 import { CameraReport } from "./CameraReport";
 import { HandleProjector, HandlesOverlay, newHandleBridge, newHandleElements } from "./branding/Handles";
-import { hiddenGroupsForView, selectHiddenGroups, selectSelectedLayerId, selectZones, useEditorStore } from "../store/useEditorStore";
+import { hiddenGroupsForView, selectHiddenGroups, selectSelectedLayerId, selectSelectedPartIndex, selectZones, useEditorStore } from "../store/useEditorStore";
 import { modelFormatFromName } from "../lib/modelFormat";
 import { groupFromModelData, validateModelSurfaces } from "../lib/ModelFileLoader";
 import { prepareModelImport, prepareMaterialImport, MaterialImportError, modelFilesFromDrop, type ModelImport, type MaterialImport } from "../lib/modelImport";
@@ -207,6 +208,7 @@ export function EditorViewport({
   const copiedPartStyle = useEditorStore((s) => s.copiedPartStyle);
   const partStylePastedOn = useEditorStore((s) => s.partStylePastedOn);
   const clearCopiedPartStyle = useEditorStore((s) => s.clearCopiedPartStyle);
+  const viewportBackgroundHex = useEditorStore((s) => s.viewportBackgroundHex);
   const eyedropperArmed = useEditorStore((s) => s.eyedropperArmed);
   const paintBucketArmed = useEditorStore((s) => s.paintBucketArmed);
   const eraserArmed = useEditorStore((s) => s.eraserArmed);
@@ -256,6 +258,12 @@ export function EditorViewport({
   }, [zones, publicFinishes, language]);
   const selectedLayer = layers.find((l) => l.id === selectedLayerId) ?? null;
   const selectedRelief = textReport?.reliefs.find((r) => r.layerId === selectedLayerId) ?? null;
+  const selectedPartIndex = useEditorStore(selectSelectedPartIndex);
+  const selectedPartBounds = selectedPartIndex == null ? null : partsReport?.groups.find((group) => group.index === selectedPartIndex)?.bounds ?? null;
+  const setRuler = useEditorStore((s) => s.setRuler);
+  useEffect(() => {
+    if (selectedPartIndex != null) setRuler(true);
+  }, [selectedPartIndex, setRuler]);
   // Calibration screenshots composite any DOM over the canvas; `?calibration=1` hides the viewport chrome.
   const calibration = useSearchParams()[0].get("calibration") === "1";
 
@@ -433,7 +441,9 @@ export function EditorViewport({
   return (
     <>
     <div
-      className="relative flex-1 min-h-0 overflow-hidden bg-secondary"
+      className="relative flex-1 min-h-0 overflow-hidden"
+      style={{ background: viewportBackgroundHex }}
+      data-viewport-bg={viewportBackgroundHex}
       data-eyedropper={eyedropperArmed ? "1" : undefined}
       data-bucket={paintBucketArmed ? "1" : undefined}
       data-eraser={eraserArmed ? "1" : undefined}
@@ -497,6 +507,7 @@ export function EditorViewport({
           onPointerMissed={onEmptyDoubleClick}
         >
           <ProceduralStudio />
+          <ViewportBackground />
           <CameraReport />
           <EditorModel
             key={url}
@@ -533,6 +544,7 @@ export function EditorViewport({
               labels={rulerLabels}
               obstacles={handleBridge}
               layer={selectedLayer}
+              partBounds={selectedPartBounds}
               faceZ={faceZ ?? rulerMeasurements.maxZ}
               relief={selectedRelief}
             />
@@ -562,7 +574,7 @@ export function EditorViewport({
         <HandlesOverlay key={selectedLayer.id} layer={selectedLayer} bridge={handleBridge} elements={handleElements} />
       )}
       {ruler && rulerMeasurements && (
-        <RulerLabels measurements={rulerMeasurements} sizeLigne={sizeLigne} sizeLabel={sizeLabel} labels={rulerLabels} layer={selectedLayer} relief={selectedRelief} />
+        <RulerLabels measurements={rulerMeasurements} sizeLigne={sizeLigne} sizeLabel={sizeLabel} labels={rulerLabels} layer={selectedLayer} partBounds={selectedPartBounds} relief={selectedRelief} />
       )}
       {!calibration && <EditorToolbox />}
       {(eyedropperArmed || paintBucketArmed || eraserArmed) && <style>{`[data-testid="editor-viewport"], [data-testid="editor-viewport"] canvas { cursor: ${eyedropperArmed ? eyedropperCursor : paintBucketArmed ? bucketCursor : eraserCursor} !important; }`}</style>}

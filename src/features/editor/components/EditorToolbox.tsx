@@ -12,6 +12,8 @@ export function EditorToolbox() {
   const bucket = useEditorStore((s) => s.paintBucketArmed);
   const eraser = useEditorStore((s) => s.eraserArmed);
   const notice = useEditorStore((s) => s.eyedropperNotice);
+  const viewportBackgroundHex = useEditorStore((s) => s.viewportBackgroundHex);
+  const setViewportBackgroundHex = useEditorStore((s) => s.setViewportBackgroundHex);
   const setTool = useEditorStore((s) => s.setEditorTool);
   const [slot, setSlot] = useState<ColourTool>("eyedropper");
   const [open, setOpen] = useState(false);
@@ -74,12 +76,18 @@ export function EditorToolbox() {
           </div>
         )}
       </div>
-      {notice && (
-        <div className="mt-auto flex w-full flex-col items-center gap-1 px-1 pb-1" data-testid="eyedropper-swatch" data-hex={notice.hex}>
-          <span className="h-8 w-8 border border-foreground" style={{ background: notice.hex }} />
-          <span className="text-center font-mono text-[9px] leading-none text-foreground">{notice.hex}</span>
-        </div>
-      )}
+      <div className="mt-auto flex w-full flex-col items-center gap-2 px-1 pb-1">
+        {notice && (
+          <div className="flex w-full flex-col items-center gap-1" data-testid="eyedropper-swatch" data-hex={notice.hex}>
+            <span className="h-8 w-8 border border-foreground" style={{ background: notice.hex }} />
+            <span className="text-center font-mono text-[9px] leading-none text-foreground">{notice.hex}</span>
+          </div>
+        )}
+        <label className="flex w-full cursor-pointer flex-col items-center gap-1" title={t("editor.tools.canvasBackground")} aria-label={t("editor.tools.canvasBackground")}>
+          <input type="color" data-testid="viewport-background" value={viewportBackgroundHex} onChange={(event) => setViewportBackgroundHex(event.currentTarget.value)} className="h-8 w-8 cursor-pointer border border-foreground bg-transparent p-0" />
+          <span className="text-center text-[9px] leading-none text-muted-foreground">{t("editor.tools.canvasBackgroundShort")}</span>
+        </label>
+      </div>
     </div>
   );
 }
