@@ -203,6 +203,15 @@ Storage API 寫入，核對 SHA-256，不覆蓋內容不同的既有檔案；結
 - HTTP IP 部署時，建立 UUID 使用安全的 `getRandomValues` 作相容處理；瀏覽器
   剪貼簿等其他要求 secure context 的功能，需待 HTTPS 才可完整使用。
 
+## CMS 初始管理員（Catalogue Editor）
+
+`catalogue_editors` 不能由一般登入帳號自行寫入。首次 CMS Admin 須用 DB／
+service role 授權。SQL、Node 腳本與操作說明見：
+
+- [CMS_ADMIN_SETUP.md](CMS_ADMIN_SETUP.md)
+- [sql/grant-cms-admin.sql](sql/grant-cms-admin.sql)
+- [scripts/grant-cms-admin.mjs](scripts/grant-cms-admin.mjs)
+
 ## Studio 與 SSH 金鑰
 
 Studio 只綁定服務器的 `127.0.0.1:8000`，PostgreSQL 和 pooler 不發布對外端口。
