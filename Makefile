@@ -58,8 +58,8 @@ package:
 
 image:
 	set -a && . deploy/compose.env && set +a && \
-	  export VITE_SUPABASE_URL="$${VITE_SUPABASE_URL:-$$SUPABASE_PUBLIC_URL}" && \
-	  export VITE_SUPABASE_PUBLISHABLE_KEY="$${VITE_SUPABASE_PUBLISHABLE_KEY:-$$ANON_KEY}" && \
+	  export VITE_SUPABASE_URL="$$SUPABASE_PUBLIC_URL" && \
+	  export VITE_SUPABASE_PUBLISHABLE_KEY="$$ANON_KEY" && \
 	  test -n "$$VITE_SUPABASE_URL" && test -n "$$VITE_SUPABASE_PUBLISHABLE_KEY" && \
 	  npm ci --include=dev --no-audit --no-fund && \
 	  npm run build

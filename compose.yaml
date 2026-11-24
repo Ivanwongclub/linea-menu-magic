@@ -17,6 +17,10 @@ services:
       context: .
       dockerfile: deploy/frontend/Dockerfile
     restart: unless-stopped
+    environment:
+      # Use the same public configuration source as the API gateway.
+      WINCYC_SUPABASE_URL: ${SUPABASE_PUBLIC_URL:?Set SUPABASE_PUBLIC_URL in deploy/compose.env}
+      WINCYC_SUPABASE_PUBLISHABLE_KEY: ${ANON_KEY:?Set ANON_KEY in deploy/compose.env}
     depends_on:
       api-gw:
         condition: service_healthy

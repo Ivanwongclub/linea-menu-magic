@@ -6,6 +6,10 @@
 來源和修改方式見 [supabase/UPSTREAM.md](supabase/UPSTREAM.md)。網站與 API
 使用同一網址。
 
+Docker 前端現在從容器啟動時產生的 `/runtime-config.js` 讀取公開 Supabase
+URL／anon key，與 API gateway 使用相同的 `deploy/compose.env` 來源。
+前端登入 401 的修正部署與驗證步驟見 [Frontend Auth configuration](FRONTEND_AUTH_CONFIG.md)。
+
 ## 日常部署：本機執行
 
 在項目根目錄執行：
