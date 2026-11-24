@@ -29,6 +29,23 @@ is required for this frontend change. A successful request made using a
 service-role key does not verify that the public anon key works; validate the
 public key as part of deployment.
 
+## Update from Git on the server
+
+For an existing checkout of `Ivanwongclub/linea-menu-magic` on `main`, run after SSH:
+
+```bash
+cd /opt/linea3d
+git pull --ff-only origin main && make update-frontend
+```
+
+The target compiles the frontend in a disposable Node container, builds the
+frontend image, checks its runtime configuration and nginx configuration, then
+recreates only `frontend`. Host Node/npm are not required. It uses the existing
+`deploy/compose.env` and stops on any failed command before continuing. Failed
+compilation, image build or startup checks leave the running frontend intact.
+After completion, verify `/admin/login` in an incognito window with the existing
+CMS account. Run `make smoke` for the full website/API checks when needed.
+
 ## Deploy a prebuilt handoff package
 
 Assume `/tmp/wincyc-frontend-auth-fix-20261124.tar.gz` contains the reviewed patch,

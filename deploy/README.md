@@ -10,6 +10,21 @@ Docker 前端現在從容器啟動時產生的 `/runtime-config.js` 讀取公開
 URL／anon key，與 API gateway 使用相同的 `deploy/compose.env` 來源。
 前端登入 401 的修正部署與驗證步驟見 [Frontend Auth configuration](FRONTEND_AUTH_CONFIG.md)。
 
+## 從 Git 更新前端：服務器執行
+
+SSH 登入後，在已經使用 `Ivanwongclub/linea-menu-magic` 的 `main` 分支部署的目錄執行：
+
+```sh
+cd /opt/linea3d
+git pull --ff-only origin main && make update-frontend
+```
+
+`make update-frontend` 使用 Docker 編譯前端、建立 image、檢查啟動設定，然後重建
+前端容器。服務器只需要原有的 Git、make、Docker Compose，不需要安裝 Node/npm。
+任何步驟失敗會停止；編譯、image build 或啟動設定檢查失敗時不會替換現有前端。
+使用原有 `deploy/compose.env`，其中 `SUPABASE_PUBLIC_URL` 和 `ANON_KEY` 必須正確。
+完成後用無痕視窗測試 `/admin/login`。
+
 ## 日常部署：本機執行
 
 在項目根目錄執行：

@@ -19,7 +19,7 @@ SSH = ssh $(SSH_OPTIONS) -i "$(SSH_KEY)" "$(SERVER)"
 ARCHIVE := .deploy/linea3d-src.tar.gz
 NODE_IMAGE := node:22-bookworm-slim
 
-.PHONY: help package image upload deploy setup build start rebuild rewrite-public-urls status logs smoke public-assets db-init db-restore
+.PHONY: help package image upload deploy setup build start rebuild update-frontend rewrite-public-urls status logs smoke public-assets db-init db-restore
 
 help:
 	@printf '%s\n' \
@@ -29,6 +29,7 @@ help:
 	  '         make upload       Package and upload source without starting services' \
 	  'Server:  make start        Use the loaded image, Caddy on 80/443, and reload functions' \
 	  '         make rebuild      Same as start. The frontend is not compiled on the server' \
+	  '         make update-frontend  Compile, build and replace only the frontend using Docker' \
 	  '         make status       Show container health' \
 	  '         make logs         Show recent service logs' \
 	  '         make smoke        Check the running website and APIs' \
@@ -90,6 +91,23 @@ start:
 	$(HTTPS) ps
 
 rebuild: start
+
+# After git pull on the server. Node/npm run in Docker, not on the host.
+update-frontend:
+	$(HTTPS) config --quiet
+	docker run --rm --user "$$(id -u):$$(id -g)" \
+	  -e npm_config_cache=/tmp/npm-cache \
+	  -v "$(CURDIR):/workspace" -w /workspace $(NODE_IMAGE) \
+	  sh -ec 'set -a; . deploy/compose.env; set +a; \
+	    export VITE_SUPABASE_URL="$$SUPABASE_PUBLIC_URL"; \
+	    export VITE_SUPABASE_PUBLISHABLE_KEY="$$ANON_KEY"; \
+	    test -n "$$VITE_SUPABASE_URL"; test -n "$$VITE_SUPABASE_PUBLISHABLE_KEY"; \
+	    npm ci --include=dev --no-audit --no-fund; npm run build'
+	$(HTTPS) build frontend
+	$(HTTPS) run --rm --no-deps --entrypoint /bin/sh frontend -ec \
+	  '/docker-entrypoint.d/40-runtime-config.sh; nginx -t'
+	$(HTTPS) up -d --no-deps --no-build --force-recreate --wait --wait-timeout 120 frontend
+	$(HTTPS) ps frontend
 
 rewrite-public-urls:
 	$(COMPOSE) exec -T db psql -X -U supabase_admin -d postgres -v ON_ERROR_STOP=1 \
