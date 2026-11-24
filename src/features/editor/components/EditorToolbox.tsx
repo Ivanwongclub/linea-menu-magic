@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type PointerEvent, type ReactElement } from "react";
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactElement } from "react";
 import { BoxSelect, Eraser, MousePointer2, PaintBucket, Pipette } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useI18n } from "@/features/i18n/I18nProvider";
@@ -49,7 +49,7 @@ export function EditorToolbox() {
     setTool(tool);
     setOpen(false);
   };
-  const openSlot = (event: PointerEvent<HTMLButtonElement>) => {
+  const openSlot = (event: ReactPointerEvent<HTMLButtonElement>) => {
     event.stopPropagation();
     setOpen(true);
     setTool(shown);
